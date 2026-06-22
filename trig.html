@@ -5,103 +5,215 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trigonometry · Maths Walkthroughs</title>
 <style>
-:root{ --red:#C0272D; --dark-red:#7A1418; --cream:#FBF6F1; --ink:#241A17; --line:#E4D6CE; --gold:#C8922A; }
-*{ box-sizing:border-box; margin:0; padding:0; }
-body{ background:var(--cream); color:var(--ink); font-family:'Helvetica Neue',Arial,sans-serif; }
-header{ background:var(--red); color:#fff; height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; position:sticky; top:0; z-index:100; }
-.back-btn{ font-size:13px; font-weight:600; color:#fff; background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.35); padding:5px 12px; border-radius:3px; cursor:pointer; text-decoration:none; }
-.header-title{ font-size:15px; font-weight:700; }
-.layout{ display:flex; max-width:1100px; margin:0 auto; padding:28px 20px 60px; gap:28px; }
-.sidebar{ width:210px; flex-shrink:0; display:flex; flex-direction:column; gap:6px; }
-.sidebar-label{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#888; font-weight:700; margin-bottom:4px; }
-.q-list-btn{ text-align:left; background:#fff; border:1px solid var(--line); border-radius:4px; padding:9px 12px; cursor:pointer; font-size:12px; transition:.15s; color:var(--ink); }
-.q-list-btn:hover{ border-color:var(--red); color:var(--red); }
-.q-list-btn.active{ background:var(--red); color:#fff; border-color:var(--red); }
-.q-list-btn .q-num{ font-weight:700; font-size:10px; display:block; opacity:.7; }
-.q-badge{ display:inline-block; font-size:9px; font-weight:700; padding:1px 5px; border-radius:8px; margin-top:3px; }
-.badge-f{ background:#e8f4ff; color:#1a5a8a; }
-.badge-e{ background:#fce8d8; color:#7A1418; }
-.main{ flex:1; min-width:0; }
-.wt-stage{ background:#fff; border:1px solid var(--line); border-radius:4px; overflow:hidden; width:100%; max-width:760px; }
-.wt-canvas{ background:linear-gradient(180deg,#fff,#fdf7f4); padding:14px 0 4px; display:flex; justify-content:center; }
-.wt-canvas svg{ width:100%; max-width:520px; height:auto; }
-.wt-panel{ padding:20px 24px 24px; border-top:1px solid var(--line); min-height:160px; }
-.wt-step-label{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:6px; }
-.wt-panel p{ font-size:16px; line-height:1.55; margin:0 0 8px; }
-.wt-formula{ font-family:'Cambria Math','Georgia',serif; font-size:17px; background:var(--cream); border-left:4px solid var(--red); padding:9px 13px; margin:8px 0; display:block; }
-.wt-controls{ width:100%; max-width:760px; display:flex; justify-content:space-between; align-items:center; margin-top:16px; }
-.wt-btn{ font-size:14px; font-weight:600; padding:9px 18px; border-radius:3px; border:1px solid var(--red); background:#fff; color:var(--red); cursor:pointer; transition:.15s; font-family:'Helvetica Neue',Arial,sans-serif; }
-.wt-btn.primary{ background:var(--red); color:#fff; }
-.wt-btn:disabled{ opacity:.3; cursor:default; }
-.wt-btn:not(:disabled):hover{ background:var(--dark-red); color:#fff; border-color:var(--dark-red); }
-.wt-dots{ display:flex; gap:6px; }
-.wt-dot{ width:8px; height:8px; border-radius:50%; background:var(--line); }
-.wt-dot.active{ background:var(--red); }
-.wt-dot.done{ background:var(--gold); }
-.wt-fadein{ animation:wtFade .45s ease; }
-@keyframes wtFade{ from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);} }
-.wt-try{ background:#fff; border:2px solid var(--gold); border-radius:6px; padding:18px 20px; margin-top:4px; }
-.wt-try-title{ font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:10px; }
-.wt-hints{ font-size:14px; color:#3a2a24; margin:8px 0 12px; padding-left:4px; list-style:none; }
-.wt-hints li{ margin-bottom:5px; padding-left:18px; position:relative; }
-.wt-hints li::before{ content:"›"; position:absolute; left:0; color:var(--gold); font-weight:700; }
-.wt-answer-row{ display:flex; gap:8px; margin-top:6px; }
-.wt-answer-row input{ flex:1; font-size:15px; padding:8px 12px; border:1px solid var(--line); border-radius:3px; outline:none; font-family:'Helvetica Neue',Arial,sans-serif; }
-.wt-answer-row input:focus{ border-color:var(--gold); }
-.wt-check{ font-size:14px; font-weight:600; padding:8px 16px; background:var(--gold); color:#fff; border:none; border-radius:3px; cursor:pointer; white-space:nowrap; font-family:'Helvetica Neue',Arial,sans-serif; }
-.wt-check:hover{ background:#a07018; }
-.wt-feedback{ margin-top:10px; font-size:14px; padding:9px 12px; border-radius:3px; display:none; font-family:'Helvetica Neue',Arial,sans-serif; }
-.wt-feedback.ok{ background:#e8f8ee; color:#1a7a3a; border:1px solid #a8dbb8; display:block; }
-.wt-feedback.err{ background:#fde8e8; color:#a01820; border:1px solid #f0b8b8; display:block; }
-.wt-working summary{ cursor:pointer; color:var(--red); font-weight:600; font-size:14px; }
-.wt-working-body{ margin-top:8px; font-size:14px; line-height:1.6; color:#3a2a24; }
-.level-tag{ display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; margin-bottom:8px; }
-.level-f{ background:#e8f4ff; color:#1a5a8a; }
-.level-e{ background:#fce8d8; color:#7A1418; }
-@media(max-width:640px){ .layout{ flex-direction:column; } .sidebar{ width:100%; flex-direction:row; flex-wrap:wrap; } .q-list-btn{ flex:1; min-width:80px; } }
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-top:3px;}
+.bf{background:#e8f4ff;color:#1a5a8a;}
+.be{background:#fce8d8;color:#7A1418;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}
+.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.lt{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:8px;}
+.lf{background:#e8f4ff;color:#1a5a8a;}
+.le{background:#fce8d8;color:#7A1418;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
 <body>
 <header>
-  <a href="index.html" class="back-btn">← All Topics</a>
-  <div class="header-title">Trigonometry</div>
+  <a href="index.html" class="back">← All Topics</a>
+  <div class="ht">Trigonometry</div>
   <div style="width:80px"></div>
 </header>
 <div class="layout">
-  <div class="sidebar" id="sidebar"><div class="sidebar-label">Questions</div></div>
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
   <div class="main">
-    <div id="wtHeader" style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
-      <div id="wtEyebrow" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
-      <h1 id="wtTitle" style="font-family:'Georgia',serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
-      <div id="wtSub" style="font-size:14px;color:#6b5750;"></div>
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
     </div>
-    <div class="wt-stage">
-      <div class="wt-canvas"><svg id="diagram" viewBox="0 0 480 300"></svg></div>
-      <div class="wt-panel wt-fadein" id="panel"></div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 300"></svg></div>
+      <div class="pnl fi" id="pn"></div>
     </div>
-    <div class="wt-controls">
-      <button class="wt-btn" id="prevBtn">← Back</button>
-      <div class="wt-dots" id="dots"></div>
-      <button class="wt-btn primary" id="nextBtn">Next →</button>
+    <div class="ctrl">
+      <button class="btn" id="pb">← Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next →</button>
     </div>
   </div>
 </div>
 <script>
-const _store={};
-function tryIt(opts){
-  const id='ti_'+Math.random().toString(36).slice(2);
-  _store[id]=opts;
-  const hints=(opts.hints||[]).map(h=>`<li>${h}</li>`).join('');
-  return `<div class="wt-try"><div class="wt-try-title">✎ Your Turn</div><p>${opts.question}</p><ul class="wt-hints">${hints}</ul><div class="wt-answer-row"><input type="number" step="any" placeholder="Your answer (${opts.unit})" id="${id}_inp"/><button class="wt-check" onclick="checkAns('${id}')">Check</button></div><div class="wt-feedback" id="${id}_fb"></div><details class="wt-working"><summary>Show full working</summary><div class="wt-working-body">${opts.working}</div></details></div>`;
+var ST={};
+function tryIt(o){
+  var id='t'+Math.random().toString(36).slice(2);ST[id]=o;
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  return '<div class="try"><div class="try-t">&#10002; Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="Answer ('+o.unit+')" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details></div>';
 }
-function checkAns(id){
-  const o=_store[id],val=parseFloat(document.getElementById(id+'_inp').value),fb=document.getElementById(id+'_fb');
-  if(isNaN(val)){fb.className='wt-feedback err';fb.textContent='Please enter a number first.';return;}
-  const tol=(o.tolerance||2)/100,lo=o.answer*(1-tol),hi=o.answer*(1+tol);
-  if(val>=lo&&val<=hi){fb.className='wt-feedback ok';fb.textContent='✓ Correct! Answer: '+o.answer.toFixed(1)+' '+o.unit;}
-  else{fb.className='wt-feedback err';fb.textContent='✗ Not quite — check your working and try again.';}
+function ck(id){
+  var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');
+  if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}
+  var tol=(o.tol||2)/100;
+  if(Math.abs(v-o.ans)<=Math.abs(o.ans*tol)+0.05){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}
+  else{f.className='fb er';f.textContent='Not quite — check your working and try again.';}
 }
-const D=Math.PI/180;
-function lbl(x,y,t,c='#6b5750',sz=12,a='middle'){return `<text x="${x}" y="${y}" font-size="${sz}" font-family="Arial" fill="${c}" text-anchor="${a}">${t}</text>`;}
-function ln(x1,y1,x2,y2,c='#C0272D',w=2,d=''){return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="${w}" ${d?`stroke-dasharray="${d}"`:''}/>` ;}
-function ra(x,y,sz=10){return `<rect x
+var D=Math.PI/180;
+function g(){return document.getElementById('dg');}
+function L(x,y,t,c,sz,a){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'">'+t+'</text>';}
+function l(x1,y1,x2,y2,c,w,d){c=c||'#C0272D';w=w||2;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>'; }
+function ra(x,y,sz){sz=sz||10;return '<rect x="'+x+'" y="'+(y-sz)+'" width="'+sz+'" height="'+sz+'" fill="none" stroke="#888" stroke-width="1.2"/>';}
+function arc(cx,cy,r,a1,a2,c){c=c||'#C8922A';var x1=cx+r*Math.cos(a1*D),y1=cy-r*Math.sin(a1*D),x2=cx+r*Math.cos(a2*D),y2=cy-r*Math.sin(a2*D);return '<path d="M'+x1+','+y1+' A'+r+','+r+' 0 0,0 '+x2+','+y2+'" fill="none" stroke="'+c+'" stroke-width="1.5"/>';}
+
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];var Ax=100,Ay=240,Bx=340,By=240,Cx=340,Cy=80;o.push('<polygon points="'+Ax+','+Ay+' '+Bx+','+By+' '+Cx+','+Cy+'" fill="'+(p>=1?'#fff5f0':'#fff')+'" stroke="#C0272D" stroke-width="2"/>');o.push(ra(Bx-10,By));o.push(L(Ax-16,Ay+5,'A','#C0272D',13,'end'));o.push(L(Bx+16,By+5,'B','#C0272D',13,'start'));o.push(L(Cx+16,Cy,'C','#C0272D',13,'start'));o.push(L((Ax+Bx)/2,Ay+18,'8 cm'));o.push(L(Bx+22,(By+Cy)/2,'6 cm'));if(p>=1)o.push(L((Ax+Cx)/2-22,(Ay+Cy)/2,'AC = ?','#C0272D',13));if(p>=2){o.push(arc(Ax,Ay,36,0,34));o.push(L(Ax+48,Ay-12,'θ','#C8922A',14));}if(p>=3)o.push(L(240,285,'AC = √(64+36) = √100 = 10 cm','#C0272D',13));s.innerHTML=o.join('');}
+
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];var Ax=80,Ay=250,Bx=360,By=250,Cx=360,Cy=90;o.push('<polygon points="'+Ax+','+Ay+' '+Bx+','+By+' '+Cx+','+Cy+'" fill="'+(p>=1?'#fff5f0':'#fff')+'" stroke="#C0272D" stroke-width="2"/>');o.push(ra(Bx-10,By));o.push(L(Ax-14,Ay+4,'A','#C0272D',13,'end'));o.push(L(Bx+14,By+5,'B','#C0272D',13,'start'));o.push(L(Cx+14,Cy,'C','#C0272D',13,'start'));o.push(L((Ax+Cx)/2-26,(Ay+Cy)/2,'15 cm'));o.push(L(Bx+20,(By+Cy)/2,'9 cm'));if(p>=1){o.push(arc(Ax,Ay,42,0,34));o.push(L(Ax+52,Ay-14,'θ','#C8922A',14));}if(p>=2)o.push(L(190,30,'sin θ = opp/hyp = 9/15 = 0.6','#C0272D',13));if(p>=3)o.push(L(190,55,'θ = sin⁻¹(0.6) = 36.9°','#C0272D',14));s.innerHTML=o.join('');}
+
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];var Ax=80,Ay=240,Bx=360,By=240,Cx=360,Cy=100;o.push('<polygon points="'+Ax+','+Ay+' '+Bx+','+By+' '+Cx+','+Cy+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');o.push(ra(Bx-10,By));o.push(L(Ax-14,Ay+4,'A','#C0272D',13,'end'));o.push(L(Bx+14,By+5,'B','#C0272D',13,'start'));o.push(L(Cx+14,Cy,'C','#C0272D',13,'start'));o.push(L((Ax+Cx)/2-26,(Ay+Cy)/2,'13 cm'));if(p>=1){o.push(arc(Ax,Ay,40,0,34));o.push(L(Ax+52,Ay-12,'40°','#C8922A',13));}o.push(L((Ax+Bx)/2,Ay+18,'AB = ?'));if(p>=2)o.push(L(200,30,'cos 40° = adj/hyp = AB/13','#C0272D',13));if(p>=3)o.push(L(200,55,'AB = 13 × cos 40° = 9.96 cm','#C0272D',13));s.innerHTML=o.join('');}
+
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 320');var o=[];var Lx=340,Ly=270,Wx=160,Wy=80;o.push(l(80,270,420,270,'#ccc',1));o.push(l(160,270,160,60,'#ccc',1));o.push(l(Lx,Ly,Wx,Wy,p>=1?'#C0272D':'#aaa',3));o.push(ra(Wx,Wy+10));o.push(L(Lx+14,Ly+16,'Base = 4 m'));o.push(L((Lx+Wx)/2+20,(Ly+Wy)/2-10,'Ladder = 9 m'));o.push(L(Wx-22,Wy+110,'Wall = h','#C0272D',13,'end'));if(p>=1){o.push(arc(Lx,Ly,45,116,180));o.push(L(Lx-58,Ly-12,'θ','#C8922A',13));}if(p>=2)o.push(L(290,40,'cos θ = 4/9 = 0.444  →  θ = 63.6°','#C0272D',12));if(p>=3)o.push(L(290,62,'h = 9 × sin(63.6°) = 8.06 m','#C0272D',12));s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 320');var o=[];var Ox=200,Oy=60,Ax=200,Ay=260,Bx=380,By=260;o.push(l(Ox,Oy-10,Ox,Oy+20,'#999',1));o.push(L(Ox,Oy-18,'N','#999',11));o.push('<polygon points="'+Ox+','+Oy+' '+Ax+','+Ay+' '+Bx+','+By+'" fill="'+(p>=1?'#fff5f0':'#fff')+'" stroke="#C0272D" stroke-width="2"/>');o.push(ra(Ax,Ay));o.push(L(Ox-14,Oy,'P','#C0272D',13,'end'));o.push(L(Ax-14,Ay+14,'Q','#C0272D',13,'end'));o.push(L(Bx+12,By+4,'R','#C0272D',13,'start'));o.push(L(Ax-30,(Oy+Ay)/2,'200 m'));o.push(L((Ax+Bx)/2,Ay+18,'150 m'));if(p>=1){o.push(arc(Ox,Oy,36,252,270));o.push(L(Ox+44,Oy+26,'θ','#C8922A',13));}if(p>=2)o.push(L(310,50,'tan θ = 150/200 = 0.75','#C0272D',12));if(p>=3)o.push(L(310,72,'θ = 36.9°','#C0272D',12));if(p>=3)o.push(L(310,94,'Bearing = 180° − 36.9° = 143.1°','#C0272D',12));s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];var Ax=80,Ay=250,Bx=380,By=250,Cx=260,Cy=70;o.push('<polygon points="'+Ax+','+Ay+' '+Bx+','+By+' '+Cx+','+Cy+'" fill="'+(p>=1?'#fff5f0':'#fff')+'" stroke="#C0272D" stroke-width="2"/>');o.push(L(Ax-14,Ay+5,'A','#C0272D',13,'end'));o.push(L(Bx+14,By+5,'B','#C0272D',13,'start'));o.push(L(Cx,Cy-12,'C','#C0272D',13));o.push(L((Ax+Bx)/2,By+18,'c = 12 cm'));o.push(L((Ax+Cx)/2-22,(Ay+Cy)/2,'a = ?','#C0272D',13));if(p>=1){o.push(arc(Ax,Ay,36,0,26));o.push(L(Ax+44,Ay-10,'42°','#C8922A',12));o.push(arc(Bx,By,36,154,180));o.push(L(Bx-52,By-12,'65°','#C8922A',12));}if(p>=2)o.push(L(240,28,'C = 180−42−65 = 73°','#C0272D',12));if(p>=3)o.push(L(240,50,'a/sin 42° = 12/sin 73°','#C0272D',12));if(p>=4)o.push(L(240,72,'a = 12 × sin42°/sin73° = 8.40 cm','#C0272D',12));s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];var Ax=80,Ay=250,Bx=360,By=250,Cx=180,Cy=80;o.push('<polygon points="'+Ax+','+Ay+' '+Bx+','+By+' '+Cx+','+Cy+'" fill="'+(p>=1?'#fff5f0':'#fff')+'" stroke="#C0272D" stroke-width="2"/>');o.push(L(Ax-14,Ay+5,'A','#C0272D',13,'end'));o.push(L(Bx+14,By+5,'B','#C0272D',13,'start'));o.push(L(Cx,Cy-12,'C','#C0272D',13));o.push(L((Ax+Bx)/2,By+18,'c = 18 cm'));o.push(L((Bx+Cx)/2+14,(By+Cy)/2,'a = 14 cm'));o.push(L((Ax+Cx)/2-14,(Ay+Cy)/2,'B = ?','#C0272D',13));if(p>=1){o.push(arc(Ax,Ay,38,0,22));o.push(L(Ax+46,Ay-10,'35°','#C8922A',12));}if(p>=2)o.push(L(260,28,'sinC/18 = sin35°/14','#C0272D',12));if(p>=3)o.push(L(260,50,'sinC = 0.737  →  C = 47.5°','#C0272D',12));if(p>=4)o.push(L(260,72,'B = 180−35−47.5 = 97.5°','#C0272D',12));s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];var Ax=80,Ay=250,Bx=380,By=200,Cx=200,Cy=70;o.push('<polygon points="'+Ax+','+Ay+' '+Bx+','+By+' '+Cx+','+Cy+'" fill="'+(p>=1?'#fff5f0':'#fff')+'" stroke="#C0272D" stroke-width="2"/>');o.push(L(Ax-14,Ay+5,'A','#C0272D',13,'end'));o.push(L(Bx+14,By+5,'B','#C0272D',13,'start'));o.push(L(Cx,Cy-12,'C','#C0272D',13));o.push(L((Ax+Bx)/2,(Ay+By)/2+16,'c = 12 cm'));o.push(L((Ax+Cx)/2-22,(Ay+Cy)/2,'b = 9 cm'));o.push(L((Bx+Cx)/2+14,(By+Cy)/2,'a = ?','#C0272D',13));if(p>=1){o.push(arc(Ax,Ay,40,0,28));o.push(L(Ax+50,Ay-12,'55°','#C8922A',12));}if(p>=2)o.push(L(270,28,'a² = b²+c²−2bc cosA','#C0272D',12));if(p>=3)o.push(L(270,50,'= 81+144−216×0.574 = 101.1','#C0272D',12));if(p>=4)o.push(L(270,72,'a = √101.1 = 10.05 cm','#C0272D',13));s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];var Ax=80,Ay=250,Bx=380,By=250,Cx=240,Cy=70;o.push('<polygon points="'+Ax+','+Ay+' '+Bx+','+By+' '+Cx+','+Cy+'" fill="'+(p>=1?'#fff5f0':'#fff')+'" stroke="#C0272D" stroke-width="2"/>');o.push(L(Ax-14,Ay+5,'A','#C0272D',13,'end'));o.push(L(Bx+14,By+5,'B','#C0272D',13,'start'));o.push(L(Cx,Cy-12,'C','#C0272D',13));o.push(L((Ax+Bx)/2,By+18,'c = 15 cm'));o.push(L((Ax+Cx)/2-22,(Ay+Cy)/2,'b = 10 cm'));o.push(L((Bx+Cx)/2+14,(By+Cy)/2,'a = 12 cm'));if(p>=1){o.push(arc(Ax,Ay,42,0,32));o.push(L(Ax+52,Ay-16,'A = ?','#C8922A',12));}if(p>=2)o.push(L(240,28,'cosA = (b²+c²−a²)/2bc','#C0272D',12));if(p>=3)o.push(L(240,50,'= (100+225−144)/300 = 0.603','#C0272D',11));if(p>=4)o.push(L(240,72,'A = cos⁻¹(0.603) = 52.9°','#C0272D',13));s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];var Ax=80,Ay=260,Bx=380,By=260,Cx=300,Cy=80;if(p>=2)o.push(l(Cx,Cy,Cx,By,'#ccc',1,'4,3'));o.push('<polygon points="'+Ax+','+Ay+' '+Bx+','+By+' '+Cx+','+Cy+'" fill="'+(p>=1?'#fce8d8':'#fff')+'" stroke="#C0272D" stroke-width="2"/>');o.push(L(Ax-14,Ay+5,'A','#C0272D',13,'end'));o.push(L(Bx+14,By+5,'B','#C0272D',13,'start'));o.push(L(Cx+14,Cy,'C','#C0272D',13,'start'));o.push(L((Ax+Cx)/2-22,(Ay+Cy)/2,'b = 11 cm'));o.push(L((Bx+Cx)/2+14,(By+Cy)/2,'a = 8 cm'));if(p>=1){o.push(arc(Cx,Cy,38,200,280));o.push(L(Cx-52,Cy+30,'C=72°','#C8922A',12));}if(p>=2)o.push(L(200,28,'Area = ½ × a × b × sinC','#C0272D',13));if(p>=3)o.push(L(200,52,'= ½ × 8 × 11 × sin72°','#C0272D',13));if(p>=4)o.push(L(200,76,'= 44 × 0.951 = 41.8 cm²','#C0272D',14));s.innerHTML=o.join('');}
+
+var QS=[
+  {ey:'Q1 · Trig Ratios · Foundation',ti:'Finding the Hypotenuse',su:'Right-angled triangle. AB = 8 cm, BC = 6 cm. Find AC.',lv:'F',steps:[
+    {lb:'The triangle',dr:dQ1,ht:'<span class="lt lf">Foundation</span><p>Triangle ABC, right angle at B. <b>AB = 8 cm</b>, <b>BC = 6 cm</b>. Find the hypotenuse <b>AC</b>.</p>'},
+    {lb:'Step 1 — Pythagoras',dr:dQ1,ht:'<p>AC is opposite the right angle — it is the hypotenuse.</p><div class="fm">AC² = AB² + BC² = 64 + 36 = 100</div>'},
+    {lb:'Step 2 — Solve',dr:dQ1,ht:'<div class="fm">AC = √100 = <b>10 cm</b></div>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Shorter sides are <b>5 cm</b> and <b>12 cm</b>. Find the hypotenuse.',hints:['hyp² = 5² + 12²','Take the square root'],ans:13,unit:'cm',working:'169 → √169 = <b>13 cm</b>'})}
+  ]},
+  {ey:'Q2 · Trig Ratios · Foundation',ti:'Finding an Angle — Sine',su:'Hypotenuse = 15 cm, opposite = 9 cm. Find angle A.',lv:'F',steps:[
+    {lb:'The triangle',dr:dQ2,ht:'<span class="lt lf">Foundation</span><p>Right angle at B. <b>AC = 15 cm</b> (hypotenuse), <b>BC = 9 cm</b> (opposite A). Find <b>angle A</b>.</p>'},
+    {lb:'Step 1 — Choose ratio',dr:dQ2,ht:'<p>Opposite and hypotenuse known → use <b>sin</b>.</p><div class="fm">sin θ = opposite ÷ hypotenuse</div>'},
+    {lb:'Step 2 — Solve',dr:dQ2,ht:'<div class="fm">sin A = 9 ÷ 15 = 0.6</div><div class="fm">A = sin⁻¹(0.6) = <b>36.9°</b></div>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Hypotenuse = <b>20 cm</b>, opposite = <b>10 cm</b>. Find angle A.',hints:['sin A = 10 ÷ 20','Use sin⁻¹'],ans:30,unit:'°',working:'sin A = 0.5 → A = sin⁻¹(0.5) = <b>30°</b>'})}
+  ]},
+  {ey:'Q3 · Trig Ratios · Foundation',ti:'Finding a Side — Cosine',su:'Hypotenuse = 13 cm, angle A = 40°. Find AB.',lv:'F',steps:[
+    {lb:'The triangle',dr:dQ3,ht:'<span class="lt lf">Foundation</span><p>Right angle at B. <b>Hypotenuse = 13 cm</b>, <b>angle A = 40°</b>. Find the adjacent side <b>AB</b>.</p>'},
+    {lb:'Step 1 — Choose ratio',dr:dQ3,ht:'<p>Hypotenuse known, want adjacent → use <b>cos</b>.</p><div class="fm">cos θ = adjacent ÷ hypotenuse</div>'},
+    {lb:'Step 2 — Solve',dr:dQ3,ht:'<div class="fm">AB = 13 × cos 40° = 13 × 0.766 = <b>9.96 cm</b></div>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Hypotenuse = <b>10 cm</b>, angle = <b>30°</b>. Find the adjacent side.',hints:['adj = hyp × cos θ','cos 30° = 0.866'],ans:8.66,tol:1.5,unit:'cm',working:'10 × cos30° = 10 × 0.866 = <b>8.66 cm</b>'})}
+  ]},
+  {ey:'Q4 · Trig Ratios · Core',ti:'Ladder Against a Wall',su:'Ladder = 9 m, base = 4 m. Find the angle and height.',lv:'F',steps:[
+    {lb:'The diagram',dr:dQ4,ht:'<span class="lt lf">Core</span><p>A <b>9 m ladder</b> leans against a wall, base <b>4 m</b> from the wall. Find the angle with the ground and the height reached.</p>'},
+    {lb:'Step 1 — Find angle',dr:dQ4,ht:'<div class="fm">cos θ = 4/9 = 0.444  →  θ = cos⁻¹(0.444) = <b>63.6°</b></div>'},
+    {lb:'Step 2 — Find height',dr:dQ4,ht:'<div class="fm">h = 9 × sin(63.6°) = 9 × 0.895 = <b>8.06 m</b></div>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'A <b>7 m</b> ladder has its base <b>2.5 m</b> from the wall. Find the height reached.',hints:['h² = 7² − 2.5²','h = √42.75'],ans:6.54,tol:1.5,unit:'m',working:'h = √(49−6.25) = √42.75 = <b>6.54 m</b>'})}
+  ]},
+  {ey:'Q5 · Trig Ratios · Extended',ti:'Bearing Problem',su:'PQ = 200 m south, QR = 150 m east. Find bearing of R from P.',lv:'E',steps:[
+    {lb:'The diagram',dr:dQ5,ht:'<span class="lt le">Extended</span><p>P is at top. Q is directly south of P (<b>200 m</b>). R is due east of Q (<b>150 m</b>). Find the <b>bearing of R from P</b>.</p>'},
+    {lb:'Step 1 — Set up',dr:dQ5,ht:'<div class="fm">tan θ = 150/200 = 0.75</div>'},
+    {lb:'Step 2 — Find angle',dr:dQ5,ht:'<div class="fm">θ = tan⁻¹(0.75) = 36.9°</div>'},
+    {lb:'Step 3 — Bearing',dr:dQ5,ht:'<div class="fm">Bearing = 180° − 36.9° = <b>143.1°</b></div>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'Ship sails <b>300 m south</b> then <b>400 m east</b>. Find the bearing of its final position from the start.',hints:['tan θ = 400/300','θ = tan⁻¹(1.333)','Bearing = 180° − θ'],ans:126.9,tol:1,unit:'°',working:'θ = 53.1° → Bearing = 180−53.1 = <b>126.9°</b>'})}
+  ]},
+  {ey:'Q6 · Sine Rule · Extended',ti:'Sine Rule — Finding a Side',su:'Angle A = 42°, angle B = 65°, AB = 12 cm. Find BC.',lv:'E',steps:[
+    {lb:'The triangle',dr:dQ6,ht:'<span class="lt le">Extended</span><p><b>Angle A = 42°</b>, <b>angle B = 65°</b>, <b>c = AB = 12 cm</b>. Find <b>a = BC</b>.</p>'},
+    {lb:'Step 1 — Find angle C',dr:dQ6,ht:'<div class="fm">C = 180° − 42° − 65° = <b>73°</b></div>'},
+    {lb:'Step 2 — Sine Rule',dr:dQ6,ht:'<div class="fm">a / sin A = c / sin C</div><div class="fm">a / sin 42° = 12 / sin 73°</div>'},
+    {lb:'Step 3 — Solve',dr:dQ6,ht:'<div class="fm">a = 12 × sin42° / sin73° = <b>8.40 cm</b></div>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'Angle P = 50°, angle Q = 70°, PQ = 10 cm. Find QR.',hints:['Angle R = 60°','QR/sinP = PQ/sinR','QR = 10 × sin50°/sin60°'],ans:8.84,tol:1.5,unit:'cm',working:'QR = 10×0.766/0.866 = <b>8.84 cm</b>'})}
+  ]},
+  {ey:'Q7 · Sine Rule · Extended',ti:'Sine Rule — Finding an Angle',su:'Angle A = 35°, a = 14 cm, c = 18 cm. Find angle B.',lv:'E',steps:[
+    {lb:'The triangle',dr:dQ7,ht:'<span class="lt le">Extended</span><p><b>Angle A = 35°</b>, <b>a = BC = 14 cm</b>, <b>c = AB = 18 cm</b>. Find <b>angle B</b>.</p>'},
+    {lb:'Step 1 — Find C',dr:dQ7,ht:'<div class="fm">sinC / 18 = sin35° / 14</div><div class="fm">sinC = 18 × 0.574 / 14 = 0.737</div>'},
+    {lb:'Step 2 — Solve C',dr:dQ7,ht:'<div class="fm">C = sin⁻¹(0.737) = <b>47.5°</b></div>'},
+    {lb:'Step 3 — Find B',dr:dQ7,ht:'<div class="fm">B = 180° − 35° − 47.5° = <b>97.5°</b></div>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'Angle A = 40°, BC = 9 cm, AC = 13 cm. Find angle B.',hints:['sinB/13 = sin40°/9','sinB = 13×sin40°/9','B = sin⁻¹(result)'],ans:68.4,tol:2,unit:'°',working:'sinB = 13×0.643/9 = 0.929 → B = <b>68.4°</b>'})}
+  ]},
+  {ey:'Q8 · Cosine Rule · Extended',ti:'Cosine Rule — Finding a Side',su:'b = 9 cm, c = 12 cm, angle A = 55°. Find a.',lv:'E',steps:[
+    {lb:'The triangle',dr:dQ8,ht:'<span class="lt le">Extended</span><p><b>b = 9 cm</b>, <b>c = 12 cm</b>, included <b>angle A = 55°</b>. Find <b>a = BC</b>.</p>'},
+    {lb:'Step 1 — Formula',dr:dQ8,ht:'<div class="fm">a² = b² + c² − 2bc cosA</div>'},
+    {lb:'Step 2 — Substitute',dr:dQ8,ht:'<div class="fm">= 81 + 144 − 216 × 0.574 = 101.1</div>'},
+    {lb:'Step 3 — Solve',dr:dQ8,ht:'<div class="fm">a = √101.1 = <b>10.05 cm</b></div>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'PQ = 7 cm, PR = 10 cm, angle P = 48°. Find QR.',hints:['QR² = 49+100−140×cos48°','cos48° = 0.669'],ans:7.44,tol:2,unit:'cm',working:'QR²=55.3 → QR = <b>7.44 cm</b>'})}
+  ]},
+  {ey:'Q9 · Cosine Rule · Extended',ti:'Cosine Rule — Finding an Angle',su:'a = 12 cm, b = 10 cm, c = 15 cm. Find angle A.',lv:'E',steps:[
+    {lb:'The triangle',dr:dQ9,ht:'<span class="lt le">Extended</span><p>All sides known: <b>a = 12</b>, <b>b = 10</b>, <b>c = 15</b>. Find <b>angle A</b>.</p>'},
+    {lb:'Step 1 — Formula',dr:dQ9,ht:'<div class="fm">cosA = (b²+c²−a²) / 2bc</div>'},
+    {lb:'Step 2 — Substitute',dr:dQ9,ht:'<div class="fm">= (100+225−144) / 300 = 181/300 = 0.603</div>'},
+    {lb:'Step 3 — Solve',dr:dQ9,ht:'<div class="fm">A = cos⁻¹(0.603) = <b>52.9°</b></div>'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt({question:'Sides 7 cm, 8 cm and 11 cm. Find the largest angle.',hints:['Largest angle opposite 11 cm','cosA = (49+64−121)/112'],ans:94.1,tol:2,unit:'°',working:'cosA = −8/112 = −0.0714 → A = <b>94.1°</b>'})}
+  ]},
+  {ey:'Q10 · Area of Triangle · Extended',ti:'Area Using ½ab sinC',su:'a = 8 cm, b = 11 cm, angle C = 72°. Find the area.',lv:'E',steps:[
+    {lb:'The triangle',dr:dQ10,ht:'<span class="lt le">Extended</span><p><b>a = 8 cm</b>, <b>b = 11 cm</b>, included <b>angle C = 72°</b>. Find the area.</p>'},
+    {lb:'Step 1 — Formula',dr:dQ10,ht:'<div class="fm">Area = ½ × a × b × sinC</div><p>Use this when you know two sides and the included angle.</p>'},
+    {lb:'Step 2 — Substitute',dr:dQ10,ht:'<div class="fm">= ½ × 8 × 11 × sin72° = ½ × 88 × 0.951</div>'},
+    {lb:'Step 3 — Calculate',dr:dQ10,ht:'<div class="fm">= 44 × 0.951 = <b>41.8 cm²</b></div>'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt({question:'Two sides <b>7 cm</b> and <b>10 cm</b>, included angle <b>55°</b>. Find the area.',hints:['Area = ½ × 7 × 10 × sin55°','sin55° = 0.819'],ans:28.7,tol:1.5,unit:'cm²',working:'Area = 35 × 0.819 = <b>28.7 cm²</b>'})}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){
+  var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);
+  QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti+'<br><span class="badge '+(q.lv==='F'?'bf':'be')+'">'+(q.lv==='F'?'Foundation':'Extended')+'</span>';b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});
+}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){
+  bSB();var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;
+  var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+  p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;
+  st.dr(si);bDT();
+  document.getElementById('pb').disabled=si===0;
+  document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';
+}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+</body>
+</html>
