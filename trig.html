@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trigonometry · Maths Walkthroughs</title>
+<style>
+:root{ --red:#C0272D; --dark-red:#7A1418; --cream:#FBF6F1; --ink:#241A17; --line:#E4D6CE; --gold:#C8922A; }
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ background:var(--cream); color:var(--ink); font-family:'Helvetica Neue',Arial,sans-serif; }
+header{ background:var(--red); color:#fff; height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; position:sticky; top:0; z-index:100; }
+.back-btn{ font-size:13px; font-weight:600; color:#fff; background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.35); padding:5px 12px; border-radius:3px; cursor:pointer; text-decoration:none; }
+.header-title{ font-size:15px; font-weight:700; }
+.layout{ display:flex; max-width:1100px; margin:0 auto; padding:28px 20px 60px; gap:28px; }
+.sidebar{ width:210px; flex-shrink:0; display:flex; flex-direction:column; gap:6px; }
+.sidebar-label{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#888; font-weight:700; margin-bottom:4px; }
+.q-list-btn{ text-align:left; background:#fff; border:1px solid var(--line); border-radius:4px; padding:9px 12px; cursor:pointer; font-size:12px; transition:.15s; color:var(--ink); }
+.q-list-btn:hover{ border-color:var(--red); color:var(--red); }
+.q-list-btn.active{ background:var(--red); color:#fff; border-color:var(--red); }
+.q-list-btn .q-num{ font-weight:700; font-size:10px; display:block; opacity:.7; }
+.q-badge{ display:inline-block; font-size:9px; font-weight:700; padding:1px 5px; border-radius:8px; margin-top:3px; }
+.badge-f{ background:#e8f4ff; color:#1a5a8a; }
+.badge-e{ background:#fce8d8; color:#7A1418; }
+.main{ flex:1; min-width:0; }
+.wt-stage{ background:#fff; border:1px solid var(--line); border-radius:4px; overflow:hidden; width:100%; max-width:760px; }
+.wt-canvas{ background:linear-gradient(180deg,#fff,#fdf7f4); padding:14px 0 4px; display:flex; justify-content:center; }
+.wt-canvas svg{ width:100%; max-width:520px; height:auto; }
+.wt-panel{ padding:20px 24px 24px; border-top:1px solid var(--line); min-height:160px; }
+.wt-step-label{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:6px; }
+.wt-panel p{ font-size:16px; line-height:1.55; margin:0 0 8px; }
+.wt-formula{ font-family:'Cambria Math','Georgia',serif; font-size:17px; background:var(--cream); border-left:4px solid var(--red); padding:9px 13px; margin:8px 0; display:block; }
+.wt-controls{ width:100%; max-width:760px; display:flex; justify-content:space-between; align-items:center; margin-top:16px; }
+.wt-btn{ font-size:14px; font-weight:600; padding:9px 18px; border-radius:3px; border:1px solid var(--red); background:#fff; color:var(--red); cursor:pointer; transition:.15s; font-family:'Helvetica Neue',Arial,sans-serif; }
+.wt-btn.primary{ background:var(--red); color:#fff; }
+.wt-btn:disabled{ opacity:.3; cursor:default; }
+.wt-btn:not(:disabled):hover{ background:var(--dark-red); color:#fff; border-color:var(--dark-red); }
+.wt-dots{ display:flex; gap:6px; }
+.wt-dot{ width:8px; height:8px; border-radius:50%; background:var(--line); }
+.wt-dot.active{ background:var(--red); }
+.wt-dot.done{ background:var(--gold); }
+.wt-fadein{ animation:wtFade .45s ease; }
+@keyframes wtFade{ from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);} }
+.wt-try{ background:#fff; border:2px solid var(--gold); border-radius:6px; padding:18px 20px; margin-top:4px; }
+.wt-try-title{ font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:10px; }
+.wt-hints{ font-size:14px; color:#3a2a24; margin:8px 0 12px; padding-left:4px; list-style:none; }
+.wt-hints li{ margin-bottom:5px; padding-left:18px; position:relative; }
+.wt-hints li::before{ content:"›"; position:absolute; left:0; color:var(--gold); font-weight:700; }
+.wt-answer-row{ display:flex; gap:8px; margin-top:6px; }
+.wt-answer-row input{ flex:1; font-size:15px; padding:8px 12px; border:1px solid var(--line); border-radius:3px; outline:none; font-family:'Helvetica Neue',Arial,sans-serif; }
+.wt-answer-row input:focus{ border-color:var(--gold); }
+.wt-check{ font-size:14px; font-weight:600; padding:8px 16px; background:var(--gold); color:#fff; border:none; border-radius:3px; cursor:pointer; white-space:nowrap; font-family:'Helvetica Neue',Arial,sans-serif; }
+.wt-check:hover{ background:#a07018; }
+.wt-feedback{ margin-top:10px; font-size:14px; padding:9px 12px; border-radius:3px; display:none; font-family:'Helvetica Neue',Arial,sans-serif; }
+.wt-feedback.ok{ background:#e8f8ee; color:#1a7a3a; border:1px solid #a8dbb8; display:block; }
+.wt-feedback.err{ background:#fde8e8; color:#a01820; border:1px solid #f0b8b8; display:block; }
+.wt-working summary{ cursor:pointer; color:var(--red); font-weight:600; font-size:14px; }
+.wt-working-body{ margin-top:8px; font-size:14px; line-height:1.6; color:#3a2a24; }
+.level-tag{ display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; margin-bottom:8px; }
+.level-f{ background:#e8f4ff; color:#1a5a8a; }
+.level-e{ background:#fce8d8; color:#7A1418; }
+@media(max-width:640px){ .layout{ flex-direction:column; } .sidebar{ width:100%; flex-direction:row; flex-wrap:wrap; } .q-list-btn{ flex:1; min-width:80px; } }
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="back-btn">← All Topics</a>
+  <div class="header-title">Trigonometry</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sidebar" id="sidebar"><div class="sidebar-label">Questions</div></div>
+  <div class="main">
+    <div id="wtHeader" style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="wtEyebrow" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="wtTitle" style="font-family:'Georgia',serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="wtSub" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="wt-stage">
+      <div class="wt-canvas"><svg id="diagram" viewBox="0 0 480 300"></svg></div>
+      <div class="wt-panel wt-fadein" id="panel"></div>
+    </div>
+    <div class="wt-controls">
+      <button class="wt-btn" id="prevBtn">← Back</button>
+      <div class="wt-dots" id="dots"></div>
+      <button class="wt-btn primary" id="nextBtn">Next →</button>
+    </div>
+  </div>
+</div>
+<script>
+const _store={};
+function tryIt(opts){
+  const id='ti_'+Math.random().toString(36).slice(2);
+  _store[id]=opts;
+  const hints=(opts.hints||[]).map(h=>`<li>${h}</li>`).join('');
+  return `<div class="wt-try"><div class="wt-try-title">✎ Your Turn</div><p>${opts.question}</p><ul class="wt-hints">${hints}</ul><div class="wt-answer-row"><input type="number" step="any" placeholder="Your answer (${opts.unit})" id="${id}_inp"/><button class="wt-check" onclick="checkAns('${id}')">Check</button></div><div class="wt-feedback" id="${id}_fb"></div><details class="wt-working"><summary>Show full working</summary><div class="wt-working-body">${opts.working}</div></details></div>`;
+}
+function checkAns(id){
+  const o=_store[id],val=parseFloat(document.getElementById(id+'_inp').value),fb=document.getElementById(id+'_fb');
+  if(isNaN(val)){fb.className='wt-feedback err';fb.textContent='Please enter a number first.';return;}
+  const tol=(o.tolerance||2)/100,lo=o.answer*(1-tol),hi=o.answer*(1+tol);
+  if(val>=lo&&val<=hi){fb.className='wt-feedback ok';fb.textContent='✓ Correct! Answer: '+o.answer.toFixed(1)+' '+o.unit;}
+  else{fb.className='wt-feedback err';fb.textContent='✗ Not quite — check your working and try again.';}
+}
+const D=Math.PI/180;
+function lbl(x,y,t,c='#6b5750',sz=12,a='middle'){return `<text x="${x}" y="${y}" font-size="${sz}" font-family="Arial" fill="${c}" text-anchor="${a}">${t}</text>`;}
+function ln(x1,y1,x2,y2,c='#C0272D',w=2,d=''){return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="${w}" ${d?`stroke-dasharray="${d}"`:''}/>` ;}
+function ra(x,y,sz=10){return `<rect x
