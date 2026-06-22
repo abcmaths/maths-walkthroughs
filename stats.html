@@ -140,27 +140,33 @@ function dQ1(p){
 function dQ2(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
   var rows=[['1',4],['2',7],['3',11],['4',6],['5',2]];
-  var tx2=120,tw=80,th=34,ty=50;
-  // headers
-  o.push(R(tx2-60,ty-30,120,30,'#C0272D','#C0272D',0));o.push(T(tx2,ty-15,'Score','#fff',13,undefined,true));
-  o.push(R(tx2+60,ty-30,tw,30,'#C0272D','#C0272D',0));o.push(T(tx2+100,ty-15,'Freq (f)','#fff',13,undefined,true));
-  o.push(R(tx2+140,ty-30,tw+20,30,p>=1?'#7A1418':'#C0272D','#C0272D',0));o.push(T(tx2+235,ty-15,'f × x','#fff',13,undefined,true));
-  rows.forEach(function(r,i){
-    var y=ty+i*th,hi=(p>=2&&i===2);
-    o.push(R(tx2-60,y,120,th,hi?'#fff5f0':'#fff','#ccc',1));o.push(T(tx2,y+th/2+5,r[0],'#241A17',14));
-    o.push(R(tx2+60,y,tw,th,hi?'#fff5f0':'#fff','#ccc',1));o.push(T(tx2+100,y+th/2+5,r[1],'#241A17',14));
-    o.push(R(tx2+140,y,tw+20,th,p>=1?'#fdf7f4':'#f8f8f8','#ccc',1));
-    if(p>=1)o.push(T(tx2+235,y+th/2+5,parseInt(r[0])*r[1],'#C0272D',14));
+  var tx=80,th=36,ty=46;
+  var colW=[70,80,80];
+  // header row
+  var hdrs=['Score (x)','Freq (f)','f \u00d7 x'];
+  hdrs.forEach(function(h,c){
+    var col=c===2?(p>=1?'#7A1418':'#999'):'#C0272D';
+    o.push(R(tx+c*80,ty-32,78,30,col,col,0));
+    o.push(T(tx+c*80+39,ty-32+20,h,'#fff',12,undefined,true));
   });
-  // totals
-  var totalF=30,totalFX=4*1+7*2+11*3+6*4+5*2; // =4+14+33+24+10=85
-  if(p>=1){
-    o.push(R(tx2+60,ty+5*th,tw,th,'#fce8d8','#C0272D',2));o.push(T(tx2+100,ty+5*th+th/2+5,totalF,'#C0272D',14,undefined,true));
-    o.push(R(tx2+140,ty+5*th,tw+20,th,'#fce8d8','#C0272D',2));o.push(T(tx2+235,ty+5*th+th/2+5,totalFX,'#C0272D',14,undefined,true));
-    o.push(R(tx2-60,ty+5*th,120,th,'#fce8d8','#C0272D',2));o.push(T(tx2,ty+5*th+th/2+5,'Total','#C0272D',12,undefined,true));
-  }
-  if(p>=2)o.push(T(320,175,'Mean = Σfx / Σf = 85/30','#C0272D',13,'start'));
-  if(p>=3)o.push(T(320,200,'= 2.83 (2 d.p.)','#C0272D',14,'start',true));
+  // data rows
+  rows.forEach(function(r,i){
+    var y=ty+i*th;
+    o.push(R(tx,y,78,th,'#fff','#ddd',1));      o.push(T(tx+39,y+th/2+5,r[0],'#241A17',14));
+    o.push(R(tx+80,y,78,th,'#fff','#ddd',1));   o.push(T(tx+119,y+th/2+5,r[1],'#241A17',14));
+    o.push(R(tx+160,y,78,th,p>=1?'#fff5f0':'#f8f8f8','#ddd',1));
+    if(p>=1)o.push(T(tx+199,y+th/2+5,parseInt(r[0])*r[1],'#C0272D',14));
+  });
+  // totals row
+  var totalF=30,totalFX=85;
+  var ty2=ty+5*th;
+  o.push(R(tx,ty2,78,th,'#fce8d8','#C0272D',2));    o.push(T(tx+39,ty2+th/2+5,'Total','#C0272D',12,undefined,true));
+  o.push(R(tx+80,ty2,78,th,'#fce8d8','#C0272D',2)); o.push(T(tx+119,ty2+th/2+5,p>=1?totalF:'—','#C0272D',14,undefined,true));
+  o.push(R(tx+160,ty2,78,th,'#fce8d8','#C0272D',2));o.push(T(tx+199,ty2+th/2+5,p>=1?totalFX:'—','#C0272D',14,undefined,true));
+  // formula to the right — only show after totals visible
+  if(p>=2)o.push(T(340,120,'Mean = \u03a3fx / \u03a3f','#C0272D',13,undefined,true));
+  if(p>=2)o.push(T(340,148,'= 85 / 30','#C0272D',13,undefined,true));
+  if(p>=3)o.push(T(340,176,'= 2.83','#1a7a3a',16,undefined,true));
   s.innerHTML=o.join('');
 }
 
@@ -429,7 +435,7 @@ var QS=[
     {lb:'Step 1 — Add f×x column',dr:dQ2,ht:'<p>Multiply each score by its frequency to get the <b>f×x</b> column, then find the totals.</p>'},
     {lb:'Step 2 — Calculate mean',dr:dQ2,ht:'<div class="fm">Mean = Σ(f×x) / Σf = 85 / 30</div>'},
     {lb:'Step 3 — Answer',dr:dQ2,ht:'<div class="fm">Mean = 85 / 30 = <b>2.83</b> (2 d.p.)</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'A table shows: score 1 (freq 3), score 2 (freq 5), score 3 (freq 2). Find the mean.',hints:['f×x column: 1×3=3, 2×5=10, 3×2=6','Σfx = 3+10+6 = 19','Σf = 3+5+2 = 10'],ans:1.9,exact:0.05,unit:'',working:'Σfx=19, Σf=10. Mean = 19/10 = <b>1.9</b>'})}
+    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'A frequency table shows the number of siblings students have:<br><br><table style="border-collapse:collapse;font-family:Arial;font-size:14px;margin:8px 0"><tr style="background:#C0272D;color:#fff"><th style="padding:6px 16px">Siblings (x)</th><th style="padding:6px 16px">Frequency (f)</th></tr><tr style="background:#fff5f0"><td style="padding:6px 16px;text-align:center">0</td><td style="padding:6px 16px;text-align:center">5</td></tr><tr><td style="padding:6px 16px;text-align:center">1</td><td style="padding:6px 16px;text-align:center">8</td></tr><tr style="background:#fff5f0"><td style="padding:6px 16px;text-align:center">2</td><td style="padding:6px 16px;text-align:center">6</td></tr><tr><td style="padding:6px 16px;text-align:center">3</td><td style="padding:6px 16px;text-align:center">1</td></tr></table>Add an f\u00d7x column, find \u03a3fx and \u03a3f, then calculate the mean.',hints:['f\u00d7x column: 0\u00d75=0,  1\u00d78=8,  2\u00d76=12,  3\u00d71=3','Add up the f\u00d7x values to get \u03a3fx','Add up the frequencies to get \u03a3f = 20','Mean = \u03a3fx \u00f7 \u03a3f'],ans:1.15,exact:0.05,unit:'siblings',working:'\u03a3fx = 0+8+12+3 = 23.  \u03a3f = 5+8+6+1 = 20.  Mean = 23\u00f720 = <b>1.15</b>'})}
   ]},
   {ey:'Q3 · Grouped Data · Extended',ti:'Estimated Mean from Grouped Data',su:'Use class midpoints to estimate the mean.',lv:'E',steps:[
     {lb:'The table',dr:dQ3,ht:'<span class="lt le">Extended</span><p>With grouped data we cannot find the exact mean. We <b>estimate</b> it using the <b>midpoint</b> of each class interval.</p>'},
