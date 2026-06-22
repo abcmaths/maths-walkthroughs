@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Differentiation - Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#6b5750;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Differentiation</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 300"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]=o;var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');return '<div class="try"><div class="try-t">Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="Answer ('+o.unit+')" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
+function ck(id){var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}if(Math.abs(v-o.ans)<=(o.exact||0.05)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}else{f.className='fb er';f.textContent='Not quite - check your working and try again.';}}
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+
+/* Q1 - Basic differentiation rule */
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var terms=[{t:'5x^4',n:5,pw:4,res:'20x^3'},{t:'3x^2',n:3,pw:2,res:'6x'},{t:'7x',n:7,pw:1,res:'7'},{t:'9',n:9,pw:0,res:'0'}];
+  o.push(T(240,22,'Differentiate: y = 5x^4 + 3x^2 + 7x + 9','#C0272D',14,'middle',true));
+  o.push(T(240,44,'Rule: if y = ax^n, then dy/dx = n * a * x^(n-1)','#888',12,'middle',false));
+  terms.forEach(function(tm,i){
+    var x=48+i*97;
+    o.push(R(x-36,60,78,50,'#fff5f0','#C0272D',2));
+    o.push(T(x+3,80,tm.t,'#C0272D',14,'middle',true));
+    o.push(T(x+3,99,'n='+tm.pw,'#888',10));
+    if(p>=i+1){
+      o.push(R(x-36,124,78,36,'#e8f8ee','#1a7a3a',2));
+      o.push(T(x+3,147,tm.res,'#1a7a3a',13,'middle',true));
+    }
+  });
+  if(p>=4){
+    o.push(R(60,174,360,44,'#fce8d8','#C0272D',2));
+    o.push(T(240,201,'dy/dx = 20x^3 + 6x + 7','#C0272D',16,'middle',true));
+  }
+  if(p>=4)o.push(T(240,240,'Constants disappear. Coefficients multiply by the power.','#888',11,'middle',false));
+  s.innerHTML=o.join('');
+}
+
+/* Q2 - Gradient of curve at a point */
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=60,oy=240,sx=36,sy=18;
+  o.push(L(ox,20,ox,oy+10,'#ddd',1.5));o.push(L(ox-10,oy,440,oy,'#ddd',1.5));
+  for(var i=-1;i<=9;i++){o.push(T(ox+i*sx,oy+14,i,'#bbb',9));}
+  [-2,0,2,4,6,8].forEach(function(v){o.push(T(ox-10,oy-v*sy,v,'#bbb',9,'end'));});
+  // curve y = x^2 - 4x + 3
+  if(p>=1){
+    var pts=[];for(var xi=-1;xi<=5;xi+=0.2){var yi=xi*xi-4*xi+3;pts.push([ox+xi*sx,oy-yi*sy]);}
+    var path='M';pts.forEach(function(pt,i){path+=(i===0?'':' L')+pt[0].toFixed(1)+','+pt[1].toFixed(1);});
+    o.push('<path d="'+path+'" fill="none" stroke="#C0272D" stroke-width="2.5"/>');
+  }
+  // tangent at x=3: y=3^2-4*3+3=0, dy/dx=2*3-4=2, tangent: y=2(x-3)+0=2x-6
+  if(p>=2){
+    var tx1=1,ty1=2*1-6,tx2=5,ty2=2*5-6;
+    o.push(L(ox+tx1*sx,oy-ty1*sy,ox+tx2*sx,oy-ty2*sy,'#1a5a8a',2,'5,3'));
+    o.push('<circle cx="'+(ox+3*sx)+'" cy="'+(oy)+'" r="6" fill="#1a5a8a" stroke="#fff" stroke-width="2"/>');
+    o.push(T(ox+3*sx+10,oy-14,'x=3, y=0','#1a5a8a',11,'start'));
+  }
+  o.push(T(240,22,'y = x^2 - 4x + 3','#C0272D',13,'middle',true));
+  if(p>=2)o.push(T(240,38,'Tangent at x=3 (blue dashed)','#1a5a8a',11,'middle',false));
+  if(p>=3){o.push(R(240,260,230,30,'#e8f8ee','#1a7a3a',1.5));o.push(T(355,280,'dy/dx = 2x-4. At x=3: gradient = 2','#1a7a3a',11,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+/* Q3 - Stationary points */
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=60,oy=200,sx=40,sy=10;
+  o.push(L(ox,20,ox,oy+10,'#ddd',1.5));o.push(L(ox-10,oy,440,oy,'#ddd',1.5));
+  [-1,0,1,2,3,4,5].forEach(function(v){o.push(T(ox+v*sx,oy+14,v,'#bbb',9));});
+  [-10,0,10,20].forEach(function(v){o.push(T(ox-10,oy-v*sy,v,'#bbb',9,'end'));});
+  // y = x^3 - 3x^2 - 9x + 5... use y = x^3/3 - x^2 - 3x + 5
+  // actually y = x^3 - 6x^2 + 9x + 1, dy/dx = 3x^2-12x+9=0 -> x=1,3
+  if(p>=1){
+    var pts2=[];for(var xi=-0.5;xi<=4.5;xi+=0.1){var yi=xi*xi*xi-6*xi*xi+9*xi+1;pts2.push([ox+(xi+0)*sx,oy-yi*sy]);}
+    var path2='M';pts2.forEach(function(pt,i){path2+=(i===0?'':' L')+pt[0].toFixed(1)+','+pt[1].toFixed(1);});
+    o.push('<path d="'+path2+'" fill="none" stroke="#C0272D" stroke-width="2.5"/>');
+  }
+  if(p>=2){
+    // max at x=1: y=1-6+9+1=5, min at x=3: y=27-54+27+1=1
+    o.push('<circle cx="'+(ox+1*sx)+'" cy="'+(oy-5*sy)+'" r="6" fill="#C8922A" stroke="#fff" stroke-width="2"/>');
+    o.push(T(ox+1*sx,oy-5*sy-14,'Max (1,5)','#C8922A',11,'middle',true));
+    if(p>=3){
+      o.push('<circle cx="'+(ox+3*sx)+'" cy="'+(oy-1*sy)+'" r="6" fill="#1a5a8a" stroke="#fff" stroke-width="2"/>');
+      o.push(T(ox+3*sx+8,oy-1*sy+16,'Min (3,1)','#1a5a8a',11,'start',true));
+    }
+  }
+  o.push(T(240,18,'y = x^3 - 6x^2 + 9x + 1','#C0272D',13,'middle',true));
+  if(p>=1)o.push(T(240,34,'dy/dx = 3x^2 - 12x + 9','#888',11,'middle',false));
+  if(p>=2)o.push(T(240,50,'Set dy/dx = 0: 3x^2-12x+9=0 -> 3(x-1)(x-3)=0','#888',11,'middle',false));
+  if(p>=3)o.push(T(240,66,'x=1 max (d2y/dx2<0), x=3 min (d2y/dx2>0)','#888',11,'middle',false));
+  s.innerHTML=o.join('');
+}
+
+/* Q4 - Increasing and decreasing */
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=60,oy=180,sx=38,sy=12;
+  o.push(L(ox,20,ox,oy+10,'#ddd',1.5));o.push(L(ox-10,oy,440,oy,'#ddd',1.5));
+  [-1,0,1,2,3,4,5].forEach(function(v){o.push(T(ox+v*sx,oy+14,v,'#bbb',9));});
+  // y=x^2-4x+1, dy/dx=2x-4, zero at x=2, dec for x<2, inc for x>2
+  if(p>=1){
+    var pts3=[];for(var xi=-0.5;xi<=4.8;xi+=0.15){var yi=xi*xi-4*xi+1;pts3.push([ox+xi*sx,oy-yi*sy]);}
+    var pathC='M';pts3.forEach(function(pt,i){pathC+=(i===0?'':' L')+pt[0].toFixed(1)+','+pt[1].toFixed(1);});
+    o.push('<path d="'+pathC+'" fill="none" stroke="#C0272D" stroke-width="2.5"/>');
+  }
+  // shade decreasing region (x<2)
+  if(p>=2){
+    o.push('<rect x="'+ox+'" y="20" width="'+(2*sx)+'" height="'+(oy-20)+'" fill="#fce8d8" opacity="0.35"/>');
+    o.push(T(ox+sx,oy+28,'Decreasing','#C0272D',10,'middle',false));
+    o.push(T(ox+sx,oy+40,'dy/dx < 0','#C0272D',10,'middle',false));
+  }
+  if(p>=3){
+    o.push('<rect x="'+(ox+2*sx)+'" y="20" width="'+(3*sx)+'" height="'+(oy-20)+'" fill="#e8f4ff" opacity="0.35"/>');
+    o.push(T(ox+3.5*sx,oy+28,'Increasing','#1a5a8a',10,'middle',false));
+    o.push(T(ox+3.5*sx,oy+40,'dy/dx > 0','#1a5a8a',10,'middle',false));
+  }
+  if(p>=2)o.push(L(ox+2*sx,20,ox+2*sx,oy,'#C8922A',1.5,'4,3'));
+  o.push(T(240,14,'y = x^2 - 4x + 1,   dy/dx = 2x - 4','#C0272D',12,'middle',true));
+  if(p>=2)o.push(T(ox+2*sx,oy-3,'x=2','#C8922A',10,'middle',false));
+  if(p>=4){o.push(R(60,210,360,44,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,237,'Decreasing: x < 2  |  Increasing: x > 2','#1a7a3a',13,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+/* Q5 - Second derivative and nature */
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(T(240,20,'y = 2x^3 - 9x^2 + 12x - 4','#C0272D',14,'middle',true));
+  var steps=[
+    {lbl:'Differentiate once',txt:'dy/dx = 6x^2 - 18x + 12',col:'#C0272D'},
+    {lbl:'Set dy/dx = 0',txt:'6x^2-18x+12=0  ->  6(x-1)(x-2)=0  ->  x=1 or x=2',col:'#1a5a8a'},
+    {lbl:'Second derivative',txt:'d^2y/dx^2 = 12x - 18',col:'#241A17'},
+    {lbl:'Nature at x=1',txt:'d^2y/dx^2 = 12(1)-18 = -6 < 0  ->  MAXIMUM',col:'#C0272D'},
+    {lbl:'Nature at x=2',txt:'d^2y/dx^2 = 12(2)-18 = +6 > 0  ->  MINIMUM',col:'#1a7a3a'}
+  ];
+  steps.forEach(function(st,i){
+    if(p>=i+1){
+      o.push(R(30,40+i*48,420,40,i===3?'#fce8d8':i===4?'#e8f8ee':'#fff5f0',i===3?'#C0272D':i===4?'#1a7a3a':'#C0272D',i>=3?2:1.5));
+      o.push(T(240,56+i*48,st.txt,st.col,12,'middle',i>=3));
+    }
+  });
+  if(p>=5)o.push(T(240,282,'Rule: d2y/dx2 < 0 = max (hill), d2y/dx2 > 0 = min (valley)','#888',11,'middle',false));
+  s.innerHTML=o.join('');
+}
+
+/* Q6 - Tangent and normal */
+function dQ6(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=80,oy=200,sx=38,sy=16;
+  o.push(L(ox,20,ox,oy+10,'#ddd',1.5));o.push(L(ox-10,oy,420,oy,'#ddd',1.5));
+  [-1,0,1,2,3,4,5].forEach(function(v){o.push(T(ox+v*sx,oy+14,v,'#bbb',9));});
+  // y=x^2, tangent at x=2: y=4, gradient=4, tangent: y=4x-4, normal: y=-x/4+9/2
+  if(p>=1){
+    var ptsC=[];for(var xi=-0.5;xi<=4.5;xi+=0.15){ptsC.push([ox+xi*sx,oy-xi*xi*sy]);}
+    var pC='M';ptsC.forEach(function(pt,i){pC+=(i===0?'':' L')+pt[0].toFixed(1)+','+pt[1].toFixed(1);});
+    o.push('<path d="'+pC+'" fill="none" stroke="#C0272D" stroke-width="2.5"/>');
+    o.push('<circle cx="'+(ox+2*sx)+'" cy="'+(oy-4*sy)+'" r="6" fill="#C0272D" stroke="#fff" stroke-width="2"/>');
+    o.push(T(ox+2*sx+8,oy-4*sy-12,'P(2,4)','#C0272D',11,'start',true));
+  }
+  // tangent
+  if(p>=2){
+    o.push(L(ox+0.5*sx,oy-(-2)*sy,ox+3.5*sx,oy-(10)*sy,'#1a5a8a',2,'5,3'));
+    o.push(T(ox+3.8*sx,oy-10*sy,'Tangent m=4','#1a5a8a',10,'start',false));
+  }
+  // normal
+  if(p>=3){
+    o.push(L(ox+0*sx,oy-(4.5)*sy,ox+4.2*sx,oy-(3.45)*sy,'#1a7a3a',2,'3,3'));
+    o.push(T(ox+4.3*sx,oy-3.45*sy,'Normal m=-1/4','#1a7a3a',10,'start',false));
+  }
+  o.push(T(240,18,'y = x^2, find tangent and normal at x = 2','#C0272D',12,'middle',true));
+  if(p>=1)o.push(T(240,280,'dy/dx = 2x. At x=2: gradient of tangent = 4','#888',11,'middle',false));
+  if(p>=3)o.push(T(240,265,'Normal gradient = -1/4 (negative reciprocal)','#888',10,'middle',false));
+  s.innerHTML=o.join('');
+}
+
+/* Q7 - Applied optimisation */
+function dQ7(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // rectangle with perimeter 20, maximise area
+  o.push(T(240,20,'Rectangle: perimeter = 20 cm. Maximise area.','#241A17',13,'middle',true));
+  var rx=100,ry=70,rw=120,rh=80;
+  o.push(R(rx,ry,rw,rh,'#fff5f0','#C0272D',2));
+  o.push(T(rx+rw/2,ry-12,'x','#C0272D',15,'middle',true));
+  o.push(T(rx+rw+16,ry+rh/2,'y','#C0272D',15,'middle',true));
+  if(p>=1){o.push(R(280,65,170,50,'#e8f4ff','#1a5a8a',1.5));o.push(T(365,84,'2x+2y=20','#1a5a8a',13,'middle',true));o.push(T(365,100,'y = 10-x','#1a5a8a',12));}
+  if(p>=2){o.push(R(280,124,170,50,'#fff5f0','#C0272D',1.5));o.push(T(365,143,'A = xy = x(10-x)','#C0272D',13,'middle',true));o.push(T(365,159,'A = 10x - x^2','#C0272D',12));}
+  if(p>=3){o.push(R(280,183,170,44,'#fff5f0','#C0272D',1.5));o.push(T(365,202,'dA/dx = 10 - 2x','#C0272D',13,'middle',true));o.push(T(365,217,'Set = 0: x = 5','#888',11));}
+  if(p>=4){o.push(R(80,252,320,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,275,'Max area = 5x5 = 25 cm^2 (a square!)','#1a7a3a',13,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+/* Q8 - Velocity and acceleration */
+function dQ8(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(T(240,20,'Displacement: s = t^3 - 6t^2 + 9t + 2','#C0272D',14,'middle',true));
+  var steps8=[
+    {lbl:'Velocity = ds/dt',txt:'v = 3t^2 - 12t + 9',col:'#1a5a8a'},
+    {lbl:'Acceleration = dv/dt',txt:'a = 6t - 12',col:'#1a7a3a'},
+    {lbl:'When is v = 0?',txt:'3t^2-12t+9=0  ->  3(t-1)(t-3)=0  ->  t=1 or t=3',col:'#C0272D'},
+    {lbl:'Acceleration at t=1',txt:'a = 6(1)-12 = -6 ms^-2 (decelerating)',col:'#C8922A'},
+    {lbl:'Acceleration at t=3',txt:'a = 6(3)-12 = +6 ms^-2 (accelerating)',col:'#1a7a3a'}
+  ];
+  steps8.forEach(function(st,i){
+    if(p>=i+1){
+      o.push(R(30,38+i*48,420,40,'#fff5f0','#C0272D',1.5));
+      o.push(T(240,54+i*48,st.txt,st.col,12,'middle',false));
+    }
+  });
+  if(p>=5)o.push(T(240,282,'s -> v by differentiating once, v -> a by differentiating again','#888',11,'middle',false));
+  s.innerHTML=o.join('');
+}
+
+var QS=[
+  {ey:'Q1 - Differentiation',ti:'The Basic Rule',su:'Differentiate y = 5x^4 + 3x^2 + 7x + 9 term by term.',steps:[
+    {lb:'The rule',dr:dQ1,ht:'<p>If y = ax^n, then <b>dy/dx = n times a times x^(n-1)</b>. Multiply by the power, then reduce the power by 1. Constants disappear.</p>'},
+    {lb:'Term 1: 5x^4',dr:dQ1,ht:'<div class="fm">5x^4 -> 4 x 5 x x^3 = 20x^3</div>'},
+    {lb:'Term 2: 3x^2',dr:dQ1,ht:'<div class="fm">3x^2 -> 2 x 3 x x^1 = 6x</div>'},
+    {lb:'Terms 3 and 4',dr:dQ1,ht:'<div class="fm">7x -> 7   (constant gradient)</div><div class="fm">9 -> 0   (constant disappears)</div>'},
+    {lb:'Full answer',dr:dQ1,ht:'<div class="fm">dy/dx = 20x^3 + 6x + 7</div>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Differentiate <b>y = 4x^3 - 2x^2 + 5x - 8</b>. What is the coefficient of x^2 in dy/dx?',hints:['Differentiate 4x^3: 3 x 4 = 12, power drops to 2','Differentiate -2x^2: 2 x -2 = -4, power drops to 1','Coefficient of x^2 in dy/dx'],ans:12,exact:0.1,unit:'(coefficient of x^2)',working:'dy/dx = 12x^2 - 4x + 5. Coefficient of x^2 = <b>12</b>'})}
+  ]},
+  {ey:'Q2 - Differentiation',ti:'Gradient of a Curve at a Point',su:'Find the gradient of y = x^2 - 4x + 3 at the point where x = 3.',steps:[
+    {lb:'The curve',dr:dQ2,ht:'<p>The <b>gradient of a curve at a point</b> equals the gradient of the tangent at that point. Differentiate to find dy/dx, then substitute the x value.</p>'},
+    {lb:'Step 1 - Differentiate',dr:dQ2,ht:'<div class="fm">y = x^2 - 4x + 3</div><div class="fm">dy/dx = 2x - 4</div>'},
+    {lb:'Step 2 - Substitute x = 3',dr:dQ2,ht:'<div class="fm">dy/dx at x=3 = 2(3) - 4 = 6 - 4 = <b>2</b></div><p>The tangent line at this point has gradient 2.</p>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Find the gradient of <b>y = x^2 - 4x + 3</b> at <b>x = 1</b>.',hints:['dy/dx = 2x - 4','Substitute x = 1'],ans:-2,exact:0.1,unit:'',working:'dy/dx = 2(1)-4 = <b>-2</b>'})}
+  ]},
+  {ey:'Q3 - Differentiation',ti:'Stationary Points',su:'Find the stationary points of y = x^3 - 6x^2 + 9x + 1.',steps:[
+    {lb:'What is a stationary point?',dr:dQ3,ht:'<p>A <b>stationary point</b> is where the gradient equals zero - the curve is momentarily flat. Set dy/dx = 0 and solve.</p>'},
+    {lb:'Step 1 - Differentiate and set to zero',dr:dQ3,ht:'<div class="fm">dy/dx = 3x^2 - 12x + 9 = 0</div><div class="fm">3(x-1)(x-3) = 0  ->  x = 1 or x = 3</div>'},
+    {lb:'Step 2 - Find y values',dr:dQ3,ht:'<div class="fm">x=1: y = 1-6+9+1 = 5  ->  point (1,5)</div><div class="fm">x=3: y = 27-54+27+1 = 1  ->  point (3,1)</div>'},
+    {lb:'Step 3 - Nature',dr:dQ3,ht:'<p>Use the second derivative d^2y/dx^2 = 6x - 12:</p><div class="fm">At x=1: 6(1)-12 = -6 < 0  ->  MAXIMUM</div><div class="fm">At x=3: 6(3)-12 = +6 > 0  ->  MINIMUM</div>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'For y = x^3 - 6x^2 + 9x + 1, what is the y-coordinate of the maximum point?',hints:['Maximum is at x = 1','Substitute x=1 into y = x^3 - 6x^2 + 9x + 1'],ans:5,exact:0.1,unit:'',working:'y = 1-6+9+1 = <b>5</b>. Maximum point is (1,5).'})}
+  ]},
+  {ey:'Q4 - Differentiation',ti:'Increasing and Decreasing Functions',su:'Find where y = x^2 - 4x + 1 is increasing and decreasing.',steps:[
+    {lb:'The idea',dr:dQ4,ht:'<p>A function is <b>increasing</b> where dy/dx > 0 (gradient positive, going uphill left to right). It is <b>decreasing</b> where dy/dx < 0 (gradient negative).</p>'},
+    {lb:'Step 1 - Differentiate',dr:dQ4,ht:'<div class="fm">dy/dx = 2x - 4</div>'},
+    {lb:'Step 2 - Decreasing region',dr:dQ4,ht:'<div class="fm">dy/dx < 0: 2x-4 < 0  ->  x < 2</div>'},
+    {lb:'Step 3 - Increasing region',dr:dQ4,ht:'<div class="fm">dy/dx > 0: 2x-4 > 0  ->  x > 2</div><div class="fm">Decreasing for x < 2, Increasing for x > 2</div>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'For y = x^2 - 6x + 4, find the value of x where the function stops decreasing and starts increasing.',hints:['dy/dx = 2x - 6','Set dy/dx = 0 to find turning point'],ans:3,exact:0.1,unit:'',working:'dy/dx = 2x-6 = 0  ->  x = <b>3</b>'})}
+  ]},
+  {ey:'Q5 - Differentiation',ti:'Second Derivative and Nature',su:'Find and classify the stationary points of y = 2x^3 - 9x^2 + 12x - 4.',steps:[
+    {lb:'The process',dr:dQ5,ht:'<p>Find dy/dx, set it to zero to find stationary points, then use the <b>second derivative</b> d^2y/dx^2 to determine whether each is a maximum or minimum.</p>'},
+    {lb:'Step 1 - First derivative',dr:dQ5,ht:'<div class="fm">dy/dx = 6x^2 - 18x + 12</div>'},
+    {lb:'Step 2 - Solve dy/dx = 0',dr:dQ5,ht:'<div class="fm">6(x-1)(x-2) = 0  ->  x=1 or x=2</div>'},
+    {lb:'Step 3 - Second derivative',dr:dQ5,ht:'<div class="fm">d^2y/dx^2 = 12x - 18</div>'},
+    {lb:'Step 4 - Classify',dr:dQ5,ht:'<div class="fm">x=1: 12-18 = -6 < 0  ->  MAXIMUM</div><div class="fm">x=2: 24-18 = +6 > 0  ->  MINIMUM</div>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'For y = 2x^3 - 9x^2 + 12x - 4, what is d^2y/dx^2 at x = 2?',hints:['d^2y/dx^2 = 12x - 18','Substitute x = 2'],ans:6,exact:0.1,unit:'',working:'12(2)-18 = 24-18 = <b>6</b> (positive, so x=2 is a minimum)'})}
+  ]},
+  {ey:'Q6 - Differentiation',ti:'Tangent and Normal to a Curve',su:'Find the equations of the tangent and normal to y = x^2 at x = 2.',steps:[
+    {lb:'The point and gradient',dr:dQ6,ht:'<p>The <b>tangent</b> touches the curve. The <b>normal</b> is perpendicular to the tangent. Normal gradient = -1 divided by tangent gradient.</p>'},
+    {lb:'Step 1 - Find the point',dr:dQ6,ht:'<div class="fm">At x=2: y = 4. Point P = (2, 4)</div>'},
+    {lb:'Step 2 - Tangent',dr:dQ6,ht:'<div class="fm">dy/dx = 2x. At x=2: gradient = 4</div><div class="fm">Tangent: y-4 = 4(x-2)  ->  y = 4x - 4</div>'},
+    {lb:'Step 3 - Normal',dr:dQ6,ht:'<div class="fm">Normal gradient = -1/4</div><div class="fm">Normal: y-4 = -1/4(x-2)  ->  y = -x/4 + 9/2</div>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'Find the gradient of the <b>normal</b> to y = x^2 at x = 3.',hints:['dy/dx = 2x, so at x=3 tangent gradient = 6','Normal gradient = -1 / tangent gradient'],ans:-0.1667,exact:0.02,unit:'(accept -1/6)',working:'Tangent gradient = 6. Normal = -1/6 = <b>-0.167</b>'})}
+  ]},
+  {ey:'Q7 - Differentiation',ti:'Optimisation',su:'A rectangle has perimeter 20 cm. Find the dimensions that maximise its area.',steps:[
+    {lb:'Setting up',dr:dQ7,ht:'<p>Many real-life problems involve finding a maximum or minimum value. Write an expression for what you want to optimise, then differentiate and set to zero.</p>'},
+    {lb:'Step 1 - Express y in terms of x',dr:dQ7,ht:'<div class="fm">2x + 2y = 20  ->  y = 10 - x</div>'},
+    {lb:'Step 2 - Write area function',dr:dQ7,ht:'<div class="fm">A = xy = x(10-x) = 10x - x^2</div>'},
+    {lb:'Step 3 - Differentiate and solve',dr:dQ7,ht:'<div class="fm">dA/dx = 10 - 2x = 0  ->  x = 5</div>'},
+    {lb:'Step 4 - Maximum area',dr:dQ7,ht:'<div class="fm">y = 10-5 = 5. Area = 5x5 = 25 cm^2</div><p>A square always gives the maximum area for a given perimeter.</p>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'A rectangle has perimeter 40 cm. What is the maximum possible area in cm^2?',hints:['2x+2y=40 -> y=20-x','A=x(20-x)','dA/dx=20-2x=0 -> x=10'],ans:100,exact:0.5,unit:'cm^2',working:'x=10, y=10. Max area = 10x10 = <b>100 cm^2</b>'})}
+  ]},
+  {ey:'Q8 - Differentiation',ti:'Velocity and Acceleration',su:'s = t^3 - 6t^2 + 9t + 2. Find velocity and acceleration expressions.',steps:[
+    {lb:'The connection',dr:dQ8,ht:'<p>If <b>s</b> is displacement (position), then <b>velocity v = ds/dt</b> (first derivative) and <b>acceleration a = dv/dt</b> (second derivative of s).</p>'},
+    {lb:'Step 1 - Velocity',dr:dQ8,ht:'<div class="fm">v = ds/dt = 3t^2 - 12t + 9</div>'},
+    {lb:'Step 2 - Acceleration',dr:dQ8,ht:'<div class="fm">a = dv/dt = 6t - 12</div>'},
+    {lb:'Step 3 - When is v = 0?',dr:dQ8,ht:'<div class="fm">3(t-1)(t-3) = 0  ->  t = 1 or t = 3</div>'},
+    {lb:'Step 4 - Acceleration values',dr:dQ8,ht:'<div class="fm">t=1: a = -6 ms^-2 (decelerating)</div><div class="fm">t=3: a = +6 ms^-2 (accelerating)</div>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'For s = t^3 - 6t^2 + 9t + 2, what is the acceleration at t = 4?',hints:['a = 6t - 12','Substitute t = 4'],ans:12,exact:0.1,unit:'ms^-2',working:'a = 6(4)-12 = 24-12 = <b>12 ms^-2</b>'})}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+</body>
+</html>
