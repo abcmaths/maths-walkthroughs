@@ -23,7 +23,7 @@ body.cc .toggle-pill::after{left:16px;}
 .hero{background:linear-gradient(135deg,var(--red) 0%,var(--dark-red) 100%);color:#fff;padding:48px 24px 40px;text-align:center;transition:background .3s;}
 body.cc .hero{background:linear-gradient(135deg,#8B0000 0%,#4a0000 100%);}
 .hero h1{font-family:'Georgia',serif;font-size:32px;margin-bottom:8px;}
-.hero p{font-size:15px;opacity:.85;max-width:500px;margin:0 auto;}
+.hero p{font-size:15px;opacity:.85;max-width:520px;margin:0 auto;}
 .year-nav{display:flex;gap:6px;overflow-x:auto;padding:16px 24px 0;border-bottom:2px solid var(--line);background:#fff;}
 .year-tab{font-size:13px;font-weight:600;padding:8px 16px;border-radius:4px 4px 0 0;border:none;background:transparent;color:#888;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s;}
 .year-tab:hover{color:var(--ink);}
@@ -32,14 +32,14 @@ body.cc .year-tab.active{color:#8B0000;border-bottom-color:#8B0000;}
 .grid-wrap{max-width:1000px;margin:0 auto;padding:28px 24px 60px;}
 .year-label{font-family:'Georgia',serif;font-size:20px;margin-bottom:6px;}
 .year-desc{font-size:13px;color:#888;margin-bottom:22px;}
-.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
-.topic-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:20px 16px 16px;cursor:pointer;transition:.2s;position:relative;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:8px;}
-.topic-card:hover{border-color:var(--red);box-shadow:0 2px 12px rgba(192,39,45,.12);transform:translateY(-1px);}
-body.cc .topic-card:hover{border-color:#8B0000;}
-.topic-card.soon{opacity:.55;cursor:default;pointer-events:none;}
-.topic-card.soon:hover{transform:none;box-shadow:none;}
-.topic-icon{font-size:26px;}
-.topic-name{font-family:'Georgia',serif;font-size:16px;font-weight:700;}
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;}
+.topic-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:20px 16px 16px;transition:.2s;position:relative;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:8px;}
+.topic-card:not(.soon){cursor:pointer;}
+.topic-card:not(.soon):hover{border-color:var(--red);box-shadow:0 2px 12px rgba(192,39,45,.12);transform:translateY(-1px);}
+body.cc .topic-card:not(.soon):hover{border-color:#8B0000;}
+.topic-card.soon{opacity:.55;cursor:default;}
+.topic-icon{font-size:24px;}
+.topic-name{font-family:'Georgia',serif;font-size:15px;font-weight:700;}
 .topic-count{font-size:12px;color:#888;}
 .topic-badge{position:absolute;top:10px;right:10px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:10px;}
 .badge-live{background:#e8f8ee;color:#1a7a3a;}
@@ -70,13 +70,22 @@ footer{text-align:center;padding:20px;font-size:12px;color:#aaa;border-top:1px s
 <footer id="siteFooter">&copy; Adorable British College &middot; Maths Walkthroughs</footer>
 
 <script>
-var brands = {
+var brands={
   abc:{badge:'ABC',name:'Adorable British College',footer:'\u00a9 Adorable British College \u00b7 Maths Walkthroughs',toggleLabel:'Switch to CC',bodyClass:''},
-  cc: {badge:'CC', name:'Curriculum Crest',        footer:'\u00a9 Curriculum Crest \u00b7 curriculumcrest.com',      toggleLabel:'Switch to ABC',bodyClass:'cc'}
+  cc: {badge:'CC', name:'Curriculum Crest',        footer:'\u00a9 Curriculum Crest \u00b7 curriculumcrest.com',     toggleLabel:'Switch to ABC',bodyClass:'cc'}
 };
 var currentBrand='abc';
 function toggleBrand(){currentBrand=currentBrand==='abc'?'cc':'abc';applyBrand();}
-function applyBrand(){var b=brands[currentBrand];document.body.className=b.bodyClass;document.getElementById('logoBadge').textContent=b.badge;document.getElementById('logoText').textContent=b.name;document.getElementById('toggleLabel').textContent=b.toggleLabel;document.getElementById('siteFooter').textContent=b.footer;document.title=b.name+' \u00b7 Maths Walkthroughs';buildYearNav();buildGrid();}
+function applyBrand(){
+  var b=brands[currentBrand];
+  document.body.className=b.bodyClass;
+  document.getElementById('logoBadge').textContent=b.badge;
+  document.getElementById('logoText').textContent=b.name;
+  document.getElementById('toggleLabel').textContent=b.toggleLabel;
+  document.getElementById('siteFooter').textContent=b.footer;
+  document.title=b.name+' \u00b7 Maths Walkthroughs';
+  buildYearNav();buildGrid();
+}
 
 var years=[
   {id:'y7', label:'Year 7', desc:'KS3 Foundation \u2014 core number, shape and data skills.'},
@@ -87,61 +96,108 @@ var years=[
   {id:'y12',label:'Year 12',desc:'WAEC General Mathematics \u2014 past paper topics and techniques.'}
 ];
 
+/* ── topics ──
+   years: which year tabs show this card
+   file:  the HTML file to link to
+   status: 'live' or 'soon'
+   count: number of walkthroughs (shown when live)
+*/
 var topics=[
-  /* Y7 */
-  {id:'alg-y7', name:'Algebra',          icon:'&#x1F522;',years:['y7'],file:'algebra-y7.html', status:'live',count:10},
-  {id:'num-y7', name:'Number',           icon:'&#x1F523;',years:['y7'],file:'number-y7.html',  status:'soon',count:0},
-  {id:'geo-y7', name:'Geometry',         icon:'&#x1F4D0;',years:['y7'],file:'geometry-y7.html',status:'soon',count:0},
-  {id:'sta-y7', name:'Statistics',       icon:'&#x1F4CA;',years:['y7'],file:'stats-y7.html',   status:'soon',count:0},
-  {id:'seq-y7', name:'Sequences',        icon:'&#x1F501;',years:['y7'],file:'sequences-y7.html',status:'soon',count:0},
-  /* Y8 */
-  {id:'alg-y8', name:'Algebra',          icon:'&#x1F522;',years:['y8'],file:'algebra-y8.html', status:'live',count:10},
-  {id:'num-y8', name:'Number',           icon:'&#x1F523;',years:['y8'],file:'number-y8.html',  status:'live',count:10},
-  {id:'geo-y8', name:'Geometry',         icon:'&#x1F4D0;',years:['y8'],file:'geometry-y8.html',status:'soon',count:0},
-  {id:'gra-y8', name:'Graphs',           icon:'&#x1F4C8;',years:['y8'],file:'graphs-y8.html',  status:'soon',count:0},
-  {id:'sta-y8', name:'Statistics',       icon:'&#x1F4CA;',years:['y8'],file:'stats-y8.html',   status:'soon',count:0},
-  /* Y9 */
-  {id:'alg-y9', name:'Algebra',          icon:'&#x1F522;',years:['y9'],file:'algebra-y9.html', status:'soon',count:0},
-  {id:'num-y9', name:'Number',           icon:'&#x1F523;',years:['y9'],file:'number-y9.html',  status:'soon',count:0},
-  {id:'geo-y9', name:'Geometry',         icon:'&#x1F4D0;',years:['y9'],file:'geometry-y9.html',status:'soon',count:0},
-  {id:'tri-y9', name:'Trigonometry',     icon:'&#x1F4CF;',years:['y9'],file:'trig-y9.html',    status:'soon',count:0},
-  {id:'gra-y9', name:'Graphs',           icon:'&#x1F4C8;',years:['y9'],file:'graphs-y9.html',  status:'soon',count:0},
-  /* Y10 */
-  {id:'men-y10',name:'Mensuration',      icon:'&#x1F4D0;',years:['y10'],file:'mensuration.html',status:'live',count:10},
-  {id:'alg-y10',name:'Algebra',          icon:'&#x1F522;',years:['y10'],file:'algebra.html',    status:'live',count:10},
-  {id:'num-y10',name:'Number',           icon:'&#x1F523;',years:['y10'],file:'number.html',     status:'live',count:10},
-  {id:'tri-y10',name:'Trigonometry',     icon:'&#x1F4CF;',years:['y10'],file:'trig.html',       status:'live',count:10},
-  {id:'sta-y10',name:'Statistics',       icon:'&#x1F4CA;',years:['y10'],file:'stats.html',      status:'live',count:10},
-  {id:'cal-y10',name:'Calculus',         icon:'&#x222B;',  years:['y10'],file:'calculus-diff.html',status:'soon',count:0},
-  {id:'geo-y10',name:'Geometry',         icon:'&#x1F4D0;',years:['y10'],file:'geometry.html',   status:'soon',count:0},
-  {id:'gra-y10',name:'Graphs',           icon:'&#x1F4C8;',years:['y10'],file:'graphs.html',     status:'soon',count:0},
-  /* Y11 */
-  {id:'men-y11',name:'Mensuration',      icon:'&#x1F4D0;',years:['y11'],file:'mensuration.html',status:'live',count:10},
-  {id:'alg-y11',name:'Algebra',          icon:'&#x1F522;',years:['y11'],file:'algebra.html',    status:'live',count:10},
-  {id:'num-y11',name:'Number',           icon:'&#x1F523;',years:['y11'],file:'number.html',     status:'live',count:10},
-  {id:'tri-y11',name:'Trigonometry',     icon:'&#x1F4CF;',years:['y11'],file:'trig.html',       status:'live',count:10},
-  {id:'sta-y11',name:'Statistics',       icon:'&#x1F4CA;',years:['y11'],file:'stats.html',      status:'live',count:10},
-  {id:'cal-y11',name:'Calculus',         icon:'&#x222B;',  years:['y11'],file:'calculus-diff.html',status:'soon',count:0},
-  {id:'geo-y11',name:'Geometry',         icon:'&#x1F4D0;',years:['y11'],file:'geometry.html',   status:'soon',count:0},
-  /* Y12 */
-  {id:'men-y12',name:'Mensuration',      icon:'&#x1F4D0;',years:['y12'],file:'mensuration.html',status:'live',count:10},
-  {id:'num-y12',name:'Number',           icon:'&#x1F523;',years:['y12'],file:'number.html',     status:'live',count:10},
-  {id:'alg-y12',name:'Algebra',          icon:'&#x1F522;',years:['y12'],file:'algebra.html',    status:'live',count:10},
-  {id:'tri-y12',name:'Trigonometry',     icon:'&#x1F4CF;',years:['y12'],file:'trig.html',       status:'live',count:10},
-  {id:'sta-y12',name:'Statistics',       icon:'&#x1F4CA;',years:['y12'],file:'stats.html',      status:'live',count:10},
-  {id:'cal-y12',name:'Calculus',         icon:'&#x222B;',  years:['y12'],file:'calculus-y12.html',status:'soon',count:0},
-  {id:'nb-y12', name:'Number Bases',     icon:'&#x0032;&#xFE0F;&#x20E3;',years:['y12'],file:'number-bases.html',      status:'live',count:5},
-  {id:'mod-y12',name:'Modulo Arithmetic',icon:'&#x1F551;',years:['y12'],file:'modulo.html',             status:'live',count:4},
-  {id:'bin-y12',name:'Binary Operations',icon:'&#x2605;',  years:['y12'],file:'binary-operations.html', status:'live',count:4},
-  {id:'mat-y12',name:'Matrices',         icon:'&#x25A6;',  years:['y12'],file:'matrices.html',           status:'live',count:4}
+
+  /* ─── YEAR 7 ─── */
+  {id:'alg-y7', name:'Algebra',            icon:'&#x1F522;', years:['y7'],  file:'algebra-y7.html',  status:'live', count:10},
+  {id:'num-y7', name:'Number',             icon:'&#x1F523;', years:['y7'],  file:'number-y7.html',   status:'soon', count:0},
+  {id:'geo-y7', name:'Geometry',           icon:'&#x1F4D0;', years:['y7'],  file:'geometry-y7.html', status:'soon', count:0},
+  {id:'sta-y7', name:'Statistics',         icon:'&#x1F4CA;', years:['y7'],  file:'stats-y7.html',    status:'soon', count:0},
+  {id:'seq-y7', name:'Sequences',          icon:'&#x1F501;', years:['y7'],  file:'sequences-y7.html',status:'soon', count:0},
+
+  /* ─── YEAR 8 ─── */
+  {id:'alg-y8', name:'Algebra',            icon:'&#x1F522;', years:['y8'],  file:'algebra-y8.html',  status:'live', count:10},
+  {id:'num-y8', name:'Number',             icon:'&#x1F523;', years:['y8'],  file:'number-y8.html',   status:'live', count:10},
+  {id:'geo-y8', name:'Geometry',           icon:'&#x1F4D0;', years:['y8'],  file:'geometry-y8.html', status:'soon', count:0},
+  {id:'gra-y8', name:'Graphs',             icon:'&#x1F4C8;', years:['y8'],  file:'graphs-y8.html',   status:'soon', count:0},
+  {id:'sta-y8', name:'Statistics',         icon:'&#x1F4CA;', years:['y8'],  file:'stats-y8.html',    status:'soon', count:0},
+
+  /* ─── YEAR 9 ─── */
+  {id:'alg-y9', name:'Algebra',            icon:'&#x1F522;', years:['y9'],  file:'algebra-y9.html',  status:'soon', count:0},
+  {id:'num-y9', name:'Number',             icon:'&#x1F523;', years:['y9'],  file:'number-y9.html',   status:'soon', count:0},
+  {id:'geo-y9', name:'Geometry',           icon:'&#x1F4D0;', years:['y9'],  file:'geometry-y9.html', status:'soon', count:0},
+  {id:'tri-y9', name:'Trigonometry',       icon:'&#x1F4CF;', years:['y9'],  file:'trig-y9.html',     status:'soon', count:0},
+  {id:'gra-y9', name:'Graphs',             icon:'&#x1F4C8;', years:['y9'],  file:'graphs-y9.html',   status:'soon', count:0},
+
+  /* ─── YEAR 10 ─── */
+  {id:'men-y10',name:'Mensuration',        icon:'&#x1F4D0;', years:['y10'], file:'mensuration.html',     status:'live', count:10},
+  {id:'alg-y10',name:'Algebra',            icon:'&#x1F522;', years:['y10'], file:'algebra.html',          status:'live', count:10},
+  {id:'num-y10',name:'Number',             icon:'&#x1F523;', years:['y10'], file:'number.html',           status:'live', count:10},
+  {id:'tri-y10',name:'Trigonometry',       icon:'&#x1F4CF;', years:['y10'], file:'trig.html',             status:'live', count:10},
+  {id:'sta-y10',name:'Statistics',         icon:'&#x1F4CA;', years:['y10'], file:'stats.html',            status:'live', count:10},
+  {id:'cal-y10',name:'Calculus',           icon:'&#x222B;',  years:['y10'], file:'calculus-diff.html',    status:'live', count:8},
+  {id:'con-y10',name:'Constructions',      icon:'&#x1F4D0;', years:['y10'], file:'constructions.html',    status:'live', count:8},
+  {id:'geo-y10',name:'Geometry',           icon:'&#x26B2;',  years:['y10'], file:'geometry.html',         status:'soon', count:0},
+  {id:'gra-y10',name:'Graphs',             icon:'&#x1F4C8;', years:['y10'], file:'graphs.html',           status:'soon', count:0},
+  {id:'seq-y10',name:'Sequences',          icon:'&#x1F501;', years:['y10'], file:'sequences.html',        status:'soon', count:0},
+
+  /* ─── YEAR 11 ─── */
+  {id:'men-y11',name:'Mensuration',        icon:'&#x1F4D0;', years:['y11'], file:'mensuration.html',      status:'live', count:10},
+  {id:'alg-y11',name:'Algebra',            icon:'&#x1F522;', years:['y11'], file:'algebra.html',           status:'live', count:10},
+  {id:'num-y11',name:'Number',             icon:'&#x1F523;', years:['y11'], file:'number.html',            status:'live', count:10},
+  {id:'tri-y11',name:'Trigonometry',       icon:'&#x1F4CF;', years:['y11'], file:'trig.html',              status:'live', count:10},
+  {id:'sta-y11',name:'Statistics',         icon:'&#x1F4CA;', years:['y11'], file:'stats.html',             status:'live', count:10},
+  {id:'cal-y11',name:'Calculus',           icon:'&#x222B;',  years:['y11'], file:'calculus-diff.html',     status:'live', count:8},
+  {id:'gra-y11',name:'Graphs',             icon:'&#x1F4C8;', years:['y11'], file:'graphs.html',            status:'live', count:8},
+  {id:'geo-y11',name:'Geometry',           icon:'&#x26B2;',  years:['y11'], file:'geometry.html',          status:'soon', count:0},
+
+  /* ─── YEAR 12 ─── */
+  {id:'men-y12',name:'Mensuration',        icon:'&#x1F4D0;', years:['y12'], file:'mensuration.html',       status:'live', count:10},
+  {id:'num-y12',name:'Number',             icon:'&#x1F523;', years:['y12'], file:'number.html',            status:'live', count:10},
+  {id:'alg-y12',name:'Algebra',            icon:'&#x1F522;', years:['y12'], file:'algebra.html',           status:'live', count:10},
+  {id:'tri-y12',name:'Trigonometry',       icon:'&#x1F4CF;', years:['y12'], file:'trig.html',              status:'live', count:10},
+  {id:'sta-y12',name:'Statistics',         icon:'&#x1F4CA;', years:['y12'], file:'stats.html',             status:'live', count:10},
+  {id:'cal-y12',name:'Calculus',           icon:'&#x222B;',  years:['y12'], file:'calculus-y12.html',      status:'live', count:10},
+  {id:'nb-y12', name:'Number Bases',       icon:'&#x0032;',  years:['y12'], file:'number-bases.html',      status:'live', count:5},
+  {id:'mod-y12',name:'Modulo Arithmetic',  icon:'&#x1F551;', years:['y12'], file:'modulo.html',            status:'live', count:4},
+  {id:'bin-y12',name:'Binary Operations',  icon:'&#x2605;',  years:['y12'], file:'binary-operations.html', status:'live', count:4},
+  {id:'mat-y12',name:'Matrices',           icon:'&#x229E;',  years:['y12'], file:'matrices.html',          status:'live', count:4}
 ];
 
 var activeYear='y10';
-function buildYearNav(){var nav=document.getElementById('yearNav');nav.innerHTML='';years.forEach(function(y){var btn=document.createElement('button');btn.className='year-tab'+(y.id===activeYear?' active':'');btn.textContent=y.label;btn.onclick=function(){activeYear=y.id;buildYearNav();buildGrid();};nav.appendChild(btn);});}
-function buildGrid(){var wrap=document.getElementById('gridWrap');var y=years.find(function(yr){return yr.id===activeYear;});var filtered=topics.filter(function(t){return t.years.indexOf(activeYear)>=0;});wrap.innerHTML='<div class="year-label">'+y.label+'</div><div class="year-desc">'+y.desc+'</div><div class="topic-grid">'+filtered.map(topicCard).join('')+'</div>';}
-function topicCard(t){var badge=t.status==='live'?'<span class="topic-badge badge-live">Live</span>':'<span class="topic-badge badge-soon">Soon</span>';var count=t.status==='live'?t.count+' walkthroughs':'Coming soon';var tag=t.status==='live'?'a':'div';var href=t.status==='live'?'href="'+t.file+'"':'';return '<'+tag+' '+href+' class="topic-card'+(t.status==='soon'?' soon':'')+'">'+'<div class="topic-icon">'+t.icon+'</div>'+badge+'<div class="topic-name">'+t.name+'</div><div class="topic-count">'+count+'</div></'+tag+'>';}
 
-buildYearNav();buildGrid();applyBrand();
+function buildYearNav(){
+  var nav=document.getElementById('yearNav');nav.innerHTML='';
+  years.forEach(function(y){
+    var btn=document.createElement('button');
+    btn.className='year-tab'+(y.id===activeYear?' active':'');
+    btn.textContent=y.label;
+    btn.onclick=function(){activeYear=y.id;buildYearNav();buildGrid();};
+    nav.appendChild(btn);
+  });
+}
+
+function buildGrid(){
+  var wrap=document.getElementById('gridWrap');
+  var y=years.find(function(yr){return yr.id===activeYear;});
+  var filtered=topics.filter(function(t){return t.years.indexOf(activeYear)>=0;});
+  wrap.innerHTML='<div class="year-label">'+y.label+'</div><div class="year-desc">'+y.desc+'</div><div class="topic-grid">'+filtered.map(topicCard).join('')+'</div>';
+}
+
+function topicCard(t){
+  var badge=t.status==='live'
+    ?'<span class="topic-badge badge-live">Live</span>'
+    :'<span class="topic-badge badge-soon">Soon</span>';
+  var count=t.status==='live'?t.count+' walkthroughs':'Coming soon';
+  var tag=t.status==='live'?'a':'div';
+  var href=t.status==='live'?'href="'+t.file+'"':'';
+  return '<'+tag+' '+href+' class="topic-card'+(t.status==='soon'?' soon':'')+'">'
+    +'<div class="topic-icon">'+t.icon+'</div>'
+    +badge
+    +'<div class="topic-name">'+t.name+'</div>'
+    +'<div class="topic-count">'+count+'</div>'
+    +'</'+tag+'>';
+}
+
+buildYearNav();
+buildGrid();
+applyBrand();
 </script>
 </body>
 </html>
