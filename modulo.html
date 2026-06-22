@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modulo Arithmetic - Year 12 WAEC</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Modulo Arithmetic - Year 12 WAEC</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 300"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]=o;var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');return '<div class="try"><div class="try-t">Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="Answer ('+o.unit+')" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
+function ck(id){var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}if(Math.abs(v-o.ans)<=(o.exact||0.05)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}else{f.className='fb er';f.textContent='Not quite - check your working and try again.';}}
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var cx=155,cy=155,r=110;
+  o.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  for(var i=0;i<12;i++){var ang=(i*30-90)*Math.PI/180;var nx=cx+r*0.78*Math.cos(ang),ny=cy+r*0.78*Math.sin(ang);o.push(T(nx,ny+4,i===0?'0':i,'#C0272D',12,'middle',i===0));}
+  o.push(T(cx,cy+r+20,'Clock face: mod 12','#888',11));
+  if(p>=1){var pos=29%12;var hang=(pos*30-90)*Math.PI/180;o.push(L(cx,cy,cx+r*0.6*Math.cos(hang),cy+r*0.6*Math.sin(hang),'#C0272D',3));o.push('<circle cx="'+(cx+r*0.78*Math.cos(hang))+'" cy="'+(cy+r*0.78*Math.sin(hang))+'" r="9" fill="#C0272D" opacity="0.3"/>');}
+  o.push(R(300,50,160,50,'#fff5f0','#C0272D',2));o.push(T(380,70,'29 mod 12','#C0272D',14,'middle',true));o.push(T(380,88,'= 29 - 2x12','#888',11));
+  if(p>=1){o.push(R(300,112,160,44,'#e8f8ee','#1a7a3a',2));o.push(T(380,139,'= 5','#1a7a3a',22,'middle',true));}
+  if(p>=2){o.push(R(300,168,160,80,'#fff8e8','#C8922A',1.5));o.push(T(380,190,'47 mod 5','#C8922A',13,'middle',true));o.push(T(380,208,'47/5=9 rem 2','#888',11));if(p>=3)o.push(T(380,232,'= 2','#1a7a3a',18,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(T(240,18,'Addition table mod 5','#C0272D',14,'middle',true));
+  var n=5,ox=70,oy=36,cw=52,ch=36;
+  o.push(R(ox,oy,cw,ch,'#C0272D','#C0272D',0));o.push(T(ox+cw/2,oy+ch/2+5,'+','#fff',14,'middle',true));
+  for(var c=0;c<n;c++){o.push(R(ox+(c+1)*cw,oy,cw,ch,'#C0272D','#C0272D',0));o.push(T(ox+(c+1)*cw+cw/2,oy+ch/2+5,c,'#fff',13,'middle',true));}
+  for(var r=0;r<n;r++){
+    o.push(R(ox,oy+(r+1)*ch,cw,ch,'#C0272D','#C0272D',0));o.push(T(ox+cw/2,oy+(r+1)*ch+ch/2+5,r,'#fff',13,'middle',true));
+    for(var c2=0;c2<n;c2++){var val=(r+c2)%5,diag=(r===c2);o.push(R(ox+(c2+1)*cw,oy+(r+1)*ch,cw,ch,p>=1?(diag?'#fce8d8':'#fff5f0'):'#f8f8f8','#ddd',1));if(p>=1)o.push(T(ox+(c2+1)*cw+cw/2,oy+(r+1)*ch+ch/2+5,val,diag?'#C0272D':'#241A17',13,'middle',diag));}
+  }
+  if(p>=2){o.push(R(30,266,420,26,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,283,'Each entry = (row+col) mod 5. No value exceeds 4.','#1a7a3a',11,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(T(240,20,'Solve: x = 7 (mod 3) - find all solutions 0 to 15','#C0272D',13,'middle',true));
+  var nums=[];for(var i=0;i<=15;i++)if(i%3===7%3)nums.push(i);
+  if(p>=1){o.push(T(240,50,'7 mod 3 = 1 (since 7 = 2x3 + 1)','#241A17',13,'middle',true));o.push(T(240,70,'So we need all x where x mod 3 = 1','#888',12,'middle',true));}
+  var cols3=['#C0272D','#1a5a8a','#1a7a3a','#C8922A','#C0272D','#1a5a8a'];
+  for(var i=0;i<=15;i++){
+    var x=32+i*26,hit=(i%3===1);
+    o.push(R(x,90,22,30,hit&&p>=2?'#fce8d8':'#f8f8f8',hit&&p>=2?'#C0272D':'#ddd',hit&&p>=2?2:1));
+    o.push(T(x+11,110,i,hit&&p>=2?'#C0272D':'#aaa',11));
+  }
+  if(p>=2){o.push(T(240,140,'Highlighted: all numbers with remainder 1 when divided by 3','#888',11,'middle',true));}
+  if(p>=3){o.push(R(60,158,360,40,'#e8f8ee','#1a7a3a',2));o.push(T(240,183,'Solutions: x = 1, 4, 7, 10, 13','#1a7a3a',14,'middle',true));}
+  if(p>=3){o.push(T(240,220,'Pattern: first solution + multiples of the modulus (3)','#888',11,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(T(240,20,'Multiplication table mod 4','#C0272D',14,'middle',true));
+  var n=4,ox=100,oy=36,cw=60,ch=40;
+  o.push(R(ox,oy,cw,ch,'#C0272D','#C0272D',0));o.push(T(ox+cw/2,oy+ch/2+5,'x','#fff',14,'middle',true));
+  for(var c=0;c<n;c++){o.push(R(ox+(c+1)*cw,oy,cw,ch,'#C0272D','#C0272D',0));o.push(T(ox+(c+1)*cw+cw/2,oy+ch/2+5,c,'#fff',13,'middle',true));}
+  for(var r=0;r<n;r++){
+    o.push(R(ox,oy+(r+1)*ch,cw,ch,'#C0272D','#C0272D',0));o.push(T(ox+cw/2,oy+(r+1)*ch+ch/2+5,r,'#fff',13,'middle',true));
+    for(var c2=0;c2<n;c2++){var val=(r*c2)%4,zero=(val===0);o.push(R(ox+(c2+1)*cw,oy+(r+1)*ch,cw,ch,p>=1?(zero?'#e8f4ff':'#fff5f0'):'#f8f8f8','#ddd',1));if(p>=1)o.push(T(ox+(c2+1)*cw+cw/2,oy+(r+1)*ch+ch/2+5,val,zero?'#1a5a8a':'#241A17',14,'middle',zero));}
+  }
+  if(p>=2){o.push(R(30,218,420,32,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,239,'Each entry = (row x col) mod 4. Blue = 0 (zero divisors exist in mod 4).','#1a7a3a',11,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+var QS=[
+  {ey:'Q1 - Modulo Arithmetic',ti:'Introduction to Modulo',su:'Find 29 mod 12 and 47 mod 5 using the clock model.',steps:[
+    {lb:'What is modulo?',dr:dQ1,ht:'<p>Modulo arithmetic works like a clock. After reaching the modulus, you return to zero. <b>n mod m</b> is the remainder when n is divided by m.</p>'},
+    {lb:'Step 1 - 29 mod 12',dr:dQ1,ht:'<div class="fm">29 = 2 x 12 + 5</div><div class="fm">29 mod 12 = <b>5</b></div>'},
+    {lb:'Step 2 - 47 mod 5',dr:dQ1,ht:'<div class="fm">47 = 9 x 5 + 2</div><div class="fm">47 mod 5 = <b>2</b></div>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Find <b>83 mod 7</b>.',hints:['83 = 11 x 7 + ?','The remainder is the answer'],ans:6,exact:0.1,unit:'',working:'83 = 11x7 + 6. Answer = <b>6</b>'})}
+  ]},
+  {ey:'Q2 - Modulo Arithmetic',ti:'Addition Table Mod 5',su:'Complete and use an addition table in mod 5.',steps:[
+    {lb:'The table',dr:dQ2,ht:'<p>In mod 5, the only values are <b>0, 1, 2, 3, 4</b>. Each entry = (row + column) mod 5. Values wrap around after 4.</p>'},
+    {lb:'Step 1 - Fill it in',dr:dQ2,ht:'<p>For example: 3+4=7, and 7 mod 5=2. Diagonal entries (same row and column) are highlighted.</p>'},
+    {lb:'Step 2 - Read it',dr:dQ2,ht:'<div class="fm">3+4 = 2 (mod 5)</div><div class="fm">4+4 = 3 (mod 5)</div>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Using mod 5, find <b>(4+3+3) mod 5</b>.',hints:['4+3=7, 7 mod 5=2','2+3=5, 5 mod 5=?'],ans:0,exact:0.1,unit:'',working:'4+3=7->2, 2+3=5->0. Answer = <b>0</b>'})}
+  ]},
+  {ey:'Q3 - Modulo Arithmetic',ti:'Solving a Modulo Equation',su:'Find all values of x from 0 to 15 that satisfy x = 7 (mod 3).',steps:[
+    {lb:'The problem',dr:dQ3,ht:'<p>Solving <b>x = 7 (mod 3)</b> means finding all x that give the same remainder as 7 when divided by 3.</p>'},
+    {lb:'Step 1 - Find the target remainder',dr:dQ3,ht:'<div class="fm">7 mod 3 = 1 (since 7 = 2x3 + 1)</div><p>So we need all x where x mod 3 = 1.</p>'},
+    {lb:'Step 2 - Identify solutions',dr:dQ3,ht:'<p>Scan 0 to 15 highlighting every number with remainder 1 when divided by 3.</p>'},
+    {lb:'Step 3 - List solutions',dr:dQ3,ht:'<div class="fm">x = 1, 4, 7, 10, 13</div><p>Each solution = previous + modulus (3). Evenly spaced.</p>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'How many solutions does x = 5 (mod 4) have in the range 0 to 20?',hints:['5 mod 4 = 1','Find all x in 0-20 where x mod 4 = 1','1, 5, 9, 13, 17 ...'],ans:5,exact:0.1,unit:'solutions',working:'x = 1, 5, 9, 13, 17. That is <b>5</b> solutions.'})}
+  ]},
+  {ey:'Q4 - Modulo Arithmetic',ti:'Multiplication Table Mod 4',su:'Complete a multiplication table in mod 4.',steps:[
+    {lb:'The table',dr:dQ4,ht:'<p>Each entry = (row x column) mod 4. Digits in mod 4 are 0, 1, 2, 3 only.</p>'},
+    {lb:'Step 1 - Fill it in',dr:dQ4,ht:'<p>For example: 3x3=9, and 9 mod 4=1. Blue entries show zeros (divisors of zero).</p>'},
+    {lb:'Step 2 - Observe patterns',dr:dQ4,ht:'<p>Notice that 2x2=0 in mod 4 even though neither factor is zero. These are called <b>zero divisors</b> - they only exist in modular arithmetic, not in ordinary numbers.</p>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'In mod 6, what is 4 x 5?',hints:['4 x 5 = 20','20 mod 6 = ?','20 = 3x6 + ?'],ans:2,exact:0.1,unit:'',working:'4x5=20. 20=3x6+2. Answer = <b>2</b>'})}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+</body>
+</html>
