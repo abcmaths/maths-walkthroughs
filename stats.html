@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Statistics · Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-top:3px;}
+.bf{background:#e8f4ff;color:#1a5a8a;}.be{background:#fce8d8;color:#7A1418;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.lt{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:8px;}
+.lf{background:#e8f4ff;color:#1a5a8a;}.le{background:#fce8d8;color:#7A1418;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="back">← All Topics</a>
+  <div class="ht">Statistics — Year 10</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 300"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">← Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next →</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function tryIt(o){
+  var id='t'+Math.random().toString(36).slice(2);ST[id]=o;
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  return '<div class="try"><div class="try-t">&#10002; Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="Answer ('+o.unit+')" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details></div>';
+}
+function ck(id){
+  var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');
+  if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}
+  if(Math.abs(v-o.ans)<=(o.exact||0.1)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}
+  else{f.className='fb er';f.textContent='Not quite — check your working and try again.';}
+}
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+
+/* Q1 — Mean median mode range */
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var data=[4,7,3,7,9,2,7,6];
+  var sorted=[2,3,4,6,7,7,7,9];
+  // show data cards
+  data.forEach(function(v,i){
+    var x=48+i*50,y=50;
+    var hi=(p>=1&&v===7);
+    o.push(R(x-20,y-20,40,40,hi?'#fce8d8':'#fff5f0',hi?'#C0272D':'#ccc',hi?2:1));
+    o.push(T(x,y+5,v,'#C0272D',18));
+  });
+  o.push(T(240,20,'Data: 4, 7, 3, 7, 9, 2, 7, 6','#241A17',13));
+  if(p>=1){
+    // sorted row
+    sorted.forEach(function(v,i){
+      var x=48+i*50,y=120;
+      var med=(i===3||i===4);
+      o.push(R(x-20,y-20,40,40,med?'#e8f4ff':'#f8f8f8',med?'#1a5a8a':'#ccc',med?2:1));
+      o.push(T(x,y+5,v,med?'#1a5a8a':'#888',16));
+    });
+    o.push(T(240,85,'Sorted:','#888',12));
+    o.push(T(240,148,'Median = mean of 4th and 5th values = (6+7)/2','#1a5a8a',12));
+  }
+  if(p>=2){
+    o.push(R(30,170,420,34,'#fff5f0','#C0272D',1.5));
+    o.push(T(50,192,'Mean = (4+7+3+7+9+2+7+6)/8 = 45/8 = 5.625','#C0272D',12,'start'));
+  }
+  if(p>=3){
+    o.push(R(30,212,420,34,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(50,234,'Mode = 7   |   Median = 6.5   |   Range = 9−2 = 7','#1a7a3a',12,'start',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* Q2 — Frequency table */
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var rows=[['1',4],['2',7],['3',11],['4',6],['5',2]];
+  var tx2=120,tw=80,th=34,ty=50;
+  // headers
+  o.push(R(tx2-60,ty-30,120,30,'#C0272D','#C0272D',0));o.push(T(tx2,ty-15,'Score','#fff',13,undefined,true));
+  o.push(R(tx2+60,ty-30,tw,30,'#C0272D','#C0272D',0));o.push(T(tx2+100,ty-15,'Freq (f)','#fff',13,undefined,true));
+  o.push(R(tx2+140,ty-30,tw+20,30,p>=1?'#7A1418':'#C0272D','#C0272D',0));o.push(T(tx2+235,ty-15,'f × x','#fff',13,undefined,true));
+  rows.forEach(function(r,i){
+    var y=ty+i*th,hi=(p>=2&&i===2);
+    o.push(R(tx2-60,y,120,th,hi?'#fff5f0':'#fff','#ccc',1));o.push(T(tx2,y+th/2+5,r[0],'#241A17',14));
+    o.push(R(tx2+60,y,tw,th,hi?'#fff5f0':'#fff','#ccc',1));o.push(T(tx2+100,y+th/2+5,r[1],'#241A17',14));
+    o.push(R(tx2+140,y,tw+20,th,p>=1?'#fdf7f4':'#f8f8f8','#ccc',1));
+    if(p>=1)o.push(T(tx2+235,y+th/2+5,parseInt(r[0])*r[1],'#C0272D',14));
+  });
+  // totals
+  var totalF=30,totalFX=4*1+7*2+11*3+6*4+5*2; // =4+14+33+24+10=85
+  if(p>=1){
+    o.push(R(tx2+60,ty+5*th,tw,th,'#fce8d8','#C0272D',2));o.push(T(tx2+100,ty+5*th+th/2+5,totalF,'#C0272D',14,undefined,true));
+    o.push(R(tx2+140,ty+5*th,tw+20,th,'#fce8d8','#C0272D',2));o.push(T(tx2+235,ty+5*th+th/2+5,totalFX,'#C0272D',14,undefined,true));
+    o.push(R(tx2-60,ty+5*th,120,th,'#fce8d8','#C0272D',2));o.push(T(tx2,ty+5*th+th/2+5,'Total','#C0272D',12,undefined,true));
+  }
+  if(p>=2)o.push(T(320,175,'Mean = Σfx / Σf = 85/30','#C0272D',13,'start'));
+  if(p>=3)o.push(T(320,200,'= 2.83 (2 d.p.)','#C0272D',14,'start',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q3 — Grouped data estimated mean */
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var rows=[['10–20',15,8],['20–30',25,14],['30–40',35,11],['40–50',45,7]];
+  var tw=80,ty=50;
+  // headers
+  ['Class','Midpt','Freq','f×mid'].forEach(function(h,i){
+    o.push(R(40+i*100,ty-30,100,30,i===3&&p>=1?'#7A1418':'#C0272D','#C0272D',0));
+    o.push(T(90+i*100,ty-15,h,'#fff',12,undefined,true));
+  });
+  rows.forEach(function(r,i){
+    var y=ty+i*40;
+    o.push(R(40,y,100,38,'#fff','#ccc',1));o.push(T(90,y+22,r[0],'#241A17',13));
+    o.push(R(140,y,100,38,p>=1?'#fff5f0':'#fff','#ccc',1));o.push(T(190,y+22,r[1],p>=1?'#C0272D':'#aaa',13));
+    o.push(R(240,y,100,38,'#fff','#ccc',1));o.push(T(290,y+22,r[2],'#241A17',13));
+    o.push(R(340,y,100,38,p>=2?'#fff5f0':'#f8f8f8','#ccc',1));
+    if(p>=2)o.push(T(390,y+22,r[1]*r[2],'#C0272D',13));
+  });
+  var totalF=40,totalFM=15*8+25*14+35*11+45*7; // =120+350+385+315=1170
+  if(p>=2){
+    o.push(R(240,ty+4*40,100,38,'#fce8d8','#C0272D',2));o.push(T(290,ty+4*40+22,totalF,'#C0272D',13,undefined,true));
+    o.push(R(340,ty+4*40,100,38,'#fce8d8','#C0272D',2));o.push(T(390,ty+4*40+22,totalFM,'#C0272D',13,undefined,true));
+  }
+  if(p>=3){
+    o.push(R(40,262,400,30,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,282,'Estimated mean = 1170 / 40 = 29.25','#1a7a3a',13,undefined,true));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* Q4 — Pie chart */
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var cx=180,cy=150,r=110;
+  var slices=[{lbl:'Football',v:12,col:'#C0272D'},{lbl:'Basketball',v:8,col:'#1a5a8a'},{lbl:'Athletics',v:6,col:'#1a7a3a'},{lbl:'Swimming',v:4,col:'#C8922A'}];
+  var total=30;
+  var angle=-90;
+  slices.forEach(function(sl,i){
+    var deg=sl.v/total*360,rad=Math.PI/180;
+    var a1=angle*rad,a2=(angle+deg)*rad;
+    var x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+    var x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
+    var lg=deg>180?1:0;
+    if(p>=1){
+      o.push('<path d="M'+cx+','+cy+' L'+x1+','+y1+' A'+r+','+r+' 0 '+lg+',1 '+x2+','+y2+' Z" fill="'+sl.col+'" stroke="#fff" stroke-width="2" opacity="0.85"/>');
+      var ma=(angle+deg/2)*rad;
+      o.push(T(cx+r*0.65*Math.cos(ma),cy+r*0.65*Math.sin(ma)+4,sl.v,'#fff',13,undefined,true));
+    }
+    angle+=deg;
+    // legend
+    o.push(R(330,60+i*42,16,16,sl.col,sl.col,0));
+    o.push(T(354,73+i*42,sl.lbl,'#241A17',12,'start'));
+    if(p>=2)o.push(T(440,73+i*42,Math.round(sl.v/total*360)+'°','#C0272D',12,'start'));
+  });
+  o.push(T(180,285,'30 students — favourite sport','#888',12));
+  if(p>=1&&p<2)o.push(T(180,20,'Each sector angle = (freq/total) × 360°','#C0272D',12));
+  s.innerHTML=o.join('');
+}
+
+/* Q5 — Bar chart / histogram */
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var bars=[{lbl:'Mon',v:8},{lbl:'Tue',v:14},{lbl:'Wed',v:11},{lbl:'Thu',v:16},{lbl:'Fri',v:20}];
+  var ox=60,oy=250,bw=52,gap=18,maxH=160,maxV=20;
+  // axes
+  o.push(L(ox,oy-maxH-10,ox,oy,'#ccc',2));
+  o.push(L(ox,oy,ox+5*(bw+gap)+10,oy,'#ccc',2));
+  // y gridlines
+  [0,5,10,15,20].forEach(function(v){
+    var y=oy-v/maxV*maxH;
+    o.push(L(ox,y,ox+5*(bw+gap),y,'#eee',1));
+    o.push(T(ox-8,y+4,v,'#aaa',11,'end'));
+  });
+  bars.forEach(function(b,i){
+    var x=ox+i*(bw+gap)+gap/2;
+    var h=b.v/maxV*maxH;
+    var hi=(p>=2&&b.v===Math.max.apply(null,bars.map(function(x){return x.v;})));
+    o.push(R(x,oy-h,bw,h,hi?'#fce8d8':'#e8f4ff',hi?'#C0272D':'#1a5a8a',hi?2:1.5));
+    if(p>=1)o.push(T(x+bw/2,oy-(h+6),b.v,'#C0272D',11,undefined,true));
+    o.push(T(x+bw/2,oy+14,b.lbl,'#888',11));
+  });
+  o.push(T(240,16,'Daily sales for one week','#241A17',13,undefined,true));
+  if(p>=2)o.push(T(240,38,'Modal day = Friday (highest bar = 20)','#C0272D',12));
+  if(p>=3){
+    var tot=bars.reduce(function(a,b){return a+b.v;},0);
+    o.push(T(240,56,'Total = 69,  Mean daily sales = 69/5 = 13.8','#1a7a3a',12));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* Q6 — Scatter graph */
+function dQ6(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var pts=[[2,30],[3,45],[4,40],[5,60],[6,65],[7,75],[8,85],[9,80],[10,95]];
+  var ox=50,oy=260,sx=35,sy=2.2;
+  // axes
+  o.push(L(ox,20,ox,oy,'#ccc',1.5));o.push(L(ox,oy,440,oy,'#ccc',1.5));
+  // labels
+  for(var i=0;i<=10;i++)o.push(T(ox+i*sx,oy+14,i,'#aaa',10));
+  [0,20,40,60,80,100].forEach(function(v){
+    var y=oy-v*sy;o.push(L(ox,y,440,y,'#f0f0f0',1));o.push(T(ox-8,y+4,v,'#aaa',10,'end'));
+  });
+  o.push(T(240,290,'Hours studied','#888',12));
+  o.push(T(20,150,'Score','#888',12,'middle'));
+  // points
+  pts.forEach(function(pt,i){
+    var x=ox+pt[0]*sx,y=oy-pt[1]*sy;
+    o.push('<circle cx="'+x+'" cy="'+y+'" r="5" fill="'+(p>=1?'#C0272D':'#ccc')+'" stroke="#fff" stroke-width="1.5"/>');
+  });
+  // line of best fit (approx y = 8.5x + 15)
+  if(p>=2){
+    var x1=ox+1*sx,y1=oy-(8.5*1+15)*sy,x2=ox+10*sx,y2=oy-(8.5*10+15)*sy;
+    o.push(L(x1,y1,x2,y2,'#1a5a8a',2));
+    o.push(T(380,40,'Line of best fit','#1a5a8a',11,'start'));
+  }
+  if(p>=3)o.push(T(240,20,'Strong positive correlation — more study → higher score','#C0272D',12,undefined,true));
+  s.innerHTML=o.join('');
+}
+
+/* Q7 — Cumulative frequency */
+function dQ7(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var pts=[[10,0],[20,6],[30,18],[40,34],[50,46],[60,50]];
+  var ox=60,oy=260,sx=32,sy=4.6;
+  // axes
+  o.push(L(ox,20,ox,oy,'#ccc',1.5));o.push(L(ox,oy,ox+5*sx*10,oy,'#ccc',1.5));
+  // y axis
+  [0,10,20,30,40,50].forEach(function(v){
+    var y=oy-v*sy;o.push(L(ox,y,ox+5*32*10/5,y,'#f0f0f0',1));o.push(T(ox-8,y+4,v,'#aaa',10,'end'));
+  });
+  // x labels
+  pts.forEach(function(pt){o.push(T(ox+(pt[0]-10)*sx,oy+14,pt[0],'#aaa',10));});
+  // curve
+  if(p>=1){
+    var path='M';
+    pts.forEach(function(pt,i){var x=ox+(pt[0]-10)*sx,y=oy-pt[1]*sy;path+=(i===0?'':' L')+x+','+y;});
+    o.push('<path d="'+path+'" fill="none" stroke="#C0272D" stroke-width="2.5"/>');
+    pts.forEach(function(pt){var x=ox+(pt[0]-10)*sx,y=oy-pt[1]*sy;o.push('<circle cx="'+x+'" cy="'+y+'" r="4" fill="#C0272D" stroke="#fff" stroke-width="1.5"/>');});
+  }
+  // median line at n/2 = 25
+  if(p>=2){
+    var medy=oy-25*sy;
+    o.push(L(ox,medy,400,medy,'#C8922A',1.5,'5,4'));
+    o.push(T(ox-8,medy+4,25,'#C8922A',10,'end'));
+    // read off x ≈ 34
+    o.push(L(ox+(34-10)*sx,medy,ox+(34-10)*sx,oy,'#C8922A',1.5,'5,4'));
+    o.push(T(ox+(34-10)*sx,oy+14,'34','#C8922A',11,undefined,true));
+  }
+  if(p>=3)o.push(T(240,20,'Median ≈ 34  |  LQ ≈ 26  |  UQ ≈ 43  |  IQR ≈ 17','#C0272D',11,undefined,true));
+  o.push(T(240,285,'Time (minutes)','#888',11));
+  s.innerHTML=o.join('');
+}
+
+/* Q8 — Basic probability */
+function dQ8(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // bag of marbles: 5R 3B 2G = 10
+  var items=[{col:'#C0272D',n:5,lbl:'Red'},{col:'#1a5a8a',n:3,lbl:'Blue'},{col:'#1a7a3a',n:2,lbl:'Green'}];
+  // draw bag shape
+  o.push('<ellipse cx="240" cy="200" rx="120" ry="70" fill="#fff8f0" stroke="#C8922A" stroke-width="2"/>');
+  o.push('<path d="M 155,170 Q 180,120 240,115 Q 300,120 325,170" fill="none" stroke="#C8922A" stroke-width="2"/>');
+  // marbles
+  var positions=[[170,185],[195,200],[220,210],[245,205],[270,198],[195,175],[225,178],[255,180],[215,225],[265,222]];
+  var cols=[];
+  items.forEach(function(it){for(var i=0;i<it.n;i++)cols.push(it.col);});
+  positions.forEach(function(pos,i){o.push('<circle cx="'+pos[0]+'" cy="'+pos[1]+'" r="13" fill="'+cols[i]+'" stroke="#fff" stroke-width="1.5"/>');});
+  o.push(T(240,280,'Bag: 5 Red, 3 Blue, 2 Green = 10 total','#888',12));
+  if(p>=1){
+    o.push(R(30,20,200,30,'#fff5f0','#C0272D',1.5));
+    o.push(T(130,40,'P(Red) = 5/10 = 1/2','#C0272D',13,'middle',true));
+  }
+  if(p>=2){
+    o.push(R(250,20,200,30,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(350,40,'P(Blue) = 3/10','#1a5a8a',13,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(30,58,420,30,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,78,'P(not Green) = 1 − 2/10 = 8/10 = 4/5','#1a7a3a',13,undefined,true));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* Q9 — Combined events / sample space */
+function dQ9(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // two dice sample space grid 6x6
+  var ox=80,oy=260,cs=28;
+  o.push(T(240,16,'Sample space: sum of two dice','#241A17',13,undefined,true));
+  // col headers (die 2)
+  for(var c=1;c<=6;c++)o.push(T(ox+c*cs,oy-7*cs-8,c,'#1a5a8a',11));
+  // row headers (die 1)
+  for(var r=1;r<=6;r++)o.push(T(ox-8,oy-(7-r)*cs,r,'#C0272D',11,'end'));
+  for(var r=1;r<=6;r++){
+    for(var c=1;c<=6;c++){
+      var sum=r+c;
+      var hi=(p>=2&&sum===7);
+      var x=ox+c*cs-cs/2,y=oy-(7-r)*cs-cs/2;
+      o.push(R(x-12,y-12,24,24,hi?'#fce8d8':p>=1?'#f8f8f8':'#fff',hi?'#C0272D':'#ddd',hi?2:1));
+      if(p>=1)o.push(T(x,y+4,sum,hi?'#C0272D':'#888',10));
+    }
+  }
+  if(p>=2)o.push(T(240,270,'P(sum=7) = 6/36 = 1/6 (highlighted)','#C0272D',12,undefined,true));
+  if(p>=3)o.push(T(240,288,'P(sum>9) = 6/36 = 1/6','#1a5a8a',12,undefined,true));
+  s.innerHTML=o.join('');
+}
+
+/* Q10 — Tree diagram */
+function dQ10(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // Two draws without replacement from 4R 2B
+  var ox=60,my=150;
+  // first branches
+  o.push(L(ox,my,ox+120,my-70,'#C0272D',p>=1?2:1.5));
+  o.push(L(ox,my,ox+120,my+70,'#1a5a8a',p>=1?2:1.5));
+  if(p>=1){
+    o.push(T(ox+50,my-48,'4/6','#C0272D',12));
+    o.push(T(ox+50,my+48,'2/6','#1a5a8a',12));
+    o.push(T(ox+130,my-72,'R','#C0272D',13,undefined,true));
+    o.push(T(ox+130,my+72,'B','#1a5a8a',13,undefined,true));
+  }
+  // second branches from R
+  if(p>=2){
+    o.push(L(ox+120,my-70,ox+240,my-110,'#C0272D',2));
+    o.push(L(ox+120,my-70,ox+240,my-35,'#1a5a8a',2));
+    o.push(T(ox+165,my-104,'3/5','#C0272D',11));
+    o.push(T(ox+165,my-42,'2/5','#1a5a8a',11));
+    o.push(T(ox+250,my-112,'R','#C0272D',12,undefined,true));
+    o.push(T(ox+250,my-33,'B','#1a5a8a',12,undefined,true));
+    // second branches from B
+    o.push(L(ox+120,my+70,ox+240,my+35,'#C0272D',2));
+    o.push(L(ox+120,my+70,ox+240,my+110,'#1a5a8a',2));
+    o.push(T(ox+165,my+40,'4/5','#C0272D',11));
+    o.push(T(ox+165,my+102,'1/5','#1a5a8a',11));
+    o.push(T(ox+250,my+33,'R','#C0272D',12,undefined,true));
+    o.push(T(ox+250,my+112,'B','#1a5a8a',12,undefined,true));
+  }
+  // outcomes
+  if(p>=3){
+    var outcomes=[['R,R','4/6 × 3/5 = 12/30',my-112],['R,B','4/6 × 2/5 = 8/30',my-33],['B,R','2/6 × 4/5 = 8/30',my+33],['B,B','2/6 × 1/5 = 2/30',my+112]];
+    outcomes.forEach(function(oc){
+      o.push(T(ox+330,oc[2]+4,oc[0],'#241A17',11,'start'));
+      o.push(T(ox+330,oc[2]+16,oc[1],'#888',10,'start'));
+    });
+  }
+  if(p>=4){
+    o.push(R(30,268,420,24,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,284,'P(both same) = 12/30 + 2/30 = 14/30 = 7/15','#1a7a3a',12,undefined,true));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* ══ QUESTION DATA ══ */
+var QS=[
+  {ey:'Q1 · Averages · Foundation',ti:'Mean, Median, Mode and Range',su:'Data: 4, 7, 3, 7, 9, 2, 7, 6. Find all four averages.',lv:'F',steps:[
+    {lb:'The data',dr:dQ1,ht:'<span class="lt lf">Foundation</span><p>Data set: <b>4, 7, 3, 7, 9, 2, 7, 6</b>. Find the mean, median, mode and range.</p>'},
+    {lb:'Step 1 — Sort and find median',dr:dQ1,ht:'<p>Sort: 2, 3, 4, <b>6, 7</b>, 7, 7, 9. With 8 values, median = mean of 4th and 5th:</p><div class="fm">Median = (6 + 7) / 2 = <b>6.5</b></div>'},
+    {lb:'Step 2 — Mean',dr:dQ1,ht:'<div class="fm">Mean = (4+7+3+7+9+2+7+6) / 8 = 45/8 = <b>5.625</b></div>'},
+    {lb:'Step 3 — Mode and Range',dr:dQ1,ht:'<div class="fm">Mode = <b>7</b> (appears 3 times)</div><div class="fm">Range = 9 − 2 = <b>7</b></div>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Data: <b>5, 3, 8, 3, 7, 4, 3, 9</b>. Find the mean.',hints:['Add all values together','Divide by how many values (8)'],ans:5.25,exact:0.05,unit:'',working:'Sum = 5+3+8+3+7+4+3+9 = 42.  Mean = 42/8 = <b>5.25</b>'})}
+  ]},
+  {ey:'Q2 · Frequency Tables · Foundation',ti:'Mean from a Frequency Table',su:'Find the mean score from a frequency table.',lv:'F',steps:[
+    {lb:'The table',dr:dQ2,ht:'<span class="lt lf">Foundation</span><p>A frequency table shows how often each score occurs. To find the mean we need a new column: <b>f × x</b> (frequency × value).</p>'},
+    {lb:'Step 1 — Add f×x column',dr:dQ2,ht:'<p>Multiply each score by its frequency to get the <b>f×x</b> column, then find the totals.</p>'},
+    {lb:'Step 2 — Calculate mean',dr:dQ2,ht:'<div class="fm">Mean = Σ(f×x) / Σf = 85 / 30</div>'},
+    {lb:'Step 3 — Answer',dr:dQ2,ht:'<div class="fm">Mean = 85 / 30 = <b>2.83</b> (2 d.p.)</div>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'A table shows: score 1 (freq 3), score 2 (freq 5), score 3 (freq 2). Find the mean.',hints:['f×x column: 1×3=3, 2×5=10, 3×2=6','Σfx = 3+10+6 = 19','Σf = 3+5+2 = 10'],ans:1.9,exact:0.05,unit:'',working:'Σfx=19, Σf=10. Mean = 19/10 = <b>1.9</b>'})}
+  ]},
+  {ey:'Q3 · Grouped Data · Extended',ti:'Estimated Mean from Grouped Data',su:'Use class midpoints to estimate the mean.',lv:'E',steps:[
+    {lb:'The table',dr:dQ3,ht:'<span class="lt le">Extended</span><p>With grouped data we cannot find the exact mean. We <b>estimate</b> it using the <b>midpoint</b> of each class interval.</p>'},
+    {lb:'Step 1 — Find midpoints',dr:dQ3,ht:'<p>Midpoint = (lower bound + upper bound) / 2. For 10–20: midpoint = 15, and so on.</p>'},
+    {lb:'Step 2 — Calculate f × midpoint',dr:dQ3,ht:'<p>Multiply each midpoint by its frequency. Then find Σf and Σ(f×mid).</p>'},
+    {lb:'Step 3 — Estimated mean',dr:dQ3,ht:'<div class="fm">Estimated mean = Σ(f×mid) / Σf = 1170 / 40 = <b>29.25</b></div>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Class 0–10 (freq 5), 10–20 (freq 15), 20–30 (freq 10). Find the estimated mean.',hints:['Midpoints: 5, 15, 25','f×mid: 5×5=25, 15×15=225, 10×25=250','Σfx=500, Σf=30'],ans:16.67,exact:0.1,unit:'',working:'Σfx=25+225+250=500. Σf=30. Mean=500/30=<b>16.67</b>'})}
+  ]},
+  {ey:'Q4 · Pie Charts · Foundation',ti:'Reading and Drawing a Pie Chart',su:'30 students chose a favourite sport. Draw sector angles.',lv:'F',steps:[
+    {lb:'The data',dr:dQ4,ht:'<span class="lt lf">Foundation</span><p>30 students: Football 12, Basketball 8, Athletics 6, Swimming 4. Convert to sector angles: <b>angle = (freq / total) × 360°</b>.</p>'},
+    {lb:'Step 1 — Calculate angles',dr:dQ4,ht:'<div class="fm">Football: 12/30 × 360 = 144°</div><div class="fm">Basketball: 8/30 × 360 = 96°</div><div class="fm">Athletics: 6/30 × 360 = 72°  |  Swimming: 48°</div>'},
+    {lb:'Step 2 — Draw the chart',dr:dQ4,ht:'<p>The completed pie chart with all four sectors and their frequencies shown.</p>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'In a pie chart of 40 students, 10 chose Science. What is the sector angle for Science?',hints:['Angle = (freq/total) × 360°','= (10/40) × 360°'],ans:90,exact:0.5,unit:'°',working:'10/40 × 360 = 0.25 × 360 = <b>90°</b>'})}
+  ]},
+  {ey:'Q5 · Bar Charts · Foundation',ti:'Reading a Bar Chart',su:'Daily sales data shown in a bar chart. Find the mean and modal day.',lv:'F',steps:[
+    {lb:'The chart',dr:dQ5,ht:'<span class="lt lf">Foundation</span><p>The bar chart shows daily sales: Mon 8, Tue 14, Wed 11, Thu 16, Fri 20. Read off values from the bars.</p>'},
+    {lb:'Step 1 — Read values',dr:dQ5,ht:'<p>Values are shown above each bar: 8, 14, 11, 16, 20.</p>'},
+    {lb:'Step 2 — Modal day',dr:dQ5,ht:'<p>The modal day is the one with the <b>highest frequency</b> — the tallest bar.</p><div class="fm">Modal day = <b>Friday</b> (20 sales)</div>'},
+    {lb:'Step 3 — Mean',dr:dQ5,ht:'<div class="fm">Total = 8+14+11+16+20 = 69</div><div class="fm">Mean = 69 / 5 = <b>13.8 sales/day</b></div>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'A bar chart shows: Mon 6, Tue 10, Wed 8, Thu 12, Fri 4. What is the mean daily value?',hints:['Add all five values','Divide by 5'],ans:8,exact:0.05,unit:'',working:'6+10+8+12+4=40.  Mean=40/5=<b>8</b>'})}
+  ]},
+  {ey:'Q6 · Scatter Graphs · Foundation/Extended',ti:'Scatter Graphs and Correlation',su:'Hours studied vs exam score — describe and use the correlation.',lv:'F',steps:[
+    {lb:'The graph',dr:dQ6,ht:'<span class="lt lf">Foundation</span><p>Each point shows one student\'s hours studied and exam score. Look for a pattern — is there a relationship?</p>'},
+    {lb:'Step 1 — Plot the points',dr:dQ6,ht:'<p>Points plotted for 9 students. As hours increase, scores also tend to increase.</p>'},
+    {lb:'Step 2 — Line of best fit',dr:dQ6,ht:'<p>Draw a straight line through the <b>middle</b> of the points — roughly equal numbers of points on each side.</p>'},
+    {lb:'Step 3 — Describe correlation',dr:dQ6,ht:'<div class="fm">Strong positive correlation</div><p>The line slopes upward — more study is associated with higher scores. We can use it to predict values.</p>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'Using the line of best fit, estimate the score for a student who studied <b>5.5 hours</b>. (Line equation: score ≈ 8.5 × hours + 15)',hints:['Substitute hours = 5.5','score = 8.5 × 5.5 + 15'],ans:61.75,exact:3,unit:'marks',working:'8.5 × 5.5 + 15 = 46.75 + 15 = <b>61.75</b> (accept 59–64)'})}
+  ]},
+  {ey:'Q7 · Cumulative Frequency · Extended',ti:'Cumulative Frequency Curve',su:'Find the median and IQR from a cumulative frequency graph.',lv:'E',steps:[
+    {lb:'The graph',dr:dQ7,ht:'<span class="lt le">Extended</span><p>Cumulative frequency plots the <b>running total</b> of frequencies. Data shows times (minutes) for 50 students to complete a task.</p>'},
+    {lb:'Step 1 — Plot the curve',dr:dQ7,ht:'<p>Points: (10,0), (20,6), (30,18), (40,34), (50,46), (60,50). Join with a smooth S-curve.</p>'},
+    {lb:'Step 2 — Read off median',dr:dQ7,ht:'<p>Median is at n/2 = 25 on the y-axis. Draw a horizontal line across to the curve, then down to the x-axis.</p><div class="fm">Median ≈ <b>34 minutes</b></div>'},
+    {lb:'Step 3 — IQR',dr:dQ7,ht:'<div class="fm">LQ (n/4 = 12.5) ≈ 26  |  UQ (3n/4 = 37.5) ≈ 43</div><div class="fm">IQR = 43 − 26 = <b>17 minutes</b></div>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'A cumulative frequency curve has n = 60. At what cumulative frequency value do you read off the <b>upper quartile</b>?',hints:['Upper quartile = 3/4 of the way through','3/4 × 60 = ?'],ans:45,exact:0.5,unit:'(cumulative frequency value)',working:'UQ is at 3n/4 = 3×60/4 = <b>45</b>'})}
+  ]},
+  {ey:'Q8 · Probability · Foundation',ti:'Basic Probability',su:'A bag contains 5 red, 3 blue and 2 green marbles. Find probabilities.',lv:'F',steps:[
+    {lb:'The bag',dr:dQ8,ht:'<span class="lt lf">Foundation</span><p>A bag has <b>5 red</b>, <b>3 blue</b> and <b>2 green</b> marbles — <b>10 total</b>. One marble is picked at random.</p><div class="fm">P(event) = favourable outcomes / total outcomes</div>'},
+    {lb:'Step 1 — P(Red)',dr:dQ8,ht:'<div class="fm">P(Red) = 5/10 = <b>1/2</b></div>'},
+    {lb:'Step 2 — P(Blue)',dr:dQ8,ht:'<div class="fm">P(Blue) = 3/10</div>'},
+    {lb:'Step 3 — P(not Green)',dr:dQ8,ht:'<div class="fm">P(not Green) = 1 − P(Green) = 1 − 2/10 = <b>8/10 = 4/5</b></div>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'A bag has 4 red, 3 blue and 1 yellow marble. What is the probability of picking blue? Give your answer as a decimal.',hints:['Total marbles = 4+3+1 = 8','P(Blue) = 3/8'],ans:0.375,exact:0.01,unit:'',working:'P(Blue) = 3/8 = <b>0.375</b>'})}
+  ]},
+  {ey:'Q9 · Combined Events · Extended',ti:'Sample Space — Two Dice',su:'List all outcomes and find P(sum = 7) and P(sum > 9).',lv:'E',steps:[
+    {lb:'The sample space',dr:dQ9,ht:'<span class="lt le">Extended</span><p>Two fair dice are rolled. The sample space shows all <b>36 equally likely outcomes</b> as a grid of sums.</p>'},
+    {lb:'Step 1 — Complete the grid',dr:dQ9,ht:'<p>Each cell shows the sum of the two dice. There are 6 × 6 = 36 possible outcomes.</p>'},
+    {lb:'Step 2 — P(sum = 7)',dr:dQ9,ht:'<p>Count outcomes where the sum = 7 (highlighted). There are 6 such outcomes.</p><div class="fm">P(sum = 7) = 6/36 = <b>1/6</b></div>'},
+    {lb:'Step 3 — P(sum > 9)',dr:dQ9,ht:'<p>Sums greater than 9: 10, 11, 12. Count: (4,6),(5,5),(6,4),(5,6),(6,5),(6,6) = 6 outcomes.</p><div class="fm">P(sum > 9) = 6/36 = <b>1/6</b></div>'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt({question:'Two fair dice are rolled. How many outcomes give a sum of <b>exactly 8</b>?',hints:['List pairs: (2,6),(3,5),(4,4),(5,3),(6,2)','Count them'],ans:5,exact:0.1,unit:'outcomes',working:'(2,6),(3,5),(4,4),(5,3),(6,2) = <b>5 outcomes</b>. P = 5/36.'})}
+  ]},
+  {ey:'Q10 · Tree Diagrams · Extended',ti:'Tree Diagram — Without Replacement',su:'Bag: 4 red, 2 blue. Two drawn without replacement. Find P(both same colour).',lv:'E',steps:[
+    {lb:'The problem',dr:dQ10,ht:'<span class="lt le">Extended</span><p>A bag has <b>4 red</b> and <b>2 blue</b> marbles. Two are drawn <b>without replacement</b>. Build a tree diagram — the probabilities on the second branches <b>change</b> after the first draw.</p>'},
+    {lb:'Step 1 — First branches',dr:dQ10,ht:'<div class="fm">P(R first) = 4/6   |   P(B first) = 2/6</div>'},
+    {lb:'Step 2 — Second branches',dr:dQ10,ht:'<p>After drawing red: 3 red and 2 blue remain (5 total).<br>After drawing blue: 4 red and 1 blue remain (5 total).</p>'},
+    {lb:'Step 3 — List outcomes',dr:dQ10,ht:'<p>Multiply along each branch to get the probability of each outcome.</p>'},
+    {lb:'Step 4 — P(same colour)',dr:dQ10,ht:'<div class="fm">P(R,R) = 4/6 × 3/5 = 12/30</div><div class="fm">P(B,B) = 2/6 × 1/5 = 2/30</div><div class="fm">P(same) = 12/30 + 2/30 = 14/30 = <b>7/15</b></div>'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt({question:'Using the same tree diagram, what is P(one red and one blue) in any order? Give as a fraction — enter the numerator over 30 (i.e. enter the numerator).',hints:['P(R then B) = 4/6 × 2/5 = 8/30','P(B then R) = 2/6 × 4/5 = 8/30','Add both'],ans:16,exact:0.1,unit:'over 30',working:'P(R,B)+P(B,R) = 8/30+8/30 = <b>16/30</b> = 8/15'})}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){
+  var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);
+  QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti+'<br><span class="badge '+(q.lv==='F'?'bf':'be')+'">'+(q.lv==='F'?'Foundation':'Extended')+'</span>';b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});
+}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){
+  bSB();var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;
+  var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+  p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;
+  st.dr(si);bDT();
+  document.getElementById('pb').disabled=si===0;
+  document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';
+}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+</body>
+</html>
