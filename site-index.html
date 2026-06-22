@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maths Walkthroughs</title>
+<style>
+:root{
+  --red:#C0272D; --dark-red:#7A1418; --cream:#FBF6F1; --ink:#241A17;
+  --line:#E4D6CE; --gold:#C8922A; --white:#fff;
+  --brand-primary:var(--red);
+}
+body.cc{ --brand-primary:#8B0000; }
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100vh;}
+
+/* ── HEADER ── */
+header{
+  background:var(--brand-primary);color:#fff;
+  padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:60px;position:sticky;top:0;z-index:200;
+  transition:background .3s;
+}
+.logo-wrap{display:flex;align-items:center;gap:12px;}
+.logo-badge{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;letter-spacing:-.5px;
+}
+.logo-text{font-size:15px;font-weight:700;letter-spacing:.02em;}
+.logo-sub{font-size:11px;opacity:.75;letter-spacing:.08em;text-transform:uppercase;}
+
+/* brand toggle */
+.brand-toggle{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);
+  border-radius:20px;padding:4px 6px 4px 10px;cursor:pointer;
+  font-size:12px;font-weight:600;color:#fff;
+  transition:.2s;
+}
+.brand-toggle:hover{background:rgba(255,255,255,.25);}
+.toggle-pill{
+  width:32px;height:18px;background:rgba(255,255,255,.3);
+  border-radius:9px;position:relative;transition:.2s;
+}
+.toggle-pill::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:14px;height:14px;border-radius:50%;background:#fff;
+  transition:.2s;
+}
+body.cc .toggle-pill{background:var(--gold);}
+body.cc .toggle-pill::after{left:16px;}
+
+/* ── HERO ── */
+.hero{
+  background:linear-gradient(135deg, var(--brand-primary) 0%, var(--dark-red) 100%);
+  color:#fff;padding:48px 24px 40px;text-align:center;
+  transition:background .3s;
+}
+.hero h1{font-family:'Georgia',serif;font-size:32px;margin-bottom:8px;}
+.hero p{font-size:15px;opacity:.85;max-width:500px;margin:0 auto;}
+
+/* ── YEAR TABS ── */
+.year-nav{
+  display:flex;gap:6px;overflow-x:auto;padding:16px 24px 0;
+  border-bottom:2px solid var(--line);
+  background:#fff;
+}
+.year-tab{
+  font-size:13px;font-weight:600;padding:8px 16px;
+  border-radius:4px 4px 0 0;border:none;background:transparent;
+  color:#888;cursor:pointer;white-space:nowrap;
+  border-bottom:3px solid transparent;margin-bottom:-2px;
+  transition:.15s;
+}
+.year-tab:hover{color:var(--ink);}
+.year-tab.active{color:var(--brand-primary);border-bottom-color:var(--brand-primary);}
+
+/* ── TOPIC GRID ── */
+.grid-wrap{max-width:1000px;margin:0 auto;padding:28px 24px 60px;}
+.year-panel{display:none;}
+.year-panel.active{display:block;}
+.year-label{
+  font-family:'Georgia',serif;font-size:20px;margin-bottom:6px;
+}
+.year-desc{font-size:13px;color:#888;margin-bottom:22px;}
+.topic-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:14px;
+}
+.topic-card{
+  background:#fff;border:1px solid var(--line);border-radius:6px;
+  padding:20px 16px 16px;cursor:pointer;
+  transition:.2s;position:relative;overflow:hidden;
+  text-decoration:none;color:inherit;
+  display:flex;flex-direction:column;gap:8px;
+}
+.topic-card:hover{border-color:var(--brand-primary);box-shadow:0 2px 12px rgba(192,39,45,.12);transform:translateY(-1px);}
+.topic-card.soon{opacity:.55;cursor:default;pointer-events:none;}
+.topic-card.soon:hover{transform:none;box-shadow:none;}
+.topic-icon{font-size:26px;}
+.topic-name{font-family:'Georgia',serif;font-size:16px;font-weight:700;}
+.topic-count{font-size:12px;color:#888;}
+.topic-badge{
+  position:absolute;top:10px;right:10px;
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 7px;border-radius:10px;
+}
+.badge-live{background:#e8f8ee;color:#1a7a3a;}
+.badge-soon{background:#f0f0f0;color:#888;}
+.badge-new{background:#fff3cd;color:#a07018;}
+
+footer{text-align:center;padding:20px;font-size:12px;color:#aaa;border-top:1px solid var(--line);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <div class="logo-badge" id="logoBadge">ABC</div>
+    <div>
+      <div class="logo-text" id="logoText">Adorable British College</div>
+      <div class="logo-sub">Maths Walkthroughs</div>
+    </div>
+  </div>
+  <button class="brand-toggle" id="brandToggle" onclick="toggleBrand()">
+    <span id="toggleLabel">Switch to CC</span>
+    <div class="toggle-pill"></div>
+  </button>
+</header>
+
+<div class="hero">
+  <h1>Step-by-step Maths</h1>
+  <p>Choose your year group, then pick a topic. Every walkthrough builds the diagram as you go — with a question to try at the end.</p>
+</div>
+
+<!-- Year tabs -->
+<div class="year-nav" id="yearNav"></div>
+
+<!-- Topic panels -->
+<div class="grid-wrap" id="gridWrap"></div>
+
+<footer id="siteFooter">© Adorable British College · Maths Walkthroughs</footer>
+
+<script>
+/* ── Brand data ── */
+const brands = {
+  abc:{
+    badge:'ABC', name:'Adorable British College',
+    footer:'© Adorable British College · Maths Walkthroughs',
+    toggleLabel:'Switch to CC', bodyClass:''
+  },
+  cc:{
+    badge:'CC', name:'Curriculum Crest',
+    footer:'© Curriculum Crest · curriculumcrest.com',
+    toggleLabel:'Switch to ABC', bodyClass:'cc'
+  }
+};
+let currentBrand = 'abc';
+
+function toggleBrand(){
+  currentBrand = currentBrand==='abc'?'cc':'abc';
+  applyBrand();
+}
+function applyBrand(){
+  const b = brands[currentBrand];
+  document.body.className = b.bodyClass;
+  document.getElementById('logoBadge').textContent = b.badge;
+  document.getElementById('logoText').textContent = b.name;
+  document.getElementById('toggleLabel').textContent = b.toggleLabel;
+  document.getElementById('siteFooter').textContent = b.footer;
+  document.title = b.name + ' · Maths Walkthroughs';
+}
+
+/* ── Site data ── */
+const years = [
+  { id:'y7',  label:'Year 7',  desc:'KS3 Foundation — core number, shape and data skills.' },
+  { id:'y8',  label:'Year 8',  desc:'KS3 Intermediate — extending algebra, geometry and statistics.' },
+  { id:'y9',  label:'Year 9',  desc:'KS3 Upper — bridging into IGCSE topics.' },
+  { id:'y10', label:'Year 10', desc:'Cambridge IGCSE — Core and Extended curriculum.' },
+  { id:'y11', label:'Year 11', desc:'Cambridge IGCSE — Full Extended, exam technique and revision.' },
+  { id:'y12', label:'Year 12', desc:'WAEC General Mathematics — past paper topics and techniques.' },
+];
+
+const topics = [
+  { id:'mensuration', name:'Mensuration',         icon:'📐', years:['y10','y11','y12'], file:'mensuration.html', status:'live',  count:10 },
+  { id:'algebra',     name:'Algebra',             icon:'🔢', years:['y7','y8','y9','y10','y11','y12'], file:'algebra.html',     status:'soon', count:0  },
+  { id:'number',      name:'Number',              icon:'🔣', years:['y7','y8','y9','y10','y11','y12'], file:'number.html',      status:'soon', count:0  },
+  { id:'geometry',    name:'Geometry & Angles',   icon:'📏', years:['y7','y8','y9','y10','y11'],       file:'geometry.html',    status:'soon', count:0  },
+  { id:'graphs',      name:'Graphs',              icon:'📈', years:['y9','y10','y11','y12'],            file:'graphs.html',      status:'soon', count:0  },
+  { id:'stats',       name:'Statistics & Prob.',  icon:'📊', years:['y7','y8','y9','y10','y11','y12'], file:'stats.html',       status:'soon', count:0  },
+  { id:'trig',        name:'Trigonometry',        icon:'📐', years:['y9','y10','y11','y12'],            file:'trig.html',        status:'soon', count:0  },
+  { id:'sequences',   name:'Sequences',           icon:'🔁', years:['y7','y8','y9','y10','y11'],       file:'sequences.html',   status:'soon', count:0  },
+];
+
+/* ── Build UI ── */
+let activeYear = 'y10';
+
+function buildYearNav(){
+  const nav = document.getElementById('yearNav');
+  nav.innerHTML = '';
+  years.forEach(y=>{
+    const btn = document.createElement('button');
+    btn.className = 'year-tab' + (y.id===activeYear?' active':'');
+    btn.textContent = y.label;
+    btn.onclick = ()=>{ activeYear=y.id; buildYearNav(); buildGrid(); };
+    nav.appendChild(btn);
+  });
+}
+
+function buildGrid(){
+  const wrap = document.getElementById('gridWrap');
+  const y = years.find(y=>y.id===activeYear);
+  const filtered = topics.filter(t=>t.years.includes(activeYear));
+
+  wrap.innerHTML = `
+    <div class="year-label">${y.label}</div>
+    <div class="year-desc">${y.desc}</div>
+    <div class="topic-grid">${filtered.map(topicCard).join('')}</div>
+  `;
+}
+
+function topicCard(t){
+  const badge = t.status==='live'
+    ? `<span class="topic-badge badge-live">Live</span>`
+    : `<span class="topic-badge badge-soon">Soon</span>`;
+  const count = t.status==='live' ? `${t.count} walkthroughs` : 'Coming soon';
+  const link = t.status==='live' ? `href="${t.file}"` : '';
+  const tag = t.status==='live' ? 'a' : 'div';
+  return `<${tag} ${link} class="topic-card ${t.status==='soon'?'soon':''}">
+    ${badge}
+    <div class="topic-icon">${t.icon}</div>
+    <div class="topic-name">${t.name}</div>
+    <div class="topic-count">${count}</div>
+  </${tag}>`;
+}
+
+buildYearNav();
+buildGrid();
+applyBrand();
+</script>
+</body>
+</html>
