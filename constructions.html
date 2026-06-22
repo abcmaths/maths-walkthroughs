@@ -87,278 +87,457 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 var ST={};
 function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]=o;var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');return '<div class="try"><div class="try-t">Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="Answer ('+o.unit+')" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
 function ck(id){var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}if(Math.abs(v-o.ans)<=(o.exact||0.05)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}else{f.className='fb er';f.textContent='Not quite - check your working and try again.';}}
-function g(){return document.getElementById('dg');}
-function T(x,y,t,c,sz,a,b){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
-function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
-function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
-function arc(cx,cy,r,a1,a2,c,w,d){var D=Math.PI/180;var x1=cx+r*Math.cos(a1*D),y1=cy+r*Math.sin(a1*D),x2=cx+r*Math.cos(a2*D),y2=cy+r*Math.sin(a2*D);var lg=Math.abs(a2-a1)>180?1:0;var sw=d?'stroke-dasharray="'+d+'"':'';return '<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+r+','+r+' 0 '+lg+',1 '+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="'+(c||'#C8922A')+'" stroke-width="'+(w||1.5)+'" '+sw+'/>';}
 
-/* Q1 - Perpendicular bisector */
+var g=function(){return document.getElementById('dg');};
+var D=Math.PI/180;
+
+/* SVG helpers */
+function Txt(x,y,t,c,sz,anc,bold){c=c||'#6b5750';sz=sz||12;anc=anc||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+anc+'" font-weight="'+(bold?700:400)+'">'+t+'</text>';}
+function Ln(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function Rc(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
+function Ci(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#C8922A')+'" stroke-width="'+(sw||1.5)+'" />';}
+
+/* Draw a partial arc from angle a1 to a2 (degrees, SVG coords where 0=right, clockwise) */
+function Arc(cx,cy,r,a1,a2,c,w,d){
+  var x1=cx+r*Math.cos(a1*D), y1=cy+r*Math.sin(a1*D);
+  var x2=cx+r*Math.cos(a2*D), y2=cy+r*Math.sin(a2*D);
+  var span=((a2-a1)+360)%360;
+  var lg=span>180?1:0;
+  c=c||'#C8922A'; w=w||1.5;
+  var ds=d?'stroke-dasharray="'+d+'"':'';
+  return '<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+r+','+r+' 0 '+lg+',1 '+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="'+c+'" stroke-width="'+w+'" '+ds+'/>';
+}
+
+/* ═══════════════════════════════════════════
+   Q1  PERPENDICULAR BISECTOR
+   A=(110,200)  B=(370,200)  midpoint=(240,200)
+   compass radius r=160 (bigger than half of AB=130)
+   intersection y-offsets: sqrt(160^2 - 130^2) = sqrt(25600-16900)=sqrt(8700)=93.3
+   So intersections at (240, 200-93) and (240, 200+93)
+════════════════════════════════════════════ */
 function dQ1(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
-  var ax=120,ay=160,bx=360,by=160;
-  o.push(L(ax,ay,bx,by,'#241A17',2));
-  o.push(T(ax-14,ay+4,'A','#241A17',13,'end',true));o.push(T(bx+14,by+4,'B','#241A17',13,'start',true));
-  var mx=(ax+bx)/2,my=(ay+by)/2;
+  var ax=110,ay=200, bx=370,by=200;
+  var mx=(ax+bx)/2, my=ay; // midpoint (240,200)
+  var r=160; // compass radius - must be > half AB (130)
+  // intersection points: offset from midpoint
+  var halfAB=(bx-ax)/2; // 130
+  var yOff=Math.round(Math.sqrt(r*r - halfAB*halfAB)); // 93
+  var ix=mx, iy1=my-yOff, iy2=my+yOff; // (240,107) and (240,293)
+
+  // base line AB
+  o.push(Ln(ax,ay,bx,by,'#241A17',2.5));
+  o.push(Txt(ax-16,ay+4,'A','#241A17',13,'end',true));
+  o.push(Txt(bx+16,by+4,'B','#241A17',13,'start',true));
+  o.push(Txt(mx,ay+20,'AB = 5 cm','#888',11,'middle',false));
+
   if(p>=1){
-    o.push(arc(ax,ay,90,-60,60,'#C8922A',1.5,'5,3'));
-    o.push(arc(bx,by,90,120,240,'#C8922A',1.5,'5,3'));
-    o.push(T(ax+30,ay-96,'r','#C8922A',10,'middle',false));
-    o.push(T(bx-30,ay-96,'r','#C8922A',10,'middle',false));
+    // Arc from A - sweep from roughly top-right to bottom-right passing through both intersection points
+    // Top intersection relative to A: angle = atan2(iy1-ay, ix-ax) = atan2(-93,130) ~ -35.6 deg
+    // Bottom intersection: atan2(93,130) ~ +35.6 deg
+    // Draw arc from -80 to +80 degrees (SVG clockwise from right)
+    o.push(Arc(ax,ay,r,-75,75,'#C8922A',1.5,'5,3'));
+    o.push(Txt(ax-10,ay-r-8,'r','#C8922A',11,'middle',false));
   }
   if(p>=2){
-    var ix1=mx,iy1=my-80,ix2=mx,iy2=my+80;
-    o.push(L(ix1,iy1,ix2,iy2,'#C0272D',2));
-    o.push('<circle cx="'+mx+'" cy="'+(my-80)+'" r="4" fill="#C0272D"/>');
-    o.push('<circle cx="'+mx+'" cy="'+(my+80)+'" r="4" fill="#C0272D"/>');
+    // Arc from B - mirror: from about 105 to 255 degrees
+    o.push(Arc(bx,by,r,105,255,'#C8922A',1.5,'5,3'));
+    // Mark the two intersection points
+    o.push(Ci(ix,iy1,5,'#C0272D','#C0272D',0));
+    o.push(Ci(ix,iy2,5,'#C0272D','#C0272D',0));
   }
   if(p>=3){
-    o.push('<rect x="'+(mx-8)+'" y="'+(my-8)+'" width="16" height="16" fill="none" stroke="#1a5a8a" stroke-width="1.5"/>');
-    o.push(T(mx,my+30,'Midpoint of AB','#1a5a8a',10,'middle',false));
-    o.push(T(mx,my-96,'Perpendicular bisector','#C0272D',10,'middle',true));
+    // Draw the perpendicular bisector through the two intersections
+    o.push(Ln(ix,iy1-10,ix,iy2+10,'#C0272D',2.5));
+    // right-angle mark at midpoint
+    o.push('<rect x="'+(mx)+'" y="'+(my-12)+'" width="12" height="12" fill="none" stroke="#1a5a8a" stroke-width="1.5"/>');
+    o.push(Txt(mx+16,my-28,'Perpendicular bisector','#C0272D',10,'start',true));
+    o.push(Txt(mx,my+36,'Every point on this line is equidistant from A and B','#888',10,'middle',false));
   }
   s.innerHTML=o.join('');
 }
 
-/* Q2 - Angle bisector */
+/* ═══════════════════════════════════════════
+   Q2  ANGLE BISECTOR
+   Vertex V=(100,250). Two rays going upper-right.
+   Ray 1 at -10 deg (nearly horizontal right)
+   Ray 2 at -60 deg (steeply up-right)
+   Step 1: arc of r1=80 from V marks P1 on ray1, P2 on ray2
+   Step 2: arcs of r2=70 from P1 and P2 - they intersect on bisector
+   Bisector is at -35 deg from V
+════════════════════════════════════════════ */
 function dQ2(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
-  var vx=120,vy=220;
-  var ang1=-30*Math.PI/180, ang2=-80*Math.PI/180;
-  var len=220;
-  var ax=vx+len*Math.cos(ang1),ay=vy+len*Math.sin(ang1);
-  var bx=vx+len*Math.cos(ang2),by=vy+len*Math.sin(ang2);
-  o.push(L(vx,vy,ax,ay,'#241A17',2));
-  o.push(L(vx,vy,bx,by,'#241A17',2));
-  o.push(T(ax+10,ay,'ray 1','#888',10,'start',false));o.push(T(bx+8,by,'ray 2','#888',10,'start',false));
-  o.push(T(vx-14,vy+4,'V','#241A17',13,'end',true));
+  var vx=100, vy=250;
+  var ang1=-10*D; // ray 1 angle (SVG: negative=up)
+  var ang2=-60*D; // ray 2 angle
+  var angBis=(-10-60)/2*D; // -35 deg
+  var rayLen=320;
+  var r1=80; // first compass radius
+
+  // P1 and P2 on the two rays at distance r1 from V
+  var p1x=vx+r1*Math.cos(ang1), p1y=vy+r1*Math.sin(ang1); // on ray1
+  var p2x=vx+r1*Math.cos(ang2), p2y=vy+r1*Math.sin(ang2); // on ray2
+
+  // Draw the two rays
+  o.push(Ln(vx,vy,vx+rayLen*Math.cos(ang1),vy+rayLen*Math.sin(ang1),'#241A17',2.5));
+  o.push(Ln(vx,vy,vx+rayLen*Math.cos(ang2),vy+rayLen*Math.sin(ang2),'#241A17',2.5));
+  o.push(Txt(vx-14,vy+14,'V','#241A17',13,'end',true));
+
   if(p>=1){
-    o.push(arc(vx,vy,70,-80,-30,'#C8922A',1.5,'5,3'));
-    var q1x=vx+70*Math.cos(ang1),q1y=vy+70*Math.sin(ang1);
-    var q2x=vx+70*Math.cos(ang2),q2y=vy+70*Math.sin(ang2);
-    o.push('<circle cx="'+q1x.toFixed(1)+'" cy="'+q1y.toFixed(1)+'" r="4" fill="#C8922A"/>');
-    o.push('<circle cx="'+q2x.toFixed(1)+'" cy="'+q2y.toFixed(1)+'" r="4" fill="#C8922A"/>');
+    // Step 1: arc from V cutting both rays
+    // Ray1 at -10 deg, ray2 at -60 deg — arc sweeps from -70 to 0 deg
+    o.push(Arc(vx,vy,r1,-70,5,'#C8922A',2,'5,3'));
+    // Mark P1 and P2
+    o.push(Ci(p1x,p1y,5,'#C8922A','#C8922A',0));
+    o.push(Ci(p2x,p2y,5,'#C8922A','#C8922A',0));
+    o.push(Txt(p1x+8,p1y+4,'P1','#C8922A',9,'start',false));
+    o.push(Txt(p2x+4,p2y-8,'P2','#C8922A',9,'start',false));
   }
   if(p>=2){
-    o.push(arc(q1x,q1y,55,80,180,'#C8922A',1,'5,3'));
-    o.push(arc(q2x,q2y,55,-10,90,'#C8922A',1,'5,3'));
+    // Step 2: equal arcs from P1 and P2
+    // They must intersect on the bisector — use r2=70
+    // Bisector at -35 deg, distance from V: the intersection point Q
+    // Q is approx at v + ~120*(cos(-35),sin(-35))
+    var r2=70;
+    // From P1, sweep arc covering the bisector direction
+    // P1 is at (-10 deg, r1=80 from V). Arc from P1 sweeping towards bisector region
+    o.push(Arc(p1x,p1y,r2,-170,-60,'#1a5a8a',1.5,'4,3'));
+    // From P2, sweep arc covering same region
+    o.push(Arc(p2x,p2y,r2,-30,60,'#1a5a8a',1.5,'4,3'));
+
+    // Calculate actual intersection: find Q where dist(Q,P1)=dist(Q,P2)=r2
+    // P1=(p1x,p1y), P2=(p2x,p2y)
+    // Q lies on bisector ray from V at angle angBis
+    // Parametrically Q=(vx+t*cos(angBis), vy+t*sin(angBis))
+    // dist(Q,P1)^2=r2^2 => (vx+t*cosB-p1x)^2+(vy+t*sinB-p1y)^2=r2^2
+    var cosB=Math.cos(angBis), sinB=Math.sin(angBis);
+    var dx1=vx-p1x, dy1=vy-p1y;
+    // expand: (dx1+t*cosB)^2+(dy1+t*sinB)^2=r2^2
+    // t^2 + 2t(dx1*cosB+dy1*sinB) + (dx1^2+dy1^2-r2^2)=0
+    var a=1, bv=2*(dx1*cosB+dy1*sinB), cv=dx1*dx1+dy1*dy1-r2*r2;
+    var disc=bv*bv-4*a*cv;
+    var t=(-bv-Math.sqrt(disc))/(2*a); // take smaller t (closer to V)
+    if(t<0) t=(-bv+Math.sqrt(disc))/(2*a);
+    var qx=vx+t*cosB, qy=vy+t*sinB;
+    o.push(Ci(qx,qy,6,'#C0272D','#C0272D',0));
+    o.push(Txt(qx+10,qy-8,'Q','#C0272D',10,'start',true));
   }
   if(p>=3){
-    var midAng=(-30-80)/2*Math.PI/180;
-    var bisX=vx+200*Math.cos(midAng),bisY=vy+200*Math.sin(midAng);
-    o.push(L(vx,vy,bisX,bisY,'#C0272D',2));
-    o.push(T(bisX+8,bisY-10,'Angle bisector','#C0272D',10,'start',true));
+    // Draw the bisector line through V and Q, extended
+    o.push(Ln(vx,vy,vx+260*Math.cos(angBis),vy+260*Math.sin(angBis),'#C0272D',2.5));
+    o.push(Txt(vx+270*Math.cos(angBis)+8,vy+270*Math.sin(angBis),'Angle bisector','#C0272D',10,'start',true));
+    o.push(Txt(vx+140,vy-30,'Angle split equally','#888',10,'middle',false));
   }
   s.innerHTML=o.join('');
 }
 
-/* Q3 - Triangle SSS */
+/* ═══════════════════════════════════════════
+   Q3  TRIANGLE SSS  AB=6cm(240px) AC=5cm(200px) BC=4cm(160px)
+════════════════════════════════════════════ */
 function dQ3(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
-  var ax=80,ay=240,bx=280,by=240;
-  // triangle: AB=6cm (200px), AC=5cm (167px), BC=4cm (133px)
-  // scale: 1cm=33px. A(80,240), B(280,240)
-  // C: AC=5->165, BC=4->132. Solve: Cx=(200^2+165^2-132^2)/(2*200)=200*(200^2+165^2-132^2)/(2*200^2)
-  var AB=200,AC=165,BC=132;
+  var ax=80, ay=240, bx=320, by=240;
+  var AB=bx-ax, AC=200, BC=160; // pixel lengths
+  // C position by cosine rule on A: cosA=(AB^2+AC^2-BC^2)/(2*AB*AC)
   var cosA=(AB*AB+AC*AC-BC*BC)/(2*AB*AC);
-  var angA=Math.acos(cosA);
-  var cx=ax+AC*Math.cos(angA),cy=ay-AC*Math.sin(angA);
-  o.push(L(ax,ay,bx,by,'#241A17',2));
-  o.push(T(ax-14,ay+4,'A','#C0272D',13,'end',true));o.push(T(bx+10,by+4,'B','#C0272D',13,'start',true));
-  o.push(T((ax+bx)/2,ay+16,'6 cm','#241A17',11,'middle',false));
-  if(p>=1){o.push(arc(ax,ay,AC,-45,45,'#C8922A',1.5,'5,3'));o.push(T(ax+80,ay-140,'5 cm radius','#C8922A',9,'start',false));}
-  if(p>=2){o.push(arc(bx,by,BC,130,230,'#1a5a8a',1.5,'5,3'));o.push(T(bx-80,ay-110,'4 cm radius','#1a5a8a',9,'end',false));}
+  var angA=Math.acos(cosA); // angle at A
+  var cx=ax+AC*Math.cos(angA), cy=ay-AC*Math.sin(angA);
+
+  o.push(Ln(ax,ay,bx,by,'#241A17',2.5));
+  o.push(Txt(ax-14,ay+14,'A','#C0272D',13,'end',true));
+  o.push(Txt(bx+14,by+14,'B','#C0272D',13,'start',true));
+  o.push(Txt((ax+bx)/2,ay+18,'6 cm','#241A17',11,'middle',false));
+
+  if(p>=1){
+    // Arc from A radius AC=200
+    o.push(Arc(ax,ay,AC,-50,10,'#C8922A',1.5,'5,3'));
+    o.push(Txt(ax+60,ay-185,'5 cm','#C8922A',10,'start',false));
+  }
+  if(p>=2){
+    // Arc from B radius BC=160
+    o.push(Arc(bx,by,BC,130,195,'#1a5a8a',1.5,'5,3'));
+    o.push(Txt(bx-170,ay-85,'4 cm','#1a5a8a',10,'end',false));
+    // Mark intersection C
+    o.push(Ci(cx,cy,6,'#C0272D','#C0272D',0));
+    o.push(Txt(cx,cy-14,'C','#C0272D',13,'middle',true));
+  }
   if(p>=3){
-    o.push(L(ax,ay,cx,cy,'#C0272D',2));o.push(L(bx,by,cx,cy,'#C0272D',2));
-    o.push('<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="5" fill="#C0272D" stroke="#fff" stroke-width="1.5"/>');
-    o.push(T(cx.toFixed(1),(cy-14).toFixed(1),'C','#C0272D',13,'middle',true));
-    o.push(T((ax+cx)/2-14,(ay+cy)/2,'5 cm','#888',10,'end',false));
-    o.push(T((bx+cx)/2+10,(by+cy)/2,'4 cm','#888',10,'start',false));
+    o.push(Ln(ax,ay,cx,cy,'#C0272D',2));
+    o.push(Ln(bx,by,cx,cy,'#C0272D',2));
+    o.push(Txt((ax+cx)/2-12,(ay+cy)/2,'5 cm','#888',10,'end',false));
+    o.push(Txt((bx+cx)/2+10,(by+cy)/2,'4 cm','#888',10,'start',false));
   }
   s.innerHTML=o.join('');
 }
 
-/* Q4 - Triangle SAS */
+/* ═══════════════════════════════════════════
+   Q4  TRIANGLE SAS  AB=7cm(280px) angle A=50deg AC=5cm(200px)
+════════════════════════════════════════════ */
 function dQ4(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
-  var ax=100,ay=240,bx=340,by=240;
-  // AB=7cm (240px), angle A=50deg, AC=5cm (171px)
-  var scale=240/7;
-  var AC=5*scale;
-  var angA=50*Math.PI/180;
-  var cx=ax+AC*Math.cos(angA),cy=ay-AC*Math.sin(angA);
-  o.push(L(ax,ay,bx,by,'#241A17',2));
-  o.push(T(ax-14,ay+4,'A','#C0272D',13,'end',true));o.push(T(bx+10,by+4,'B','#C0272D',13,'start',true));
-  o.push(T((ax+bx)/2,ay+16,'7 cm','#241A17',11,'middle',false));
+  var ax=80, ay=240, bx=360, by=240;
+  var AC=200;
+  var angA=50*D; // 50 degrees, going upward (SVG y flipped)
+  var cx=ax+AC*Math.cos(-angA), cy=ay+AC*Math.sin(-angA); // negative because up in SVG
+
+  o.push(Ln(ax,ay,bx,by,'#241A17',2.5));
+  o.push(Txt(ax-14,ay+14,'A','#C0272D',13,'end',true));
+  o.push(Txt(bx+14,by+14,'B','#C0272D',13,'start',true));
+  o.push(Txt((ax+bx)/2,ay+18,'7 cm','#241A17',11,'middle',false));
+
   if(p>=1){
-    o.push(arc(ax,ay,55,0,-50,'#C8922A',1.5,'5,3'));
-    o.push(T(ax+70,ay-20,'50°','#C8922A',11,'start',false));
+    // Show the 50 degree angle arc at A
+    // Ray AB is at 0 degrees (right). Ray AC is at -50 deg (up-right). Arc from 0 to -50.
+    o.push(Arc(ax,ay,60,-50,0,'#C8922A',1.5,'5,3'));
+    o.push(Txt(ax+72,ay-22,'50°','#C8922A',12,'start',false));
   }
   if(p>=2){
-    o.push(L(ax,ay,cx,cy,'#C0272D',2.5));
-    o.push(T((ax+cx)/2-16,(ay+cy)/2,'5 cm','#C0272D',11,'end',false));
+    // Draw AC ray and mark 5cm
+    o.push(Ln(ax,ay,cx,cy,'#C0272D',2.5));
+    o.push(Ci(cx,cy,6,'#C0272D','#C0272D',0));
+    o.push(Txt(cx+10,cy-10,'C','#C0272D',13,'start',true));
+    o.push(Txt((ax+cx)/2-16,(ay+cy)/2,'5 cm','#C0272D',11,'end',false));
   }
   if(p>=3){
-    o.push(L(bx,by,cx,cy,'#1a5a8a',2));
-    o.push('<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="5" fill="#C0272D" stroke="#fff" stroke-width="1.5"/>');
-    o.push(T(cx.toFixed(1),(cy-14).toFixed(1),'C','#C0272D',13,'middle',true));
+    o.push(Ln(bx,by,cx,cy,'#1a5a8a',2));
+    o.push(Txt((bx+cx)/2+10,(by+cy)/2,'BC (measure)','#1a5a8a',9,'start',false));
   }
   s.innerHTML=o.join('');
 }
 
-/* Q5 - Locus: equidistant from two points */
+/* ═══════════════════════════════════════════
+   Q5  LOCUS: equidistant from two points
+   A=(140,160)  B=(340,160)  midpoint=(240,160)
+   Show arcs from A and B of same radius that VISIBLY CROSS
+   Use r=120 (half AB=100, so arcs will cross above and below)
+   yOff = sqrt(120^2-100^2) = sqrt(14400-10000) = sqrt(4400) = 66.3
+════════════════════════════════════════════ */
 function dQ5(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
-  var ax=140,ay=150,bx=340,by=150;
-  o.push('<circle cx="'+ax+'" cy="'+ay+'" r="6" fill="#C0272D" stroke="#fff" stroke-width="2"/>');
-  o.push('<circle cx="'+bx+'" cy="'+by+'" r="6" fill="#1a5a8a" stroke="#fff" stroke-width="2"/>');
-  o.push(T(ax-14,ay-16,'A','#C0272D',13,'end',true));o.push(T(bx+14,ay-16,'B','#1a5a8a',13,'start',true));
+  var ax=140, ay=160, bx=340, by=160;
+  var mx=(ax+bx)/2, my=ay; // (240,160)
+  var r=120;
+  var halfAB=(bx-ax)/2; // 100
+  var yOff=Math.round(Math.sqrt(r*r-halfAB*halfAB)); // 66
+
+  o.push(Ci(ax,ay,6,'#C0272D','#C0272D',0));
+  o.push(Ci(bx,by,6,'#1a5a8a','#1a5a8a',0));
+  o.push(Txt(ax-14,ay-12,'A','#C0272D',13,'end',true));
+  o.push(Txt(bx+14,by-12,'B','#1a5a8a',13,'start',true));
+  o.push(Ln(ax,ay,bx,by,'#888',1,'4,3'));
+  o.push(Txt(mx,ay+16,'AB = 4 cm','#888',10,'middle',false));
+
   if(p>=1){
-    o.push(arc(ax,ay,80,-80,80,'#C8922A',1,'5,3'));
-    o.push(arc(bx,by,80,100,260,'#C8922A',1,'5,3'));
+    // Arc from A — sweeps from above-right to below-right, passing through both crossings
+    // Crossing above: angle from A = atan2(-(yOff), halfAB) ~ atan2(-66,100) ~ -33 deg
+    // Crossing below: atan2(yOff, halfAB) ~ +33 deg
+    // Sweep from -70 to +70 to show both crossings clearly
+    o.push(Arc(ax,ay,r,-70,70,'#C8922A',1.5,'5,3'));
+    o.push(Txt(ax+30,ay-r-10,'r','#C8922A',11,'middle',false));
   }
   if(p>=2){
-    var mx=(ax+bx)/2;
-    o.push(L(mx,20,mx,280,'#C0272D',2));
-    o.push(T(mx,14,'Perpendicular bisector of AB','#C0272D',10,'middle',true));
+    // Arc from B — sweeps from above-left to below-left
+    o.push(Arc(bx,by,r,110,250,'#C8922A',1.5,'5,3'));
+    // Mark the two crossing points
+    o.push(Ci(mx,my-yOff,6,'#C0272D','#C0272D',0)); // top crossing
+    o.push(Ci(mx,my+yOff,6,'#C0272D','#C0272D',0)); // bottom crossing
   }
   if(p>=3){
-    o.push(R(60,175,360,80,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,205,'Locus = all points equidistant from A and B','#1a7a3a',12,'middle',true));
-    o.push(T(240,225,'= perpendicular bisector of AB','#1a7a3a',12,'middle',true));
-    o.push(T(240,245,'Every point on this line is the same distance from A as from B','#888',10,'middle',false));
+    // Draw perpendicular bisector through the two crossings
+    o.push(Ln(mx,my-yOff-30,mx,my+yOff+30,'#C0272D',2.5));
+    // right angle mark
+    o.push('<rect x="'+mx+'" y="'+(my-12)+'" width="12" height="12" fill="none" stroke="#1a5a8a" stroke-width="1.5"/>');
+    o.push(Txt(mx+16,my-40,'Perpendicular bisector of AB','#C0272D',10,'start',true));
+    o.push(Rc(30,235,420,54,'#e8f8ee','#1a7a3a',1.5));
+    o.push(Txt(240,255,'Locus = all points equidistant from A and B','#1a7a3a',12,'middle',true));
+    o.push(Txt(240,274,'= perpendicular bisector of AB','#1a7a3a',11,'middle',false));
   }
   s.innerHTML=o.join('');
 }
 
-/* Q6 - Locus: equidistant from two lines */
+/* ═══════════════════════════════════════════
+   Q6  LOCUS: equidistant from two lines (angle bisector)
+════════════════════════════════════════════ */
 function dQ6(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
-  var vx=120,vy=260;
-  var r1x=vx+300,r1y=vy,r2x=vx+200,r2y=vy-240;
-  o.push(L(vx,vy,r1x,r1y,'#241A17',2));
-  o.push(L(vx,vy,r2x,r2y,'#241A17',2));
-  o.push(T(vx-14,vy+4,'V','#241A17',12,'end',true));
-  if(p>=1){o.push(arc(vx,vy,80,-50,0,'#C8922A',1.5,'5,3'));o.push(T(vx+90,vy-20,'angle','#C8922A',9,'start',false));}
+  var vx=80, vy=260;
+  var ang1=0*D;    // ray 1: horizontal right
+  var ang2=-55*D;  // ray 2: up-right at 55 deg
+  var angBis=(0-55)/2*D; // -27.5 deg bisector
+  var rayLen=340;
+
+  o.push(Ln(vx,vy,vx+rayLen,vy,'#241A17',2.5));  // ray 1 horizontal
+  o.push(Ln(vx,vy,vx+rayLen*Math.cos(ang2),vy+rayLen*Math.sin(ang2),'#241A17',2.5));
+  o.push(Txt(vx-14,vy+4,'V','#241A17',12,'end',true));
+  o.push(Txt(vx+rayLen+8,vy+4,'ray 1','#888',10,'start',false));
+  o.push(Txt(vx+rayLen*Math.cos(ang2)+6,vy+rayLen*Math.sin(ang2)-6,'ray 2','#888',10,'start',false));
+
+  if(p>=1){
+    // Show angle arc at vertex
+    o.push(Arc(vx,vy,60,-55,0,'#C8922A',1.5,'5,3'));
+    o.push(Txt(vx+74,vy-20,'55°','#C8922A',11,'start',false));
+  }
   if(p>=2){
-    var angBis=Math.atan2(r2y-vy,r2x-vx)/2+Math.atan2(r1y-vy,r1x-vx)/2;
-    var bisX=vx+280*Math.cos(angBis),bisY=vy+280*Math.sin(angBis);
-    o.push(L(vx,vy,bisX,bisY,'#C0272D',2));
-    o.push(T(bisX+8,bisY,'Angle bisector','#C0272D',10,'start',true));
+    o.push(Ln(vx,vy,vx+rayLen*Math.cos(angBis),vy+rayLen*Math.sin(angBis),'#C0272D',2.5));
+    o.push(Txt(vx+rayLen*Math.cos(angBis)+8,vy+rayLen*Math.sin(angBis)-6,'Angle bisector','#C0272D',10,'start',true));
   }
   if(p>=3){
-    o.push(R(40,20,400,80,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,45,'Locus = all points equidistant from both lines','#1a7a3a',12,'middle',true));
-    o.push(T(240,65,'= angle bisector of the angle between the two lines','#1a7a3a',12,'middle',true));
-    o.push(T(240,82,'Every point on this bisector is the same distance from each line','#888',10,'middle',false));
+    o.push(Rc(30,20,420,76,'#e8f8ee','#1a7a3a',1.5));
+    o.push(Txt(240,45,'Locus = all points equidistant from both lines','#1a7a3a',12,'middle',true));
+    o.push(Txt(240,63,'= angle bisector of the angle between the lines','#1a7a3a',12,'middle',false));
+    o.push(Txt(240,80,'Every point on this bisector is the same distance from each ray','#888',10,'middle',false));
   }
   s.innerHTML=o.join('');
 }
 
-/* Q7 - Locus: fixed distance from a point (circle) */
+/* ═══════════════════════════════════════════
+   Q7  LOCUS: fixed distance from a point (circle)
+════════════════════════════════════════════ */
 function dQ7(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
-  var cx=240,cy=160,r=100;
-  o.push('<circle cx="'+cx+'" cy="'+cy+'" r="5" fill="#C0272D" stroke="#fff" stroke-width="2"/>');
-  o.push(T(cx+10,cy-10,'P','#C0272D',13,'start',true));
-  if(p>=1){
-    [0,45,90,135,180,225,270,315].forEach(function(ang){
-      var D=Math.PI/180;
-      var px=cx+r*Math.cos(ang*D),py=cy+r*Math.sin(ang*D);
-      o.push(L(cx,cy,px,py,'#C8922A',1,'4,3'));
-      o.push('<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="3" fill="#C8922A"/>');
-    });
-    o.push(T(cx+r/2+10,cy-12,'r','#C8922A',12,'start',false));
-  }
-  if(p>=2){o.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#C0272D" stroke-width="2.5"/>');o.push(T(cx,cy+r+18,'Circle radius r from P','#C0272D',11,'middle',true));}
-  if(p>=3){
-    o.push(R(40,20,400,44,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,47,'Locus of points exactly r from P = circle, centre P, radius r','#1a7a3a',11,'middle',true));
-  }
-  s.innerHTML=o.join('');
-}
+  var cx=240, cy=148, r=100;
 
-/* Q8 - Combined locus region */
-function dQ8(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
-  var ax=120,ay=200,bx=360,by=200;
-  o.push('<circle cx="'+ax+'" cy="'+ay+'" r="5" fill="#C0272D" stroke="#fff" stroke-width="2"/>');
-  o.push('<circle cx="'+bx+'" cy="'+by+'" r="5" fill="#1a5a8a" stroke="#fff" stroke-width="2"/>');
-  o.push(T(ax-14,ay+14,'A','#C0272D',12,'end',true));o.push(T(bx+14,by+14,'B','#1a5a8a',12,'start',true));
-  o.push(L(ax,ay,bx,by,'#888',1,'4,3'));o.push(T((ax+bx)/2,ay+14,'AB = 6 cm (scale)','#888',10,'middle',false));
+  o.push(Ci(cx,cy,5,'#C0272D','#C0272D',0));
+  o.push(Txt(cx+10,cy-10,'P','#C0272D',13,'start',true));
+
   if(p>=1){
-    o.push('<circle cx="'+ax+'" cy="'+ay+'" r="80" fill="none" stroke="#C0272D" stroke-width="1.5" stroke-dasharray="5,3"/>');
-    o.push(T(ax-88,ay,'< 4 cm from A','#C0272D',9,'end',false));
+    // Show 8 radii with dots at r distance
+    [0,45,90,135,180,225,270,315].forEach(function(ang){
+      var px=cx+r*Math.cos(ang*D), py=cy+r*Math.sin(ang*D);
+      o.push(Ln(cx,cy,px,py,'#C8922A',1,'4,3'));
+      o.push(Ci(px,py,4,'#C8922A','#C8922A',0));
+    });
+    o.push(Txt(cx+r/2+6,cy-14,'r','#C8922A',13,'start',false));
   }
   if(p>=2){
-    var mx=(ax+bx)/2;
-    o.push(L(mx,30,mx,270,'#1a5a8a',1.5,'5,3'));
-    o.push(T(mx+6,36,'Closer to A','#1a5a8a',9,'start',false));
+    o.push(Ci(cx,cy,r,'none','#C0272D',2.5));
+    o.push(Txt(cx,cy+r+18,'Circle, centre P, radius r','#C0272D',11,'middle',true));
   }
   if(p>=3){
-    // shade intersection region: left of perp bisector AND inside circle from A
-    o.push('<clipPath id="clip1"><circle cx="'+ax+'" cy="'+ay+'" r="80"/></clipPath>');
-    o.push('<rect x="'+ax+'" y="30" width="'+(mx-ax)+'" height="240" fill="#fce8d8" opacity="0.5" clip-path="url(#clip1)"/>');
-    o.push(T(ax+20,ay-30,'Shaded = satisfies both conditions','#C8922A',9,'start',false));
+    o.push(Rc(30,18,420,36,'#e8f8ee','#1a7a3a',1.5));
+    o.push(Txt(240,41,'Locus of points exactly r from P = circle, centre P, radius r','#1a7a3a',11,'middle',true));
   }
   s.innerHTML=o.join('');
 }
 
+/* ═══════════════════════════════════════════
+   Q8  COMBINED LOCI
+   A=(130,160)  B=(350,160)  AB=220px
+   Condition 1: within 90px of A (circle around A, r=90)
+   Condition 2: closer to A than B (left side of perp bisector at x=240)
+   The shaded intersection is: inside the circle AND left of x=240
+   Crucially the circle around A (r=90) does NOT reach B (distance=220)
+   And it DOES cross the perp bisector (r=90 > halfAB=110? No! r=90 < 110)
+   So the circle is entirely on A's side — shaded region = semicircle on left of bisector
+   Use r=130 so it crosses the bisector: yOff=sqrt(130^2-110^2)=sqrt(16900-12100)=sqrt(4800)=69
+════════════════════════════════════════════ */
+function dQ8(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ax=130, ay=160, bx=350, by=160;
+  var mx=(ax+bx)/2; // perp bisector x = 240
+  var r=130; // circle radius around A (crosses midpoint bisector)
+  var halfAB=(bx-ax)/2; // 110
+  var yOff=Math.round(Math.sqrt(r*r-halfAB*halfAB)); // 69 — where circle crosses bisector
+
+  o.push(Ci(ax,ay,6,'#C0272D','#C0272D',0));
+  o.push(Ci(bx,by,6,'#1a5a8a','#1a5a8a',0));
+  o.push(Txt(ax-14,ay+16,'A','#C0272D',13,'end',true));
+  o.push(Txt(bx+14,by+16,'B','#1a5a8a',13,'start',true));
+  o.push(Ln(ax,ay,bx,by,'#888',1,'4,3'));
+  o.push(Txt(mx,ay+32,'AB = 5 cm','#888',10,'middle',false));
+
+  if(p>=1){
+    // Full circle around A (dashed)
+    o.push(Ci(ax,ay,r,'none','#C0272D',2,'5,3'));
+    o.push(Txt(ax-r-8,ay,'within r of A','#C0272D',9,'end',false));
+  }
+  if(p>=2){
+    // Perpendicular bisector of AB (vertical line at mx=240)
+    o.push(Ln(mx,20,mx,280,'#1a5a8a',2,'5,3'));
+    o.push(Txt(mx+8,32,'closer to A','#1a5a8a',9,'start',false));
+    o.push(Txt(mx+8,46,'(left of bisector)','#1a5a8a',9,'start',false));
+    o.push(Txt(mx-8,32,'closer to B','#888',9,'end',false));
+  }
+  if(p>=3){
+    // Shaded region: LEFT semicircle of the circle around A
+    // The circle intersects the bisector at (mx, ay-yOff) and (mx, ay+yOff)
+    // The left half-arc from top crossing to bottom crossing (going left, i.e. the long way)
+    // In SVG terms: from top crossing going anticlockwise (sweep-flag=0) to bottom crossing
+    var topX=mx, topY=ay-yOff;
+    var botX=mx, botY=ay+yOff;
+    // Path: start at top crossing, arc left side (large arc, anticlockwise=sweep 0) to bottom crossing, then straight line back up the bisector
+    var shadePath='M '+topX+','+topY+' A '+r+','+r+' 0 1,0 '+botX+','+botY+' Z';
+    o.push('<path d="'+shadePath+'" fill="#fce8d8" opacity="0.55" stroke="none"/>');
+    // Redraw the circle and bisector on top so they show through
+    o.push(Ci(ax,ay,r,'none','#C0272D',2,'5,3'));
+    o.push(Ln(mx,20,mx,280,'#1a5a8a',2,'5,3'));
+    o.push(Ci(topX,topY,5,'#C0272D','#C0272D',0));
+    o.push(Ci(botX,botY,5,'#C0272D','#C0272D',0));
+    o.push(Txt(ax-50,ay,'Shaded region','#C8922A',10,'middle',false));
+    o.push(Txt(ax-50,ay+14,'satisfies BOTH','#C8922A',10,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* ═══════════════════════════════════════════
+   QUESTION DATA
+════════════════════════════════════════════ */
 var QS=[
   {ey:'Q1 - Constructions',ti:'Perpendicular Bisector',su:'Construct the perpendicular bisector of line segment AB using compass and ruler only.',steps:[
     {lb:'What it is',dr:dQ1,ht:'<p>The <b>perpendicular bisector</b> of AB is a line that crosses AB at its midpoint at exactly 90 degrees. Every point on it is equidistant from A and B.</p>'},
-    {lb:'Step 1 - Set the compass',dr:dQ1,ht:'<p>Open the compass to <b>more than half the length</b> of AB. Place the point on A and draw an arc above and below the line.</p>'},
-    {lb:'Step 2 - Repeat from B',dr:dQ1,ht:'<p>Keep the same compass width. Place the point on B and draw arcs that cross the first arcs. The intersection points are where the bisector passes.</p>'},
-    {lb:'Step 3 - Draw the line',dr:dQ1,ht:'<p>Draw a straight line through the two intersection points. This is the perpendicular bisector. The right angle confirms it is perpendicular.</p>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'The perpendicular bisector of a line of length 10 cm passes through the midpoint. How far is the midpoint from each endpoint?',hints:['The midpoint divides the line equally','10 cm / 2 = ?'],ans:5,exact:0.1,unit:'cm',working:'10 / 2 = <b>5 cm</b> from each endpoint.'})}
+    {lb:'Step 1 - Arc from A',dr:dQ1,ht:'<p>Open the compass to <b>more than half the length of AB</b>. Place the point on A and draw an arc above and below the line.</p>'},
+    {lb:'Step 2 - Arc from B, mark crossings',dr:dQ1,ht:'<p>Keep the <b>same compass width</b>. Place the point on B and draw arcs that cross the first pair. Mark both crossing points.</p>'},
+    {lb:'Step 3 - Draw the bisector',dr:dQ1,ht:'<p>Draw a straight line through the two crossing points. This is the perpendicular bisector. The right angle box confirms 90 degrees.</p>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'The perpendicular bisector of a 10 cm line passes through the midpoint. How far is that midpoint from each endpoint?',hints:['The midpoint divides the line equally'],ans:5,exact:0.1,unit:'cm',working:'10 / 2 = <b>5 cm</b> from each endpoint.'})}
   ]},
   {ey:'Q2 - Constructions',ti:'Angle Bisector',su:'Construct the bisector of a given angle using compass and ruler only.',steps:[
     {lb:'What it is',dr:dQ2,ht:'<p>The <b>angle bisector</b> cuts an angle exactly in half. Every point on it is equidistant from both sides (rays) of the angle.</p>'},
-    {lb:'Step 1 - Arc from vertex',dr:dQ2,ht:'<p>Place compass on vertex V. Draw an arc that crosses both rays. Mark the two crossing points.</p>'},
-    {lb:'Step 2 - Arcs from crossing points',dr:dQ2,ht:'<p>Place compass on each crossing point and draw arcs of the same radius inside the angle. The arcs must intersect.</p>'},
-    {lb:'Step 3 - Draw the bisector',dr:dQ2,ht:'<p>Draw a straight line from V through the intersection of the inner arcs. This line bisects the angle exactly.</p>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'If an angle of 80 degrees is bisected, what is the size of each half?',hints:['Divide the angle by 2','80 / 2 = ?'],ans:40,exact:0.1,unit:'degrees',working:'80 / 2 = <b>40 degrees</b> each side.'})}
+    {lb:'Step 1 - Arc from vertex',dr:dQ2,ht:'<p>Place the compass on vertex V. Draw an arc that crosses both rays. Mark the two crossing points P1 and P2.</p>'},
+    {lb:'Step 2 - Equal arcs from P1 and P2',dr:dQ2,ht:'<p>Use the same radius and place the compass on P1, then P2. Draw arcs inside the angle — they cross at point Q.</p>'},
+    {lb:'Step 3 - Draw the bisector',dr:dQ2,ht:'<p>Draw a straight line from V through Q. This line bisects the angle exactly.</p>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'An angle of 80 degrees is bisected. What is the size of each half?',hints:['Divide the angle by 2'],ans:40,exact:0.1,unit:'degrees',working:'80 / 2 = <b>40 degrees</b> each side.'})}
   ]},
   {ey:'Q3 - Constructions',ti:'Constructing a Triangle: SSS',su:'Construct triangle ABC with AB = 6 cm, BC = 4 cm, AC = 5 cm.',steps:[
-    {lb:'SSS means all three sides given',dr:dQ3,ht:'<p>When all three sides are known (SSS), draw one side as the base, then use a compass set to each of the other two sides to locate the third vertex.</p>'},
-    {lb:'Step 1 - Draw the base AB',dr:dQ3,ht:'<p>Draw AB = 6 cm as a horizontal line. Mark A and B clearly.</p>'},
-    {lb:'Step 2 - Arc from A',dr:dQ3,ht:'<p>Set the compass to 5 cm (length AC). Place on A and draw an arc above the line. All points on this arc are 5 cm from A.</p>'},
-    {lb:'Step 3 - Arc from B and find C',dr:dQ3,ht:'<p>Set compass to 4 cm (length BC). Place on B and draw an arc. Where the two arcs cross is point C. Draw AC and BC to complete the triangle.</p>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'In a triangle with sides 6, 4 and 5 cm, which side would you draw as the base first?',hints:['Conventionally draw the longest side, or the one whose two connecting sides are both given','Any side works, but the longest is often easiest'],ans:6,exact:0.5,unit:'cm (the longest side)',working:'Draw AB = <b>6 cm</b> as the base. Then use arcs of 5 cm and 4 cm to find C.'})}
+    {lb:'SSS: all three sides given',dr:dQ3,ht:'<p>Draw one side as the base. Use arcs from each endpoint to locate the third vertex where they cross.</p>'},
+    {lb:'Step 1 - Draw base AB = 6 cm',dr:dQ3,ht:'<p>Draw a horizontal line AB = 6 cm. Label A and B clearly.</p>'},
+    {lb:'Step 2 - Arc from A (5 cm)',dr:dQ3,ht:'<p>Set compass to 5 cm. Place on A and draw an arc above the baseline. All points on this arc are 5 cm from A.</p>'},
+    {lb:'Step 3 - Arc from B (4 cm), find C',dr:dQ3,ht:'<p>Set compass to 4 cm. Place on B and draw an arc. Where the two arcs cross is point C. Draw AC and BC.</p>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'In a triangle with sides 6, 4 and 5 cm, which arc do you draw first from A?',hints:['From A you mark the side AC = 5 cm'],ans:5,exact:0.1,unit:'cm (arc from A)',working:'Draw an arc of radius <b>5 cm</b> from A.'})}
   ]},
   {ey:'Q4 - Constructions',ti:'Constructing a Triangle: SAS',su:'Construct triangle ABC with AB = 7 cm, angle A = 50 degrees, AC = 5 cm.',steps:[
-    {lb:'SAS means two sides and included angle',dr:dQ4,ht:'<p>When two sides and the angle between them (SAS) are given, draw one side, use a protractor to mark the angle, then measure along the second side.</p>'},
+    {lb:'SAS: two sides and included angle',dr:dQ4,ht:'<p>Draw one side, use a protractor to mark the included angle at one end, then measure the second side along that ray.</p>'},
     {lb:'Step 1 - Draw AB = 7 cm',dr:dQ4,ht:'<p>Draw a horizontal line 7 cm long. Label A on the left and B on the right.</p>'},
-    {lb:'Step 2 - Mark angle A = 50 degrees',dr:dQ4,ht:'<p>Place a protractor at A, aligned with AB. Mark a point at 50 degrees. Draw a ray from A through this point.</p>'},
+    {lb:'Step 2 - Mark angle A = 50 degrees',dr:dQ4,ht:'<p>Place a protractor at A, aligned with AB. Mark a point at 50 degrees. Draw a ray from A through this mark.</p>'},
     {lb:'Step 3 - Mark C and complete',dr:dQ4,ht:'<p>Measure 5 cm along the ray from A. Mark this point C. Draw BC to complete the triangle.</p>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'In a SAS construction with angle A = 50 degrees, the angle is measured from which line using the protractor?',hints:['The angle is at vertex A','It is between the two given sides AB and AC','Measure from AB'],ans:50,exact:1,unit:'degrees from AB',working:'The <b>50 degree</b> angle is measured from line AB at vertex A, opening towards where C will be.'})}
+    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'In a SAS construction with angle A = 50 degrees, what size angle does the protractor read when marking point C?',hints:['You measure the given angle at A','The angle is 50 degrees'],ans:50,exact:1,unit:'degrees',working:'The protractor reads <b>50 degrees</b> at vertex A.'})}
   ]},
-  {ey:'Q5 - Loci',ti:'Locus: Equidistant from Two Points',su:'Describe and construct the locus of points equidistant from A and B.',steps:[
-    {lb:'What is a locus?',dr:dQ5,ht:'<p>A <b>locus</b> (plural: loci) is the set of all points satisfying a given condition. It forms a line, curve or region.</p>'},
-    {lb:'Step 1 - Consider the condition',dr:dQ5,ht:'<p>We want all points P such that PA = PB (equally far from A and B). How do we find them?</p>'},
-    {lb:'Step 2 - Construct it',dr:dQ5,ht:'<p>Draw arcs from A and B of the same radius. Where they cross, those points are equidistant from A and B. Join them.</p>'},
-    {lb:'Step 3 - The answer',dr:dQ5,ht:'<div class="fm">Locus = perpendicular bisector of AB</div><p>The locus is a straight line, perpendicular to AB, passing through its midpoint.</p>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'If AB = 10 cm, how far is any point on the perpendicular bisector from A? (Hint: think about the midpoint only.)',hints:['The midpoint of AB is on the locus','Midpoint is 5 cm from each end','Other points on the bisector are further away'],ans:5,exact:0.5,unit:'cm (minimum distance, at midpoint)',working:'The midpoint is exactly <b>5 cm</b> from A. Points elsewhere on the bisector are further away.'})}
+  {ey:'Q5 - Loci',ti:'Locus: Equidistant from Two Points',su:'Describe and construct the locus of all points equidistant from A and B.',steps:[
+    {lb:'What is a locus?',dr:dQ5,ht:'<p>A <b>locus</b> is the set of all points satisfying a given condition. Here we want every point P such that PA = PB.</p>'},
+    {lb:'Step 1 - Arc from A',dr:dQ5,ht:'<p>Open compass to a radius <b>greater than half AB</b>. Draw an arc from A above and below the line.</p>'},
+    {lb:'Step 2 - Same arc from B, mark crossings',dr:dQ5,ht:'<p>Keep the same radius. Draw arcs from B so they cross the arcs from A above and below. Mark both crossing points.</p>'},
+    {lb:'Step 3 - The locus',dr:dQ5,ht:'<div class="fm">Locus = perpendicular bisector of AB</div><p>Every point on this line is exactly the same distance from A as from B.</p>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'If AB = 10 cm, how far is the midpoint of AB from each of A and B?',hints:['Midpoint divides AB equally'],ans:5,exact:0.1,unit:'cm',working:'The midpoint is <b>5 cm</b> from each end.'})}
   ]},
   {ey:'Q6 - Loci',ti:'Locus: Equidistant from Two Lines',su:'Describe the locus of points equidistant from two intersecting lines.',steps:[
-    {lb:'The condition',dr:dQ6,ht:'<p>We want all points equally far from two straight lines that meet at a vertex. The perpendicular distance from a point to a line is what we measure.</p>'},
-    {lb:'Step 1 - Think about it',dr:dQ6,ht:'<p>The point must be the same perpendicular distance from each line. This is similar to bisecting the angle between the lines.</p>'},
-    {lb:'Step 2 - Construct it',dr:dQ6,ht:'<p>Use the angle bisector construction. The bisector passes through the vertex and divides the angle equally.</p>'},
-    {lb:'Step 3 - The answer',dr:dQ6,ht:'<div class="fm">Locus = angle bisector of the angle between the two lines</div><p>If the two lines form two pairs of angles, there are actually TWO bisectors, perpendicular to each other.</p>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'Two lines meet at 80 degrees. The angle bisector divides this into two equal angles. What is each angle?',hints:['80 / 2 = ?'],ans:40,exact:0.5,unit:'degrees',working:'80 / 2 = <b>40 degrees</b> on each side of the bisector.'})}
+    {lb:'The condition',dr:dQ6,ht:'<p>We want all points equally far (perpendicular distance) from two straight lines that meet at a vertex V.</p>'},
+    {lb:'Step 1 - Think about it',dr:dQ6,ht:'<p>Such a point lies in the middle of the angle — the same distance from each ray. This is exactly what an angle bisector does.</p>'},
+    {lb:'Step 2 - Construct the bisector',dr:dQ6,ht:'<p>Use the angle bisector construction: arc from V, then equal arcs from the two crossing points, then draw the line through V and the intersection.</p>'},
+    {lb:'Step 3 - The answer',dr:dQ6,ht:'<div class="fm">Locus = angle bisector of the angle between the two lines</div><p>There are actually two bisectors (for the two pairs of angles), perpendicular to each other.</p>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'Two lines meet at 80 degrees. The angle bisector divides this angle into two equal parts. What is each part?',hints:['80 / 2 = ?'],ans:40,exact:0.5,unit:'degrees',working:'80 / 2 = <b>40 degrees</b>.'})}
   ]},
-  {ey:'Q7 - Loci',ti:'Locus: Fixed Distance from a Point',su:'Describe the locus of points exactly r cm from a fixed point P.',steps:[
-    {lb:'The condition',dr:dQ7,ht:'<p>We want all points exactly <b>r cm from point P</b>. Think about how many such points there are and what shape they form.</p>'},
-    {lb:'Step 1 - Consider a few points',dr:dQ7,ht:'<p>A point r cm north of P qualifies. So does a point r cm east, west, south, or at any direction. There are infinitely many.</p>'},
-    {lb:'Step 2 - The locus',dr:dQ7,ht:'<div class="fm">Locus = a circle, centre P, radius r</div><p>The circle passes through every point exactly r from P.</p>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'A dog is on a lead of length 3 m attached to a post. What is the area of the region the dog can reach?',hints:['The boundary of the region is the locus (a circle)','Area of circle = pi x r^2','r = 3 m'],ans:28.3,exact:0.5,unit:'m^2',working:'Area = pi x 3^2 = 9pi = <b>28.3 m^2</b>'})}
+  {ey:'Q7 - Loci',ti:'Locus: Fixed Distance from a Point',su:'Describe the locus of all points exactly r cm from a fixed point P.',steps:[
+    {lb:'The condition',dr:dQ7,ht:'<p>We want every point at exactly distance r from P — in any direction. Think about what shape that makes.</p>'},
+    {lb:'Step 1 - Consider all directions',dr:dQ7,ht:'<p>A point r away to the north qualifies. So does one r to the east, south, west, or any direction. Together they form a shape.</p>'},
+    {lb:'Step 2 - The locus',dr:dQ7,ht:'<div class="fm">Locus = a circle, centre P, radius r</div>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'A dog on a 3 m lead attached to a post. What is the area (in m^2) the dog can reach? Use pi = 3.14.',hints:['The boundary is a circle radius 3 m','Area = pi x r^2 = 3.14 x 9'],ans:28.3,exact:0.5,unit:'m^2',working:'Area = 3.14 x 9 = <b>28.3 m^2</b>'})}
   ]},
-  {ey:'Q8 - Loci',ti:'Combined Loci',su:'Find and shade the region within 4 cm of A and closer to A than B.',steps:[
-    {lb:'Two conditions',dr:dQ8,ht:'<p>Some loci problems have two conditions that must both be satisfied. The answer is the <b>intersection</b> (overlap) of the two regions.</p>'},
-    {lb:'Condition 1: within 4 cm of A',dr:dQ8,ht:'<div class="fm">Locus 1: circle, centre A, radius 4 cm</div><p>The region is the inside of this circle (including the boundary).</p>'},
-    {lb:'Condition 2: closer to A than B',dr:dQ8,ht:'<div class="fm">Locus 2: perpendicular bisector of AB</div><p>The region closer to A than B is the half-plane on A\'s side of the bisector.</p>'},
-    {lb:'Combined region',dr:dQ8,ht:'<p>The shaded region satisfies BOTH conditions: it is inside the circle around A AND on A\'s side of the perpendicular bisector of AB.</p>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'If A and B are 10 cm apart and the region must be within 3 cm of A AND closer to A than B, is the point exactly 3 cm from A and 4 cm from B in the region? Answer 1 for yes, 0 for no.',hints:['Check condition 1: is it within 3 cm of A? (exactly 3 = on boundary, so yes)','Check condition 2: is it closer to A (3 cm) than B (4 cm)? 3 < 4, so yes'],ans:1,exact:0.1,unit:'(1=yes, 0=no)',working:'3 cm from A (on boundary, so included). 3 < 4, so closer to A. Both conditions met. Answer = <b>1</b> (yes)'})}
+  {ey:'Q8 - Loci',ti:'Combined Loci',su:'Shade the region within r of A AND closer to A than B.',steps:[
+    {lb:'Two conditions',dr:dQ8,ht:'<p>When two conditions must both be satisfied, find each locus separately, then shade the <b>overlap</b> (intersection) of both regions.</p>'},
+    {lb:'Condition 1 - Circle around A',dr:dQ8,ht:'<div class="fm">Region 1: inside the circle, centre A, radius r</div><p>The dashed circle shows the boundary. The region is everything inside it.</p>'},
+    {lb:'Condition 2 - Closer to A than B',dr:dQ8,ht:'<div class="fm">Region 2: the A-side of the perpendicular bisector of AB</div><p>The dashed vertical line is the bisector. Points left of it are closer to A.</p>'},
+    {lb:'Combined region',dr:dQ8,ht:'<p>The shaded region satisfies BOTH: it is inside the circle around A AND on A\'s side of the perpendicular bisector of AB. Note the circle crosses the bisector at two points.</p>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'A point is exactly on the perpendicular bisector of AB. Is it closer to A, closer to B, or equidistant? Enter 1 for equidistant, 0 for closer to one side.',hints:['The perpendicular bisector is the locus of equidistant points'],ans:1,exact:0.1,unit:'(1=equidistant)',working:'By definition every point on the perpendicular bisector is <b>equidistant</b> from A and B.'})}
   ]}
 ];
 
