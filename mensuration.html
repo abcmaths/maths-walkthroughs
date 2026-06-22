@@ -8,7 +8,6 @@
 :root{ --red:#C0272D; --dark-red:#7A1418; --cream:#FBF6F1; --ink:#241A17; --line:#E4D6CE; --gold:#C8922A; }
 *{ box-sizing:border-box; margin:0; padding:0; }
 body{ background:var(--cream); color:var(--ink); font-family:'Helvetica Neue',Arial,sans-serif; }
-
 header{
   background:var(--red); color:#fff; height:56px;
   display:flex; align-items:center; justify-content:space-between;
@@ -21,29 +20,15 @@ header{
 }
 .back-btn:hover{ background:rgba(255,255,255,.3); }
 .header-title{ font-size:15px; font-weight:700; }
-
-/* Question selector sidebar on wide screens */
 .layout{ display:flex; max-width:1100px; margin:0 auto; padding:28px 20px 60px; gap:28px; }
-.sidebar{
-  width:200px; flex-shrink:0;
-  display:flex; flex-direction:column; gap:6px;
-}
-.sidebar-label{
-  font-size:11px; letter-spacing:.12em; text-transform:uppercase;
-  color:#888; font-weight:700; margin-bottom:4px;
-}
-.q-list-btn{
-  text-align:left; background:#fff; border:1px solid var(--line);
-  border-radius:4px; padding:9px 12px; cursor:pointer; font-size:13px;
-  transition:.15s; color:var(--ink);
-}
+.sidebar{ width:200px; flex-shrink:0; display:flex; flex-direction:column; gap:6px; }
+.sidebar-label{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#888; font-weight:700; margin-bottom:4px; }
+.q-list-btn{ text-align:left; background:#fff; border:1px solid var(--line); border-radius:4px; padding:9px 12px; cursor:pointer; font-size:13px; transition:.15s; color:var(--ink); }
 .q-list-btn:hover{ border-color:var(--red); color:var(--red); }
 .q-list-btn.active{ background:var(--red); color:#fff; border-color:var(--red); }
 .q-list-btn .q-num{ font-weight:700; font-size:11px; display:block; opacity:.7; }
 .q-list-btn .q-name{ font-size:13px; }
-
 .main{ flex:1; min-width:0; }
-
 @media(max-width:640px){
   .layout{ flex-direction:column; }
   .sidebar{ width:100%; flex-direction:row; flex-wrap:wrap; }
@@ -56,234 +41,378 @@ header{
 <header>
   <a href="index.html" class="back-btn">← All Topics</a>
   <div class="header-title">Mensuration</div>
-  <div style="width:80px"></div><!-- spacer -->
+  <div style="width:80px"></div>
 </header>
 
 <div class="layout">
-  <!-- Sidebar: question list -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-label">Questions</div>
-    <!-- populated by JS -->
   </div>
-
-  <!-- Main walkthrough area -->
   <div class="main">
     <div id="app"></div>
   </div>
 </div>
 
-<!-- Load the shared engine -->
 <script src="engine.js"></script>
 
-<!-- ═══════════════════════════════════════════
-     DRAWING HELPERS
-     Put all your SVG draw functions here.
-     Each function receives `phase` (= current step index).
-     Draw into the svg with id = app_svg
-════════════════════════════════════════════ -->
 <script>
-const SVG_ID = 'app_svg';
-function getSVG(){ return document.getElementById(SVG_ID); }
+/* ═══════════════════════════════════
+   DRAWING FUNCTIONS
+═══════════════════════════════════ */
+function getSVG(){ return document.getElementById('app_svg'); }
 
-/* ── Draw: Trapezoidal Prism ── */
 function drawTrapPrism(phase){
-  const s=getSVG(); if(!s) return; s.setAttribute('viewBox','0 0 480 300');
-  const fx1=80,fy1=240,fx2=300,fy2=240,fx3=260,fy3=120,fx4=120,fy4=120;
-  const dx=60,dy=-30;
+  const s=getSVG();if(!s)return;s.setAttribute('viewBox','0 0 480 300');
+  const fx1=80,fy1=240,fx2=300,fy2=240,fx3=260,fy3=120,fx4=120,fy4=120,dx=60,dy=-30;
   const bx1=fx1+dx,by1=fy1+dy,bx2=fx2+dx,by2=fy2+dy,bx3=fx3+dx,by3=fy3+dy,bx4=fx4+dx,by4=fy4+dy;
   let o=[];
   o.push(`<polygon points="${bx1},${by1} ${bx2},${by2} ${bx3},${by3} ${bx4},${by4}" fill="#f5e6dd" stroke="#bbb" stroke-width="1" stroke-dasharray="4,3"/>`);
-  [[fx1,fy1,bx1,by1],[fx2,fy2,bx2,by2],[fx3,fy3,bx3,by3],[fx4,fy4,bx4,by4]].forEach(([x1,y1,x2,y2])=>{
-    o.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#aaa" stroke-width="1"/>`);
-  });
-  if(phase>=1) o.push(`<polygon points="${fx4},${fy4} ${fx3},${fy3} ${bx3},${by3} ${bx4},${by4}" fill="#fce8d8" stroke="#C0272D" stroke-width="1.5"/>`);
-  const ff=phase>=1?"#fff0e8":"#fff";
-  o.push(`<polygon points="${fx1},${fy1} ${fx2},${fy2} ${fx3},${fy3} ${fx4},${fy4}" fill="${ff}" stroke="#C0272D" stroke-width="2"/>`);
+  [[fx1,fy1,bx1,by1],[fx2,fy2,bx2,by2],[fx3,fy3,bx3,by3],[fx4,fy4,bx4,by4]].forEach(([x1,y1,x2,y2])=>o.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#aaa" stroke-width="1"/>`));
+  if(phase>=1)o.push(`<polygon points="${fx4},${fy4} ${fx3},${fy3} ${bx3},${by3} ${bx4},${by4}" fill="#fce8d8" stroke="#C0272D" stroke-width="1.5"/>`);
+  o.push(`<polygon points="${fx1},${fy1} ${fx2},${fy2} ${fx3},${fy3} ${fx4},${fy4}" fill="${phase>=1?'#fff0e8':'#fff'}" stroke="#C0272D" stroke-width="2"/>`);
   if(phase>=1){
-    o.push(`<text x="${(fx4+fx3)/2}" y="${fy4-8}" font-size="12" font-family="Helvetica Neue,Arial" fill="#C0272D" font-weight="600" text-anchor="middle">a=10</text>`);
-    o.push(`<text x="${(fx1+fx2)/2}" y="${fy1+16}" font-size="12" font-family="Helvetica Neue,Arial" fill="#C0272D" font-weight="600" text-anchor="middle">b=21</text>`);
-    o.push(`<text x="${fx2+12}" y="${(fy2+fy3)/2}" font-size="12" font-family="Helvetica Neue,Arial" fill="#C0272D" font-weight="600">h=8</text>`);
+    o.push(`<text x="${(fx4+fx3)/2}" y="${fy4-8}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">a=10</text>`);
+    o.push(`<text x="${(fx1+fx2)/2}" y="${fy1+16}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">b=21</text>`);
+    o.push(`<text x="${fx2+12}" y="${(fy2+fy3)/2}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600">h=8</text>`);
   }
-  if(phase>=2) o.push(`<text x="${(fx2+bx2)/2+5}" y="${(fy2+by2)/2+14}" font-size="12" font-family="Helvetica Neue,Arial" fill="#C0272D" font-weight="600">l=20</text>`);
+  if(phase>=2)o.push(`<text x="${(fx2+bx2)/2+5}" y="${(fy2+by2)/2+14}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600">l=20</text>`);
   s.innerHTML=o.join('');
 }
 
-/* ── Draw: Annulus ── */
+function drawRatio(phase){
+  const s=getSVG();if(!s)return;s.setAttribute('viewBox','0 0 480 300');
+  const cx=130,cy=240,cr=55,ch=150;let o=[];
+  o.push(`<ellipse cx="${cx}" cy="${cy}" rx="${cr}" ry="14" fill="#e8d8cc" stroke="#bbb" stroke-width="1"/>`);
+  o.push(`<rect x="${cx-cr}" y="${cy-ch}" width="${cr*2}" height="${ch}" fill="${phase===1?'#fce8d8':'#fff0f0'}" stroke="#C0272D" stroke-width="2"/>`);
+  o.push(`<ellipse cx="${cx}" cy="${cy-ch}" rx="${cr}" ry="14" fill="${phase===1?'#ffc6a8':'#ffe0d0'}" stroke="#C0272D" stroke-width="2"/>`);
+  o.push(`<text x="${cx}" y="${cy+28}" font-size="12" font-family="Arial" fill="#6b5750" text-anchor="middle">Cylinder r=6</text>`);
+  if(phase>=1)o.push(`<text x="${cx}" y="${cy-ch/2}" font-size="14" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">36πh</text>`);
+  const bx=310,by=240,bw=90,bh=150,bd=30;
+  o.push(`<polygon points="${bx},${by} ${bx+bw},${by} ${bx+bw+bd},${by-bd} ${bx+bd},${by-bd}" fill="#c8e0d0" stroke="#bbb" stroke-width="1"/>`);
+  o.push(`<polygon points="${bx+bw},${by} ${bx+bw},${by-bh} ${bx+bw+bd},${by-bh-bd} ${bx+bw+bd},${by-bd}" fill="#daeee2" stroke="#bbb" stroke-width="1"/>`);
+  o.push(`<rect x="${bx}" y="${by-bh}" width="${bw}" height="${bh}" fill="${phase===2?'#d8f0e8':'#f0fff8'}" stroke="#0a7a3a" stroke-width="2"/>`);
+  o.push(`<text x="${bx+bw/2}" y="${by+28}" font-size="12" font-family="Arial" fill="#6b5750" text-anchor="middle">Cuboid 13×8</text>`);
+  if(phase>=2)o.push(`<text x="${bx+bw/2}" y="${by-bh/2}" font-size="14" font-family="Arial" fill="#0a7a3a" text-anchor="middle">104h</text>`);
+  if(phase>=3)o.push(`<text x="240" y="285" font-size="15" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">Ratio: 9π : 26</text>`);
+  s.innerHTML=o.join('');
+}
+
+function drawConeInCyl(phase){
+  const s=getSVG();if(!s)return;s.setAttribute('viewBox','0 0 480 300');
+  const cx=240,cy=260,r=85,h=190;let o=[];
+  o.push(`<rect x="${cx-r}" y="${cy-h}" width="${r*2}" height="${h}" fill="${phase===1?'#fce8d8':'#fff5f0'}" stroke="#C0272D" stroke-width="2"/>`);
+  o.push(`<ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="15" fill="#e8d0c8" stroke="#C0272D" stroke-width="1.5"/>`);
+  o.push(`<ellipse cx="${cx}" cy="${cy-h}" rx="${r}" ry="15" fill="${phase===1?'#fce8d8':'#fff5f0'}" stroke="#C0272D" stroke-width="1.5"/>`);
+  o.push(`<polygon points="${cx-r},${cy} ${cx+r},${cy} ${cx},${cy-h}" fill="${phase===2?'#f8d0b8':'rgba(200,100,80,0.12)'}" stroke="#7A1418" stroke-width="1.8" stroke-dasharray="6,4"/>`);
+  o.push(`<ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="15" fill="none" stroke="#7A1418" stroke-width="1.5" stroke-dasharray="5,4"/>`);
+  o.push(`<text x="${cx+r+8}" y="${cy-h/2}" font-size="12" font-family="Arial" fill="#6b5750">h=15</text>`);
+  o.push(`<text x="${cx}" y="${cy+28}" font-size="12" font-family="Arial" fill="#6b5750" text-anchor="middle">r=7</text>`);
+  if(phase>=3)o.push(`<text x="${cx}" y="${cy-h/2-10}" font-size="14" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">490π cm³</text>`);
+  s.innerHTML=o.join('');
+}
+
+function drawKite(phase){
+  const s=getSVG();if(!s)return;s.setAttribute('viewBox','0 0 480 320');
+  const ax=240,ay=40,bx=110,by=180,cx2=370,cy2=180,dx=240,dy=290;
+  const rad=Math.hypot(bx-ax,by-ay);let o=[];
+  o.push(`<circle cx="${ax}" cy="${ay}" r="${rad}" fill="none" stroke="#ddd" stroke-width="1.5" stroke-dasharray="5,4"/>`);
+  if(phase>=1){
+    o.push(`<line x1="${ax}" y1="${ay}" x2="${dx}" y2="${dy}" stroke="#C8922A" stroke-width="1.5" stroke-dasharray="5,4"/>`);
+    o.push(`<line x1="${bx}" y1="${by}" x2="${cx2}" y2="${cy2}" stroke="#C8922A" stroke-width="1.5" stroke-dasharray="5,4"/>`);
+  }
+  o.push(`<polygon points="${ax},${ay} ${bx},${by} ${dx},${dy} ${cx2},${cy2}" fill="${phase>=3?'#fce8d8':'#fff8f5'}" stroke="#C0272D" stroke-width="2"/>`);
+  [[ax,ay,'A'],[bx,by,'B'],[cx2,cy2,'C'],[dx,dy,'D']].forEach(([x,y,l])=>{
+    o.push(`<circle cx="${x}" cy="${y}" r="4" fill="#C0272D"/>`);
+    const off=l==='A'?[0,-14]:l==='B'?[-16,0]:l==='C'?[14,0]:[0,14];
+    o.push(`<text x="${x+off[0]}" y="${y+off[1]}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">${l}</text>`);
+  });
+  if(phase>=2)o.push(`<text x="${ax+8}" y="${ay+60}" font-size="13" font-family="Arial" fill="#C0272D">r=10</text>`);
+  s.innerHTML=o.join('');
+}
+
+function drawFrustum(phase){
+  const s=getSVG();if(!s)return;s.setAttribute('viewBox','0 0 480 320');
+  const cx=240,R=110,r=40,yBot=270,yTop=150;let o=[];
+  if(phase>=1){
+    o.push(`<polygon points="${cx-r},${yTop} ${cx+r},${yTop} ${cx},${yTop-40}" fill="#ffe0cc" stroke="#C8922A" stroke-width="1.5" stroke-dasharray="5,4"/>`);
+    o.push(`<text x="${cx}" y="${yTop-48}" font-size="11" font-family="Arial" fill="#888" text-anchor="middle">Small cone H≈2.86</text>`);
+  }
+  o.push(`<polygon points="${cx-R},${yBot} ${cx+R},${yBot} ${cx+r},${yTop} ${cx-r},${yTop}" fill="${phase>=3?'#fce8d8':'#fff5f0'}" stroke="#C0272D" stroke-width="2"/>`);
+  o.push(`<ellipse cx="${cx}" cy="${yBot}" rx="${R}" ry="16" fill="#e0c8bc" stroke="#C0272D" stroke-width="1.5"/>`);
+  o.push(`<ellipse cx="${cx}" cy="${yTop}" rx="${r}" ry="8" fill="${phase>=1?'#ffd0b8':'#ffe8e0'}" stroke="#C0272D" stroke-width="1.5"/>`);
+  o.push(`<text x="${cx+R+8}" y="${yBot}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600">R=11</text>`);
+  o.push(`<text x="${cx+r+6}" y="${yTop-2}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600">r=4</text>`);
+  o.push(`<line x1="${cx-R-20}" y1="${yBot}" x2="${cx-R-20}" y2="${yTop}" stroke="#bbb" stroke-width="1"/>`);
+  o.push(`<text x="${cx-R-38}" y="${(yBot+yTop)/2+5}" font-size="11" font-family="Arial" fill="#6b5750" transform="rotate(-90,${cx-R-38},${(yBot+yTop)/2})">h=5</text>`);
+  s.innerHTML=o.join('');
+}
+
+function drawSphere(phase){
+  const s=getSVG();if(!s)return;s.setAttribute('viewBox','0 0 480 300');
+  const cx=240,cy=150,r=100;let o=[];
+  o.push(`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${phase>=2?'#fce8d8':'#fff5f0'}" stroke="#C0272D" stroke-width="2"/>`);
+  o.push(`<ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="18" fill="none" stroke="#bbb" stroke-width="1" stroke-dasharray="5,4"/>`);
+  if(phase>=1){
+    o.push(`<line x1="${cx}" y1="${cy}" x2="${cx+r}" y2="${cy}" stroke="#C0272D" stroke-width="2"/>`);
+    o.push(`<text x="${cx+r/2}" y="${cy-8}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">r≈8.38</text>`);
+  }
+  if(phase>=2)o.push(`<text x="${cx}" y="${cy+r+24}" font-size="13" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">SA≈881.8 cm²</text>`);
+  o.push(`<text x="${cx}" y="${cy+r+40}" font-size="12" font-family="Arial" fill="#6b5750" text-anchor="middle">V=2463 cm³</text>`);
+  s.innerHTML=o.join('');
+}
+
+function drawHemiCups(phase){
+  const s=getSVG();if(!s)return;s.setAttribute('viewBox','0 0 480 300');
+  const cx=160,cy=180,R=100;let o=[];
+  o.push(`<path d="M ${cx-R} ${cy} A ${R} ${R} 0 0 0 ${cx+R} ${cy}" fill="${phase===1?'#a8d8f8':'#ddeef8'}" stroke="#1a6ea8" stroke-width="2"/>`);
+  o.push(`<ellipse cx="${cx}" cy="${cy}" rx="${R}" ry="14" fill="#c8e4f4" stroke="#1a6ea8" stroke-width="1.5"/>`);
+  o.push(`<text x="${cx}" y="${cy+30}" font-size="12" font-family="Arial" fill="#6b5750" text-anchor="middle">Hemisphere R=17</text>`);
+  if(phase>=1)o.push(`<text x="${cx}" y="${cy-50}" font-size="13" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">≈10296 cm³</text>`);
+  if(phase>=2){
+    for(let i=0;i<3;i++){
+      const ccx=330+i*44,ccy=200,cr2=14,ch=50;
+      o.push(`<rect x="${ccx-cr2}" y="${ccy-ch}" width="${cr2*2}" height="${ch}" fill="#fce8d8" stroke="#C0272D" stroke-width="1.5"/>`);
+      o.push(`<ellipse cx="${ccx}" cy="${ccy}" rx="${cr2}" ry="5" fill="#e8c8b4" stroke="#C0272D" stroke-width="1"/>`);
+      o.push(`<ellipse cx="${ccx}" cy="${ccy-ch}" rx="${cr2}" ry="5" fill="#fce8d8" stroke="#C0272D" stroke-width="1"/>`);
+    }
+    o.push(`<text x="352" y="232" font-size="11" font-family="Arial" fill="#6b5750" text-anchor="middle">r=2, h=9</text>`);
+  }
+  if(phase>=3)o.push(`<text x="352" y="268" font-size="15" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">90 complete cups</text>`);
+  s.innerHTML=o.join('');
+}
+
+function drawCuboidPyramid(phase){
+  const s=getSVG();if(!s)return;s.setAttribute('viewBox','0 0 480 320');
+  const ox=160,oy=260,w=130,h=80,d=50;let o=[];
+  o.push(`<polygon points="${ox},${oy-h} ${ox+w},${oy-h} ${ox+w+d},${oy-h-d} ${ox+d},${oy-h-d}" fill="#e8e0d8" stroke="#aaa" stroke-width="1" stroke-dasharray="4,3"/>`);
+  o.push(`<polygon points="${ox+w},${oy} ${ox+w+d},${oy-d} ${ox+w+d},${oy-h-d} ${ox+w},${oy-h}" fill="#f0e8e0" stroke="#C0272D" stroke-width="1.5"/>`);
+  o.push(`<rect x="${ox}" y="${oy-h}" width="${w}" height="${h}" fill="${phase===1?'#fce8d8':'#fff5f0'}" stroke="#C0272D" stroke-width="2"/>`);
+  o.push(`<line x1="${ox}" y1="${oy}" x2="${ox+w}" y2="${oy}" stroke="#C0272D" stroke-width="2"/>`);
+  const apx=ox+w/2+d/2,apy=oy-h-d-90;
+  const p1=[ox+d,oy-h-d],p2=[ox+w+d,oy-h-d],p3=[ox+w,oy-h],p4=[ox,oy-h];
+  const pf=phase>=2?'#fce0c8':'#ffe8d8';
+  [[apx,apy,p1,p2],[apx,apy,p2,p3],[apx,apy,p3,p4],[apx,apy,p4,p1]].forEach(([ax,ay,pa,pb])=>{
+    o.push(`<polygon points="${ax},${ay} ${pa[0]},${pa[1]} ${pb[0]},${pb[1]}" fill="${pf}" stroke="#C0272D" stroke-width="1.5"/>`);
+  });
+  if(phase>=1)o.push(`<text x="${ox+w/2}" y="${oy+16}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">10×10, h=6</text>`);
+  if(phase>=2)o.push(`<text x="${apx+10}" y="${apy+55}" font-size="12" font-family="Arial" fill="#C0272D">l=13</text>`);
+  s.innerHTML=o.join('');
+}
+
 function drawAnnulus(phase){
-  const s=getSVG(); if(!s) return; s.setAttribute('viewBox','0 0 480 300');
-  const cx=240,cy=150,R=110,r=40;
-  let o=[];
+  const s=getSVG();if(!s)return;s.setAttribute('viewBox','0 0 480 300');
+  const cx=240,cy=150,R=110,r=40;let o=[];
   o.push(`<circle cx="${cx}" cy="${cy}" r="${R}" fill="${phase>=1?'#fce8d8':'#fff0ea'}" stroke="#C0272D" stroke-width="2.5"/>`);
   o.push(`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${phase>=2?'#e0f0ff':'#f5f0ff'}" stroke="#6060aa" stroke-width="2"/>`);
   o.push(`<line x1="${cx}" y1="${cy}" x2="${cx+R}" y2="${cy}" stroke="#C0272D" stroke-width="1.5"/>`);
   o.push(`<line x1="${cx}" y1="${cy}" x2="${cx-r}" y2="${cy}" stroke="#6060aa" stroke-width="1.5"/>`);
-  o.push(`<text x="${cx+R/2}" y="${cy-8}" font-size="12" font-family="Helvetica Neue,Arial" fill="#C0272D" font-weight="600" text-anchor="middle">R=8</text>`);
-  o.push(`<text x="${cx-r/2}" y="${cy-8}" font-size="12" font-family="Helvetica Neue,Arial" fill="#6060aa" text-anchor="middle">r=3</text>`);
-  if(phase>=3) o.push(`<text x="${cx}" y="${cy+R+24}" font-size="13" font-family="Helvetica Neue,Arial" fill="#C0272D" font-weight="600" text-anchor="middle">Area = 55π ≈ 172.8 cm²</text>`);
+  o.push(`<text x="${cx+R/2}" y="${cy-8}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">R=8</text>`);
+  o.push(`<text x="${cx-r/2}" y="${cy-8}" font-size="12" font-family="Arial" fill="#6060aa" text-anchor="middle">r=3</text>`);
+  if(phase>=3)o.push(`<text x="${cx}" y="${cy+R+24}" font-size="13" font-family="Arial" fill="#C0272D" font-weight="600" text-anchor="middle">Area=55π≈172.8 cm²</text>`);
   s.innerHTML=o.join('');
 }
 
-/* ── Draw: Cone on Hemisphere ── */
 function drawConeHemi(phase){
-  const s=getSVG(); if(!s) return; s.setAttribute('viewBox','0 0 480 320');
-  const cx=240,baseY=210,R=90,tipY=50,hemiBottomY=baseY+76;
-  let o=[];
-  const hf=phase===4||phase>=5?"#F0D9E0":"#fdf2ea";
-  const hs=phase===4||phase>=5?"#7A1418":"#bb8f78";
-  o.push(`<path d="M ${cx-R} ${baseY} A ${R} ${R*0.85} 0 0 0 ${cx+R} ${baseY}" fill="${hf}" stroke="${hs}" stroke-width="${phase>=4?2.5:1.5}"/>`);
-  const cf=phase===3||phase>=5?"#F6D9C9":"#fff";
-  const cs=phase===3||phase>=5?"#C0272D":"#bb8f78";
-  o.push(`<polygon points="${cx-R},${baseY} ${cx},${tipY} ${cx+R},${baseY}" fill="${cf}" stroke="${cs}" stroke-width="${phase>=3?2.5:1.5}"/>`);
+  const s=getSVG();if(!s)return;s.setAttribute('viewBox','0 0 480 320');
+  const cx=240,baseY=210,R=90,tipY=50,hemiBottomY=baseY+76;let o=[];
+  o.push(`<path d="M ${cx-R} ${baseY} A ${R} ${R*0.85} 0 0 0 ${cx+R} ${baseY}" fill="${phase===4||phase>=5?'#F0D9E0':'#fdf2ea'}" stroke="${phase===4||phase>=5?'#7A1418':'#bb8f78'}" stroke-width="${phase>=4?2.5:1.5}"/>`);
+  o.push(`<polygon points="${cx-R},${baseY} ${cx},${tipY} ${cx+R},${baseY}" fill="${phase===3||phase>=5?'#F6D9C9':'#fff'}" stroke="${phase===3||phase>=5?'#C0272D':'#bb8f78'}" stroke-width="${phase>=3?2.5:1.5}"/>`);
   o.push(`<ellipse cx="${cx}" cy="${baseY}" rx="${R}" ry="15" fill="none" stroke="#aaa" stroke-width="1.2" stroke-dasharray="5,3"/>`);
   if(phase===2){
     o.push(`<line x1="${cx}" y1="${baseY}" x2="${cx}" y2="${tipY}" stroke="#C8922A" stroke-width="1.5" stroke-dasharray="4,3"/>`);
     o.push(`<line x1="${cx}" y1="${baseY}" x2="${cx+R}" y2="${baseY}" stroke="#C8922A" stroke-width="1.5" stroke-dasharray="4,3"/>`);
     o.push(`<line x1="${cx+R}" y1="${baseY}" x2="${cx}" y2="${tipY}" stroke="#C0272D" stroke-width="2.5"/>`);
-    o.push(`<text x="${cx+8}" y="${(baseY+tipY)/2}" font-size="12" font-family="Helvetica Neue,Arial" fill="#C0272D" font-weight="600">h=24</text>`);
-    o.push(`<text x="${cx+R/2-8}" y="${baseY+18}" font-size="12" font-family="Helvetica Neue,Arial" fill="#C0272D" font-weight="600">r=7</text>`);
-    o.push(`<text x="${cx+R/2+16}" y="${(baseY+tipY)/2-28}" font-size="12" font-family="Helvetica Neue,Arial" fill="#C0272D" font-weight="600">l=25</text>`);
+    o.push(`<text x="${cx+8}" y="${(baseY+tipY)/2}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600">h=24</text>`);
+    o.push(`<text x="${cx+R/2-8}" y="${baseY+18}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600">r=7</text>`);
+    o.push(`<text x="${cx+R/2+16}" y="${(baseY+tipY)/2-28}" font-size="12" font-family="Arial" fill="#C0272D" font-weight="600">l=25</text>`);
   } else {
-    o.push(`<text x="${cx}" y="${hemiBottomY+20}" font-size="12" font-family="Helvetica Neue,Arial" fill="#6b5750" text-anchor="middle">r=7 cm</text>`);
-    if(phase>=1) o.push(`<text x="${cx+R+10}" y="${(baseY+tipY)/2}" font-size="12" font-family="Helvetica Neue,Arial" fill="#6b5750">h=24</text>`);
+    o.push(`<text x="${cx}" y="${hemiBottomY+20}" font-size="12" font-family="Arial" fill="#6b5750" text-anchor="middle">r=7 cm</text>`);
+    if(phase>=1)o.push(`<text x="${cx+R+10}" y="${(baseY+tipY)/2}" font-size="12" font-family="Arial" fill="#6b5750">h=24</text>`);
   }
   s.innerHTML=o.join('');
 }
-
-/* ══════════════════════════════════════════
-   ADD MORE draw functions here as you build
-   more questions. Pattern:
-   function drawMyTopic(phase){ ... }
-══════════════════════════════════════════ */
 </script>
 
-<!-- ═══════════════════════════════════════════
+<!-- ═══════════════════════════════════
      QUESTION DATA
-     Add/remove question objects from this array.
-     Copy the pattern from the existing ones.
-════════════════════════════════════════════ -->
+═══════════════════════════════════ -->
 <script>
 const questions = [
   {
-    eyebrow: "Question 1 · Mensuration",
-    title:   "Volume of a Trapezoidal Prism",
-    sub:     "Find the volume of a prism with trapezoidal cross-section.",
+    eyebrow:"Question 1 · Mensuration", title:"Volume of a Trapezoidal Prism",
+    sub:"Find the volume of a prism with trapezoidal cross-section.",
     steps:[
-      { label:"The solid",
-        html:`<p>A prism has a <b>trapezoidal cross-section</b>. Parallel sides <b>a = 10 cm</b> and <b>b = 21 cm</b>, perpendicular height <b>h = 8 cm</b>, prism length <b>l = 20 cm</b>.</p>
-              <p>Volume = cross-sectional area × length.</p>`,
-        draw: drawTrapPrism },
-      { label:"Step 1 — Area of the trapezium",
-        html:`<div class="wt-formula">A = ½ × (a+b) × h = ½ × (10+21) × 8 = <b>124 cm²</b></div>`,
-        draw: drawTrapPrism },
-      { label:"Step 2 — Volume",
-        html:`<div class="wt-formula">V = A × l = 124 × 20 = <b>2480 cm³</b></div>`,
-        draw: drawTrapPrism },
-      { label:"Your turn",
-        html: WalkthroughEngine.tryIt({
-          question:"A trapezoidal prism has parallel sides <b>6 cm</b> and <b>14 cm</b>, trapezium height <b>5 cm</b>, and prism length <b>12 cm</b>. Find its volume.",
-          hints:["Find the trapezium area: ½ × (6+14) × 5","Multiply by the length: area × 12"],
-          answer:600, unit:"cm³",
-          working:"A = ½ × (6+14) × 5 = 50 cm²<br><b>V = 50 × 12 = 600 cm³</b>"
-        }),
-        draw: drawTrapPrism }
+      { label:"The solid", draw:drawTrapPrism,
+        html:`<p>A prism has a <b>trapezoidal cross-section</b>. Parallel sides <b>a = 10 cm</b> and <b>b = 21 cm</b>, perpendicular height <b>h = 8 cm</b>, prism length <b>l = 20 cm</b>.</p><p>Volume = cross-sectional area × length.</p>`},
+      { label:"Step 1 — Area of the trapezium", draw:drawTrapPrism,
+        html:`<div class="wt-formula">A = ½ × (a+b) × h = ½ × (10+21) × 8 = <b>124 cm²</b></div>`},
+      { label:"Step 2 — Volume", draw:drawTrapPrism,
+        html:`<div class="wt-formula">V = A × l = 124 × 20 = <b>2480 cm³</b></div>`},
+      { label:"Your turn", draw:drawTrapPrism,
+        html:WalkthroughEngine.tryIt({ question:"A trapezoidal prism has parallel sides <b>6 cm</b> and <b>14 cm</b>, trapezium height <b>5 cm</b>, and prism length <b>12 cm</b>. Find its volume.", hints:["Find the trapezium area: ½ × (6+14) × 5","Multiply by the length: area × 12"], answer:600, unit:"cm³", working:"A = ½ × (6+14) × 5 = 50 cm²<br><b>V = 50 × 12 = 600 cm³</b>" })}
     ]
   },
-
   {
-    eyebrow: "Question 9 · Mensuration",
-    title:   "Area of an Annulus",
-    sub:     "Outer circle minus inner circle.",
+    eyebrow:"Question 2 · Mensuration", title:"Cylinder to Cuboid Volume Ratio",
+    sub:"Same height — compare the two volumes.",
     steps:[
-      { label:"The shape",
-        html:`<p>An annulus (ring) has outer radius <b>R = 8 cm</b> and inner radius <b>r = 3 cm</b>.</p>`,
-        draw: drawAnnulus },
-      { label:"Step 1 — Outer circle",
-        html:`<div class="wt-formula">A<sub>outer</sub> = πR² = π×64 = 64π cm²</div>`,
-        draw: drawAnnulus },
-      { label:"Step 2 — Inner circle",
-        html:`<div class="wt-formula">A<sub>inner</sub> = πr² = π×9 = 9π cm²</div>`,
-        draw: drawAnnulus },
-      { label:"Step 3 — Annulus area",
-        html:`<div class="wt-formula">A = 64π − 9π = 55π ≈ <b>172.8 cm²</b></div>`,
-        draw: drawAnnulus },
-      { label:"Your turn",
-        html: WalkthroughEngine.tryIt({
-          question:"An annulus has outer radius <b>10 cm</b> and inner radius <b>6 cm</b>. Find its area (to 1 d.p.).",
-          hints:["A = π(R² − r²)","Substitute R=10, r=6"],
-          answer:201.1, tolerance:1, unit:"cm²",
-          working:"A = π(100 − 36) = 64π ≈ <b>201.1 cm²</b>"
-        }),
-        draw: drawAnnulus }
+      { label:"The two solids", draw:drawRatio,
+        html:`<p>Both solids share the same height h. <b>Cylinder</b> radius r = 6 cm. <b>Cuboid</b> base 13 cm × 8 cm.</p>`},
+      { label:"Step 1 — Cylinder volume", draw:drawRatio,
+        html:`<div class="wt-formula">V<sub>cyl</sub> = πr²h = π × 36 × h = 36πh</div>`},
+      { label:"Step 2 — Cuboid volume", draw:drawRatio,
+        html:`<div class="wt-formula">V<sub>cub</sub> = 13 × 8 × h = 104h</div>`},
+      { label:"Step 3 — Ratio", draw:drawRatio,
+        html:`<div class="wt-formula">36πh : 104h → divide by 4 → <b>9π : 26</b></div><p>≈ 28.27 : 26 — the cylinder is slightly larger.</p>`},
+      { label:"Your turn", draw:drawRatio,
+        html:WalkthroughEngine.tryIt({ question:"A cylinder has radius <b>5 cm</b>. A cuboid has base <b>9 cm × 11 cm</b>. Both have the same height. Find the base area of each and write the ratio in the form <b>aπ : b</b>.", hints:["Cylinder base area = πr² = 25π","Cuboid base area = 9 × 11 = 99","Simplify 25π : 99 — can it simplify?"], answer:99, tolerance:0.5, unit:"cm² (cuboid base)", working:"Cylinder base = 25π ≈ 78.5 cm²<br>Cuboid base = 99 cm²<br><b>Ratio = 25π : 99</b> (already in simplest form)" })}
     ]
   },
-
   {
-    eyebrow: "Question 10 · Mensuration",
-    title:   "Surface Area: Cone on a Hemisphere",
-    sub:     "Identify which surfaces are actually on the outside.",
+    eyebrow:"Question 3 · Mensuration", title:"Cone Removed from Cylinder",
+    sub:"Find the volume of space remaining.",
     steps:[
-      { label:"The solid",
-        html:`<p>A <b>cone on top of a hemisphere</b>, joined at radius <b>r = 7 cm</b>. Cone height <b>h = 24 cm</b>. The joining circle is internal — never include it.</p>`,
-        draw: drawConeHemi },
-      { label:"What's showing?",
-        html:`<p>① Curved surface of the cone<br>② Curved surface of the hemisphere</p>`,
-        draw: drawConeHemi },
-      { label:"Step 1 — Slant height",
-        html:`<div class="wt-formula">l² = 7² + 24² = 625 → l = <b>25 cm</b></div>`,
-        draw: drawConeHemi },
-      { label:"Step 2 — Cone CSA",
-        html:`<div class="wt-formula">πrl = π×7×25 = 175π ≈ <b>549.8 cm²</b></div>`,
-        draw: drawConeHemi },
-      { label:"Step 3 — Hemisphere CSA",
-        html:`<div class="wt-formula">2πr² = 2π×49 = 98π ≈ <b>307.9 cm²</b></div>`,
-        draw: drawConeHemi },
-      { label:"Step 4 — Total",
-        html:`<div class="wt-formula">175π + 98π = 273π ≈ <b>857.7 cm²</b></div>`,
-        draw: drawConeHemi },
-      { label:"Your turn",
-        html: WalkthroughEngine.tryIt({
-          question:"Cone on hemisphere, both radius <b>5 cm</b>, cone height <b>12 cm</b>. Find total outer surface area (to 1 d.p.).",
-          hints:["l = √(r²+h²)","Cone CSA = πrl","Hemisphere CSA = 2πr²","Add — do NOT add the flat join"],
-          answer:361.3, tolerance:1, unit:"cm²",
-          working:"l=13 cm<br>Cone=65π≈204.2<br>Hemi=50π≈157.1<br><b>Total=115π≈361.3 cm²</b>"
-        }),
-        draw: drawConeHemi }
+      { label:"The solid", draw:drawConeInCyl,
+        html:`<p>A <b>cone</b> (dashed) fits exactly inside a cylinder. Both have <b>r = 7 cm</b> and <b>h = 15 cm</b>. Find the remaining volume.</p>`},
+      { label:"Step 1 — Cylinder volume", draw:drawConeInCyl,
+        html:`<div class="wt-formula">V<sub>cyl</sub> = πr²h = π × 49 × 15 = 735π ≈ <b>2309.1 cm³</b></div>`},
+      { label:"Step 2 — Cone volume", draw:drawConeInCyl,
+        html:`<div class="wt-formula">V<sub>cone</sub> = ⅓πr²h = ⅓ × 735π = 245π ≈ <b>769.7 cm³</b></div>`},
+      { label:"Step 3 — Subtract", draw:drawConeInCyl,
+        html:`<div class="wt-formula">V<sub>remain</sub> = 735π − 245π = 490π ≈ <b>1539.4 cm³</b></div>`},
+      { label:"Your turn", draw:drawConeInCyl,
+        html:WalkthroughEngine.tryIt({ question:"A cone fits exactly inside a cylinder. Both have <b>radius 5 cm</b> and <b>height 12 cm</b>. Find the remaining volume (to 1 d.p.).", hints:["V cylinder = πr²h = π × 25 × 12 = 300π","V cone = ⅓ × 300π = 100π","Remaining = 300π − 100π"], answer:628.3, tolerance:1, unit:"cm³", working:"V<sub>cyl</sub> = 300π, V<sub>cone</sub> = 100π<br><b>Remaining = 200π ≈ 628.3 cm³</b>" })}
+    ]
+  },
+  {
+    eyebrow:"Question 4 · Mensuration", title:"Area of a Kite ABDC",
+    sub:"AB and AC are radii; use the diagonal method.",
+    steps:[
+      { label:"The shape", draw:drawKite,
+        html:`<p>Kite <b>ABDC</b>: A top, B and C wing-tips (AB = AC = r = 10 cm), D bottom. Angle ∠BAC = 60°. Diagonals AD and BC shown dashed.</p>`},
+      { label:"Step 1 — Diagonal BC", draw:drawKite,
+        html:`<div class="wt-formula">BM = r·sin(θ/2) = 10·sin(30°) = 5 cm → BC = <b>10 cm</b></div>`},
+      { label:"Step 2 — Diagonal AD", draw:drawKite,
+        html:`<div class="wt-formula">AD = r + r·cos(θ/2) = 10 + 10·cos(30°) = 10 + 5√3 ≈ <b>18.66 cm</b></div>`},
+      { label:"Step 3 — Area", draw:drawKite,
+        html:`<div class="wt-formula">Area = ½ × d₁ × d₂ = ½ × 10 × 18.66 ≈ <b>93.3 cm²</b></div>`},
+      { label:"Your turn", draw:drawKite,
+        html:WalkthroughEngine.tryIt({ question:"A kite has diagonals of length <b>14 cm</b> and <b>9 cm</b>. Find its area.", hints:["Area of kite = ½ × d₁ × d₂","Substitute d₁ = 14 and d₂ = 9"], answer:63, unit:"cm²", working:"Area = ½ × 14 × 9 = <b>63 cm²</b>" })}
+    ]
+  },
+  {
+    eyebrow:"Question 5 · Mensuration", title:"Volume of a Frustum by Subtraction",
+    sub:"Large cone minus small cone — no frustum formula needed.",
+    steps:[
+      { label:"The solid", draw:drawFrustum,
+        html:`<p>Frustum: large radius <b>R = 11 cm</b>, small radius <b>r = 4 cm</b>, height <b>h = 5 cm</b>.</p>`},
+      { label:"Step 1 — Height of small cone", draw:drawFrustum,
+        html:`<div class="wt-formula">4/11 = H/(H+5) → H = 20/7 ≈ <b>2.857 cm</b></div>`},
+      { label:"Step 2 — Full cone height", draw:drawFrustum,
+        html:`<div class="wt-formula">H<sub>full</sub> = 20/7 + 5 = 55/7 ≈ <b>7.857 cm</b></div>`},
+      { label:"Step 3 — Subtract volumes", draw:drawFrustum,
+        html:`<div class="wt-formula">V = ⅓π(121 × 55/7 − 16 × 20/7) = 6335π/21 ≈ <b>947.3 cm³</b></div>`},
+      { label:"Your turn", draw:drawFrustum,
+        html:WalkthroughEngine.tryIt({ question:"A frustum has large radius <b>9 cm</b>, small radius <b>3 cm</b>, and height <b>8 cm</b>. Find its volume (to 1 d.p.).", hints:["Similar triangles: 3/9 = H/(H+8) → H = 4 cm","Full cone height = 12 cm","V = ⅓π(81×12 − 9×4)"], answer:980.2, tolerance:1.5, unit:"cm³", working:"H=4, full height=12<br>V = ⅓π(972−36) = 312π ≈ <b>980.2 cm³</b>" })}
+    ]
+  },
+  {
+    eyebrow:"Question 6 · Mensuration", title:"Surface Area of a Sphere from its Volume",
+    sub:"Find r from the volume, then use SA = 4πr².",
+    steps:[
+      { label:"The solid", draw:drawSphere,
+        html:`<p>A sphere has <b>volume = 2463 cm³</b>. Find its surface area.</p>`},
+      { label:"Step 1 — Find the radius", draw:drawSphere,
+        html:`<div class="wt-formula">r³ = 3V/(4π) ≈ 588.13 → r ≈ <b>8.376 cm</b></div>`},
+      { label:"Step 2 — Surface area", draw:drawSphere,
+        html:`<div class="wt-formula">SA = 4πr² = 4π × 70.16 ≈ <b>881.8 cm²</b></div>`},
+      { label:"Your turn", draw:drawSphere,
+        html:WalkthroughEngine.tryIt({ question:"A sphere has volume <b>904.8 cm³</b>. Find its surface area (to 1 d.p.).", hints:["r³ = 3V ÷ (4π)","Find r using cube root","SA = 4πr²"], answer:452.4, tolerance:1.5, unit:"cm²", working:"r³=216 → r=6 cm<br><b>SA = 4π×36 = 144π ≈ 452.4 cm²</b>" })}
+    ]
+  },
+  {
+    eyebrow:"Question 7 · Mensuration", title:"Hemisphere Poured into Cylindrical Cups",
+    sub:"How many complete cups can be filled?",
+    steps:[
+      { label:"The setup", draw:drawHemiCups,
+        html:`<p>Hemisphere bowl radius <b>R = 17 cm</b>. Cups: radius <b>r = 2 cm</b>, height <b>h = 9 cm</b>.</p>`},
+      { label:"Step 1 — Hemisphere volume", draw:drawHemiCups,
+        html:`<div class="wt-formula">V<sub>hemi</sub> = ⅔πR³ = ⅔π×4913 ≈ <b>10 296.2 cm³</b></div>`},
+      { label:"Step 2 — One cup volume", draw:drawHemiCups,
+        html:`<div class="wt-formula">V<sub>cup</sub> = πr²h = π×4×9 = 36π ≈ <b>113.1 cm³</b></div>`},
+      { label:"Step 3 — Number of cups", draw:drawHemiCups,
+        html:`<div class="wt-formula">N = 9826π/3 ÷ 36π = 9826/108 ≈ 90.98 → <b>90 cups</b></div>`},
+      { label:"Your turn", draw:drawHemiCups,
+        html:WalkthroughEngine.tryIt({ question:"A hemisphere of radius <b>12 cm</b> is poured into cups of radius <b>3 cm</b> and height <b>8 cm</b>. How many complete cups?", hints:["V hemi = ⅔π×12³ = 1152π","V cup = π×9×8 = 72π","N = 1152π ÷ 72π — round down"], answer:16, tolerance:0, unit:"cups", working:"V<sub>hemi</sub>=1152π, V<sub>cup</sub>=72π<br>N=1152/72=<b>16 cups</b>" })}
+    ]
+  },
+  {
+    eyebrow:"Question 8 · Mensuration", title:"Surface Area: Cuboid Topped by Pyramid",
+    sub:"Total outer surface area — don't include the hidden join.",
+    steps:[
+      { label:"The solid", draw:drawCuboidPyramid,
+        html:`<p><b>Cuboid</b>: square base 10×10 cm, height 6 cm. <b>Pyramid</b>: slant height l = 13 cm. The shared top face is hidden — exclude it from both.</p>`},
+      { label:"Step 1 — Cuboid faces", draw:drawCuboidPyramid,
+        html:`<div class="wt-formula">Base 100 + 4 sides 240 = <b>340 cm²</b></div>`},
+      { label:"Step 2 — Pyramid faces", draw:drawCuboidPyramid,
+        html:`<div class="wt-formula">4 × (½×10×13) = 4 × 65 = <b>260 cm²</b></div>`},
+      { label:"Step 3 — Total", draw:drawCuboidPyramid,
+        html:`<div class="wt-formula">340 + 260 = <b>600 cm²</b></div>`},
+      { label:"Your turn", draw:drawCuboidPyramid,
+        html:WalkthroughEngine.tryIt({ question:"A cuboid (square base <b>8×8 cm</b>, height <b>5 cm</b>) is topped by a pyramid with slant height <b>10 cm</b>. Find the total outer surface area.", hints:["Cuboid: base + 4 sides (no top face)","Pyramid: 4 triangular faces only (no base)","Add both totals"], answer:384, unit:"cm²", working:"Cuboid: 64 + 4×40 = 224 cm²<br>Pyramid: 4×(½×8×10) = 160 cm²<br><b>Total = 384 cm²</b>" })}
+    ]
+  },
+  {
+    eyebrow:"Question 9 · Mensuration", title:"Area of an Annulus",
+    sub:"Outer circle minus inner circle.",
+    steps:[
+      { label:"The shape", draw:drawAnnulus,
+        html:`<p>An annulus (ring) has outer radius <b>R = 8 cm</b> and inner radius <b>r = 3 cm</b>.</p>`},
+      { label:"Step 1 — Outer circle", draw:drawAnnulus,
+        html:`<div class="wt-formula">A<sub>outer</sub> = πR² = 64π cm²</div>`},
+      { label:"Step 2 — Inner circle", draw:drawAnnulus,
+        html:`<div class="wt-formula">A<sub>inner</sub> = πr² = 9π cm²</div>`},
+      { label:"Step 3 — Annulus area", draw:drawAnnulus,
+        html:`<div class="wt-formula">A = 64π − 9π = 55π ≈ <b>172.8 cm²</b></div>`},
+      { label:"Your turn", draw:drawAnnulus,
+        html:WalkthroughEngine.tryIt({ question:"An annulus has outer radius <b>10 cm</b> and inner radius <b>6 cm</b>. Find its area (to 1 d.p.).", hints:["A = π(R² − r²)","= π(100 − 36) = 64π"], answer:201.1, tolerance:1, unit:"cm²", working:"A = 64π ≈ <b>201.1 cm²</b>" })}
+    ]
+  },
+  {
+    eyebrow:"Question 10 · Mensuration", title:"Surface Area: Cone on a Hemisphere",
+    sub:"Identify which surfaces are actually on the outside.",
+    steps:[
+      { label:"The solid", draw:drawConeHemi,
+        html:`<p>A <b>cone on top of a hemisphere</b>, joined at radius <b>r = 7 cm</b>. Cone height <b>h = 24 cm</b>. The joining circle is internal — never include it.</p>`},
+      { label:"What's showing?", draw:drawConeHemi,
+        html:`<p>① Curved surface of the cone<br>② Curved surface of the hemisphere<br>The flat join between them is hidden inside.</p>`},
+      { label:"Step 1 — Slant height", draw:drawConeHemi,
+        html:`<div class="wt-formula">l² = 7² + 24² = 625 → l = <b>25 cm</b></div>`},
+      { label:"Step 2 — Cone CSA", draw:drawConeHemi,
+        html:`<div class="wt-formula">πrl = π×7×25 = 175π ≈ <b>549.8 cm²</b></div>`},
+      { label:"Step 3 — Hemisphere CSA", draw:drawConeHemi,
+        html:`<div class="wt-formula">2πr² = 2π×49 = 98π ≈ <b>307.9 cm²</b></div>`},
+      { label:"Step 4 — Total", draw:drawConeHemi,
+        html:`<div class="wt-formula">175π + 98π = 273π ≈ <b>857.7 cm²</b></div>`},
+      { label:"Your turn", draw:drawConeHemi,
+        html:WalkthroughEngine.tryIt({ question:"Cone on hemisphere, both radius <b>5 cm</b>, cone height <b>12 cm</b>. Find total outer surface area (to 1 d.p.).", hints:["l = √(r²+h²) = √(25+144)","Cone CSA = πrl","Hemisphere CSA = 2πr²","Add — do NOT include the flat join"], answer:361.3, tolerance:1, unit:"cm²", working:"l=13<br>Cone=65π≈204.2, Hemi=50π≈157.1<br><b>Total=115π≈361.3 cm²</b>" })}
     ]
   }
-
-  /* ── TEMPLATE FOR A NEW QUESTION ──────────────────
-  ,{
-    eyebrow: "Question N · Mensuration",
-    title:   "Your question title",
-    sub:     "Brief description.",
-    steps:[
-      { label:"The solid",   html:`<p>...</p>`, draw: yourDrawFn },
-      { label:"Step 1 — ...", html:`<div class="wt-formula">...</div>`, draw: yourDrawFn },
-      { label:"Your turn",
-        html: WalkthroughEngine.tryIt({
-          question:"...", hints:["..."], answer:0, unit:"cm²", working:"..."
-        }),
-        draw: yourDrawFn }
-    ]
-  }
-  ─────────────────────────────────────────────── */
 ];
 
-/* ── Build sidebar question list ── */
+/* ── Sidebar ── */
 function buildSidebar(){
-  const sb = document.getElementById('sidebar');
-  // keep the label div
-  const label = sb.querySelector('.sidebar-label');
-  sb.innerHTML=''; sb.appendChild(label);
+  const sb=document.getElementById('sidebar');
+  const lbl=sb.querySelector('.sidebar-label');
+  sb.innerHTML=''; sb.appendChild(lbl);
   questions.forEach((q,i)=>{
     const b=document.createElement('button');
     b.className='q-list-btn'+(i===0?' active':'');
-    b.id='sb_btn_'+i;
+    b.id='sb_'+i;
     b.innerHTML=`<span class="q-num">Q${i+1}</span><span class="q-name">${q.title}</span>`;
     b.onclick=()=>{
       document.querySelectorAll('.q-list-btn').forEach(x=>x.classList.remove('active'));
       b.classList.add('active');
-      // re-init engine with single question
       WalkthroughEngine.init({ containerId:'app', questions:[questions[i]] });
     };
     sb.appendChild(b);
@@ -291,13 +420,7 @@ function buildSidebar(){
 }
 
 buildSidebar();
-
-/* ── Init engine with first question ── */
-WalkthroughEngine.init({
-  containerId: 'app',
-  questions:   [questions[0]]
-});
+WalkthroughEngine.init({ containerId:'app', questions:[questions[0]] });
 </script>
-
 </body>
 </html>
