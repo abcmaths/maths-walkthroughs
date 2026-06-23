@@ -5,218 +5,573 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Maths Walkthroughs</title>
 <style>
-:root{--red:#C0272D;--dark-red:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+:root{
+  --red:#C0272D;--dark-red:#7A1418;--cream:#FBF6F1;--ink:#241A17;
+  --line:#E4D6CE;--gold:#C8922A;--white:#fff;
+  --brand-primary:var(--red);
+}
+body.cc{--brand-primary:#8B0000;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100vh;}
-header{background:var(--red);color:#fff;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200;transition:background .3s;}
-body.cc header{background:#8B0000;}
-.logo-wrap{display:flex;align-items:center;gap:12px;}
-.logo-badge{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;letter-spacing:-.5px;}
-.logo-text{font-size:15px;font-weight:700;letter-spacing:.02em;}
-.logo-sub{font-size:11px;opacity:.75;letter-spacing:.08em;text-transform:uppercase;}
-.brand-toggle{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:4px 6px 4px 10px;cursor:pointer;font-size:12px;font-weight:600;color:#fff;transition:.2s;}
+
+/* HEADER */
+header{
+  background:var(--brand-primary);color:#fff;
+  padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:60px;position:sticky;top:0;z-index:200;
+  transition:background .3s;gap:10px;
+}
+.logo-wrap{display:flex;align-items:center;gap:10px;flex:1;}
+.logo-badge{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;letter-spacing:-.5px;flex-shrink:0;
+}
+.logo-text{font-size:15px;font-weight:700;letter-spacing:.02em;line-height:1.2;}
+.logo-sub{font-size:10px;opacity:.75;letter-spacing:.08em;text-transform:uppercase;}
+
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+.brand-toggle{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);
+  border-radius:20px;padding:5px 12px;
+  cursor:pointer;color:#fff;font-size:12px;font-weight:600;
+  transition:.2s;white-space:nowrap;
+}
 .brand-toggle:hover{background:rgba(255,255,255,.25);}
-.toggle-pill{width:32px;height:18px;background:rgba(255,255,255,.3);border-radius:9px;position:relative;transition:.2s;}
-.toggle-pill::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.2s;}
+.toggle-pill{
+  width:28px;height:14px;background:rgba(255,255,255,.3);
+  border-radius:7px;position:relative;transition:.25s;
+}
+.toggle-pill::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:10px;height:10px;border-radius:50%;background:#fff;
+  transition:.25s;
+}
 body.cc .toggle-pill{background:var(--gold);}
 body.cc .toggle-pill::after{left:16px;}
-.hero{background:linear-gradient(135deg,var(--red) 0%,var(--dark-red) 100%);color:#fff;padding:48px 24px 40px;text-align:center;transition:background .3s;}
-body.cc .hero{background:linear-gradient(135deg,#8B0000 0%,#4a0000 100%);}
-.hero h1{font-family:'Georgia',serif;font-size:32px;margin-bottom:8px;}
-.hero p{font-size:15px;opacity:.85;max-width:520px;margin:0 auto;}
-.year-nav{display:flex;gap:6px;overflow-x:auto;padding:16px 24px 0;border-bottom:2px solid var(--line);background:#fff;}
-.year-tab{font-size:13px;font-weight:600;padding:8px 16px;border-radius:4px 4px 0 0;border:none;background:transparent;color:#888;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s;}
-.year-tab:hover{color:var(--ink);}
-.year-tab.active{color:var(--red);border-bottom-color:var(--red);}
-body.cc .year-tab.active{color:#8B0000;border-bottom-color:#8B0000;}
-.grid-wrap{max-width:1000px;margin:0 auto;padding:28px 24px 60px;}
-.year-label{font-family:'Georgia',serif;font-size:20px;margin-bottom:6px;}
-.year-desc{font-size:13px;color:#888;margin-bottom:22px;}
-.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;}
-.topic-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:20px 16px 16px;transition:.2s;position:relative;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:8px;}
-.topic-card:not(.soon){cursor:pointer;}
-.topic-card:not(.soon):hover{border-color:var(--red);box-shadow:0 2px 12px rgba(192,39,45,.12);transform:translateY(-1px);}
-body.cc .topic-card:not(.soon):hover{border-color:#8B0000;}
-.topic-card.soon{opacity:.55;cursor:default;}
-.topic-icon{font-size:24px;}
-.topic-name{font-family:'Georgia',serif;font-size:15px;font-weight:700;}
-.topic-count{font-size:12px;color:#888;}
-.topic-badge{position:absolute;top:10px;right:10px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:10px;}
-.badge-live{background:#e8f8ee;color:#1a7a3a;}
-.badge-soon{background:#f0f0f0;color:#888;}
-footer{text-align:center;padding:20px;font-size:12px;color:#aaa;border-top:1px solid var(--line);}
+
+.feedback-btn{
+  font-size:12px;font-weight:600;color:#fff;
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);
+  padding:5px 12px;border-radius:20px;
+  text-decoration:none;white-space:nowrap;transition:.2s;
+}
+.feedback-btn:hover{background:rgba(255,255,255,.28);}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,var(--brand-primary) 0%,var(--dark-red) 100%);
+  color:#fff;text-align:center;padding:42px 20px 36px;
+  transition:background .3s;
+}
+.hero h1{font-size:clamp(22px,4vw,32px);font-weight:800;margin-bottom:8px;letter-spacing:-.02em;}
+.hero p{font-size:14px;opacity:.85;max-width:520px;margin:0 auto;}
+
+/* YEAR TABS */
+.tabs-wrap{background:#fff;border-bottom:2px solid var(--line);position:sticky;top:60px;z-index:100;}
+.tabs{
+  display:flex;max-width:1100px;margin:0 auto;
+  padding:0 16px;overflow-x:auto;gap:2px;
+}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{
+  padding:13px 18px;font-size:13px;font-weight:600;
+  cursor:pointer;color:#888;border-bottom:3px solid transparent;
+  white-space:nowrap;transition:.15s;background:none;border-top:0;border-left:0;border-right:0;
+}
+.tab:hover{color:var(--brand-primary);}
+.tab.on{color:var(--brand-primary);border-bottom-color:var(--brand-primary);}
+
+/* MAIN GRID */
+.main{max-width:1100px;margin:0 auto;padding:32px 16px 60px;}
+.year-section{display:none;}
+.year-section.on{display:block;}
+
+.section-intro{
+  background:#fff;border:1px solid var(--line);border-radius:6px;
+  padding:16px 20px;margin-bottom:24px;
+  display:flex;align-items:center;gap:14px;
+}
+.section-intro .yr-badge{
+  background:var(--brand-primary);color:#fff;
+  font-size:12px;font-weight:800;padding:4px 10px;border-radius:3px;white-space:nowrap;
+}
+.section-intro p{font-size:13px;color:#555;line-height:1.5;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+
+.card{
+  background:#fff;border:1px solid var(--line);border-radius:6px;
+  padding:20px 18px;text-decoration:none;color:var(--ink);
+  display:flex;flex-direction:column;gap:6px;
+  transition:.18s;position:relative;
+}
+.card:hover{border-color:var(--brand-primary);transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.07);}
+.card.soon{opacity:.55;pointer-events:none;}
+.card-icon{font-size:22px;margin-bottom:4px;}
+.card-title{font-size:14px;font-weight:700;line-height:1.3;}
+.card-meta{font-size:11px;color:#888;}
+.card-badge{
+  position:absolute;top:12px;right:12px;
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;
+  background:#e8f5e9;color:#2e7d32;
+}
+.card-badge.soon{background:#fafafa;color:#999;}
+.card-badge.new{background:#fff3e0;color:#e65100;}
+
+/* FOOTER */
+footer{
+  text-align:center;padding:20px;font-size:12px;color:#aaa;
+  border-top:1px solid var(--line);
+}
+footer a{color:#aaa;text-decoration:none;}
+footer a:hover{color:var(--brand-primary);}
 </style>
 </head>
-<body>
-<header>
+<body id="body">
+
+<header id="siteHeader">
   <div class="logo-wrap">
     <div class="logo-badge" id="logoBadge">ABC</div>
     <div>
       <div class="logo-text" id="logoText">Adorable British College</div>
-      <div class="logo-sub">Maths Walkthroughs</div>
+      <div class="logo-sub" id="logoSub">Maths Walkthroughs</div>
     </div>
   </div>
-  <button class="brand-toggle" id="brandToggle" onclick="toggleBrand()">
-    <span id="toggleLabel">Switch to CC</span>
-    <div class="toggle-pill"></div>
-  </button>
-  <a href="feedback.html" style="font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:5px 12px;border-radius:20px;text-decoration:none;white-space:nowrap;">&#x2709; Feedback</a>
+  <div class="header-right">
+    <button class="brand-toggle" id="brandToggle" onclick="toggleBrand()">
+      <span id="toggleLabel">Switch to CC</span>
+      <div class="toggle-pill"></div>
+    </button>
+    <a class="feedback-btn" href="https://forms.gle/gjb6ULTcBHCuQdQB6" target="_blank" rel="noopener">&#x2709; Feedback</a>
+  </div>
 </header>
-<div class="hero">
-  <h1>Step-by-step Maths</h1>
-  <p>Choose your year group, then pick a topic. Every walkthrough builds the diagram as you go &mdash; with a question to try at the end.</p>
+
+<div class="hero" id="siteHero">
+  <h1 id="heroTitle">Maths Walkthroughs</h1>
+  <p id="heroSub">Step-by-step interactive worked examples with practice questions — choose your year group below.</p>
 </div>
-<div class="year-nav" id="yearNav"></div>
-<div class="grid-wrap" id="gridWrap"></div>
-<footer id="siteFooter">&copy; Adorable British College &middot; Maths Walkthroughs &middot; <a href="feedback.html" style="color:#aaa;">Give Feedback</a></footer>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab on" onclick="showYear('y7',this)">Year 7</button>
+    <button class="tab" onclick="showYear('y8',this)">Year 8</button>
+    <button class="tab" onclick="showYear('y9',this)">Year 9</button>
+    <button class="tab" onclick="showYear('y10',this)">Year 10</button>
+    <button class="tab" onclick="showYear('y11',this)">Year 11</button>
+    <button class="tab" onclick="showYear('y12',this)">Year 12</button>
+    <button class="tab" onclick="showYear('addmaths',this)">Add Maths</button>
+    <button class="tab" onclick="showYear('further',this)">Further Maths</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- YEAR 7 -->
+  <div class="year-section on" id="sec-y7">
+    <div class="section-intro">
+      <span class="yr-badge">Year 7</span>
+      <p>Building core foundations — number, basic geometry, sequences, and data handling.</p>
+    </div>
+    <div class="grid">
+      <a class="card" href="number-y7.html">
+        <div class="card-icon">🔢</div>
+        <div class="card-title">Number</div>
+        <div class="card-meta">Place value · Fractions · Decimals · Percentages</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="geometry-y7.html">
+        <div class="card-icon">📐</div>
+        <div class="card-title">Geometry</div>
+        <div class="card-meta">Angles · Triangles · Basic shapes · Perimeter &amp; area</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="stats-y7.html">
+        <div class="card-icon">📊</div>
+        <div class="card-title">Statistics</div>
+        <div class="card-meta">Mean · Mode · Median · Bar charts · Pictograms</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="sequences-y7.html">
+        <div class="card-icon">🔁</div>
+        <div class="card-title">Sequences</div>
+        <div class="card-meta">Term-to-term rules · nth term · Pattern recognition</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="algebra-y7.html">
+        <div class="card-icon">🔡</div>
+        <div class="card-title">Algebra</div>
+        <div class="card-meta">Expressions · Simplifying · Basic equations</div>
+        <span class="card-badge">Live</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- YEAR 8 -->
+  <div class="year-section" id="sec-y8">
+    <div class="section-intro">
+      <span class="yr-badge">Year 8</span>
+      <p>Extending number and algebra, introducing proportion and probability.</p>
+    </div>
+    <div class="grid">
+      <a class="card" href="number-y8.html">
+        <div class="card-icon">🔢</div>
+        <div class="card-title">Number</div>
+        <div class="card-meta">Primes · Powers · Standard form · Ratio</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="algebra-y8.html">
+        <div class="card-icon">🔡</div>
+        <div class="card-title">Algebra</div>
+        <div class="card-meta">Expanding · Factorising · Linear equations · Formulae</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <div class="card soon">
+        <div class="card-icon">📐</div>
+        <div class="card-title">Geometry</div>
+        <div class="card-meta">Transformations · Coordinates · Pythagoras intro</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+      <div class="card soon">
+        <div class="card-icon">📊</div>
+        <div class="card-title">Statistics &amp; Probability</div>
+        <div class="card-meta">Averages from tables · Probability experiments</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- YEAR 9 -->
+  <div class="year-section" id="sec-y9">
+    <div class="section-intro">
+      <span class="yr-badge">Year 9</span>
+      <p>Cambridge Checkpoint and transition to IGCSE — consolidating key skills.</p>
+    </div>
+    <div class="grid">
+      <div class="card soon">
+        <div class="card-icon">🔢</div>
+        <div class="card-title">Number</div>
+        <div class="card-meta">Surds intro · Indices · Bounds</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+      <div class="card soon">
+        <div class="card-icon">🔡</div>
+        <div class="card-title">Algebra</div>
+        <div class="card-meta">Simultaneous equations · Inequalities · Sequences</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+      <div class="card soon">
+        <div class="card-icon">📐</div>
+        <div class="card-title">Geometry</div>
+        <div class="card-meta">Trigonometry intro · Circle properties · Vectors intro</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+      <div class="card soon">
+        <div class="card-icon">📊</div>
+        <div class="card-title">Statistics</div>
+        <div class="card-meta">Cumulative frequency · Histograms · Scatter graphs</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- YEAR 10 -->
+  <div class="year-section" id="sec-y10">
+    <div class="section-intro">
+      <span class="yr-badge">Year 10</span>
+      <p>Cambridge IGCSE 0580 — core and extended topics for the first year of the programme.</p>
+    </div>
+    <div class="grid">
+      <a class="card" href="number-y10.html">
+        <div class="card-icon">🔢</div>
+        <div class="card-title">Number</div>
+        <div class="card-meta">Indices · Standard form · Bounds · Percentages</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="algebra-y10.html">
+        <div class="card-icon">🔡</div>
+        <div class="card-title">Algebra</div>
+        <div class="card-meta">Equations · Simultaneous · Inequalities · Functions</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="mensuration-y10.html">
+        <div class="card-icon">📏</div>
+        <div class="card-title">Mensuration</div>
+        <div class="card-meta">Area · Perimeter · Volume · Surface area</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="geometry-y10.html">
+        <div class="card-icon">📐</div>
+        <div class="card-title">Geometry</div>
+        <div class="card-meta">Angles · Symmetry · Bearings · Constructions</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="trigonometry-y10.html">
+        <div class="card-icon">📡</div>
+        <div class="card-title">Trigonometry</div>
+        <div class="card-meta">SOH-CAH-TOA · Sine &amp; cosine rule · Bearings</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="stats-y10.html">
+        <div class="card-icon">📊</div>
+        <div class="card-title">Statistics</div>
+        <div class="card-meta">Averages · Histograms · Cumulative frequency · Box plots</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="graphs-y10.html">
+        <div class="card-icon">📈</div>
+        <div class="card-title">Graphs</div>
+        <div class="card-meta">Linear · Quadratic · Distance-time · Speed-time</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="constructions-y10.html">
+        <div class="card-icon">🔵</div>
+        <div class="card-title">Constructions &amp; Loci</div>
+        <div class="card-meta">Bisectors · Loci · Scale drawings</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="probability-y10.html">
+        <div class="card-icon">🎲</div>
+        <div class="card-title">Probability</div>
+        <div class="card-meta">Tree diagrams · Venn diagrams · Combined events</div>
+        <span class="card-badge">Live</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- YEAR 11 -->
+  <div class="year-section" id="sec-y11">
+    <div class="section-intro">
+      <span class="yr-badge">Year 11</span>
+      <p>Cambridge IGCSE 0580 — completing the programme, exam-level extended content.</p>
+    </div>
+    <div class="grid">
+      <a class="card" href="algebra-y11.html">
+        <div class="card-icon">🔡</div>
+        <div class="card-title">Algebra</div>
+        <div class="card-meta">Quadratics · Factor theorem · Sequences · Functions</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="mensuration-y11.html">
+        <div class="card-icon">📏</div>
+        <div class="card-title">Mensuration</div>
+        <div class="card-meta">Cylinder · Cone · Sphere · Frustum · Arc &amp; sector</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="geometry-y11.html">
+        <div class="card-icon">📐</div>
+        <div class="card-title">Geometry</div>
+        <div class="card-meta">Circle theorems · Pythagoras in 3D · Proof</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="vectors-y11.html">
+        <div class="card-icon">➡️</div>
+        <div class="card-title">Vectors</div>
+        <div class="card-meta">Column vectors · Magnitude · Position vectors · Proof</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="transformations-y11.html">
+        <div class="card-icon">🔄</div>
+        <div class="card-title">Transformations</div>
+        <div class="card-meta">Rotation · Reflection · Enlargement · Combined</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="differentiation-y11.html">
+        <div class="card-icon">∂</div>
+        <div class="card-title">Differentiation</div>
+        <div class="card-meta">Gradient · Turning points · Rates of change</div>
+        <span class="card-badge">Live</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- YEAR 12 -->
+  <div class="year-section" id="sec-y12">
+    <div class="section-intro">
+      <span class="yr-badge">Year 12</span>
+      <p>WAEC/NECO syllabus — including specialist topics and Cambridge A-Level bridging content.</p>
+    </div>
+    <div class="grid">
+      <a class="card" href="algebra-y12.html">
+        <div class="card-icon">🔡</div>
+        <div class="card-title">Algebra</div>
+        <div class="card-meta">Variation · Remainder &amp; factor theorem · AP/GP · Logs · Binomial</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="geometry-y12.html">
+        <div class="card-icon">🌍</div>
+        <div class="card-title">Geometry</div>
+        <div class="card-meta">Earth geometry · Great circles · Latitude &amp; longitude</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="calculus-y12.html">
+        <div class="card-icon">∫</div>
+        <div class="card-title">Calculus</div>
+        <div class="card-meta">Differentiation · Integration · Applications</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="numberbases-y12.html">
+        <div class="card-icon">0️⃣</div>
+        <div class="card-title">Number Bases</div>
+        <div class="card-meta">Binary · Octal · Hexadecimal · Conversions</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="modulo-y12.html">
+        <div class="card-icon">🔁</div>
+        <div class="card-title">Modulo Arithmetic</div>
+        <div class="card-meta">Clock arithmetic · Modular operations</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="binaryops-y12.html">
+        <div class="card-icon">⭐</div>
+        <div class="card-title">Binary Operations</div>
+        <div class="card-meta">Custom operations · Commutativity · Identity elements</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <a class="card" href="matrices-y12.html">
+        <div class="card-icon">🔲</div>
+        <div class="card-title">Matrices</div>
+        <div class="card-meta">Operations · Determinant · Inverse · Transformations</div>
+        <span class="card-badge">Live</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ADD MATHS -->
+  <div class="year-section" id="sec-addmaths">
+    <div class="section-intro">
+      <span class="yr-badge">Add Maths</span>
+      <p>Cambridge Additional Mathematics (0606) — extending IGCSE into AS-Level territory.</p>
+    </div>
+    <div class="grid">
+      <a class="card" href="algebra-addmaths.html">
+        <div class="card-icon">🔡</div>
+        <div class="card-title">Algebra</div>
+        <div class="card-meta">Surds · Binomial general term · Partial fractions · Polynomial division · Modulus · Rational functions</div>
+        <span class="card-badge">Live</span>
+      </a>
+      <div class="card soon">
+        <div class="card-icon">📡</div>
+        <div class="card-title">Trigonometry</div>
+        <div class="card-meta">Identities · Double angle · R-form</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+      <div class="card soon">
+        <div class="card-icon">∫</div>
+        <div class="card-title">Calculus</div>
+        <div class="card-meta">Chain rule · Product rule · Quotient rule · Integration by substitution</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+      <div class="card soon">
+        <div class="card-icon">📈</div>
+        <div class="card-title">Functions &amp; Graphs</div>
+        <div class="card-meta">Composite · Inverse · Exponentials · Logarithms</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FURTHER MATHS -->
+  <div class="year-section" id="sec-further">
+    <div class="section-intro">
+      <span class="yr-badge">Further Maths</span>
+      <p>Cambridge AS &amp; A-Level Mathematics (9709) — for our highest-attaining students.</p>
+    </div>
+    <div class="grid">
+      <div class="card soon">
+        <div class="card-icon">🔢</div>
+        <div class="card-title">Pure 1</div>
+        <div class="card-meta">Quadratics · Functions · Coordinate geometry · Sequences · Differentiation</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+      <div class="card soon">
+        <div class="card-icon">🔢</div>
+        <div class="card-title">Pure 2</div>
+        <div class="card-meta">Algebra · Logarithms · Trigonometry · Vectors · Integration</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+      <div class="card soon">
+        <div class="card-icon">📊</div>
+        <div class="card-title">Statistics</div>
+        <div class="card-meta">Distributions · Normal · Hypothesis testing · Correlation</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+      <div class="card soon">
+        <div class="card-icon">⚡</div>
+        <div class="card-title">Mechanics</div>
+        <div class="card-meta">Kinematics · Forces · Equilibrium · Moments</div>
+        <span class="card-badge soon">Coming Soon</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<footer id="siteFooter">
+  &copy; Adorable British College &middot; Maths Walkthroughs &middot;
+  <a href="https://forms.gle/gjb6ULTcBHCuQdQB6" target="_blank" rel="noopener">Give Feedback</a>
+</footer>
 
 <script>
-var brands={
-  abc:{badge:'ABC',name:'Adorable British College',footer:'\u00a9 Adorable British College \u00b7 Maths Walkthroughs',toggleLabel:'Switch to CC',bodyClass:''},
-  cc: {badge:'CC', name:'Curriculum Crest',        footer:'\u00a9 Curriculum Crest \u00b7 curriculumcrest.com',     toggleLabel:'Switch to ABC',bodyClass:'cc'}
+const brands = {
+  abc:{
+    badge:'ABC',
+    name:'Adorable British College',
+    sub:'Maths Walkthroughs',
+    hero:'Maths Walkthroughs',
+    heroSub:'Step-by-step interactive worked examples with practice questions — choose your year group below.',
+    footer:'\u00A9 Adorable British College \u00B7 Maths Walkthroughs',
+    toggle:'Switch to CC',
+    cls:''
+  },
+  cc:{
+    badge:'CC',
+    name:'Curriculum Crest',
+    sub:'Maths Walkthroughs',
+    hero:'Maths Walkthroughs',
+    heroSub:'Step-by-step interactive worked examples with practice questions — choose your year group below.',
+    footer:'\u00A9 Curriculum Crest \u00B7 Maths Walkthroughs',
+    toggle:'Switch to ABC',
+    cls:'cc'
+  }
 };
-var currentBrand='abc';
-function toggleBrand(){currentBrand=currentBrand==='abc'?'cc':'abc';applyBrand();}
-function applyBrand(){
-  var b=brands[currentBrand];
-  document.body.className=b.bodyClass;
+let current='abc';
+
+function applyBrand(key){
+  const b=brands[key];
+  document.getElementById('body').className=b.cls;
   document.getElementById('logoBadge').textContent=b.badge;
   document.getElementById('logoText').textContent=b.name;
-  document.getElementById('toggleLabel').textContent=b.toggleLabel;
-  document.getElementById('siteFooter').innerHTML=b.footer+' &middot; <a href="feedback.html" style="color:#aaa;">Give Feedback</a>';
-  document.title=b.name+' \u00b7 Maths Walkthroughs';
-  buildYearNav();buildGrid();
+  document.getElementById('logoSub').textContent=b.sub;
+  document.getElementById('heroTitle').textContent=b.hero;
+  document.getElementById('heroSub').textContent=b.heroSub;
+  document.getElementById('toggleLabel').textContent=b.toggle;
+  document.getElementById('siteFooter').innerHTML=
+    b.footer+' &middot; <a href="https://forms.gle/gjb6ULTcBHCuQdQB6" target="_blank" rel="noopener" style="color:#aaa;">Give Feedback</a>';
 }
 
-var years=[
-  {id:'y7', label:'Year 7', desc:'KS3 Foundation \u2014 core number, shape and data skills.'},
-  {id:'y8', label:'Year 8', desc:'KS3 Intermediate \u2014 extending algebra, geometry and statistics.'},
-  {id:'y9', label:'Year 9', desc:'KS3 Upper \u2014 bridging into IGCSE topics.'},
-  {id:'y10',label:'Year 10',desc:'Cambridge IGCSE \u2014 Core and Extended curriculum.'},
-  {id:'y11',label:'Year 11',desc:'Cambridge IGCSE \u2014 Full Extended, exam technique and revision.'},
-  {id:'y12',label:'Year 12',desc:'WAEC General Mathematics \u2014 past paper topics and techniques.'},
-  {id:'addmaths',label:'Add Maths',desc:'Cambridge Additional Mathematics (0606) \u2014 bridging IGCSE to A-Level.'},
-  {id:'further',label:'Further Maths',desc:'Further Pure Mathematics \u2014 advanced topics beyond A-Level core.'}
-];
-
-/* status:'live' = file exists | status:'soon' = not yet built
-   For topics shared across years, each year needs its own file eventually.
-   Files not yet split are marked 'soon' for the years that don't have a file yet. */
-var topics=[
-
-  /* ─── YEAR 7 ─── */
-  {id:'alg-y7', name:'Algebra',           icon:'&#x1F522;', years:['y7'],  file:'algebra-y7.html',           status:'live', count:10},
-  {id:'num-y7', name:'Number',            icon:'&#x1F523;', years:['y7'],  file:'number-y7.html',            status:'live', count:10},
-  {id:'geo-y7', name:'Geometry',          icon:'&#x1F4D0;', years:['y7'],  file:'geometry-y7.html',          status:'live', count:10},
-  {id:'sta-y7', name:'Statistics',        icon:'&#x1F4CA;', years:['y7'],  file:'stats-y7.html',             status:'live', count:10},
-  {id:'seq-y7', name:'Sequences',         icon:'&#x1F501;', years:['y7'],  file:'sequences-y7.html',         status:'live', count:10},
-
-  /* ─── YEAR 8 ─── */
-  {id:'alg-y8', name:'Algebra',           icon:'&#x1F522;', years:['y8'],  file:'algebra-y8.html',           status:'live', count:10},
-  {id:'num-y8', name:'Number',            icon:'&#x1F523;', years:['y8'],  file:'number-y8.html',            status:'live', count:10},
-  {id:'geo-y8', name:'Geometry',          icon:'&#x1F4D0;', years:['y8'],  file:'geometry-y8.html',          status:'soon', count:0},
-  {id:'gra-y8', name:'Graphs',            icon:'&#x1F4C8;', years:['y8'],  file:'graphs-y8.html',            status:'soon', count:0},
-  {id:'sta-y8', name:'Statistics',        icon:'&#x1F4CA;', years:['y8'],  file:'stats-y8.html',             status:'soon', count:0},
-
-  /* ─── YEAR 9 ─── */
-  {id:'alg-y9', name:'Algebra',           icon:'&#x1F522;', years:['y9'],  file:'algebra-y9.html',           status:'soon', count:0},
-  {id:'num-y9', name:'Number',            icon:'&#x1F523;', years:['y9'],  file:'number-y9.html',            status:'soon', count:0},
-  {id:'geo-y9', name:'Geometry',          icon:'&#x1F4D0;', years:['y9'],  file:'geometry-y9.html',          status:'soon', count:0},
-  {id:'tri-y9', name:'Trigonometry',      icon:'&#x1F4CF;', years:['y9'],  file:'trig-y9.html',              status:'soon', count:0},
-  {id:'gra-y9', name:'Graphs',            icon:'&#x1F4C8;', years:['y9'],  file:'graphs-y9.html',            status:'soon', count:0},
-
-  /* ─── YEAR 10 ─── */
-  {id:'alg-y10', name:'Algebra',          icon:'&#x1F522;', years:['y10'], file:'algebra-y10.html',          status:'live', count:10},
-  {id:'num-y10', name:'Number',           icon:'&#x1F523;', years:['y10'], file:'number-y10.html',           status:'live', count:10},
-  {id:'men-y10', name:'Mensuration',      icon:'&#x1F4D0;', years:['y10'], file:'mensuration-y10.html',      status:'live', count:8},
-  {id:'tri-y10', name:'Trigonometry',     icon:'&#x1F4CF;', years:['y10'], file:'trig-y10.html',             status:'live', count:10},
-  {id:'sta-y10', name:'Statistics',       icon:'&#x1F4CA;', years:['y10'], file:'stats-y10.html',            status:'live', count:10},
-  {id:'cal-y10', name:'Calculus',         icon:'&#x222B;',  years:['y10'], file:'calculus-diff-y10.html',    status:'live', count:8},
-  {id:'con-y10', name:'Constructions',    icon:'&#x1F4D0;', years:['y10'], file:'constructions-y10.html',    status:'live', count:8},
-  {id:'gra-y10', name:'Graphs',           icon:'&#x1F4C8;', years:['y10'], file:'graphs-y10.html',           status:'live', count:8},
-  {id:'geo-y10', name:'Geometry',         icon:'&#x26B2;',  years:['y10'], file:'geometry-y10.html',         status:'live', count:10},
-  {id:'seq-y10', name:'Sequences',        icon:'&#x1F501;', years:['y10'], file:'sequences-y10.html',        status:'soon', count:0},
-
-  /* ─── YEAR 11 ─── */
-  {id:'men-y11', name:'Mensuration',      icon:'&#x1F4D0;', years:['y11'], file:'mensuration-y11.html',      status:'live', count:15},
-  {id:'alg-y11', name:'Algebra',          icon:'&#x1F522;', years:['y11'], file:'algebra-y11.html',          status:'live', count:10},
-  {id:'num-y11', name:'Number',           icon:'&#x1F523;', years:['y11'], file:'number-y11.html',           status:'soon', count:0},
-  {id:'tri-y11', name:'Trigonometry',     icon:'&#x1F4CF;', years:['y11'], file:'trig-y11.html',             status:'soon', count:0},
-  {id:'sta-y11', name:'Statistics',       icon:'&#x1F4CA;', years:['y11'], file:'stats-y11.html',            status:'soon', count:0},
-  {id:'cal-y11', name:'Calculus',         icon:'&#x222B;',  years:['y11'], file:'calculus-diff-y11.html',    status:'soon', count:0},
-  {id:'vec-y11', name:'Vectors',          icon:'&#x27A1;',  years:['y11'], file:'vectors-y11.html',          status:'live', count:10},
-  {id:'tra-y11', name:'Transformations',  icon:'&#x1F504;', years:['y11'], file:'transformations-y11.html',  status:'live', count:10},
-  {id:'geo-y11', name:'Geometry',         icon:'&#x26B2;',  years:['y11'], file:'geometry-y11.html',         status:'live', count:10},
-
-  /* ─── YEAR 12 ─── */
-  {id:'cal-y12', name:'Calculus',         icon:'&#x222B;',  years:['y12'], file:'calculus-y12.html',         status:'live', count:10},
-  {id:'nb-y12',  name:'Number Bases',     icon:'&#x0032;',  years:['y12'], file:'number-bases-y12.html',     status:'live', count:5},
-  {id:'mod-y12', name:'Modulo Arithmetic',icon:'&#x1F551;', years:['y12'], file:'modulo-y12.html',           status:'live', count:4},
-  {id:'bin-y12', name:'Binary Operations',icon:'&#x2605;',  years:['y12'], file:'binary-operations-y12.html',status:'live', count:4},
-  {id:'mat-y12', name:'Matrices',         icon:'&#x229E;',  years:['y12'], file:'matrices-y12.html',         status:'live', count:4},
-  {id:'geo-y12', name:'Geometry',         icon:'&#x26B2;',  years:['y12'], file:'geometry-y12.html',         status:'live', count:10},
-  {id:'alg-y12', name:'Algebra',          icon:'&#x1F522;', years:['y12'], file:'algebra-y12.html',          status:'live', count:10},
-  {id:'num-y12', name:'Number',           icon:'&#x1F523;', years:['y12'], file:'number-y12.html',           status:'soon', count:0},
-  {id:'men-y12', name:'Mensuration',      icon:'&#x1F4D0;', years:['y12'], file:'mensuration-y12.html',      status:'soon', count:0},
-  {id:'tri-y12', name:'Trigonometry',     icon:'&#x1F4CF;', years:['y12'], file:'trig-y12.html',             status:'soon', count:0},
-  {id:'sta-y12', name:'Statistics',       icon:'&#x1F4CA;', years:['y12'], file:'stats-y12.html',            status:'soon', count:0},
-
-  /* ─── ADDITIONAL MATHEMATICS (0606) ─── */
-  {id:'alg-am',  name:'Algebra',          icon:'&#x1F522;', years:['addmaths'], file:'algebra-addmaths.html',      status:'live', count:10},
-  {id:'cal-am',  name:'Calculus',         icon:'&#x222B;',  years:['addmaths'], file:'calculus-addmaths.html',     status:'soon', count:0},
-  {id:'tri-am',  name:'Trigonometry',     icon:'&#x1F4CF;', years:['addmaths'], file:'trig-addmaths.html',         status:'soon', count:0},
-  {id:'cog-am',  name:'Coordinate Geom',  icon:'&#x1F4C9;', years:['addmaths'], file:'coord-geom-addmaths.html',   status:'soon', count:0},
-  {id:'log-am',  name:'Logs & Exponentials',icon:'&#x1D452;',years:['addmaths'], file:'logs-addmaths.html',         status:'soon', count:0},
-  {id:'pol-am',  name:'Polynomials',      icon:'&#x1F9EE;', years:['addmaths'], file:'polynomials-addmaths.html',  status:'soon', count:0},
-
-  /* ─── FURTHER MATHEMATICS ─── */
-  {id:'alg-fm',  name:'Algebra',          icon:'&#x1F522;', years:['further'], file:'algebra-further.html',       status:'soon', count:0},
-  {id:'cpx-fm',  name:'Complex Numbers',  icon:'&#x2102;',  years:['further'], file:'complex-further.html',       status:'soon', count:0},
-  {id:'mat-fm',  name:'Matrices',         icon:'&#x229E;',  years:['further'], file:'matrices-further.html',      status:'soon', count:0},
-  {id:'vec-fm',  name:'Vectors 3D',       icon:'&#x27A1;',  years:['further'], file:'vectors-further.html',       status:'soon', count:0},
-  {id:'prf-fm',  name:'Proof',            icon:'&#x2200;',  years:['further'], file:'proof-further.html',         status:'soon', count:0},
-  {id:'ser-fm',  name:'Series',           icon:'&#x2211;',  years:['further'], file:'series-further.html',        status:'soon', count:0},
-  {id:'dif-fm',  name:'Differential Eqs', icon:'&#x1D451;', years:['further'], file:'diffeq-further.html',        status:'soon', count:0}
-];
-
-var activeYear='y10';
-
-function buildYearNav(){
-  var nav=document.getElementById('yearNav');nav.innerHTML='';
-  years.forEach(function(y){
-    var btn=document.createElement('button');
-    btn.className='year-tab'+(y.id===activeYear?' active':'');
-    btn.textContent=y.label;
-    btn.onclick=function(){activeYear=y.id;buildYearNav();buildGrid();};
-    nav.appendChild(btn);
-  });
+function toggleBrand(){
+  current=(current==='abc')?'cc':'abc';
+  applyBrand(current);
+  localStorage.setItem('brand',current);
 }
 
-function buildGrid(){
-  var wrap=document.getElementById('gridWrap');
-  var y=years.find(function(yr){return yr.id===activeYear;});
-  var filtered=topics.filter(function(t){return t.years.indexOf(activeYear)>=0;});
-  wrap.innerHTML='<div class="year-label">'+y.label+'</div><div class="year-desc">'+y.desc+'</div><div class="topic-grid">'+filtered.map(topicCard).join('')+'</div>';
+function showYear(id,btn){
+  document.querySelectorAll('.year-section').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('sec-'+id).classList.add('on');
+  btn.classList.add('on');
 }
 
-function topicCard(t){
-  var badge=t.status==='live'
-    ?'<span class="topic-badge badge-live">Live</span>'
-    :'<span class="topic-badge badge-soon">Soon</span>';
-  var count=t.status==='live'?t.count+' walkthroughs':'Coming soon';
-  var tag=t.status==='live'?'a':'div';
-  var href=t.status==='live'?'href="'+t.file+'"':'';
-  return '<'+tag+' '+href+' class="topic-card'+(t.status==='soon'?' soon':'')+'">'
-    +'<div class="topic-icon">'+t.icon+'</div>'
-    +badge
-    +'<div class="topic-name">'+t.name+'</div>'
-    +'<div class="topic-count">'+count+'</div>'
-    +'</'+tag+'>';
-}
-
-buildYearNav();
-buildGrid();
-applyBrand();
+// Restore saved brand on load
+const saved=localStorage.getItem('brand');
+if(saved&&brands[saved]){current=saved;applyBrand(current);}
 </script>
 </body>
 </html>
