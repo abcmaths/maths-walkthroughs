@@ -250,14 +250,24 @@ var V={};
   V.q15bear=rnd(30,250);
   V.q15back=V.q15bear<180?V.q15bear+180:V.q15bear-180;
 
-  // Q16 Circle theorems
-  var ctOpts=[
-    {aoc:rnd(80,160),type:'centre'},// angle at centre = 2× circumference
-    {opp:rnd(60,110),type:'cyclic'}// opposite angles in cyclic quad
-  ];
-  V.q16ct=pick(ctOpts);
-  if(V.q16ct.type==='centre'){V.q16aoc=V.q16ct.aoc;V.q16abc=V.q16ct.aoc/2;}
-  else{V.q16dab=V.q16ct.opp;V.q16bcd=180-V.q16ct.opp;}
+  // Q16 Circle theorems — one of 7 IGCSE theorems
+  var ctType=pick(['centre','semicircle','segment','cyclic','tangentrad','tangentlen','altseg']);
+  V.q16type=ctType;
+  if(ctType==='centre'){
+    V.q16aoc=rnd(80,160); V.q16abc=V.q16aoc/2;
+  } else if(ctType==='semicircle'){
+    V.q16semi_a=rnd(25,65); V.q16semi_b=90-V.q16semi_a;
+  } else if(ctType==='segment'){
+    V.q16seg_known=rnd(35,75); V.q16seg_ans=V.q16seg_known;
+  } else if(ctType==='cyclic'){
+    V.q16dab=rnd(60,110); V.q16bcd=180-V.q16dab;
+  } else if(ctType==='tangentrad'){
+    V.q16oab=rnd(30,70); V.q16trad_ans=90-V.q16oab;
+  } else if(ctType==='tangentlen'){
+    V.q16text=rnd(30,80); V.q16tlen_reflex=180+V.q16text;
+  } else {
+    V.q16alt_chord=rnd(35,75); V.q16alt_ans=V.q16alt_chord;
+  }
 
   // Q17 Grouped data: 5 classes, random
   var classes=[150,155,160,165,170,175];
@@ -529,33 +539,161 @@ function dQ15(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   s.innerHTML=o.join('');}
 
 function dQ16(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var ct=V.q16ct;
-  var cx=240,cy=120,rad=85;
+  var cx=200,cy=125,rad=90,tp=V.q16type;
+  // helper: point on circle at angle deg (0=right, CCW)
+  function pt(deg){var r=deg*Math.PI/180;return [cx+rad*Math.cos(r),cy-rad*Math.sin(r)];}
   o.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+rad+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
-  o.push('<circle cx="'+cx+'" cy="'+cy+'" r="4" fill="#C8922A"/>');o.push(T(cx+8,cy+4,'O','#C8922A',11,'start',true));
-  if(ct.type==='centre'){
-    var aoc=ct.aoc,abc=ct.aoc/2;
-    // A top, B bottom-left, C bottom-right
-    var ax=cx,ay=cy-rad;
-    var bc=-(180-aoc/2),cc=aoc/2-180; // angles for B and C from centre in degrees offset from bottom
-    var ba=(180+aoc/2)*Math.PI/180,ca=(180-aoc/2)*Math.PI/180;
-    var bx=cx+rad*Math.cos(ba),by=cy+rad*Math.sin(ba);
-    var ccx=cx+rad*Math.cos(ca),ccy=cy+rad*Math.sin(ca);
-    o.push(poly3(ax,ay,bx,by,ccx,ccy));
-    o.push(L(cx,cy,ax,ay,'#C8922A',1.5,'4,3'));o.push(L(cx,cy,ccx,ccy,'#C8922A',1.5,'4,3'));
-    o.push(T(ax,ay-10,'A','#241A17',11,'middle',false));
-    o.push(T(bx-10,by+4,'B','#241A17',11,'end',false));o.push(T(ccx+6,ccy+4,'C','#241A17',11,'start',false));
-    if(p>=1){o.push(T(cx+20,cy+10,'AOC='+aoc+'°','#C8922A',10,'start',false));}
-    if(p>=2){o.push(R(20,218,440,36,'#e8f8ee','#1a7a3a',1.5));
-      o.push(T(240,241,'ABC = ½ × AOC = ½ × '+aoc+' = '+abc+'°  (angle at centre = 2× circumference)','#1a7a3a',12,'middle',false));}
-  } else {
-    var dab=ct.opp,bcd=180-ct.opp;
-    o.push(T(cx,cy+rad+16,'ABCD cyclic quadrilateral','#888',11,'middle',false));
-    if(p>=1){o.push(T(cx-40,cy-40,'DAB = '+dab+'°','#C0272D',12,'middle',false));}
-    if(p>=2){o.push(R(20,218,440,36,'#e8f8ee','#1a7a3a',1.5));
-      o.push(T(240,241,'BCD = 180 − '+dab+' = '+bcd+'°  (opposite angles in cyclic quad sum to 180°)','#1a7a3a',11,'middle',false));}
+  o.push('<circle cx="'+cx+'" cy="'+cy+'" r="4" fill="#C8922A"/>');
+  o.push(T(cx+8,cy+4,'O','#C8922A',11,'start',true));
+
+  if(tp==='centre'){
+    var aoc=V.q16aoc,abc=V.q16abc;
+    var A=pt(90),B=pt(90+aoc/2+30),C=pt(90-aoc/2-30),Bp=pt(210);
+    // angle AOC at centre subtends arc AC; B is on major arc
+    var Av=pt(90),Cv=pt(90-aoc),Bv=pt(90+150);
+    o.push(L(Av[0],Av[1],Bv[0],Bv[1],'#241A17',1.5));o.push(L(Cv[0],Cv[1],Bv[0],Bv[1],'#241A17',1.5));
+    o.push(L(Av[0],Av[1],Cv[0],Cv[1],'#888',1,'4,3'));
+    o.push(L(cx,cy,Av[0],Av[1],'#C8922A',1.5,'4,3'));o.push(L(cx,cy,Cv[0],Cv[1],'#C8922A',1.5,'4,3'));
+    o.push(T(Av[0],Av[1]-10,'A','#241A17',11,'middle',false));
+    o.push(T(Bv[0]-10,Bv[1],'B','#241A17',11,'end',false));
+    o.push(T(Cv[0]+8,Cv[1]-8,'C','#241A17',11,'start',false));
+    if(p>=1){o.push(T(cx+20,cy-10,'AOC='+aoc+'°','#C8922A',11,'start',false));}
+    if(p>=2){o.push(R(310,60,155,130,'#e8f8ee','#1a7a3a',1.5));
+      o.push(T(387,80,'Theorem:','#1a7a3a',11,'middle',true));
+      o.push(T(387,97,'Angle at centre','#241A17',10,'middle',false));
+      o.push(T(387,111,'= 2 × angle at','#241A17',10,'middle',false));
+      o.push(T(387,125,'circumference','#241A17',10,'middle',false));
+      o.push(T(387,148,'ABC = '+aoc+' ÷ 2','#1a7a3a',12,'middle',true));
+      o.push(T(387,166,'= '+abc+'°','#1a7a3a',14,'middle',true));}
+
+  } else if(tp==='semicircle'){
+    var sa=V.q16semi_a,sb=V.q16semi_b;
+    // diameter horizontal; A left, C right, B on top of circle
+    var Av=pt(180),Cv=pt(0),Bv=pt(70);
+    o.push(L(Av[0],Av[1],Cv[0],Cv[1],'#C0272D',2));// diameter
+    o.push(L(Av[0],Av[1],Bv[0],Bv[1],'#241A17',1.5));o.push(L(Cv[0],Cv[1],Bv[0],Bv[1],'#241A17',1.5));
+    o.push(T(Av[0]-10,Av[1],'A','#241A17',11,'end',false));
+    o.push(T(Cv[0]+10,Cv[1],'C','#241A17',11,'start',false));
+    o.push(T(Bv[0],Bv[1]-12,'B','#241A17',11,'middle',false));
+    // right angle mark at B
+    var rx=Bv[0]+8,ry=Bv[1]+8;
+    o.push('<rect x="'+(Bv[0]-6)+'" y="'+(Bv[1]+2)+'" width="10" height="10" fill="none" stroke="#1a5a8a" stroke-width="1.5"/>');
+    if(p>=1){o.push(T(Av[0]+22,Av[1]+14,'BAC='+sa+'°','#C0272D',11,'start',false));}
+    if(p>=2){o.push(R(310,60,155,130,'#e8f8ee','#1a7a3a',1.5));
+      o.push(T(387,80,'Theorem:','#1a7a3a',11,'middle',true));
+      o.push(T(387,97,'Angle in a','#241A17',10,'middle',false));
+      o.push(T(387,111,'semicircle = 90°','#241A17',10,'middle',false));
+      o.push(T(387,130,'AC is diameter','#888',9,'middle',false));
+      o.push(T(387,148,'ABC = 90°','#1a7a3a',12,'middle',true));
+      o.push(T(387,166,'BCA = 90−'+sa+' = '+sb+'°','#1a7a3a',12,'middle',true));}
+
+  } else if(tp==='segment'){
+    var sk=V.q16seg_known;
+    // A, C on circle; B and D on same arc side — angles ABС = ADB
+    var Av=pt(150),Cv=pt(30),Bv=pt(260),Dv=pt(290);
+    o.push(L(Av[0],Av[1],Bv[0],Bv[1],'#241A17',1.5));o.push(L(Cv[0],Cv[1],Bv[0],Bv[1],'#241A17',1.5));
+    o.push(L(Av[0],Av[1],Dv[0],Dv[1],'#1a5a8a',1.5));o.push(L(Cv[0],Cv[1],Dv[0],Dv[1],'#1a5a8a',1.5));
+    o.push(L(Av[0],Av[1],Cv[0],Cv[1],'#888',1,'4,3'));
+    o.push(T(Av[0]-10,Av[1],'A','#241A17',11,'end',false));o.push(T(Cv[0]+8,Cv[1],'C','#241A17',11,'start',false));
+    o.push(T(Bv[0]-10,Bv[1]+4,'B','#C0272D',11,'end',true));o.push(T(Dv[0]+8,Dv[1]+4,'D','#1a5a8a',11,'start',true));
+    if(p>=1){o.push(T(Bv[0]-14,Bv[1]-12,'ABC='+sk+'°','#C0272D',10,'end',false));}
+    if(p>=2){o.push(R(310,60,155,130,'#e8f8ee','#1a7a3a',1.5));
+      o.push(T(387,80,'Theorem:','#1a7a3a',11,'middle',true));
+      o.push(T(387,97,'Angles in the','#241A17',10,'middle',false));
+      o.push(T(387,111,'same segment','#241A17',10,'middle',false));
+      o.push(T(387,125,'are equal','#241A17',10,'middle',false));
+      o.push(T(387,148,'ADC = ABC','#1a7a3a',12,'middle',true));
+      o.push(T(387,166,'= '+sk+'°','#1a7a3a',14,'middle',true));}
+
+  } else if(tp==='cyclic'){
+    var dab=V.q16dab,bcd=V.q16bcd;
+    var Av=pt(120),Bv=pt(30),Cv=pt(300),Dv=pt(210);
+    o.push(L(Av[0],Av[1],Bv[0],Bv[1],'#241A17',1.5));o.push(L(Bv[0],Bv[1],Cv[0],Cv[1],'#241A17',1.5));
+    o.push(L(Cv[0],Cv[1],Dv[0],Dv[1],'#241A17',1.5));o.push(L(Dv[0],Dv[1],Av[0],Av[1],'#241A17',1.5));
+    o.push(T(Av[0]-8,Av[1]-8,'A','#241A17',11,'end',false));o.push(T(Bv[0]+8,Bv[1]-8,'B','#241A17',11,'start',false));
+    o.push(T(Cv[0]+8,Cv[1]+10,'C','#241A17',11,'start',false));o.push(T(Dv[0]-8,Dv[1]+10,'D','#241A17',11,'end',false));
+    if(p>=1){o.push(T(Av[0]-6,Av[1]+16,'DAB='+dab+'°','#C0272D',10,'end',false));}
+    if(p>=2){o.push(R(310,60,155,130,'#e8f8ee','#1a7a3a',1.5));
+      o.push(T(387,80,'Theorem:','#1a7a3a',11,'middle',true));
+      o.push(T(387,97,'Opposite angles','#241A17',10,'middle',false));
+      o.push(T(387,111,'in a cyclic quad','#241A17',10,'middle',false));
+      o.push(T(387,125,'sum to 180°','#241A17',10,'middle',false));
+      o.push(T(387,148,'BCD = 180−'+dab,'#1a7a3a',12,'middle',true));
+      o.push(T(387,166,'= '+bcd+'°','#1a7a3a',14,'middle',true));}
+
+  } else if(tp==='tangentrad'){
+    var oab=V.q16oab,tans=V.q16trad_ans;
+    // tangent at A; OA is radius; B is another point
+    var Av=pt(0);// A at rightmost point, tangent is vertical
+    var Bv=pt(50);
+    o.push(L(Av[0],Av[1]-60,Av[0],Av[1]+60,'#C8922A',2));// tangent line (vertical)
+    o.push(L(cx,cy,Av[0],Av[1],'#C0272D',2));// radius OA
+    o.push(L(cx,cy,Bv[0],Bv[1],'#241A17',1.5));// OB
+    o.push(L(Av[0],Av[1],Bv[0],Bv[1],'#241A17',1.5));// AB chord
+    // right angle mark at A
+    o.push('<rect x="'+(Av[0]-12)+'" y="'+(Av[1]-12)+'" width="10" height="10" fill="none" stroke="#1a5a8a" stroke-width="1.5"/>');
+    o.push(T(Av[0]+14,Av[1],'A','#241A17',11,'start',false));
+    o.push(T(Bv[0]+6,Bv[1]-8,'B','#241A17',11,'start',false));
+    o.push(T(Av[0]+16,Av[1]-45,'tangent','#C8922A',9,'start',false));
+    if(p>=1){o.push(T(cx-10,cy+14,'OAB='+oab+'°','#C0272D',10,'end',false));}
+    if(p>=2){o.push(R(310,50,155,140,'#e8f8ee','#1a7a3a',1.5));
+      o.push(T(387,70,'Theorem:','#1a7a3a',11,'middle',true));
+      o.push(T(387,87,'Tangent ⊥ radius','#241A17',10,'middle',false));
+      o.push(T(387,101,'OAB = 90°','#241A17',10,'middle',false));
+      o.push(T(387,115,'(tangent meets','#888',9,'middle',false));
+      o.push(T(387,127,'radius at 90°)','#888',9,'middle',false));
+      o.push(T(387,148,'ABO = 90−'+oab,'#1a7a3a',12,'middle',true));
+      o.push(T(387,166,'= '+tans+'°','#1a7a3a',14,'middle',true));}
+
+  } else if(tp==='tangentlen'){
+    var tp2=V.q16text,ref=V.q16tlen_reflex;
+    // external point P; two tangents PA and PB
+    var Pv=[cx+rad+55,cy];
+    var Av=pt(40),Bv=pt(-40);
+    o.push(L(Pv[0],Pv[1],Av[0],Av[1],'#C8922A',2));
+    o.push(L(Pv[0],Pv[1],Bv[0],Bv[1],'#C8922A',2));
+    o.push(L(cx,cy,Av[0],Av[1],'#C0272D',1.5,'4,3'));
+    o.push(L(cx,cy,Bv[0],Bv[1],'#C0272D',1.5,'4,3'));
+    o.push('<circle cx="'+Pv[0]+'" cy="'+Pv[1]+'" r="4" fill="#1a5a8a"/>');
+    o.push(T(Pv[0]+10,Pv[1]+4,'P','#1a5a8a',11,'start',true));
+    o.push(T(Av[0]-4,Av[1]-10,'A','#241A17',11,'end',false));
+    o.push(T(Bv[0]-4,Bv[1]+14,'B','#241A17',11,'end',false));
+    if(p>=1){o.push(T(Pv[0]+4,Pv[1]-18,'APB='+tp2+'°','#C0272D',10,'start',false));
+      o.push(T(cx-18,cy+14,'PA=PB','#C8922A',9,'end',false));}
+    if(p>=2){o.push(R(310,50,155,145,'#e8f8ee','#1a7a3a',1.5));
+      o.push(T(387,70,'Theorem:','#1a7a3a',11,'middle',true));
+      o.push(T(387,87,'Tangent lengths','#241A17',10,'middle',false));
+      o.push(T(387,101,'from ext. point','#241A17',10,'middle',false));
+      o.push(T(387,115,'are equal','#241A17',10,'middle',false));
+      o.push(T(387,130,'APB+AOB=180°','#888',9,'middle',false));
+      o.push(T(387,148,'Reflex AOB','#1a7a3a',12,'middle',true));
+      o.push(T(387,166,'= 180+'+tp2+'='+ref+'°','#1a7a3a',12,'middle',true));}
+
+  } else {// altseg
+    var ac=V.q16alt_chord,aa=V.q16alt_ans;
+    // tangent at B; chord BC; angle in alternate segment = angle between tangent and chord
+    var Bv=pt(0);// B at right, tangent vertical
+    var Cv=pt(120),Dv=pt(240);
+    o.push(L(Bv[0],Bv[1]-70,Bv[0],Bv[1]+70,'#C8922A',2));// tangent
+    o.push(L(Bv[0],Bv[1],Cv[0],Cv[1],'#241A17',2));// chord BC
+    o.push(L(Bv[0],Bv[1],Dv[0],Dv[1],'#241A17',1.5));
+    o.push(L(Cv[0],Cv[1],Dv[0],Dv[1],'#241A17',1.5));
+    o.push(T(Bv[0]+12,Bv[1],'B','#241A17',11,'start',false));
+    o.push(T(Cv[0]-8,Cv[1]-8,'C','#241A17',11,'end',false));
+    o.push(T(Dv[0]-8,Dv[1]+10,'D','#241A17',11,'end',false));
+    o.push(T(Bv[0]+14,Bv[1]-52,'tangent','#C8922A',9,'start',false));
+    if(p>=1){o.push(T(Bv[0]+14,Bv[1]+20,'TBC='+ac+'°','#C0272D',11,'start',false));}
+    if(p>=2){o.push(R(310,50,155,145,'#e8f8ee','#1a7a3a',1.5));
+      o.push(T(387,70,'Theorem:','#1a7a3a',11,'middle',true));
+      o.push(T(387,87,'Alternate segment','#241A17',10,'middle',false));
+      o.push(T(387,101,'theorem: angle','#241A17',10,'middle',false));
+      o.push(T(387,115,'tangent-chord =','#241A17',10,'middle',false));
+      o.push(T(387,129,'angle in alt. seg.','#241A17',10,'middle',false));
+      o.push(T(387,148,'BDC = TBC','#1a7a3a',12,'middle',true));
+      o.push(T(387,166,'= '+ac+'°','#1a7a3a',14,'middle',true));}
   }
-  s.innerHTML=o.join('');}
+  s.innerHTML=o.join('');
+}
 function poly3(x1,y1,x2,y2,x3,y3){return '<polygon points="'+x1.toFixed(1)+','+y1.toFixed(1)+' '+x2.toFixed(1)+','+y2.toFixed(1)+' '+x3.toFixed(1)+','+y3.toFixed(1)+'" fill="none" stroke="#241A17" stroke-width="1.5"/>';}
 
 function dQ17(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
@@ -673,8 +811,46 @@ function yt14(){var l2=rnd(3,8),w2=rnd(2,5),h2=rnd(2,4);var sa2=2*(l2*w2+l2*h2+w
   return tryIt({question:'Find the surface area of a cuboid: l=<b>'+l2+'</b>, w=<b>'+w2+'</b>, h=<b>'+h2+'</b> cm.',hints:['SA = 2(lw+lh+wh)'],ans:sa2,tol:0,unit:'cm²',working:'2('+l2*w2+'+'+l2*h2+'+'+w2*h2+') = '+sa2+' cm²'});}
 function yt15(){var br=rnd(40,260);var bk=br<180?br+180:br-180;
   return tryIt({question:'Bearing from X to Y is <b>'+br+'°</b>. Find the bearing of X from Y.',hints:['Add or subtract 180°'],ans:bk,tol:0,unit:'°',working:br+(br<180?' + 180':' − 180')+' = '+bk+'°'});}
-function yt16(){var aoc2=rnd(80,160);
-  return tryIt({question:'Angle AOC = <b>'+aoc2+'°</b> (O is centre). Find angle ABC on the circumference.',hints:['Angle at centre = 2 × angle at circumference'],ans:aoc2/2,tol:0,unit:'°',working:'ABC = '+aoc2+' ÷ 2 = '+aoc2/2+'°'});}
+function yt16(){
+  var types=['centre','semicircle','segment','cyclic','tangentrad','tangentlen','altseg'];
+  var tp=pick(types);
+  if(tp==='centre'){
+    var aoc2=rnd(80,160);
+    return tryIt({question:'Angle AOC = <b>'+aoc2+'°</b> (O is centre). Find angle ABC at the circumference.',
+      hints:['Angle at centre = 2 × angle at circumference'],
+      ans:aoc2/2,tol:0,unit:'°',working:'ABC = '+aoc2+' ÷ 2 = '+aoc2/2+'°'});
+  } else if(tp==='semicircle'){
+    var sa2=rnd(25,65),sb2=90-sa2;
+    return tryIt({question:'AC is a diameter. Angle BAC = <b>'+sa2+'°</b>. Find angle BCA.',
+      hints:['Angle in a semicircle = 90°','Angles in a triangle sum to 180°'],
+      ans:sb2,tol:0,unit:'°',working:'ABC = 90° (semicircle). BCA = 180 − 90 − '+sa2+' = '+sb2+'°'});
+  } else if(tp==='segment'){
+    var sk2=rnd(35,75);
+    return tryIt({question:'B and D lie on the same arc. Angle ABC = <b>'+sk2+'°</b>. Find angle ADC.',
+      hints:['Angles in the same segment are equal'],
+      ans:sk2,tol:0,unit:'°',working:'ADC = ABC = '+sk2+'° (same segment)'});
+  } else if(tp==='cyclic'){
+    var dab2=rnd(60,110),bcd2=180-dab2;
+    return tryIt({question:'ABCD is a cyclic quadrilateral. Angle DAB = <b>'+dab2+'°</b>. Find angle BCD.',
+      hints:['Opposite angles in a cyclic quadrilateral sum to 180°'],
+      ans:bcd2,tol:0,unit:'°',working:'BCD = 180 − '+dab2+' = '+bcd2+'°'});
+  } else if(tp==='tangentrad'){
+    var oab2=rnd(30,70),tr2=90-oab2;
+    return tryIt({question:'A tangent meets the circle at A. OA is the radius. Angle OAB = <b>'+oab2+'°</b>. Find angle ABO.',
+      hints:['Tangent is perpendicular to radius: OAT = 90°','Angles in triangle sum to 180°'],
+      ans:tr2,tol:0,unit:'°',working:'OAT = 90°. ABO = 180 − 90 − '+oab2+' = '+tr2+'°'});
+  } else if(tp==='tangentlen'){
+    var tp3=rnd(30,80),ref2=180+tp3;
+    return tryIt({question:'Tangents PA and PB touch the circle from external point P. Angle APB = <b>'+tp3+'°</b>. Find the reflex angle AOB.',
+      hints:['Angle APB + angle AOB (non-reflex) = 180°','Reflex AOB = 360 − non-reflex AOB'],
+      ans:ref2,tol:0,unit:'°',working:'Non-reflex AOB = 180 − '+tp3+' = '+(180-tp3)+'°. Reflex = 360 − '+(180-tp3)+' = '+ref2+'°'});
+  } else {
+    var ac2=rnd(35,75);
+    return tryIt({question:'A tangent touches the circle at B. The angle between the tangent and chord BC is <b>'+ac2+'°</b>. Find angle BDC in the alternate segment.',
+      hints:['Alternate segment theorem: tangent-chord angle = angle in alternate segment'],
+      ans:ac2,tol:0,unit:'°',working:'BDC = '+ac2+'° (alternate segment theorem)'});
+  }
+}
 function yt17(){var freqs2=[rnd(3,7),rnd(7,12),rnd(12,18),rnd(6,10),rnd(2,6)];var mids2=[152.5,157.5,162.5,167.5,172.5];var n2=freqs2.reduce(function(a,b){return a+b;},0);var sfx=0;for(var i=0;i<5;i++)sfx+=freqs2[i]*mids2[i];var mean2=sfx/n2;
   return tryIt({question:'Heights grouped: frequencies '+freqs2.join(', ')+' for classes 150–155 to 170–175. Estimate mean (1 d.p.).',hints:['Midpoints: 152.5, 157.5, 162.5, 167.5, 172.5','Mean = Σfx ÷ n'],ans:Math.round(mean2*10)/10,tol:0.3,unit:'cm',working:'Σfx = '+sfx.toFixed(1)+', n = '+n2+', mean = '+mean2.toFixed(1)+' cm'});}
 function yt18(){var q12=rnd(18,30),q32=rnd(40,55);
@@ -778,10 +954,51 @@ var QS=[
     {lb:'Verify',dr:dQ15,ht:'<p>The back bearing differs by exactly 180°. If bearing < 180°, add 180°. If ≥ 180°, subtract 180°.</p>'},
     {lb:'Your turn',dr:dQ15,ht:yt15}
   ]},
-  {ey:'Q16 · Y10 AOC · Geometry',ti:'Circle Theorems <span class="badge e">E</span>',su:V.q16ct.type==='centre'?'Angle AOC = '+V.q16ct.aoc+'°. Find angle ABC.':'ABCD cyclic quad. Angle DAB = '+V.q16ct.opp+'°. Find BCD.',steps:[
-    {lb:'The theorem',dr:dQ16,ht:'<p>The <b>angle at the centre</b> is twice the angle at the circumference subtended by the same arc.</p><p>Opposite angles in a <b>cyclic quadrilateral</b> sum to 180°.</p>'},
-    {lb:'Apply',dr:dQ16,ht:V.q16ct.type==='centre'?'<div class="fm">ABC = ½ × AOC = ½ × '+V.q16ct.aoc+' = '+V.q16abc+'°</div>':'<div class="fm">BCD = 180 − DAB = 180 − '+V.q16ct.opp+' = '+V.q16bcd+'°</div>'},
-    {lb:'State the reason',dr:dQ16,ht:'<p>Always write the theorem name as your reason: "angle at the centre = twice angle at circumference" or "opposite angles in cyclic quadrilateral sum to 180°".</p>'},
+  {ey:'Q16 · Y10 AOC · Geometry',ti:'Circle Theorems <span class="badge e">E</span>',
+   su:(function(){
+     var t=V.q16type;
+     if(t==='centre') return 'Angle AOC = '+V.q16aoc+'° (O is centre). Find angle ABC at the circumference.';
+     if(t==='semicircle') return 'AC is a diameter. Angle BAC = '+V.q16semi_a+'°. Find angle ABC and angle BCA.';
+     if(t==='segment') return 'B and D are on the same arc. Angle ABC = '+V.q16seg_known+'°. Find angle ADC.';
+     if(t==='cyclic') return 'ABCD is a cyclic quadrilateral. Angle DAB = '+V.q16dab+'°. Find angle BCD.';
+     if(t==='tangentrad') return 'A tangent touches the circle at A. Angle OAB = '+V.q16oab+'°. Find angle ABO.';
+     if(t==='tangentlen') return 'Tangents PA and PB from point P. Angle APB = '+V.q16text+'°. Find the reflex angle AOB.';
+     return 'Tangent at B. Angle between tangent and chord BC = '+V.q16alt_chord+'°. Find angle BDC.';
+   })(),
+   steps:[
+    {lb:'The theorem',dr:dQ16,ht:(function(){
+      var t=V.q16type;
+      if(t==='centre') return '<p>The <b>angle at the centre</b> is twice the angle at the circumference subtended by the same arc.</p>';
+      if(t==='semicircle') return '<p>The <b>angle in a semicircle</b> is always 90°. If AC is a diameter, angle ABC = 90°.</p>';
+      if(t==='segment') return '<p><b>Angles in the same segment</b> are equal — both angles stand on the same chord from the same side.</p>';
+      if(t==='cyclic') return '<p><b>Opposite angles in a cyclic quadrilateral</b> sum to 180°.</p>';
+      if(t==='tangentrad') return '<p>A <b>tangent is perpendicular to the radius</b> at the point of contact. So OAT = 90°.</p>';
+      if(t==='tangentlen') return '<p><b>Two tangent lengths from an external point are equal</b>. Also angle APB + angle AOB (non-reflex) = 180°.</p>';
+      return '<p>The <b>alternate segment theorem</b>: the angle between a tangent and a chord equals the angle in the alternate segment.</p>';
+    })()},
+    {lb:'Apply',dr:dQ16,ht:(function(){
+      var t=V.q16type;
+      if(t==='centre') return '<div class="fm">ABC = ½ × AOC = ½ × '+V.q16aoc+' = '+V.q16abc+'°</div>';
+      if(t==='semicircle') return '<div class="fm">ABC = 90° (angle in semicircle)</div><div class="fm">BCA = 180 − 90 − '+V.q16semi_a+' = '+V.q16semi_b+'°</div>';
+      if(t==='segment') return '<div class="fm">ADC = ABC = '+V.q16seg_known+'°</div>';
+      if(t==='cyclic') return '<div class="fm">BCD = 180 − '+V.q16dab+' = '+V.q16bcd+'°</div>';
+      if(t==='tangentrad') return '<div class="fm">OAB = 90° (tangent ⊥ radius)</div><div class="fm">ABO = 180 − 90 − '+V.q16oab+' = '+V.q16trad_ans+'°</div>';
+      if(t==='tangentlen') return '<div class="fm">AOB (non-reflex) = 180 − '+V.q16text+' = '+(180-V.q16text)+'°</div><div class="fm">Reflex AOB = 360 − '+(180-V.q16text)+' = '+V.q16tlen_reflex+'°</div>';
+      return '<div class="fm">BDC = '+V.q16alt_chord+'° (alternate segment theorem)</div>';
+    })()},
+    {lb:'State the reason',dr:dQ16,ht:(function(){
+      var t=V.q16type;
+      var reasons={
+        centre:'"Angle at the centre = twice the angle at the circumference (same arc)"',
+        semicircle:'"Angle in a semicircle = 90°"',
+        segment:'"Angles in the same segment are equal"',
+        cyclic:'"Opposite angles in a cyclic quadrilateral sum to 180°"',
+        tangentrad:'"Tangent is perpendicular to the radius at the point of contact"',
+        tangentlen:'"Two tangent lengths from an external point are equal; angle APB + angle AOB = 180°"',
+        altseg:'"Alternate segment theorem"'
+      };
+      return '<p>Always write the full theorem name as your reason:</p><div class="fm">'+reasons[t]+'</div>';
+    })()},
     {lb:'Your turn',dr:dQ16,ht:yt16}
   ]},
   {ey:'Q17 · Y10 AOC · Statistics',ti:'Grouped Data — Estimated Mean <span class="badge e">E</span>',su:'Heights of '+V.q17n+' students, grouped in 5 cm classes.',steps:[
