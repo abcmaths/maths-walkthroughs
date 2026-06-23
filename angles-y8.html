@@ -55,10 +55,10 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
-.newq-btn{float:right;font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
-.newq-btn:hover{background:var(--gold);color:#fff;}
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
 .try-q{font-size:15px;margin:8px 0 10px;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;}
+.f{background:#1a5a8a;color:#fff;}.e{background:#C0272D;color:#fff;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
@@ -88,238 +88,253 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
   </div>
 </div>
 <script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
 function tryIt(o){
-  var id='t'+Math.random().toString(36).slice(2);
-  ST[id]={o:o};
+  var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
   return '<div class="try" data-tryid="'+id+'">'
-    +'<div class="try-t">\u2714 Your Turn</div>'
+    +'<div class="try-t">✔ Your Turn</div>'
     +'<div class="try-q">'+o.question+'</div>'
     +(h?'<ul class="hl">'+h+'</ul>':'')
-    +'<div class="ar">'
-    +'<input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
-    +'<details class="wk"><summary>Show working</summary>'
-    +'<div class="wk-b">'+o.working+'</div></details>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
     +'</div>';
 }
 document.addEventListener('click',function(e){
+  if(e.target.classList.contains('try-new')){render();return;}
   if(e.target.classList.contains('try-ck')){
-    var id=e.target.getAttribute('data-tryid');
-    var o=ST[id].o;
+    var id=e.target.getAttribute('data-tryid'),o=ST[id].o;
     var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
     var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
     if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
-      fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;
-    }else{
-      fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';
-    }
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
   }
 });
 function g(){return document.getElementById('dg');}
-function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function T(x,y,t,c,sz,a,b){return '<text x="'+x+'" y="'+y+'" font-size="'+(sz||12)+'" font-family="Arial" fill="'+(c||'#241A17')+'" text-anchor="'+(a||'middle')+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" rx="2"/>';}
-function arc(cx,cy,r,a1,a2,c,w){var r1=a1*Math.PI/180,r2=a2*Math.PI/180;var x1=cx+r*Math.cos(r1),y1=cy-r*Math.sin(r1),x2=cx+r*Math.cos(r2),y2=cy-r*Math.sin(r2);var laf=((a2-a1+360)%360)>180?1:0;return '<path d="M '+x1.toFixed(1)+','+y1.toFixed(1)+' A '+r+','+r+' 0 '+laf+',0 '+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="'+(c||'#C8922A')+'" stroke-width="'+(w||1.5)+'" />';}
-
-/* Q1: Alternate angles */
-function dQ1(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  // Two parallel lines
-  o.push(L(40,90,440,90,'#241A17',2.5));
-  o.push(L(40,180,'440','180','#241A17',2.5));
-  // Arrow marks
-  o.push(T(400,84,'\u203a','#241A17',18,'middle',true));
-  o.push(T(400,175,'\u203a','#241A17',18,'middle',true));
-  // Transversal
-  o.push(L(140,20,300,240,'#555',2));
-  // Intersection points approx
-  var x1=176,y1=90,x2=244,y2=180;
-  if(p>=1){
-    // Alternate angle at top (below-left of upper intersection)
-    o.push(arc(x1,y1,38,200,250,'#C0272D',2.5));
-    o.push(T(x1-46,y1+30,'65\u00b0','#C0272D',14,'middle',true));
-  }
-  if(p>=2){
-    // Z-shape highlight
-    o.push(L(x1-18,y1+36,x2+18,y2-36,'#C8922A',1,'6,3'));
-    o.push(T(212,135,'Z','#C8922A',20,'middle',true));
-  }
-  if(p>=3){
-    // Alternate angle at bottom (above-right of lower intersection)
-    o.push(arc(x2,y2,38,20,70,'#1a5a8a',2.5));
-    o.push(T(x2+46,y2-30,'65\u00b0','#1a5a8a',14,'middle',true));
-  }
-  if(p>=4){
-    o.push(T(240,248,'Alternate angles are equal (Z-angles)','#C0272D',13,'middle',true));
-  }
-  s.innerHTML=o.join('');
+function arc(cx,cy,r,a1,a2,col,w){
+  var r1=a1*Math.PI/180,r2=a2*Math.PI/180;
+  var x1=cx+r*Math.cos(r1),y1=cy+r*Math.sin(r1),x2=cx+r*Math.cos(r2),y2=cy+r*Math.sin(r2);
+  var laf=((a2-a1+360)%360)>180?1:0;
+  return '<path d="M '+x1.toFixed(1)+','+y1.toFixed(1)+' A '+r+','+r+' 0 '+laf+',1 '+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="'+(col||'#C8922A')+'" stroke-width="'+(w||1.5)+'"/>';
 }
 
-/* Q2: Corresponding angles */
-function dQ2(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(L(40,90,440,90,'#241A17',2.5));
-  o.push(L(40,180,440,180,'#241A17',2.5));
-  o.push(T(400,84,'\u203a','#241A17',18,'middle',true));
-  o.push(T(400,175,'\u203a','#241A17',18,'middle',true));
-  o.push(L(140,20,300,240,'#555',2));
-  var x1=176,y1=90,x2=244,y2=180;
-  if(p>=1){
-    o.push(arc(x1,y1,38,250,360,'#C0272D',2.5));
-    o.push(T(x1+46,y1+22,'112\u00b0','#C0272D',13,'middle',true));
-    o.push(T(x1-20,y1-28,'F-shape','#C8922A',11,'middle',false));
-  }
-  if(p>=2){
-    o.push(L(x1-20,y1-20,x2+20,y2+20,'#C8922A',1,'6,3'));
-    o.push(L(x1-20,y1+8,x1+30,y1+8,'#C8922A',1,'6,3'));
-    o.push(L(x2-20,y2+8,x2+30,y2+8,'#C8922A',1,'6,3'));
-  }
-  if(p>=3){
-    o.push(arc(x2,y2,38,250,360,'#1a5a8a',2.5));
-    o.push(T(x2+46,y2+22,'112\u00b0','#1a5a8a',13,'middle',true));
-  }
-  if(p>=4){
-    o.push(T(240,248,'Corresponding angles are equal (F-angles)','#C0272D',13,'middle',true));
-  }
-  s.innerHTML=o.join('');
-}
+// Q1: Angles on a straight line
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(L(40,160,440,160,'#241A17',2));
+  o.push(L(240,160,160,60,'#C0272D',2));
+  if(p>=1){o.push(T(188,148,'47°','#C0272D',13,'middle',true));o.push(arc(240,160,50,180,217,'#C0272D',1.5));}
+  if(p>=2){o.push(T(300,140,'x','#1a5a8a',16,'middle',true));o.push(arc(240,160,50,217,360,'#1a5a8a',1.5));}
+  if(p>=3){o.push(R(100,190,280,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,213,'x = 180 − 47 = 133°','#1a7a3a',15,'middle',true));}
+  s.innerHTML=o.join('');}
 
-/* Q3: Co-interior angles */
-function dQ3(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(L(40,90,440,90,'#241A17',2.5));
-  o.push(L(40,180,440,180,'#241A17',2.5));
-  o.push(T(400,84,'\u203a','#241A17',18,'middle',true));
-  o.push(T(400,175,'\u203a','#241A17',18,'middle',true));
-  o.push(L(140,20,300,240,'#555',2));
-  var x1=176,y1=90,x2=244,y2=180;
-  if(p>=1){
-    o.push(arc(x1,y1,40,250,360,'#C0272D',2.5));
-    o.push(T(x1+48,y1+24,'a','#C0272D',16,'middle',true));
-  }
-  if(p>=2){
-    o.push(arc(x2,y2,40,180,250,'#1a5a8a',2.5));
-    o.push(T(x2-42,y2-28,'b','#1a5a8a',16,'middle',true));
-    o.push(T(215,136,'C','#C8922A',20,'middle',true));
-  }
-  if(p>=3){
-    o.push(T(240,30,'a + b = 180\u00b0   (co-interior / C-angles)','#C0272D',14,'middle',true));
-    o.push(T(240,52,'They are supplementary \u2014 they add to 180\u00b0','#888',12,'middle',false));
-  }
-  if(p>=4){
-    o.push(T(240,248,'Co-interior angles add to 180\u00b0 (same side of transversal)','#C0272D',13,'middle',true));
-  }
-  s.innerHTML=o.join('');
-}
+// Q2: Angles around a point
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var cx=240,cy=140;
+  [[0,80,'#C0272D'],[80,195,'#1a5a8a'],[195,270,'#C8922A'],[270,360,'#1a7a3a']].forEach(function(seg,i){
+    var a1=seg[0]-90,a2=seg[1]-90,col=seg[2];
+    var r1=a1*Math.PI/180,r2=a2*Math.PI/180;
+    o.push(L(cx,cy,cx+100*Math.cos(r1),cy+100*Math.sin(r1),col,2));
+  });
+  o.push(L(cx,cy,cx+100*Math.cos((270-90)*Math.PI/180),cy+100*Math.sin((270-90)*Math.PI/180),'#1a7a3a',2));
+  if(p>=1){o.push(T(cx+50,cy-60,'80°','#C0272D',13,'middle',true));o.push(T(cx-60,cy+30,'115°','#1a5a8a',13,'middle',true));}
+  if(p>=2){o.push(T(cx+20,cy+65,'75°','#C8922A',13,'middle',true));o.push(T(cx+70,cy-10,'x','#1a7a3a',16,'middle',true));}
+  if(p>=3){o.push(R(80,220,320,32,'#e8f8ee','#1a7a3a',2));o.push(T(240,241,'x = 360 − 80 − 115 − 75 = 90°','#1a7a3a',14,'middle',true));}
+  s.innerHTML=o.join('');}
 
-/* Q4: Interior angles of polygon */
-function dQ4(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  // Draw a pentagon
-  var cx=160,cy=135,r=90,n=5;
-  var pts=[];
-  for(var i=0;i<n;i++){var a=(i*2*Math.PI/n)-Math.PI/2;pts.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]);}
-  o.push('<polygon points="'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ')+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
-  if(p>=1){
-    o.push(T(cx,cy,'Pentagon','#C0272D',13,'middle',true));
-    o.push(T(cx,cy+18,'n = 5','#888',11,'middle',false));
-  }
+// Q3: Vertically opposite / parallel lines
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(L(40,80,440,80,'#241A17',2));o.push(L(40,180,'#241A17',2));o.push(L(40,180,440,180,'#241A17',2));
+  o.push(L(160,20,260,240,'#C0272D',2));
+  if(p>=1){o.push(T(185,95,'65°','#C0272D',13,'middle',true));}
   if(p>=2){
-    o.push(T(340,80,'Sum of interior angles:','#241A17',13,'start',false));
-    o.push(T(340,100,'(n \u2212 2) \u00d7 180\u00b0','#C0272D',15,'start',true));
-    o.push(T(340,124,'= (5 \u2212 2) \u00d7 180','#241A17',13,'start',false));
-    o.push(T(340,144,'= 3 \u00d7 180','#241A17',13,'start',false));
-    o.push(T(340,168,'= 540\u00b0','#C0272D',18,'start',true));
+    o.push(T(210,170,'65°','#C8922A',13,'middle',true));
+    o.push(T(155,170,'115°','#1a5a8a',13,'middle',true));
+    o.push(T(50,130,'Alt. angles','#888',11,'start',false));
+    o.push(T(50,145,'Co-int. angles','#888',11,'start',false));
   }
-  if(p>=3){
-    // 9-sided shape worked example
-    o.push(T(340,200,'9-sided: (9\u22122)\u00d7180','#1a5a8a',12,'start',false));
-    o.push(T(340,218,'= 7 \u00d7 180 = 1260\u00b0','#1a5a8a',14,'start',true));
-  }
-  if(p>=4){
-    o.push(T(240,248,'Formula: (n \u2212 2) \u00d7 180\u00b0 for any polygon','#C0272D',13,'middle',true));
-  }
-  s.innerHTML=o.join('');
-}
+  if(p>=3){o.push(R(60,210,360,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,233,'Alternate angles equal; co-interior sum to 180°','#1a7a3a',12,'middle',true));}
+  s.innerHTML=o.join('');}
 
-/* Q5: Exterior angles */
-function dQ5(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+// Q4: Angles in a triangle
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push('<polygon points="240,30 80,220 400,220" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  if(p>=1){o.push(T(240,22,'58°','#C0272D',13,'middle',true));o.push(T(90,228,'73°','#1a5a8a',13,'middle',true));}
+  if(p>=2){o.push(T(390,228,'x','#C8922A',16,'middle',true));}
+  if(p>=3){o.push(R(100,240,280,14,'#e8f8ee','#1a7a3a',1));o.push(T(240,250,'x = 180−58−73 = 49°','#1a7a3a',13,'middle',true));}
+  s.innerHTML=o.join('');}
+
+// Q5: Isosceles triangle
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push('<polygon points="240,30 100,220 380,220" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  o.push(L(166,128,174,122,'#C0272D',2));o.push(L(174,122,182,128,'#C0272D',2));
+  o.push(L(298,128,306,122,'#C0272D',2));o.push(L(306,122,314,128,'#C0272D',2));
+  if(p>=1){o.push(T(240,22,'x','#C0272D',16,'middle',true));o.push(T(240,14,'apex','#888',9,'middle',false));}
+  if(p>=2){o.push(T(108,228,'52°','#1a5a8a',13,'middle',true));o.push(T(372,228,'52°','#1a5a8a',13,'middle',true));
+    o.push(T(360,100,'Equal sides → equal base angles','#888',10,'end',false));}
+  if(p>=3){o.push(R(100,240,280,14,'#e8f8ee','#1a7a3a',1));o.push(T(240,250,'x = 180−52−52 = 76°','#1a7a3a',13,'middle',true));}
+  s.innerHTML=o.join('');}
+
+// Q6: Exterior angle of triangle
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push('<polygon points="120,200 360,200 240,60" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  o.push(L(360,200,430,200,'#888',2,'6,3'));
+  if(p>=1){o.push(T(240,52,'55°','#C0272D',13,'middle',true));o.push(T(128,208,'70°','#1a5a8a',13,'middle',true));}
+  if(p>=2){o.push(T(408,192,'e','#C8922A',16,'middle',true));}
+  if(p>=3){o.push(R(80,230,320,22,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,246,'e = 55 + 70 = 125°  (ext. angle = sum of remote interior)','#1a7a3a',12,'middle',true));}
+  s.innerHTML=o.join('');}
+
+// Q7: Angles in polygons
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   // Regular hexagon
-  var cx=180,cy=135,r=85,n=6;
-  var pts=[];
-  for(var i=0;i<n;i++){var a=(i*2*Math.PI/n)-Math.PI/2;pts.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]);}
-  o.push('<polygon points="'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ')+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
-  if(p>=1){
-    // Extend one side to show exterior angle
-    var p0=pts[0],p1=pts[1];
-    var dx=p1[0]-p0[0],dy=p1[1]-p0[1];
-    o.push(L(p1[0],p1[1],p1[0]+dx*0.6,p1[1]+dy*0.6,'#1a5a8a',2,''));
-    o.push(arc(p1[0],p1[1],36,260,320,'#1a5a8a',2));
-    o.push(T(p1[0]+44,p1[1]-10,'ext.','#1a5a8a',11,'middle',false));
-    o.push(T(p1[0]+44,p1[1]+4,'angle','#1a5a8a',11,'middle',false));
-  }
-  if(p>=2){
-    o.push(T(360,70,'Exterior angle of','#241A17',13,'start',false));
-    o.push(T(360,88,'regular polygon:','#241A17',13,'start',false));
-    o.push(T(360,112,'360\u00b0 \u00f7 n','#C0272D',16,'start',true));
-    o.push(T(360,136,'Hexagon (n=6):','#241A17',12,'start',false));
-    o.push(T(360,154,'360 \u00f7 6 = 60\u00b0','#C0272D',15,'start',true));
-  }
-  if(p>=3){
-    o.push(T(360,185,'Interior + exterior','#888',12,'start',false));
-    o.push(T(360,201,'= 180\u00b0 always','#888',12,'start',false));
-    o.push(T(360,221,'Interior = 180\u221260 = 120\u00b0','#1a5a8a',13,'start',true));
-  }
-  if(p>=4){
-    o.push(T(240,248,'All exterior angles of any polygon sum to 360\u00b0','#C0272D',13,'middle',true));
-  }
-  s.innerHTML=o.join('');
-}
+  var cx=160,cy=130,r=90;
+  var pts=[];for(var i=0;i<6;i++){var a=(i*60-90)*Math.PI/180;pts.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));}
+  o.push('<polygon points="'+pts.join(' ')+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  if(p>=1){o.push(T(cx,cy,'Hexagon\nn = 6','#888',12,'middle',false));
+    o.push(R(290,40,170,40,'#fff5f0','#C0272D',1.5));o.push(T(375,65,'Sum = (n−2)×180°','#241A17',12,'middle',false));}
+  if(p>=2){o.push(R(290,90,170,40,'#e8f0ff','#1a5a8a',1.5));o.push(T(375,115,'= 4 × 180 = 720°','#1a5a8a',14,'middle',true));}
+  if(p>=3){o.push(R(290,140,170,40,'#e8f8ee','#1a7a3a',1.5));o.push(T(375,165,'Each angle = 720÷6 = 120°','#1a7a3a',13,'middle',true));}
+  if(p>=4){o.push(T(375,200,'Ext. angle = 360÷6 = 60°','#C8922A',12,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// Q8: Bearing
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var ox=160,oy=60;
+  // North line
+  o.push(L(ox,oy+10,ox,oy+110,'#333',1.5));o.push(T(ox,oy+5,'N','#333',12,'middle',true));
+  // Bearing line
+  var br=125,br2=(br-90)*Math.PI/180;
+  o.push(L(ox,oy+10,ox+120*Math.cos(br2),oy+10+120*Math.sin(br2),'#C0272D',2));
+  if(p>=1){o.push(arc(ox,oy+10,40,-90,br-90,'#C0272D',1.5));o.push(T(ox+55,oy+45,'125°','#C0272D',13,'middle',true));
+    o.push(T(ox+5,oy+20,'A','#241A17',12,'start',false));}
+  if(p>=2){// back bearing
+    var ox2=330,oy2=170;
+    o.push(L(ox2,oy2-10,ox2,oy2-90,'#333',1.5,'4,3'));o.push(T(ox2,oy2-95,'N','#333',12,'middle',true));
+    o.push(L(ox2,oy2,ox2-120*Math.cos(br2),oy2-120*Math.sin(br2),'#1a5a8a',2,'4,3'));
+    o.push(T(ox2+10,oy2,'B','#241A17',12,'start',false));}
+  if(p>=3){o.push(R(60,220,360,32,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,241,'Back bearing = 125 + 180 = 305°','#1a7a3a',14,'middle',true));}
+  s.innerHTML=o.join('');}
+
+// Q9: Angles in quadrilaterals
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push('<polygon points="100,200 380,200 420,60 60,60" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  if(p>=1){o.push(T(70,55,'110°','#C0272D',13,'middle',true));o.push(T(415,55,'85°','#1a5a8a',13,'middle',true));}
+  if(p>=2){o.push(T(390,208,'70°','#C8922A',13,'middle',true));o.push(T(100,208,'x','#1a7a3a',16,'middle',true));}
+  if(p>=3){o.push(R(80,228,320,26,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,246,'x = 360−110−85−70 = 95°','#1a7a3a',14,'middle',true));}
+  s.innerHTML=o.join('');}
+
+// Q10: Constructions / angle bisector concept
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var vx=200,vy=200;
+  o.push(L(vx,vy,vx+180,vy,'#241A17',2));
+  o.push(L(vx,vy,vx+130,vy-140,'#241A17',2));
+  if(p>=1){o.push(arc(vx,vy,50,180,227,'#C8922A',1.5));o.push(T(vx+65,vy-20,'47°','#C8922A',13,'middle',true));}
+  if(p>=2){// bisector
+    var bisa=(180+227)/2;var bisr=bisa*Math.PI/180;
+    o.push(L(vx,vy,vx+160*Math.cos(bisr),vy+160*Math.sin(bisr),'#C0272D',2,'6,3'));
+    o.push(arc(vx,vy,36,180,bisa,'#C0272D',1.5));o.push(arc(vx,vy,36,bisa,227,'#C0272D',1.5));
+    o.push(T(vx+50,vy-55,'Bisector','#C0272D',11,'middle',false));}
+  if(p>=3){o.push(R(60,220,360,32,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,241,'Each half = 47÷2 = 23.5°','#1a7a3a',14,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function yt1(){var a=rnd(25,75);return tryIt({question:'Two angles on a straight line are <b>'+a+'°</b> and <b>x</b>. Find x.',hints:['Angles on a straight line sum to 180°','x = 180 − '+a],ans:180-a,tol:0.5,unit:'°',working:'180 − '+a+' = '+(180-a)+'°'});}
+function yt2(){var a=rnd(60,100),b=rnd(60,100),c=rnd(40,80);return tryIt({question:'Three angles around a point: <b>'+a+'°</b>, <b>'+b+'°</b>, <b>'+c+'°</b> and <b>x</b>. Find x.',hints:['Angles around a point sum to 360°'],ans:360-a-b-c,tol:0.5,unit:'°',working:'360 − '+a+' − '+b+' − '+c+' = '+(360-a-b-c)+'°'});}
+function yt3(){var a=rnd(30,70);return tryIt({question:'A transversal crosses parallel lines. One angle is <b>'+a+'°</b>. What is the alternate angle?',hints:['Alternate angles are equal'],ans:a,tol:0.5,unit:'°',working:'Alternate angles are equal: '+a+'°'});}
+function yt4(){var a=rnd(40,70),b=rnd(30,60);return tryIt({question:'A triangle has angles <b>'+a+'°</b> and <b>'+b+'°</b>. Find the third angle.',hints:['Angles in a triangle sum to 180°'],ans:180-a-b,tol:0.5,unit:'°',working:'180 − '+a+' − '+b+' = '+(180-a-b)+'°'});}
+function yt5(){var base=rnd(30,65);return tryIt({question:'An isosceles triangle has base angles of <b>'+base+'°</b> each. Find the apex angle.',hints:['All three angles sum to 180°','Apex = 180 − 2 × '+base],ans:180-2*base,tol:0.5,unit:'°',working:'180 − 2×'+base+' = '+(180-2*base)+'°'});}
+function yt6(){var a=rnd(35,65),b=rnd(35,65);return tryIt({question:'Two interior angles of a triangle are <b>'+a+'°</b> and <b>'+b+'°</b>. Find the exterior angle at the third vertex.',hints:['Exterior angle = sum of the two remote interior angles'],ans:a+b,tol:0.5,unit:'°',working:a+' + '+b+' = '+(a+b)+'°'});}
+function yt7(){var n=rnd(5,10);var s=(n-2)*180;return tryIt({question:'Find the sum of interior angles of a <b>'+n+'-sided polygon</b>.',hints:['Formula: (n − 2) × 180°','n = '+n],ans:s,tol:0.5,unit:'°',working:'('+n+' − 2) × 180 = '+(n-2)+' × 180 = '+s+'°'});}
+function yt8(){var br=rnd(40,170);var back=br<180?br+180:br-180;return tryIt({question:'A bearing from A to B is <b>'+br+'°</b>. What is the back bearing (B to A)?',hints:['Back bearing = bearing + 180° (or − 180° if > 180°)'],ans:back,tol:0.5,unit:'°',working:br+' + 180 = '+(br+180)+(br+180>360?' → '+(br+180-360)+'°':'°')});}
+function yt9(){var a=rnd(70,110),b=rnd(70,100),c=rnd(70,100);return tryIt({question:'Three angles in a quadrilateral are <b>'+a+'°</b>, <b>'+b+'°</b> and <b>'+c+'°</b>. Find the fourth.',hints:['Angles in a quadrilateral sum to 360°'],ans:360-a-b-c,tol:0.5,unit:'°',working:'360 − '+a+' − '+b+' − '+c+' = '+(360-a-b-c)+'°'});}
+function yt10(){var ang=rnd(40,90);return tryIt({question:'An angle of <b>'+ang+'°</b> is bisected. What is each half?',hints:['Bisect = divide into 2 equal parts'],ans:ang/2,tol:0.5,unit:'°',working:ang+' ÷ 2 = '+ang/2+'°'});}
 
 var QS=[
-  {ey:'Q1 \u00b7 Year 8 \u00b7 Angles',ti:'Alternate Angles',su:'Two parallel lines are cut by a transversal. One angle is 65\u00b0. Find the alternate angle.',steps:[
-    {lb:'Parallel lines & transversal',dr:dQ1,ht:'<p>When a <b>transversal</b> crosses two parallel lines it creates several pairs of angles. The arrow marks on the lines show they are parallel.</p>'},
-    {lb:'Spot the Z-shape',dr:dQ1,ht:'<p>Alternate angles sit on <b>opposite sides</b> of the transversal, between the parallel lines. They form a Z (or N) shape.</p>'},
-    {lb:'The alternate angle',dr:dQ1,ht:'<div class="fm">Alternate angle = 65\u00b0</div><p>Alternate angles are always <b>equal</b>.</p>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Two parallel lines are cut by a transversal. One alternate angle is <b>73\u00b0</b>. Find the other alternate angle.',hints:['Alternate angles are equal','No calculation needed'],ans:73,tol:0.5,unit:'\u00b0',working:'Alternate angles are equal \u2192 73\u00b0'})}
+  {ey:'Q1 · Year 8 · Angles',ti:'Angles on a Straight Line <span class="badge f">F</span>',su:'A line is intersected. One angle is 47°. Find x.',steps:[
+    {lb:'The rule',dr:dQ1,ht:'<p>Angles on a straight line always sum to <b>180°</b>.</p>'},
+    {lb:'Mark the unknown',dr:dQ1,ht:'<div class="fm">47° + x = 180°</div>'},
+    {lb:'Solve',dr:dQ1,ht:'<div class="fm">x = 180 − 47 = 133°</div>'},
+    {lb:'Your turn',dr:dQ1,ht:yt1}
   ]},
-  {ey:'Q2 \u00b7 Year 8 \u00b7 Angles',ti:'Corresponding Angles',su:'A transversal crosses two parallel lines. One angle is 112\u00b0. Find the corresponding angle.',steps:[
-    {lb:'Corresponding angles',dr:dQ2,ht:'<p>Corresponding angles are on the <b>same side</b> of the transversal, one at each parallel line. They form an F-shape.</p>'},
-    {lb:'The F-shape',dr:dQ2,ht:'<p>Find the F: the two angles sit in matching positions at their respective intersections.</p>'},
-    {lb:'Equal angles',dr:dQ2,ht:'<div class="fm">Corresponding angle = 112\u00b0</div><p>Corresponding angles are always <b>equal</b> when lines are parallel.</p>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'A corresponding angle to one of <b>58\u00b0</b> is formed when a transversal crosses two parallel lines. What is its size?',hints:['Corresponding angles are equal (F-angles)'],ans:58,tol:0.5,unit:'\u00b0',working:'Corresponding angles are equal \u2192 58\u00b0'})}
+  {ey:'Q2 · Year 8 · Angles',ti:'Angles Around a Point <span class="badge f">F</span>',su:'Three angles around a point are 80°, 115° and 75°. Find x.',steps:[
+    {lb:'The rule',dr:dQ2,ht:'<p>Angles around a point sum to <b>360°</b>.</p>'},
+    {lb:'Set up the equation',dr:dQ2,ht:'<div class="fm">80 + 115 + 75 + x = 360</div>'},
+    {lb:'Solve',dr:dQ2,ht:'<div class="fm">x = 360 − 270 = 90°</div>'},
+    {lb:'Your turn',dr:dQ2,ht:yt2}
   ]},
-  {ey:'Q3 \u00b7 Year 8 \u00b7 Angles',ti:'Co-interior Angles',su:'Two co-interior angles are (3x + 10)\u00b0 and (2x + 20)\u00b0. Find x and both angles.',steps:[
-    {lb:'Co-interior (C-angles)',dr:dQ3,ht:'<p>Co-interior angles (also called allied or same-side interior angles) are <b>between</b> the parallel lines on the <b>same side</b> of the transversal. They form a C-shape.</p>'},
-    {lb:'They add to 180\u00b0',dr:dQ3,ht:'<div class="fm">Co-interior angles add to 180\u00b0</div><p>Unlike alternate and corresponding, these are <b>supplementary</b>, not equal.</p>'},
-    {lb:'Set up the equation',dr:dQ3,ht:'<div class="fm">(3x + 10) + (2x + 20) = 180</div><div class="fm">5x + 30 = 180</div><div class="fm">x = 30</div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Two co-interior angles are <b>(4x + 5)\u00b0</b> and <b>(3x + 15)\u00b0</b>. Find x.',hints:['Co-interior angles add to 180\u00b0','4x + 5 + 3x + 15 = 180','7x + 20 = 180'],ans:23,tol:0.5,unit:'',working:'7x + 20 = 180 \u2192 7x = 160 \u2192 x \u2248 22.9 \u2248 23'})}
+  {ey:'Q3 · Year 8 · Angles',ti:'Parallel Lines <span class="badge f">F</span>',su:'A transversal crosses two parallel lines. One angle is 65°.',steps:[
+    {lb:'Alternate and co-interior',dr:dQ3,ht:'<p><b>Alternate angles</b> (Z-angles) are equal.<br><b>Co-interior angles</b> (C-angles) sum to 180°.</p>'},
+    {lb:'Identify pairs',dr:dQ3,ht:'<div class="fm">Alternate: both 65°</div><div class="fm">Co-interior: 65° + 115° = 180°</div>'},
+    {lb:'Apply the rule',dr:dQ3,ht:'<p>Corresponding angles are also equal (F-angles).</p>'},
+    {lb:'Your turn',dr:dQ3,ht:yt3}
   ]},
-  {ey:'Q4 \u00b7 Year 8 \u00b7 Angles',ti:'Interior Angles of a Polygon',su:'Find the sum of interior angles of a 9-sided polygon.',steps:[
-    {lb:'The formula',dr:dQ4,ht:'<p>The interior angles of any polygon add up to a fixed total that depends only on the number of sides.</p><div class="fm">Sum = (n \u2212 2) \u00d7 180\u00b0</div>'},
-    {lb:'Why it works',dr:dQ4,ht:'<p>Any polygon can be cut into triangles from one vertex. An n-sided shape makes (n\u22122) triangles, each with 180\u00b0.</p>'},
-    {lb:'Apply to 9 sides',dr:dQ4,ht:'<div class="fm">(9 \u2212 2) \u00d7 180 = 7 \u00d7 180 = 1260\u00b0</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'Find the sum of interior angles of a <b>12-sided polygon</b>.',hints:['Use (n \u2212 2) \u00d7 180\u00b0','n = 12'],ans:1800,tol:0.5,unit:'\u00b0',working:'(12 \u2212 2) \u00d7 180 = 10 \u00d7 180 = 1800\u00b0'})}
+  {ey:'Q4 · Year 8 · Angles',ti:'Angles in a Triangle <span class="badge f">F</span>',su:'A triangle has angles 58°, 73° and x. Find x.',steps:[
+    {lb:'The rule',dr:dQ4,ht:'<p>Angles in any triangle sum to <b>180°</b>.</p>'},
+    {lb:'Set up',dr:dQ4,ht:'<div class="fm">58 + 73 + x = 180</div>'},
+    {lb:'Solve',dr:dQ4,ht:'<div class="fm">x = 180 − 131 = 49°</div>'},
+    {lb:'Your turn',dr:dQ4,ht:yt4}
   ]},
-  {ey:'Q5 \u00b7 Year 8 \u00b7 Angles',ti:'Exterior Angles of a Regular Polygon',su:'Find the exterior angle and interior angle of a regular hexagon.',steps:[
-    {lb:'Exterior angles',dr:dQ5,ht:'<p>An <b>exterior angle</b> is formed by extending one side of the polygon. For a <b>regular</b> polygon all exterior angles are equal and they always sum to 360\u00b0.</p>'},
-    {lb:'The formula',dr:dQ5,ht:'<div class="fm">Each exterior angle = 360\u00b0 \u00f7 n</div><p>For a regular hexagon (n = 6): 360 \u00f7 6 = <b>60\u00b0</b></p>'},
-    {lb:'Find the interior angle',dr:dQ5,ht:'<div class="fm">Interior = 180\u00b0 \u2212 exterior</div><div class="fm">= 180 \u2212 60 = 120\u00b0</div>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'Each exterior angle of a regular polygon is <b>24\u00b0</b>. How many sides does it have?',hints:['Exterior angle = 360 \u00f7 n','Rearrange: n = 360 \u00f7 exterior angle'],ans:15,tol:0,unit:'sides',working:'n = 360 \u00f7 24 = 15 sides'})}
+  {ey:'Q5 · Year 8 · Angles',ti:'Isosceles Triangles <span class="badge f">F</span>',su:'An isosceles triangle has base angles of 52°. Find the apex angle.',steps:[
+    {lb:'Equal sides → equal angles',dr:dQ5,ht:'<p>In an isosceles triangle the <b>two base angles are equal</b>. Tick marks show the equal sides.</p>'},
+    {lb:'Set up',dr:dQ5,ht:'<div class="fm">52 + 52 + x = 180</div>'},
+    {lb:'Solve',dr:dQ5,ht:'<div class="fm">x = 180 − 104 = 76°</div>'},
+    {lb:'Your turn',dr:dQ5,ht:yt5}
+  ]},
+  {ey:'Q6 · Year 8 · Angles',ti:'Exterior Angle of a Triangle <span class="badge f">F</span>',su:'Two interior angles are 55° and 70°. Find the exterior angle.',steps:[
+    {lb:'The theorem',dr:dQ6,ht:'<p>An <b>exterior angle</b> of a triangle equals the sum of the two <b>non-adjacent interior angles</b>.</p>'},
+    {lb:'Apply it',dr:dQ6,ht:'<div class="fm">e = 55 + 70 = 125°</div>'},
+    {lb:'Check',dr:dQ6,ht:'<p>Interior angle at that vertex = 180 − 125 = 55°. All three interior: 55 + 55 + 70 = 180° ✓</p>'},
+    {lb:'Your turn',dr:dQ6,ht:yt6}
+  ]},
+  {ey:'Q7 · Year 8 · Angles',ti:'Angles in Polygons <span class="badge e">E</span>',su:'Find the interior and exterior angle of a regular hexagon.',steps:[
+    {lb:'Interior angle sum',dr:dQ7,ht:'<p>For any polygon with n sides:</p><div class="fm">Sum of interior angles = (n − 2) × 180°</div>'},
+    {lb:'Apply for hexagon',dr:dQ7,ht:'<div class="fm">(6 − 2) × 180 = 720°</div>'},
+    {lb:'Each angle (regular polygon)',dr:dQ7,ht:'<div class="fm">Each interior = 720 ÷ 6 = 120°</div><div class="fm">Each exterior = 360 ÷ 6 = 60°</div>'},
+    {lb:'Your turn',dr:dQ7,ht:yt7}
+  ]},
+  {ey:'Q8 · Year 8 · Angles',ti:'Bearings <span class="badge e">E</span>',su:'The bearing from A to B is 125°. Find the back bearing.',steps:[
+    {lb:'What is a bearing?',dr:dQ8,ht:'<p>Bearings are measured <b>clockwise from North</b>, always written as 3 digits (e.g. 045°, 125°).</p>'},
+    {lb:'The bearing',dr:dQ8,ht:'<p>Mark North at A, measure 125° clockwise to find B.</p>'},
+    {lb:'Back bearing',dr:dQ8,ht:'<div class="fm">Back bearing = 125 + 180 = 305°</div><p>Add 180° (or subtract if result > 360°).</p>'},
+    {lb:'Your turn',dr:dQ8,ht:yt8}
+  ]},
+  {ey:'Q9 · Year 8 · Angles',ti:'Angles in Quadrilaterals <span class="badge f">F</span>',su:'Three angles of a quadrilateral are 110°, 85° and 70°. Find the fourth.',steps:[
+    {lb:'The rule',dr:dQ9,ht:'<p>Angles in any quadrilateral sum to <b>360°</b>.</p>'},
+    {lb:'Set up',dr:dQ9,ht:'<div class="fm">110 + 85 + 70 + x = 360</div>'},
+    {lb:'Solve',dr:dQ9,ht:'<div class="fm">x = 360 − 265 = 95°</div>'},
+    {lb:'Your turn',dr:dQ9,ht:yt9}
+  ]},
+  {ey:'Q10 · Year 8 · Angles',ti:'Angle Bisectors <span class="badge f">F</span>',su:'An angle of 47° is bisected. Find each half.',steps:[
+    {lb:'What is an angle bisector?',dr:dQ10,ht:'<p>An angle bisector divides an angle into <b>two equal halves</b>. Constructed with compass and ruler.</p>'},
+    {lb:'Apply',dr:dQ10,ht:'<div class="fm">47 ÷ 2 = 23.5°</div>'},
+    {lb:'Each half is equal',dr:dQ10,ht:'<p>Both halves = 23.5°. The bisector line is equidistant from both arms of the angle.</p>'},
+    {lb:'Your turn',dr:dQ10,ht:yt10}
   ]}
 ];
 
 var qi=0,si=0;
-function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
-function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
-function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \u2192';}
+function bSB(){var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);
+  QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';
+  QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').innerHTML=q.ti;document.getElementById('su').textContent=q.su;
+  var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+  p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);
+  st.dr(si);bDT();
+  document.getElementById('pb').disabled=si===0;
+  document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';}
 document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
 document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
 render();
