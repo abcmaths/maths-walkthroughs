@@ -57,6 +57,8 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
 .try-q{font-size:15px;margin:8px 0 10px;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;letter-spacing:.05em;}
+.f{background:#1a5a8a;color:#fff;}.e{background:#C0272D;color:#fff;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
@@ -86,81 +88,370 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
   </div>
 </div>
 <script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 
 var ST={};
-function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');var ph='Answer'+(o.unit?' ('+o.unit+')':'');return '<div class="try" data-tryid="'+id+'"><div class="try-t">\u2714 Your Turn</div><div class="try-q">'+o.question+'</div>'+(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div><div class="try-fb" data-tryid="'+id+'"></div><details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
-document.addEventListener('click',function(e){if(e.target.classList.contains('try-ck')){var id=e.target.getAttribute('data-tryid'),o=ST[id].o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}}});
+function tryIt(o){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]={o:o};
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">✔ Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +(h?'<ul class="hl">'+h+'</ul>':'')
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
+    +'</div>';
+}
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('try-new')){render();return;}
+  if(e.target.classList.contains('try-ck')){
+    var id=e.target.getAttribute('data-tryid'),o=ST[id].o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
+  }
+});
+
 function g(){return document.getElementById('dg');}
 function T(x,y,t,c,sz,a,b){return '<text x="'+x+'" y="'+y+'" font-size="'+(sz||12)+'" font-family="Arial" fill="'+(c||'#241A17')+'" text-anchor="'+(a||'middle')+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" rx="2"/>';}
-function arc(cx,cy,r,a1,a2,c,w){var r1=a1*Math.PI/180,r2=a2*Math.PI/180;var x1=cx+r*Math.cos(r1),y1=cy-r*Math.sin(r1),x2=cx+r*Math.cos(r2),y2=cy-r*Math.sin(r2);var laf=((a2-a1+360)%360)>180?1:0;return '<path d="M '+x1.toFixed(1)+','+y1.toFixed(1)+' A '+r+','+r+' 0 '+laf+',0 '+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="'+(c||'#C8922A')+'" stroke-width="'+(w||1.5)+'" />';}
 
+// ── Random values generated once on page load ──
+var q1=(function(){var a=rnd(2,6),b=rnd(2,6),c=rnd(1,5),k=rnd(1,7);return{a:a,b:b,c:c,k:k,ans:a+b+c};})();
+var q2=(function(){var f=rnd(2,6),t1=1,t2=rnd(2,8);return{f:f,t1:t1,t2:t2,ft1:f*t1,ft2:f*t2};})();
+var q3=(function(){var a=rnd(2,5),b=rnd(1,8),x=pick([-3,-2,-1,2,3,4]);return{a:a,b:b,x:x,ans:a*x+b};})();
+var q4=(function(){var a=rnd(1,3),b=rnd(1,4),x=pick([-3,-2,2,3]);return{a:a,b:b,x:x,ans:a*x*x-b*x};})();
+var q5=(function(){var p=rnd(1,6),q=rnd(1,6);return{p:p,q:q,coeff:p+q,con:p*q};})();
+var q6=(function(){var f=pick([2,3,4,5,6]),a=rnd(2,7),b=rnd(1,5);return{f:f,a:a,b:b,fa:f*a,fb:f*b};})();
+var q7=(function(){var a=rnd(2,6),x=rnd(2,8),b=rnd(2,9);return{a:a,b:b,c:a*x+b,ans:x};})();
+var q8=(function(){
+  var diff=rnd(1,3),x=rnd(2,6),a=diff+rnd(2,4),c=a-diff,b=rnd(1,5),d=b+diff*x;
+  return{a:a,b:b,c:c,d:d,ans:x};
+})();
+var q9=(function(){
+  var d=rnd(1,3),x=rnd(4,9),tot=3*x+3*d;
+  return{d:d,x:x,tot:tot,s2:x+d,s3:x+2*d};
+})();
+var q10=(function(){var a=rnd(2,5),b=rnd(2,4),c=rnd(1,3);return{a:a,b:b,c:c,add:a+b,sub:a-c,pow:a*2};})();
 
+// ── Draw functions ──
 function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,30,'3x + 5x \u2212 2 + 4x','#C0272D',20,'middle',true));
+  o.push(T(240,30,q1.a+'x + '+q1.b+'x − '+q1.k+' + '+q1.c+'x','#C0272D',19,'middle',true));
   if(p>=1){
-    ['3x','5x','4x'].forEach(function(t,i){o.push(R(40+i*130,55,110,40,'#fff5f0','#C0272D',1.5));o.push(T(95+i*130,80,t,'#C0272D',16,'middle',true));});
-    o.push(R(40,108,110,38,'#e8f0ff','#1a5a8a',1.5));o.push(T(95,132,'\u22122','#1a5a8a',16,'middle',true));
-    o.push(T(240,165,'Collect x terms: 3x + 5x + 4x','#888',13,'middle',false));}
-  if(p>=2){o.push(R(100,178,280,44,'#e8f8ee','#1a7a3a',2));o.push(T(240,206,'12x \u2212 2','#1a7a3a',22,'middle',true));}
-  if(p>=3){o.push(T(240,242,'Only like terms (same letter, same power) can be combined','#888',11,'middle',false));}
+    [q1.a+'x',q1.b+'x',q1.c+'x'].forEach(function(t,i){
+      o.push(R(20+i*138,50,118,38,'#fff5f0','#C0272D',1.5));
+      o.push(T(79+i*138,74,t,'#C0272D',16,'middle',true));
+    });
+    o.push(R(20,98,118,36,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(79,120,'−'+q1.k,'#1a5a8a',16,'middle',true));
+    o.push(T(240,150,'Collect x terms: '+q1.a+'x + '+q1.b+'x + '+q1.c+'x','#888',13,'middle',false));
+  }
+  if(p>=2){o.push(R(110,164,260,42,'#e8f8ee','#1a7a3a',2));o.push(T(240,191,q1.ans+'x − '+q1.k,'#1a7a3a',22,'middle',true));}
+  if(p>=3){o.push(T(240,230,'Only like terms (same letter & power) can be combined','#888',11,'middle',false));}
   s.innerHTML=o.join('');}
 
 function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,30,'Expand: 3(x + 4)','#C0272D',20,'middle',true));
+  o.push(T(240,28,'Expand: '+q2.f+'(x + '+q2.t2+')','#C0272D',20,'middle',true));
   if(p>=1){
-    o.push(T(140,80,'3','#C0272D',22,'middle',true));o.push(T(200,80,'(','#241A17',22,'middle',false));
-    o.push(T(245,80,'x','#1a5a8a',22,'middle',true));o.push(T(280,80,'+','#241A17',20,'middle',false));
-    o.push(T(318,80,'4','#C8922A',22,'middle',true));o.push(T(345,80,')','#241A17',22,'middle',false));
-    // arrows
-    o.push('<path d="M 150,65 Q 200,40 236,68" fill="none" stroke="#C0272D" stroke-width="2" marker-end="url(#ar1)"/>');
-    o.push('<path d="M 150,66 Q 240,35 308,67" fill="none" stroke="#C0272D" stroke-width="2" marker-end="url(#ar1)"/>');
+    o.push(T(130,80,q2.f,'#C0272D',22,'middle',true));
+    o.push(T(186,80,'(x + '+q2.t2+')','#241A17',20,'middle',false));
     o.push('<defs><marker id="ar1" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#C0272D"/></marker></defs>');
-    o.push(T(195,48,'3\u00d7x','#C0272D',11,'middle',false));o.push(T(270,38,'3\u00d74','#C0272D',11,'middle',false));}
-  if(p>=2){o.push(R(100,108,280,44,'#e8f8ee','#1a7a3a',2));o.push(T(240,136,'3x + 12','#1a7a3a',22,'middle',true));}
-  if(p>=3){o.push(T(240,185,'Multiply the factor outside by EACH term inside','#888',13,'middle',false));}
+    o.push('<path d="M 138,65 Q 190,38 215,66" fill="none" stroke="#C0272D" stroke-width="2" marker-end="url(#ar1)"/>');
+    o.push('<path d="M 140,65 Q 240,30 285,66" fill="none" stroke="#C0272D" stroke-width="2" marker-end="url(#ar1)"/>');
+    o.push(T(185,44,q2.f+'×x','#C0272D',11,'middle',false));
+    o.push(T(258,36,q2.f+'×'+q2.t2,'#C0272D',11,'middle',false));
+  }
+  if(p>=2){o.push(R(100,106,280,44,'#e8f8ee','#1a7a3a',2));o.push(T(240,134,q2.ft1+'x + '+q2.ft2,'#1a7a3a',22,'middle',true));}
+  if(p>=3){o.push(T(240,180,'Multiply the factor outside by EACH term inside','#888',13,'middle',false));}
   s.innerHTML=o.join('');}
 
 function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,30,'Substitute x = \u22122 into 2x\u00b2 + 3x','#241A17',15,'middle',false));
-  if(p>=1){o.push(T(240,70,'Replace every x with (\u22122) \u2014 use brackets!','#888',13,'middle',false));
-    o.push(R(60,82,360,40,'#fff5f0','#C0272D',1.5));o.push(T(240,107,'2(\u22122)\u00b2 + 3(\u22122)','#C0272D',17,'middle',true));}
-  if(p>=2){o.push(T(240,152,'(\u22122)\u00b2 = +4   (negative squared = positive)','#888',12,'middle',false));
-    o.push(R(60,163,360,40,'#e8f0ff','#1a5a8a',1.5));o.push(T(240,188,'2(4) + 3(\u22122) = 8 \u2212 6','#1a5a8a',16,'middle',true));}
-  if(p>=3){o.push(R(160,213,160,38,'#e8f8ee','#1a7a3a',2));o.push(T(240,238,'= 2','#1a7a3a',22,'middle',true));}
+  var xd=(q3.x<0?'('+q3.x+')':String(q3.x));
+  o.push(T(240,28,'x = '+q3.x+' into '+q3.a+'x + '+q3.b,'#241A17',15,'middle',false));
+  if(p>=1){o.push(T(240,65,'Replace x with '+xd,'#888',13,'middle',false));
+    o.push(R(80,76,320,38,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,100,q3.a+xd+' + '+q3.b,'#C0272D',17,'middle',true));}
+  if(p>=2){o.push(T(240,145,'= '+(q3.a*q3.x)+' + '+q3.b,'#1a5a8a',16,'middle',true));}
+  if(p>=3){o.push(R(150,163,180,40,'#e8f8ee','#1a7a3a',2));o.push(T(240,188,'= '+q3.ans,'#1a7a3a',24,'middle',true));}
   s.innerHTML=o.join('');}
 
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var xd=(q4.x<0?'('+q4.x+')':String(q4.x));
+  o.push(T(240,28,'x = '+q4.x+' into '+q4.a+'x² − '+q4.b+'x','#241A17',15,'middle',false));
+  if(p>=1){o.push(T(240,62,'Replace x with '+xd+' — use brackets!','#888',12,'middle',false));
+    o.push(R(60,73,360,38,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,97,q4.a+xd+'² − '+q4.b+xd,'#C0272D',17,'middle',true));}
+  if(p>=2){var sq=q4.x*q4.x;
+    o.push(T(240,138,'('+q4.x+')² = '+sq,'#888',12,'middle',false));
+    o.push(R(60,148,360,38,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,172,q4.a+'('+sq+') − '+q4.b+'('+q4.x+') = '+(q4.a*sq)+' − '+(q4.b*q4.x),'#1a5a8a',14,'middle',true));}
+  if(p>=3){o.push(R(160,198,160,40,'#e8f8ee','#1a7a3a',2));o.push(T(240,223,'= '+q4.ans,'#1a7a3a',22,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,26,'Expand: (x + '+q5.p+')(x + '+q5.q+')','#C0272D',19,'middle',true));
+  if(p>=1){
+    var lbls=['First','Outer','Inner','Last'],cols=['#C0272D','#1a5a8a','#C8922A','#1a7a3a'];
+    var terms=['x²','+'+q5.q+'x','+'+q5.p+'x','+'+q5.con];
+    terms.forEach(function(t,i){
+      o.push(R(18+i*112,46,100,44,cols[i]+'22',cols[i],1.5));
+      o.push(T(68+i*112,60,lbls[i],cols[i],9,'middle',false));
+      o.push(T(68+i*112,80,t,cols[i],14,'middle',true));
+    });
+  }
+  if(p>=2){o.push(T(240,114,'Collect x terms: '+q5.q+'x + '+q5.p+'x = '+q5.coeff+'x','#888',12,'middle',false));
+    o.push(R(90,125,300,42,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,151,'x² + '+q5.coeff+'x + '+q5.con,'#1a7a3a',20,'middle',true));}
+  if(p>=3){o.push(T(240,192,'Coefficient of x = sum of the two numbers ('+q5.p+'+'+q5.q+'='+q5.coeff+')','#888',11,'middle',false));
+    o.push(T(240,210,'Constant = product of the two numbers ('+q5.p+'×'+q5.q+'='+q5.con+')','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'Factorise: '+q6.fa+'x + '+q6.fb,'#C0272D',20,'middle',true));
+  if(p>=1){o.push(T(240,65,'Find the HCF of '+q6.fa+' and '+q6.fb,'#888',13,'middle',false));
+    o.push(R(140,75,200,38,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,99,'HCF = '+q6.f,'#C0272D',16,'middle',true));}
+  if(p>=2){o.push(T(240,138,'Divide each term by '+q6.f,'#888',12,'middle',false));
+    o.push(T(240,156,q6.fa+'x ÷ '+q6.f+' = '+q6.a+'x      '+q6.fb+' ÷ '+q6.f+' = '+q6.b,'#1a5a8a',13,'middle',false));}
+  if(p>=3){o.push(R(100,170,280,42,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,196,q6.f+'('+q6.a+'x + '+q6.b+')','#1a7a3a',22,'middle',true));}
+  if(p>=4){o.push(T(240,232,'Check: '+q6.f+'×'+q6.a+'x + '+q6.f+'×'+q6.b+' = '+q6.fa+'x + '+q6.fb+' ✔','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'Solve: '+q7.a+'x + '+q7.b+' = '+q7.c,'#C0272D',20,'middle',true));
+  if(p>=1){o.push(T(240,65,'Step 1: Subtract '+q7.b+' from both sides','#888',12,'middle',false));
+    o.push(R(90,75,300,38,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,99,q7.a+'x = '+(q7.c-q7.b),'#C0272D',18,'middle',true));}
+  if(p>=2){o.push(T(240,132,'Step 2: Divide both sides by '+q7.a,'#888',12,'middle',false));
+    o.push(R(160,143,160,42,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,170,'x = '+q7.ans,'#1a7a3a',24,'middle',true));}
+  if(p>=3){o.push(T(240,208,'Check: '+q7.a+'×'+q7.ans+' + '+q7.b+' = '+(q7.a*q7.ans+q7.b)+' ✔','#888',12,'middle',false));}
+  s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'Solve: '+q8.a+'x + '+q8.b+' = '+q8.c+'x + '+q8.d,'#C0272D',17,'middle',true));
+  if(p>=1){o.push(T(240,65,'Move x terms left, numbers right','#888',12,'middle',false));
+    o.push(R(60,75,360,38,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,99,q8.a+'x − '+q8.c+'x = '+q8.d+' − '+q8.b,'#C0272D',15,'middle',true));}
+  if(p>=2){var diff=q8.a-q8.c,rhs=q8.d-q8.b;
+    o.push(R(90,120,300,38,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,144,diff+'x = '+rhs,'#1a5a8a',18,'middle',true));}
+  if(p>=3){o.push(R(160,168,160,42,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,195,'x = '+q8.ans,'#1a7a3a',22,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push('<polygon points="240,28 90,210 390,210" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  if(p>=1){
+    o.push(T(148,128,'x','#C0272D',14,'middle',true));
+    o.push(T(332,128,'x+'+q9.d,'#C0272D',14,'middle',true));
+    o.push(T(240,228,'x+'+2*q9.d,'#C0272D',14,'middle',true));
+    o.push(T(240,248,'Perimeter = '+q9.tot+' cm','#241A17',13,'middle',false));
+  }
+  if(p>=2){o.push(R(20,30,220,38,'#fff5f0','#C0272D',1.5));
+    o.push(T(130,54,'x + (x+'+q9.d+') + (x+'+2*q9.d+') = '+q9.tot,'#C0272D',11,'middle',false));}
+  if(p>=3){o.push(R(20,76,220,38,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(130,100,'3x + '+3*q9.d+' = '+q9.tot,'#1a5a8a',14,'middle',true));
+    o.push(R(20,122,220,38,'#e8f8ee','#1a7a3a',2));
+    o.push(T(130,146,'x = '+q9.x,'#1a7a3a',16,'middle',true));}
+  if(p>=4){o.push(T(380,80,'Sides:','#888',12,'start',false));
+    o.push(T(380,98,q9.x+' cm','#241A17',13,'start',false));
+    o.push(T(380,116,(q9.x+q9.d)+' cm','#241A17',13,'start',false));
+    o.push(T(380,134,(q9.x+2*q9.d)+' cm','#241A17',13,'start',false));}
+  s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Index Laws','#C0272D',17,'middle',true));
+  if(p>=1){
+    o.push(R(30,34,420,52,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,52,'Multiply: same base → ADD powers','#888',11,'middle',false));
+    o.push(T(240,72,'x'+q10.a+' × x'+q10.b+' = x'+(q10.add),'#C0272D',16,'middle',true));
+  }
+  if(p>=2){
+    o.push(R(30,96,420,52,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,114,'Divide: same base → SUBTRACT powers','#888',11,'middle',false));
+    o.push(T(240,134,'x'+q10.a+' ÷ x'+q10.c+' = x'+(q10.sub),'#1a5a8a',16,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(30,158,420,52,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,176,'Power to a power → MULTIPLY powers','#888',11,'middle',false));
+    o.push(T(240,196,'(x'+q10.a+')² = x'+(q10.pow),'#1a7a3a',16,'middle',true));
+  }
+  if(p>=4){o.push(T(240,232,'x° = 1 for any non-zero x','#888',12,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// ── Your Turn generators (fresh random each call) ──
+function yt1(){var a=rnd(2,5),b=rnd(2,5),c=rnd(1,4),k=rnd(1,7);
+  return tryIt({question:'Simplify <b>'+a+'x + '+b+'x − '+k+' + '+c+'x</b>. Enter the coefficient of x.',
+    hints:['Collect all x terms','The constant −'+k+' stays separate'],
+    ans:a+b+c,tol:0,unit:'(coefficient of x)',working:(a+b+c)+'x − '+k+'. Coefficient = '+(a+b+c)});}
+
+function yt2(){var f=rnd(2,7),t=rnd(2,9),c=rnd(1,8);
+  return tryIt({question:'Expand <b>'+f+'('+t+'x + '+c+')</b>. Enter the constant term.',
+    hints:[f+' × '+t+'x = '+f*t+'x',f+' × '+c+' = '+f*c],
+    ans:f*c,tol:0,unit:'(constant term)',working:f*t+'x + '+f*c+'. Constant = '+f*c});}
+
+function yt3(){var a=rnd(2,6),b=rnd(1,9),x=pick([-3,-2,-1,2,3,4,5]);
+  return tryIt({question:'Substitute <b>x = '+x+'</b> into <b>'+a+'x + '+b+'</b>.',
+    hints:['Replace x with '+(x<0?'('+x+')':x)],
+    ans:a*x+b,tol:0,unit:'',working:a+'('+x+')+'+b+' = '+(a*x+b)});}
+
+function yt4(){var a=rnd(1,3),b=rnd(1,5),x=pick([-2,-1,2,3]);
+  return tryIt({question:'Substitute <b>x = '+x+'</b> into <b>'+a+'x² + '+b+'x</b>.',
+    hints:['('+x+')² = '+(x*x),''+a*x*x+' + '+(b*x)],
+    ans:a*x*x+b*x,tol:0,unit:'',working:a+'('+x+')²+'+b+'('+x+') = '+a*x*x+'+('+(b*x)+') = '+(a*x*x+b*x)});}
+
+function yt5(){var p=rnd(1,7),q=rnd(1,7);
+  return tryIt({question:'Expand <b>(x + '+p+')(x + '+q+')</b>. What is the constant term?',
+    hints:['Last × Last: '+p+' × '+q],
+    ans:p*q,tol:0,unit:'(constant)',working:'x² + '+(p+q)+'x + '+p*q+'. Constant = '+p*q});}
+
+function yt6(){var f=pick([2,3,4,5,6]),a=rnd(2,6),b=rnd(1,5);
+  return tryIt({question:'Factorise <b>'+(f*a)+'x + '+(f*b)+'</b>. What is the HCF (the factor outside the bracket)?',
+    hints:['Find HCF of '+(f*a)+' and '+(f*b)],
+    ans:f,tol:0,unit:'(HCF)',working:'HCF = '+f+'. Answer: '+f+'('+a+'x + '+b+')'});}
+
+function yt7(){var a=rnd(2,6),x=rnd(2,9),b=rnd(2,10);
+  return tryIt({question:'Solve <b>'+a+'x + '+b+' = '+(a*x+b)+'</b>.',
+    hints:['Subtract '+b+' from both sides','Divide by '+a],
+    ans:x,tol:0,unit:'',working:a+'x = '+(a*x)+', x = '+x});}
+
+function yt8(){var diff=rnd(1,3),x=rnd(2,5),a=diff+rnd(2,3),c=a-diff,b=rnd(1,5),d=b+diff*x;
+  return tryIt({question:'Solve <b>'+a+'x + '+b+' = '+c+'x + '+d+'</b>.',
+    hints:['Move x terms: '+(a-c)+'x = '+(d-b)],
+    ans:x,tol:0,unit:'',working:(a-c)+'x = '+(d-b)+', x = '+x});}
+
+function yt9(){var d=rnd(1,4),x=rnd(4,8),tot=3*x+3*d;
+  return tryIt({question:'A triangle has sides <b>x</b>, <b>x+'+d+'</b> and <b>x+'+2*d+'</b> cm. Perimeter = '+tot+' cm. Find x.',
+    hints:['3x + '+3*d+' = '+tot],
+    ans:x,tol:0,unit:'cm',working:'3x = '+(tot-3*d)+', x = '+x});}
+
+function yt10(){var a=rnd(2,5),b=rnd(2,4);
+  return tryIt({question:'Simplify <b>y'+a+' × y'+b+'</b>. What is the power in the answer?',
+    hints:['Add the powers: '+a+' + '+b],
+    ans:a+b,tol:0,unit:'(power)',working:'y'+a+' × y'+b+' = y'+(a+b)+'. Power = '+(a+b)});}
 
 var QS=[
-  {ey:'Q1 \u00b7 Year 8 \u00b7 Algebraic Manipulation',ti:'Simplifying Expressions',su:'Simplify: 3x + 5x \u2212 2 + 4x',steps:[
-    {lb:'Identify like terms',dr:dQ1,ht:'<p>Like terms have the <b>same letter and power</b>. Only like terms can be added or subtracted.</p><p>Here: 3x, 5x and 4x are like terms. \u22122 is a constant.</p>'},
-    {lb:'Collect x terms',dr:dQ1,ht:'<div class="fm">3x + 5x + 4x = 12x</div><p>The constant \u22122 stays as it is.</p>'},
-    {lb:'Write the answer',dr:dQ1,ht:'<div class="fm">12x \u2212 2</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Simplify <b>4x\u00b2 + 3x \u2212 x\u00b2 + 7 \u2212 2x</b>. What is the coefficient of x?',hints:['Collect x\u00b2 terms: 4x\u00b2 \u2212 x\u00b2','Collect x terms: 3x \u2212 2x','Collect constants: +7'],ans:1,tol:0,unit:'(coefficient of x)',working:'3x\u00b2 + x + 7. Coefficient of x = 1'})}
+  {ey:'Q1 · Year 8 · Algebraic Manipulation',ti:'Simplifying Expressions <span class="badge f">F</span>',
+   su:'Simplify: '+q1.a+'x + '+q1.b+'x − '+q1.k+' + '+q1.c+'x',steps:[
+    {lb:'Identify like terms',dr:dQ1,ht:'<p>Like terms share the <b>same letter and same power</b>. Only like terms can be added or subtracted.</p><p>Here: '+q1.a+'x, '+q1.b+'x, '+q1.c+'x are like terms. −'+q1.k+' is a constant (no letter).</p>'},
+    {lb:'Collect x terms',dr:dQ1,ht:'<div class="fm">'+q1.a+'x + '+q1.b+'x + '+q1.c+'x = '+q1.ans+'x</div><p>The constant −'+q1.k+' stays as it is — there are no other constants to combine with.</p>'},
+    {lb:'Final answer',dr:dQ1,ht:'<div class="fm">'+q1.ans+'x − '+q1.k+'</div>'},
+    {lb:'Your turn',dr:dQ1,ht:yt1}
   ]},
-  {ey:'Q2 \u00b7 Year 8 \u00b7 Algebraic Manipulation',ti:'Expanding Brackets',su:'Expand: 3(x + 4)',steps:[
-    {lb:'Multiply each term',dr:dQ2,ht:'<p>Multiply the number <b>outside</b> the bracket by <b>every term inside</b>.</p>'},
-    {lb:'Apply to each term',dr:dQ2,ht:'<div class="fm">3 \u00d7 x = 3x &nbsp;&nbsp;&nbsp; 3 \u00d7 4 = 12</div>'},
-    {lb:'Write expanded form',dr:dQ2,ht:'<div class="fm">3(x + 4) = 3x + 12</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Expand and simplify <b>2(x + 4) + 3(x \u2212 1)</b>. What is the constant term?',hints:['Expand 2(x+4) = 2x+8','Expand 3(x\u22121) = 3x\u22123','Add: 5x + 5'],ans:5,tol:0,unit:'(constant term)',working:'2x+8+3x\u22123 = 5x+5. Constant = 5'})}
+  {ey:'Q2 · Year 8 · Algebraic Manipulation',ti:'Expanding Single Brackets <span class="badge f">F</span>',
+   su:'Expand: '+q2.f+'(x + '+q2.t2+')',steps:[
+    {lb:'The rule',dr:dQ2,ht:'<p>Multiply the factor <b>outside</b> the bracket by <b>every term inside</b>. Think of it as the factor being distributed across all terms.</p>'},
+    {lb:'Multiply each term',dr:dQ2,ht:'<div class="fm">'+q2.f+' × x = '+q2.ft1+'x</div><div class="fm">'+q2.f+' × '+q2.t2+' = '+q2.ft2+'</div>'},
+    {lb:'Write expanded form',dr:dQ2,ht:'<div class="fm">'+q2.f+'(x + '+q2.t2+') = '+q2.ft1+'x + '+q2.ft2+'</div>'},
+    {lb:'Your turn',dr:dQ2,ht:yt2}
   ]},
-  {ey:'Q3 \u00b7 Year 8 \u00b7 Algebraic Manipulation',ti:'Substitution',su:'Substitute x = \u22122 into 2x\u00b2 + 3x.',steps:[
-    {lb:'Replace x with (\u22122)',dr:dQ3,ht:'<p>Put brackets around the substituted value to avoid sign errors.</p><div class="fm">2(\u22122)\u00b2 + 3(\u22122)</div>'},
-    {lb:'Evaluate powers first',dr:dQ3,ht:'<p>(\u22122)\u00b2 = +4 because negative \u00d7 negative = positive.</p><div class="fm">2(4) + 3(\u22122) = 8 \u2212 6</div>'},
-    {lb:'Final answer',dr:dQ3,ht:'<div class="fm">8 \u2212 6 = 2</div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Substitute <b>p = 4, q = \u22123</b> into <b>3p \u2212 q\u00b2</b>.',hints:['3(4) = 12','(\u22123)\u00b2 = 9','12 \u2212 9'],ans:3,tol:0.5,unit:'',working:'3(4) \u2212 (\u22123)\u00b2 = 12 \u2212 9 = 3'})}
+  {ey:'Q3 · Year 8 · Algebraic Manipulation',ti:'Substitution — Linear <span class="badge f">F</span>',
+   su:'Substitute x = '+q3.x+' into '+q3.a+'x + '+q3.b,steps:[
+    {lb:'Replace x with value',dr:dQ3,ht:'<p>Replace every x with the given value. <b>Always use brackets</b> around the substituted value — this prevents sign errors with negatives.</p>'},
+    {lb:'Work out the arithmetic',dr:dQ3,ht:'<div class="fm">'+q3.a*q3.x+' + '+q3.b+' = '+q3.ans+'</div>'},
+    {lb:'Answer',dr:dQ3,ht:'<div class="fm">'+q3.ans+'</div>'},
+    {lb:'Your turn',dr:dQ3,ht:yt3}
+  ]},
+  {ey:'Q4 · Year 8 · Algebraic Manipulation',ti:'Substitution — Quadratic <span class="badge e">E</span>',
+   su:'Substitute x = '+q4.x+' into '+q4.a+'x² − '+q4.b+'x',steps:[
+    {lb:'Replace x (use brackets)',dr:dQ4,ht:'<p>Always bracket the substituted value. With a negative number, squaring it gives a <b>positive</b> result.</p>'},
+    {lb:'Evaluate the squared term',dr:dQ4,ht:'<div class="fm">('+q4.x+')² = '+q4.x*q4.x+'</div><div class="fm">'+q4.a+' × '+q4.x*q4.x+' = '+q4.a*q4.x*q4.x+'</div>'},
+    {lb:'Complete the calculation',dr:dQ4,ht:'<div class="fm">'+q4.a*q4.x*q4.x+' − '+(q4.b*q4.x)+' = '+q4.ans+'</div>'},
+    {lb:'Your turn',dr:dQ4,ht:yt4}
+  ]},
+  {ey:'Q5 · Year 8 · Algebraic Manipulation',ti:'Expanding Double Brackets <span class="badge e">E</span>',
+   su:'Expand and simplify: (x + '+q5.p+')(x + '+q5.q+')',steps:[
+    {lb:'FOIL method',dr:dQ5,ht:'<p><b>F</b>irst · <b>O</b>uter · <b>I</b>nner · <b>L</b>ast. Multiply each term in the first bracket by each term in the second bracket — four products total.</p>'},
+    {lb:'Four products',dr:dQ5,ht:'<div class="fm">x² + '+q5.q+'x + '+q5.p+'x + '+q5.con+'</div>'},
+    {lb:'Collect like terms',dr:dQ5,ht:'<div class="fm">x² + '+q5.coeff+'x + '+q5.con+'</div><p>Coefficient of x = '+q5.p+' + '+q5.q+' = '+q5.coeff+'</p>'},
+    {lb:'Your turn',dr:dQ5,ht:yt5}
+  ]},
+  {ey:'Q6 · Year 8 · Algebraic Manipulation',ti:'Factorising — Common Factor <span class="badge f">F</span>',
+   su:'Factorise: '+q6.fa+'x + '+q6.fb,steps:[
+    {lb:'Find the HCF',dr:dQ6,ht:'<p>Factorising is the reverse of expanding. Find the <b>Highest Common Factor</b> of the coefficients. This goes outside the bracket.</p>'},
+    {lb:'Divide each term',dr:dQ6,ht:'<div class="fm">'+q6.fa+'x ÷ '+q6.f+' = '+q6.a+'x &nbsp;&nbsp;&nbsp; '+q6.fb+' ÷ '+q6.f+' = '+q6.b+'</div>'},
+    {lb:'Write factorised form',dr:dQ6,ht:'<div class="fm">'+q6.f+'('+q6.a+'x + '+q6.b+')</div><p>Always verify by expanding back out.</p>'},
+    {lb:'Your turn',dr:dQ6,ht:yt6}
+  ]},
+  {ey:'Q7 · Year 8 · Algebraic Manipulation',ti:'Solving Linear Equations <span class="badge f">F</span>',
+   su:'Solve: '+q7.a+'x + '+q7.b+' = '+q7.c,steps:[
+    {lb:'Inverse operations',dr:dQ7,ht:'<p>Use inverse operations to isolate x — whatever is done to one side must be done to the other.</p><p><b>Step 1:</b> Subtract '+q7.b+' from both sides.</p>'},
+    {lb:'Divide to find x',dr:dQ7,ht:'<div class="fm">'+q7.a+'x = '+(q7.c-q7.b)+'</div><p><b>Step 2:</b> Divide both sides by '+q7.a+'.</p>'},
+    {lb:'Solution and check',dr:dQ7,ht:'<div class="fm">x = '+q7.ans+'</div><p>Check: '+q7.a+' × '+q7.ans+' + '+q7.b+' = '+(q7.a*q7.ans+q7.b)+' ✔</p>'},
+    {lb:'Your turn',dr:dQ7,ht:yt7}
+  ]},
+  {ey:'Q8 · Year 8 · Algebraic Manipulation',ti:'Unknowns on Both Sides <span class="badge e">E</span>',
+   su:'Solve: '+q8.a+'x + '+q8.b+' = '+q8.c+'x + '+q8.d,steps:[
+    {lb:'Collect x terms on one side',dr:dQ8,ht:'<p>Subtract '+q8.c+'x from both sides to move x terms to the left. Subtract '+q8.b+' from both sides to move numbers to the right.</p>'},
+    {lb:'Simplify',dr:dQ8,ht:'<div class="fm">'+(q8.a-q8.c)+'x = '+(q8.d-q8.b)+'</div>'},
+    {lb:'Solve',dr:dQ8,ht:'<div class="fm">x = '+q8.ans+'</div>'},
+    {lb:'Your turn',dr:dQ8,ht:yt8}
+  ]},
+  {ey:'Q9 · Year 8 · Algebraic Manipulation',ti:'Forming & Solving Equations <span class="badge e">E</span>',
+   su:'A triangle has sides x, (x+'+q9.d+') and (x+'+2*q9.d+') cm. Perimeter = '+q9.tot+' cm.',steps:[
+    {lb:'Form an equation',dr:dQ9,ht:'<p>Write the perimeter as a sum of all three sides, and set it equal to '+q9.tot+'.</p><div class="fm">x + (x+'+q9.d+') + (x+'+2*q9.d+') = '+q9.tot+'</div>'},
+    {lb:'Simplify and solve',dr:dQ9,ht:'<div class="fm">3x + '+3*q9.d+' = '+q9.tot+'</div><div class="fm">3x = '+(q9.tot-3*q9.d)+'</div>'},
+    {lb:'Find x and the side lengths',dr:dQ9,ht:'<div class="fm">x = '+q9.x+' cm</div><p>Sides: '+q9.x+' cm, '+(q9.x+q9.d)+' cm, '+(q9.x+2*q9.d)+' cm</p>'},
+    {lb:'Your turn',dr:dQ9,ht:yt9}
+  ]},
+  {ey:'Q10 · Year 8 · Algebraic Manipulation',ti:'Index Laws <span class="badge e">E</span>',
+   su:'Simplify x'+q10.a+' × x'+q10.b+' and x'+q10.a+' ÷ x'+q10.c,steps:[
+    {lb:'Multiplying powers',dr:dQ10,ht:'<p>When multiplying powers of the <b>same base</b>, <b>add</b> the indices.</p><div class="fm">xᵃ × xᵇ = xᵃ⁺ᵇ</div><div class="fm">x'+q10.a+' × x'+q10.b+' = x'+(q10.add)+'</div>'},
+    {lb:'Dividing powers',dr:dQ10,ht:'<p>When dividing powers of the same base, <b>subtract</b> the indices.</p><div class="fm">x'+q10.a+' ÷ x'+q10.c+' = x'+(q10.sub)+'</div>'},
+    {lb:'Power of a power',dr:dQ10,ht:'<p>When raising a power to another power, <b>multiply</b> the indices.</p><div class="fm">(x'+q10.a+')² = x'+(q10.pow)+'</div>'},
+    {lb:'Your turn',dr:dQ10,ht:yt10}
   ]}
 ];
 
 var qi=0,si=0;
-function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
-function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
-function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \u2192';}
+function bSB(){
+  var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');
+  sb.innerHTML='';sb.appendChild(lbl);
+  QS.forEach(function(q,i){
+    var b=document.createElement('button');
+    b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;
+    b.onclick=function(){qi=i;si=0;render();};
+    sb.appendChild(b);
+  });
+}
+function bDT(){
+  var w=document.getElementById('dt');w.innerHTML='';
+  QS[qi].steps.forEach(function(_,i){
+    var d=document.createElement('div');
+    d.className='dot'+(i===si?' on':i<si?' dn':'');
+    w.appendChild(d);
+  });
+}
+function render(){
+  bSB();
+  var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').innerHTML=q.ey;
+  document.getElementById('ti').innerHTML=q.ti;
+  document.getElementById('su').textContent=q.su;
+  var p=document.getElementById('pn');
+  p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+  p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);
+  st.dr(si);bDT();
+  document.getElementById('pb').disabled=si===0;
+  document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';
+}
 document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
 document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
 render();
-
 </script>
 </body>
 </html>
