@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Integers, Powers &amp; Roots &middot; Year 8 &middot; Maths Walkthroughs</title>
+<title>Integers, Powers & Roots &middot; Year 8 &middot; Maths Walkthroughs</title>
 <style>
 :root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -57,6 +57,8 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
 .try-q{font-size:15px;margin:8px 0 10px;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;}
+.f{background:#1a5a8a;color:#fff;}.e{background:#C0272D;color:#fff;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
@@ -86,22 +88,35 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
   </div>
 </div>
 <script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
 function tryIt(o){
   var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
-  return '<div class="try" data-tryid="'+id+'"><div class="try-t">\u2714 Your Turn</div><div class="try-q">'+o.question+'</div>'+(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div><div class="try-fb" data-tryid="'+id+'"></div><details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details></div>';
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">✔ Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +(h?'<ul class="hl">'+h+'</ul>':'')
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
+    +'</div>';
 }
 document.addEventListener('click',function(e){
+  if(e.target.classList.contains('try-new')){render();return;}
   if(e.target.classList.contains('try-ck')){
     var id=e.target.getAttribute('data-tryid'),o=ST[id].o;
     var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
     var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
-    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-    else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
   }
 });
 function g(){return document.getElementById('dg');}
@@ -109,177 +124,182 @@ function T(x,y,t,c,sz,a,b){return '<text x="'+x+'" y="'+y+'" font-size="'+(sz||1
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" rx="2"/>';}
 
-/* Q1 Negative integers - BIDMAS */
-function dQ1(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(R(60,20,360,40,'#fff5f0','#C0272D',2));
-  o.push(T(240,46,'\u22126 \u00d7 4 + 18 \u00f7 (\u22123)','#C0272D',17,'middle',true));
-  if(p>=1){
-    o.push(T(240,85,'Step 1: Multiplication and division first (BIDMAS)','#888',12,'middle',false));
-    o.push(R(60,95,160,36,'#fce8d8','#C0272D',1.5));
-    o.push(T(140,118,'\u22126 \u00d7 4 = \u221224','#C0272D',14,'middle',true));
-  }
-  if(p>=2){
-    o.push(R(270,95,170,36,'#e8f0ff','#1a5a8a',1.5));
-    o.push(T(355,118,'18 \u00f7 (\u22123) = \u22126','#1a5a8a',14,'middle',true));
-    o.push(T(240,148,'Different signs \u2192 negative result','#888',11,'middle',false));
-  }
-  if(p>=3){
-    o.push(R(120,160,240,40,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,186,'\u221224 + (\u22126) = \u221230','#1a7a3a',16,'middle',true));
-  }
-  if(p>=4){
-    o.push(T(240,230,'Same signs \u2192 +   Different signs \u2192 \u2212','#C0272D',13,'middle',true));
-    o.push(T(240,248,'(applies to both \u00d7 and \u00f7)','#888',11,'middle',false));
-  }
-  s.innerHTML=o.join('');
-}
-
-/* Q2 Index laws - multiply */
-function dQ2(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,34,'2\u00b3 \u00d7 2\u2075','#C0272D',22,'middle',true));
-  if(p>=1){
-    o.push(T(240,70,'Same base \u2192 ADD the powers','#241A17',13,'middle',false));
-    o.push(R(100,82,280,38,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,106,'2\u00b3 \u00d7 2\u2075 = 2\u00b3\u207a\u2075 = 2\u2078','#C0272D',16,'middle',true));
-  }
-  if(p>=2){
-    o.push(T(240,142,'Calculate 2\u2078:','#888',12,'middle',false));
-    o.push(T(240,162,'2\u2078 = 256','#241A17',18,'middle',true));
-  }
-  if(p>=3){
-    o.push(L(40,185,440,185,'#E4D6CE',1));
-    o.push(T(60,206,'Law','#888',11,'start',true));
-    o.push(T(200,206,'Rule','#888',11,'start',true));
-    o.push(T(60,222,'Multiply','#241A17',11,'start',false));
-    o.push(T(200,222,'a\u1d50 \u00d7 a\u207f = a\u1d50\u207a\u207f','#C0272D',12,'start',true));
-    o.push(T(60,238,'Divide','#241A17',11,'start',false));
-    o.push(T(200,238,'a\u1d50 \u00f7 a\u207f = a\u1d50\u207b\u207f','#1a5a8a',12,'start',true));
-    o.push(T(340,222,'Power of power','#241A17',11,'start',false));
-    o.push(T(340,222,'','#241A17',11,'start',false));
-  }
-  if(p>=4){
-    o.push(T(240,250,'Zero index: a\u2070 = 1 for any non-zero a','#C8922A',12,'middle',true));
-  }
-  s.innerHTML=o.join('');
-}
-
-/* Q3 Index laws - divide */
-function dQ3(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,34,'3\u2074 \u00f7 3\u00b2','#C0272D',22,'middle',true));
-  if(p>=1){
-    o.push(T(240,70,'Same base \u2192 SUBTRACT the powers','#241A17',13,'middle',false));
-    o.push(R(100,82,280,38,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,106,'3\u2074 \u00f7 3\u00b2 = 3\u2074\u207b\u00b2 = 3\u00b2','#C0272D',16,'middle',true));
-  }
-  if(p>=2){
-    o.push(T(240,148,'3\u00b2 = 9','#241A17',20,'middle',true));
-  }
-  if(p>=3){
-    o.push(T(240,195,'Verification: 3\u2074 = 81,  3\u00b2 = 9','#888',13,'middle',false));
-    o.push(T(240,215,'81 \u00f7 9 = 9 \u2713','#1a7a3a',14,'middle',true));
-  }
-  if(p>=4){
-    o.push(T(240,248,'Subtraction law only works when the BASE is the same','#C0272D',12,'middle',true));
-  }
-  s.innerHTML=o.join('');
-}
-
-/* Q4 Prime factors */
-function dQ4(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,26,'Write 360 as a product of prime factors','#241A17',14,'middle',false));
-  // Factor tree style boxes
-  var steps=[
-    {val:'360',div:'2',res:'180',y:50},
-    {val:'180',div:'2',res:'90',y:90},
-    {val:'90',div:'2',res:'45',y:130},
-    {val:'45',div:'3',res:'15',y:170},
-    {val:'15',div:'3',res:'5',y:210}
-  ];
-  steps.forEach(function(st,i){
-    if(p>=i+1){
-      o.push(R(40,st.y,80,30,'#fff5f0','#C0272D',1.5));
-      o.push(T(80,st.y+20,st.val,'#241A17',13,'middle',true));
-      o.push(T(160,st.y+20,'\u00f7 '+st.div,'#888',12,'middle',false));
-      o.push(R(200,st.y,80,30,'#e8f8ee','#1a7a3a',1.5));
-      o.push(T(240,st.y+20,st.res,'#1a7a3a',13,'middle',true));
-    }
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var nl=[-5,-4,-3,-2,-1,0,1,2,3,4,5];
+  o.push(L(20,130,460,130,'#333',2));
+  nl.forEach(function(n,i){var x=20+i*40;o.push(L(x,122,x,138,'#333',1.5));o.push(T(x,152,n,'#888',11,'middle',false));});
+  if(p>=1){o.push('<circle cx="180" cy="130" r="7" fill="#C0272D"/>');o.push(T(180,112,'-2','#C0272D',13,'middle',true));}
+  if(p>=2){o.push('<circle cx="300" cy="130" r="7" fill="#1a5a8a"/>');o.push(T(300,112,'3','#1a5a8a',13,'middle',true));
+    o.push(T(240,175,'-2 + 3 = 1  (move 3 right from -2)','#888',13,'middle',false));}
+  if(p>=3){o.push('<circle cx="260" cy="130" r="5" fill="#1a7a3a"/>');o.push(R(80,190,320,36,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,214,'-2 - 5 = -7  (move 5 left)','#1a7a3a',14,'middle',true));}
+  s.innerHTML=o.join('');}
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,25,'Rules for multiplying/dividing negatives','#C0272D',14,'middle',true));
+  var rules=['+  ×  +  =  +','−  ×  −  =  +','+  ×  −  =  −','−  ×  +  =  −'];
+  var cols=['#1a7a3a','#1a7a3a','#C0272D','#C0272D'];
+  rules.forEach(function(r,i){if(p>=i+1){o.push(R(80,44+i*46,320,38,cols[i]+'22',cols[i],1.5));o.push(T(240,68+i*46,r,cols[i],15,'middle',true));}});
+  if(p>=4){o.push(T(240,238,'Same signs → positive   Different signs → negative','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,25,'Powers and roots','#C0272D',15,'middle',true));
+  if(p>=1){o.push(R(30,40,420,46,'#fff5f0','#C0272D',1.5));o.push(T(240,58,'2⁵ means 2×2×2×2×2','#C0272D',13,'middle',false));o.push(T(240,76,'= 32','#C0272D',18,'middle',true));}
+  if(p>=2){o.push(R(30,96,420,46,'#e8f0ff','#1a5a8a',1.5));o.push(T(240,114,'√81 = 9  (9² = 81)','#1a5a8a',16,'middle',true));o.push(T(240,132,'∛27 = 3  (3³ = 27)','#1a5a8a',14,'middle',false));}
+  if(p>=3){o.push(R(30,152,420,46,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,170,'3⁴ = 81   4³ = 64   5² = 25','#1a7a3a',13,'middle',false));o.push(T(240,188,'Know squares to 15² and cubes to 5³','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,25,'Factors, multiples and primes','#C0272D',14,'middle',true));
+  if(p>=1){o.push(R(20,40,440,40,'#fff5f0','#C0272D',1.5));o.push(T(240,65,'Factors of 24: 1,2,3,4,6,8,12,24','#C0272D',13,'middle',false));}
+  if(p>=2){o.push(R(20,90,440,40,'#e8f0ff','#1a5a8a',1.5));o.push(T(240,115,'Multiples of 6: 6,12,18,24,30,...','#1a5a8a',13,'middle',false));}
+  if(p>=3){o.push(R(20,140,440,40,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,165,'Primes: 2,3,5,7,11,13,17,19,23...','#1a7a3a',13,'middle',false));o.push(T(240,195,'Prime: exactly 2 factors (1 and itself)','#888',12,'middle',false));}
+  if(p>=4){o.push(T(240,230,'1 is NOT a prime number','#C0272D',12,'middle',true));}
+  s.innerHTML=o.join('');}
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Prime factor decomposition of 60','#C0272D',14,'middle',true));
+  if(p>=1){// factor tree
+    o.push(T(240,50,'60','#241A17',18,'middle',true));o.push(L(240,58,180,90,'#888',1.5));o.push(L(240,58,300,90,'#888',1.5));
+    o.push(T(175,106,'2','#C0272D',16,'middle',true));o.push(T(305,106,'30','#241A17',16,'middle',false));}
+  if(p>=2){o.push(L(305,114,265,148,'#888',1.5));o.push(L(305,114,345,148,'#888',1.5));
+    o.push(T(260,164,'2','#C0272D',16,'middle',true));o.push(T(350,164,'15','#241A17',16,'middle',false));}
+  if(p>=3){o.push(L(350,172,315,206,'#888',1.5));o.push(L(350,172,385,206,'#888',1.5));
+    o.push(T(310,222,'3','#C0272D',16,'middle',true));o.push(T(390,222,'5','#C0272D',16,'middle',true));
+    o.push(R(60,238,360,18,'#e8f8ee','#1a7a3a',1));o.push(T(240,252,'60 = 2² × 3 × 5','#1a7a3a',14,'middle',true));}
+  s.innerHTML=o.join('');}
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'HCF and LCM of 12 and 18','#C0272D',14,'middle',true));
+  if(p>=1){o.push(T(240,50,'12 = 2² × 3   18 = 2 × 3²','#241A17',13,'middle',false));
+    o.push('<circle cx="160" cy="140" r="80" fill="#C0272D22" stroke="#C0272D" stroke-width="2"/>');
+    o.push('<circle cx="320" cy="140" r="80" fill="#1a5a8a22" stroke="#1a5a8a" stroke-width="2"/>');
+    o.push(T(115,140,'4','#C0272D',18,'middle',true));o.push(T(240,140,'6','#888',18,'middle',true));o.push(T(365,140,'9','#1a5a8a',18,'middle',true));
+    o.push(T(115,165,'only 12','#888',9,'middle',false));o.push(T(240,165,'shared','#888',9,'middle',false));o.push(T(365,165,'only 18','#888',9,'middle',false));}
+  if(p>=2){o.push(R(30,212,200,36,'#fff5f0','#C0272D',1.5));o.push(T(130,235,'HCF = 6','#C0272D',16,'middle',true));}
+  if(p>=3){o.push(R(250,212,200,36,'#e8f8ee','#1a7a3a',1.5));o.push(T(350,235,'LCM = 36','#1a7a3a',16,'middle',true));}
+  s.innerHTML=o.join('');}
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'BIDMAS / Order of Operations','#C0272D',15,'middle',true));
+  var steps=['B – Brackets','I – Indices (powers)','D/M – Divide/Multiply (left→right)','A/S – Add/Subtract (left→right)'];
+  var cols=['#C0272D','#C8922A','#1a5a8a','#1a7a3a'];
+  steps.forEach(function(s2,i){if(p>=i+1){o.push(R(40,38+i*46,400,38,cols[i]+'22',cols[i],1.5));o.push(T(240,62+i*46,s2,cols[i],13,'middle',false));}});
+  if(p>=4){o.push(T(240,232,'Example: 3 + 4² ÷ 2 = 3 + 16÷2 = 3+8 = 11','#888',12,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Negative number arithmetic','#C0272D',14,'middle',true));
+  if(p>=1){o.push(R(20,36,440,44,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,54,'−3 × −4 = +12','#C0272D',16,'middle',true));o.push(T(240,72,'(neg × neg = pos)','#888',11,'middle',false));}
+  if(p>=2){o.push(R(20,90,440,44,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,108,'−20 ÷ 4 = −5','#1a5a8a',16,'middle',true));o.push(T(240,126,'(neg ÷ pos = neg)','#888',11,'middle',false));}
+  if(p>=3){o.push(R(20,144,440,44,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,162,'(−3)² = 9','#1a7a3a',16,'middle',true));o.push(T(240,180,'neg squared = positive','#888',11,'middle',false));}
+  if(p>=4){o.push(T(240,220,'−3² = −9  (square only the 3, then negate)','#C0272D',12,'middle',false));
+    o.push(T(240,240,'vs (−3)² = 9  (square the whole −3)','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Squares and square roots','#C0272D',14,'middle',true));
+  var sq=[1,4,9,16,25,36,49,64,81,100,121,144,169,196,225];
+  sq.forEach(function(v,i){
+    if(p>=1){var col=i%2===0?'#fff5f0':'#fff';o.push(R(14+i*32,36,30,38,col,'#E4D6CE',1));o.push(T(29+i*32,60,v,'#C0272D',10,'middle',true));}
   });
-  if(p>=6){
-    o.push(R(290,50,170,160,'#fdf4e8','#C8922A',2));
-    o.push(T(375,90,'Primes found:','#888',12,'middle',false));
-    o.push(T(375,115,'2, 2, 2, 3, 3, 5','#C8922A',15,'middle',true));
-    o.push(T(375,148,'360 = 2\u00b3 \u00d7 3\u00b2 \u00d7 5','#C0272D',16,'middle',true));
-  }
-  s.innerHTML=o.join('');
-}
-
-/* Q5 HCF and LCM */
-function dQ5(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,22,'Find HCF and LCM of 24 and 36','#241A17',14,'middle',false));
-  if(p>=1){
-    o.push(R(20,38,200,36,'#fff5f0','#C0272D',1.5));
-    o.push(T(120,61,'24 = 2\u00b3 \u00d7 3','#C0272D',14,'middle',true));
-    o.push(R(260,38,200,36,'#e8f0ff','#1a5a8a',1.5));
-    o.push(T(360,61,'36 = 2\u00b2 \u00d7 3\u00b2','#1a5a8a',14,'middle',true));
-  }
-  if(p>=2){
-    o.push(T(240,100,'HCF \u2014 take LOWEST power of each shared prime','#241A17',12,'middle',false));
-    o.push(R(80,110,320,36,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,133,'HCF = 2\u00b2 \u00d7 3 = 4 \u00d7 3 = 12','#1a7a3a',15,'middle',true));
-  }
-  if(p>=3){
-    o.push(T(240,170,'LCM \u2014 take HIGHEST power of each prime','#241A17',12,'middle',false));
-    o.push(R(80,180,320,36,'#fdf4e8','#C8922A',2));
-    o.push(T(240,203,'LCM = 2\u00b3 \u00d7 3\u00b2 = 8 \u00d7 9 = 72','#C8922A',15,'middle',true));
-  }
-  if(p>=4){
-    o.push(T(240,248,'HCF: lowest powers   LCM: highest powers','#C0272D',13,'middle',true));
-  }
-  s.innerHTML=o.join('');
-}
-
+  if(p>=1){o.push(T(240,88,'Squares 1² to 15²','#888',11,'middle',false));}
+  if(p>=2){o.push(R(60,100,360,44,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,118,'√144 = 12   √225 = 15','#1a5a8a',16,'middle',true));
+    o.push(T(240,136,'√ always gives positive result','#888',11,'middle',false));}
+  if(p>=3){o.push(R(60,152,360,44,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,170,'3³ = 27   ∛125 = 5   ∛216 = 6','#1a7a3a',13,'middle',false));
+    o.push(T(240,188,'Cube roots — know cubes to 5³ = 125','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Lowest common multiple (LCM) problem','#C0272D',14,'middle',true));
+  if(p>=1){o.push(T(240,55,'Bus A: every 8 min  Bus B: every 12 min','#241A17',13,'middle',false));
+    o.push(T(240,75,'When do they BOTH leave together?','#888',12,'middle',false));}
+  if(p>=2){o.push(T(240,105,'Multiples of 8: 8, 16, 24, 32...','#C0272D',13,'middle',false));
+    o.push(T(240,125,'Multiples of 12: 12, 24, 36...','#1a5a8a',13,'middle',false));}
+  if(p>=3){o.push(R(100,145,280,44,'#e8f8ee','#1a7a3a',2));o.push(T(240,172,'LCM = 24 minutes','#1a7a3a',18,'middle',true));}
+  s.innerHTML=o.join('');}
+function yt1(){var a=rnd(-8,-1),b=rnd(1,10);return tryIt({question:'Calculate <b>'+a+' + '+b+'</b>.',hints:['Start at '+a+' on number line','Move '+b+' places right'],ans:a+b,tol:0,unit:'',working:a+' + '+b+' = '+(a+b)});}
+function yt2(){var a=pick([-6,-5,-4,-3,-2]),b=pick([-4,-3,-2,3,4,5]);return tryIt({question:'Calculate <b>'+a+' × '+b+'</b>.',hints:['Same signs → positive','Different signs → negative'],ans:a*b,tol:0,unit:'',working:a+' × '+b+' = '+a*b});}
+function yt3(){var b=rnd(2,5),e=rnd(2,4);return tryIt({question:'Calculate <b>'+b+'<sup>'+e+'</sup></b>.',hints:['Multiply '+b+' by itself '+e+' times'],ans:Math.pow(b,e),tol:0,unit:'',working:b+'^'+e+' = '+Math.pow(b,e)});}
+function yt4(){var n=rnd(12,48);var factors=[];for(var i=1;i<=n;i++)if(n%i===0)factors.push(i);return tryIt({question:'How many factors does <b>'+n+'</b> have?',hints:['Factors of '+n+': try dividing by 1,2,3,...'],ans:factors.length,tol:0,unit:'factors',working:'Factors of '+n+': '+factors.join(', ')+' → '+factors.length+' factors'});}
+function yt5(){var n=pick([12,18,20,24,30,36]);function primes(x){var f=[];var d=2;while(d*d<=x){while(x%d===0){f.push(d);x=Math.floor(x/d);}d++;}if(x>1)f.push(x);return f;}var pf=primes(n);return tryIt({question:'How many prime factors (with repetition) does <b>'+n+'</b> have? e.g. 12=2×2×3 has 3.',hints:['Build the factor tree for '+n],ans:pf.length,tol:0,unit:'',working:n+' = '+pf.join('×')+' → '+pf.length+' prime factors'});}
+function yt6(){var a=pick([6,8,10,12,15]),b=pick([9,10,12,15,18]);function gcd(x,y){return y===0?x:gcd(y,x%y);}return tryIt({question:'Find the HCF of <b>'+a+'</b> and <b>'+b+'</b>.',hints:['List factors of each','Find largest common one'],ans:gcd(a,b),tol:0,unit:'',working:'HCF('+a+','+b+') = '+gcd(a,b)});}
+function yt7(){return tryIt({question:'Calculate <b>5 + 3² × 2</b> using correct order of operations.',hints:['Indices first: 3² = 9','Then multiply: 9 × 2 = 18','Then add: 5 + 18'],ans:23,tol:0,unit:'',working:'5 + 9 × 2 = 5 + 18 = 23'});}
+function yt8(){var a=pick([-6,-4,-3,-2]),b=pick([-4,-3,-2]);return tryIt({question:'Calculate <b>'+a+' ÷ '+b+'</b>.',hints:['Both negative → result is positive'],ans:a/b,tol:0.01,unit:'',working:a+' ÷ '+b+' = '+a/b});}
+function yt9(){var sq=pick([4,9,16,25,36,49,64,81,100,121,144,169]);return tryIt({question:'Find √'+sq+'.',hints:['Think: what number squared = '+sq+'?'],ans:Math.sqrt(sq),tol:0,unit:'',working:'√'+sq+' = '+Math.sqrt(sq)});}
+function yt10(){var a=pick([4,5,6,8]),b=pick([6,8,9,10,12]);function lcm(x,y){function gcd(a2,b2){return b2===0?a2:gcd(b2,a2%b2);}return x*y/gcd(x,y);}return tryIt({question:'Find the LCM of <b>'+a+'</b> and <b>'+b+'</b>.',hints:['List multiples of each','Find first common multiple'],ans:lcm(a,b),tol:0,unit:'',working:'LCM('+a+','+b+') = '+lcm(a,b)});}
 var QS=[
-  {ey:'Q1 \u00b7 Year 8 \u00b7 Integers, Powers & Roots',ti:'Negative Number Operations',su:'Calculate: \u22126 \u00d7 4 + 18 \u00f7 (\u22123)',steps:[
-    {lb:'BIDMAS first',dr:dQ1,ht:'<p>Always follow <b>BIDMAS</b>: Brackets, Indices, Division and Multiplication (left to right), Addition and Subtraction. Multiplication and division come before addition.</p>'},
-    {lb:'Multiply: \u22126 \u00d7 4',dr:dQ1,ht:'<p>Different signs (negative \u00d7 positive) give a <b>negative</b> result.</p><div class="fm">\u22126 \u00d7 4 = \u221224</div>'},
-    {lb:'Divide: 18 \u00f7 (\u22123)',dr:dQ1,ht:'<p>Different signs (positive \u00f7 negative) give a <b>negative</b> result.</p><div class="fm">18 \u00f7 (\u22123) = \u22126</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Calculate: <b>\u22125 \u00d7 (\u22123) + 20 \u00f7 (\u22124)</b>',hints:['Multiply and divide first','\u22125 \u00d7 (\u22123) = +15 (same signs)','20 \u00f7 (\u22124) = \u22125 (different signs)'],ans:10,tol:0.5,unit:'',working:'\u22125 \u00d7 (\u22123) = +15;  20 \u00f7 (\u22124) = \u22125;  15 + (\u22125) = 10'})}
+  {ey:'Q1 · Year 8 · Integers',ti:'Adding & Subtracting Negatives <span class="badge f">F</span>',su:'Calculate −2 + 3 and −2 − 5 using a number line.',steps:[
+    {lb:'Number line',dr:dQ1,ht:'<p>Use the number line. Adding a positive → move <b>right</b>. Subtracting a positive → move <b>left</b>.</p>'},
+    {lb:'−2 + 3',dr:dQ1,ht:'<div class="fm">−2 + 3 = 1</div><p>Start at −2, move 3 right → land on 1.</p>'},
+    {lb:'−2 − 5',dr:dQ1,ht:'<div class="fm">−2 − 5 = −7</div><p>Start at −2, move 5 left → land on −7.</p>'},
+    {lb:'Your turn',dr:dQ1,ht:yt1}
   ]},
-  {ey:'Q2 \u00b7 Year 8 \u00b7 Integers, Powers & Roots',ti:'Index Law: Multiplication',su:'Evaluate 2\u00b3 \u00d7 2\u2075',steps:[
-    {lb:'Same base rule',dr:dQ2,ht:'<p>When you multiply powers with the <b>same base</b>, add the indices.</p><div class="fm">a\u1d50 \u00d7 a\u207f = a\u1d50\u207a\u207f</div>'},
-    {lb:'Add the powers',dr:dQ2,ht:'<div class="fm">2\u00b3 \u00d7 2\u2075 = 2\u00b3\u207a\u2075 = 2\u2078</div>'},
-    {lb:'Calculate',dr:dQ2,ht:'<div class="fm">2\u2078 = 256</div><p>You can verify: 2\u00b3 = 8, 2\u2075 = 32, 8 \u00d7 32 = 256 \u2713</p>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Simplify <b>5\u00b3 \u00d7 5\u2074</b>. Give the value.',hints:['Add the indices: 3 + 4','5\u2077 = ?'],ans:78125,tol:0.5,unit:'',working:'5\u00b3 \u00d7 5\u2074 = 5\u2077 = 78125'})}
+  {ey:'Q2 · Year 8 · Integers',ti:'Multiplying & Dividing Negatives <span class="badge f">F</span>',su:'Find the rules for multiplying and dividing with negative numbers.',steps:[
+    {lb:'The sign rules',dr:dQ2,ht:'<p>The sign of the result depends on whether the signs are the <b>same</b> or <b>different</b>.</p>'},
+    {lb:'Same signs → positive',dr:dQ2,ht:'<div class="fm">+ × + = +  and  − × − = +</div>'},
+    {lb:'Different signs → negative',dr:dQ2,ht:'<div class="fm">+ × − = −  and  − × + = −</div>'},
+    {lb:'Your turn',dr:dQ2,ht:yt2}
   ]},
-  {ey:'Q3 \u00b7 Year 8 \u00b7 Integers, Powers & Roots',ti:'Index Law: Division',su:'Simplify 3\u2074 \u00f7 3\u00b2',steps:[
-    {lb:'Division law',dr:dQ3,ht:'<p>When you divide powers with the <b>same base</b>, subtract the indices.</p><div class="fm">a\u1d50 \u00f7 a\u207f = a\u1d50\u207b\u207f</div>'},
-    {lb:'Subtract the powers',dr:dQ3,ht:'<div class="fm">3\u2074 \u00f7 3\u00b2 = 3\u2074\u207b\u00b2 = 3\u00b2</div>'},
-    {lb:'Calculate and verify',dr:dQ3,ht:'<div class="fm">3\u00b2 = 9</div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Simplify <b>4\u2076 \u00f7 4\u00b3</b>. Give the value.',hints:['Subtract the indices: 6 \u2212 3','4\u00b3 = ?'],ans:64,tol:0.5,unit:'',working:'4\u2076 \u00f7 4\u00b3 = 4\u00b3 = 64'})}
+  {ey:'Q3 · Year 8 · Integers',ti:'Powers and Roots <span class="badge f">F</span>',su:'Calculate 2⁵, √81 and ∛27.',steps:[
+    {lb:'Powers',dr:dQ3,ht:'<p>2⁵ means 2 multiplied by itself 5 times.</p><div class="fm">2⁵ = 2×2×2×2×2 = 32</div>'},
+    {lb:'Square and cube roots',dr:dQ3,ht:'<div class="fm">√81 = 9  because 9² = 81</div><div class="fm">∛27 = 3  because 3³ = 27</div>'},
+    {lb:'Key facts to know',dr:dQ3,ht:'<p>Learn squares to 15² and cubes to 5³. They appear very frequently.</p>'},
+    {lb:'Your turn',dr:dQ3,ht:yt3}
   ]},
-  {ey:'Q4 \u00b7 Year 8 \u00b7 Integers, Powers & Roots',ti:'Prime Factor Decomposition',su:'Write 360 as a product of prime factors.',steps:[
-    {lb:'Divide by primes',dr:dQ4,ht:'<p>Keep dividing by the <b>smallest prime</b> that goes in exactly. Primes are: 2, 3, 5, 7, 11, 13&hellip;</p>'},
-    {lb:'Repeated division',dr:dQ4,ht:'<p>360 \u00f7 2 = 180<br>180 \u00f7 2 = 90<br>90 \u00f7 2 = 45<br>45 \u00f7 3 = 15<br>15 \u00f7 3 = 5<br>5 \u00f7 5 = 1</p>'},
-    {lb:'Stop at 1',dr:dQ4,ht:'<p>When the result reaches 1, list all the primes used.</p><div class="fm">2, 2, 2, 3, 3, 5</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'How many prime factors does 360 have in total (counting repeats)?',hints:['List: 2, 2, 2, 3, 3, 5','Count them all'],ans:6,tol:0,unit:'factors',working:'2\u00b3 \u00d7 3\u00b2 \u00d7 5 gives 3+2+1 = 6 prime factors'})}
+  {ey:'Q4 · Year 8 · Integers',ti:'Factors, Multiples & Primes <span class="badge f">F</span>',su:'Find factors of 24, multiples of 6, and identify prime numbers.',steps:[
+    {lb:'Factors of 24',dr:dQ4,ht:'<p>A <b>factor</b> divides exactly into the number. List in pairs: 1×24, 2×12, 3×8, 4×6.</p>'},
+    {lb:'Multiples and primes',dr:dQ4,ht:'<p><b>Multiples</b> are the times-table. <b>Primes</b> have exactly two factors: 1 and themselves.</p>'},
+    {lb:'Is 1 prime?',dr:dQ4,ht:'<p>No — 1 has only <b>one</b> factor (itself), so it is not prime. 2 is the smallest prime and the only even prime.</p>'},
+    {lb:'Your turn',dr:dQ4,ht:yt4}
   ]},
-  {ey:'Q5 \u00b7 Year 8 \u00b7 Integers, Powers & Roots',ti:'HCF and LCM',su:'Find the HCF and LCM of 24 and 36.',steps:[
-    {lb:'Prime factorise both',dr:dQ5,ht:'<p>Write both numbers as products of prime factors first.</p><div class="fm">24 = 2\u00b3 \u00d7 3 &nbsp;&nbsp;&nbsp; 36 = 2\u00b2 \u00d7 3\u00b2</div>'},
-    {lb:'HCF: lowest powers',dr:dQ5,ht:'<p>For the <b>HCF</b>, take the <b>lowest</b> power of each prime that appears in <b>both</b>.</p><div class="fm">HCF = 2\u00b2 \u00d7 3\u00b9 = 4 \u00d7 3 = 12</div>'},
-    {lb:'LCM: highest powers',dr:dQ5,ht:'<p>For the <b>LCM</b>, take the <b>highest</b> power of each prime that appears in <b>either</b>.</p><div class="fm">LCM = 2\u00b3 \u00d7 3\u00b2 = 8 \u00d7 9 = 72</div>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'Find the LCM of 12 and 18. (12 = 2\u00b2 \u00d7 3, &nbsp;18 = 2 \u00d7 3\u00b2)',hints:['Take highest power of each prime','Highest power of 2 is 2\u00b2','Highest power of 3 is 3\u00b2'],ans:36,tol:0,unit:'',working:'LCM = 2\u00b2 \u00d7 3\u00b2 = 4 \u00d7 9 = 36'})}
+  {ey:'Q5 · Year 8 · Integers',ti:'Prime Factor Decomposition <span class="badge e">E</span>',su:'Write 60 as a product of its prime factors.',steps:[
+    {lb:'Build a factor tree',dr:dQ5,ht:'<p>Repeatedly divide by the smallest prime factor until you reach 1. Draw as a tree.</p>'},
+    {lb:'Continue dividing',dr:dQ5,ht:'<p>60 → 2 × 30 → 2 × 2 × 15 → 2 × 2 × 3 × 5</p>'},
+    {lb:'Write in index form',dr:dQ5,ht:'<div class="fm">60 = 2² × 3 × 5</div>'},
+    {lb:'Your turn',dr:dQ5,ht:yt5}
+  ]},
+  {ey:'Q6 · Year 8 · Integers',ti:'HCF and LCM <span class="badge e">E</span>',su:'Find the HCF and LCM of 12 and 18.',steps:[
+    {lb:'Prime factorise both',dr:dQ6,ht:'<div class="fm">12 = 2² × 3   18 = 2 × 3²</div>'},
+    {lb:'HCF — use lowest powers',dr:dQ6,ht:'<div class="fm">HCF = 2¹ × 3¹ = 6</div><p>Take the <b>lowest</b> power of each shared prime factor.</p>'},
+    {lb:'LCM — use highest powers',dr:dQ6,ht:'<div class="fm">LCM = 2² × 3² = 36</div><p>Take the <b>highest</b> power of every prime factor.</p>'},
+    {lb:'Your turn',dr:dQ6,ht:yt6}
+  ]},
+  {ey:'Q7 · Year 8 · Integers',ti:'Order of Operations (BIDMAS) <span class="badge f">F</span>',su:'Calculate 3 + 4² ÷ 2 using correct order.',steps:[
+    {lb:'BIDMAS order',dr:dQ7,ht:'<p>Always work in this order: <b>B</b>rackets → <b>I</b>ndices → <b>D/M</b> → <b>A/S</b>.</p>'},
+    {lb:'Apply step by step',dr:dQ7,ht:'<div class="fm">3 + 4² ÷ 2 = 3 + 16 ÷ 2</div>'},
+    {lb:'Complete',dr:dQ7,ht:'<div class="fm">= 3 + 8 = 11</div>'},
+    {lb:'Your turn',dr:dQ7,ht:yt7}
+  ]},
+  {ey:'Q8 · Year 8 · Integers',ti:'Negative Number Arithmetic <span class="badge f">F</span>',su:'Calculate −3 × −4,  −20 ÷ 4, and (−3)².',steps:[
+    {lb:'Multiplication',dr:dQ8,ht:'<div class="fm">−3 × −4 = +12</div><p>Two negatives multiplied → positive.</p>'},
+    {lb:'Division',dr:dQ8,ht:'<div class="fm">−20 ÷ 4 = −5</div><p>Negative ÷ positive → negative.</p>'},
+    {lb:'Squaring negatives',dr:dQ8,ht:'<div class="fm">(−3)² = 9  but  −3² = −9</div><p>Brackets matter! (−3)² squares the whole number.</p>'},
+    {lb:'Your turn',dr:dQ8,ht:yt8}
+  ]},
+  {ey:'Q9 · Year 8 · Integers',ti:'Squares, Cubes and their Roots <span class="badge f">F</span>',su:'Know squares to 15² and cubes to 5³.',steps:[
+    {lb:'Squares 1² to 15²',dr:dQ9,ht:'<p>These must be memorised. The square numbers: 1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196, 225.</p>'},
+    {lb:'Square roots',dr:dQ9,ht:'<div class="fm">√144 = 12   √225 = 15</div>'},
+    {lb:'Cube roots',dr:dQ9,ht:'<div class="fm">∛27 = 3   ∛125 = 5   ∛216 = 6</div>'},
+    {lb:'Your turn',dr:dQ9,ht:yt9}
+  ]},
+  {ey:'Q10 · Year 8 · Integers',ti:'LCM in Context <span class="badge e">E</span>',su:'Bus A leaves every 8 min, Bus B every 12 min. When do they next leave together?',steps:[
+    {lb:'Identify the question',dr:dQ10,ht:'<p>We need the <b>Lowest Common Multiple</b> — the smallest number that is a multiple of both 8 and 12.</p>'},
+    {lb:'List multiples',dr:dQ10,ht:'<p>Multiples of 8: 8, 16, <b>24</b>, ...<br>Multiples of 12: 12, <b>24</b>, ...</p>'},
+    {lb:'Answer',dr:dQ10,ht:'<div class="fm">LCM(8, 12) = 24 minutes</div>'},
+    {lb:'Your turn',dr:dQ10,ht:yt10}
   ]}
 ];
 
 var qi=0,si=0;
-function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
-function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
-function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \u2192';}
+function bSB(){var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);
+  QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';
+  QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').innerHTML=q.ti;document.getElementById('su').textContent=q.su;
+  var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+  p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);
+  st.dr(si);bDT();
+  document.getElementById('pb').disabled=si===0;
+  document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';}
 document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
 document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
 render();
