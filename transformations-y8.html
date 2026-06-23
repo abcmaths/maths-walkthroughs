@@ -50,13 +50,14 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .ar input:focus{border-color:var(--gold);}
 .ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
 .ck:hover{background:#a07018;}
-.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
+.try-q{font-size:15px;margin:8px 0 10px;}
 .fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
 .fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
-.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
-.try-q{font-size:15px;margin:8px 0 10px;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;}
+.f{background:#1a5a8a;color:#fff;}.e{background:#C0272D;color:#fff;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
@@ -86,104 +87,292 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
   </div>
 </div>
 <script>
-
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');var ph='Answer'+(o.unit?' ('+o.unit+')':'');return '<div class="try" data-tryid="'+id+'"><div class="try-t">\\u2714 Your Turn</div><div class="try-q">'+o.question+'</div>'+(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div><div class="try-fb" data-tryid="'+id+'"></div><details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
-document.addEventListener('click',function(e){if(e.target.classList.contains('try-ck')){var id=e.target.getAttribute('data-tryid'),o=ST[id].o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\\u2713 Correct! '+o.working;}else{fb.className='try-fb fb er';fb.textContent='Not quite \\u2014 try again.';}}});
+function tryIt(o){
+  var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">✔ Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +(h?'<ul class="hl">'+h+'</ul>':'')
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
+    +'</div>';
+}
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('try-new')){render();return;}
+  if(e.target.classList.contains('try-ck')){
+    var id=e.target.getAttribute('data-tryid'),o=ST[id].o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
+  }
+});
 function g(){return document.getElementById('dg');}
 function T(x,y,t,c,sz,a,b){return '<text x="'+x+'" y="'+y+'" font-size="'+(sz||12)+'" font-family="Arial" fill="'+(c||'#241A17')+'" text-anchor="'+(a||'middle')+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" rx="2"/>';}
-function arc(cx,cy,r,a1,a2,c,w){var r1=a1*Math.PI/180,r2=a2*Math.PI/180;var x1=cx+r*Math.cos(r1),y1=cy-r*Math.sin(r1),x2=cx+r*Math.cos(r2),y2=cy-r*Math.sin(r2);var laf=((a2-a1+360)%360)>180?1:0;return '<path d="M '+x1.toFixed(1)+','+y1.toFixed(1)+' A '+r+','+r+' 0 '+laf+',0 '+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="'+(c||'#C8922A')+'" stroke-width="'+(w||1.5)+'" />';}
+function grid(cx,cy,cells,sz){var o=[];for(var i=-cells;i<=cells;i++){o.push(L(cx+i*sz,cy-cells*sz,cx+i*sz,cy+cells*sz,'#e8e0da',1));o.push(L(cx-cells*sz,cy+i*sz,cx+cells*sz,cy+i*sz,'#e8e0da',1));}o.push(L(cx-cells*sz,cy,cx+cells*sz,cy,'#bbb',1.5));o.push(L(cx,cy-cells*sz,cx,cy+cells*sz,'#bbb',1.5));return o.join('');}
+function poly(pts,fill,stroke,sw){return '<polygon points="'+pts.map(function(p){return p[0]+','+p[1];}).join(' ')+'" fill="'+(fill||'#C0272D44')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" stroke-linejoin="round"/>';}
 
-
+// Q1 Reflection
 function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var cx=220,cy=130,sc=30;
-  o.push(L(40,cy,420,cy,'#ddd',1.5));o.push(L(cx,10,cx,250,'#ddd',1.5));
-  o.push(T(cx+5,18,'y','#888',11,'start',false));o.push(T(414,cy+14,'x','#888',11,'start',false));
-  // Original triangle A: (1,1)(3,1)(1,3) -> px (cx+sc,cy-sc)(cx+3sc,cy-sc)(cx+sc,cy-3sc)
-  var A=[[cx+sc,cy-sc],[cx+3*sc,cy-sc],[cx+sc,cy-3*sc]];
-  o.push('<polygon points="'+A.map(function(p){return p[0]+','+p[1];}).join(' ')+'" fill="#fce8d8" stroke="#C0272D" stroke-width="2"/>');
-  o.push(T(cx+2*sc,cy-2*sc-8,'P','#C0272D',11,'middle',true));
-  if(p>=1){// reflect in y-axis: x -> -x
-    var B=A.map(function(pt){return [cx-(pt[0]-cx),pt[1]];});
-    o.push('<polygon points="'+B.map(function(p){return p[0]+','+p[1];}).join(' ')+'" fill="#e8f0ff" stroke="#1a5a8a" stroke-width="2" stroke-dasharray="5,3"/>');
-    o.push(T(cx-2*sc,cy-2*sc-8,"P'","#1a5a8a",11,'middle',true));
-    o.push(T(cx,20,'y-axis (mirror)','#C8922A',10,'middle',false));}
-  if(p>=2){o.push(T(320,50,'(x, y) \u2192 (\u2212x, y)','#1a5a8a',13,'start',true));
-    o.push(T(320,68,'Each point same','#888',10,'start',false));
-    o.push(T(320,82,'distance from','#888',10,'start',false));
-    o.push(T(320,96,'mirror line','#888',10,'start',false));}
-  if(p>=3){o.push(T(240,230,'Describe fully: Reflection in the y-axis','#C0272D',13,'middle',true));}
+  var cx=240,cy=130,sz=30;
+  o.push(grid(cx,cy,4,sz));
+  var A=[cx+sz,cy-2*sz],B=[cx+3*sz,cy-2*sz],C=[cx+sz,cy];
+  o.push(poly([A,B,C],'#C0272D44','#C0272D',2));
+  o.push(T(A[0]-8,A[1],'A','#C0272D',11,'middle',true));o.push(T(B[0]+8,B[1],'B','#C0272D',11,'middle',true));o.push(T(C[0]-8,C[1]+4,'C','#C0272D',11,'middle',true));
+  if(p>=1){o.push(L(cx,cy-4*sz,cx,cy+4*sz,'#1a5a8a',2,'6,3'));o.push(T(cx+4,'#888',11)+'');o.push(T(cx+2,cy-4*sz+12,'y-axis','#1a5a8a',10,'start',false));}
+  if(p>=2){var A2=[cx-sz,cy-2*sz],B2=[cx-3*sz,cy-2*sz],C2=[cx-sz,cy];
+    o.push(poly([A2,B2,C2],'#1a7a3a44','#1a7a3a',2));
+    o.push(T(A2[0]+8,A2[1],"A'",'#1a7a3a',11,'middle',true));o.push(T(B2[0]-8,B2[1],"B'",'#1a7a3a',11,'middle',true));o.push(T(C2[0]+8,C2[1]+4,"C'",'#1a7a3a',11,'middle',true));}
+  if(p>=3){o.push(R(60,220,360,32,'#e8f8ee','#1a7a3a',1.5));o.push(T(cx,241,'x-coords negate, y-coords stay the same','#1a7a3a',12,'middle',false));}
   s.innerHTML=o.join('');}
 
+// Q2 Rotation
 function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var cx=220,cy=130,sc=30;
-  o.push(L(40,cy,420,cy,'#ddd',1.5));o.push(L(cx,10,cx,250,'#ddd',1.5));
-  var A=[[cx+sc,cy-sc],[cx+3*sc,cy-sc],[cx+sc,cy-3*sc]];
-  o.push('<polygon points="'+A.map(function(p){return p[0]+','+p[1];}).join(' ')+'" fill="#fce8d8" stroke="#C0272D" stroke-width="2"/>');
-  o.push(T(cx+2*sc,cy-2*sc-8,'P','#C0272D',11,'middle',true));
-  if(p>=1){// translate by (3,-2)
-    var tx=3*sc,ty=-2*sc;
-    var B=A.map(function(pt){return [pt[0]+tx,pt[1]+ty];});
-    o.push('<polygon points="'+B.map(function(p){return p[0]+','+p[1];}).join(' ')+'" fill="#e8f8ee" stroke="#1a7a3a" stroke-width="2" stroke-dasharray="5,3"/>');
-    o.push(T(cx+5*sc,cy-3*sc-8,"P'","#1a7a3a",11,'middle',true));
-    o.push(L(A[0][0],A[0][1],B[0][0],B[0][1],'#C8922A',1.5,'4,2'));}
-  if(p>=2){o.push(T(60,50,'Vector: ','#241A17',13,'start',false));
-    o.push(T(120,40,'3','#C8922A',15,'middle',true));o.push(T(120,58,'\u22122','#C8922A',15,'middle',true));
-    o.push('<rect x="108" y="28" width="24" height="36" fill="none" stroke="#C8922A" stroke-width="1.5" rx="2"/>');
-    o.push(T(60,90,'Add 3 to every x; subtract 2 from every y','#888',12,'start',false));}
-  if(p>=3){o.push(T(240,230,'Describe: Translation by vector (3, \u22122)','#C0272D',13,'middle',true));}
+  var cx=240,cy=130,sz=30;
+  o.push(grid(cx,cy,4,sz));
+  var A=[cx+sz,cy-2*sz],B=[cx+3*sz,cy-2*sz],C=[cx+sz,cy];
+  o.push(poly([A,B,C],'#C0272D44','#C0272D',2));
+  o.push(T(A[0],A[1]-8,'A','#C0272D',11,'middle',true));o.push(T(B[0],B[1]-8,'B','#C0272D',11,'middle',true));o.push(T(C[0]-8,C[1],'C','#C0272D',11,'middle',true));
+  if(p>=1){o.push('<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="#C8922A"/>');o.push(T(cx+10,cy+16,'O(0,0)','#C8922A',10,'start',false));}
+  if(p>=2){// 90° clockwise: (x,y)→(y,−x)
+    var A2=[cx+2*sz,cy+sz],B2=[cx+2*sz,cy+3*sz],C2=[cx,cy+sz];
+    o.push(poly([A2,B2,C2],'#1a7a3a44','#1a7a3a',2));
+    o.push(T(A2[0]+8,A2[1],"A'",'#1a7a3a',11,'middle',true));o.push(T(B2[0]+8,B2[1],"B'",'#1a7a3a',11,'middle',true));o.push(T(C2[0]-8,C2[1],"C'",'#1a7a3a',11,'middle',true));}
+  if(p>=3){o.push(R(60,218,360,36,'#e8f8ee','#1a7a3a',1.5));o.push(T(cx,236,'90° CW: (x,y) → (y, −x)','#1a7a3a',13,'middle',true));}
   s.innerHTML=o.join('');}
 
+// Q3 Translation
 function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var cx=100,cy=200,sc=28;
-  o.push(L(30,cy,440,cy,'#ddd',1.5));o.push(L(cx,20,cx,240,'#ddd',1.5));
-  o.push('<circle cx="'+cx+'" cy="'+cy+'" r="5" fill="#241A17"/>');o.push(T(cx-14,cy+14,'O','#241A17',11,'middle',true));
-  var A=[[cx+sc,cy-sc],[cx+3*sc,cy-sc],[cx+sc,cy-3*sc]];
-  o.push('<polygon points="'+A.map(function(p){return p[0]+','+p[1];}).join(' ')+'" fill="#fce8d8" stroke="#C0272D" stroke-width="2"/>');
-  o.push(T(cx+2*sc,cy-2*sc-8,'P','#C0272D',11,'middle',true));
-  if(p>=1){// enlarge SF=2 from O
-    var B=A.map(function(pt){return [cx+2*(pt[0]-cx),cy+2*(pt[1]-cy)];});
-    o.push('<polygon points="'+B.map(function(p){return p[0]+','+p[1];}).join(' ')+'" fill="#e8f0ff" stroke="#1a5a8a" stroke-width="2" stroke-dasharray="5,3"/>');
-    o.push(T(cx+4*sc,cy-4*sc-10,"P' (SF=2)","#1a5a8a",11,'middle',true));
-    // ray lines
-    A.forEach(function(pt,i){o.push(L(cx,cy,B[i][0],B[i][1],'#C8922A',1,'5,3'));});}
-  if(p>=2){o.push(T(320,70,'Scale factor = 2','#1a5a8a',14,'start',true));
-    o.push(T(320,90,'Distance from O doubles','#888',12,'start',false));
-    o.push(T(320,108,'Area scales by SF\u00b2 = 4','#888',12,'start',false));}
-  if(p>=3){o.push(T(240,240,'Describe: Enlargement SF=2, centre O','#C0272D',13,'middle',true));}
+  var cx=200,cy=160,sz=30;
+  o.push(grid(cx,cy,4,sz));
+  var A=[cx,cy-2*sz],B=[cx+2*sz,cy-2*sz],C=[cx,cy];
+  o.push(poly([A,B,C],'#C0272D44','#C0272D',2));
+  o.push(T(A[0]-8,A[1],'A','#C0272D',11,'middle',true));o.push(T(B[0]+8,B[1],'B','#C0272D',11,'middle',true));o.push(T(C[0]-8,C[1]+4,'C','#C0272D',11,'middle',true));
+  if(p>=1){o.push(T(350,40,'Vector','#888',11,'middle',false));
+    o.push(R(316,48,68,50,'#fff5f0','#C0272D',1.5));
+    o.push(T(350,68,'(3)','#C0272D',18,'middle',true));o.push(T(350,88,'(−2)','#C0272D',18,'middle',true));}
+  if(p>=2){var tx=3*sz,ty=-2*sz;
+    var A2=[A[0]+tx,A[1]+ty],B2=[B[0]+tx,B[1]+ty],C2=[C[0]+tx,C[1]+ty];
+    o.push(poly([A2,B2,C2],'#1a7a3a44','#1a7a3a',2));
+    o.push(L(A[0],A[1],A2[0],A2[1],'#C8922A',1,'4,3'));}
+  if(p>=3){o.push(R(60,220,360,32,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,241,'Add vector to each vertex: x+3, y−2','#1a7a3a',12,'middle',false));}
   s.innerHTML=o.join('');}
+
+// Q4 Enlargement
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var cx=160,cy=200,sz=28;
+  o.push(grid(240,130,4,sz));
+  var A=[cx,cy-2*sz],B=[cx+sz,cy-2*sz],C=[cx,cy];
+  o.push(poly([A,B,C],'#C0272D44','#C0272D',2));
+  if(p>=1){o.push('<circle cx="'+cx+'" cy="'+cy+'" r="5" fill="#C8922A"/>');o.push(T(cx-10,cy+14,'CoE','#C8922A',9,'middle',false));}
+  if(p>=2){// SF 2 from (cx,cy): each point moves 2× as far from CoE
+    var sf=2;
+    var A2=[cx+(A[0]-cx)*sf,cy+(A[1]-cy)*sf],B2=[cx+(B[0]-cx)*sf,cy+(B[1]-cy)*sf],C2=[cx+(C[0]-cx)*sf,cy+(C[1]-cy)*sf];
+    o.push(poly([A2,B2,C2],'#1a7a3a44','#1a7a3a',2));
+    [A,B,C].forEach(function(pt,i){var pt2=[A2,B2,C2][i];o.push(L(cx,cy,pt2[0],pt2[1],'#C8922A',1,'4,3'));});}
+  if(p>=3){o.push(R(60,226,360,28,'#e8f8ee','#1a7a3a',1));o.push(T(240,244,'SF 2: each distance from CoE doubles','#1a7a3a',12,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// Q5 Combined transformations
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var cx=240,cy=130,sz=28;
+  o.push(grid(cx,cy,4,sz));
+  var A=[cx,cy-sz],B=[cx+2*sz,cy-sz],C=[cx+2*sz,cy];
+  o.push(poly([A,B,C],'#C0272D44','#C0272D',2));o.push(T(cx+sz,cy-sz-10,'Shape A','#C0272D',10,'middle',false));
+  if(p>=1){// Reflect in x-axis then translate
+    var A2=[cx,cy+sz],B2=[cx+2*sz,cy+sz],C2=[cx+2*sz,cy];
+    o.push(poly([A2,B2,C2],'#1a5a8a44','#1a5a8a',2));o.push(T(cx+sz,cy+sz+14,'B (reflected)','#1a5a8a',10,'middle',false));}
+  if(p>=2){var A3=[cx-2*sz,cy+sz],B3=[cx,cy+sz],C3=[cx,cy];
+    o.push(poly([A3,B3,C3],'#1a7a3a44','#1a7a3a',2));o.push(T(cx-sz,cy+sz+14,'C (translated)','#1a7a3a',10,'middle',false));}
+  if(p>=3){o.push(R(40,220,400,32,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,241,'Order matters: do each transformation in sequence','#1a7a3a',12,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// Q6 Translation vectors
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,25,'Translation vectors','#C0272D',15,'middle',true));
+  if(p>=1){o.push(R(80,42,140,70,'#fff5f0','#C0272D',2));
+    o.push(T(150,68,'( 4 )','#C0272D',20,'middle',true));o.push(T(150,90,'(−3)','#C0272D',20,'middle',true));
+    o.push(T(270,65,'4 right','#888',12,'start',false));o.push(T(270,85,'3 down','#888',12,'start',false));}
+  if(p>=2){o.push(R(80,122,140,70,'#e8f0ff','#1a5a8a',2));
+    o.push(T(150,148,'(−2)','#1a5a8a',20,'middle',true));o.push(T(150,170,'( 5 )','#1a5a8a',20,'middle',true));
+    o.push(T(270,146,'2 left','#888',12,'start',false));o.push(T(270,166,'5 up','#888',12,'start',false));}
+  if(p>=3){o.push(R(40,202,400,36,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,225,'Top = x (right +, left −)  Bottom = y (up +, down −)','#1a7a3a',12,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// Q7 Similarity
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push('<polygon points="60,200 160,200 60,110" fill="#C0272D44" stroke="#C0272D" stroke-width="2"/>');
+  o.push(T(90,215,'6cm','#C0272D',11,'middle',false));o.push(T(48,155,'9cm','#C0272D',11,'end',false));
+  if(p>=1){o.push('<polygon points="220,200 370,200 220,65" fill="#1a5a8a44" stroke="#1a5a8a" stroke-width="2"/>');
+    o.push(T(295,215,'9cm','#1a5a8a',11,'middle',false));o.push(T(208,133,'?','#1a5a8a',14,'end',true));}
+  if(p>=2){o.push(R(30,220,420,32,'#fff5f0','#C0272D',1.5));o.push(T(240,241,'Scale factor = 9÷6 = 1.5','#C0272D',14,'middle',true));}
+  if(p>=3){o.push(R(30,226,420,28,'#e8f8ee','#1a7a3a',1));o.push(T(240,241,'Missing side = 9 × 1.5 = 13.5cm','#1a7a3a',14,'middle',true));}
+  s.innerHTML=o.join('');}
+
+// Q8 Congruence
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Congruence conditions','#C0272D',15,'middle',true));
+  var conds=[['SSS','All 3 sides equal'],['SAS','2 sides + included angle'],['ASA','2 angles + included side'],['RHS','Right angle, hypotenuse, side']];
+  var cols=['#C0272D','#1a5a8a','#C8922A','#1a7a3a'];
+  conds.forEach(function(c,i){if(p>=i+1){o.push(R(20,38+i*50,440,40,cols[i]+'22',cols[i],1.5));o.push(T(80,63+i*50,c[0],cols[i],16,'middle',true));o.push(T(280,63+i*50,c[1],cols[i],12,'middle',false));}});
+  s.innerHTML=o.join('');}
+
+// Q9 Describing transformations
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Describing transformations fully','#C0272D',14,'middle',true));
+  var rows=[['Reflection','Mirror line (e.g. y = x)'],['Rotation','Angle, direction, centre'],['Translation','Vector'],['Enlargement','Scale factor, centre']];
+  rows.forEach(function(r,i){if(p>=i+1){o.push(R(20,36+i*52,200,44,'#fff5f0','#C0272D',1.5));o.push(T(120,62+i*52,r[0],'#C0272D',13,'middle',true));
+    o.push(R(228,36+i*52,234,44,'#fff','#E4D6CE',1));o.push(T(345,58+i*52,r[1],'#888',11,'middle',false));}});
+  s.innerHTML=o.join('');}
+
+// Q10 Fractional enlargement
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var cx=140,cy=120,sz=28;
+  o.push(grid(240,130,4,sz));
+  var pts=[[cx,cy],[cx+4*sz,cy],[cx+4*sz,cy+3*sz],[cx,cy+3*sz]];
+  o.push(poly(pts,'#C0272D44','#C0272D',2));o.push(T(cx+2*sz,cy-10,'6×4 rectangle','#C0272D',10,'middle',false));
+  if(p>=1){o.push('<circle cx="'+cx+'" cy="'+cy+'" r="5" fill="#C8922A"/>');o.push(T(cx-10,cy-10,'CoE','#C8922A',9,'middle',false));}
+  if(p>=2){// SF 0.5
+    var sf=0.5,pts2=pts.map(function(pt){return [cx+(pt[0]-cx)*sf,cy+(pt[1]-cy)*sf];});
+    o.push(poly(pts2,'#1a7a3a44','#1a7a3a',2));o.push(T(cx+sz,cy+sz/2+4,'SF ½','#1a7a3a',10,'middle',false));}
+  if(p>=3){o.push(R(60,226,360,28,'#e8f8ee','#1a7a3a',1));o.push(T(240,244,'SF < 1 → image is smaller than object','#1a7a3a',12,'middle',false));}
+  s.innerHTML=o.join('');}
+
+function yt1(){var d=pick(['x-axis','y-axis','y = x']);var x=rnd(1,4),y=rnd(1,4);
+  var ans;var wrk;
+  if(d==='x-axis'){ans=y;wrk='Reflecting in x-axis: y-coordinate negates → ('+x+',−'+y+'). |y| = '+y;}
+  else if(d==='y-axis'){ans=x;wrk='Reflecting in y-axis: x-coordinate negates → (−'+x+','+y+'). |x| = '+x;}
+  else{ans=x;wrk='Reflecting in y=x: coordinates swap → ('+y+','+x+'). New x = '+y+' … enter the new y-coord: '+x;}
+  return tryIt({question:'Point <b>('+x+','+y+')</b> is reflected in the <b>'+d+'</b>. What is the absolute value of the changed coordinate?',
+    hints:['x-axis: y negates','y-axis: x negates','y=x: coordinates swap'],
+    ans:ans,tol:0,unit:'',working:wrk});}
+function yt2(){var degs=pick([90,180,270]);var ans;
+  if(degs===90){ans=90;}else if(degs===180){ans=180;}else{ans=270;}
+  return tryIt({question:'A shape is rotated <b>'+degs+'° clockwise</b>. What is the equivalent <b>anticlockwise</b> angle?',
+    hints:['Clockwise + anticlockwise = 360°'],
+    ans:360-degs,tol:0,unit:'°',working:360+'−'+degs+' = '+(360-degs)+'°'});}
+function yt3(){var tx=rnd(-4,4),ty=rnd(-4,4),x=rnd(1,4),y=rnd(1,4);
+  return tryIt({question:'Translate point <b>('+x+','+y+')</b> by vector <b>('+tx+' / '+ty+')</b>. What is the new x-coordinate?',
+    hints:['Add the top number of the vector to x'],
+    ans:x+tx,tol:0,unit:'',working:'New x = '+x+' + '+tx+' = '+(x+tx)});}
+function yt4(){var sf=pick([2,3,4]),side=rnd(3,8);
+  return tryIt({question:'A shape is enlarged by scale factor <b>'+sf+'</b>. A side of length <b>'+side+' cm</b> becomes how long?',
+    hints:['Multiply each length by the scale factor'],
+    ans:sf*side,tol:0,unit:'cm',working:side+' × '+sf+' = '+sf*side+' cm'});}
+function yt5(){var side=rnd(4,12),sf=pick([2,3]);
+  return tryIt({question:'Two similar shapes: smaller has side <b>'+side+' cm</b>, scale factor is <b>'+sf+'</b>. What is the corresponding side in the larger shape?',
+    hints:['Multiply by scale factor'],
+    ans:side*sf,tol:0,unit:'cm',working:side+' × '+sf+' = '+side*sf+' cm'});}
+function yt6(){var x=rnd(1,5),y=rnd(1,5);
+  return tryIt({question:'A translation moves ('+x+','+y+') to ('+(x+3)+','+(y-2)+'). What is the top number of the vector?',
+    hints:['Top = change in x'],
+    ans:3,tol:0,unit:'',working:'x changes by +'+(3)+', so top of vector = 3'});}
+function yt7(){var side1=rnd(3,8),sf=rnd(2,4),side2=side1*sf;
+  return tryIt({question:'Two similar triangles. Corresponding sides are <b>'+side1+' cm</b> and <b>'+side2+' cm</b>. What is the scale factor?',
+    hints:['SF = larger ÷ smaller'],
+    ans:sf,tol:0.01,unit:'',working:side2+' ÷ '+side1+' = '+sf});}
+function yt8(){return tryIt({question:'Two triangles are congruent. Triangle A has sides 3, 4, 5 cm. What is the longest side of Triangle B?',
+    hints:['Congruent means identical in size and shape'],
+    ans:5,tol:0,unit:'cm',working:'Congruent shapes are identical — longest side = 5 cm'});}
+function yt9(){return tryIt({question:'To fully describe a rotation you need 3 things. How many degrees is a half-turn?',
+    hints:['Half of 360°'],
+    ans:180,tol:0,unit:'°',working:'Half turn = 360 ÷ 2 = 180°'});}
+function yt10(){var side=rnd(6,12),sf=0.5;
+  return tryIt({question:'A rectangle has width <b>'+side+' cm</b>. It is enlarged by scale factor <b>0.5</b>. What is the new width?',
+    hints:['Multiply by 0.5 (= divide by 2)'],
+    ans:side*0.5,tol:0.01,unit:'cm',working:side+' × 0.5 = '+side*0.5+' cm'});}
 
 var QS=[
-  {ey:'Q1 \u00b7 Year 8 \u00b7 Transformations',ti:'Reflection',su:'Reflect triangle P in the y-axis.',steps:[
-    {lb:'What is reflection?',dr:dQ1,ht:'<p>A reflection creates a <b>mirror image</b>. Every point moves to an equal distance on the opposite side of the mirror line.</p>'},
-    {lb:'Reflect in y-axis',dr:dQ1,ht:'<p>Reflection in the y-axis: the <b>x-coordinate changes sign</b>, y stays the same.</p><div class="fm">(x, y) \u2192 (\u2212x, y)</div>'},
-    {lb:'Describe fully',dr:dQ1,ht:'<p>Always state the <b>mirror line</b> when describing a reflection. Here: <i>Reflection in the y-axis</i>.</p>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Point (4, \u22122) is reflected in the <b>x-axis</b>. What is the new y-coordinate?',hints:['x-axis reflection: (x,y) \u2192 (x, \u2212y)','Negate the y-coordinate'],ans:2,tol:0.05,unit:'',working:'(4,\u22122) \u2192 (4, 2). New y = 2'})}
+  {ey:'Q1 · Year 8 · Transformations',ti:'Reflection <span class="badge f">F</span>',su:'Reflect triangle ABC in the y-axis.',steps:[
+    {lb:'Mirror line',dr:dQ1,ht:'<p>The y-axis is the mirror line. Each point reflects horizontally — the x-coordinate changes sign, y stays the same.</p>'},
+    {lb:'Reflect each vertex',dr:dQ1,ht:'<div class="fm">A(1,2) → A′(−1,2)   B(3,2) → B′(−3,2)   C(1,0) → C′(−1,0)</div>'},
+    {lb:'Key rule',dr:dQ1,ht:'<div class="fm">Reflection in y-axis: (x, y) → (−x, y)</div><p>Reflection in x-axis: (x, y) → (x, −y)</p>'},
+    {lb:'Your turn',dr:dQ1,ht:yt1}
   ]},
-  {ey:'Q2 \u00b7 Year 8 \u00b7 Transformations',ti:'Translation',su:'Translate triangle P by vector (3, \u22122).',steps:[
-    {lb:'What is translation?',dr:dQ2,ht:'<p>A translation slides a shape without rotating or reflecting it. Every point moves the same distance in the same direction.</p>'},
-    {lb:'Apply the vector',dr:dQ2,ht:'<p>The vector tells you: top number = movement right (+) or left (\u2212); bottom number = movement up (+) or down (\u2212).</p><div class="fm">Add 3 to every x-coordinate. Subtract 2 from every y-coordinate.</div>'},
-    {lb:'Describe fully',dr:dQ2,ht:'<p>Always state the <b>column vector</b> when describing a translation.</p>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Point (2, 5) is translated by vector (\u22124, 3). What is the new x-coordinate?',hints:['Add the x-component: 2 + (\u22124)'],ans:-2,tol:0.05,unit:'',working:'2 + (\u22124) = \u22122'})}
+  {ey:'Q2 · Year 8 · Transformations',ti:'Rotation <span class="badge f">F</span>',su:'Rotate triangle ABC 90° clockwise about the origin.',steps:[
+    {lb:'Centre of rotation',dr:dQ2,ht:'<p>The origin O(0,0) is the centre. Mark it clearly. Rotation does not change the size or shape.</p>'},
+    {lb:'90° clockwise rule',dr:dQ2,ht:'<div class="fm">(x, y) → (y, −x)</div>'},
+    {lb:'Apply to each vertex',dr:dQ2,ht:'<div class="fm">A(1,2)→(2,−1)   B(3,2)→(2,−3)   C(1,0)→(0,−1)</div>'},
+    {lb:'Your turn',dr:dQ2,ht:yt2}
   ]},
-  {ey:'Q3 \u00b7 Year 8 \u00b7 Transformations',ti:'Enlargement',su:'Enlarge triangle P by scale factor 2 about the origin O.',steps:[
-    {lb:'What is enlargement?',dr:dQ3,ht:'<p>An enlargement changes the <b>size</b> of a shape. Every point\u2019s distance from the <b>centre of enlargement</b> is multiplied by the scale factor.</p>'},
-    {lb:'Apply SF = 2',dr:dQ3,ht:'<p>Multiply each point\u2019s distance from O by 2. Draw ray lines from O through each vertex \u2014 the image lies on these lines.</p>'},
-    {lb:'Describe fully',dr:dQ3,ht:'<p>Always state the <b>scale factor</b> and <b>centre</b> when describing an enlargement.</p><p>Area of image = SF\u00b2 \u00d7 original area = 4 times larger.</p>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'A shape is enlarged by scale factor 3. The original area is 8 cm\u00b2. What is the image area?',hints:['Area scales by SF\u00b2','3\u00b2 = 9'],ans:72,tol:0.5,unit:'cm\u00b2',working:'9 \u00d7 8 = 72 cm\u00b2'})}
+  {ey:'Q3 · Year 8 · Transformations',ti:'Translation <span class="badge f">F</span>',su:'Translate triangle ABC by vector (3 / −2).',steps:[
+    {lb:'What is a vector?',dr:dQ3,ht:'<p>A column vector describes the movement: top number = right/left, bottom number = up/down.</p>'},
+    {lb:'Apply the vector',dr:dQ3,ht:'<div class="fm">Add 3 to each x-coordinate, subtract 2 from each y-coordinate.</div>'},
+    {lb:'Every point moves equally',dr:dQ3,ht:'<p>Translation preserves shape, size and orientation — the image is congruent to the object.</p>'},
+    {lb:'Your turn',dr:dQ3,ht:yt3}
+  ]},
+  {ey:'Q4 · Year 8 · Transformations',ti:'Enlargement <span class="badge f">F</span>',su:'Enlarge the triangle by scale factor 2, centre of enlargement at origin.',steps:[
+    {lb:'Centre of enlargement',dr:dQ4,ht:'<p>Draw lines from the centre through each vertex. The image is twice as far from the centre.</p>'},
+    {lb:'Scale factor 2',dr:dQ4,ht:'<div class="fm">Each distance from CoE × 2</div>'},
+    {lb:'Result',dr:dQ4,ht:'<p>All lengths double, all angles stay the same. The image is similar (not congruent) to the object.</p>'},
+    {lb:'Your turn',dr:dQ4,ht:yt4}
+  ]},
+  {ey:'Q5 · Year 8 · Transformations',ti:'Combined Transformations <span class="badge e">E</span>',su:'Reflect shape A in the x-axis then translate by (−2 / 0).',steps:[
+    {lb:'Do transformations in order',dr:dQ5,ht:'<p>Apply the first transformation to get B, then the second transformation to B to get C.</p>'},
+    {lb:'Step 1: reflect in x-axis',dr:dQ5,ht:'<p>Each y-coordinate negates. Shape A → Shape B.</p>'},
+    {lb:'Step 2: translate by (−2 / 0)',dr:dQ5,ht:'<p>Move B 2 left → Shape C. Note: order of transformations matters.</p>'},
+    {lb:'Your turn',dr:dQ5,ht:yt5}
+  ]},
+  {ey:'Q6 · Year 8 · Transformations',ti:'Translation Vectors <span class="badge f">F</span>',su:'Understand column vector notation.',steps:[
+    {lb:'Reading vectors',dr:dQ6,ht:'<p>The top number is the x-movement (right = positive), the bottom is the y-movement (up = positive).</p>'},
+    {lb:'Examples',dr:dQ6,ht:'<div class="fm">(4/−3) = 4 right, 3 down</div><div class="fm">(−2/5) = 2 left, 5 up</div>'},
+    {lb:'Key signs',dr:dQ6,ht:'<p>Positive x → right. Negative x → left. Positive y → up. Negative y → down.</p>'},
+    {lb:'Your turn',dr:dQ6,ht:yt6}
+  ]},
+  {ey:'Q7 · Year 8 · Transformations',ti:'Similarity <span class="badge e">E</span>',su:'Two similar triangles have corresponding sides 6 cm and 9 cm. Find the scale factor.',steps:[
+    {lb:'Similar shapes',dr:dQ7,ht:'<p>Similar shapes have the same angles and proportional sides. One is an enlargement of the other.</p>'},
+    {lb:'Scale factor',dr:dQ7,ht:'<div class="fm">SF = 9 ÷ 6 = 1.5</div>'},
+    {lb:'Use the SF',dr:dQ7,ht:'<div class="fm">Missing side = 9 × 1.5 = 13.5 cm</div>'},
+    {lb:'Your turn',dr:dQ7,ht:yt7}
+  ]},
+  {ey:'Q8 · Year 8 · Transformations',ti:'Congruence <span class="badge f">F</span>',su:'Learn the four congruence conditions.',steps:[
+    {lb:'What is congruence?',dr:dQ8,ht:'<p>Congruent shapes are identical in size and shape. They may be rotated, reflected or translated versions of each other.</p>'},
+    {lb:'Four conditions',dr:dQ8,ht:'<p>SSS, SAS, ASA, RHS — any one of these is sufficient to prove two triangles are congruent.</p>'},
+    {lb:'Apply',dr:dQ8,ht:'<p>If you know 3 sides match (SSS), or 2 sides and the angle between (SAS), the triangles must be congruent.</p>'},
+    {lb:'Your turn',dr:dQ8,ht:yt8}
+  ]},
+  {ey:'Q9 · Year 8 · Transformations',ti:'Describing Transformations <span class="badge f">F</span>',su:'Know exactly what information is needed to describe each type.',steps:[
+    {lb:'What to include',dr:dQ9,ht:'<p>Each transformation needs specific information to be fully described. Missing details lose marks.</p>'},
+    {lb:'Required details',dr:dQ9,ht:'<p><b>Reflection</b>: mirror line. <b>Rotation</b>: angle, direction, centre. <b>Translation</b>: vector. <b>Enlargement</b>: scale factor, centre.</p>'},
+    {lb:'Common mistakes',dr:dQ9,ht:'<p>For rotation: always give centre. For enlargement: always give centre of enlargement. For reflection: give the equation of the mirror line.</p>'},
+    {lb:'Your turn',dr:dQ9,ht:yt9}
+  ]},
+  {ey:'Q10 · Year 8 · Transformations',ti:'Fractional Enlargement <span class="badge e">E</span>',su:'Enlarge a rectangle by scale factor 1/2.',steps:[
+    {lb:'SF less than 1',dr:dQ10,ht:'<p>A scale factor between 0 and 1 produces an image <b>smaller</b> than the object. It is still called an enlargement.</p>'},
+    {lb:'Apply SF = 0.5',dr:dQ10,ht:'<div class="fm">Each distance from CoE × 0.5 → image is half the size</div>'},
+    {lb:'Negative SF',dr:dQ10,ht:'<p>A negative scale factor places the image on the opposite side of the centre and also inverts it.</p>'},
+    {lb:'Your turn',dr:dQ10,ht:yt10}
   ]}
 ];
-
 var qi=0,si=0;
-function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
-function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
-function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \\u2192';}
+function bSB(){var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);
+  QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';
+  QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').innerHTML=q.ti;document.getElementById('su').textContent=q.su;
+  var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+  p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);
+  st.dr(si);bDT();
+  document.getElementById('pb').disabled=si===0;
+  document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';}
 document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
 document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
 render();
-
 </script>
 </body>
 </html>
