@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vectors - Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#6b5750;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Vectors</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 300"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]=o;var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');return '<div class="try"><div class="try-t">Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="Answer ('+o.unit+')" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
+function ck(id){var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}if(Math.abs(v-o.ans)<=(o.exact||0.05)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}else{f.className='fb er';f.textContent='Not quite - check your working and try again.';}}
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function arr(x1,y1,x2,y2,c,w){c=c||'#C0272D';w=w||2;var dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy),ux=dx/len,uy=dy/len,hs=8;var ax=x2-ux*hs+uy*hs*0.4,ay=y2-uy*hs-ux*hs*0.4,bx=x2-ux*hs-uy*hs*0.4,by=y2-uy*hs+ux*hs*0.4;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"/><polygon points="'+x2+','+y2+' '+ax.toFixed(1)+','+ay.toFixed(1)+' '+bx.toFixed(1)+','+by.toFixed(1)+'" fill="'+c+'" stroke="none"/>';}
+function grid(ox,oy,cols,rows,sc){var o=[];for(var i=0;i<=cols;i++)o.push(L(ox+i*sc,oy,ox+i*sc,oy-rows*sc,'#eee',1));for(var j=0;j<=rows;j++)o.push(L(ox,oy-j*sc,ox+cols*sc,oy-j*sc,'#eee',1));o.push(L(ox,oy-rows*sc,ox,oy+10,'#ccc',1.5));o.push(L(ox-10,oy,ox+cols*sc+10,oy,'#ccc',1.5));return o;}
+
+/* Q1 - Column vector notation */
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=100,oy=220,sc=36;
+  o=o.concat(grid(ox,oy,8,5,sc));
+  [0,1,2,3,4,5,6,7,8].forEach(function(v){o.push(T(ox+v*sc,oy+16,v,'#aaa',9));});
+  [0,1,2,3,4,5].forEach(function(v){if(v>0)o.push(T(ox-12,oy-v*sc+4,v,'#aaa',9,'end'));});
+  if(p>=1){o=o.concat(arr(ox,oy,ox+4*sc,oy-3*sc,'#C0272D',2.5));o.push(T(ox+2*sc-12,oy-1.5*sc-8,'a','#C0272D',13,'middle',true));}
+  if(p>=2){o.push(T(ox+4*sc+8,oy-3*sc-4,'(4, 3)','#C0272D',11,'start',true));o.push(T(300,60,'Column vector:','#241A17',12,'start',false));o.push(T(300,80,'a = (4)','#C0272D',14,'start',true));o.push(T(300,98,'    (3)','#C0272D',14,'start',true));}
+  if(p>=3){
+    o=o.concat(arr(ox,oy-3*sc,ox+2*sc,oy-3*sc-2*sc,'#1a5a8a',2.5));
+    o.push(T(ox+sc,oy-4*sc-8,'b','#1a5a8a',13,'middle',true));
+    o.push(T(300,128,'b = (2)','#1a5a8a',14,'start',true));
+    o.push(T(300,146,'    (2)','#1a5a8a',14,'start',true));
+  }
+  o.push(T(240,16,'Column Vector Notation','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q2 - Vector addition */
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=60,oy=250,sc=36;
+  o=o.concat(grid(ox,oy,10,6,sc));
+  [0,2,4,6,8,10].forEach(function(v){o.push(T(ox+v*sc,oy+16,v,'#aaa',9));});
+  [0,2,4,6].forEach(function(v){if(v>0)o.push(T(ox-12,oy-v*sc+4,v,'#aaa',9,'end'));});
+  // a=(3,2), b=(2,3), a+b=(5,5)
+  if(p>=1){o=o.concat(arr(ox,oy,ox+3*sc,oy-2*sc,'#C0272D',2.5));o.push(T(ox+1.5*sc,oy-sc-8,'a','#C0272D',13,'middle',true));}
+  if(p>=2){o=o.concat(arr(ox+3*sc,oy-2*sc,ox+5*sc,oy-5*sc,'#1a5a8a',2.5));o.push(T(ox+4*sc,oy-3.5*sc+8,'b','#1a5a8a',13,'middle',true));}
+  if(p>=3){
+    o=o.concat(arr(ox,oy,ox+5*sc,oy-5*sc,'#C8922A',2,'6,4'));
+    o.push(T(ox+2.5*sc+16,oy-2.5*sc,'a+b','#C8922A',12,'start',true));
+    o.push(T(ox+5*sc+6,oy-5*sc-4,'(5,5)','#C8922A',10,'start',true));
+  }
+  o.push(T(240,16,'Vector Addition: a + b','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q3 - Scalar multiplication */
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=80,oy=240,sc=32;
+  o=o.concat(grid(ox,oy,11,6,sc));
+  [0,2,4,6,8,10].forEach(function(v){o.push(T(ox+v*sc,oy+16,v,'#aaa',9));});
+  [0,1,2,3,4,5,6].forEach(function(v){if(v>0)o.push(T(ox-12,oy-v*sc+4,v,'#aaa',9,'end'));});
+  // v=(2,1), 2v=(4,2), 3v=(6,3)
+  if(p>=1){o=o.concat(arr(ox,oy,ox+2*sc,oy-1*sc,'#C0272D',2.5));o.push(T(ox+sc,oy-0.5*sc-10,'v','#C0272D',13,'middle',true));}
+  if(p>=2){o=o.concat(arr(ox,oy,ox+4*sc,oy-2*sc,'#1a5a8a',2.5));o.push(T(ox+2*sc,oy-sc-10,'2v','#1a5a8a',13,'middle',true));}
+  if(p>=3){
+    o=o.concat(arr(ox,oy,ox+6*sc,oy-3*sc,'#C8922A',2.5));
+    o.push(T(ox+3*sc,oy-1.5*sc+12,'3v','#C8922A',13,'middle',true));
+    o.push(T(300,80,'v = (2)   2v = (4)   3v = (6)','#241A17',11,'start',false));
+    o.push(T(300,98,'    (1)        (2)        (3)','#241A17',11,'start',false));
+    o.push(T(300,124,'Scalar mult. scales the vector.','#6b5750',11,'start',false));
+    o.push(T(300,142,'Direction stays the same.','#6b5750',11,'start',false));
+  }
+  o.push(T(240,16,'Scalar Multiplication','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q4 - Magnitude of a vector */
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=100,oy=240,sc=36;
+  o=o.concat(grid(ox,oy,8,5,sc));
+  [0,1,2,3,4,5,6,7,8].forEach(function(v){o.push(T(ox+v*sc,oy+16,v,'#aaa',9));});
+  [0,1,2,3,4,5].forEach(function(v){if(v>0)o.push(T(ox-12,oy-v*sc+4,v,'#aaa',9,'end'));});
+  // v=(3,4), |v|=5
+  if(p>=1){o=o.concat(arr(ox,oy,ox+3*sc,oy-4*sc,'#C0272D',2.5));o.push(T(ox+1.5*sc-12,oy-2*sc,'v=(3,4)','#C0272D',11,'end',true));}
+  if(p>=2){
+    o.push(L(ox+3*sc,oy,ox+3*sc,oy-4*sc,'#ccc',1,'4,3'));
+    o.push(L(ox,oy,ox+3*sc,oy,'#ccc',1,'4,3'));
+    o.push(T(ox+1.5*sc,oy+14,'3','#888',10,'middle',false));
+    o.push(T(ox+3*sc+14,oy-2*sc,'4','#888',10,'start',false));
+  }
+  if(p>=3){
+    o.push(T(300,100,'|v| = sqrt(3\u00b2 + 4\u00b2)','#241A17',13,'start',true));
+    o.push(T(300,126,'     = sqrt(9 + 16)','#241A17',13,'start',false));
+    o.push(T(300,152,'     = sqrt(25)','#241A17',13,'start',false));
+    o.push(T(300,178,'     = 5','#C0272D',14,'start',true));
+    o.push(T(ox+3*sc+6,oy-4*sc-4,'|v| = 5','#C0272D',11,'start',true));
+  }
+  o.push(T(240,16,'Magnitude: |v| = sqrt(x\u00b2 + y\u00b2)','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q5 - Vector subtraction */
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=80,oy=240,sc=36;
+  o=o.concat(grid(ox,oy,10,6,sc));
+  [0,2,4,6,8,10].forEach(function(v){o.push(T(ox+v*sc,oy+16,v,'#aaa',9));});
+  [0,2,4,6].forEach(function(v){if(v>0)o.push(T(ox-12,oy-v*sc+4,v,'#aaa',9,'end'));});
+  // a=(5,4), b=(2,1), a-b=(3,3)
+  if(p>=1){o=o.concat(arr(ox,oy,ox+5*sc,oy-4*sc,'#C0272D',2.5));o.push(T(ox+2.5*sc,oy-2*sc-10,'a','#C0272D',13,'middle',true));}
+  if(p>=2){o=o.concat(arr(ox,oy,ox+2*sc,oy-1*sc,'#1a5a8a',2.5));o.push(T(ox+sc,oy-0.5*sc-10,'b','#1a5a8a',13,'middle',true));}
+  if(p>=3){
+    // -b from tip of a: (5,4)+(−2,−1)=(3,3)
+    o=o.concat(arr(ox+5*sc,oy-4*sc,ox+3*sc,oy-3*sc,'#888',1.5,'5,3'));
+    o.push(T(ox+4.2*sc,oy-3.3*sc+8,'-b','#888',11,'start',false));
+    o=o.concat(arr(ox,oy,ox+3*sc,oy-3*sc,'#C8922A',2,'6,4'));
+    o.push(T(ox+1.5*sc,oy-1.5*sc+14,'a-b','#C8922A',12,'start',true));
+    o.push(T(ox+3*sc+6,oy-3*sc-4,'(3,3)','#C8922A',10,'start',true));
+  }
+  o.push(T(240,16,'Vector Subtraction: a \u2212 b','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q6 - Position vectors */
+function dQ6(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=60,oy=260,sc=36;
+  o=o.concat(grid(ox,oy,10,6,sc));
+  [0,2,4,6,8,10].forEach(function(v){o.push(T(ox+v*sc,oy+16,v,'#aaa',9));});
+  [0,2,4,6].forEach(function(v){if(v>0)o.push(T(ox-12,oy-v*sc+4,v,'#aaa',9,'end'));});
+  // O origin, A=(2,3), B=(6,4)
+  var ax=ox+2*sc,ay=oy-3*sc,bx=ox+6*sc,by=oy-4*sc;
+  o.push(T(ox-10,oy+4,'O','#888',11,'end',true));
+  if(p>=1){
+    o=o.concat(arr(ox,oy,ax,ay,'#C0272D',2.5));
+    o.push('<circle cx="'+ax+'" cy="'+ay+'" r="5" fill="#C0272D" stroke="#fff" stroke-width="2"/>');
+    o.push(T(ax-8,ay-10,'A(2,3)','#C0272D',11,'end',true));
+    o.push(T(ox+sc-10,oy-1.5*sc,'OA','#C0272D',11,'end',true));
+  }
+  if(p>=2){
+    o=o.concat(arr(ox,oy,bx,by,'#1a5a8a',2.5));
+    o.push('<circle cx="'+bx+'" cy="'+by+'" r="5" fill="#1a5a8a" stroke="#fff" stroke-width="2"/>');
+    o.push(T(bx+6,by-10,'B(6,4)','#1a5a8a',11,'start',true));
+    o.push(T(ox+3*sc,oy-2*sc+14,'OB','#1a5a8a',11,'start',true));
+  }
+  if(p>=3){
+    o=o.concat(arr(ax,ay,bx,by,'#C8922A',2.5));
+    o.push(T((ax+bx)/2+6,(ay+by)/2-10,'AB = OB - OA','#C8922A',11,'start',true));
+    o.push(T((ax+bx)/2+6,(ay+by)/2+6,'= (4,1)','#C8922A',11,'start',true));
+  }
+  o.push(T(240,16,'Position Vectors','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q7 - Parallel vectors */
+function dQ7(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=80,oy=250,sc=32;
+  o=o.concat(grid(ox,oy,11,7,sc));
+  [0,2,4,6,8,10].forEach(function(v){o.push(T(ox+v*sc,oy+16,v,'#aaa',9));});
+  [0,2,4,6].forEach(function(v){if(v>0)o.push(T(ox-12,oy-v*sc+4,v,'#aaa',9,'end'));});
+  // a=(2,1), b=(4,2)=2a, c=(6,3)=3a all parallel
+  if(p>=1){o=o.concat(arr(ox,oy,ox+2*sc,oy-sc,'#C0272D',2.5));o.push(T(ox+sc-8,oy-0.5*sc-12,'a=(2,1)','#C0272D',10,'end',true));}
+  if(p>=2){o=o.concat(arr(ox,oy-2*sc,ox+4*sc,oy-3*sc,'#1a5a8a',2.5));o.push(T(ox+2*sc,oy-2.5*sc-12,'b=(4,2)=2a','#1a5a8a',10,'middle',true));}
+  if(p>=3){
+    o=o.concat(arr(ox+sc,oy-4*sc,ox+7*sc,oy-7*sc,'#C8922A',2.5));
+    o.push(T(ox+4*sc,oy-5.5*sc-10,'c=(6,3)=3a','#C8922A',10,'middle',true));
+    o.push(T(240,260,'Vectors are parallel if one is a scalar multiple of the other.','#241A17',11,'middle',false));
+  }
+  o.push(T(240,16,'Parallel Vectors','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q8 - Midpoint using vectors */
+function dQ8(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=70,oy=260,sc=36;
+  o=o.concat(grid(ox,oy,10,6,sc));
+  [0,2,4,6,8,10].forEach(function(v){o.push(T(ox+v*sc,oy+16,v,'#aaa',9));});
+  [0,2,4,6].forEach(function(v){if(v>0)o.push(T(ox-12,oy-v*sc+4,v,'#aaa',9,'end'));});
+  // A=(1,5), B=(7,3), M=(4,4)
+  var ax=ox+1*sc,ay=oy-5*sc,bx=ox+7*sc,by=oy-3*sc,mx=ox+4*sc,my=oy-4*sc;
+  o.push(T(ox-10,oy+4,'O','#888',11,'end',true));
+  if(p>=1){
+    o=o.concat(arr(ox,oy,ax,ay,'#C0272D',2));
+    o=o.concat(arr(ox,oy,bx,by,'#1a5a8a',2));
+    o.push('<circle cx="'+ax+'" cy="'+ay+'" r="5" fill="#C0272D" stroke="#fff" stroke-width="2"/>');
+    o.push('<circle cx="'+bx+'" cy="'+by+'" r="5" fill="#1a5a8a" stroke="#fff" stroke-width="2"/>');
+    o.push(T(ax-8,ay-10,'A(1,5)','#C0272D',11,'end',true));
+    o.push(T(bx+8,by-8,'B(7,3)','#1a5a8a',11,'start',true));
+  }
+  if(p>=2){
+    o.push(L(ax,ay,bx,by,'#888',1,'4,3'));
+  }
+  if(p>=3){
+    o.push('<circle cx="'+mx+'" cy="'+my+'" r="6" fill="#C8922A" stroke="#fff" stroke-width="2"/>');
+    o.push(T(mx+8,my-10,'M(4,4)','#C8922A',11,'start',true));
+    o=o.concat(arr(ox,oy,mx,my,'#C8922A',2,'5,3'));
+    o.push(T(280,120,'OM = \u00bd(OA + OB)','#241A17',13,'start',true));
+    o.push(T(280,146,'   = \u00bd((1)+(7))','#241A17',12,'start',false));
+    o.push(T(280,162,'       ((5) (3))','#241A17',12,'start',false));
+    o.push(T(280,186,'   = (4)','#C0272D',13,'start',true));
+    o.push(T(280,204,'     (4)','#C0272D',13,'start',true));
+  }
+  o.push(T(240,16,'Midpoint of AB using Vectors','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q9 - Expressing one vector in terms of others */
+function dQ9(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=70,oy=260,sc=36;
+  o=o.concat(grid(ox,oy,10,6,sc));
+  // O, A, B, C where OA=a, OB=b, M midpoint AB, C on OB such that OC=2b
+  var ax=ox+2*sc,ay=oy-4*sc,bx=ox+8*sc,by=oy-2*sc,mx=(ax+bx)/2,my=(ay+by)/2;
+  o.push(T(ox-10,oy+4,'O','#888',11,'end',true));
+  if(p>=1){
+    o=o.concat(arr(ox,oy,ax,ay,'#C0272D',2.5));
+    o.push('<circle cx="'+ax+'" cy="'+ay+'" r="5" fill="#C0272D" stroke="#fff" stroke-width="2"/>');
+    o.push(T(ax-8,ay-10,'A','#C0272D',11,'end',true));
+    o.push(T((ox+ax)/2-12,(oy+ay)/2,'a','#C0272D',13,'end',true));
+  }
+  if(p>=2){
+    o=o.concat(arr(ox,oy,bx,by,'#1a5a8a',2.5));
+    o.push('<circle cx="'+bx+'" cy="'+by+'" r="5" fill="#1a5a8a" stroke="#fff" stroke-width="2"/>');
+    o.push(T(bx+8,by+4,'B','#1a5a8a',11,'start',true));
+    o.push(T((ox+bx)/2,(oy+by)/2+14,'b','#1a5a8a',13,'middle',true));
+  }
+  if(p>=3){
+    o.push('<circle cx="'+mx+'" cy="'+my+'" r="5" fill="#C8922A" stroke="#fff" stroke-width="2"/>');
+    o.push(T(mx,my-12,'M','#C8922A',11,'middle',true));
+    o=o.concat(arr(ax,ay,mx,my,'#888',1.5));
+    o.push(T(300,110,'M is midpoint of AB','#241A17',11,'start',false));
+    o.push(T(300,132,'OM = OA + AM','#241A17',13,'start',true));
+    o.push(T(300,155,'   = a + \u00bd(b \u2212 a)','#241A17',13,'start',false));
+    o.push(T(300,178,'   = \u00bda + \u00bdb','#C0272D',13,'start',true));
+  }
+  o.push(T(240,16,'Expressing Routes as Vectors','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q10 - Unit vectors */
+function dQ10(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=240,oy=190,sc=36;
+  // axes through centre
+  o.push(L(40,oy,440,oy,'#ddd',1.5));o.push(L(ox,30,ox,270,'#ddd',1.5));
+  // grid dots
+  for(var i=-3;i<=3;i++)for(var j=-3;j<=3;j++){if(i===0&&j===0)continue;o.push('<circle cx="'+(ox+i*sc)+'" cy="'+(oy-j*sc)+'" r="1.5" fill="#ddd"/>');}
+  [-2,-1,1,2,3].forEach(function(v){o.push(T(ox+v*sc,oy+16,v,'#aaa',9));});
+  [-2,-1,1,2,3].forEach(function(v){o.push(T(ox-12,oy-v*sc+4,v,'#aaa',9,'end'));});
+  // v=(3,4), unit vector = (0.6, 0.8)
+  if(p>=1){o=o.concat(arr(ox,oy,ox+3*sc,oy-4*sc,'#C0272D',2.5));o.push(T(ox+1.5*sc-14,oy-2*sc,'v=(3,4)','#C0272D',11,'end',true));}
+  if(p>=2){
+    o.push(T(310,80,'|v| = sqrt(3\u00b2+4\u00b2) = 5','#241A17',12,'start',true));
+    o.push(T(310,104,'Unit vector \u0302v:','#241A17',12,'start',false));
+    o.push(T(310,126,'\u0302v = v / |v| = (3/5)','#C0272D',13,'start',true));
+    o.push(T(310,148,'              (4/5)','#C0272D',13,'start',false));
+    o.push(T(310,168,'   = (0.6)','#C0272D',13,'start',true));
+    o.push(T(310,188,'     (0.8)','#C0272D',13,'start',false));
+  }
+  if(p>=3){
+    // draw unit vector
+    o=o.concat(arr(ox,oy,ox+0.6*sc,oy-0.8*sc,'#C8922A',2.5));
+    o.push(T(ox+0.6*sc+8,oy-0.8*sc-8,'\u0302v','#C8922A',12,'start',true));
+    o.push(T(310,216,'|\u0302v| = 1 (always)','#6b5750',11,'start',false));
+  }
+  o.push(T(240,18,'Unit Vectors','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+var QS=[
+  {ey:'Q1 \u2022 Year 11 \u2022 Foundation',ti:'Column Vector Notation',su:'Represent vectors a and b as column vectors and draw them on a grid.',steps:[
+    {lb:'What is a vector?',dr:dQ1,ht:'<p>A <b>vector</b> has both <b>magnitude</b> (size) and <b>direction</b>. We write it as a column: the top number is movement in x, the bottom is movement in y.</p>'},
+    {lb:'Reading the column vector',dr:dQ1,ht:'<div class="fm">a = (4) means 4 right and 3 up<br>    (3)</div><p>Draw an arrow from the starting point, 4 right and 3 up.</p>'},
+    {lb:'A second vector',dr:dQ1,ht:'<p>From the tip of a, draw vector b = (2, 2) — 2 right and 2 up.</p><div class="fm">b = (2)<br>    (2)</div>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Vector <b>c = (5, 2)</b>. How far to the right does it move?',hints:['The top number in a column vector is the horizontal (x) movement','(5) means 5 right, (2) means 2 up'],ans:5,exact:0.1,unit:'units right',working:'The top component of a column vector is the x-movement. c = (5, 2) moves <b>5</b> units right.'})}
+  ]},
+  {ey:'Q2 \u2022 Year 11 \u2022 Foundation',ti:'Vector Addition',su:'If a = (3, 2) and b = (2, 3), find a + b and show it on a grid.',steps:[
+    {lb:'The method',dr:dQ2,ht:'<p>To add vectors, place them <b>tip to tail</b>. The resultant goes from the start of the first to the tip of the second.</p>'},
+    {lb:'Draw a',dr:dQ2,ht:'<div class="fm">a = (3) — 3 right, 2 up<br>    (2)</div><p>Draw a from the origin.</p>'},
+    {lb:'Add b at the tip of a',dr:dQ2,ht:'<div class="fm">b = (2) — 2 right, 3 up<br>    (3)</div><p>Start b from where a ends. The resultant a+b goes from the origin to the final tip.</p>'},
+    {lb:'The result',dr:dQ2,ht:'<div class="fm">a + b = (3+2) = (5)<br>         (2+3)   (5)</div><p>Add the components. The resultant arrow is the dashed line.</p>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'If a = (3, 2) and b = (2, 3), what is the y-component of a + b?',hints:['Add the y-components: 2 + 3','(3+2, 2+3)'],ans:5,exact:0.1,unit:'',working:'y-component: 2 + 3 = <b>5</b>. So a + b = (5, 5).'})}
+  ]},
+  {ey:'Q3 \u2022 Year 11 \u2022 Foundation',ti:'Scalar Multiplication',su:'Given v = (2, 1), draw v, 2v and 3v on the same grid.',steps:[
+    {lb:'What is scalar multiplication?',dr:dQ3,ht:'<p>Multiplying a vector by a <b>scalar</b> (a number) scales its length. The direction stays the same. Multiplying by a negative scalar reverses the direction.</p>'},
+    {lb:'Draw v',dr:dQ3,ht:'<div class="fm">v = (2) — 2 right, 1 up<br>    (1)</div>'},
+    {lb:'Draw 2v',dr:dQ3,ht:'<div class="fm">2v = 2 x (2) = (4)<br>         (1)   (2)</div><p>Twice as long, same direction.</p>'},
+    {lb:'Draw 3v',dr:dQ3,ht:'<div class="fm">3v = 3 x (2) = (6)<br>         (1)   (3)</div><p>Three times as long. All three vectors are parallel.</p>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'If v = (2, 1), what is the x-component of 4v?',hints:['Multiply the x-component by 4','2 × 4 = ?'],ans:8,exact:0.1,unit:'',working:'4v = 4 × (2, 1) = (8, 4). x-component = <b>8</b>.'})}
+  ]},
+  {ey:'Q4 \u2022 Year 11 \u2022 Foundation',ti:'Magnitude of a Vector',su:'Find the magnitude of v = (3, 4) using Pythagoras\' theorem.',steps:[
+    {lb:'What is magnitude?',dr:dQ4,ht:'<p>The <b>magnitude</b> (or modulus) of a vector is its length. Written |v|. We use Pythagoras\' theorem on the x and y components.</p>'},
+    {lb:'The right-angled triangle',dr:dQ4,ht:'<p>The vector (3, 4) forms the hypotenuse of a right-angled triangle with legs 3 (horizontal) and 4 (vertical).</p>'},
+    {lb:'Apply Pythagoras',dr:dQ4,ht:'<div class="fm">|v| = sqrt(3\u00b2 + 4\u00b2)</div><div class="fm">    = sqrt(9 + 16) = sqrt(25) = 5</div><p>The 3-4-5 triple is worth remembering!</p>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'Find the magnitude of the vector (5, 12).',hints:['|v| = sqrt(x\u00b2 + y\u00b2)','5\u00b2 = 25, 12\u00b2 = 144','25 + 144 = 169'],ans:13,exact:0.1,unit:'',working:'|v| = sqrt(5\u00b2 + 12\u00b2) = sqrt(25+144) = sqrt(169) = <b>13</b>. (5-12-13 triple)'})}
+  ]},
+  {ey:'Q5 \u2022 Year 11 \u2022 Extended',ti:'Vector Subtraction',su:'If a = (5, 4) and b = (2, 1), find a \u2212 b graphically and algebraically.',steps:[
+    {lb:'The method',dr:dQ5,ht:'<p>Subtracting a vector means adding the <b>negative</b> of that vector. a \u2212 b = a + (\u2212b). Graphically, add \u2212b at the tip of a.</p>'},
+    {lb:'Draw a and b',dr:dQ5,ht:'<div class="fm">a = (5,4)   b = (2,1)</div><p>Draw both from the origin.</p>'},
+    {lb:'Apply \u2212b at tip of a',dr:dQ5,ht:'<p>From the tip of a, draw \u2212b = (\u22122, \u22121). The dashed arrow shows this.</p>'},
+    {lb:'The result',dr:dQ5,ht:'<div class="fm">a \u2212 b = (5-2) = (3)<br>          (4-1)   (3)</div><p>The resultant (dashed orange) goes from origin to (3, 3).</p>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'If a = (5, 4) and b = (2, 1), what is the x-component of a \u2212 b?',hints:['Subtract x-components: 5 \u2212 2','(5\u22122, 4\u22121)'],ans:3,exact:0.1,unit:'',working:'x-component: 5 \u2212 2 = <b>3</b>. So a \u2212 b = (3, 3).'})}
+  ]},
+  {ey:'Q6 \u2022 Year 11 \u2022 Extended',ti:'Position Vectors',su:'A = (2, 3) and B = (6, 4). Find vector AB.',steps:[
+    {lb:'What are position vectors?',dr:dQ6,ht:'<p>A <b>position vector</b> gives the position of a point relative to the origin O. OA is the vector from O to A.</p>'},
+    {lb:'Draw OA and OB',dr:dQ6,ht:'<div class="fm">OA = (2)   OB = (6)<br>     (3)        (4)</div>'},
+    {lb:'Find vector AB',dr:dQ6,ht:'<p>To get from A to B, go back to O then forward to B.</p><div class="fm">AB = AO + OB = -OA + OB = OB - OA</div>'},
+    {lb:'Calculate AB',dr:dQ6,ht:'<div class="fm">AB = OB - OA = (6)-(2) = (4)<br>                (4) (3)   (1)</div><p>The orange arrow shows AB = (4, 1).</p>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'If OA = (2, 3) and OB = (6, 4), what is the y-component of AB?',hints:['AB = OB \u2212 OA','Subtract y-components: 4 \u2212 3'],ans:1,exact:0.1,unit:'',working:'AB = (6\u22122, 4\u22123) = (4, 1). y-component = <b>1</b>.'})}
+  ]},
+  {ey:'Q7 \u2022 Year 11 \u2022 Extended',ti:'Parallel Vectors',su:'Show that vectors a = (2, 1), b = (4, 2) and c = (6, 3) are all parallel.',steps:[
+    {lb:'What makes vectors parallel?',dr:dQ7,ht:'<p>Two vectors are <b>parallel</b> if one is a scalar multiple of the other. Their directions are the same (or exactly opposite for antiparallel).</p>'},
+    {lb:'Compare a and b',dr:dQ7,ht:'<div class="fm">b = (4) = 2 \u00d7 (2) = 2a<br>    (2)       (1)</div><p>b is twice a, so b is parallel to a.</p>'},
+    {lb:'Compare a and c',dr:dQ7,ht:'<div class="fm">c = (6) = 3 \u00d7 (2) = 3a<br>    (3)       (1)</div><p>c is three times a, confirming all three are parallel.</p>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'If a = (2, 1), which scalar k makes (10, 5) = k\u00b7a?',hints:['(10, 5) = k(2, 1)','10 = 2k, so k = ?'],ans:5,exact:0.1,unit:'',working:'10 = 2k \u2192 k = <b>5</b>. Check: 5\u00d7(2,1) = (10,5). \u2713'})}
+  ]},
+  {ey:'Q8 \u2022 Year 11 \u2022 Extended',ti:'Midpoint Using Vectors',su:'A = (1, 5) and B = (7, 3). Find the position vector of the midpoint M.',steps:[
+    {lb:'The formula',dr:dQ8,ht:'<p>The midpoint M of AB has position vector:</p><div class="fm">OM = \u00bd(OA + OB)</div><p>Add the position vectors then halve the result.</p>'},
+    {lb:'Draw the points',dr:dQ8,ht:'<div class="fm">OA = (1)   OB = (7)<br>     (5)        (3)</div>'},
+    {lb:'Join AB',dr:dQ8,ht:'<p>The midpoint M lies at the centre of the line segment AB.</p>'},
+    {lb:'Calculate OM',dr:dQ8,ht:'<div class="fm">OM = \u00bd((1)+(7)) = \u00bd(8) = (4)<br>         ((5) (3))    (8)   (4)</div><p>M has coordinates (4, 4).</p>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'A = (1, 5), B = (7, 3). What is the x-coordinate of midpoint M?',hints:['OM = \u00bd(OA + OB)','x: \u00bd(1 + 7)'],ans:4,exact:0.1,unit:'',working:'\u00bd(1+7) = \u00bd \u00d7 8 = <b>4</b>. M = (4, 4).'})}
+  ]},
+  {ey:'Q9 \u2022 Year 11 \u2022 Extended',ti:'Route Vectors',su:'OA = a, OB = b. M is the midpoint of AB. Express OM in terms of a and b.',steps:[
+    {lb:'Setting up the route',dr:dQ9,ht:'<p>To find a vector between two points, use a route via a known point. To get from O to M, we can go O \u2192 A \u2192 M.</p>'},
+    {lb:'Draw OA and OB',dr:dQ9,ht:'<div class="fm">OA = a   OB = b</div><p>Both position vectors are drawn from O.</p>'},
+    {lb:'Find AM',dr:dQ9,ht:'<p>M is the midpoint of AB, so AM = \u00bdAB.</p><div class="fm">AB = AO + OB = \u2212a + b = b \u2212 a</div><div class="fm">AM = \u00bd(b \u2212 a)</div>'},
+    {lb:'Express OM',dr:dQ9,ht:'<div class="fm">OM = OA + AM</div><div class="fm">   = a + \u00bd(b \u2212 a)</div><div class="fm">   = a + \u00bdb \u2212 \u00bda</div><div class="fm">   = \u00bda + \u00bdb</div>'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt({question:'If OA = a and OB = b, and N divides AB such that AN = \u00bdAB, the position vector ON = \u00bda + \u00bdb. What is the coefficient of b in this expression? (Enter as a decimal)',hints:['ON = OA + AN','AN = \u00bd(b \u2212 a)','Simplify: a + \u00bd(b\u2212a)'],ans:0.5,exact:0.01,unit:'',working:'ON = a + \u00bd(b\u2212a) = \u00bda + \u00bdb. Coefficient of b = <b>0.5</b>.'})}
+  ]},
+  {ey:'Q10 \u2022 Year 11 \u2022 Extended',ti:'Unit Vectors',su:'Find the unit vector in the direction of v = (3, 4).',steps:[
+    {lb:'What is a unit vector?',dr:dQ10,ht:'<p>A <b>unit vector</b> has magnitude exactly 1. Written \u0302v (v-hat). It points in the same direction as v but with length 1.</p>'},
+    {lb:'Find the magnitude',dr:dQ10,ht:'<div class="fm">|v| = sqrt(3\u00b2 + 4\u00b2) = sqrt(25) = 5</div>'},
+    {lb:'Divide by the magnitude',dr:dQ10,ht:'<div class="fm">\u0302v = v / |v| = (3/5) = (0.6)</div><div class="fm">              (4/5)   (0.8)</div>'},
+    {lb:'Verify',dr:dQ10,ht:'<div class="fm">|\u0302v| = sqrt(0.6\u00b2 + 0.8\u00b2) = sqrt(0.36+0.64) = sqrt(1) = 1 \u2713</div><p>The small orange arrow shows the unit vector \u0302v.</p>'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt({question:'Find the magnitude of the unit vector (0.6, 0.8). (Check it equals 1.)',hints:['|v| = sqrt(0.6\u00b2 + 0.8\u00b2)','0.36 + 0.64 = ?'],ans:1,exact:0.01,unit:'',working:'sqrt(0.36 + 0.64) = sqrt(1) = <b>1</b>. Unit vectors always have magnitude 1.'})}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+</body>
+</html>
