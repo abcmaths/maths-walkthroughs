@@ -57,6 +57,8 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
 .try-q{font-size:15px;margin:8px 0 10px;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;}
+.f{background:#1a5a8a;color:#fff;}.e{background:#C0272D;color:#fff;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
@@ -86,97 +88,183 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
   </div>
 </div>
 <script>
-
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');var ph='Answer'+(o.unit?' ('+o.unit+')':'');return '<div class="try" data-tryid="'+id+'"><div class="try-t">\\u2714 Your Turn</div><div class="try-q">'+o.question+'</div>'+(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div><div class="try-fb" data-tryid="'+id+'"></div><details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
-document.addEventListener('click',function(e){if(e.target.classList.contains('try-ck')){var id=e.target.getAttribute('data-tryid'),o=ST[id].o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\\u2713 Correct! '+o.working;}else{fb.className='try-fb fb er';fb.textContent='Not quite \\u2014 try again.';}}});
+function tryIt(o){
+  var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">✔ Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +(h?'<ul class="hl">'+h+'</ul>':'')
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
+    +'</div>';
+}
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('try-new')){render();return;}
+  if(e.target.classList.contains('try-ck')){
+    var id=e.target.getAttribute('data-tryid'),o=ST[id].o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
+  }
+});
 function g(){return document.getElementById('dg');}
 function T(x,y,t,c,sz,a,b){return '<text x="'+x+'" y="'+y+'" font-size="'+(sz||12)+'" font-family="Arial" fill="'+(c||'#241A17')+'" text-anchor="'+(a||'middle')+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" rx="2"/>';}
-function arc(cx,cy,r,a1,a2,c,w){var r1=a1*Math.PI/180,r2=a2*Math.PI/180;var x1=cx+r*Math.cos(r1),y1=cy-r*Math.sin(r1),x2=cx+r*Math.cos(r2),y2=cy-r*Math.sin(r2);var laf=((a2-a1+360)%360)>180?1:0;return '<path d="M '+x1.toFixed(1)+','+y1.toFixed(1)+' A '+r+','+r+' 0 '+laf+',0 '+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="'+(c||'#C8922A')+'" stroke-width="'+(w||1.5)+'" />';}
-
 
 function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var convs=[{f:'3.6 km',t:'3600 m',op:'\u00d7 1000',fc:'#C0272D',tc:'#1a7a3a'},{f:'8500 g',t:'8.5 kg',op:'\u00f7 1000',fc:'#1a5a8a',tc:'#C8922A'},{f:'450 ml',t:'0.45 l',op:'\u00f7 1000',fc:'#C8922A',tc:'#1a5a8a'}];
-  convs.forEach(function(c,i){
-    if(p>=i+1){
-      o.push(R(30,20+i*74,120,44,c.fc==='#C0272D'?'#fff5f0':'c.fc==="1a5a8a"?"#e8f0ff":"#fdf4e8"','#aaa',1));
-      o.push(R(30,20+i*74,120,44,'#fff5f0',c.fc,1.5));
-      o.push(T(90,47+i*74,c.f,c.fc,14,'middle',true));
-      o.push(T(215,47+i*74,c.op,'#888',12,'middle',false));
-      o.push(R(300,20+i*74,150,44,'#e8f8ee','#1a7a3a',1.5));
-      o.push(T(375,47+i*74,c.t,'#1a7a3a',14,'middle',true));
+  o.push(T(240,22,'Metric unit conversions','#C0272D',15,'middle',true));
+  var rows=[['Length','km','m','cm','mm','×1000','×100','×10'],['Mass','t','kg','g','mg','×1000','×1000','×1000'],['Capacity','Ml','kl','l','ml','×1000','×1000','×1000']];
+  rows.forEach(function(r,i){
+    if(p>=i+1){o.push(R(14,38+i*62,452,54,i===0?'#fff5f0':i===1?'#e8f0ff':'#e8f8ee',['#C0272D','#1a5a8a','#1a7a3a'][i],1.5));
+      o.push(T(50,66+i*62,r[0],['#C0272D','#1a5a8a','#1a7a3a'][i],11,'middle',true));
+      [1,2,3].forEach(function(j){o.push(T(100+j*80,66+i*62,r[j],'#241A17',12,'middle',false));});
+      [4,5,6].forEach(function(j){o.push(T(140+([0,1,2][j-4])*80,80+i*62,r[j],'#888',9,'middle',false));});
     }
   });
-  if(p>=4){o.push(T(240,245,'\u00d7 for smaller units, \u00f7 for larger units','#C0272D',13,'middle',true));}
+  if(p>=4){o.push(R(14,224,452,32,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,245,'÷ to go the other way (e.g. cm → m: ÷100)','#1a7a3a',12,'middle',false));}
   s.innerHTML=o.join('');}
-
 function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  // SDT triangle
-  var tx=240,ty=155,r=90;
-  o.push('<polygon points="240,42 150,194 330,194" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
-  o.push(L(150,138,330,138,'#C0272D',1.5));o.push(L(240,138,240,194,'#C0272D',1.5));
-  o.push(T(240,100,'D','#C0272D',24,'middle',true));
-  o.push(T(190,172,'S','#1a5a8a',24,'middle',true));
-  o.push(T(285,172,'T','#1a7a3a',24,'middle',true));
-  if(p>=1){o.push(T(240,216,'Cover D \u2192 S \u00d7 T','#888',12,'middle',false));
-    o.push(T(240,232,'Cover S \u2192 D \u00f7 T','#888',12,'middle',false));
-    o.push(T(240,248,'Cover T \u2192 D \u00f7 S','#888',12,'middle',false));}
-  if(p>=2){o.push(T(60,50,'Example:','#241A17',13,'start',true));
-    o.push(T(60,70,'240 km in 3 h','#241A17',13,'start',false));
-    o.push(T(60,92,'S = 240 \u00f7 3','#C0272D',14,'start',true));
-    o.push(T(60,112,'= 80 km/h','#C0272D',16,'start',true));}
-  if(p>=3){o.push(T(350,50,'Time check:','#241A17',13,'start',true));
-    o.push(T(350,70,'40 min = 40/60','#888',12,'start',false));
-    o.push(T(350,86,'= 2/3 hours','#888',12,'start',false));
-    o.push(T(350,106,'D = 15 \u00d7 2/3','#1a5a8a',13,'start',true));
-    o.push(T(350,122,'= 10 km','#1a5a8a',14,'start',true));}
+  o.push(T(240,22,'Speed, distance and time','#C0272D',15,'middle',true));
+  // DST triangle
+  o.push('<polygon points="240,45 170,155 310,155" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  o.push(L(170,155,310,155,'#C0272D',3));
+  o.push(T(240,105,'D','#C0272D',22,'middle',true));
+  o.push(T(195,168,'S','#1a5a8a',22,'middle',true));o.push(T(285,168,'T','#1a7a3a',22,'middle',true));
+  if(p>=1){o.push(T(240,195,'Cover D → S=D÷T   Cover S → D=S×T   Cover T → T=D÷S','#888',11,'middle',false));}
+  if(p>=2){o.push(R(30,210,420,34,'#e8f0ff','#1a5a8a',1.5));o.push(T(240,232,'Example: D=150km, T=2.5h → S=150÷2.5=60km/h','#1a5a8a',12,'middle',false));}
+  if(p>=3){o.push(T(240,252,'Convert time: 2h 30min = 2.5h   90min = 1.5h','#888',10,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Scale drawings','#C0272D',15,'middle',true));
+  o.push(R(60,40,300,160,'#fff5f0','#888',1.5,'3,3'));
+  if(p>=1){o.push(T(210,228,'6cm on plan','#888',11,'middle',false));o.push(L(60,220,360,220,'#C0272D',2));
+    o.push(T(60,215,'|','#C0272D',12,'middle',false));o.push(T(360,215,'|','#C0272D',12,'middle',false));}
+  if(p>=2){o.push(R(20,232,440,22,'#e8f0ff','#1a5a8a',1));o.push(T(240,247,'Scale 1:50 → 6cm represents 6×50=300cm=3m','#1a5a8a',12,'middle',false));}
+  if(p>=3){o.push(T(240,200,'Actual = map × scale denominator','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Compound measures — density','#C0272D',15,'middle',true));
+  o.push('<polygon points="240,45 170,145 310,145" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  o.push(L(170,145,310,145,'#C0272D',3));
+  o.push(T(240,100,'M','#C0272D',22,'middle',true));
+  o.push(T(195,158,'D','#1a5a8a',22,'middle',true));o.push(T(285,158,'V','#1a7a3a',22,'middle',true));
+  if(p>=1){o.push(T(240,182,'Density = Mass ÷ Volume   (g/cm³ or kg/m³)','#888',12,'middle',false));}
+  if(p>=2){o.push(R(30,196,420,36,'#e8f0ff','#1a5a8a',1.5));o.push(T(240,218,'M=D×V   V=M÷D','#1a5a8a',14,'middle',true));}
+  if(p>=3){o.push(T(240,245,'e.g. mass=60g, density=3g/cm³ → V=60÷3=20cm³','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Pressure = Force ÷ Area','#C0272D',15,'middle',true));
+  o.push('<polygon points="240,45 170,145 310,145" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  o.push(L(170,145,310,145,'#C0272D',3));
+  o.push(T(240,100,'F','#C0272D',22,'middle',true));
+  o.push(T(195,158,'P','#1a5a8a',22,'middle',true));o.push(T(285,158,'A','#1a7a3a',22,'middle',true));
+  if(p>=1){o.push(T(240,182,'Pressure = Force ÷ Area   (N/m² or Pa)','#888',12,'middle',false));}
+  if(p>=2){o.push(R(30,196,420,36,'#e8f0ff','#1a5a8a',1.5));o.push(T(240,218,'F=P×A   A=F÷P','#1a5a8a',14,'middle',true));}
+  if(p>=3){o.push(T(240,245,'e.g. F=200N, A=0.5m² → P=200÷0.5=400 Pa','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Area and volume unit conversions','#C0272D',14,'middle',true));
+  if(p>=1){o.push(R(14,38,452,54,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,58,'Length: ×100 (m→cm)','#C0272D',12,'middle',false));
+    o.push(T(240,76,'Area: ×100² = ×10,000 (m²→cm²)','#C0272D',13,'middle',true));}
+  if(p>=2){o.push(R(14,102,452,54,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,122,'Volume: ×100³ = ×1,000,000 (m³→cm³)','#1a5a8a',13,'middle',true));
+    o.push(T(240,140,'1 litre = 1000 cm³   1 cm³ = 1 ml','#1a5a8a',12,'middle',false));}
+  if(p>=3){o.push(R(14,166,452,54,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,186,'3.5 m² = 3.5 × 10,000 = 35,000 cm²','#1a7a3a',13,'middle',true));
+    o.push(T(240,204,'2 m³ = 2,000,000 cm³ = 2,000 litres','#1a7a3a',12,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Time calculations','#C0272D',15,'middle',true));
+  if(p>=1){o.push(R(14,36,452,52,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,56,'1 year = 365 days = 52 weeks','#C0272D',12,'middle',false));
+    o.push(T(240,74,'1 day = 24 hours = 1440 minutes = 86,400 seconds','#C0272D',12,'middle',false));}
+  if(p>=2){o.push(R(14,98,452,52,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,118,'Train leaves 09:47, journey 2h 35min','#1a5a8a',12,'middle',false));
+    o.push(T(240,136,'Arrives: 09:47 + 2:35 = 12:22','#1a5a8a',14,'middle',true));}
+  if(p>=3){o.push(R(14,160,452,38,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,184,'Do NOT use decimal: 1.5h ≠ 1h 50min','#1a7a3a',13,'middle',true));}
+  s.innerHTML=o.join('');}
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Converting between metric and imperial','#C0272D',14,'middle',true));
+  var approx=[['1 inch','≈ 2.54 cm'],['1 mile','≈ 1.6 km'],['1 kg','≈ 2.2 pounds'],['1 litre','≈ 1.75 pints'],['1 gallon','≈ 4.5 litres']];
+  approx.forEach(function(a,i){if(p>=1){o.push(R(14,38+i*40,452,36,i%2===0?'#fff5f0':'#fff','#E4D6CE',1));
+    o.push(T(130,62+i*40,a[0],'#C0272D',13,'middle',true));o.push(T(320,62+i*40,a[1],'#888',13,'middle',false));}});
+  s.innerHTML=o.join('');}
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Speed calculations with unit conversions','#C0272D',13,'middle',true));
+  if(p>=1){o.push(T(240,52,'Convert 90 km/h to m/s','#241A17',14,'middle',false));
+    o.push(R(14,62,452,44,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,82,'90 km = 90,000 m','#C0272D',13,'middle',false));o.push(T(240,98,'1 hour = 3600 seconds','#C0272D',13,'middle',false));}
+  if(p>=2){o.push(R(80,116,320,36,'#e8f0ff','#1a5a8a',1.5));o.push(T(240,139,'90,000 ÷ 3600 = 25 m/s','#1a5a8a',16,'middle',true));}
+  if(p>=3){o.push(T(240,175,'km/h → m/s: divide by 3.6','#888',12,'middle',false));
+    o.push(T(240,195,'m/s → km/h: multiply by 3.6','#888',12,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Bearings and scale drawings combined','#C0272D',13,'middle',true));
+  if(p>=1){o.push(R(14,36,452,44,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,56,'A map has scale 1:25,000','#C0272D',13,'middle',false));
+    o.push(T(240,72,'A road measures 8 cm on the map','#C0272D',13,'middle',false));}
+  if(p>=2){o.push(R(60,90,360,38,'#e8f0ff','#1a5a8a',1.5));o.push(T(240,114,'Actual = 8 × 25,000 = 200,000 cm = 2 km','#1a5a8a',13,'middle',true));}
+  if(p>=3){o.push(T(240,148,'A bearing of 065° from A to B:','#888',12,'middle',false));
+    o.push(T(240,168,'Draw North at A, measure 065° clockwise','#888',12,'middle',false));
+    o.push(T(240,188,'Then scale the actual distance on the diagram','#888',12,'middle',false));}
   s.innerHTML=o.join('');}
 
-function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  // Map
-  o.push(R(30,40,200,140,'#e8f0ff','#1a5a8a',1.5));
-  o.push(T(130,110,'MAP','#1a5a8a',16,'middle',true));
-  o.push(T(130,130,'Scale 1 : 25 000','#888',12,'middle',false));
-  if(p>=1){o.push(L(30,196,230,196,'#C0272D',2));o.push(L(30,188,30,204,'#C0272D',2));o.push(L(230,188,230,204,'#C0272D',2));
-    o.push(T(130,213,'8 cm on map','#C0272D',12,'middle',true));}
-  if(p>=2){o.push(T(320,80,'Real distance:','#241A17',14,'start',false));
-    o.push(T(320,102,'8 \u00d7 25 000','#C0272D',14,'start',true));
-    o.push(T(320,122,'= 200 000 cm','#241A17',14,'start',false));}
-  if(p>=3){o.push(R(280,140,180,46,'#e8f8ee','#1a7a3a',2));
-    o.push(T(370,168,'= 2 km','#1a7a3a',18,'middle',true));}
-  s.innerHTML=o.join('');}
+function yt1(){var units=pick([['km','m',1000],['m','cm',100],['cm','mm',10],['kg','g',1000],['l','ml',1000]]);
+  var v=rnd(2,15);return tryIt({question:'Convert <b>'+v+' '+units[0]+'</b> to '+units[1]+'.',hints:['Multiply by '+units[2]],ans:v*units[2],tol:0,unit:units[1],working:v+' '+units[0]+' = '+v+' × '+units[2]+' = '+v*units[2]+' '+units[1]});}
+function yt2(){var d=rnd(60,200),t=rnd(2,5)+pick([0,0.5]);return tryIt({question:'A car travels <b>'+d+' km</b> in <b>'+t+' hours</b>. Find its speed.',hints:['Speed = Distance ÷ Time',''+d+' ÷ '+t],ans:d/t,tol:0.1,unit:'km/h',working:d+' ÷ '+t+' = '+(d/t).toFixed(1)+' km/h'});}
+function yt3(){var cm=rnd(3,20),scale=pick([50,100,200,500]);return tryIt({question:'A map has scale 1:'+scale+'. A distance of <b>'+cm+' cm</b> on the map represents how many metres?',hints:['Multiply by '+scale+' to get cm','Then ÷100 for metres'],ans:cm*scale/100,tol:0,unit:'m',working:cm+' × '+scale+' = '+(cm*scale)+'cm = '+cm*scale/100+'m'});}
+function yt4(){var m=rnd(40,200),v=rnd(5,30);return tryIt({question:'A block has mass <b>'+m+' g</b> and volume <b>'+v+' cm³</b>. Find its density.',hints:['Density = Mass ÷ Volume'],ans:m/v,tol:0.01,unit:'g/cm³',working:m+' ÷ '+v+' = '+(m/v).toFixed(2)+' g/cm³'});}
+function yt5(){var f=rnd(100,500),a=rnd(2,10);return tryIt({question:'Force = <b>'+f+' N</b>, Area = <b>'+a+' m²</b>. Find the pressure.',hints:['Pressure = Force ÷ Area'],ans:f/a,tol:0.1,unit:'Pa',working:f+' ÷ '+a+' = '+(f/a).toFixed(1)+' Pa'});}
+function yt6(){var m2=rnd(2,8);return tryIt({question:'Convert <b>'+m2+' m²</b> to cm².',hints:['1 m² = 10,000 cm²'],ans:m2*10000,tol:0,unit:'cm²',working:m2+' × 10,000 = '+m2*10000+' cm²'});}
+function yt7(){var h=rnd(8,11),m=rnd(10,50);var th=pick([1,2]);var tm=rnd(15,50);var newm=m+tm,newh=h+th;while(newm>=60){newm-=60;newh++;}return tryIt({question:'Train departs at <b>'+h+':'+String(m).padStart(2,'0')+'</b>. Journey takes <b>'+th+'h '+tm+'min</b>. What time does it arrive? Give just the hour.',hints:['Add hours, then minutes','Carry over if minutes ≥ 60'],ans:newh,tol:0,unit:'(hour)',working:h+':'+String(m).padStart(2,'0')+' + '+th+'h '+tm+'min = '+newh+':'+String(newm).padStart(2,'0')});}
+function yt8(){var miles=rnd(5,30);return tryIt({question:'Convert <b>'+miles+' miles</b> to km (use 1 mile ≈ 1.6 km).',hints:['Multiply by 1.6'],ans:miles*1.6,tol:0.2,unit:'km',working:miles+' × 1.6 = '+miles*1.6+' km'});}
+function yt9(){var ms=rnd(5,30);return tryIt({question:'Convert <b>'+ms+' m/s</b> to km/h.',hints:['Multiply by 3.6'],ans:ms*3.6,tol:0.2,unit:'km/h',working:ms+' × 3.6 = '+ms*3.6+' km/h'});}
+function yt10(){var cm=rnd(4,15),scale=pick([25000,50000,100000]);return tryIt({question:'Map scale 1:'+scale.toLocaleString()+'. Distance on map = <b>'+cm+' cm</b>. Actual distance in km?',hints:['Multiply by '+scale.toLocaleString()+' → cm','Divide by 100 → m, then by 1000 → km'],ans:cm*scale/100000,tol:0.001,unit:'km',working:cm+' × '+scale+' ÷ 100,000 = '+cm*scale/100000+' km'});}
 
 var QS=[
-  {ey:'Q1 \u00b7 Year 8 \u00b7 Units & Measurement',ti:'Unit Conversions',su:'Convert: 3.6 km to metres, 8500 g to kg, 450 ml to litres.',steps:[
-    {lb:'The key facts',dr:dQ1,ht:'<p>Metric conversions to memorise:</p><div class="fm">1 km = 1000 m &nbsp; 1 kg = 1000 g &nbsp; 1 litre = 1000 ml</div><p>Multiply to convert to a <b>smaller</b> unit. Divide to convert to a <b>larger</b> unit.</p>'},
-    {lb:'km to m',dr:dQ1,ht:'<div class="fm">3.6 km \u00d7 1000 = 3600 m</div>'},
-    {lb:'g to kg, ml to l',dr:dQ1,ht:'<div class="fm">8500 g \u00f7 1000 = 8.5 kg</div><div class="fm">450 ml \u00f7 1000 = 0.45 litres</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Convert <b>4.25 km</b> to metres.',hints:['1 km = 1000 m','Multiply by 1000'],ans:4250,tol:0.5,unit:'m',working:'4.25 \u00d7 1000 = 4250 m'})}
-  ]},
-  {ey:'Q2 \u00b7 Year 8 \u00b7 Units & Measurement',ti:'Speed, Distance, Time',su:'A car travels 240 km in 3 hours. Find its average speed.',steps:[
-    {lb:'The SDT triangle',dr:dQ2,ht:'<p>The triangle helps you remember the three formulas. <b>Cover</b> the quantity you want to find \u2014 the remaining two show the calculation.</p>'},
-    {lb:'Find speed',dr:dQ2,ht:'<div class="fm">Speed = Distance \u00f7 Time = 240 \u00f7 3 = 80 km/h</div>'},
-    {lb:'Converting time',dr:dQ2,ht:'<p>Always convert time to the right unit. If speed is in km/h, time must be in hours.</p><div class="fm">40 minutes = 40/60 = 2/3 hour</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'A train travels at <b>96 km/h</b> for <b>2.5 hours</b>. Find the distance.',hints:['Distance = Speed \u00d7 Time','96 \u00d7 2.5'],ans:240,tol:0.5,unit:'km',working:'96 \u00d7 2.5 = 240 km'})}
-  ]},
-  {ey:'Q3 \u00b7 Year 8 \u00b7 Units & Measurement',ti:'Scale Drawings',su:'A map has scale 1:25 000. Two points are 8 cm apart on the map. Find the real distance.',steps:[
-    {lb:'Reading a scale',dr:dQ3,ht:'<p>A scale of <b>1:25 000</b> means 1 cm on the map represents 25 000 cm in real life.</p>'},
-    {lb:'Calculate real distance',dr:dQ3,ht:'<div class="fm">8 cm \u00d7 25 000 = 200 000 cm</div>'},
-    {lb:'Convert to km',dr:dQ3,ht:'<div class="fm">200 000 cm \u00f7 100 = 2000 m = 2 km</div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Scale 1:50 000. Distance on map = 6 cm. Real distance in km?',hints:['6 \u00d7 50 000 = cm','\u00f7 100 000 to get km'],ans:3,tol:0.05,unit:'km',working:'6 \u00d7 50 000 = 300 000 cm = 3000 m = 3 km'})}
-  ]}
+  {ey:'Q1 · Year 8 · Measurement',ti:'Metric Conversions <span class="badge f">F</span>',su:'Convert between km, m, cm, mm, kg, g, litres and ml.',steps:[{lb:'Length',dr:dQ1,ht:'<div class="fm">km → m: ×1000   m → cm: ×100   cm → mm: ×10</div>'},{lb:'Mass and capacity',dr:dQ1,ht:'<div class="fm">kg → g: ×1000   t → kg: ×1000</div><div class="fm">litre → ml: ×1000</div>'},{lb:'Dividing to go back',dr:dQ1,ht:'<p>To convert the other way, divide. E.g. mm → cm: ÷10, ml → l: ÷1000.</p>'},{lb:'Your turn',dr:dQ1,ht:yt1}]},
+  {ey:'Q2 · Year 8 · Measurement',ti:'Speed, Distance, Time <span class="badge f">F</span>',su:'Use the formula triangle for speed, distance and time.',steps:[{lb:'The formula triangle',dr:dQ2,ht:'<p>Cover the quantity you want to find — the triangle shows whether to multiply or divide.</p>'},{lb:'Three formulas',dr:dQ2,ht:'<div class="fm">S = D ÷ T   D = S × T   T = D ÷ S</div>'},{lb:'Units',dr:dQ2,ht:'<p>Match units: if distance in km and time in hours, speed is km/h. Convert time to decimal hours first (e.g. 2h 30min = 2.5h).</p>'},{lb:'Your turn',dr:dQ2,ht:yt2}]},
+  {ey:'Q3 · Year 8 · Measurement',ti:'Scale Drawings <span class="badge f">F</span>',su:'Use a scale of 1:50 to find real distances.',steps:[{lb:'Reading a scale',dr:dQ3,ht:'<p>A scale of 1:50 means every 1 unit on the drawing represents 50 units in real life.</p>'},{lb:'Map to real life',dr:dQ3,ht:'<div class="fm">Actual = map measurement × scale denominator</div>'},{lb:'Apply',dr:dQ3,ht:'<div class="fm">6 cm on map at 1:50 → 6 × 50 = 300 cm = 3 m</div>'},{lb:'Your turn',dr:dQ3,ht:yt3}]},
+  {ey:'Q4 · Year 8 · Measurement',ti:'Density <span class="badge e">E</span>',su:'Density = Mass ÷ Volume.',steps:[{lb:'The formula',dr:dQ4,ht:'<div class="fm">Density = Mass ÷ Volume</div><p>Units: g/cm³ or kg/m³.</p>'},{lb:'Formula triangle',dr:dQ4,ht:'<div class="fm">M = D × V   V = M ÷ D   D = M ÷ V</div>'},{lb:'Example',dr:dQ4,ht:'<div class="fm">M=60g, D=3g/cm³ → V=60÷3=20cm³</div>'},{lb:'Your turn',dr:dQ4,ht:yt4}]},
+  {ey:'Q5 · Year 8 · Measurement',ti:'Pressure <span class="badge e">E</span>',su:'Pressure = Force ÷ Area.',steps:[{lb:'The formula',dr:dQ5,ht:'<div class="fm">Pressure = Force ÷ Area</div><p>Units: Pascals (Pa) = N/m².</p>'},{lb:'Formula triangle',dr:dQ5,ht:'<div class="fm">F = P × A   A = F ÷ P   P = F ÷ A</div>'},{lb:'Example',dr:dQ5,ht:'<div class="fm">F=200N, A=0.5m² → P=400Pa</div>'},{lb:'Your turn',dr:dQ5,ht:yt5}]},
+  {ey:'Q6 · Year 8 · Measurement',ti:'Area and Volume Unit Conversion <span class="badge e">E</span>',su:'Convert m² to cm² and m³ to cm³.',steps:[{lb:'Squaring and cubing the factor',dr:dQ6,ht:'<p>For area, square the linear conversion factor. For volume, cube it.</p>'},{lb:'Area',dr:dQ6,ht:'<div class="fm">1 m² = 100² cm² = 10,000 cm²</div>'},{lb:'Volume',dr:dQ6,ht:'<div class="fm">1 m³ = 100³ cm³ = 1,000,000 cm³</div><div class="fm">1 litre = 1,000 cm³</div>'},{lb:'Your turn',dr:dQ6,ht:yt6}]},
+  {ey:'Q7 · Year 8 · Measurement',ti:'Time Calculations <span class="badge f">F</span>',su:'Calculate arrival times and durations using 24-hour clock.',steps:[{lb:'24-hour clock',dr:dQ7,ht:'<p>Add hours, then minutes. If minutes exceed 59, carry 1 hour. Never use decimals for time (2.5h ≠ 2h 50min).</p>'},{lb:'Example',dr:dQ7,ht:'<div class="fm">09:47 + 2h 35min → 09:47 + 2:35 = 12:22</div>'},{lb:'Durations',dr:dQ7,ht:'<p>To find duration: subtract start from end time, working in hours and minutes separately.</p>'},{lb:'Your turn',dr:dQ7,ht:yt7}]},
+  {ey:'Q8 · Year 8 · Measurement',ti:'Metric and Imperial <span class="badge f">F</span>',su:'Know approximate metric–imperial conversions.',steps:[{lb:'Key conversions',dr:dQ8,ht:'<p>You will be given these in an exam, but knowing them helps estimate: 1 mile ≈ 1.6 km, 1 kg ≈ 2.2 lb, 1 litre ≈ 1.75 pints.</p>'},{lb:'Applying them',dr:dQ8,ht:'<div class="fm">30 miles ≈ 30 × 1.6 = 48 km</div>'},{lb:'Reverse',dr:dQ8,ht:'<div class="fm">To convert km to miles: ÷ 1.6</div>'},{lb:'Your turn',dr:dQ8,ht:yt8}]},
+  {ey:'Q9 · Year 8 · Measurement',ti:'Speed Unit Conversion <span class="badge e">E</span>',su:'Convert 90 km/h to m/s.',steps:[{lb:'Convert distance and time',dr:dQ9,ht:'<div class="fm">90 km = 90,000 m   1 hour = 3,600 s</div>'},{lb:'Divide',dr:dQ9,ht:'<div class="fm">90,000 ÷ 3,600 = 25 m/s</div>'},{lb:'Quick rule',dr:dQ9,ht:'<div class="fm">km/h → m/s: ÷ 3.6</div><div class="fm">m/s → km/h: × 3.6</div>'},{lb:'Your turn',dr:dQ9,ht:yt9}]},
+  {ey:'Q10 · Year 8 · Measurement',ti:'Scale Maps and Bearings <span class="badge e">E</span>',su:'Use a 1:25,000 map to find real distances.',steps:[{lb:'Apply the scale',dr:dQ10,ht:'<div class="fm">Actual = map × scale denominator</div>'},{lb:'Convert units',dr:dQ10,ht:'<div class="fm">8 cm × 25,000 = 200,000 cm = 2 km</div>'},{lb:'Combined with bearings',dr:dQ10,ht:'<p>On scale drawings, use a protractor to measure or draw bearings, and use the scale to mark distances accurately.</p>'},{lb:'Your turn',dr:dQ10,ht:yt10}]}
 ];
 
 var qi=0,si=0;
-function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
-function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
-function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \\u2192';}
+function bSB(){var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);
+  QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';
+  QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').innerHTML=q.ti;document.getElementById('su').textContent=q.su;
+  var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+  p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);
+  st.dr(si);bDT();
+  document.getElementById('pb').disabled=si===0;
+  document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \u2192';}
 document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
 document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
 render();
-
 </script>
 </body>
 </html>
