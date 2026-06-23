@@ -44,7 +44,7 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
 .hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
 .hl li{margin-bottom:5px;padding-left:18px;position:relative;}
-.hl li::before{content:"\u203a";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
 .ar{display:flex;gap:8px;margin-top:6px;}
 .ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
 .ar input:focus{border-color:var(--gold);}
@@ -56,6 +56,11 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+
+.newq-btn{float:right;font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.newq-btn:hover{background:var(--gold);color:#fff;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
+.try-q{font-size:15px;margin:8px 0 10px;}
 </style>
 </head>
 <body>
@@ -84,9 +89,84 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
   </div>
 </div>
 <script>
+
 var ST={};
-function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]=o;var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');return '<div class="try"><div class="try-t">\u2714 Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="Answer ('+o.unit+')" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
-function ck(id){var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}if(Math.abs(v-o.ans)<=(o.tol||0.05)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}else{f.className='fb er';f.textContent='Not quite \u2014 check your working and try again.';}}
+
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rPick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function htmlFrac(num,den,col,lbl){
+  col=col||'#C0272D';
+  return '<span style="display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;line-height:1.1;">'
+    +(lbl?'<span style="font-size:10px;color:#888;font-style:italic;line-height:1.2;">numerator</span>':'')
+    +'<span style="font-size:17px;font-weight:700;color:'+col+';border-bottom:2px solid '+col+';padding:0 4px 1px;min-width:18px;text-align:center;">'+num+'</span>'
+    +'<span style="font-size:17px;color:'+col+';padding:1px 4px 0;min-width:18px;text-align:center;">'+den+'</span>'
+    +(lbl?'<span style="font-size:10px;color:#888;font-style:italic;line-height:1.2;">denominator</span>':'')
+    +'</span>';
+}
+
+function tryIt(genFn){
+  if(typeof genFn==='object'){var _o=genFn;genFn=function(){return _o;};}
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn();
+  ST[id]={o:o,genFn:genFn};
+  return buildTry(id,o);
+}
+
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var ex=o.extraHTML||'';
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">✔ Your Turn'
+    +' <button class="newq-btn" data-tryid="'+id+'">↻ New</button></div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +ex
+    +(h?'<ul class="hl">'+h+'</ul>':'')
+    +'<div class="ar">'
+    +'<input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'
+    +'<div class="wk-b">'+o.working+'</div></details>'
+    +'</div>';
+}
+
+function newQ(id){
+  var e=ST[id]; if(!e||!e.genFn)return;
+  var o=e.genFn(); e.o=o;
+  var box=document.querySelector('.try[data-tryid="'+id+'"]');
+  if(!box)return;
+  var tmp=document.createElement('div');
+  tmp.innerHTML=buildTry(id,o);
+  box.parentNode.replaceChild(tmp.firstChild,box);
+  ST[id]={o:o,genFn:e.genFn};
+}
+
+function ckById(id){
+  var e=ST[id]; if(!e)return;
+  var o=e.o;
+  var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+  var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+  if(!inp||!fb)return;
+  var v=parseFloat(inp.value);
+  if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
+    fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+  }else{
+    fb.className='try-fb fb er';fb.textContent='Not quite — try again.';
+  }
+}
+
+document.addEventListener('click',function(e){
+  var btn=e.target;
+  if(btn.classList.contains('newq-btn')){
+    newQ(btn.getAttribute('data-tryid'));
+  } else if(btn.classList.contains('try-ck')){
+    ckById(btn.getAttribute('data-tryid'));
+  }
+});
+
 function g(){return document.getElementById('dg');}
 function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
 function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||1.5)+'" rx="3"/>';}
