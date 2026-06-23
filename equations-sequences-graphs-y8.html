@@ -57,6 +57,8 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
 .try-q{font-size:15px;margin:8px 0 10px;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;}
+.f{background:#1a5a8a;color:#fff;}.e{background:#C0272D;color:#fff;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
@@ -86,107 +88,169 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
   </div>
 </div>
 <script>
-
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');var ph='Answer'+(o.unit?' ('+o.unit+')':'');return '<div class="try" data-tryid="'+id+'"><div class="try-t">\u2714 Your Turn</div><div class="try-q">'+o.question+'</div>'+(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div><div class="try-fb" data-tryid="'+id+'"></div><details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
-document.addEventListener('click',function(e){if(e.target.classList.contains('try-ck')){var id=e.target.getAttribute('data-tryid'),o=ST[id].o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}}});
+function tryIt(o){
+  var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">✔ Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +(h?'<ul class="hl">'+h+'</ul>':'')
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
+    +'</div>';
+}
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('try-new')){render();return;}
+  if(e.target.classList.contains('try-ck')){
+    var id=e.target.getAttribute('data-tryid'),o=ST[id].o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
+  }
+});
 function g(){return document.getElementById('dg');}
 function T(x,y,t,c,sz,a,b){return '<text x="'+x+'" y="'+y+'" font-size="'+(sz||12)+'" font-family="Arial" fill="'+(c||'#241A17')+'" text-anchor="'+(a||'middle')+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" rx="2"/>';}
-function arc(cx,cy,r,a1,a2,c,w){var r1=a1*Math.PI/180,r2=a2*Math.PI/180;var x1=cx+r*Math.cos(r1),y1=cy-r*Math.sin(r1),x2=cx+r*Math.cos(r2),y2=cy-r*Math.sin(r2);var laf=((a2-a1+360)%360)>180?1:0;return '<path d="M '+x1.toFixed(1)+','+y1.toFixed(1)+' A '+r+','+r+' 0 '+laf+',0 '+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="'+(c||'#C8922A')+'" stroke-width="'+(w||1.5)+'" />';}
-
 
 function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,30,'Solve: 3x + 4 = 2x + 11','#C0272D',18,'middle',true));
-  if(p>=1){o.push(T(240,70,'Collect x terms on one side','#888',13,'middle',false));
-    o.push(R(40,82,400,40,'#fff5f0','#C0272D',1.5));o.push(T(240,107,'3x \u2212 2x + 4 = 11','#C0272D',16,'middle',true));
-    o.push(T(240,140,'x + 4 = 11','#241A17',18,'middle',true));}
-  if(p>=2){o.push(T(240,178,'Subtract 4 from both sides','#888',12,'middle',false));
-    o.push(R(120,188,240,44,'#e8f8ee','#1a7a3a',2));o.push(T(240,216,'x = 7','#1a7a3a',24,'middle',true));}
-  if(p>=3){o.push(T(240,250,'Check: 3(7)+4 = 25, 2(7)+11 = 25 \u2713','#888',11,'middle',false));}
+  o.push(T(240,25,'Solving: 2x + 5 = 17','#C0272D',17,'middle',true));
+  if(p>=1){o.push(T(240,62,'Step 1: subtract 5 from both sides','#888',12,'middle',false));o.push(R(100,72,280,38,'#fff5f0','#C0272D',1.5));o.push(T(240,96,'2x = 12','#C0272D',18,'middle',true));}
+  if(p>=2){o.push(T(240,130,'Step 2: divide both sides by 2','#888',12,'middle',false));o.push(R(160,140,160,40,'#e8f8ee','#1a7a3a',2));o.push(T(240,166,'x = 6','#1a7a3a',24,'middle',true));}
+  if(p>=3){o.push(T(240,210,'Check: 2(6)+5 = 17 ✓','#888',12,'middle',false));}
   s.innerHTML=o.join('');}
-
 function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,30,'Inequality: 4x \u2212 3 > 9','#C0272D',18,'middle',true));
-  if(p>=1){o.push(T(240,70,'Add 3 to both sides','#888',13,'middle',false));
-    o.push(R(80,82,320,40,'#fff5f0','#C0272D',1.5));o.push(T(240,107,'4x > 12','#C0272D',18,'middle',true));}
-  if(p>=2){o.push(T(240,152,'Divide both sides by 4','#888',12,'middle',false));
-    o.push(R(120,162,240,44,'#e8f8ee','#1a7a3a',2));o.push(T(240,190,'x > 3','#1a7a3a',24,'middle',true));}
-  if(p>=3){// number line
-    o.push(L(60,228,420,228,'#241A17',2));
-    o.push(T(230,242,'3','#241A17',12,'middle',true));
-    o.push('<circle cx="230" cy="228" r="7" fill="white" stroke="#C0272D" stroke-width="2.5"/>');
-    o.push(L(237,228,412,228,'#C0272D',3));
-    o.push(T(100,220,'x > 3 (open circle = 3 not included)','#888',10,'middle',false));}
+  var seq=[3,7,11,15,19];
+  seq.forEach(function(v,i){o.push(R(20+i*92,20,80,44,'#fff5f0','#C0272D',1.5));o.push(T(60+i*92,48,v,'#C0272D',20,'middle',true));});
+  if(p>=1){o.push(T(240,85,'Differences: +4, +4, +4, +4 → arithmetic','#888',12,'middle',false));}
+  if(p>=2){o.push(T(240,108,'nth term = 4n − 1','#1a5a8a',16,'middle',true));o.push(T(240,128,'Check n=1: 4(1)−1 = 3 ✓','#888',11,'middle',false));}
+  if(p>=3){o.push(R(80,145,320,42,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,171,'10th term = 4(10)−1 = 39','#1a7a3a',15,'middle',true));}
   s.innerHTML=o.join('');}
-
 function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,26,'Sequence: 5, 9, 13, 17, \u2026','#241A17',16,'middle',false));
-  if(p>=1){o.push(T(240,64,'Find the common difference: 9\u22125 = 4','#888',13,'middle',false));
-    [5,9,13,17,21].forEach(function(v,i){o.push(R(30+i*88,78,74,44,'#fff5f0','#C0272D',1.5));o.push(T(67+i*88,105,v,'#C0272D',18,'middle',true));if(i<4){o.push(T(113+i*88,88,'+4','#C8922A',11,'middle',false));}});}
-  if(p>=2){o.push(T(240,150,'Start with 4n (coefficient = difference)','#888',13,'middle',false));
-    o.push(T(240,170,'When n=1: 4\u00d71 = 4, but 1st term = 5, adjust +1','#888',12,'middle',false));}
-  if(p>=3){o.push(R(100,184,280,44,'#e8f8ee','#1a7a3a',2));o.push(T(240,212,'nth term = 4n + 1','#1a7a3a',20,'middle',true));}
-  if(p>=4){o.push(T(240,248,'Check: n=1 \u21925, n=2\u21929, n=20\u219281 \u2713','#888',11,'middle',false));}
+  o.push(L(50,20,50,220,'#333',2));o.push(L(50,220,450,220,'#333',2));
+  for(var i=0;i<=4;i++){o.push(L(50+i*90,220,50+i*90,225,'#333',1));o.push(T(50+i*90,238,i,'#888',10,'middle',false));}
+  for(var j=0;j<=4;j++){o.push(L(50,220-j*48,45,220-j*48,'#333',1));o.push(T(42,224-j*48,j*2,'#888',10,'end',false));}
+  if(p>=1){// y=2x+1 points
+    var pts=[[0,1],[1,3],[2,5],[3,7],[4,9]];
+    pts.forEach(function(pt){o.push('<circle cx="'+(50+pt[0]*90)+'" cy="'+(220-pt[1]*24)+'" r="5" fill="#C0272D"/>');});
+    o.push(T(360,45,'y = 2x + 1','#C0272D',14,'start',true));}
+  if(p>=2){o.push(L(50,196,410,28,'#C0272D',2));}
+  if(p>=3){o.push(T(300,200,'gradient = 2','#888',11,'middle',false));o.push(T(300,215,'y-intercept = 1','#888',11,'middle',false));}
   s.innerHTML=o.join('');}
-
 function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  // coordinate axes
-  var cx=80,cy=210,sc=30;
-  o.push(L(cx,10,cx,cy+10,'#999',1.5));o.push(L(cx-10,cy,420,cy,'#999',1.5));
-  o.push(T(cx+5,16,'y','#888',11,'start',false));o.push(T(415,cy+14,'x','#888',11,'start',false));
-  for(var i=-1;i<=10;i++){if(i!==0){o.push(T(cx+i*sc,cy+13,i,'#ccc',8,'middle',false));}}
-  for(var j=-2;j<=6;j++){if(j!==0){o.push(T(cx-10,cy-j*sc+3,j,'#ccc',8,'end',false));}}
-  if(p>=1){// plot y=2x-3 for x=0 to 4
-    var pts=[[0,-3],[1,-1],[2,1],[3,3],[4,5]];
-    pts.forEach(function(pt){o.push('<circle cx="'+(cx+pt[0]*sc)+'" cy="'+(cy-pt[1]*sc)+'" r="4" fill="#C0272D"/>');});
-    o.push(L(cx-0.5*sc,cy+4*sc,cx+4.5*sc,cy-6*sc,'#C0272D',2));
-    o.push(T(cx+4.5*sc+6,cy-6*sc,'y=2x\u22123','#C0272D',11,'start',true));}
-  if(p>=2){o.push(T(300,60,'y-intercept: (0,\u22123)','#888',12,'start',false));
-    o.push(T(300,78,'Gradient = 2','#888',12,'start',false));
-    o.push(T(300,96,'Rise 2 for each 1 right','#888',12,'start',false));}
-  if(p>=3){o.push(T(300,130,'Gradient between two points:','#241A17',12,'start',false));
-    o.push(T(300,148,'(y\u2082\u2212y\u2081)\u00f7(x\u2082\u2212x\u2081)','#C0272D',13,'start',true));
-    o.push(T(300,168,'(1,2)\u2192(5,10): (10\u22122)\u00f7(5\u22121)=2','#888',12,'start',false));}
+  o.push(T(240,25,'Find gradient and equation of a line','#C0272D',14,'middle',true));
+  if(p>=1){o.push(L(60,200,380,80,'#C0272D',2));
+    o.push('<circle cx="60" cy="200" r="5" fill="#C0272D"/>');o.push(T(60,215,'(1, 2)','#C0272D',11,'middle',false));
+    o.push('<circle cx="380" cy="80" r="5" fill="#C0272D"/>');o.push(T(380,68,'(5, 8)','#C0272D',11,'middle',false));}
+  if(p>=2){o.push(R(20,228,440,28,'#fff5f0','#C0272D',1));o.push(T(240,247,'m = (8−2)÷(5−1) = 6÷4 = 3/2','#C0272D',12,'middle',true));}
+  if(p>=3){o.push(T(240,185,'y − 2 = (3/2)(x − 1)  →  y = 1.5x + 0.5','#1a7a3a',12,'middle',true));}
   s.innerHTML=o.join('');}
-
-
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,25,'Geometric sequence: 2, 6, 18, 54,...','#C0272D',15,'middle',true));
+  if(p>=1){[2,6,18,54,162].forEach(function(v,i){o.push(R(20+i*92,40,80,44,'#fff5f0','#C0272D',1.5));o.push(T(60+i*92,68,v,'#C0272D',17,'middle',true));});}
+  if(p>=2){o.push(T(240,110,'Common ratio = 6÷2 = 3','#1a5a8a',15,'middle',true));
+    o.push(T(240,132,'Each term × 3 to get next term','#888',12,'middle',false));}
+  if(p>=3){o.push(R(80,148,320,38,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,172,'nth term = 2 × 3^(n−1)','#1a7a3a',15,'middle',true));}
+  s.innerHTML=o.join('');}
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Solving simultaneous equations','#C0272D',14,'middle',true));
+  if(p>=1){o.push(T(240,50,'y = 2x + 1  and  y = x + 4','#241A17',14,'middle',false));
+    o.push(R(20,60,440,38,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,84,'Set equal: 2x + 1 = x + 4','#C0272D',14,'middle',false));}
+  if(p>=2){o.push(T(240,116,'x = 3','#1a5a8a',18,'middle',true));}
+  if(p>=3){o.push(R(60,130,360,38,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,154,'y = 2(3)+1 = 7  →  (3, 7)','#1a7a3a',16,'middle',true));}
+  s.innerHTML=o.join('');}
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'y = x² − 2x − 3 (quadratic graph)','#C0272D',14,'middle',true));
+  var xs=[-1,0,1,2,3],ys=[0,-3,-4,-3,0];
+  o.push(L(50,170,430,170,'#333',1.5));o.push(L(240,20,240,230,'#333',1.5));
+  if(p>=1){xs.forEach(function(x,i){o.push('<circle cx="'+(240+x*72)+'" cy="'+(170-ys[i]*20)+'" r="5" fill="#C0272D"/>');});}
+  if(p>=2){o.push('<path d="M 168,170 Q 240,250 312,170" fill="none" stroke="#C0272D" stroke-width="2"/>');
+    o.push(T(240,256,'Parabola (U-shape) → minimum point','#888',11,'middle',false));}
+  if(p>=3){o.push(T(240,30,'Roots at x = −1 and x = 3 (where y = 0)','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Real-life graphs: distance-time','#C0272D',14,'middle',true));
+  o.push(L(50,220,450,220,'#333',2));o.push(L(50,20,50,220,'#333',2));
+  o.push(T(240,250,'Time (hours)','#888',11,'middle',false));
+  if(p>=1){o.push(L(50,220,200,100,'#C0272D',2));o.push(L(200,100,300,100,'#C8922A',2));o.push(L(300,100,450,220,'#1a5a8a',2));}
+  if(p>=2){o.push(T(130,140,'Going','#C0272D',11,'middle',false));o.push(T(250,90,'Stopped','#C8922A',11,'middle',false));o.push(T(380,150,'Returning','#1a5a8a',11,'middle',false));}
+  if(p>=3){o.push(T(240,35,'Slope = speed   Flat = stopped','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Inequalities on a number line','#C0272D',14,'middle',true));
+  o.push(L(30,90,450,90,'#333',2));
+  [-2,-1,0,1,2,3,4,5].forEach(function(n,i){var x=30+i*60;o.push(L(x,83,x,97,'#333',1.5));o.push(T(x,112,n,'#888',11,'middle',false));});
+  if(p>=1){o.push('<circle cx="150" cy="90" r="7" fill="none" stroke="#C0272D" stroke-width="2.5"/>');
+    o.push(L(150,90,330,90,'#C0272D',3));
+    o.push('<circle cx="330" cy="90" r="7" fill="#C0272D"/>');
+    o.push(T(240,55,'−1 < x ≤ 3','#C0272D',18,'middle',true));}
+  if(p>=2){o.push(T(152,130,'open circle = NOT included','#888',10,'middle',false));
+    o.push(T(330,130,'filled = included','#888',10,'middle',false));}
+  if(p>=3){o.push(T(240,165,'Solve: 2x + 1 < 7  →  x < 3','#1a7a3a',13,'middle',true));}
+  s.innerHTML=o.join('');}
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Fibonacci and special sequences','#C0272D',14,'middle',true));
+  if(p>=1){o.push(R(20,36,440,44,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,54,'Fibonacci: 1, 1, 2, 3, 5, 8, 13, 21...','#C0272D',13,'middle',false));
+    o.push(T(240,72,'Each term = sum of previous two','#888',11,'middle',false));}
+  if(p>=2){o.push(R(20,90,440,44,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,108,'Square numbers: 1, 4, 9, 16, 25...   nth term = n²','#1a5a8a',13,'middle',false));
+    o.push(T(240,126,'Triangular numbers: 1, 3, 6, 10...   nth term = ½n(n+1)','#1a5a8a',12,'middle',false));}
+  if(p>=3){o.push(R(20,144,440,44,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,162,'Cube numbers: 1, 8, 27, 64...   nth term = n³','#1a7a3a',13,'middle',false));
+    o.push(T(240,180,'Powers of 2: 1, 2, 4, 8, 16...   nth term = 2^(n−1)','#1a7a3a',12,'middle',false));}
+  s.innerHTML=o.join('');}
+function yt1(){var a=rnd(2,5),b=rnd(2,8),x=rnd(2,8),c=a*x+b;return tryIt({question:'Solve <b>'+a+'x + '+b+' = '+c+'</b>.',hints:['Subtract '+b+' from both sides','Divide by '+a],ans:x,tol:0,unit:'',working:a+'x = '+(c-b)+', x = '+x});}
+function yt2(){var a=rnd(2,6),b=rnd(-4,4),n=rnd(5,12);return tryIt({question:'nth term of a sequence is <b>'+a+'n + '+b+'</b>. Find the <b>'+n+'th</b> term.',hints:['Substitute n = '+n],ans:a*n+b,tol:0,unit:'',working:a+'('+n+') + '+b+' = '+(a*n+b)});}
+function yt3(){var m=rnd(1,4),c=rnd(-3,4);return tryIt({question:'A line has gradient <b>'+m+'</b> and y-intercept <b>'+c+'</b>. What is y when x = 3?',hints:['y = '+m+'x + '+c,'x = 3'],ans:m*3+c,tol:0,unit:'',working:'y = '+m+'(3) + '+c+' = '+(m*3+c)});}
+function yt4(){var x1=rnd(0,3),y1=rnd(0,5),x2=x1+rnd(2,4),y2=y1+rnd(2,6);return tryIt({question:'Find the gradient of the line through <b>('+x1+','+y1+')</b> and <b>('+x2+','+y2+')</b>.',hints:['m = (y2−y1)÷(x2−x1)'],ans:(y2-y1)/(x2-x1),tol:0.05,unit:'',working:'('+y2+'−'+y1+')÷('+x2+'−'+x1+') = '+(y2-y1)+'/'+(x2-x1)+' = '+((y2-y1)/(x2-x1)).toFixed(2)});}
+function yt5(){var a=rnd(2,5),r=rnd(2,4),n=rnd(3,6);return tryIt({question:'Geometric sequence starts <b>'+a+', '+(a*r)+'...</b> with ratio '+r+'. Find the <b>'+n+'th term</b>.',hints:['nth term = '+a+' × '+r+'^(n−1)','n = '+n],ans:a*Math.pow(r,n-1),tol:0,unit:'',working:a+' × '+r+'^'+(n-1)+' = '+a*Math.pow(r,n-1)});}
+function yt6(){var x=rnd(1,6),c1=rnd(1,5),c2=c1+x;return tryIt({question:'Solve simultaneously: <b>y = 3x + '+c1+'</b> and <b>y = 2x + '+c2+'</b>. Find x.',hints:['Set the two expressions equal','3x + '+c1+' = 2x + '+c2],ans:x,tol:0,unit:'',working:'3x+'+c1+' = 2x+'+c2+', x = '+x});}
+function yt7(){var x=rnd(-2,3);return tryIt({question:'For y = x² − 3, what is y when x = '+x+'?',hints:['Square x first: '+x+'² = '+x*x,'Then subtract 3'],ans:x*x-3,tol:0,unit:'',working:x+'² − 3 = '+x*x+' − 3 = '+(x*x-3)});}
+function yt8(){return tryIt({question:'On a distance-time graph, a horizontal section means the object is doing what? Enter 1 = moving, 2 = stopped, 3 = accelerating.',hints:['No change in distance over time'],ans:2,tol:0,unit:'',working:'Horizontal = stopped (distance not changing)'});}
+function yt9(){var a=rnd(2,4),b=rnd(4,12),lim=Math.floor((b-1)/a);return tryIt({question:'Solve the inequality <b>'+a+'x + 1 < '+b+'</b>. What is the largest integer value of x?',hints:[a+'x < '+(b-1),'x < '+((b-1)/a).toFixed(2)],ans:lim,tol:0,unit:'',working:a+'x < '+(b-1)+', x < '+((b-1)/a).toFixed(2)+', largest integer = '+lim});}
+function yt10(){var n=rnd(4,8);return tryIt({question:'Find the <b>'+n+'th triangular number</b>. (Formula: ½n(n+1))',hints:['½ × '+n+' × '+(n+1)],ans:n*(n+1)/2,tol:0,unit:'',working:'½ × '+n+' × '+(n+1)+' = '+n*(n+1)/2});}
 var QS=[
-  {ey:'Q1 \u00b7 Year 8 \u00b7 Equations, Sequences & Graphs',ti:'Equations: Unknowns on Both Sides',su:'Solve: 3x + 4 = 2x + 11',steps:[
-    {lb:'Move x terms to one side',dr:dQ1,ht:'<p>Subtract <b>2x</b> from both sides to collect all x terms on the left.</p><div class="fm">3x \u2212 2x + 4 = 11</div>'},
-    {lb:'Simplify',dr:dQ1,ht:'<div class="fm">x + 4 = 11</div><p>Now subtract 4 from both sides.</p>'},
-    {lb:'Solve',dr:dQ1,ht:'<div class="fm">x = 7</div><p>Check: 3(7)+4 = 25 and 2(7)+11 = 25 \u2713</p>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Solve <b>5x \u2212 3 = 3x + 9</b>.',hints:['Subtract 3x from both sides','2x \u2212 3 = 9','Add 3 to both sides'],ans:6,tol:0.5,unit:'',working:'2x = 12 \u2192 x = 6'})}
-  ]},
-  {ey:'Q2 \u00b7 Year 8 \u00b7 Equations, Sequences & Graphs',ti:'Inequalities',su:'Solve and represent on a number line: 4x \u2212 3 > 9',steps:[
-    {lb:'Solve like an equation',dr:dQ2,ht:'<p>Treat an inequality like an equation, <b>except</b>: if you multiply or divide by a negative number, you must flip the inequality sign.</p>'},
-    {lb:'Add 3',dr:dQ2,ht:'<div class="fm">4x > 12</div>'},
-    {lb:'Represent on a number line',dr:dQ2,ht:'<div class="fm">x > 3</div><p>Open circle at 3 (not included), arrow pointing right.</p>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Solve <b>2x + 1 \u2264 9</b>. What is the boundary value of x?',hints:['Subtract 1: 2x \u2264 8','Divide by 2'],ans:4,tol:0,unit:'',working:'2x \u2264 8 \u2192 x \u2264 4. Boundary = 4'})}
-  ]},
-  {ey:'Q3 \u00b7 Year 8 \u00b7 Equations, Sequences & Graphs',ti:'Sequences: nth Term',su:'Find the nth term of the sequence 5, 9, 13, 17, \u2026',steps:[
-    {lb:'Find the common difference',dr:dQ3,ht:'<p>In an arithmetic sequence the terms increase (or decrease) by a fixed amount. This is the <b>common difference</b>.</p><p>9 \u2212 5 = <b>4</b>, so the difference is 4.</p>'},
-    {lb:'Set up 4n',dr:dQ3,ht:'<p>The coefficient of n equals the common difference. Start with <b>4n</b>.</p><p>When n=1: 4(1)=4, but the first term is 5, so adjust by <b>+1</b>.</p>'},
-    {lb:'nth term',dr:dQ3,ht:'<div class="fm">nth term = 4n + 1</div><p>Check: n=4 \u2192 4(4)+1 = 17 \u2713</p>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Using nth term = 4n + 1, find the <b>20th term</b>.',hints:['Substitute n = 20','4 \u00d7 20 + 1'],ans:81,tol:0,unit:'',working:'4(20)+1 = 80+1 = 81'})}
-  ]},
-  {ey:'Q4 \u00b7 Year 8 \u00b7 Equations, Sequences & Graphs',ti:'Linear Graphs',su:'Plot y = 2x \u2212 3 and find the gradient between (1, 2) and (5, 10).',steps:[
-    {lb:'Build a table of values',dr:dQ4,ht:'<p>Substitute values of x to find y. Use at least 3 points.</p><div class="fm">x=0: y=\u22123 &nbsp; x=1: y=\u22121 &nbsp; x=2: y=1</div>'},
-    {lb:'Plot and draw the line',dr:dQ4,ht:'<p>Plot each (x, y) point, then draw a straight line through them. The <b>y-intercept</b> is \u22123 and the <b>gradient</b> is 2.</p>'},
-    {lb:'Calculate gradient',dr:dQ4,ht:'<div class="fm">gradient = (y\u2082\u2212y\u2081) \u00f7 (x\u2082\u2212x\u2081)</div><div class="fm">= (10\u22122) \u00f7 (5\u22121) = 8 \u00f7 4 = 2</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'Find the gradient of the line through <b>(2, 5)</b> and <b>(6, 13)</b>.',hints:['Gradient = (y\u2082\u2212y\u2081) \u00f7 (x\u2082\u2212x\u2081)','(13\u22125) \u00f7 (6\u22122)'],ans:2,tol:0.1,unit:'',working:'(13\u22125)\u00f7(6\u22122) = 8\u00f74 = 2'})}
-  ]}
+  {ey:'Q1 · Year 8 · Equations',ti:'Solving Linear Equations <span class="badge f">F</span>',su:'Solve 2x + 5 = 17.',steps:[{lb:'Inverse operations',dr:dQ1,ht:'<p>Undo operations in reverse order — subtract 5 first, then divide by 2.</p>'},{lb:'Subtract 5',dr:dQ1,ht:'<div class="fm">2x = 12</div>'},{lb:'Divide by 2',dr:dQ1,ht:'<div class="fm">x = 6</div><p>Check: 2(6) + 5 = 17 ✓</p>'},{lb:'Your turn',dr:dQ1,ht:yt1}]},
+  {ey:'Q2 · Year 8 · Sequences',ti:'Arithmetic Sequences — nth Term <span class="badge f">F</span>',su:'Find the nth term of 3, 7, 11, 15, 19,...',steps:[{lb:'Find the common difference',dr:dQ2,ht:'<p>Subtract consecutive terms: 7−3=4. Common difference d=4. This gives the coefficient of n.</p>'},{lb:'nth term formula',dr:dQ2,ht:'<div class="fm">nth term = 4n + (first term − d) = 4n − 1</div>'},{lb:'Find the 10th term',dr:dQ2,ht:'<div class="fm">4(10) − 1 = 39</div>'},{lb:'Your turn',dr:dQ2,ht:yt2}]},
+  {ey:'Q3 · Year 8 · Graphs',ti:'Drawing Straight-Line Graphs <span class="badge f">F</span>',su:'Draw y = 2x + 1.',steps:[{lb:'Table of values',dr:dQ3,ht:'<p>Choose x values (e.g. 0,1,2,3,4). Calculate y for each using y = 2x + 1.</p>'},{lb:'Plot the points',dr:dQ3,ht:'<p>Points: (0,1), (1,3), (2,5), (3,7), (4,9). Join with a straight line.</p>'},{lb:'Read off features',dr:dQ3,ht:'<div class="fm">gradient = 2   y-intercept = 1</div>'},{lb:'Your turn',dr:dQ3,ht:yt3}]},
+  {ey:'Q4 · Year 8 · Graphs',ti:'Gradient and y-intercept <span class="badge f">F</span>',su:'Find the gradient of the line through (1,2) and (5,8).',steps:[{lb:'Gradient formula',dr:dQ4,ht:'<div class="fm">m = (y₂ − y₁) ÷ (x₂ − x₁)</div>'},{lb:'Apply it',dr:dQ4,ht:'<div class="fm">m = (8−2) ÷ (5−1) = 6 ÷ 4 = 3/2</div>'},{lb:'Equation of the line',dr:dQ4,ht:'<div class="fm">y = 1.5x + 0.5</div>'},{lb:'Your turn',dr:dQ4,ht:yt4}]},
+  {ey:'Q5 · Year 8 · Sequences',ti:'Geometric Sequences <span class="badge e">E</span>',su:'Find the nth term of 2, 6, 18, 54,...',steps:[{lb:'Identify the ratio',dr:dQ5,ht:'<p>Divide consecutive terms: 6÷2 = 3. Common ratio r = 3.</p>'},{lb:'nth term formula',dr:dQ5,ht:'<div class="fm">nth term = a × r^(n−1) = 2 × 3^(n−1)</div>'},{lb:'Verify',dr:dQ5,ht:'<p>n=4: 2 × 3³ = 2 × 27 = 54 ✓</p>'},{lb:'Your turn',dr:dQ5,ht:yt5}]},
+  {ey:'Q6 · Year 8 · Equations',ti:'Simultaneous Equations <span class="badge e">E</span>',su:'Solve: y = 2x + 1 and y = x + 4.',steps:[{lb:'Substitution method',dr:dQ6,ht:'<p>Both expressions equal y, so set them equal to each other.</p>'},{lb:'Solve for x',dr:dQ6,ht:'<div class="fm">2x + 1 = x + 4  →  x = 3</div>'},{lb:'Find y',dr:dQ6,ht:'<div class="fm">y = 3 + 4 = 7  →  solution: (3, 7)</div>'},{lb:'Your turn',dr:dQ6,ht:yt6}]},
+  {ey:'Q7 · Year 8 · Graphs',ti:'Quadratic Graphs <span class="badge e">E</span>',su:'Plot y = x² − 2x − 3 and identify key features.',steps:[{lb:'Table of values',dr:dQ7,ht:'<p>Calculate y for x = −1, 0, 1, 2, 3. Quadratic graphs form a parabola (U or ∩ shape).</p>'},{lb:'Plot and connect',dr:dQ7,ht:'<p>Join points with a smooth curve — not straight lines.</p>'},{lb:'Key features',dr:dQ7,ht:'<p>Roots (where y=0): x = −1 and x = 3.<br>Minimum point at x = 1.</p>'},{lb:'Your turn',dr:dQ7,ht:yt7}]},
+  {ey:'Q8 · Year 8 · Graphs',ti:'Real-Life Graphs <span class="badge f">F</span>',su:'Interpret a distance-time graph.',steps:[{lb:'Reading the graph',dr:dQ8,ht:'<p>The y-axis shows distance, the x-axis shows time. The slope of each section gives speed.</p>'},{lb:'Three sections',dr:dQ8,ht:'<p>Rising section = moving away. Flat = stopped. Falling = returning.</p>'},{lb:'Calculate speed',dr:dQ8,ht:'<div class="fm">Speed = gradient = distance ÷ time</div>'},{lb:'Your turn',dr:dQ8,ht:yt8}]},
+  {ey:'Q9 · Year 8 · Equations',ti:'Inequalities <span class="badge f">F</span>',su:'Show −1 < x ≤ 3 on a number line and solve 2x + 1 < 7.',steps:[{lb:'Number line notation',dr:dQ9,ht:'<p>Open circle (○) = value NOT included. Filled circle (●) = value included.</p>'},{lb:'Show on number line',dr:dQ9,ht:'<p>−1 < x ≤ 3: open circle at −1, filled at 3, line between.</p>'},{lb:'Solve the inequality',dr:dQ9,ht:'<div class="fm">2x + 1 < 7  →  2x < 6  →  x < 3</div>'},{lb:'Your turn',dr:dQ9,ht:yt9}]},
+  {ey:'Q10 · Year 8 · Sequences',ti:'Special Sequences <span class="badge f">F</span>',su:'Identify Fibonacci, square, triangular and cube number sequences.',steps:[{lb:'Fibonacci',dr:dQ10,ht:'<p>Each term = sum of the previous two: 1, 1, 2, 3, 5, 8, 13, 21,...</p>'},{lb:'Square and triangular',dr:dQ10,ht:'<p>Squares: n². Triangular: ½n(n+1). These appear frequently in pattern questions.</p>'},{lb:'Cubes and powers',dr:dQ10,ht:'<p>Cube numbers: n³. Powers of 2: 2^(n−1). Recognise them quickly in exams.</p>'},{lb:'Your turn',dr:dQ10,ht:yt10}]}
 ];
 
 var qi=0,si=0;
-function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
-function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
-function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \u2192';}
+function bSB(){var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);
+  QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';
+  QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').innerHTML=q.ti;document.getElementById('su').textContent=q.su;
+  var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+  p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);
+  st.dr(si);bDT();
+  document.getElementById('pb').disabled=si===0;
+  document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \u2192';}
 document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
 document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
 render();
-
 </script>
 </body>
 </html>
