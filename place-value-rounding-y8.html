@@ -57,6 +57,8 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
 .try-q{font-size:15px;margin:8px 0 10px;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;}
+.f{background:#1a5a8a;color:#fff;}.e{background:#C0272D;color:#fff;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
@@ -86,160 +88,335 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
   </div>
 </div>
 <script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');var ph='Answer'+(o.unit?' ('+o.unit+')':'');return '<div class="try" data-tryid="'+id+'"><div class="try-t">\u2714 Your Turn</div><div class="try-q">'+o.question+'</div>'+(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div><div class="try-fb" data-tryid="'+id+'"></div><details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
-document.addEventListener('click',function(e){if(e.target.classList.contains('try-ck')){var id=e.target.getAttribute('data-tryid'),o=ST[id].o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}}});
+function tryIt(o){
+  var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">✔ Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +(h?'<ul class="hl">'+h+'</ul>':'')
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
+    +'</div>';
+}
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('try-new')){render();return;}
+  if(e.target.classList.contains('try-ck')){
+    var id=e.target.getAttribute('data-tryid'),o=ST[id].o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.05)){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
+  }
+});
 function g(){return document.getElementById('dg');}
 function T(x,y,t,c,sz,a,b){return '<text x="'+x+'" y="'+y+'" font-size="'+(sz||12)+'" font-family="Arial" fill="'+(c||'#241A17')+'" text-anchor="'+(a||'middle')+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" rx="2"/>';}
 
-/* Q1 Significant figures */
-function dQ1(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  // Display the number with digit boxes
-  var digits=['0','.','0','0','6','7','4','3'];
-  var cols=['#ccc','#ccc','#ccc','#ccc','#C0272D','#1a5a8a','#888','#888'];
-  digits.forEach(function(d,i){
-    var x=40+i*52,w=d==='.'?20:44;
-    if(d!=='.'){
-      o.push(R(x,30,44,50,p>=1&&i>=4?'#fff5f0':'#fafafa',cols[i],(p>=1&&i>=4)?2:1));
+// Q1 Place value table
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var cols=['Millions','Hund. Th.','Ten Th.','Thousands','Hundreds','Tens','Units'];
+  var vals=[0,0,3,4,7,2,6]; // 347,276 displayed partially
+  var cw=66;
+  cols.forEach(function(c,i){
+    o.push(R(14+i*cw,20,cw,36,'#C0272D','#C0272D',1));
+    o.push(T(14+i*cw+cw/2,43,c,'#fff',8,'middle',true));
+  });
+  vals.forEach(function(v,i){
+    if(p>=1){
+      o.push(R(14+i*cw,58,cw,46,i===4?'#fff5f0':i===5?'#e8f0ff':i===6?'#e8f8ee':'#fff','#E4D6CE',1));
+      o.push(T(14+i*cw+cw/2,87,v>0?v:'—','#241A17',22,'middle',true));
     }
-    o.push(T(x+(d==='.'?10:22),62,d,cols[i],d==='.'?14:20,'middle',i>=4&&p>=1));
   });
-  if(p>=1){
-    o.push(T(252,100,'1st s.f.','#C0272D',11,'middle',true));
-    o.push(T(304,100,'2nd s.f.','#1a5a8a',11,'middle',true));
-    o.push(L(252,88,252,82,'#C0272D',1.5));
-    o.push(L(304,88,304,82,'#1a5a8a',1.5));
-  }
-  if(p>=2){
-    o.push(T(240,128,'Next digit after 2nd s.f. is 4 \u2192 round DOWN (keep 7)','#888',12,'middle',false));
-  }
-  if(p>=3){
-    o.push(R(100,148,280,44,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,176,'0.006743 \u2248 0.0067 (2 s.f.)','#1a7a3a',17,'middle',true));
-  }
-  if(p>=4){
-    o.push(T(240,220,'Leading zeros are NOT significant','#C0272D',13,'middle',true));
-    o.push(T(240,240,'Count s.f. from the first non-zero digit','#888',11,'middle',false));
-  }
-  s.innerHTML=o.join('');
-}
+  if(p>=2){o.push(T(240,130,'3 in Ten Thousands place = 30,000','#C0272D',13,'middle',true));
+    o.push(T(240,150,'7 in Hundreds place = 700','#1a5a8a',13,'middle',true));}
+  if(p>=3){o.push(R(40,168,400,36,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,191,'Number = 347,276','#1a7a3a',17,'middle',true));}
+  s.innerHTML=o.join('');}
 
-/* Q2 Ordering decimals */
-function dQ2(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  // Number line
-  o.push(L(40,130,440,130,'#241A17',2));
-  o.push(T(440,144,'+','#888',13,'middle',false));
-  // tick marks with labels
-  var pts=[{v:'\u22122.3',x:82},{v:'\u22121.8',x:152},{v:'0',x:240},{v:'0.5',x:282},{v:'2.1',x:356}];
-  pts.forEach(function(pt,i){
-    var col=pt.v.indexOf('\u2212')>=0?'#C0272D':'#1a7a3a';
-    if(p===0){col='#888';}
-    if(p>=1&&i<2){col='#C0272D';}
-    if(p>=2&&i>=3){col='#1a7a3a';}
-    if(i===2){col='#888';}
-    o.push(L(pt.x,122,pt.x,138,col,2));
-    o.push(T(pt.x,152,pt.v,col,12,'middle',p>=1));
+// Q2 Rounding to decimal places
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var num='3.8 4 7 6';
+  var digits=['3','.','8','4','7','6'];
+  var labels=['units','','tenths','hundredths','thousandths','ten-th.'];
+  digits.forEach(function(d,i){
+    var col=p>=1&&i===2?'#C0272D':p>=2&&i===3?'#C8922A':'#241A17';
+    o.push(R(40+i*68,30,60,50,i===2&&p>=1?'#fff5f0':i===3&&p>=2?'#fffbe8':'#fff','#E4D6CE',1.5));
+    o.push(T(70+i*68,62,d,col,26,'middle',true));
+    if(labels[i])o.push(T(70+i*68,95,labels[i],'#888',9,'middle',false));
   });
-  if(p>=1){
-    o.push(T(240,40,'Negative numbers get smaller as they move left','#241A17',12,'middle',false));
-    o.push(T(240,60,'\u22122.3 < \u22121.8 < 0 < 0.5 < 2.1','#C0272D',16,'middle',true));
-  }
-  if(p>=2){
-    o.push(T(240,100,'Further left = smaller value','#888',12,'middle',false));
-    o.push(T(82,100,'smallest','#C0272D',10,'middle',false));
-    o.push(T(356,100,'largest','#1a7a3a',10,'middle',false));
-  }
-  if(p>=3){
-    o.push(R(60,175,360,52,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,198,'Order (ascending): \u22122.3, \u22121.8, 0.5, 2.1','#C0272D',14,'middle',true));
-    o.push(T(240,220,'Ascending = smallest to largest','#888',11,'middle',false));
-  }
-  s.innerHTML=o.join('');
-}
+  if(p>=1){o.push(T(240,120,'Round to 1 d.p. → look at 2nd decimal (4)','#888',12,'middle',false));
+    o.push(T(240,138,'4 < 5 → round DOWN → keep 8','#C0272D',13,'middle',true));}
+  if(p>=2){o.push(T(240,162,'Round to 2 d.p. → look at 3rd decimal (7)','#888',12,'middle',false));
+    o.push(T(240,180,'7 ≥ 5 → round UP → 84 → 85','#C8922A',13,'middle',true));}
+  if(p>=3){o.push(R(80,198,320,40,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,213,'1 d.p.: 3.8   2 d.p.: 3.85','#1a7a3a',16,'middle',true));}
+  s.innerHTML=o.join('');}
 
-/* Q3 Estimation */
-function dQ3(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,30,'Estimate: 398 \u00d7 51','#241A17',16,'middle',true));
-  if(p>=1){
-    o.push(T(240,72,'Round each number to 1 significant figure','#888',13,'middle',false));
-    o.push(R(60,84,160,38,'#fff5f0','#C0272D',1.5));
-    o.push(T(140,108,'398 \u2248 400','#C0272D',15,'middle',true));
-    o.push(R(260,84,160,38,'#e8f0ff','#1a5a8a',1.5));
-    o.push(T(340,108,'51 \u2248 50','#1a5a8a',15,'middle',true));
-  }
-  if(p>=2){
-    o.push(T(240,150,'Multiply the rounded values','#888',12,'middle',false));
-    o.push(R(120,160,240,44,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,187,'400 \u00d7 50 = 20 000','#1a7a3a',18,'middle',true));
-  }
-  if(p>=3){
-    o.push(T(240,225,'Actual answer: 20 298','#888',12,'middle',false));
-    o.push(T(240,245,'Estimation is close \u2714 (within 2%)','#1a7a3a',12,'middle',true));
-  }
-  s.innerHTML=o.join('');
-}
+// Q3 Rounding to sig figs
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var digits=['0','.','0','0','6','4','7'];
+  var sf=[false,false,false,false,true,true,true];
+  digits.forEach(function(d,i){
+    var highlight=p>=1&&sf[i];
+    o.push(R(20+i*66,30,58,50,highlight?'#fff5f0':'#fff','#E4D6CE',1.5));
+    o.push(T(49+i*66,62,d,highlight?'#C0272D':'#888',22,'middle',highlight));
+  });
+  if(p>=1){o.push(T(240,105,'Leading zeros are NOT significant','#888',12,'middle',false));
+    o.push(T(240,122,'First sig fig = 6 (first non-zero digit)','#C0272D',13,'middle',true));}
+  if(p>=2){o.push(T(240,148,'2 sig figs: 0.0064','#1a5a8a',14,'middle',true));}
+  if(p>=3){o.push(R(80,165,320,36,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,188,'3 sig figs: 0.00647','#1a7a3a',16,'middle',true));}
+  s.innerHTML=o.join('');}
 
-/* Q4 Standard form */
-function dQ4(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,30,'Write 4 500 000 in standard form','#241A17',14,'middle',false));
+// Q4 Estimating by rounding
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'Estimate: 38.7 × 4.92 ÷ 9.8','#C0272D',16,'middle',true));
   if(p>=1){
-    o.push(T(240,62,'Standard form: A \u00d7 10\u207f where 1 \u2264 A < 10','#C0272D',13,'middle',true));
-    o.push(T(240,85,'Step 1: Write the significant figures with','#888',12,'middle',false));
-    o.push(T(240,100,'a decimal after the first digit: 4.5','#241A17',14,'middle',true));
+    o.push(R(40,46,400,40,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,71,'Round each to 1 s.f.: 40 × 5 ÷ 10','#C0272D',14,'middle',false));
   }
-  if(p>=2){
-    o.push(T(240,130,'Step 2: Count places the decimal moved LEFT','#888',12,'middle',false));
-    // Arrow showing movement
-    o.push(T(140,158,'4  5  0  0  0  0  0','#241A17',16,'middle',false));
-    o.push(L(167,162,320,162,'#C8922A',1.5));
-    o.push(T(240,178,'6 places \u2192 10\u2076','#C8922A',13,'middle',true));
+  if(p>=2){o.push(R(100,96,280,40,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,121,'40 × 5 = 200','#1a5a8a',16,'middle',true));}
+  if(p>=3){o.push(R(130,146,220,40,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,171,'200 ÷ 10 = 20','#1a7a3a',18,'middle',true));}
+  if(p>=4){o.push(T(240,210,'Exact answer ≈ 19.4  Estimate: 20 ✓','#888',12,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// Q5 Standard form (large numbers)
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'Write 340,000 in standard form','#241A17',15,'middle',false));
+  if(p>=1){o.push(T(240,65,'Move decimal after first digit: 3.4','#888',13,'middle',false));
+    o.push(R(100,75,280,38,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,99,'3.4 × 10?','#C0272D',16,'middle',true));}
+  if(p>=2){o.push(T(240,132,'Count places moved: 3 4 0 0 0 0 → 5 places','#888',12,'middle',false));
+    o.push(R(100,144,280,38,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,168,'3.4 × 10⁵','#1a7a3a',20,'middle',true));}
+  if(p>=3){o.push(T(240,210,'Standard form: a × 10ⁿ where 1 ≤ a < 10','#888',12,'middle',false));
+    o.push(T(240,230,'Large number → positive power','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// Q6 Standard form (small numbers)
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'Write 0.000057 in standard form','#241A17',15,'middle',false));
+  if(p>=1){o.push(T(240,65,'Move decimal right to after first sig fig: 5.7','#888',13,'middle',false));
+    o.push(R(100,75,280,38,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,99,'5.7 × 10?','#C0272D',16,'middle',true));}
+  if(p>=2){o.push(T(240,132,'Moved 5 places right → power is −5','#888',12,'middle',false));
+    o.push(R(100,144,280,38,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,168,'5.7 × 10⁻⁵','#1a7a3a',20,'middle',true));}
+  if(p>=3){o.push(T(240,210,'Small number < 1 → negative power','#888',12,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// Q7 Calculating with standard form
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'(3.2 × 10⁴) × (2.5 × 10³)','#C0272D',17,'middle',true));
+  if(p>=1){o.push(T(240,68,'Multiply the numbers: 3.2 × 2.5','#888',13,'middle',false));
+    o.push(R(100,78,280,38,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,102,'3.2 × 2.5 = 8.0','#C0272D',16,'middle',true));}
+  if(p>=2){o.push(T(240,136,'Add the powers: 4 + 3 = 7','#888',13,'middle',false));
+    o.push(R(100,146,280,38,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,170,'8.0 × 10⁷','#1a5a8a',18,'middle',true));}
+  if(p>=3){o.push(T(240,210,'Check: 1 ≤ 8.0 < 10 ✓ Answer is in standard form','#888',12,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// Q8 Upper and lower bounds
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'A length is 4.7 cm to 1 d.p. Find bounds.','#241A17',14,'middle',false));
+  o.push(L(60,130,420,130,'#333',2));
+  if(p>=1){
+    o.push(L(200,120,200,140,'#1a5a8a',2));o.push(T(200,112,'4.65','#1a5a8a',13,'middle',true));o.push(T(200,155,'LB','#1a5a8a',11,'middle',false));
+    o.push(L(310,120,310,140,'#C0272D',2));o.push(T(310,112,'4.75','#C0272D',13,'middle',true));o.push(T(310,155,'UB','#C0272D',11,'middle',false));
+    o.push(T(255,130,'4.7','#1a7a3a',14,'middle',true));
   }
-  if(p>=3){
-    o.push(R(100,195,280,46,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,223,'4 500 000 = 4.5 \u00d7 10\u2076','#1a7a3a',18,'middle',true));
+  if(p>=2){o.push(R(60,170,360,36,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,193,'Error interval: 4.65 ≤ l < 4.75','#C0272D',14,'middle',true));}
+  if(p>=3){o.push(T(240,225,'Half the unit of measurement = 0.05','#888',12,'middle',false));
+    o.push(T(240,245,'LB = 4.7 − 0.05   UB = 4.7 + 0.05','#888',12,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// Q9 Ordering decimals/fractions
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var nums=[0.7,0.73,0.703,0.73];
+  var strs=['0.7','0.73','0.703','7/10'];
+  o.push(T(240,22,'Order smallest to largest: 0.7, 0.73, 0.703, 7/10','#C0272D',13,'middle',true));
+  if(p>=1){o.push(T(240,55,'Convert all to same decimal places:','#888',12,'middle',false));
+    strs.forEach(function(n,i){
+      o.push(R(20+i*112,65,100,40,'#fff5f0','#C0272D',1.5));
+      o.push(T(70+i*112,90,n,'#241A17',13,'middle',false));
+    });
   }
-  if(p>=4){
-    o.push(T(240,252,'Large number \u2192 positive power. Small number \u2192 negative power.','#888',11,'middle',false));
-  }
-  s.innerHTML=o.join('');
-}
+  if(p>=2){var conv=['0.700','0.730','0.703','0.700'];
+    conv.forEach(function(n,i){o.push(T(70+i*112,120,n,'#1a5a8a',12,'middle',true));});}
+  if(p>=3){o.push(R(40,135,400,36,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,158,'0.7 = 7/10 < 0.703 < 0.73','#1a7a3a',14,'middle',true));}
+  if(p>=4){o.push(T(240,200,'7/10 = 0.7 — equal to the first value!','#888',12,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// Q10 Truncation vs rounding
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,25,'Compare: round 3.876 and truncate 3.876 to 2 d.p.','#241A17',13,'middle',false));
+  if(p>=1){o.push(R(30,44,420,50,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,62,'Rounding: look at 3rd d.p. (6 ≥ 5) → round UP','#C0272D',13,'middle',false));
+    o.push(T(240,80,'3.876 rounded to 2 d.p. = 3.88','#C0272D',15,'middle',true));}
+  if(p>=2){o.push(R(30,104,420,50,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,122,'Truncation: simply remove digits after 2nd d.p.','#1a5a8a',13,'middle',false));
+    o.push(T(240,140,'3.876 truncated to 2 d.p. = 3.87','#1a5a8a',15,'middle',true));}
+  if(p>=3){o.push(R(30,164,420,36,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,187,'Truncation always rounds toward zero','#1a7a3a',13,'middle',false));}
+  if(p>=4){o.push(T(240,220,'Rounded: 3.88  Truncated: 3.87','#241A17',14,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function yt1(){var d=rnd(10000,999999);
+  var digits=String(d).split('');
+  var places=['millions','hundred thousands','ten thousands','thousands','hundreds','tens','units'];
+  var pidx=rnd(0,digits.length-1);
+  var pval=parseInt(digits[pidx])*Math.pow(10,digits.length-1-pidx);
+  return tryIt({question:'What is the value of the digit <b>'+digits[pidx]+'</b> in the number <b>'+d.toLocaleString()+'</b>?',
+    hints:['Count place from right','Position: '+(places[7-digits.length+pidx])],
+    ans:pval,tol:pval*0.001,unit:'',working:'The digit '+digits[pidx]+' is in the '+(places[7-digits.length+pidx])+' place = '+pval.toLocaleString()});}
+
+function yt2(){var n=rnd(1000,9999)/100;
+  var r1=Math.round(n*10)/10,r2=Math.round(n*100)/100;
+  return tryIt({question:'Round <b>'+n.toFixed(3)+'</b> to <b>2 decimal places</b>.',
+    hints:['Look at the 3rd decimal place','If ≥ 5, round up; if < 5, round down'],
+    ans:r2,tol:0.001,unit:'',working:n.toFixed(3)+' → 3rd d.p. is '+Math.floor((n*1000)%10)+' → '+r2.toFixed(2)});}
+
+function yt3(){var n=rnd(1,999)/10000;
+  var s=n.toPrecision(2);
+  return tryIt({question:'Round <b>'+n.toFixed(5)+'</b> to <b>2 significant figures</b>.',
+    hints:['Find the first non-zero digit','Count 2 sig figs from there'],
+    ans:parseFloat(s),tol:parseFloat(s)*0.01,unit:'',working:n.toFixed(5)+' → 2 s.f. = '+s});}
+
+function yt4(){var a=rnd(18,49),b=rnd(3,9)+0.1*rnd(1,9);
+  var est=Math.round(a/10)*10*Math.round(b);
+  return tryIt({question:'Estimate <b>'+a+' × '+b.toFixed(1)+'</b> by rounding to 1 significant figure.',
+    hints:['Round '+a+' to '+Math.round(a/10)*10,'Round '+b.toFixed(1)+' to '+Math.round(b)],
+    ans:est,tol:Math.abs(est)*0.05,unit:'',working:Math.round(a/10)*10+' × '+Math.round(b)+' = '+est});}
+
+function yt5(){var m=rnd(1,9)+rnd(1,9)/10,p=rnd(2,6);
+  return tryIt({question:'Write <b>'+m.toFixed(1)+' × 10^'+p+'</b> as an ordinary number.',
+    hints:['Multiply by 10^'+p,'Move decimal '+p+' places right'],
+    ans:m*Math.pow(10,p),tol:m*Math.pow(10,p)*0.001,unit:'',working:m.toFixed(1)+' × 10^'+p+' = '+(m*Math.pow(10,p))});}
+
+function yt6(){var m=rnd(1,9)+rnd(1,9)/10,p=rnd(2,5);
+  return tryIt({question:'Write <b>'+m.toFixed(1)+' × 10^−'+p+'</b> as an ordinary number. Give your answer as a decimal.',
+    hints:['Move decimal '+p+' places LEFT'],
+    ans:m*Math.pow(10,-p),tol:m*Math.pow(10,-p)*0.01,unit:'',working:m.toFixed(1)+' × 10^−'+p+' = '+(m*Math.pow(10,-p)).toFixed(p+1)});}
+
+function yt7(){var a=rnd(2,8)+rnd(1,9)/10,pa=rnd(2,4),b=rnd(2,5)+rnd(1,9)/10,pb=rnd(1,3);
+  var ans=(a*b)*Math.pow(10,pa+pb);var m=a*b;
+  var pf=pa+pb;if(m>=10){m/=10;pf++;}
+  return tryIt({question:'Calculate <b>('+a.toFixed(1)+' × 10^'+pa+') × ('+b.toFixed(1)+' × 10^'+pb+')</b>. Give the power of 10 in your answer.',
+    hints:['Multiply the numbers: '+a.toFixed(1)+' × '+b.toFixed(1),'Add the powers: '+pa+' + '+pb],
+    ans:pf,tol:0,unit:'(power of 10)',working:a.toFixed(1)+' × '+b.toFixed(1)+' = '+(a*b).toFixed(2)+', powers: '+pa+'+'+pb+' → answer power = '+pf});}
+
+function yt8(){var n=rnd(30,99)/10;
+  var lb=n-0.05,ub=n+0.05;
+  return tryIt({question:'A length is measured as <b>'+n.toFixed(1)+' cm</b> to 1 d.p. What is the upper bound?',
+    hints:['Upper bound = measurement + half the unit','Half of 0.1 = 0.05'],
+    ans:ub,tol:0.001,unit:'cm',working:n.toFixed(1)+' + 0.05 = '+ub.toFixed(2)+' cm'});}
+
+function yt9(){var opts=[[0.4,0.04,0.404,'2/5'],[0.6,0.061,0.61,'3/5'],[0.8,0.08,0.801,'4/5']];
+  var q=pick(opts);
+  var sorted=[q[0],q[1],q[2],parseFloat(q[3].split('/')[0])/parseFloat(q[3].split('/')[1])].sort(function(a,b){return a-b;});
+  return tryIt({question:'Order smallest to largest: '+q[0]+', '+q[1]+', '+q[2]+', '+q[3]+'. What is the <b>largest</b> value as a decimal?',
+    hints:['Convert all to decimals with same decimal places'],
+    ans:sorted[3],tol:0.001,unit:'',working:'Sorted: '+sorted.map(function(x){return x.toFixed(3);}).join(' < ')+'. Largest = '+sorted[3]});}
+
+function yt10(){var n=(rnd(100,999)/100);
+  var tr=Math.floor(n*10)/10;
+  return tryIt({question:'Truncate <b>'+n.toFixed(2)+'</b> to 1 decimal place.',
+    hints:['Simply remove digits after the 1st decimal place','Do NOT round up'],
+    ans:tr,tol:0.001,unit:'',working:'Remove digits after 1st d.p.: '+tr.toFixed(1)});}
 
 var QS=[
-  {ey:'Q1 \u00b7 Year 8 \u00b7 Place Value & Rounding',ti:'Significant Figures',su:'Round 0.006743 to 2 significant figures.',steps:[
-    {lb:'Find the first s.f.',dr:dQ1,ht:'<p>Significant figures are counted from the <b>first non-zero digit</b>. Leading zeros do not count.</p><p>In 0.006743, the first significant figure is <b>6</b>.</p>'},
-    {lb:'Count to 2 s.f.',dr:dQ1,ht:'<p>The 2nd significant figure is <b>7</b>. Now look at the <b>next digit</b> to decide whether to round up or down.</p>'},
-    {lb:'Round down',dr:dQ1,ht:'<p>The next digit is <b>4</b>, which is less than 5, so we <b>round down</b> — keep the 7 as it is.</p><div class="fm">0.006743 \u2248 0.0067</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Round <b>0.003085</b> to 2 significant figures. Give the 4th decimal place of your answer.',hints:['First non-zero digit is 3 (1st s.f.)','2nd s.f. is 0','Next digit is 8 \u2265 5, so round up'],ans:9,tol:0,unit:'(4th d.p.)',working:'0.003085 \u2192 1st s.f.=3, 2nd s.f.=0, next digit=8 \u2192 round up \u2192 0.0031. The 4th decimal place is 1... wait: 0.0031 has 3 in 3rd d.p. and 1 in 4th d.p. Answer: 4th d.p. = 1. Hmm, let me recount: 0.0031 \u2192 d.p.1=0, d.p.2=0, d.p.3=3, d.p.4=1. Answer = 1.'})}
+  {ey:'Q1 · Year 8 · Place Value',ti:'Place Value <span class="badge f">F</span>',su:'Identify the value of each digit in 347,276.',steps:[
+    {lb:'The place value table',dr:dQ1,ht:'<p>Each position in a number has a value. Moving left, each place is ×10 the one before.</p>'},
+    {lb:'Read each digit',dr:dQ1,ht:'<p>The 3 is in the Ten Thousands column → value = 30,000.<br>The 7 is in the Hundreds column → value = 700.</p>'},
+    {lb:'Full number',dr:dQ1,ht:'<div class="fm">300,000 + 40,000 + 7,000 + 200 + 70 + 6 = 347,276</div>'},
+    {lb:'Your turn',dr:dQ1,ht:yt1}
   ]},
-  {ey:'Q2 \u00b7 Year 8 \u00b7 Place Value & Rounding',ti:'Ordering Decimals and Negatives',su:'Put in order (smallest first): \u22122.3, 0.5, \u22121.8, 2.1',steps:[
-    {lb:'Use a number line',dr:dQ2,ht:'<p>Plot each number on a number line. Further <b>left</b> = smaller. Further <b>right</b> = larger.</p><p>Negative numbers with larger absolute value are <b>smaller</b>, not larger.</p>'},
-    {lb:'Place the values',dr:dQ2,ht:'<p>On the number line: \u22122.3 is furthest left, then \u22121.8, then 0.5, then 2.1.</p>'},
-    {lb:'Read the order',dr:dQ2,ht:'<div class="fm">\u22122.3 < \u22121.8 < 0.5 < 2.1</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Which number is smallest: \u22123.7, \u22120.307, 0.37?  Enter: 1 for \u22123.7, 2 for \u22120.307, 3 for 0.37',hints:['Negative numbers further from zero are smaller','\u22123.7 is further left than \u22120.307'],ans:1,tol:0,unit:'',working:'\u22123.7 is the smallest \u2192 answer: 1'})}
+  {ey:'Q2 · Year 8 · Place Value',ti:'Rounding to Decimal Places <span class="badge f">F</span>',su:'Round 3.8476 to 1 d.p. and 2 d.p.',steps:[
+    {lb:'The rule',dr:dQ2,ht:'<p>To round to n decimal places, look at the (n+1)th decimal place. If it is 5 or more, round up; otherwise round down.</p>'},
+    {lb:'Round to 1 d.p.',dr:dQ2,ht:'<div class="fm">3.8476 → 2nd d.p. is 4 < 5 → 3.8</div>'},
+    {lb:'Round to 2 d.p.',dr:dQ2,ht:'<div class="fm">3.8476 → 3rd d.p. is 7 ≥ 5 → 3.85</div>'},
+    {lb:'Your turn',dr:dQ2,ht:yt2}
   ]},
-  {ey:'Q3 \u00b7 Year 8 \u00b7 Place Value & Rounding',ti:'Estimation',su:'Estimate the value of 398 \u00d7 51.',steps:[
-    {lb:'Round to 1 s.f.',dr:dQ3,ht:'<p>For a quick estimate, round each number to <b>1 significant figure</b> before calculating. This keeps the arithmetic easy.</p>'},
-    {lb:'Round each number',dr:dQ3,ht:'<div class="fm">398 \u2248 400 &nbsp;&nbsp;&nbsp; 51 \u2248 50</div>'},
-    {lb:'Multiply the estimates',dr:dQ3,ht:'<div class="fm">400 \u00d7 50 = 20 000</div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Estimate <b>612 \u00d7 49</b> by rounding each to 1 s.f.',hints:['612 \u2248 600','49 \u2248 50','600 \u00d7 50 = ?'],ans:30000,tol:0.5,unit:'',working:'600 \u00d7 50 = 30 000'})}
+  {ey:'Q3 · Year 8 · Place Value',ti:'Significant Figures <span class="badge f">F</span>',su:'Round 0.006476 to 2 and 3 significant figures.',steps:[
+    {lb:'What counts as significant?',dr:dQ3,ht:'<p>Leading zeros are <b>not</b> significant. The first significant figure is the first non-zero digit.</p>'},
+    {lb:'2 significant figures',dr:dQ3,ht:'<div class="fm">0.006476 → 2 s.f. = 0.0064</div>'},
+    {lb:'3 significant figures',dr:dQ3,ht:'<div class="fm">0.006476 → 3 s.f. = 0.00648</div>'},
+    {lb:'Your turn',dr:dQ3,ht:yt3}
   ]},
-  {ey:'Q4 \u00b7 Year 8 \u00b7 Place Value & Rounding',ti:'Standard Form',su:'Write 4 500 000 in standard form.',steps:[
-    {lb:'What is standard form?',dr:dQ4,ht:'<p>Standard form (scientific notation) writes a number as <b>A \u00d7 10\u207f</b> where A is between 1 and 10, and n is an integer.</p>'},
-    {lb:'Write the digits',dr:dQ4,ht:'<p>Write the significant figures with the decimal point after the first digit: <b>4.5</b></p>'},
-    {lb:'Count the places',dr:dQ4,ht:'<p>Count how many places the decimal moved left to get from 4.5 back to 4 500 000.</p><div class="fm">4.5 \u00d7 10\u2076</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'Write <b>38 000 000</b> in standard form. What is the power of 10?',hints:['Decimal goes after 3: 3.8','Count places from 3.8 to 38 000 000'],ans:7,tol:0,unit:'(power)',working:'38 000 000 = 3.8 \u00d7 10\u2077, power = 7'})}
+  {ey:'Q4 · Year 8 · Place Value',ti:'Estimation <span class="badge f">F</span>',su:'Estimate 38.7 × 4.92 ÷ 9.8 by rounding to 1 s.f.',steps:[
+    {lb:'Round to 1 s.f.',dr:dQ4,ht:'<p>Round each number to 1 significant figure to make the calculation easy to do mentally.</p>'},
+    {lb:'Multiply',dr:dQ4,ht:'<div class="fm">40 × 5 = 200</div>'},
+    {lb:'Divide',dr:dQ4,ht:'<div class="fm">200 ÷ 10 = 20</div>'},
+    {lb:'Your turn',dr:dQ4,ht:yt4}
+  ]},
+  {ey:'Q5 · Year 8 · Place Value',ti:'Standard Form — Large Numbers <span class="badge e">E</span>',su:'Write 340,000 in standard form.',steps:[
+    {lb:'Standard form format',dr:dQ5,ht:'<p>Standard form: <b>a × 10ⁿ</b> where 1 ≤ a < 10. Used for very large or very small numbers.</p>'},
+    {lb:'Find a and n',dr:dQ5,ht:'<div class="fm">3.4 × 10? → count places: 5 places</div>'},
+    {lb:'Write in standard form',dr:dQ5,ht:'<div class="fm">340,000 = 3.4 × 10⁵</div>'},
+    {lb:'Your turn',dr:dQ5,ht:yt5}
+  ]},
+  {ey:'Q6 · Year 8 · Place Value',ti:'Standard Form — Small Numbers <span class="badge e">E</span>',su:'Write 0.000057 in standard form.',steps:[
+    {lb:'Small numbers → negative power',dr:dQ6,ht:'<p>For numbers less than 1, move the decimal right to find a. The power will be negative.</p>'},
+    {lb:'Find a and n',dr:dQ6,ht:'<div class="fm">5.7 × 10? → moved 5 places right → 10⁻⁵</div>'},
+    {lb:'Write in standard form',dr:dQ6,ht:'<div class="fm">0.000057 = 5.7 × 10⁻⁵</div>'},
+    {lb:'Your turn',dr:dQ6,ht:yt6}
+  ]},
+  {ey:'Q7 · Year 8 · Place Value',ti:'Calculating with Standard Form <span class="badge e">E</span>',su:'Calculate (3.2 × 10⁴) × (2.5 × 10³).',steps:[
+    {lb:'Multiply the numbers separately',dr:dQ7,ht:'<p>Multiply the a-values and the powers of 10 separately.</p>'},
+    {lb:'Multiply a-values',dr:dQ7,ht:'<div class="fm">3.2 × 2.5 = 8.0</div>'},
+    {lb:'Add the powers',dr:dQ7,ht:'<div class="fm">10⁴ × 10³ = 10⁷ → answer = 8.0 × 10⁷</div>'},
+    {lb:'Your turn',dr:dQ7,ht:yt7}
+  ]},
+  {ey:'Q8 · Year 8 · Place Value',ti:'Upper and Lower Bounds <span class="badge e">E</span>',su:'A length is 4.7 cm to 1 d.p. Find the upper and lower bounds.',steps:[
+    {lb:'What are bounds?',dr:dQ8,ht:'<p>A rounded measurement could be any value within half a unit of the given measurement.</p>'},
+    {lb:'Calculate bounds',dr:dQ8,ht:'<div class="fm">Lower bound = 4.7 − 0.05 = 4.65 cm</div><div class="fm">Upper bound = 4.7 + 0.05 = 4.75 cm</div>'},
+    {lb:'Error interval',dr:dQ8,ht:'<div class="fm">4.65 ≤ l < 4.75</div><p>Note: upper bound uses strict inequality (&lt;).</p>'},
+    {lb:'Your turn',dr:dQ8,ht:yt8}
+  ]},
+  {ey:'Q9 · Year 8 · Place Value',ti:'Ordering Decimals and Fractions <span class="badge f">F</span>',su:'Order smallest to largest: 0.7, 0.73, 0.703, 7/10.',steps:[
+    {lb:'Convert to comparable form',dr:dQ9,ht:'<p>Convert all values to decimals with the same number of decimal places so you can compare directly.</p>'},
+    {lb:'Convert',dr:dQ9,ht:'<div class="fm">0.700, 0.730, 0.703, 0.700</div>'},
+    {lb:'Order',dr:dQ9,ht:'<div class="fm">0.7 = 7/10 &lt; 0.703 &lt; 0.73</div>'},
+    {lb:'Your turn',dr:dQ9,ht:yt9}
+  ]},
+  {ey:'Q10 · Year 8 · Place Value',ti:'Truncation <span class="badge e">E</span>',su:'Compare rounding and truncating 3.876 to 2 d.p.',steps:[
+    {lb:'Rounding',dr:dQ10,ht:'<p>Rounding considers the next digit to decide whether to round up or down.</p><div class="fm">3.876 → 3rd d.p. = 6 ≥ 5 → round up → 3.88</div>'},
+    {lb:'Truncation',dr:dQ10,ht:'<p>Truncation simply removes digits beyond the required places — no rounding.</p><div class="fm">3.876 → truncate after 2nd d.p. → 3.87</div>'},
+    {lb:'Compare',dr:dQ10,ht:'<p>Truncation always gives a result closer to zero than rounding (for positive numbers).</p>'},
+    {lb:'Your turn',dr:dQ10,ht:yt10}
   ]}
 ];
+
 var qi=0,si=0;
-function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
-function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
-function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \u2192';}
+function bSB(){var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);
+  QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';
+  QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').innerHTML=q.ti;document.getElementById('su').textContent=q.su;
+  var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+  p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);
+  st.dr(si);bDT();
+  document.getElementById('pb').disabled=si===0;
+  document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';}
 document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
 document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
 render();
