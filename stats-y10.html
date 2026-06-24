@@ -90,8 +90,14 @@ function round1(x){return Math.round(x*10)/10;}
 function round2(x){return Math.round(x*100)/100;}
 
 var ST={};
-function tryIt(o){
-  var id='t'+Math.random().toString(36).slice(2);ST[id]=o;
+function tryIt(genOrObj){
+  var genFn=typeof genOrObj==='function'?genOrObj:function(){return genOrObj;};
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn();
+  ST[id]={o:o,genFn:genFn};
+  return buildTry(id,o);
+}
+function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
@@ -106,19 +112,33 @@ function tryIt(o){
     +'</div>';
 }
 document.addEventListener('click',function(e){
-  if(e.target.classList.contains('try-new')){render();return;}
-  if(e.target.classList.contains('try-ck')){
-    var id=e.target.getAttribute('data-tryid');
-    var o=ST[id];
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');
+    var entry=ST[id]; if(!entry)return;
+    var o=entry.genFn();
+    entry.o=o;
+    var wrap=el.closest?el.closest('.try'):document.querySelector('.try[data-tryid="'+id+'"]');
+    if(!wrap)return;
+    var tmp=document.createElement('div');
+    tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+    ST[id]={o:o,genFn:entry.genFn};
+    return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');
+    var entry=ST[id]; if(!entry)return;
+    var o=entry.o;
     var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
     var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
-    if(!inp||!fb||!o)return;
+    if(!inp||!fb)return;
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
     var tol=o.tol!=null?o.tol:0.5;
     if(Math.abs(v-o.ans)<=tol){
-      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct!  '+o.working;
-    }else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}
+      fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
   }
 });
 function g(){return document.getElementById('dg');}
@@ -126,7 +146,7 @@ function T(x,y,txt,c,sz,a,bold){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 
-
+/* Q1 — Mean median mode range */
 function dQ1(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
   var data=[4,7,3,7,9,2,7,6];
@@ -456,14 +476,14 @@ var QS=[
     {lb:'Step 1 — Sort and find median',dr:dQ1,ht:'<p>Sort: 2, 3, 4, <b>6, 7</b>, 7, 7, 9. With 8 values, median = mean of 4th and 5th:</p><div class="fm">Median = (6 + 7) / 2 = <b>6.5</b></div>'},
     {lb:'Step 2 — Mean',dr:dQ1,ht:'<div class="fm">Mean = (4+7+3+7+9+2+7+6) / 8 = 45/8 = <b>5.625</b></div>'},
     {lb:'Step 3 — Mode and Range',dr:dQ1,ht:'<div class="fm">Mode = <b>7</b> (appears 3 times)</div><div class="fm">Range = 9 − 2 = <b>7</b></div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt((function(){var d=[rnd(3,9),rnd(3,9),rnd(3,9),rnd(3,9),rnd(3,9),rnd(3,9)];var s=d.reduce(function(a,b){return a+b;},0);var m=round1(s/d.length);return{question:'Data: <b>'+d.join(', ')+'</b>. Find the mean (1 d.p.).',hints:['Sum = '+s+', count = '+d.length],ans:m,tol:0.1,unit:'',working:s+'/'+d.length+' = '+m};})())}
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var d=[rnd(3,9),rnd(3,9),rnd(3,9),rnd(3,9),rnd(3,9),rnd(3,9)];var s=d.reduce(function(a,b){return a+b;},0);var m=round1(s/d.length);return{question:'Data: <b>'+d.join(', ')+'</b>. Find the mean (1 d.p.).',hints:['Sum = '+s+', count = '+d.length],ans:m,tol:0.1,unit:'',working:s+'/'+d.length+' = '+m};})}
   ]},
   {ey:'Q2 · Frequency Tables · Foundation',ti:'Mean from a Frequency Table',su:'Find the mean score from a frequency table.',lv:'F',steps:[
     {lb:'The table',dr:dQ2,ht:'<span class="lt lf">Foundation</span><p>A frequency table shows how often each score occurs. To find the mean we need a new column: <b>f × x</b> (frequency × value).</p>'},
     {lb:'Step 1 — Add f×x column',dr:dQ2,ht:'<p>Multiply each score by its frequency to get the <b>f×x</b> column, then find the totals.</p>'},
     {lb:'Step 2 — Calculate mean',dr:dQ2,ht:'<div class="fm">Mean = Σ(f×x) / Σf = 85 / 30</div>'},
     {lb:'Step 3 — Answer',dr:dQ2,ht:'<div class="fm">Mean = 85 / 30 = <b>2.83</b> (2 d.p.)</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt((function(){var vals=[2,3,4,5],fr=[rnd(2,5),rnd(3,7),rnd(2,6),rnd(1,4)];var sfx=vals.reduce(function(a,v,i){return a+v*fr[i];},0);var n=fr.reduce(function(a,b){return a+b;},0);var m=round1(sfx/n);return{question:'Frequency table: 2(freq '+fr[0]+'), 3('+fr[1]+'), 4('+fr[2]+'), 5('+fr[3]+'). Mean (1 d.p.)?',hints:['Σfx = '+sfx+', n = '+n],ans:m,tol:0.1,unit:'',working:'Σfx/n = '+sfx+'/'+n+' = '+m};})())}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var vals=[2,3,4,5],fr=[rnd(2,5),rnd(3,7),rnd(2,6),rnd(1,4)];var sfx=vals.reduce(function(a,v,i){return a+v*fr[i];},0);var n=fr.reduce(function(a,b){return a+b;},0);var m=round1(sfx/n);return{question:'Frequency table: 2(freq '+fr[0]+'), 3('+fr[1]+'), 4('+fr[2]+'), 5('+fr[3]+'). Mean (1 d.p.)?',hints:['Σfx = '+sfx+', n = '+n],ans:m,tol:0.1,unit:'',working:'Σfx/n = '+sfx+'/'+n+' = '+m};})}
   ]},
   {ey:'Q3 · Grouped Data · Extended',ti:'Estimated Mean from Grouped Data',su:'Use class midpoints to estimate the mean.',lv:'E',steps:[
     {lb:'The table',dr:dQ3,ht:'<span class="lt le">Extended</span><p>With grouped data we cannot find the exact mean. We <b>estimate</b> it using the <b>midpoint</b> of each class interval.</p>'},
@@ -476,42 +496,42 @@ var QS=[
     {lb:'The data',dr:dQ4,ht:'<span class="lt lf">Foundation</span><p>30 students: Football 12, Basketball 8, Athletics 6, Swimming 4. Convert to sector angles: <b>angle = (freq / total) × 360°</b>.</p>'},
     {lb:'Step 1 — Calculate angles',dr:dQ4,ht:'<div class="fm">Football: 12/30 × 360 = 144°</div><div class="fm">Basketball: 8/30 × 360 = 96°</div><div class="fm">Athletics: 6/30 × 360 = 72°  |  Swimming: 48°</div>'},
     {lb:'Step 2 — Draw the chart',dr:dQ4,ht:'<p>The completed pie chart with all four sectors and their frequencies shown.</p>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt((function(){var mids=[5,15,25],fr=[rnd(3,8),rnd(4,10),rnd(2,6)];var sfm=mids.reduce(function(a,v,i){return a+v*fr[i];},0);var n=fr.reduce(function(a,b){return a+b;},0);var m=round1(sfm/n);return{question:'Grouped: 0–9(freq '+fr[0]+'), 10–19('+fr[1]+'), 20–29('+fr[2]+'). Estimated mean (1 d.p.)?',hints:['Use midpoints 5, 15, 25'],ans:m,tol:0.2,unit:'',working:sfm+'/'+n+' = '+m};})())}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var mids=[5,15,25],fr=[rnd(3,8),rnd(4,10),rnd(2,6)];var sfm=mids.reduce(function(a,v,i){return a+v*fr[i];},0);var n=fr.reduce(function(a,b){return a+b;},0);var m=round1(sfm/n);return{question:'Grouped: 0–9(freq '+fr[0]+'), 10–19('+fr[1]+'), 20–29('+fr[2]+'). Estimated mean (1 d.p.)?',hints:['Use midpoints 5, 15, 25'],ans:m,tol:0.2,unit:'',working:sfm+'/'+n+' = '+m};})}
   ]},
   {ey:'Q5 · Bar Charts · Foundation',ti:'Reading a Bar Chart',su:'Daily sales data shown in a bar chart. Find the mean and modal day.',lv:'F',steps:[
     {lb:'The chart',dr:dQ5,ht:'<span class="lt lf">Foundation</span><p>The bar chart shows daily sales: Mon 8, Tue 14, Wed 11, Thu 16, Fri 20. Read off values from the bars.</p>'},
     {lb:'Step 1 — Read values',dr:dQ5,ht:'<p>Values are shown above each bar: 8, 14, 11, 16, 20.</p>'},
     {lb:'Step 2 — Modal day',dr:dQ5,ht:'<p>The modal day is the one with the <b>highest frequency</b> — the tallest bar.</p><div class="fm">Modal day = <b>Friday</b> (20 sales)</div>'},
     {lb:'Step 3 — Mean',dr:dQ5,ht:'<div class="fm">Total = 8+14+11+16+20 = 69</div><div class="fm">Mean = 69 / 5 = <b>13.8 sales/day</b></div>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt((function(){var c=rnd(6,18),tot=rnd(24,40);var ang=Math.round(c/tot*360);return{question:'Pie chart of '+tot+' students, '+c+' chose Sport. Sector angle (nearest degree)?',hints:['Angle = ('+c+'/'+tot+')×360'],ans:ang,tol:1,unit:'°',working:'('+c+'/'+tot+')×360 = '+ang+'°'};})())}
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var c=rnd(6,18),tot=rnd(24,40);var ang=Math.round(c/tot*360);return{question:'Pie chart of '+tot+' students, '+c+' chose Sport. Sector angle (nearest degree)?',hints:['Angle = ('+c+'/'+tot+')×360'],ans:ang,tol:1,unit:'°',working:'('+c+'/'+tot+')×360 = '+ang+'°'};})}
   ]},
   {ey:'Q6 · Scatter Graphs · Foundation/Extended',ti:'Scatter Graphs and Correlation',su:'Hours studied vs exam score — describe and use the correlation.',lv:'F',steps:[
     {lb:'The graph',dr:dQ6,ht:'<span class="lt lf">Foundation</span><p>Each point shows one student\'s hours studied and exam score. Look for a pattern — is there a relationship?</p>'},
     {lb:'Step 1 — Plot the points',dr:dQ6,ht:'<p>Points plotted for 9 students. As hours increase, scores also tend to increase.</p>'},
     {lb:'Step 2 — Line of best fit',dr:dQ6,ht:'<p>Draw a straight line through the <b>middle</b> of the points — roughly equal numbers of points on each side.</p>'},
     {lb:'Step 3 — Describe correlation',dr:dQ6,ht:'<div class="fm">Strong positive correlation</div><p>The line slopes upward — more study is associated with higher scores. We can use it to predict values.</p>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt((function(){var d=[rnd(5,12),rnd(5,12),rnd(5,12),rnd(5,12),rnd(5,12)];var s=d.reduce(function(a,b){return a+b;},0);var m=round1(s/5);return{question:'Sales Mon–Fri: <b>'+d.join(', ')+'</b>. Mean?',hints:['Sum = '+s],ans:m,tol:0.1,unit:'',working:s+'/5 = '+m};})())}
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var d=[rnd(5,12),rnd(5,12),rnd(5,12),rnd(5,12),rnd(5,12)];var s=d.reduce(function(a,b){return a+b;},0);var m=round1(s/5);return{question:'Sales Mon–Fri: <b>'+d.join(', ')+'</b>. Mean?',hints:['Sum = '+s],ans:m,tol:0.1,unit:'',working:s+'/5 = '+m};})}
   ]},
   {ey:'Q7 · Cumulative Frequency · Extended',ti:'Cumulative Frequency Curve',su:'Find the median and IQR from a cumulative frequency graph.',lv:'E',steps:[
     {lb:'The graph',dr:dQ7,ht:'<span class="lt le">Extended</span><p>Cumulative frequency plots the <b>running total</b> of frequencies. Data shows times (minutes) for 50 students to complete a task.</p>'},
     {lb:'Step 1 — Plot the curve',dr:dQ7,ht:'<p>Points: (10,0), (20,6), (30,18), (40,34), (50,46), (60,50). Join with a smooth S-curve.</p>'},
     {lb:'Step 2 — Read off median',dr:dQ7,ht:'<p>Median is at n/2 = 25 on the y-axis. Draw a horizontal line across to the curve, then down to the x-axis.</p><div class="fm">Median ≈ <b>34 minutes</b></div>'},
     {lb:'Step 3 — IQR',dr:dQ7,ht:'<div class="fm">LQ (n/4 = 12.5) ≈ 26  |  UQ (3n/4 = 37.5) ≈ 43</div><div class="fm">IQR = 43 − 26 = <b>17 minutes</b></div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt((function(){var sc=pick([{q:'Hours studied vs exam score.',a:1,w:'More study → higher score: positive.'},{q:'Temperature vs hot drink sales.',a:2,w:'Warmer → fewer hot drinks: negative.'},{q:'Age of car vs resale value.',a:2,w:'Older car → lower value: negative.'}]);return{question:'Type of correlation for: <b>'+sc.q+'</b><br>1=positive, 2=negative',hints:['Does one variable increase as the other increases or decreases?'],ans:sc.a,tol:0,unit:'',working:sc.w};})())}
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var sc=pick([{q:'Hours studied vs exam score.',a:1,w:'More study → higher score: positive.'},{q:'Temperature vs hot drink sales.',a:2,w:'Warmer → fewer hot drinks: negative.'},{q:'Age of car vs resale value.',a:2,w:'Older car → lower value: negative.'}]);return{question:'Type of correlation for: <b>'+sc.q+'</b><br>1=positive, 2=negative',hints:['Does one variable increase as the other increases or decreases?'],ans:sc.a,tol:0,unit:'',working:sc.w};})}
   ]},
   {ey:'Q8 · Probability · Foundation',ti:'Basic Probability',su:'A bag contains 5 red, 3 blue and 2 green marbles. Find probabilities.',lv:'F',steps:[
     {lb:'The bag',dr:dQ8,ht:'<span class="lt lf">Foundation</span><p>A bag has <b>5 red</b>, <b>3 blue</b> and <b>2 green</b> marbles — <b>10 total</b>. One marble is picked at random.</p><div class="fm">P(event) = favourable outcomes / total outcomes</div>'},
     {lb:'Step 1 — P(Red)',dr:dQ8,ht:'<div class="fm">P(Red) = 5/10 = <b>1/2</b></div>'},
     {lb:'Step 2 — P(Blue)',dr:dQ8,ht:'<div class="fm">P(Blue) = 3/10</div>'},
     {lb:'Step 3 — P(not Green)',dr:dQ8,ht:'<div class="fm">P(not Green) = 1 − P(Green) = 1 − 2/10 = <b>8/10 = 4/5</b></div>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt((function(){var q1=rnd(15,30),q3=rnd(35,55);return{question:'Q1 = '+q1+', Q3 = '+q3+'. Find the IQR.',hints:['IQR = Q3 − Q1'],ans:q3-q1,tol:0,unit:'',working:q3+' − '+q1+' = '+(q3-q1)};})())}
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var q1=rnd(15,30),q3=rnd(35,55);return{question:'Q1 = '+q1+', Q3 = '+q3+'. Find the IQR.',hints:['IQR = Q3 − Q1'],ans:q3-q1,tol:0,unit:'',working:q3+' − '+q1+' = '+(q3-q1)};})}
   ]},
   {ey:'Q9 · Combined Events · Extended',ti:'Sample Space — Two Dice',su:'List all outcomes and find P(sum = 7) and P(sum > 9).',lv:'E',steps:[
     {lb:'The sample space',dr:dQ9,ht:'<span class="lt le">Extended</span><p>Two fair dice are rolled. The sample space shows all <b>36 equally likely outcomes</b> as a grid of sums.</p>'},
     {lb:'Step 1 — Complete the grid',dr:dQ9,ht:'<p>Each cell shows the sum of the two dice. There are 6 × 6 = 36 possible outcomes.</p>'},
     {lb:'Step 2 — P(sum = 7)',dr:dQ9,ht:'<p>Count outcomes where the sum = 7 (highlighted). There are 6 such outcomes.</p><div class="fm">P(sum = 7) = 6/36 = <b>1/6</b></div>'},
     {lb:'Step 3 — P(sum > 9)',dr:dQ9,ht:'<p>Sums greater than 9: 10, 11, 12. Count: (4,6),(5,5),(6,4),(5,6),(6,5),(6,6) = 6 outcomes.</p><div class="fm">P(sum > 9) = 6/36 = <b>1/6</b></div>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt((function(){var r=rnd(3,7),b=rnd(2,5),g=rnd(1,3),tot=r+b+g;return{question:'Bag: '+r+' red, '+b+' blue, '+g+' green. P(blue) numerator? (denom = '+tot+')',hints:['P(blue) = '+b+'/'+tot],ans:b,tol:0,unit:'(num, denom='+tot+')',working:'P(blue) = '+b+'/'+tot};})())}
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var r=rnd(3,7),b=rnd(2,5),g=rnd(1,3),tot=r+b+g;return{question:'Bag: '+r+' red, '+b+' blue, '+g+' green. P(blue) numerator? (denom = '+tot+')',hints:['P(blue) = '+b+'/'+tot],ans:b,tol:0,unit:'(num, denom='+tot+')',working:'P(blue) = '+b+'/'+tot};})}
   ]},
   {ey:'Q10 · Tree Diagrams · Extended',ti:'Tree Diagram — Without Replacement',su:'Bag: 4 red, 2 blue. Two drawn without replacement. Find P(both same colour).',lv:'E',steps:[
     {lb:'The problem',dr:dQ10,ht:'<span class="lt le">Extended</span><p>A bag has <b>4 red</b> and <b>2 blue</b> marbles. Two are drawn <b>without replacement</b>. Build a tree diagram — the probabilities on the second branches <b>change</b> after the first draw.</p>'},
@@ -519,7 +539,7 @@ var QS=[
     {lb:'Step 2 — Second branches',dr:dQ10,ht:'<p>After drawing red: 3 red and 2 blue remain (5 total).<br>After drawing blue: 4 red and 1 blue remain (5 total).</p>'},
     {lb:'Step 3 — List outcomes',dr:dQ10,ht:'<p>Multiply along each branch to get the probability of each outcome.</p>'},
     {lb:'Step 4 — P(same colour)',dr:dQ10,ht:'<div class="fm">P(R,R) = 4/6 × 3/5 = 12/30</div><div class="fm">P(B,B) = 2/6 × 1/5 = 2/30</div><div class="fm">P(same) = 12/30 + 2/30 = 14/30 = <b>7/15</b></div>'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt((function(){return{question:'Two dice rolled. How many outcomes give a total of 7?',hints:['List systematically'],ans:6,tol:0,unit:'',working:'(1,6),(2,5),(3,4),(4,3),(5,2),(6,1) = 6 outcomes'};})())}
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){return{question:'Two dice rolled. How many outcomes give a total of 7?',hints:['List systematically'],ans:6,tol:0,unit:'',working:'(1,6),(2,5),(3,4),(4,3),(5,2),(6,1) = 6 outcomes'};})}
   ]}
 ];
 

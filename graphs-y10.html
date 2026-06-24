@@ -90,8 +90,14 @@ function round1(x){return Math.round(x*10)/10;}
 function round2(x){return Math.round(x*100)/100;}
 
 var ST={};
-function tryIt(o){
-  var id='t'+Math.random().toString(36).slice(2);ST[id]=o;
+function tryIt(genOrObj){
+  var genFn=typeof genOrObj==='function'?genOrObj:function(){return genOrObj;};
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn();
+  ST[id]={o:o,genFn:genFn};
+  return buildTry(id,o);
+}
+function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
@@ -106,21 +112,37 @@ function tryIt(o){
     +'</div>';
 }
 document.addEventListener('click',function(e){
-  if(e.target.classList.contains('try-new')){render();return;}
-  if(e.target.classList.contains('try-ck')){
-    var id=e.target.getAttribute('data-tryid');
-    var o=ST[id];
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');
+    var entry=ST[id]; if(!entry)return;
+    var o=entry.genFn();
+    entry.o=o;
+    var wrap=el.closest?el.closest('.try'):document.querySelector('.try[data-tryid="'+id+'"]');
+    if(!wrap)return;
+    var tmp=document.createElement('div');
+    tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+    ST[id]={o:o,genFn:entry.genFn};
+    return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');
+    var entry=ST[id]; if(!entry)return;
+    var o=entry.o;
     var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
     var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
-    if(!inp||!fb||!o)return;
+    if(!inp||!fb)return;
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
     var tol=o.tol!=null?o.tol:0.5;
     if(Math.abs(v-o.ans)<=tol){
-      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct!  '+o.working;
-    }else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}
+      fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
   }
 });
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
 
 function htmlSup(h){
   // Convert x^n or x^{n} to HTML <sup>; skip inside HTML tags
@@ -341,55 +363,55 @@ var QS=[
     {lb:'Step 1 - Plot y = x - 2',dr:dQ1,ht:'<div class="fm">x=0: y=-2  |  x=4: y=2  |  x=6: y=4</div><p>Plot these points and draw a straight line through them.</p>'},
     {lb:'Step 2 - Plot y = 4',dr:dQ1,ht:'<p>y = 4 is a horizontal line at height 4 on the y-axis. It has gradient 0.</p>'},
     {lb:'Step 3 - Intersection',dr:dQ1,ht:'<div class="fm">x - 2 = 4  ->  x = 6</div><div class="fm">Intersection: (6, 4)</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt((function(){var m=rnd(2,5),c2=rnd(0,4),xv=rnd(2,5);var yv=m*xv-c2;return{question:'Find x where <b>y = '+m+'x − '+c2+'</b> crosses <b>y = '+yv+'</b>.',hints:['Set '+m+'x − '+c2+' = '+yv,'Solve for x'],ans:xv,tol:0,unit:'',working:m+'x = '+(yv+c2)+', x = '+xv};})())}
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var m=rnd(2,5),c2=rnd(0,4),xv=rnd(2,5);var yv=m*xv-c2;return{question:'Find x where <b>y = '+m+'x − '+c2+'</b> crosses <b>y = '+yv+'</b>.',hints:['Set '+m+'x − '+c2+' = '+yv,'Solve for x'],ans:xv,tol:0,unit:'',working:m+'x = '+(yv+c2)+', x = '+xv};})}
   ]},
   {ey:'Q2 - Graphs',ti:'Quadratic Graphs',su:'Sketch y = x^2 - 2x - 3, finding roots, vertex and line of symmetry.',steps:[
     {lb:'The parabola',dr:dQ2,ht:'<p>A quadratic graph is a <b>parabola</b>. Key features: roots (where y=0), vertex (turning point) and line of symmetry.</p>'},
     {lb:'Step 1 - Find the roots',dr:dQ2,ht:'<div class="fm">x^2 - 2x - 3 = (x+1)(x-3) = 0</div><div class="fm">Roots: x = -1 and x = 3</div>'},
     {lb:'Step 2 - Vertex and symmetry',dr:dQ2,ht:'<div class="fm">Line of symmetry: x = (-1+3)/2 = 1</div><div class="fm">Vertex: y = 1-2-3 = -4  ->  point (1, -4)</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt((function(){var b=rnd(2,6),c=rnd(0,5);var xv=-b/2,yv=-b*b/4+c;return{question:'For <b>y = x² + '+b+'x + '+c+'</b>, find the y-coordinate of the vertex (1 d.p.).',hints:['x at vertex = −b/2 = '+xv,'Substitute back in'],ans:round1(yv),tol:0.2,unit:'',working:'x = '+xv+', y = '+round1(yv)};})())}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var b=rnd(2,6),c=rnd(0,5);var xv=-b/2,yv=-b*b/4+c;return{question:'For <b>y = x² + '+b+'x + '+c+'</b>, find the y-coordinate of the vertex (1 d.p.).',hints:['x at vertex = −b/2 = '+xv,'Substitute back in'],ans:round1(yv),tol:0.2,unit:'',working:'x = '+xv+', y = '+round1(yv)};})}
   ]},
   {ey:'Q3 - Graphs',ti:'Distance-Time Graphs',su:'Interpret a distance-time graph showing a journey with three stages.',steps:[
     {lb:'Reading the graph',dr:dQ3,ht:'<p>In a <b>distance-time graph</b>, the <b>gradient = speed</b>. A horizontal line means the object is stationary. Steeper gradient = faster speed.</p>'},
     {lb:'Stage 1 - Outward journey',dr:dQ3,ht:'<div class="fm">Speed = distance / time = 80 / 2 = 40 km/h</div>'},
     {lb:'Stage 2 - Stationary',dr:dQ3,ht:'<p>The flat section (t=2 to t=4) shows the object is stationary for 2 hours. Distance remains 80 km.</p>'},
     {lb:'Stage 3 - Return journey',dr:dQ3,ht:'<div class="fm">Speed = (80-20) / (6-4) = 60/2 = 30 km/h</div><p>Note: returning means distance from start is decreasing.</p>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt((function(){var d=rnd(20,80),t=rnd(1,3);return{question:'Distance-time: '+d+' km in '+t+' hour(s). Speed?',hints:['Speed = distance ÷ time'],ans:d/t,tol:0,unit:'km/h',working:d+' ÷ '+t+' = '+(d/t)+' km/h'};})())}
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var d=rnd(20,80),t=rnd(1,3);return{question:'Distance-time: '+d+' km in '+t+' hour(s). Speed?',hints:['Speed = distance ÷ time'],ans:d/t,tol:0,unit:'km/h',working:d+' ÷ '+t+' = '+(d/t)+' km/h'};})}
   ]},
   {ey:'Q4 - Graphs',ti:'Speed-Time Graphs',su:'Interpret a speed-time graph and calculate total distance travelled.',steps:[
     {lb:'Reading the graph',dr:dQ4,ht:'<p>In a <b>speed-time graph</b>, the <b>gradient = acceleration</b>. The <b>area under the graph = distance travelled</b>.</p>'},
     {lb:'Stage 1 - Acceleration',dr:dQ4,ht:'<div class="fm">Acceleration = change in speed / time = 30/4 = 7.5 m/s^2</div>'},
     {lb:'Stage 2 - Constant speed',dr:dQ4,ht:'<p>The horizontal section shows constant speed of 30 m/s for 4 seconds. Acceleration = 0.</p>'},
     {lb:'Stage 3 - Area = distance',dr:dQ4,ht:'<div class="fm">Triangle (0-4s): 0.5 x 4 x 30 = 60 m</div><div class="fm">Rectangle (4-8s): 4 x 30 = 120 m</div><div class="fm">Triangle (8-10s): 0.5 x 2 x 30 = 30 m</div><div class="fm">Total = 60+120+30 = 210 m</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt((function(){var v=rnd(10,30),t=rnd(2,6);return{question:'Speed-time: constant '+v+' m/s for '+t+' s. Total distance?',hints:['Distance = speed × time'],ans:v*t,tol:0,unit:'m',working:v+' × '+t+' = '+v*t+' m'};})())}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var v=rnd(10,30),t=rnd(2,6);return{question:'Speed-time: constant '+v+' m/s for '+t+' s. Total distance?',hints:['Distance = speed × time'],ans:v*t,tol:0,unit:'m',working:v+' × '+t+' = '+v*t+' m'};})}
   ]},
   {ey:'Q5 - Graphs',ti:'Reciprocal Graphs',su:'Sketch y = 1/x, identifying asymptotes and key features.',steps:[
     {lb:'The shape',dr:dQ5,ht:'<p>y = 1/x produces a <b>hyperbola</b> with two branches. As x gets large, y approaches 0. As x approaches 0, y becomes very large. The graph never touches the axes.</p>'},
     {lb:'Step 1 - Plot the curve',dr:dQ5,ht:'<div class="fm">x=1: y=1 | x=2: y=0.5 | x=0.5: y=2</div><div class="fm">x=-1: y=-1 | x=-2: y=-0.5</div>'},
     {lb:'Step 2 - Asymptotes',dr:dQ5,ht:'<p><b>Asymptotes</b> are lines the graph approaches but never reaches.</p><div class="fm">Vertical asymptote: x = 0 (y-axis)</div><div class="fm">Horizontal asymptote: y = 0 (x-axis)</div>'},
     {lb:'Step 3 - Key features',dr:dQ5,ht:'<p>The two branches are in quadrants 1 and 3 (for y=1/x). The graph has rotational symmetry of order 2 about the origin.</p>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt((function(){var k=pick([6,10,12,15,20]);var x=pick([2,3,4,5]);return{question:'For <b>y = '+k+'/x</b>, find y when x = '+x+'.',hints:['Substitute x = '+x],ans:k/x,tol:0,unit:'',working:k+' ÷ '+x+' = '+k/x};})())}
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var k=pick([6,10,12,15,20]);var x=pick([2,3,4,5]);return{question:'For <b>y = '+k+'/x</b>, find y when x = '+x+'.',hints:['Substitute x = '+x],ans:k/x,tol:0,unit:'',working:k+' ÷ '+x+' = '+k/x};})}
   ]},
   {ey:'Q6 - Graphs',ti:'Cubic Graphs',su:'Sketch y = x^3 - 3x, finding roots and turning points.',steps:[
     {lb:'The cubic shape',dr:dQ6,ht:'<p>A cubic graph has an S-shaped curve. It can have up to <b>3 roots</b> (x-intercepts) and up to <b>2 turning points</b>.</p>'},
     {lb:'Step 1 - Find roots',dr:dQ6,ht:'<div class="fm">x^3 - 3x = x(x^2-3) = x(x-sqrt3)(x+sqrt3)</div><div class="fm">Roots: x = -1.73, 0, 1.73</div>'},
     {lb:'Step 2 - Turning points',dr:dQ6,ht:'<div class="fm">dy/dx = 3x^2 - 3 = 0  ->  x = +/-1</div><div class="fm">Local max at (-1, 2), local min at (1, -2)</div>'},
     {lb:'Step 3 - End behaviour',dr:dQ6,ht:'<p>As x approaches +infinity, y approaches +infinity. As x approaches -infinity, y approaches -infinity. This is the S-shape typical of positive cubics.</p>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt((function(){var x=pick([-2,-1,1,2]);var y=x*x*x-3*x;return{question:'For <b>y = x³ − 3x</b>, find y when x = '+x+'.',hints:['Substitute x = '+x],ans:y,tol:0,unit:'',working:x+'³ − 3('+x+') = '+y};})())}
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var x=pick([-2,-1,1,2]);var y=x*x*x-3*x;return{question:'For <b>y = x³ − 3x</b>, find y when x = '+x+'.',hints:['Substitute x = '+x],ans:y,tol:0,unit:'',working:x+'³ − 3('+x+') = '+y};})}
   ]},
   {ey:'Q7 - Graphs',ti:'Conversion Graphs',su:'Use a miles-to-kilometres conversion graph to convert values.',steps:[
     {lb:'The graph',dr:dQ7,ht:'<p>A <b>conversion graph</b> is a straight line through the origin. You read from one axis, move to the line, then across to the other axis. 1 mile = 1.609 km.</p>'},
     {lb:'Step 1 - The graph line',dr:dQ7,ht:'<div class="fm">km = 1.609 x miles</div><p>Plot (0,0) and (10, 16.09). Draw a straight line through both points.</p>'},
     {lb:'Step 2 - Convert 5 miles',dr:dQ7,ht:'<p>Read up from 5 miles to the line, then across to the km axis.</p><div class="fm">5 miles = 5 x 1.609 = 8.05 km</div>'},
     {lb:'Step 3 - Convert 12 km',dr:dQ7,ht:'<p>Read across from 12 km to the line, then down to the miles axis.</p><div class="fm">12 km / 1.609 = 7.46 miles</div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt((function(){var mi=pick([10,20,30,40,50]);var km=Math.round(mi*1.609);return{question:'Convert <b>'+mi+' miles</b> to km (1 mile ≈ 1.609 km, nearest km).',hints:['Multiply by 1.609'],ans:km,tol:1,unit:'km',working:mi+' × 1.609 ≈ '+km+' km'};})())}
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var mi=pick([10,20,30,40,50]);var km=Math.round(mi*1.609);return{question:'Convert <b>'+mi+' miles</b> to km (1 mile ≈ 1.609 km, nearest km).',hints:['Multiply by 1.609'],ans:km,tol:1,unit:'km',working:mi+' × 1.609 ≈ '+km+' km'};})}
   ]},
   {ey:'Q8 - Graphs',ti:'Simultaneous Equations Graphically',su:'Solve y = x^2 - 4x + 4 and y = x + 2 graphically.',steps:[
     {lb:'The method',dr:dQ8,ht:'<p>Plot both graphs on the same axes. The <b>intersection points</b> are the solutions to the simultaneous equations.</p>'},
     {lb:'Step 1 - Plot the quadratic',dr:dQ8,ht:'<div class="fm">y = x^2 - 4x + 4 = (x-2)^2</div><p>Vertex at (2, 0). The curve touches the x-axis at x = 2.</p>'},
     {lb:'Step 2 - Plot the straight line',dr:dQ8,ht:'<p>y = x + 2: gradient 1, y-intercept 2.</p>'},
     {lb:'Step 3 - Read intersections',dr:dQ8,ht:'<p>Setting equal: x^2-4x+4 = x+2 gives x^2-5x+2=0.</p><div class="fm">x = (5 +/- sqrt17) / 2 = 0.44 or 4.56</div>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt((function(){var m=rnd(1,3),c3=rnd(0,3),xv=rnd(1,4);var c4=m*xv+c3+xv;return{question:'Find x where <b>y = '+m+'x + '+c3+'</b> meets <b>y = −x + '+c4+'</b>.',hints:['Set equal: '+m+'x + '+c3+' = −x + '+c4],ans:xv,tol:0,unit:'',working:(m+1)+'x = '+(c4-c3)+', x = '+xv};})())}
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var m=rnd(1,3),c3=rnd(0,3),xv=rnd(1,4);var c4=m*xv+c3+xv;return{question:'Find x where <b>y = '+m+'x + '+c3+'</b> meets <b>y = −x + '+c4+'</b>.',hints:['Set equal: '+m+'x + '+c3+' = −x + '+c4],ans:xv,tol:0,unit:'',working:(m+1)+'x = '+(c4-c3)+', x = '+xv};})}
   ]}
 ];
 

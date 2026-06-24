@@ -90,8 +90,14 @@ function round1(x){return Math.round(x*10)/10;}
 function round2(x){return Math.round(x*100)/100;}
 
 var ST={};
-function tryIt(o){
-  var id='t'+Math.random().toString(36).slice(2);ST[id]=o;
+function tryIt(genOrObj){
+  var genFn=typeof genOrObj==='function'?genOrObj:function(){return genOrObj;};
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn();
+  ST[id]={o:o,genFn:genFn};
+  return buildTry(id,o);
+}
+function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
@@ -106,21 +112,39 @@ function tryIt(o){
     +'</div>';
 }
 document.addEventListener('click',function(e){
-  if(e.target.classList.contains('try-new')){render();return;}
-  if(e.target.classList.contains('try-ck')){
-    var id=e.target.getAttribute('data-tryid');
-    var o=ST[id];
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');
+    var entry=ST[id]; if(!entry)return;
+    var o=entry.genFn();
+    entry.o=o;
+    var wrap=el.closest?el.closest('.try'):document.querySelector('.try[data-tryid="'+id+'"]');
+    if(!wrap)return;
+    var tmp=document.createElement('div');
+    tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+    ST[id]={o:o,genFn:entry.genFn};
+    return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');
+    var entry=ST[id]; if(!entry)return;
+    var o=entry.o;
     var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
     var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
-    if(!inp||!fb||!o)return;
+    if(!inp||!fb)return;
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
     var tol=o.tol!=null?o.tol:0.5;
     if(Math.abs(v-o.ans)<=tol){
-      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct!  '+o.working;
-    }else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}
+      fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
   }
 });
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 
 
 /* Q2 - Compound shape */
@@ -294,14 +318,14 @@ var QS=[
     {lb:'Labelling the dimensions',dr:dQ1,ht:'<div class="fm">Rectangle: l = 9 cm, w = 5 cm</div><div class="fm">Triangle: b = 12 cm, h = 7 cm</div><p>The height of a triangle is always perpendicular to the base.</p>'},
     {lb:'Rectangle area',dr:dQ1,ht:'<div class="fm">A = 9 \u00d7 5 = 45 cm\u00b2</div>'},
     {lb:'Triangle area',dr:dQ1,ht:'<div class="fm">A = \u00bd \u00d7 12 \u00d7 7 = 42 cm\u00b2</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt((function(){var l=rnd(5,14),w=rnd(3,9);return{question:'Area of rectangle: length <b>'+l+' cm</b>, width <b>'+w+' cm</b>.',hints:['Area = l × w'],ans:l*w,tol:0,unit:'cm²',working:l+' × '+w+' = '+l*w+' cm²'};})())}
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var l=rnd(5,14),w=rnd(3,9);return{question:'Area of rectangle: length <b>'+l+' cm</b>, width <b>'+w+' cm</b>.',hints:['Area = l × w'],ans:l*w,tol:0,unit:'cm²',working:l+' × '+w+' = '+l*w+' cm²'};})}
   ]},
   {ey:'Q2 \u2022 Year 10 \u2022 Foundation',ti:'Area of a Compound Shape',su:'Find the area of an L-shaped region (12\u00d78 cm with a 5\u00d74 cm rectangle removed).',steps:[
     {lb:'The shape',dr:dQ2,ht:'<p>A <b>compound shape</b> is made from two or more simple shapes. Split it into rectangles, find each area, then add them together.</p>'},
     {lb:'Label the dimensions',dr:dQ2,ht:'<p>The outer rectangle is 12 cm wide and 8 cm tall. A 5\u00d74 cm piece is missing from the top-right.</p>'},
     {lb:'Split into two rectangles',dr:dQ2,ht:'<p>Draw a horizontal line to divide the L-shape into two rectangles:</p><div class="fm">A\u2081 = 12 \u00d7 4 = 48 cm\u00b2</div><div class="fm">A\u2082 = 7 \u00d7 4 = 28 cm\u00b2</div>'},
     {lb:'Total area',dr:dQ2,ht:'<div class="fm">Total = 48 + 28 = 76 cm\u00b2</div><p>Alternative: outer area minus missing piece = (12\u00d78) \u2212 (5\u00d74) = 96 \u2212 20 = 76 cm\u00b2 \u2713</p>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt((function(){var a=rnd(6,12),b=rnd(5,10),c=rnd(2,4),d=rnd(2,4);return{question:'L-shape: outer '+a+'×'+b+' cm, cut-out '+c+'×'+d+' cm. Area?',hints:['Area = outer − cut-out'],ans:a*b-c*d,tol:0,unit:'cm²',working:a*b+' − '+c*d+' = '+(a*b-c*d)+' cm²'};})())}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var a=rnd(6,12),b=rnd(5,10),c=rnd(2,4),d=rnd(2,4);return{question:'L-shape: outer '+a+'×'+b+' cm, cut-out '+c+'×'+d+' cm. Area?',hints:['Area = outer − cut-out'],ans:a*b-c*d,tol:0,unit:'cm²',working:a*b+' − '+c*d+' = '+(a*b-c*d)+' cm²'};})}
   ]},
   {ey:'Q3 \u2022 Year 10 \u2022 Foundation',ti:'Volume and Surface Area of a Cuboid',su:'Cuboid: length 8 cm, width 4 cm, height 5 cm. Find volume and surface area.',steps:[
     {lb:'The cuboid',dr:dQ3,ht:'<p>A <b>cuboid</b> has 6 rectangular faces. Opposite faces are identical. We need two formulas: <b>V = lwh</b> and <b>SA = 2(lw + lh + wh)</b>.</p>'},
@@ -315,32 +339,32 @@ var QS=[
     {lb:'Label the faces',dr:dQ4,ht:'<p>Base: 10\u00d76 cm. Two long sides: 10\u00d73 cm each. Two short sides: 6\u00d73 cm each.</p>'},
     {lb:'Calculate each face',dr:dQ4,ht:'<div class="fm">Base = 10 \u00d7 6 = 60 cm\u00b2</div><div class="fm">2 long sides = 2 \u00d7 (10 \u00d7 3) = 60 cm\u00b2</div><div class="fm">2 short sides = 2 \u00d7 (6 \u00d7 3) = 36 cm\u00b2</div>'},
     {lb:'Total surface area',dr:dQ4,ht:'<div class="fm">SA = 60 + 60 + 36 = 156 cm\u00b2</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt((function(){var l=rnd(4,10),w=rnd(3,7),h=rnd(2,6);return{question:'Volume of cuboid: '+l+'×'+w+'×'+h+' cm.',hints:['V = l×w×h'],ans:l*w*h,tol:0,unit:'cm³',working:l+'×'+w+'×'+h+' = '+l*w*h+' cm³'};})())}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var l=rnd(4,10),w=rnd(3,7),h=rnd(2,6);return{question:'Volume of cuboid: '+l+'×'+w+'×'+h+' cm.',hints:['V = l×w×h'],ans:l*w*h,tol:0,unit:'cm³',working:l+'×'+w+'×'+h+' = '+l*w*h+' cm³'};})}
   ]},
   {ey:'Q5 \u2022 Year 10 \u2022 Foundation',ti:'Volume of a Triangular Prism',su:'Triangular cross-section: base 10 cm, height 6 cm. Prism length 15 cm.',steps:[
     {lb:'The prism',dr:dQ5,ht:'<p>A <b>triangular prism</b> has a triangular cross-section. Volume = area of cross-section \u00d7 length.</p>'},
     {lb:'Cross-sectional area',dr:dQ5,ht:'<div class="fm">A = \u00bd \u00d7 base \u00d7 height = \u00bd \u00d7 10 \u00d7 6 = 30 cm\u00b2</div>'},
     {lb:'Volume',dr:dQ5,ht:'<div class="fm">V = A \u00d7 l = 30 \u00d7 15 = 450 cm\u00b3</div>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt((function(){var l=rnd(6,12),w=rnd(4,8),h=rnd(2,5);var sa=2*(l*h+w*h)+l*w;return{question:'Open box (no lid): base '+l+'×'+w+' cm, height '+h+' cm. Surface area?',hints:['Base + 2 long sides + 2 short sides'],ans:sa,tol:0,unit:'cm²',working:l*w+'+'+2*l*h+'+'+2*w*h+' = '+sa+' cm²'};})())}
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var l=rnd(6,12),w=rnd(4,8),h=rnd(2,5);var sa=2*(l*h+w*h)+l*w;return{question:'Open box (no lid): base '+l+'×'+w+' cm, height '+h+' cm. Surface area?',hints:['Base + 2 long sides + 2 short sides'],ans:sa,tol:0,unit:'cm²',working:l*w+'+'+2*l*h+'+'+2*w*h+' = '+sa+' cm²'};})}
   ]},
   {ey:'Q6 \u2022 Year 10 \u2022 Foundation',ti:'Circumference and Area of a Circle',su:'Circle with radius 9 cm. Find circumference and area (to 1 d.p.).',steps:[
     {lb:'The formulae',dr:dQ6,ht:'<p>Two key formulae for a circle with radius r:</p><div class="fm">Circumference C = 2\u03c0r</div><div class="fm">Area A = \u03c0r\u00b2</div>'},
     {lb:'Label the radius',dr:dQ6,ht:'<div class="fm">r = 9 cm</div>'},
     {lb:'Circumference',dr:dQ6,ht:'<div class="fm">C = 2\u03c0 \u00d7 9 = 18\u03c0 \u2248 56.5 cm</div>'},
     {lb:'Area',dr:dQ6,ht:'<div class="fm">A = \u03c0 \u00d7 9\u00b2 = 81\u03c0 \u2248 254.5 cm\u00b2</div>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt((function(){var b=rnd(6,12),h=rnd(4,8),l=rnd(5,12);var vol=0.5*b*h*l;return{question:'Triangular prism: triangle base '+b+' cm, height '+h+' cm, length '+l+' cm. Volume?',hints:['V = ½×base×height×length'],ans:vol,tol:0,unit:'cm³',working:'½×'+b+'×'+h+'×'+l+' = '+vol+' cm³'};})())}
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var b=rnd(6,12),h=rnd(4,8),l=rnd(5,12);var vol=0.5*b*h*l;return{question:'Triangular prism: triangle base '+b+' cm, height '+h+' cm, length '+l+' cm. Volume?',hints:['V = ½×base×height×length'],ans:vol,tol:0,unit:'cm³',working:'½×'+b+'×'+h+'×'+l+' = '+vol+' cm³'};})}
   ]},
   {ey:'Q7 \u2022 Year 10 \u2022 Extended',ti:'Volume of a Trapezoidal Prism',su:'Parallel sides a = 10 cm, b = 21 cm, perpendicular height 8 cm, length 20 cm.',steps:[
     {lb:'The solid',dr:dQ7,ht:'<p>A prism has a <b>trapezoidal cross-section</b>. Volume = cross-sectional area \u00d7 length.</p>'},
     {lb:'Area of the trapezium',dr:dQ7,ht:'<div class="fm">A = \u00bd \u00d7 (a + b) \u00d7 h = \u00bd \u00d7 (10 + 21) \u00d7 8 = 124 cm\u00b2</div>'},
     {lb:'Volume',dr:dQ7,ht:'<div class="fm">V = A \u00d7 l = 124 \u00d7 20 = 2480 cm\u00b3</div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt((function(){var r=rnd(3,12);var c=round1(2*Math.PI*r);return{question:'Circumference of circle, radius <b>'+r+' cm</b> (1 d.p.).',hints:['C = 2πr'],ans:c,tol:0.2,unit:'cm',working:'2π×'+r+' = '+c+' cm'};})())}
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var r=rnd(3,12);var c=round1(2*Math.PI*r);return{question:'Circumference of circle, radius <b>'+r+' cm</b> (1 d.p.).',hints:['C = 2πr'],ans:c,tol:0.2,unit:'cm',working:'2π×'+r+' = '+c+' cm'};})}
   ]},
   {ey:'Q8 \u2022 Year 10 \u2022 Extended',ti:'Surface Area of a Sphere from its Volume',su:'A sphere has volume 2463 cm\u00b3. Find its surface area.',steps:[
     {lb:'The problem',dr:dQ8,ht:'<p>We are not given the radius directly. First use <b>V = \u2154\u03c0r\u00b3</b> to find r, then apply <b>SA = 4\u03c0r\u00b2</b>.</p>'},
     {lb:'Find the radius',dr:dQ8,ht:'<div class="fm">r\u00b3 = 3V \u00f7 (4\u03c0) = 3 \u00d7 2463 \u00f7 (4\u03c0) \u2248 588.1</div><div class="fm">r = \u00b3\u221a588.1 \u2248 8.376 cm</div>'},
     {lb:'Surface area',dr:dQ8,ht:'<div class="fm">SA = 4\u03c0r\u00b2 = 4\u03c0 \u00d7 70.16 \u2248 881.8 cm\u00b2</div>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt((function(){var a=rnd(6,12),b=rnd(8,16),h=rnd(4,8),l=rnd(5,12);var vol=0.5*(a+b)*h*l;return{question:'Trapezoidal prism: parallel sides '+a+' and '+b+' cm, height '+h+' cm, length '+l+' cm. Volume?',hints:['½(a+b)×h×l'],ans:vol,tol:0,unit:'cm³',working:'½('+a+'+'+b+')×'+h+'×'+l+' = '+vol+' cm³'};})())}
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var a=rnd(6,12),b=rnd(8,16),h=rnd(4,8),l=rnd(5,12);var vol=0.5*(a+b)*h*l;return{question:'Trapezoidal prism: parallel sides '+a+' and '+b+' cm, height '+h+' cm, length '+l+' cm. Volume?',hints:['½(a+b)×h×l'],ans:vol,tol:0,unit:'cm³',working:'½('+a+'+'+b+')×'+h+'×'+l+' = '+vol+' cm³'};})}
   ]}
 ];
 

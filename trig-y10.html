@@ -93,8 +93,14 @@ function round1(x){return Math.round(x*10)/10;}
 function round2(x){return Math.round(x*100)/100;}
 
 var ST={};
-function tryIt(o){
-  var id='t'+Math.random().toString(36).slice(2);ST[id]=o;
+function tryIt(genOrObj){
+  var genFn=typeof genOrObj==='function'?genOrObj:function(){return genOrObj;};
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn();
+  ST[id]={o:o,genFn:genFn};
+  return buildTry(id,o);
+}
+function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
@@ -109,19 +115,33 @@ function tryIt(o){
     +'</div>';
 }
 document.addEventListener('click',function(e){
-  if(e.target.classList.contains('try-new')){render();return;}
-  if(e.target.classList.contains('try-ck')){
-    var id=e.target.getAttribute('data-tryid');
-    var o=ST[id];
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');
+    var entry=ST[id]; if(!entry)return;
+    var o=entry.genFn();
+    entry.o=o;
+    var wrap=el.closest?el.closest('.try'):document.querySelector('.try[data-tryid="'+id+'"]');
+    if(!wrap)return;
+    var tmp=document.createElement('div');
+    tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+    ST[id]={o:o,genFn:entry.genFn};
+    return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');
+    var entry=ST[id]; if(!entry)return;
+    var o=entry.o;
     var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
     var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
-    if(!inp||!fb||!o)return;
+    if(!inp||!fb)return;
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
     var tol=o.tol!=null?o.tol:0.5;
     if(Math.abs(v-o.ans)<=tol){
-      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct!  '+o.working;
-    }else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}
+      fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
   }
 });
 var D=Math.PI/180;
@@ -160,67 +180,67 @@ var QS=[
     {lb:'The triangle',dr:dQ1,ht:'<span class="lt lf">Foundation</span><p>Triangle ABC, right angle at B. <b>AB = 8 cm</b>, <b>BC = 6 cm</b>. Find the hypotenuse <b>AC</b>.</p>'},
     {lb:'Step 1 — Pythagoras',dr:dQ1,ht:'<p>AC is opposite the right angle — it is the hypotenuse.</p><div class="fm">AC² = AB² + BC² = 64 + 36 = 100</div>'},
     {lb:'Step 2 — Solve',dr:dQ1,ht:'<div class="fm">AC = √100 = <b>10 cm</b></div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt((function(){var pts=[[3,4,5],[5,12,13],[8,15,17],[6,8,10]];var a=pick(pts);return{question:'Right triangle: sides <b>'+a[0]+' cm</b> and <b>'+a[1]+' cm</b>. Hypotenuse?',hints:['c² = '+a[0]+'² + '+a[1]+'²'],ans:a[2],tol:0.1,unit:'cm',working:'√('+(a[0]*a[0]+a[1]*a[1])+') = '+a[2]+' cm'};})())}
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var pts=[[3,4,5],[5,12,13],[8,15,17],[6,8,10]];var a=pick(pts);return{question:'Right triangle: sides <b>'+a[0]+' cm</b> and <b>'+a[1]+' cm</b>. Hypotenuse?',hints:['c² = '+a[0]+'² + '+a[1]+'²'],ans:a[2],tol:0.1,unit:'cm',working:'√('+(a[0]*a[0]+a[1]*a[1])+') = '+a[2]+' cm'};})}
   ]},
   {ey:'Q2 · Trig Ratios · Foundation',ti:'Finding an Angle — Sine',su:'Hypotenuse = 15 cm, opposite = 9 cm. Find angle A.',lv:'F',steps:[
     {lb:'The triangle',dr:dQ2,ht:'<span class="lt lf">Foundation</span><p>Right angle at B. <b>AC = 15 cm</b> (hypotenuse), <b>BC = 9 cm</b> (opposite A). Find <b>angle A</b>.</p>'},
     {lb:'Step 1 — Choose ratio',dr:dQ2,ht:'<p>Opposite and hypotenuse known → use <b>sin</b>.</p><div class="fm">sin θ = opposite ÷ hypotenuse</div>'},
     {lb:'Step 2 — Solve',dr:dQ2,ht:'<div class="fm">sin A = 9 ÷ 15 = 0.6</div><div class="fm">A = sin⁻¹(0.6) = <b>36.9°</b></div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt((function(){var hyp=pick([10,15,20,25]),opp=pick([5,6,8,10,12]);if(opp>=hyp)opp=hyp-3;var ang=Math.round(Math.asin(opp/hyp)*180/Math.PI);return{question:'Hyp = '+hyp+' cm, opp = '+opp+' cm. Find angle A (nearest °).',hints:['sin A = opp/hyp'],ans:ang,tol:1,unit:'°',working:'sin⁻¹('+opp+'/'+hyp+') = '+ang+'°'};})())}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var hyp=pick([10,15,20,25]),opp=pick([5,6,8,10,12]);if(opp>=hyp)opp=hyp-3;var ang=Math.round(Math.asin(opp/hyp)*180/Math.PI);return{question:'Hyp = '+hyp+' cm, opp = '+opp+' cm. Find angle A (nearest °).',hints:['sin A = opp/hyp'],ans:ang,tol:1,unit:'°',working:'sin⁻¹('+opp+'/'+hyp+') = '+ang+'°'};})}
   ]},
   {ey:'Q3 · Trig Ratios · Foundation',ti:'Finding a Side — Cosine',su:'Hypotenuse = 13 cm, angle A = 40°. Find AB.',lv:'F',steps:[
     {lb:'The triangle',dr:dQ3,ht:'<span class="lt lf">Foundation</span><p>Right angle at B. <b>Hypotenuse = 13 cm</b>, <b>angle A = 40°</b>. Find the adjacent side <b>AB</b>.</p>'},
     {lb:'Step 1 — Choose ratio',dr:dQ3,ht:'<p>Hypotenuse known, want adjacent → use <b>cos</b>.</p><div class="fm">cos θ = adjacent ÷ hypotenuse</div>'},
     {lb:'Step 2 — Solve',dr:dQ3,ht:'<div class="fm">AB = 13 × cos 40° = 13 × 0.766 = <b>9.96 cm</b></div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt((function(){var hyp=pick([10,12,15,20]),ang=pick([30,40,45,60]);var adj=round1(hyp*Math.cos(ang*Math.PI/180));return{question:'Hyp = '+hyp+' cm, angle = '+ang+'°. Adjacent side (1 d.p.)?',hints:['adj = hyp × cos('+ang+'°)'],ans:adj,tol:0.2,unit:'cm',working:hyp+'×cos('+ang+'°) = '+adj+' cm'};})())}
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var hyp=pick([10,12,15,20]),ang=pick([30,40,45,60]);var adj=round1(hyp*Math.cos(ang*Math.PI/180));return{question:'Hyp = '+hyp+' cm, angle = '+ang+'°. Adjacent side (1 d.p.)?',hints:['adj = hyp × cos('+ang+'°)'],ans:adj,tol:0.2,unit:'cm',working:hyp+'×cos('+ang+'°) = '+adj+' cm'};})}
   ]},
   {ey:'Q4 · Trig Ratios · Core',ti:'Ladder Against a Wall',su:'Ladder = 9 m, base = 4 m. Find the angle and height.',lv:'F',steps:[
     {lb:'The diagram',dr:dQ4,ht:'<span class="lt lf">Core</span><p>A <b>9 m ladder</b> leans against a wall, base <b>4 m</b> from the wall. Find the angle with the ground and the height reached.</p>'},
     {lb:'Step 1 — Find angle',dr:dQ4,ht:'<div class="fm">cos θ = 4/9 = 0.444  →  θ = cos⁻¹(0.444) = <b>63.6°</b></div>'},
     {lb:'Step 2 — Find height',dr:dQ4,ht:'<div class="fm">h = 9 × sin(63.6°) = 9 × 0.895 = <b>8.06 m</b></div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt((function(){var lad=pick([8,9,10,12]),base=pick([3,4,5]);if(base>=lad)base=3;var ang=Math.round(Math.acos(base/lad)*180/Math.PI);return{question:'Ladder '+lad+' m, base '+base+' m from wall. Angle with ground (nearest °)?',hints:['cos(θ) = adj/hyp = '+base+'/'+lad],ans:ang,tol:1,unit:'°',working:'cos⁻¹('+base+'/'+lad+') = '+ang+'°'};})())}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var lad=pick([8,9,10,12]),base=pick([3,4,5]);if(base>=lad)base=3;var ang=Math.round(Math.acos(base/lad)*180/Math.PI);return{question:'Ladder '+lad+' m, base '+base+' m from wall. Angle with ground (nearest °)?',hints:['cos(θ) = adj/hyp = '+base+'/'+lad],ans:ang,tol:1,unit:'°',working:'cos⁻¹('+base+'/'+lad+') = '+ang+'°'};})}
   ]},
   {ey:'Q5 · Trig Ratios · Extended',ti:'Bearing Problem',su:'PQ = 200 m south, QR = 150 m east. Find bearing of R from P.',lv:'E',steps:[
     {lb:'The diagram',dr:dQ5,ht:'<span class="lt le">Extended</span><p>P is at top. Q is directly south of P (<b>200 m</b>). R is due east of Q (<b>150 m</b>). Find the <b>bearing of R from P</b>.</p>'},
     {lb:'Step 1 — Set up',dr:dQ5,ht:'<div class="fm">tan θ = 150/200 = 0.75</div>'},
     {lb:'Step 2 — Find angle',dr:dQ5,ht:'<div class="fm">θ = tan⁻¹(0.75) = 36.9°</div>'},
     {lb:'Step 3 — Bearing',dr:dQ5,ht:'<div class="fm">Bearing = 180° − 36.9° = <b>143.1°</b></div>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt((function(){var d=rnd(100,300),bear=pick([30,45,60]);var east=Math.round(d*Math.sin(bear*Math.PI/180));return{question:'Ship travels '+d+' m on bearing '+bear.toString().padStart(3,'0')+'°. Distance east (nearest m)?',hints:['East = distance × sin(bearing)'],ans:east,tol:2,unit:'m',working:d+'×sin('+bear+'°) = '+east+' m'};})())}
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var d=rnd(100,300),bear=pick([30,45,60]);var east=Math.round(d*Math.sin(bear*Math.PI/180));return{question:'Ship travels '+d+' m on bearing '+bear.toString().padStart(3,'0')+'°. Distance east (nearest m)?',hints:['East = distance × sin(bearing)'],ans:east,tol:2,unit:'m',working:d+'×sin('+bear+'°) = '+east+' m'};})}
   ]},
   {ey:'Q6 · Sine Rule · Extended',ti:'Sine Rule — Finding a Side',su:'Angle A = 42°, angle B = 65°, AB = 12 cm. Find BC.',lv:'E',steps:[
     {lb:'The triangle',dr:dQ6,ht:'<span class="lt le">Extended</span><p><b>Angle A = 42°</b>, <b>angle B = 65°</b>, <b>c = AB = 12 cm</b>. Find <b>a = BC</b>.</p>'},
     {lb:'Step 1 — Find angle C',dr:dQ6,ht:'<div class="fm">C = 180° − 42° − 65° = <b>73°</b></div>'},
     {lb:'Step 2 — Sine Rule',dr:dQ6,ht:'<div class="fm">a / sin A = c / sin C</div><div class="fm">a / sin 42° = 12 / sin 73°</div>'},
     {lb:'Step 3 — Solve',dr:dQ6,ht:'<div class="fm">a = 12 × sin42° / sin73° = <b>8.40 cm</b></div>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt((function(){var A=pick([35,40,45,50]),B=pick([55,60,65,70]),AB=rnd(8,14);var BC=round1(AB*Math.sin(A*Math.PI/180)/Math.sin(B*Math.PI/180));return{question:'Angle A='+A+'°, B='+B+'°, AB='+AB+' cm. Find BC (1 d.p.).',hints:['Sine rule: BC/sinA = AB/sinB'],ans:BC,tol:0.3,unit:'cm',working:'BC = '+AB+'×sin('+A+')/sin('+B+') = '+BC+' cm'};})())}
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var A=pick([35,40,45,50]),B=pick([55,60,65,70]),AB=rnd(8,14);var BC=round1(AB*Math.sin(A*Math.PI/180)/Math.sin(B*Math.PI/180));return{question:'Angle A='+A+'°, B='+B+'°, AB='+AB+' cm. Find BC (1 d.p.).',hints:['Sine rule: BC/sinA = AB/sinB'],ans:BC,tol:0.3,unit:'cm',working:'BC = '+AB+'×sin('+A+')/sin('+B+') = '+BC+' cm'};})}
   ]},
   {ey:'Q7 · Sine Rule · Extended',ti:'Sine Rule — Finding an Angle',su:'Angle A = 35°, a = 14 cm, c = 18 cm. Find angle B.',lv:'E',steps:[
     {lb:'The triangle',dr:dQ7,ht:'<span class="lt le">Extended</span><p><b>Angle A = 35°</b>, <b>a = BC = 14 cm</b>, <b>c = AB = 18 cm</b>. Find <b>angle B</b>.</p>'},
     {lb:'Step 1 — Find C',dr:dQ7,ht:'<div class="fm">sinC / 18 = sin35° / 14</div><div class="fm">sinC = 18 × 0.574 / 14 = 0.737</div>'},
     {lb:'Step 2 — Solve C',dr:dQ7,ht:'<div class="fm">C = sin⁻¹(0.737) = <b>47.5°</b></div>'},
     {lb:'Step 3 — Find B',dr:dQ7,ht:'<div class="fm">B = 180° − 35° − 47.5° = <b>97.5°</b></div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt((function(){var A=pick([30,35,40]),a=rnd(8,14),c=rnd(10,16);if(c*Math.sin(A*Math.PI/180)/a>1)c=a-1;var C=Math.round(Math.asin(c*Math.sin(A*Math.PI/180)/a)*180/Math.PI);return{question:'A='+A+'°, a='+a+' cm, c='+c+' cm. Find angle C (nearest °).',hints:['sinC/c = sinA/a','sinC = '+c+'×sin'+A+'°/'+a],ans:C,tol:1,unit:'°',working:'C = sin⁻¹('+c+'×sin'+A+'°/'+a+') = '+C+'°'};})())}
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var A=pick([30,35,40]),a=rnd(8,14),c=rnd(10,16);if(c*Math.sin(A*Math.PI/180)/a>1)c=a-1;var C=Math.round(Math.asin(c*Math.sin(A*Math.PI/180)/a)*180/Math.PI);return{question:'A='+A+'°, a='+a+' cm, c='+c+' cm. Find angle C (nearest °).',hints:['sinC/c = sinA/a','sinC = '+c+'×sin'+A+'°/'+a],ans:C,tol:1,unit:'°',working:'C = sin⁻¹('+c+'×sin'+A+'°/'+a+') = '+C+'°'};})}
   ]},
   {ey:'Q8 · Cosine Rule · Extended',ti:'Cosine Rule — Finding a Side',su:'b = 9 cm, c = 12 cm, angle A = 55°. Find a.',lv:'E',steps:[
     {lb:'The triangle',dr:dQ8,ht:'<span class="lt le">Extended</span><p><b>b = 9 cm</b>, <b>c = 12 cm</b>, included <b>angle A = 55°</b>. Find <b>a = BC</b>.</p>'},
     {lb:'Step 1 — Formula',dr:dQ8,ht:'<div class="fm">a² = b² + c² − 2bc cosA</div>'},
     {lb:'Step 2 — Substitute',dr:dQ8,ht:'<div class="fm">= 81 + 144 − 216 × 0.574 = 101.1</div>'},
     {lb:'Step 3 — Solve',dr:dQ8,ht:'<div class="fm">a = √101.1 = <b>10.05 cm</b></div>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt((function(){var b=rnd(6,12),c=rnd(6,12),A=pick([50,55,60,65,70]);var a=round1(Math.sqrt(b*b+c*c-2*b*c*Math.cos(A*Math.PI/180)));return{question:'b='+b+' cm, c='+c+' cm, A='+A+'°. Find side a (1 d.p.).',hints:['a² = b²+c²−2bc·cosA'],ans:a,tol:0.3,unit:'cm',working:'a = '+a+' cm'};})())}
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var b=rnd(6,12),c=rnd(6,12),A=pick([50,55,60,65,70]);var a=round1(Math.sqrt(b*b+c*c-2*b*c*Math.cos(A*Math.PI/180)));return{question:'b='+b+' cm, c='+c+' cm, A='+A+'°. Find side a (1 d.p.).',hints:['a² = b²+c²−2bc·cosA'],ans:a,tol:0.3,unit:'cm',working:'a = '+a+' cm'};})}
   ]},
   {ey:'Q9 · Cosine Rule · Extended',ti:'Cosine Rule — Finding an Angle',su:'a = 12 cm, b = 10 cm, c = 15 cm. Find angle A.',lv:'E',steps:[
     {lb:'The triangle',dr:dQ9,ht:'<span class="lt le">Extended</span><p>All sides known: <b>a = 12</b>, <b>b = 10</b>, <b>c = 15</b>. Find <b>angle A</b>.</p>'},
     {lb:'Step 1 — Formula',dr:dQ9,ht:'<div class="fm">cosA = (b²+c²−a²) / 2bc</div>'},
     {lb:'Step 2 — Substitute',dr:dQ9,ht:'<div class="fm">= (100+225−144) / 300 = 181/300 = 0.603</div>'},
     {lb:'Step 3 — Solve',dr:dQ9,ht:'<div class="fm">A = cos⁻¹(0.603) = <b>52.9°</b></div>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt((function(){var a=rnd(8,14),b=rnd(6,12),c=rnd(7,13);var cosA=(b*b+c*c-a*a)/(2*b*c);if(Math.abs(cosA)>1){a=8;b=9;c=10;cosA=(81+100-64)/180;}var A=Math.round(Math.acos(cosA)*180/Math.PI);return{question:'a='+a+' cm, b='+b+' cm, c='+c+' cm. Find angle A (nearest °).',hints:['cosA = (b²+c²−a²)/(2bc)'],ans:A,tol:1,unit:'°',working:'A = '+A+'°'};})())}
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var a=rnd(8,14),b=rnd(6,12),c=rnd(7,13);var cosA=(b*b+c*c-a*a)/(2*b*c);if(Math.abs(cosA)>1){a=8;b=9;c=10;cosA=(81+100-64)/180;}var A=Math.round(Math.acos(cosA)*180/Math.PI);return{question:'a='+a+' cm, b='+b+' cm, c='+c+' cm. Find angle A (nearest °).',hints:['cosA = (b²+c²−a²)/(2bc)'],ans:A,tol:1,unit:'°',working:'A = '+A+'°'};})}
   ]},
   {ey:'Q10 · Area of Triangle · Extended',ti:'Area Using ½ab sinC',su:'a = 8 cm, b = 11 cm, angle C = 72°. Find the area.',lv:'E',steps:[
     {lb:'The triangle',dr:dQ10,ht:'<span class="lt le">Extended</span><p><b>a = 8 cm</b>, <b>b = 11 cm</b>, included <b>angle C = 72°</b>. Find the area.</p>'},
     {lb:'Step 1 — Formula',dr:dQ10,ht:'<div class="fm">Area = ½ × a × b × sinC</div><p>Use this when you know two sides and the included angle.</p>'},
     {lb:'Step 2 — Substitute',dr:dQ10,ht:'<div class="fm">= ½ × 8 × 11 × sin72° = ½ × 88 × 0.951</div>'},
     {lb:'Step 3 — Calculate',dr:dQ10,ht:'<div class="fm">= 44 × 0.951 = <b>41.8 cm²</b></div>'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt((function(){var a=rnd(6,12),b=rnd(6,12),C=pick([45,50,55,60,65,70,75]);var area=round1(0.5*a*b*Math.sin(C*Math.PI/180));return{question:'a='+a+' cm, b='+b+' cm, C='+C+'°. Area of triangle (1 d.p.)?',hints:['½ab·sinC'],ans:area,tol:0.5,unit:'cm²',working:'½×'+a+'×'+b+'×sin('+C+'°) = '+area+' cm²'};})())}
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var a=rnd(6,12),b=rnd(6,12),C=pick([45,50,55,60,65,70,75]);var area=round1(0.5*a*b*Math.sin(C*Math.PI/180));return{question:'a='+a+' cm, b='+b+' cm, C='+C+'°. Area of triangle (1 d.p.)?',hints:['½ab·sinC'],ans:area,tol:0.5,unit:'cm²',working:'½×'+a+'×'+b+'×sin('+C+'°) = '+area+' cm²'};})}
   ]}
 ];
 
