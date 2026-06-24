@@ -234,64 +234,193 @@ function dQ3(p){
 }
 
 /* Q4 - Open box (net) */
+/* Q4 - Open box: 3D then net */
 function dQ4(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
-  // Net of open box: base in centre, 4 sides folded out. Base 10x6, sides height 3
-  var sc=20,bx=180,by=120,bw=10*sc,bh=6*sc;
-  // Base
-  o.push(R(bx,by,bw,bh,'#fce8d8','#C0272D'));
-  o.push(T(bx+bw/2,by+bh/2,'Base\n10\u00d76','#C0272D',11,'middle',true));
-  if(p>=1){
-    // top flap
-    o.push(R(bx,by-3*sc,bw,3*sc,'#e8f0ff','#1a5a8a'));
-    o.push(T(bx+bw/2,by-1.5*sc,'10\u00d73','#1a5a8a',11,'middle',false));
-    // bottom flap
-    o.push(R(bx,by+bh,bw,3*sc,'#e8f0ff','#1a5a8a'));
-    o.push(T(bx+bw/2,by+bh+1.5*sc,'10\u00d73','#1a5a8a',11,'middle',false));
-    // left flap
-    o.push(R(bx-3*sc,by,3*sc,bh,'#e8ffe8','#1a7a3a'));
-    o.push(T(bx-1.5*sc,by+bh/2,'6\u00d73','#1a7a3a',11,'middle',false));
-    // right flap
-    o.push(R(bx+bw,by,3*sc,bh,'#e8ffe8','#1a7a3a'));
-    o.push(T(bx+bw+1.5*sc,by+bh/2,'6\u00d73','#1a7a3a',11,'middle',false));
+
+  // ── Box dimensions (10 × 6 × 3, no lid) ─────────────────────────────────
+  // 3D view: isometric-ish, front face bottom-left
+  var ox=28, oy=200, W=160, H=60, D=55, dxd=50, dyd=-20;
+
+  // Face colours (5 faces of open box)
+  var cBase='#fce8d8', cFront='#fce8d8', cBack='#e8d0bc';
+  var cLeft='#c8b0d8', cRight='#a8d8a8', cBottom='#f0d080';
+
+  if(p===0){
+    // ── p=0: full 3D open box ──────────────────────────────────────────────
+
+    // Back face (hidden — teal, drawn first)
+    o.push('<polygon points="'+(ox+dxd)+','+(oy+dyd)+' '+(ox+W+dxd)+','+(oy+dyd)+' '
+      +(ox+W+dxd)+','+(oy-H+dyd)+' '+(ox+dxd)+','+(oy-H+dyd)+'" fill="#b8d8e8" stroke="none"/>');
+
+    // Bottom face (ox,oy to back-bottom)
+    o.push('<polygon points="'+ox+','+oy+' '+(ox+W)+','+oy+' '+(ox+W+dxd)+','+(oy+dyd)+' '+(ox+dxd)+','+(oy+dyd)+'" fill="'+cBottom+'" stroke="none"/>');
+    // Right face
+    o.push('<polygon points="'+(ox+W)+','+oy+' '+(ox+W)+','+(oy-H)+' '+(ox+W+dxd)+','+(oy-H+dyd)+' '+(ox+W+dxd)+','+(oy+dyd)+'" fill="'+cRight+'" stroke="none"/>');
+    // Left face
+    o.push('<polygon points="'+ox+','+oy+' '+ox+','+(oy-H)+' '+(ox+dxd)+','+(oy-H+dyd)+' '+(ox+dxd)+','+(oy+dyd)+'" fill="'+cLeft+'" stroke="none"/>');
+    // Front face
+    o.push('<polygon points="'+ox+','+oy+' '+(ox+W)+','+oy+' '+(ox+W)+','+(oy-H)+' '+ox+','+(oy-H)+'" fill="'+cFront+'" stroke="none"/>');
+
+    // Visible solid edges
+    // Front rect
+    o.push(L(ox,oy,ox+W,oy,'#C0272D',2));
+    o.push(L(ox+W,oy,ox+W,oy-H,'#C0272D',2));
+    o.push(L(ox+W,oy-H,ox,oy-H,'#C0272D',2));
+    o.push(L(ox,oy-H,ox,oy,'#C0272D',2));
+    // Right depth edges (visible)
+    o.push(L(ox+W,oy,ox+W+dxd,oy+dyd,'#241A17',2));
+    o.push(L(ox+W,oy-H,ox+W+dxd,oy-H+dyd,'#241A17',2));
+    // Top-back edge B2->C2 (visible)
+    o.push(L(ox+W+dxd,oy-H+dyd,ox+dxd,oy-H+dyd,'#241A17',1.5));
+    // Right-back vertical (visible)
+    o.push(L(ox+W+dxd,oy+dyd,ox+W+dxd,oy-H+dyd,'#241A17',1.5));
+
+    // DOTTED hidden edges (drawn last)
+    o.push(L(ox,oy,ox+dxd,oy+dyd,'#555',1.5,'6,4'));           // left depth bottom
+    o.push(L(ox,oy-H,ox+dxd,oy-H+dyd,'#555',1.5,'6,4'));       // left depth top
+    o.push(L(ox+dxd,oy+dyd,ox+dxd,oy-H+dyd,'#555',1.5,'6,4')); // back-left vertical
+    o.push(L(ox+dxd,oy+dyd,ox+W+dxd,oy+dyd,'#555',1.5,'6,4')); // back bottom edge
+
+    // Labels
+    o.push(T(ox+W/2,oy+16,'10 cm (length)','#C0272D',11,'middle',true));
+    o.push(T(ox-14,oy-H/2,'3 cm','#241A17',11,'middle',true));
+    o.push(T(ox+W+dxd/2+18,oy+dyd/2+6,'6 cm (width)','#888',11,'start',false));
+    o.push(T(ox+W+2,oy-H+2,'No lid','#C8922A',10,'start',true));
+
+    o.push(R(14,8,452,30,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,27,'Open box — 10\u00d76 cm base, height 3 cm, NO LID','#C0272D',12,'middle',true));
+
+  } else {
+    // ── p>=1: NET (unfolded flat) ─────────────────────────────────────────
+    // Scale: sc=16 makes 10cm=160px, 6cm=96px, 3cm=48px
+    var sc=16;
+    var L10=10*sc,L6=6*sc,L3=3*sc; // 160, 96, 48
+    // Centre the net: total width = L3+L10+L3 = 256, height = L3+L6+L3 = 192
+    var nx=112, ny=54;  // top-left of BASE rectangle
+
+    // Base (cream/red)
+    o.push('<polygon points="'+nx+','+ny+' '+(nx+L10)+','+ny+' '+(nx+L10)+','+(ny+L6)+' '+nx+','+(ny+L6)+'" fill="'+cBase+'" stroke="#C0272D" stroke-width="1.5"/>');
+
+    if(p>=1){
+      // Top flap (front side — cream)
+      o.push('<polygon points="'+nx+','+(ny-L3)+' '+(nx+L10)+','+(ny-L3)+' '+(nx+L10)+','+ny+' '+nx+','+ny+'" fill="'+cFront+'" stroke="#C0272D" stroke-width="1.5"/>');
+      // Bottom flap (back side — back colour)
+      o.push('<polygon points="'+nx+','+(ny+L6)+' '+(nx+L10)+','+(ny+L6)+' '+(nx+L10)+','+(ny+L6+L3)+' '+nx+','+(ny+L6+L3)+'" fill="'+cBack+'" stroke="#C0272D" stroke-width="1.5"/>');
+      // Left flap (left side — purple)
+      o.push('<polygon points="'+(nx-L3)+','+ny+' '+nx+','+ny+' '+nx+','+(ny+L6)+' '+(nx-L3)+','+(ny+L6)+'" fill="'+cLeft+'" stroke="#C0272D" stroke-width="1.5"/>');
+      // Right flap (right side — green)
+      o.push('<polygon points="'+(nx+L10)+','+ny+' '+(nx+L10+L3)+','+ny+' '+(nx+L10+L3)+','+(ny+L6)+' '+(nx+L10)+','+(ny+L6)+'" fill="'+cRight+'" stroke="#C0272D" stroke-width="1.5"/>');
+    }
+
+    if(p>=2){
+      // Dimension labels on all faces
+      o.push(T(nx+L10/2,ny+L6/2+4,'Base: 10\u00d76','#C0272D',11,'middle',true));
+      o.push(T(nx+L10/2,ny-L3/2,'10\u00d73  (front)','#C0272D',10,'middle',false));
+      o.push(T(nx+L10/2,ny+L6+L3/2,'10\u00d73  (back)','#6b5750',10,'middle',false));
+      o.push(T(nx-L3/2,(ny+ny+L6)/2,'6\u00d73','#6a1b9a',10,'middle',false));
+      o.push(T(nx+L10+L3/2,(ny+ny+L6)/2,'6\u00d73','#2e7d32',10,'middle',false));
+      // Dimension ticks
+      o.push(T(nx+L10/2,ny-L3-8,'10 cm','#888',9,'middle',false));
+      o.push(T(nx-L3-8,(ny+ny+L6)/2,'6 cm','#888',9,'middle',false));
+      o.push(T(nx-L3-8,ny-L3/2,'3 cm','#888',9,'middle',false));
+    }
+
+    if(p>=3){
+      o.push(R(14,250,452,40,'#e8f8ee','#1a7a3a',1.5));
+      o.push(T(240,262,'SA = 60 + 2(10\u00d73) + 2(6\u00d73)  =  60 + 60 + 36  =  156 cm\u00b2','#1a7a3a',12,'middle',true));
+      o.push(T(240,278,'5 faces (no lid)','#888',10,'middle',false));
+    }
+
+    o.push(R(14,8,452,30,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,27,'Net of open box — unfolded flat','#C0272D',12,'middle',true));
   }
-  if(p>=2){
-    o.push(T(50,240,'SA (open box) = base + 4 sides','#241A17',12,'start',true));
-    o.push(T(50,260,'= 60 + 2(10\u00d73) + 2(6\u00d73)','#241A17',12,'start',false));
-  }
-  if(p>=3){o.push(T(50,280,'= 60 + 60 + 36 = 156 cm\u00b2','#C0272D',13,'start',true));}
-  o.push(T(240,14,'Surface Area of an Open Box','#C0272D',12,'middle',true));
+
   s.innerHTML=o.join('');
 }
+
 
 /* Q5 - Volume of triangular prism */
 function dQ5(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
-  var ox=80,oy=240,l=220,bw=120,bh=80,d=60;
-  // back triangle
-  var bk=ox+d;
-  o.push('<polygon points="'+(bk)+','+(oy-d)+' '+(bk+bw)+','+(oy-d)+' '+(bk+bw/2)+','+(oy-d-bh)+'" fill="#e0e8f8" stroke="#bbb" stroke-width="1" stroke-dasharray="4,3"/>');
-  // connecting edges dashed
-  o.push(L(ox,oy,bk,oy-d,'#bbb',1,'4,3'));
-  o.push(L(ox+bw,oy,bk+bw,oy-d,'#bbb',1,'4,3'));
-  o.push(L(ox+bw/2,oy-bh,bk+bw/2,oy-d-bh,'#bbb',1,'4,3'));
-  // front triangle
-  o.push('<polygon points="'+ox+','+oy+' '+(ox+bw)+','+oy+' '+(ox+bw/2)+','+(oy-bh)+'" fill="#fce8d8" stroke="#C0272D" stroke-width="2"/>');
-  // bottom rect
-  o.push('<polygon points="'+ox+','+oy+' '+bk+','+(oy-d)+' '+(bk+bw)+','+(oy-d)+' '+(ox+bw)+','+oy+'" fill="#f0e8e0" stroke="#C0272D" stroke-width="1.5"/>');
+
+  // Vertices: front triangle A(bottom-left) B(bottom-right) C(apex)
+  var Ax=55,Ay=252,Bx=195,By=252,Cx=125,Cy=142;
+  // Depth offset (prism length direction)
+  var dx=145,dy=-42;
+  // Back triangle vertices
+  var Ax2=Ax+dx,Ay2=Ay+dy;
+  var Bx2=Bx+dx,By2=By+dy;
+  var Cx2=Cx+dx,Cy2=Cy+dy;
+
+  // ── STEP 1: Draw all filled faces (no strokes that would show over dotted lines) ──
+
+  // Back triangular face — teal, NO stroke (we'll draw its edges manually after)
+  o.push('<polygon points="'+Ax2+','+Ay2+' '+Bx2+','+By2+' '+Cx2+','+Cy2+'" fill="#b8d8e8" stroke="none"/>');
+
+  // Bottom rectangular face — amber
+  o.push('<polygon points="'+Ax+','+Ay+' '+Bx+','+By+' '+Bx2+','+By2+' '+Ax2+','+Ay2+'" fill="#f0d080" stroke="none"/>');
+  // Right sloped face — green
+  o.push('<polygon points="'+Bx+','+By+' '+Cx+','+Cy+' '+Cx2+','+Cy2+' '+Bx2+','+By2+'" fill="#a8d8a8" stroke="none"/>');
+  // Left sloped face — purple
+  o.push('<polygon points="'+Ax+','+Ay+' '+Cx+','+Cy+' '+Cx2+','+Cy2+' '+Ax2+','+Ay2+'" fill="#c8b0d8" stroke="none"/>');
+  // Front triangular face — cream
+  o.push('<polygon points="'+Ax+','+Ay+' '+Bx+','+By+' '+Cx+','+Cy+'" fill="#fce8d8" stroke="none"/>');
+
+  // ── STEP 2: Draw all VISIBLE solid edges on top of faces ──────────────────
+  // Front triangle edges
+  o.push(L(Ax,Ay,Bx,By,'#C0272D',2.5));
+  o.push(L(Bx,By,Cx,Cy,'#C0272D',2.5));
+  o.push(L(Ax,Ay,Cx,Cy,'#C0272D',2.5));
+  // Visible depth edges B->B2 and C->C2
+  o.push(L(Bx,By,Bx2,By2,'#241A17',2));
+  o.push(L(Cx,Cy,Cx2,Cy2,'#241A17',2));
+  // Visible back edges: B2->C2 (top-back) and B2 bottom (right side visible)
+  o.push(L(Bx2,By2,Cx2,Cy2,'#241A17',1.5));
+
+  // ── STEP 3: Draw all HIDDEN dotted edges LAST so they show over faces ─────
+  // Hidden depth edge A->A2 (left, behind the prism)
+  o.push(L(Ax,Ay,Ax2,Ay2,'#555',1.5,'6,4'));
+  // Hidden back base A2->B2
+  o.push(L(Ax2,Ay2,Bx2,By2,'#555',1.5,'6,4'));
+  // Hidden back left slant A2->C2
+  o.push(L(Ax2,Ay2,Cx2,Cy2,'#555',1.5,'6,4'));
+
+  // ── Title ─────────────────────────────────────────────────────────────────
+  o.push(R(14,8,452,30,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,27,'Triangular Prism \u2014 base 10 cm,  height 6 cm,  length 15 cm','#C0272D',12,'middle',true));
+
+  // ── p>=1: dimension labels ────────────────────────────────────────────────
   if(p>=1){
-    o.push(T(ox+bw/2,oy+14,'base = 10 cm','#C0272D',12,'middle',true));
-    o.push(L(ox+bw/2,oy,ox+bw/2,oy-bh,'#aaa',1,'4,3'));
-    o.push(T(ox+bw/2+20,oy-bh/2,'h = 6 cm','#C0272D',12,'start',true));
-    o.push(T(ox+bw+d/2+4,oy-d/2+4,'l = 15 cm','#888',11,'start',false));
+    o.push(T((Ax+Bx)/2,Ay+16,'base = 10 cm','#C0272D',12,'middle',true));
+    // Perpendicular height inside front triangle (dashed blue)
+    var Hx=(Ax+Bx)/2,Hy=Ay;
+    o.push(L(Hx,Hy,Cx,Cy,'#1a5a8a',1.5,'4,3'));
+    o.push(T(Hx+16,(Hy+Cy)/2+4,'h = 6 cm','#1a5a8a',12,'start',true));
+    // Right-angle marker
+    o.push(L(Hx,Hy-8,Hx,Hy,'#1a5a8a',1));
+    o.push(L(Hx,Hy-8,Hx+8,Hy-8,'#1a5a8a',1));
+    // Length along B->B2
+    o.push(T((Bx+Bx2)/2+6,(By+By2)/2+6,'l = 15 cm','#555',12,'start',false));
   }
-  if(p>=2){o.push(T(340,140,'A\u25b3 = \u00bd \u00d7 10 \u00d7 6','#241A17',13,'start',true));o.push(T(340,162,'     = 30 cm\u00b2','#241A17',13,'start',false));}
-  if(p>=3){o.push(T(340,196,'V = 30 \u00d7 15','#241A17',13,'start',true));o.push(T(340,218,'  = 450 cm\u00b3','#C0272D',14,'start',true));}
-  o.push(T(240,16,'Volume of a Triangular Prism','#C0272D',12,'middle',true));
+
+  // ── p>=2: cross-section area ──────────────────────────────────────────────
+  if(p>=2){
+    o.push(R(296,88,168,58,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(380,106,'\u25b3 cross-section:','#1a5a8a',11,'middle',false));
+    o.push(T(380,126,'A = \u00bd \u00d7 10 \u00d7 6 = 30 cm\u00b2','#1a5a8a',13,'middle',true));
+  }
+
+  // ── p>=3: volume ──────────────────────────────────────────────────────────
+  if(p>=3){
+    o.push(R(296,158,168,58,'#e8f8ee','#1a7a3a',2));
+    o.push(T(380,176,'V = area \u00d7 length','#1a7a3a',12,'middle',false));
+    o.push(T(380,198,'= 30 \u00d7 15 = 450 cm\u00b3','#1a7a3a',14,'middle',true));
+  }
+
   s.innerHTML=o.join('');
 }
 
-/* Q6 - Circumference and area of circle */
 function dQ6(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
   var cx=200,cy=150,r=100;
@@ -368,12 +497,12 @@ var QS=[
     {lb:'Surface area',dr:dQ3,ht:'<div class="fm">SA = 2(lw + lh + wh)</div><div class="fm">   = 2(32 + 40 + 20) = 2 \u00d7 92 = 184 cm\u00b2</div>'},
     {lb:'Your turn',dr:dQ3,ht:tryIt({question:'A cuboid has length <b>6 cm</b>, width <b>3 cm</b> and height <b>4 cm</b>. Find its volume.',hints:['V = l \u00d7 w \u00d7 h','6 \u00d7 3 \u00d7 4'],ans:72,exact:0.1,unit:'cm\u00b3',working:'V = 6 \u00d7 3 \u00d7 4 = <b>72 cm\u00b3</b>'})}
   ]},
-  {ey:'Q4 \u2022 Year 10 \u2022 Foundation',ti:'Surface Area of an Open Box',su:'An open box (no lid) has base 10\u00d76 cm and height 3 cm. Find its surface area.',steps:[
-    {lb:'The net',dr:dQ4,ht:'<p>An <b>open box</b> has no top face. Its surface area = base + 4 sides. The net (unfolded box) shows all the faces laid flat.</p>'},
-    {lb:'Label the faces',dr:dQ4,ht:'<p>Base: 10\u00d76 cm. Two long sides: 10\u00d73 cm each. Two short sides: 6\u00d73 cm each.</p>'},
-    {lb:'Calculate each face',dr:dQ4,ht:'<div class="fm">Base = 10 \u00d7 6 = 60 cm\u00b2</div><div class="fm">2 long sides = 2 \u00d7 (10 \u00d7 3) = 60 cm\u00b2</div><div class="fm">2 short sides = 2 \u00d7 (6 \u00d7 3) = 36 cm\u00b2</div>'},
-    {lb:'Total surface area',dr:dQ4,ht:'<div class="fm">SA = 60 + 60 + 36 = 156 cm\u00b2</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var l=rnd(4,10),w=rnd(3,7),h=rnd(2,6);return{question:'Volume of cuboid: '+l+'×'+w+'×'+h+' cm.',hints:['V = l×w×h'],ans:l*w*h,tol:0,unit:'cm³',working:l+'×'+w+'×'+h+' = '+l*w*h+' cm³'};})}
+  {ey:'Q4 • Year 10 • Foundation',ti:'Surface Area of an Open Box',su:'An open box (no lid) has base 10×6 cm and height 3 cm. Find its surface area.',steps:[
+    {lb:'The open box',dr:dQ4,ht:'<p>An <b>open box</b> has no lid. It has 5 faces: a base and 4 sides. The coloured 3D view shows each face. Hidden edges are dotted.</p>'},
+    {lb:'Unfold to a net',dr:dQ4,ht:'<p>Unfolding the box flat gives a <b>net</b>. Each face lays out around the base. The net shows exactly which rectangles make up the surface area.</p>'},
+    {lb:'Label dimensions',dr:dQ4,ht:'<p>Base: <b>10×6</b>. Two long sides: <b>10×3</b> each. Two short sides: <b>6×3</b> each.</p>'},
+    {lb:'Total surface area',dr:dQ4,ht:'<div class="fm">SA = 10×6 + 2(10×3) + 2(6×3)</div><div class="fm">= 60 + 60 + 36 = <b>156 cm²</b></div>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var l=rnd(5,12),w=rnd(3,8),h=rnd(2,5);var sa=l*w+2*l*h+2*w*h;return{question:'Open box (no lid): base <b>'+l+'×'+w+' cm</b>, height <b>'+h+' cm</b>. Surface area?',hints:['5 faces: base + 2 long sides + 2 short sides','Base = '+l+'×'+w+' = '+l*w,'Long sides: 2×('+l+'×'+h+') = '+2*l*h,'Short sides: 2×('+w+'×'+h+') = '+2*w*h],ans:sa,tol:0,unit:'cm²',working:l*w+' + '+2*l*h+' + '+2*w*h+' = '+sa+' cm²'};})}
   ]},
   {ey:'Q5 \u2022 Year 10 \u2022 Foundation',ti:'Volume of a Triangular Prism',su:'Triangular cross-section: base 10 cm, height 6 cm. Prism length 15 cm.',steps:[
     {lb:'The prism',dr:dQ5,ht:'<p>A <b>triangular prism</b> has a triangular cross-section. Volume = area of cross-section \u00d7 length.</p>'},
