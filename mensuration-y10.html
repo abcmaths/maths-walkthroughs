@@ -238,109 +238,104 @@ function dQ3(p){
 function dQ4(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 
-  // ── Box dimensions (10 × 6 × 3, no lid) ─────────────────────────────────
-  // 3D view: isometric-ish, front face bottom-left
-  var ox=28, oy=200, W=160, H=60, D=55, dxd=50, dyd=-20;
+  var cBase='#fce8d8',cFront='#fce8d8',cBack='#e8d0bc';
+  var cLeft='#c8b0d8',cRight='#a8d8a8',cBottom='#f0d080';
 
-  // Face colours (5 faces of open box)
-  var cBase='#fce8d8', cFront='#fce8d8', cBack='#e8d0bc';
-  var cLeft='#c8b0d8', cRight='#a8d8a8', cBottom='#f0d080';
+  // Title box — always on top, drawn last
+  function title(txt){
+    o.push(R(14,8,452,30,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,27,txt,'#C0272D',12,'middle',true));
+  }
 
   if(p===0){
-    // ── p=0: full 3D open box ──────────────────────────────────────────────
+    // ── 3D open box ──────────────────────────────────────────────────────
+    // oy=215 keeps box well below header (top of front face = oy-H = 215-70 = 145)
+    var ox=30,oy=215,W=160,H=70,dxd=50,dyd=-22;
 
-    // Back face (hidden — teal, drawn first)
-    o.push('<polygon points="'+(ox+dxd)+','+(oy+dyd)+' '+(ox+W+dxd)+','+(oy+dyd)+' '
-      +(ox+W+dxd)+','+(oy-H+dyd)+' '+(ox+dxd)+','+(oy-H+dyd)+'" fill="#b8d8e8" stroke="none"/>');
-
-    // Bottom face (ox,oy to back-bottom)
+    // Back face (hidden, teal)
+    o.push('<polygon points="'+(ox+dxd)+','+(oy+dyd)+' '+(ox+W+dxd)+','+(oy+dyd)+' '+(ox+W+dxd)+','+(oy-H+dyd)+' '+(ox+dxd)+','+(oy-H+dyd)+'" fill="#b8d8e8" stroke="none"/>');
+    // Bottom face (amber)
     o.push('<polygon points="'+ox+','+oy+' '+(ox+W)+','+oy+' '+(ox+W+dxd)+','+(oy+dyd)+' '+(ox+dxd)+','+(oy+dyd)+'" fill="'+cBottom+'" stroke="none"/>');
-    // Right face
+    // Right face (green)
     o.push('<polygon points="'+(ox+W)+','+oy+' '+(ox+W)+','+(oy-H)+' '+(ox+W+dxd)+','+(oy-H+dyd)+' '+(ox+W+dxd)+','+(oy+dyd)+'" fill="'+cRight+'" stroke="none"/>');
-    // Left face
+    // Left face (purple)
     o.push('<polygon points="'+ox+','+oy+' '+ox+','+(oy-H)+' '+(ox+dxd)+','+(oy-H+dyd)+' '+(ox+dxd)+','+(oy+dyd)+'" fill="'+cLeft+'" stroke="none"/>');
-    // Front face
+    // Front face (cream)
     o.push('<polygon points="'+ox+','+oy+' '+(ox+W)+','+oy+' '+(ox+W)+','+(oy-H)+' '+ox+','+(oy-H)+'" fill="'+cFront+'" stroke="none"/>');
 
     // Visible solid edges
-    // Front rect
     o.push(L(ox,oy,ox+W,oy,'#C0272D',2));
     o.push(L(ox+W,oy,ox+W,oy-H,'#C0272D',2));
     o.push(L(ox+W,oy-H,ox,oy-H,'#C0272D',2));
     o.push(L(ox,oy-H,ox,oy,'#C0272D',2));
-    // Right depth edges (visible)
     o.push(L(ox+W,oy,ox+W+dxd,oy+dyd,'#241A17',2));
     o.push(L(ox+W,oy-H,ox+W+dxd,oy-H+dyd,'#241A17',2));
-    // Top-back edge B2->C2 (visible)
     o.push(L(ox+W+dxd,oy-H+dyd,ox+dxd,oy-H+dyd,'#241A17',1.5));
-    // Right-back vertical (visible)
     o.push(L(ox+W+dxd,oy+dyd,ox+W+dxd,oy-H+dyd,'#241A17',1.5));
 
-    // DOTTED hidden edges (drawn last)
-    o.push(L(ox,oy,ox+dxd,oy+dyd,'#555',1.5,'6,4'));           // left depth bottom
-    o.push(L(ox,oy-H,ox+dxd,oy-H+dyd,'#555',1.5,'6,4'));       // left depth top
-    o.push(L(ox+dxd,oy+dyd,ox+dxd,oy-H+dyd,'#555',1.5,'6,4')); // back-left vertical
-    o.push(L(ox+dxd,oy+dyd,ox+W+dxd,oy+dyd,'#555',1.5,'6,4')); // back bottom edge
+    // Hidden dotted edges (drawn last so visible over fills)
+    o.push(L(ox,oy,ox+dxd,oy+dyd,'#555',1.5,'6,4'));
+    o.push(L(ox,oy-H,ox+dxd,oy-H+dyd,'#555',1.5,'6,4'));
+    o.push(L(ox+dxd,oy+dyd,ox+dxd,oy-H+dyd,'#555',1.5,'6,4'));
+    o.push(L(ox+dxd,oy+dyd,ox+W+dxd,oy+dyd,'#555',1.5,'6,4'));
 
     // Labels
-    o.push(T(ox+W/2,oy+16,'10 cm (length)','#C0272D',11,'middle',true));
+    o.push(T(ox+W/2,oy+16,'10 cm','#C0272D',11,'middle',true));
     o.push(T(ox-14,oy-H/2,'3 cm','#241A17',11,'middle',true));
-    o.push(T(ox+W+dxd/2+18,oy+dyd/2+6,'6 cm (width)','#888',11,'start',false));
+    o.push(T(ox+W+dxd/2+20,oy+dyd/2+8,'6 cm','#888',11,'start',false));
     o.push(T(ox+W+2,oy-H+2,'No lid','#C8922A',10,'start',true));
 
-    o.push(R(14,8,452,30,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,27,'Open box — 10\u00d76 cm base, height 3 cm, NO LID','#C0272D',12,'middle',true));
+    title('Open box \u2014 10\u00d76 cm base, height 3 cm, NO LID');
 
   } else {
-    // ── p>=1: NET (unfolded flat) ─────────────────────────────────────────
-    // Scale: sc=16 makes 10cm=160px, 6cm=96px, 3cm=48px
-    var sc=16;
-    var L10=10*sc,L6=6*sc,L3=3*sc; // 160, 96, 48
-    // Centre the net: total width = L3+L10+L3 = 256, height = L3+L6+L3 = 192
-    var nx=112, ny=54;  // top-left of BASE rectangle
+    // ── NET (unfolded flat) ───────────────────────────────────────────────
+    // sc=15: 10cm=150px, 6cm=90px, 3cm=45px
+    // Total net height = 45+90+45 = 180px
+    // ny = top of base. Top flap top = ny-45. Must clear header bottom (y=38).
+    // ny-45 >= 46  →  ny >= 91. Use ny=96 → top flap top = 51, clear of header.
+    // Total net bottom = ny+90+45 = 96+135 = 231. Leaves room for SA row at y=248.
+    var sc=15;
+    var L10=150,L6=90,L3=45;
+    // Centre horizontally: total width = L3+L10+L3 = 240. Centre at 240 → nx = 240-120-45 = 75
+    var nx=75, ny=96;
 
-    // Base (cream/red)
+    // Base
     o.push('<polygon points="'+nx+','+ny+' '+(nx+L10)+','+ny+' '+(nx+L10)+','+(ny+L6)+' '+nx+','+(ny+L6)+'" fill="'+cBase+'" stroke="#C0272D" stroke-width="1.5"/>');
-
-    if(p>=1){
-      // Top flap (front side — cream)
-      o.push('<polygon points="'+nx+','+(ny-L3)+' '+(nx+L10)+','+(ny-L3)+' '+(nx+L10)+','+ny+' '+nx+','+ny+'" fill="'+cFront+'" stroke="#C0272D" stroke-width="1.5"/>');
-      // Bottom flap (back side — back colour)
-      o.push('<polygon points="'+nx+','+(ny+L6)+' '+(nx+L10)+','+(ny+L6)+' '+(nx+L10)+','+(ny+L6+L3)+' '+nx+','+(ny+L6+L3)+'" fill="'+cBack+'" stroke="#C0272D" stroke-width="1.5"/>');
-      // Left flap (left side — purple)
-      o.push('<polygon points="'+(nx-L3)+','+ny+' '+nx+','+ny+' '+nx+','+(ny+L6)+' '+(nx-L3)+','+(ny+L6)+'" fill="'+cLeft+'" stroke="#C0272D" stroke-width="1.5"/>');
-      // Right flap (right side — green)
-      o.push('<polygon points="'+(nx+L10)+','+ny+' '+(nx+L10+L3)+','+ny+' '+(nx+L10+L3)+','+(ny+L6)+' '+(nx+L10)+','+(ny+L6)+'" fill="'+cRight+'" stroke="#C0272D" stroke-width="1.5"/>');
-    }
+    // Top flap (front side)
+    o.push('<polygon points="'+nx+','+(ny-L3)+' '+(nx+L10)+','+(ny-L3)+' '+(nx+L10)+','+ny+' '+nx+','+ny+'" fill="'+cFront+'" stroke="#C0272D" stroke-width="1.5"/>');
+    // Bottom flap (back side)
+    o.push('<polygon points="'+nx+','+(ny+L6)+' '+(nx+L10)+','+(ny+L6)+' '+(nx+L10)+','+(ny+L6+L3)+' '+nx+','+(ny+L6+L3)+'" fill="'+cBack+'" stroke="#C0272D" stroke-width="1.5"/>');
+    // Left flap (purple)
+    o.push('<polygon points="'+(nx-L3)+','+ny+' '+nx+','+ny+' '+nx+','+(ny+L6)+' '+(nx-L3)+','+(ny+L6)+'" fill="'+cLeft+'" stroke="#C0272D" stroke-width="1.5"/>');
+    // Right flap (green)
+    o.push('<polygon points="'+(nx+L10)+','+ny+' '+(nx+L10+L3)+','+ny+' '+(nx+L10+L3)+','+(ny+L6)+' '+(nx+L10)+','+(ny+L6)+'" fill="'+cRight+'" stroke="#C0272D" stroke-width="1.5"/>');
 
     if(p>=2){
-      // Dimension labels on all faces
+      // Face labels (centred in each face)
       o.push(T(nx+L10/2,ny+L6/2+4,'Base: 10\u00d76','#C0272D',11,'middle',true));
-      o.push(T(nx+L10/2,ny-L3/2,'10\u00d73  (front)','#C0272D',10,'middle',false));
-      o.push(T(nx+L10/2,ny+L6+L3/2,'10\u00d73  (back)','#6b5750',10,'middle',false));
-      o.push(T(nx-L3/2,(ny+ny+L6)/2,'6\u00d73','#6a1b9a',10,'middle',false));
-      o.push(T(nx+L10+L3/2,(ny+ny+L6)/2,'6\u00d73','#2e7d32',10,'middle',false));
-      // Dimension ticks
-      o.push(T(nx+L10/2,ny-L3-8,'10 cm','#888',9,'middle',false));
-      o.push(T(nx-L3-8,(ny+ny+L6)/2,'6 cm','#888',9,'middle',false));
-      o.push(T(nx-L3-8,ny-L3/2,'3 cm','#888',9,'middle',false));
+      o.push(T(nx+L10/2,ny-L3/2+4,'10\u00d73  (front)','#C0272D',10,'middle',false));
+      o.push(T(nx+L10/2,ny+L6+L3/2+4,'10\u00d73  (back)','#6b5750',10,'middle',false));
+      o.push(T(nx-L3/2,ny+L6/2+4,'6\u00d73','#6a1b9a',10,'middle',false));
+      o.push(T(nx+L10+L3/2,ny+L6/2+4,'6\u00d73','#2e7d32',10,'middle',false));
+      // Outer dimension annotations (outside the net boundary, clear of faces)
+      o.push(T(nx+L10/2,ny-L3-10,'10 cm','#888',9,'middle',false));
+      o.push(T(nx-L3-10,ny+L6/2+4,'6 cm','#888',9,'middle',false));
+      o.push(T(nx-L3-10,ny-L3/2+4,'3 cm','#888',9,'middle',false));
     }
 
     if(p>=3){
-      o.push(R(14,250,452,40,'#e8f8ee','#1a7a3a',1.5));
-      o.push(T(240,262,'SA = 60 + 2(10\u00d73) + 2(6\u00d73)  =  60 + 60 + 36  =  156 cm\u00b2','#1a7a3a',12,'middle',true));
-      o.push(T(240,278,'5 faces (no lid)','#888',10,'middle',false));
+      o.push(R(14,248,452,42,'#e8f8ee','#1a7a3a',1.5));
+      o.push(T(240,261,'SA = 10\u00d76 + 2(10\u00d73) + 2(6\u00d73)','#1a7a3a',12,'middle',false));
+      o.push(T(240,278,'= 60 + 60 + 36 = 156 cm\u00b2','#1a7a3a',13,'middle',true));
     }
 
-    o.push(R(14,8,452,30,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,27,'Net of open box — unfolded flat','#C0272D',12,'middle',true));
+    title('Net of open box \u2014 unfolded flat');
   }
 
   s.innerHTML=o.join('');
 }
 
 
-/* Q5 - Volume of triangular prism */
 function dQ5(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 
