@@ -67,7 +67,7 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 <div id="welcome-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;display:flex;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:6px;max-width:480px;width:90%;padding:28px 28px 22px;box-shadow:0 8px 32px rgba(0,0,0,.3);position:relative;">
     <div style="width:40px;height:4px;background:#C0272D;border-radius:2px;margin-bottom:14px;"></div>
-    <p style="font-size:15px;line-height:1.6;color:#241A17;margin:0 0 18px;">This list of 20 questions is a starter for your revision. You should also look at some of the topics listed in these 20 questions by choosing other topics on this website.</p>
+    <p style="font-size:15px;line-height:1.6;color:#241A17;margin:0 0 18px;">This list of 21 questions is a starter for your revision. You should also look at some of the topics listed in these 20 questions by choosing other topics on this website.</p>
     <button onclick="document.getElementById('welcome-overlay').style.display='none'" style="background:#C0272D;color:#fff;border:none;border-radius:3px;padding:9px 22px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Got it &mdash; let&rsquo;s go</button>
   </div>
 </div>
@@ -81,7 +81,7 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
   <div class="main">
     <div class="aoc-banner">
       <strong>End of Year Assessment of Competency &mdash; Year 7</strong>
-      20 questions covering Data Handling &amp; Presentation topics. Numbers are randomised each visit. Work through each step carefully, then try the Your Turn question.
+      21 questions covering Data Handling &amp; Presentation topics. Numbers are randomised each visit. Work through each step carefully, then try the Your Turn question.
     </div>
     <div class="hdr">
       <div class="eyebrow" id="ey"></div>
@@ -157,6 +157,25 @@ var V={};
   V.q1total=V.q1freqs.reduce(function(a,b){return a+b;},0);
   V.q1mode=subjects[V.q1freqs.indexOf(Math.max.apply(null,V.q1freqs))];
   V.q1range=Math.max.apply(null,V.q1freqs)-Math.min.apply(null,V.q1freqs);
+
+  // Q1b Mean, Median, Mode, Range from a data set
+  var rawData=[];for(var _i=0;_i<8;_i++)rawData.push(rnd(2,12));
+  rawData.sort(function(a,b){return a-b;});
+  V.q1b_data=rawData.slice();
+  V.q1b_min=rawData[0];V.q1b_max=rawData[rawData.length-1];
+  V.q1b_range=V.q1b_max-V.q1b_min;
+  var sum1b=rawData.reduce(function(a,b){return a+b;},0);
+  V.q1b_sum=sum1b;V.q1b_n=rawData.length;
+  V.q1b_mean=round2(sum1b/rawData.length);
+  // median: 8 values, median = mean of 4th and 5th
+  V.q1b_med=round1((rawData[3]+rawData[4])/2);
+  // mode: value appearing most
+  var freq1b={};rawData.forEach(function(x){freq1b[x]=(freq1b[x]||0)+1;});
+  var maxF1b=Math.max.apply(null,Object.values(freq1b));
+  var modes1b=Object.keys(freq1b).filter(function(k){return freq1b[k]===maxF1b;});
+  V.q1b_mode=modes1b.length===rawData.length?'No mode':modes1b.join(', ');
+  V.q1b_modeF=maxF1b;
+  V.q1b_sum12=rawData[3]+rawData[4];
 
   // Q2 Bar chart — reading and comparing
   var months=['Jan','Feb','Mar','Apr','May'];
@@ -284,241 +303,557 @@ var V={};
 // DIAGRAM FUNCTIONS
 // ══════════════════════════════════════════════════════════════════════════
 
+function drawTally(f,tx,cy){
+  // Draw f tally marks starting at tx, centred on cy
+  // Groups of 5: 4 verticals then a diagonal cross-stroke, gap between groups
+  var marks='';
+  var groupW=32,markSp=6,topY=cy-8,botY=cy+8,diagH=10;
+  for(var t=0;t<f;t++){
+    var grp=Math.floor(t/5),pos=t%5;
+    var gx=tx+grp*(groupW+6);
+    if(pos<4){// vertical stroke
+      var mx=gx+pos*markSp;
+      marks+='<line x1="'+mx+'" y1="'+topY+'" x2="'+mx+'" y2="'+botY+'" stroke="#241A17" stroke-width="1.5"/>';
+    } else {// diagonal cross stroke across the 4 verticals
+      var dx1=gx-2,dy1=cy-diagH,dx2=gx+4*markSp-2,dy2=cy+diagH;
+      marks+='<line x1="'+dx1+'" y1="'+dy1+'" x2="'+dx2+'" y2="'+dy2+'" stroke="#C0272D" stroke-width="1.8"/>';
+    }
+  }
+  return marks;
+}
+function dQ1b(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var data=V.q1b_data,n=V.q1b_n,mn=V.q1b_min,mx=V.q1b_max,rng=V.q1b_range;
+  var sum=V.q1b_sum,mean=V.q1b_mean,med=V.q1b_med,mode=V.q1b_mode;
+  o.push(T(240,15,'Averages and Range','#C0272D',13,'middle',true));
+  // always show the sorted data list as numbered cards
+  data.forEach(function(v,i){
+    var cx=32+i*52,cy=44;
+    o.push(R(cx-20,cy-16,40,32,'#fff5f0','#C0272D',1.5));
+    o.push(T(cx,cy+6,v,'#C0272D',14,'middle',true));
+    o.push(T(cx,cy+22,(i+1),'#888',8,'middle',false));
+  });
+  o.push(T(240,82,'Data in order: '+data.join(', '),'#888',10,'middle',false));
+  // step 1: range
+  if(p>=1){
+    o.push(R(14,92,452,36,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,105,'Range = highest \u2212 lowest = '+mx+' \u2212 '+mn+' = '+rng,'#C0272D',12,'middle',true));
+    // arrow from first to last card
+    o.push(L(12,44,12+n*52,44,'#C0272D',1.5));
+    o.push(T(12+n*52/2,38,'Range','#C0272D',8,'middle',false));
+  }
+  // step 2: mode
+  if(p>=2){
+    o.push(R(14,134,452,28,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,152,'Mode = '+mode+(V.q1b_modeF>1?' (appears '+V.q1b_modeF+' times)':' (no value repeats)'),'#1a5a8a',12,'middle',false));
+  }
+  // step 3: median – highlight middle two cards
+  if(p>=3){
+    [3,4].forEach(function(i){
+      var cx=32+i*52;
+      o.push(R(cx-22,26,44,36,'#fff','#C8922A',2.5));
+    });
+    o.push(R(14,168,452,36,'#fff8ee','#C8922A',1.5));
+    o.push(T(240,182,'Median = ('+data[3]+' + '+data[4]+') \u00f7 2 = '+V.q1b_sum12+' \u00f7 2 = '+med,'#C8922A',12,'middle',false));
+  }
+  // step 4: mean
+  if(p>=4){
+    o.push(R(14,210,452,40,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,224,'Mean = sum \u00f7 count = '+sum+' \u00f7 '+n+' = '+mean,'#1a7a3a',12,'middle',false));
+    o.push(T(240,244,'Sum: '+data.join('+')+' = '+sum,'#888',9,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
+
 function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var freqs=V.q1freqs,subjs=V.q1subj,tot=V.q1total;
-  o.push(T(240,18,'Favourite Sport Survey','#C0272D',13,'middle',true));
-  // table header
-  ['Sport','Tally','Frequency'].forEach(function(h,i){
-    var ww=[130,170,110];var xx=[14,150,328];
-    o.push(R(xx[i],24,ww[i]-4,22,'#C0272D','#C0272D',1));
-    o.push(T(xx[i]+ww[i]/2-4,39,h,'#fff',10,'middle',true));
-  });
+  o.push(T(240,15,'Favourite Sport — Tally Chart','#C0272D',13,'middle',true));
+  // header row
+  var hx=[14,150,376],hw=[132,222,90],hlab=['Sport','Tally','Freq.'];
+  hx.forEach(function(x,i){o.push(R(x,22,hw[i],22,'#C0272D','#C0272D',0));o.push(T(x+hw[i]/2,37,hlab[i],'#fff',10,'middle',true));});
+  // data rows — always show the table skeleton
   freqs.forEach(function(f,i){
-    var bg=i%2===0?'#fff5f0':'#fff';var y=48+i*33;
-    o.push(R(14,y,126,31,bg,'#E4D6CE',1));o.push(T(77,y+19,subjs[i],'#241A17',10,'middle',false));
-    if(p>=1){
-      // draw tally marks
-      var tx=154,ty=y+19;
-      var marks='';for(var t=0;t<f;t++){var x2=tx+t%5*7;var y2=ty-(t%5===4?3:0);marks+=t%5===4?'<line x1="'+(x2-4)+'" y1="'+(y2-6)+'" x2="'+(x2+4)+'" y2="'+(y2+6)+'" stroke="#C0272D" stroke-width="1.5"/>':'<line x1="'+x2+'" y1="'+(y2-7)+'" x2="'+x2+'" y2="'+(y2+7)+'" stroke="#241A17" stroke-width="1.5"/>';}
-      o.push(marks);
-      o.push(R(328,y,108,31,bg,'#E4D6CE',1));o.push(T(382,y+19,f,'#C0272D',11,'middle',true));
+    var bg=i%2===0?'#fff8f6':'#fff';var ry=46+i*34;
+    o.push(R(14,ry,132,33,bg,'#E4D6CE',1));
+    o.push(T(80,ry+20,subjs[i],'#241A17',10,'middle',false));
+    o.push(R(150,ry,222,33,bg,'#E4D6CE',1));// tally cell
+    o.push(R(376,ry,90,33,bg,'#E4D6CE',1));// freq cell
+    if(p>=1){// fill in tallies and frequencies
+      o.push(drawTally(f,158,ry+16));
+      o.push(T(421,ry+20,f,'#C0272D',11,'middle',true));
     }
   });
-  if(p>=2){o.push(R(14,216,442,28,'#e8f8ee','#1a7a3a',1));
-    o.push(T(235,234,'Total = '+tot+'   Mode = '+V.q1mode+'   Range = '+V.q1range,'#1a7a3a',11,'middle',false));}
-  s.innerHTML=o.join('');}
+  if(p>=2){
+    o.push(R(14,220,452,30,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,239,'Total = '+tot+'   Mode = '+V.q1mode+' (most frequent)   Range = '+Math.max.apply(null,freqs)+'\u2212'+Math.min.apply(null,freqs)+' = '+V.q1range,'#1a7a3a',10,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var sales=V.q2sales,months=V.q2months,tot=V.q2total;
-  var mx=Math.max.apply(null,sales),sc=140/mx;
-  var ox=50,oy=210,bw=72;
-  var cols=['#C0272D','#1a5a8a','#C8922A','#888','#1a7a3a'];
-  o.push(T(240,16,'Monthly Sales','#C0272D',13,'middle',true));
-  o.push(L(ox,oy,ox,oy-155,'#333',1.5));o.push(L(ox,oy,ox+5*bw+10,oy,'#333',1.5));
-  for(var t=0;t<=mx;t+=10){var yy=oy-t*sc;if(yy>=oy-150){o.push(L(ox-3,yy,ox,yy,'#333',1));o.push(T(ox-6,yy+4,t,'#888',9,'end',false));}}
+  var mx=Math.max.apply(null,sales);
+  var scMax=Math.ceil(mx/10)*10;
+  var ox=55,oy=210,bw=72,axH=155;
+  var sc=axH/scMax;
+  var cols=['#C0272D','#1a5a8a','#C8922A','#7A1418','#1a7a3a'];
+  o.push(T(240,14,'Monthly Book Sales','#C0272D',13,'middle',true));
+  // axes always visible from step 0
+  o.push(L(ox,oy,ox,oy-axH-10,'#333',1.5));
+  o.push(L(ox,oy,ox+5*bw+10,oy,'#333',1.5));
+  // gridlines and y-axis ticks
+  for(var t=0;t<=scMax;t+=10){
+    var yy=oy-t*sc;
+    o.push(L(ox,yy,ox+5*bw+10,yy,'#E4D6CE',1,'3,3'));
+    o.push(L(ox-4,yy,ox,yy,'#333',1));
+    o.push(T(ox-7,yy+4,t,'#888',9,'end',false));
+  }
+  // x-axis month labels always visible
   sales.forEach(function(f,i){
-    var bh=f*sc,bx=ox+i*bw+5;
-    if(p>=1){o.push('<rect x="'+bx+'" y="'+(oy-bh)+'" width="'+(bw-8)+'" height="'+bh+'" fill="'+cols[i]+'88" stroke="'+cols[i]+'" stroke-width="1.5"/>');
-      o.push(T(bx+(bw-8)/2,oy-bh-5,f,cols[i],10,'middle',true));}
-    o.push(T(bx+(bw-8)/2,oy+12,months[i],'#888',10,'middle',false));
+    var bx=ox+i*bw+6;
+    o.push(T(bx+(bw-10)/2,oy+13,months[i],'#555',10,'middle',false));
+    if(p>=1){
+      var bh=f*sc;
+      o.push('<rect x="'+bx+'" y="'+(oy-bh)+'" width="'+(bw-10)+'" height="'+bh+'" fill="'+cols[i]+'99" stroke="'+cols[i]+'" stroke-width="1.5" rx="1"/>');
+      o.push(T(bx+(bw-10)/2,oy-bh-6,f,cols[i],10,'middle',true));
+    }
   });
-  if(p>=2){o.push(R(14,230,452,24,'#e8f8ee','#1a7a3a',1));
-    o.push(T(240,246,'Total = '+tot+'   Highest: '+V.q2maxMonth+' ('+V.q2max+')   Mar\u2212Jan = '+V.q2diff,'#1a7a3a',11,'middle',false));}
-  s.innerHTML=o.join('');}
+  if(p>=2){
+    var hi=sales.indexOf(V.q2max);var bxh=ox+hi*bw+6;var bhh=V.q2max*sc;
+    o.push('<rect x="'+bxh+'" y="'+(oy-bhh)+'" width="'+(bw-10)+'" height="'+bhh+'" fill="none" stroke="#C8922A" stroke-width="2.5" rx="1" stroke-dasharray="4,2"/>');
+    o.push(T(240,232,'\u25b2 Highest: '+V.q2maxMonth+' with '+V.q2max+' books','#C8922A',11,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(14,242,452,16,'#e8f8ee','#1a7a3a',1));
+    o.push(T(240,254,'Total = '+tot+'   Mar \u2212 Jan = '+V.q2sales[2]+' \u2212 '+V.q2sales[0]+' = '+V.q2diff,'#1a7a3a',10,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var freqs=V.q3freqs,items=V.q3items,tot=V.q3tot,angles=V.q3angles;
-  var cx=160,cy=128,rad=90;
-  o.push(T(240,14,'Pie Chart \u2014 Favourite Colour','#C0272D',13,'middle',true));
+  var cx=155,cy=130,rad=90;
+  o.push(T(240,14,'Pie Chart \u2014 Favourite Colour (total = '+tot+')','#C0272D',12,'middle',true));
   var cols2=['#C0272D','#1a5a8a','#1a7a3a','#C8922A'];
-  var start=0;
-  angles.forEach(function(ang,i){
-    if(p>=1){
-      var s1=start*Math.PI/180,e1=(start+ang)*Math.PI/180;
-      var x1=cx+rad*Math.cos(s1-Math.PI/2),y1=cy+rad*Math.sin(s1-Math.PI/2);
-      var x2=cx+rad*Math.cos(e1-Math.PI/2),y2=cy+rad*Math.sin(e1-Math.PI/2);
+  // circle outline always visible
+  o.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+rad+'" fill="#f8f4f2" stroke="#ccc" stroke-width="1.5"/>');
+  // legend always visible
+  items.forEach(function(it,i){
+    var ly=38+i*38;
+    o.push(R(306,ly,14,14,cols2[i],cols2[i],0));
+    o.push(T(326,ly+11,it+': '+freqs[i]+' students','#241A17',11,'start',false));
+  });
+  if(p>=1){
+    // draw filled sectors
+    var start=0;
+    angles.forEach(function(ang,i){
+      var s1=start*Math.PI/180-Math.PI/2;
+      var e1=(start+ang)*Math.PI/180-Math.PI/2;
+      var x1=cx+rad*Math.cos(s1),y1=cy+rad*Math.sin(s1);
+      var x2=cx+rad*Math.cos(e1),y2=cy+rad*Math.sin(e1);
       var lg=ang>180?1:0;
       o.push('<path d="M '+cx+','+cy+' L '+x1.toFixed(1)+','+y1.toFixed(1)+' A '+rad+','+rad+' 0 '+lg+',1 '+x2.toFixed(1)+','+y2.toFixed(1)+' Z" fill="'+cols2[i]+'99" stroke="'+cols2[i]+'" stroke-width="1.5"/>');
-      // label midpoint
-      var mid=(start+ang/2)*Math.PI/180-Math.PI/2;
-      var lx=cx+(rad*0.62)*Math.cos(mid),ly=cy+(rad*0.62)*Math.sin(mid);
-      o.push(T(lx.toFixed(1),ly.toFixed(1),ang+'\u00b0',cols2[i],9,'middle',true));
-    }
-    start+=ang;
-  });
-  // legend
-  items.forEach(function(it,i){
-    o.push(R(300,30+i*38,12,12,cols2[i],cols2[i],1));
-    o.push(T(318,42+i*38,it+': '+freqs[i]+' ('+Math.round(freqs[i]/tot*100)+'%)','#241A17',11,'start',false));
-  });
-  if(p>=2){o.push(R(300,190,168,30,'#e8f8ee','#1a7a3a',1));
-    o.push(T(384,207,'Red angle = '+V.q3redAngle+'\u00b0','#1a7a3a',12,'middle',true));}
-  s.innerHTML=o.join('');}
+      start+=ang;
+    });
+  }
+  if(p>=2){
+    // show angle for the first (Red) sector with working
+    o.push(R(300,195,168,52,'#fff5f0','#C0272D',1.5));
+    o.push(T(384,210,'Red angle:','#C0272D',10,'middle',true));
+    o.push(T(384,224,'('+freqs[0]+' \u00f7 '+tot+') \u00d7 360','#241A17',10,'middle',false));
+    o.push(T(384,240,'= '+V.q3redAngle+'\u00b0','#C0272D',13,'middle',true));
+  }
+  if(p>=3){
+    // label each sector angle
+    var start2=0;
+    angles.forEach(function(ang,i){
+      var mid=(start2+ang/2)*Math.PI/180-Math.PI/2;
+      var lx=cx+rad*0.60*Math.cos(mid),ly=cy+rad*0.60*Math.sin(mid);
+      o.push(T(lx.toFixed(1),ly.toFixed(1),ang+'\u00b0',cols2[i],10,'middle',true));
+      start2+=ang;
+    });
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var r=V.q4r,b=V.q4b,gg=V.q4g,tot=V.q4tot;
-  o.push(T(240,22,'Probability \u2014 Coloured Counters','#C0272D',14,'middle',true));
-  var cx=240,cy=110,rad=70;
-  o.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+rad+'" fill="#f5f0eb" stroke="#C0272D" stroke-width="2"/>');
-  o.push(T(cx,cy-20,r+' Red','#C0272D',13,'middle',true));
-  o.push(T(cx,cy,b+' Blue','#1a5a8a',13,'middle',true));
-  o.push(T(cx,cy+20,gg+' Green','#1a7a3a',13,'middle',true));
-  o.push(T(cx,cy+44,'Total: '+tot,'#888',11,'middle',false));
-  if(p>=1){o.push(R(20,185,440,36,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,199,'P(red) = '+r+'/'+tot,'#C0272D',13,'middle',false));
-    o.push(T(240,215,'P(not red) = '+(b+gg)+'/'+tot,'#888',11,'middle',false));}
-  if(p>=2){o.push(R(100,224,280,28,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,242,'Simplified P(red) = '+V.q4pRedN+'/'+V.q4pRedD,'#1a7a3a',13,'middle',true));}
-  s.innerHTML=o.join('');}
+  o.push(T(240,15,'Probability \u2014 Counters in a Bag','#C0272D',13,'middle',true));
+  // draw individual counters in a bag shape — always visible
+  var cols3=['#C0272D','#1a5a8a','#1a7a3a'];
+  var counts=[r,b,gg];var names=['Red','Blue','Green'];
+  var allC=[];
+  counts.forEach(function(n,ci){for(var k=0;k<n;k++)allC.push(ci);});
+  // shuffle so colours are mixed
+  for(var i=allC.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=allC[i];allC[i]=allC[j];allC[j]=tmp;}
+  // arrange in a grid inside a bag oval
+  var cols_per_row=Math.ceil(Math.sqrt(tot)),cr=10;
+  var startX=100,startY=40,gap=24;
+  allC.forEach(function(ci,k){
+    var row=Math.floor(k/cols_per_row),col=k%cols_per_row;
+    var cx2=startX+col*gap,cy2=startY+row*gap;
+    o.push('<circle cx="'+cx2+'" cy="'+cy2+'" r="'+cr+'" fill="'+cols3[ci]+'CC" stroke="'+cols3[ci]+'" stroke-width="1.5"/>');
+    o.push(T(cx2,cy2+4,(ci===0?'R':ci===1?'B':'G'),'#fff',8,'middle',true));
+  });
+  // bag outline
+  o.push('<ellipse cx="'+(startX+cols_per_row*gap/2-gap/2)+'" cy="'+(startY+Math.ceil(tot/cols_per_row)*gap/2)+'" rx="'+(cols_per_row*gap/2+18)+'" ry="'+(Math.ceil(tot/cols_per_row)*gap/2+18)+'" fill="none" stroke="#C8922A" stroke-width="2" stroke-dasharray="6,3"/>');
+  // key
+  counts.forEach(function(n,ci){
+    o.push('<circle cx="326" cy="'+(36+ci*26)+'" r="9" fill="'+cols3[ci]+'CC" stroke="'+cols3[ci]+'" stroke-width="1.5"/>');
+    o.push(T(340,40+ci*26,names[ci]+': '+n,'#241A17',11,'start',false));
+  });
+  o.push(T(340,120,'Total: '+tot,'#888',11,'start',false));
+  // step 1: explain P() notation and write the probability
+  if(p>=1){
+    o.push(R(296,130,172,40,'#fff5f0','#C0272D',1.5));
+    o.push(T(382,146,'P(Red) means:','#C0272D',10,'middle',true));
+    o.push(T(382,162,'"Probability of picking Red"','#241A17',9,'middle',false));
+  }
+  if(p>=2){
+    o.push(R(296,178,172,30,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(382,190,'P(Red) = '+r+' out of '+tot,'#1a5a8a',10,'middle',false));
+    o.push(T(382,202,'= '+r+'/'+tot,'#1a5a8a',12,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(296,215,172,38,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(382,228,'Simplified: '+V.q4pRedN+'/'+V.q4pRedD,'#1a7a3a',13,'middle',true));
+    o.push(T(382,244,'P(not Red) = '+(tot-r)+'/'+tot,'#888',10,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,18,'Probability \u2014 Listing Outcomes (Coin + Die)','#C0272D',12,'middle',true));
-  // draw sample space grid
-  var ox=70,oy=50,cw=52,rh=28;
-  o.push(T(ox-20,oy-8,'Coin','#888',10,'end',false));
-  ['H','T'].forEach(function(c,i){o.push(T(ox+cw/2+i*cw*3,oy-8,c,'#241A17',11,'middle',true));});
-  [1,2,3,4,5,6].forEach(function(d,j){
-    o.push(T(ox-8,oy+rh/2+j*rh,d,'#241A17',11,'end',false));
-    ['H','T'].forEach(function(c,i){
-      var isEven=d%2===0;
-      var fill=p>=1&&c==='H'&&isEven?'#C0272D33':'#fff5f0';
-      o.push(R(ox+i*cw*3,oy+j*rh,cw*2.8,rh-2,fill,'#E4D6CE',1));
-      o.push(T(ox+cw/2+i*cw*3,oy+rh/2+j*rh-2,c+d,'#241A17',10,'middle',false));
-    });
-  });
-  o.push(T(ox-20,oy+rh*3-2,'Die','#888',10,'end',false));
-  if(p>=1){o.push(R(320,40,148,100,'#fff5f0','#C0272D',1.5));
-    o.push(T(394,58,'Highlighted:','#C0272D',10,'middle',true));
-    o.push(T(394,74,'H2, H4, H6','#C0272D',11,'middle',true));
-    o.push(T(394,92,'= 3 outcomes','#888',10,'middle',false));
-    o.push(T(394,108,'out of 12 total','#888',10,'middle',false));}
-  if(p>=2){o.push(R(320,148,148,40,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(394,164,'P(H and even)','#1a7a3a',10,'middle',true));
-    o.push(T(394,180,'= 3/12 = 1/4','#1a7a3a',13,'middle',true));}
-  s.innerHTML=o.join('');}
+  o.push(T(240,14,'Sample Space \u2014 Coin and Dice','#C0272D',12,'middle',true));
+  // layout: col headers H T;  row headers 1-6
+  var ox=130,oy=34,cw=72,rh=32;
+  // column headers
+  o.push(R(ox,oy,cw,24,'#1a5a8a','#1a5a8a',0));   o.push(T(ox+cw/2,oy+16,'H (Heads)','#fff',10,'middle',true));
+  o.push(R(ox+cw,oy,cw,24,'#888','#888',0));         o.push(T(ox+cw+cw/2,oy+16,'T (Tails)','#fff',10,'middle',true));
+  o.push(T(ox-10,oy+12,'Coin\u2192','#555',9,'end',false));
+  o.push(T(ox-10,oy+30,'Dice\u2193','#555',9,'end',false));
+  // rows
+  for(var d=1;d<=6;d++){
+    var ry=oy+24+(d-1)*rh;
+    var isEven=d%2===0;
+    // row label
+    o.push(R(ox-36,ry,32,rh,'#f0f0f0','#ccc',1)); o.push(T(ox-20,ry+rh/2+4,d,'#333',11,'middle',true));
+    // H cell
+    var hFill=p>=1&&isEven?'#C0272D33':'#fff8f6';
+    o.push(R(ox,ry,cw,rh,hFill,'#E4D6CE',1));
+    o.push(T(ox+cw/2,ry+rh/2+4,'H'+d,isEven&&p>=1?'#C0272D':'#555',11,'middle',isEven&&p>=1));
+    // T cell
+    o.push(R(ox+cw,ry,cw,rh,'#f8f8f8','#E4D6CE',1));
+    o.push(T(ox+cw+cw/2,ry+rh/2+4,'T'+d,'#888',11,'middle',false));
+  }
+  // side explanation panel
+  if(p>=1){
+    o.push(R(314,60,154,96,'#fff5f0','#C0272D',1.5));
+    o.push(T(391,76,'Highlighted (red):','#C0272D',10,'middle',true));
+    o.push(T(391,92,'H + even number','#241A17',10,'middle',false));
+    o.push(T(391,108,'H2, H4, H6','#C0272D',11,'middle',true));
+    o.push(T(391,124,'3 outcomes','#888',10,'middle',false));
+    o.push(T(391,148,'Total outcomes: 12','#888',10,'middle',false));
+  }
+  if(p>=2){
+    o.push(R(314,164,154,40,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(391,180,'P(H and even)','#1a7a3a',10,'middle',true));
+    o.push(T(391,196,'= 3 \u00f7 12 = 1/4','#1a7a3a',13,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var dist=V.q6dist,tout=V.q6timeOut,rest=V.q6rest,tback=V.q6timeBack;
   var totalT=tout+rest+tback;
-  var ox=50,oy=220,tw=360,dh=170;
-  var tScale=tw/totalT,dScale=dh/dist;
-  // axes
-  o.push(L(ox,oy,ox+tw,oy,'#333',1.5));o.push(L(ox,oy,ox,oy-dh,'#333',1.5));
-  o.push(T(ox+tw/2,oy+18,'Time (minutes)','#888',10,'middle',false));
-  o.push(T(28,oy-dh/2,'Distance (km)','#888',10,'middle',false));
-  // y ticks
-  for(var d=0;d<=dist;d+=dist/4){var yy=oy-d*dScale;o.push(L(ox-3,yy,ox,yy,'#333',1));o.push(T(ox-6,yy+4,d,'#888',9,'end',false));}
-  // x ticks
-  [0,tout,tout+rest,totalT].forEach(function(t){var xx=ox+t*tScale;o.push(L(xx,oy,xx,oy+3,'#333',1));o.push(T(xx,oy+12,t,'#888',9,'middle',false));});
-  if(p>=1){
-    var x1=ox,y1=oy,x2=ox+tout*tScale,y2=oy-dist*dScale;
-    o.push(L(x1,y1,x2,y2,'#C0272D',2.5));// outward
-    o.push(L(x2,y2,ox+(tout+rest)*tScale,y2,'#C8922A',2.5,'5,3'));// rest
-    o.push(L(ox+(tout+rest)*tScale,y2,ox+totalT*tScale,oy,'#1a5a8a',2.5));// return
+  var ox=60,oy=220,tw=340,axH=170;
+  var tSc=tw/totalT,dSc=axH/dist;
+  // key time x-positions
+  var x0=ox, x1=ox+tout*tSc, x2=ox+(tout+rest)*tSc, x3=ox+totalT*tSc;
+  // key y-positions
+  var y0=oy, yTop=oy-dist*dSc;
+  // ── axes always visible ──────────────────────────────
+  o.push(L(ox,oy,ox+tw+20,oy,'#333',1.5));
+  o.push(L(ox,oy,ox,oy-axH-15,'#333',1.5));
+  o.push(T(ox+tw/2+10,oy+18,'Time (minutes)','#555',10,'middle',false));
+  o.push(T(22,oy-axH/2,'Distance from home (km)','#555',9,'middle',false));
+  // y-axis ticks
+  for(var d=0;d<=dist;d+=dist/4){
+    var yy=oy-d*dSc;
+    o.push(L(ox-4,yy,ox,yy,'#333',1));
+    o.push(T(ox-7,yy+4,d,'#888',9,'end',false));
+    if(d>0)o.push(L(ox,yy,ox+tw+20,yy,'#eee',1,'3,2'));
   }
-  if(p>=2){o.push(R(300,20,168,70,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(384,38,'Speed out:','#1a7a3a',10,'middle',true));
-    o.push(T(384,54,dist+'km \u00f7 '+(tout/60).toFixed(2)+'h','#888',9,'middle',false));
-    o.push(T(384,70,'= '+V.q6speedOut+' km/h','#1a7a3a',12,'middle',true));}
-  s.innerHTML=o.join('');}
+  // x-axis time labels always
+  [[0,'0'],[tout,tout],[tout+rest,tout+rest],[totalT,totalT]].forEach(function(tp){
+    var xx=ox+tp[0]*tSc;
+    o.push(L(xx,oy,xx,oy+4,'#333',1));
+    o.push(T(xx,oy+13,tp[1],'#888',9,'middle',false));
+  });
+  // ── step 1: draw the outward journey (red) ──────────
+  if(p>=1){
+    o.push(L(x0,y0,x1,yTop,'#C0272D',2.5));
+    o.push('<circle cx="'+x1+'" cy="'+yTop+'" r="4" fill="#C0272D"/>');
+    o.push(T(x1+6,yTop-6,dist+' km','#C0272D',9,'start',false));
+  }
+  // ── step 2: add the rest (horizontal = not moving) ──
+  if(p>=2){
+    o.push(L(x1,yTop,x2,yTop,'#C8922A',2.5,'6,3'));
+    o.push(T((x1+x2)/2,yTop-10,'STOPPED ('+rest+' min)','#C8922A',9,'middle',true));
+  }
+  // ── step 3: add the return journey (blue) ────────────
+  if(p>=3){
+    o.push(L(x2,yTop,x3,y0,'#1a5a8a',2.5));
+    o.push('<circle cx="'+x3+'" cy="'+y0+'" r="4" fill="#1a5a8a"/>');
+    o.push(T(x3+6,y0-8,'Home','#1a5a8a',9,'start',false));
+  }
+  // ── step 4: show speed out working ────────────────────
+  if(p>=4){
+    o.push(R(310,20,158,72,'#fff5f0','#C0272D',1.5));
+    o.push(T(389,34,'Journey out:','#C0272D',10,'middle',true));
+    o.push(T(389,50,dist+' km in '+tout+' min','#241A17',9,'middle',false));
+    o.push(T(389,64,tout+' \u00f7 60 = '+(tout/60).toFixed(2)+' h','#888',9,'middle',false));
+    o.push(T(389,78,'Speed = '+V.q6speedOut+' km/h','#C0272D',11,'middle',true));
+  }
+  // ── step 5: show speed back working ───────────────────
+  if(p>=5){
+    o.push(R(310,100,158,72,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(389,114,'Return journey:','#1a5a8a',10,'middle',true));
+    o.push(T(389,130,dist+' km in '+tback+' min','#241A17',9,'middle',false));
+    o.push(T(389,144,tback+' \u00f7 60 = '+(tback/60).toFixed(2)+' h','#888',9,'middle',false));
+    o.push(T(389,158,'Speed = '+V.q6speedBack+' km/h','#1a5a8a',11,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var td=V.q7totalDist,tt=V.q7totalTime,avg=V.q7avgSpeed;
-  o.push(T(240,22,'Travel Graphs \u2014 Average Speed','#C0272D',14,'middle',true));
-  if(p>=1){o.push(R(20,40,440,50,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,60,'Total distance = '+td+' km','#C0272D',13,'middle',false));
-    o.push(T(240,80,'Total time = '+tt+' min = '+(tt/60).toFixed(2)+' hours','#888',12,'middle',false));}
-  if(p>=2){o.push(R(20,102,440,44,'#e8f0ff','#1a5a8a',1.5));
-    o.push(T(240,118,'Speed = Distance \u00f7 Time','#1a5a8a',14,'middle',true));
-    o.push(T(240,138,'= '+td+' \u00f7 '+(tt/60).toFixed(2),'#888',12,'middle',false));}
-  if(p>=3){o.push(R(120,158,240,44,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,186,'Average speed = '+avg+' km/h','#1a7a3a',18,'middle',true));}
-  if(p>=4){o.push(T(240,226,'Remember: speed = distance \u00f7 time. Always convert minutes to hours first.','#888',11,'middle',false));}
-  s.innerHTML=o.join('');}
+  o.push(T(240,15,'Average Speed','#C0272D',14,'middle',true));
+  // always show the DST triangle
+  var tx=60,ty=80,tw2=100,th=80;
+  // triangle outline
+  o.push('<polygon points="'+tx+','+(ty+th)+' '+(tx+tw2/2)+','+ty+' '+(tx+tw2)+','+(ty+th)+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  // dividing line
+  o.push(L(tx,ty+th,tx+tw2,ty+th,'#C0272D',2));
+  o.push(L(tx+tw2/2,ty+th,tx+tw2/2,ty+th+2,'#C0272D',2));
+  // labels
+  o.push(T(tx+tw2/2,ty+th/2+12,'D','#C0272D',22,'middle',true));
+  o.push(T(tx+tw2/4+2,ty+th+20,'S','#1a5a8a',18,'middle',true));
+  o.push(T(tx+3*tw2/4,ty+th+20,'T','#1a7a3a',18,'middle',true));
+  // formula labels
+  o.push(T(tx+tw2/2,ty+th+38,'Speed = D \u00f7 T','#1a5a8a',10,'middle',false));
+  o.push(T(tx+tw2/2,ty+th+52,'Distance = S \u00d7 T','#888',9,'middle',false));
+  o.push(T(tx+tw2/2,ty+th+66,'Time = D \u00d7 S','#888',9,'middle',false));
+  // step 1: identify what we know
+  if(p>=1){
+    o.push(R(200,38,268,52,'#fff5f0','#C0272D',1.5));
+    o.push(T(334,54,'Distance = '+td+' km','#C0272D',12,'middle',true));
+    o.push(T(334,78,'Time = '+tt+' minutes','#888',11,'middle',false));
+  }
+  // step 2: convert minutes to hours
+  if(p>=2){
+    o.push(R(200,98,268,52,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(334,114,'Convert: '+tt+' \u00f7 60','#1a5a8a',12,'middle',true));
+    o.push(T(334,130,'= '+(tt/60).toFixed(2)+' hours','#1a5a8a',12,'middle',true));
+  }
+  // step 3: apply formula
+  if(p>=3){
+    o.push(R(200,158,268,52,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(334,174,'Speed = '+td+' \u00f7 '+(tt/60).toFixed(2),'#1a7a3a',12,'middle',true));
+    o.push(T(334,196,'= '+avg+' km/h','#1a7a3a',16,'middle',true));
+  }
+  // step 4: check with units
+  if(p>=4){
+    o.push(R(200,218,268,36,'#fff8ee','#C8922A',1.5));
+    o.push(T(334,232,'km \u00f7 hours = km/h \u2713','#C8922A',11,'middle',true));
+    o.push(T(334,246,'Always check your units match the question.','#888',9,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var a=V.q8a,b=V.q8b,c=V.q8c,d=V.q8d,perim=V.q8perim,area=V.q8area;
-  // Draw L-shape: outer corners at (ox,oy) bottom-left, width b, height a; cut out c×d from top-right
-  var ox=60,oy=220,sc=Math.min(180/b,160/a);
-  var W=b*sc,H=a*sc,cw=c*sc,ch=d*sc;
-  o.push(T(240,14,'Compound Shape (L-shape)','#C0272D',13,'middle',true));
-  // L shape path
-  o.push('<path d="M '+ox+','+(oy-H)+' L '+(ox+W)+','+(oy-H)+' L '+(ox+W)+','+(oy-H+ch)+' L '+(ox+W-cw)+','+(oy-H+ch)+' L '+(ox+W-cw)+','+oy+' L '+ox+','+oy+' Z" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
-  // dimensions
+  var a=V.q8a,b=V.q8b,c=V.q8c,d=V.q8d,area=V.q8area;
+  var sc=Math.min(150/b,140/a);
+  var ox=30,oy=210,W=b*sc,H=a*sc,cw=c*sc,ch=d*sc;
+  o.push(T(160,14,'Compound Shape (L-shape)','#C0272D',12,'middle',true));
+  // step 0: always show the L-shape outline with dimensions
+  // Ghost rectangle (full rectangle, dashed) from step 2
+  if(p>=2){
+    o.push(R(ox,oy-H,W,H,'#fff0f0','#C0272D',1.5));
+    // dashed border
+    o.push('<rect x="'+ox+'" y="'+(oy-H)+'" width="'+W+'" height="'+H+'" fill="none" stroke="#C0272D" stroke-width="1.5" stroke-dasharray="6,3" rx="1"/>');
+  }
+  // Cut-out region (shown red from step 3)
+  if(p>=3){
+    o.push(R(ox+W-cw,oy-H,cw,ch,'#ffd0d0','#C0272D',1.5));
+    o.push(T(ox+W-cw/2,oy-H+ch/2,'Cut out','#C0272D',8,'middle',false));
+    o.push(T(ox+W-cw/2,oy-H+ch/2+12,c+'\u00d7'+d+'='+c*d,'#C0272D',8,'middle',false));
+  }
+  // L-shape filled (green from step 1, then changes to show the sum)
+  o.push('<path d="M '+ox+','+(oy-H)+' L '+(ox+W)+','+(oy-H)+' L '+(ox+W)+','+(oy-H+ch)+' L '+(ox+W-cw)+','+(oy-H+ch)+' L '+(ox+W-cw)+','+oy+' L '+ox+','+oy+' Z" fill="'+(p>=2?'#d0ffd8':'#e8f8ee')+'" stroke="#1a7a3a" stroke-width="2"/>');
+  // dimensions always
+  o.push(T(ox+W/2,oy+13,b+' cm','#555',9,'middle',false));
+  o.push(T(ox-12,oy-H/2,a+' cm','#555',9,'middle',false));
   if(p>=1){
-    o.push(T(ox+W/2,oy+14,b+' cm','#888',10,'middle',false));
-    o.push(T(ox-12,oy-H/2,a+' cm','#888',10,'middle',false));
-    o.push(T(ox+W+12,oy-H+ch/2,d+' cm','#888',10,'middle',false));
-    o.push(T(ox+W-cw/2,oy-H-8,c+' cm','#888',10,'middle',false));}
-  if(p>=2){o.push(R(270,70,190,60,'#fff5f0','#C0272D',1.5));
-    o.push(T(365,88,'Perimeter = '+perim+' cm','#C0272D',12,'middle',true));
-    o.push(T(365,106,'(same as '+a+'\u00d7'+b+' rectangle)','#888',10,'middle',false));}
-  if(p>=3){o.push(R(270,142,190,60,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(365,160,'Area = '+a*b+' \u2212 '+c*d,'#1a7a3a',12,'middle',true));
-    o.push(T(365,178,'= '+area+' cm\u00b2','#1a7a3a',14,'middle',true));}
-  s.innerHTML=o.join('');}
+    o.push(T(ox+W+10,oy-H+ch/2,d+' cm','#888',8,'start',false));
+    o.push(T(ox+W-cw/2,oy-H-8,c+' cm','#888',8,'middle',false));
+    o.push(T(ox+W-cw+(-10),oy-H+ch+10,'missing','#888',7,'end',false));
+  }
+  // working panel on the right
+  if(p>=2){
+    o.push(R(290,26,180,70,'#fff5f0','#C0272D',1.5));
+    o.push(T(380,40,'Full rectangle:','#C0272D',10,'middle',true));
+    o.push(T(380,56,a+' \u00d7 '+b+' = '+a*b+' cm\u00b2','#C0272D',12,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(290,104,180,60,'#ffd0d0','#C0272D',1.5));
+    o.push(T(380,118,'Cut-out piece:','#C0272D',10,'middle',true));
+    o.push(T(380,134,c+' \u00d7 '+d+' = '+c*d+' cm\u00b2','#C0272D',12,'middle',true));
+  }
+  if(p>=4){
+    o.push(R(290,172,180,60,'#e8f8ee','#1a7a3a',2));
+    o.push(T(380,186,'L-shape area:','#1a7a3a',10,'middle',true));
+    o.push(T(380,202,a*b+' \u2212 '+c*d+' = '+area+' cm\u00b2','#1a7a3a',13,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var l=V.q9l,w=V.q9w,h=V.q9h,sa=V.q9sa,vol=V.q9vol;
-  o.push(T(240,16,'Net of a Cuboid','#C0272D',13,'middle',true));
-  // Draw a simple cross-shaped net
-  var us=22,ox=120,oy=60;// unit scale
-  // top face
-  o.push(R(ox+w*us,oy,l*us,h*us,'#fff5f0','#C0272D',1.5));o.push(T(ox+w*us+l*us/2,oy+h*us/2,'top\n'+l+'\u00d7'+h,'#C0272D',8,'middle',false));
-  // front face
-  o.push(R(ox+w*us,oy+h*us,l*us,w*us,'#e8f0ff','#1a5a8a',1.5));o.push(T(ox+w*us+l*us/2,oy+h*us+w*us/2,'front\n'+l+'\u00d7'+w,'#1a5a8a',8,'middle',false));
-  // bottom face
-  o.push(R(ox+w*us,oy+h*us+w*us,l*us,h*us,'#fff5f0','#C0272D',1.5));o.push(T(ox+w*us+l*us/2,oy+h*us+w*us+h*us/2,'btm','#C0272D',8,'middle',false));
-  // back
-  o.push(R(ox+w*us,oy+h*us+w*us+h*us,l*us,w*us,'#e8f0ff','#1a5a8a',1.5));o.push(T(ox+w*us+l*us/2,oy+2*h*us+2*w*us-w*us/2,'back','#1a5a8a',8,'middle',false));
-  // left
-  o.push(R(ox,oy+h*us,w*us,w*us,'#e8f8ee','#1a7a3a',1.5));o.push(T(ox+w*us/2,oy+h*us+w*us/2,'L','#1a7a3a',8,'middle',false));
-  // right
-  o.push(R(ox+(w+l)*us,oy+h*us,w*us,w*us,'#e8f8ee','#1a7a3a',1.5));o.push(T(ox+(w+l)*us+w*us/2,oy+h*us+w*us/2,'R','#1a7a3a',8,'middle',false));
-  if(p>=1){o.push(T(240,190,'6 faces: top+bottom ('+l+'\u00d7'+h+'), front+back ('+l+'\u00d7'+w+'), left+right ('+w+'\u00d7'+h+')','#888',10,'middle',false));}
-  if(p>=2){o.push(R(100,204,280,44,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,218,'SA = 2(lw+lh+wh) = 2('+l*w+'+'+l*h+'+'+w*h+')','#1a7a3a',11,'middle',false));
-    o.push(T(240,236,'= '+sa+' cm\u00b2','#1a7a3a',14,'middle',true));}
-  s.innerHTML=o.join('');}
+  var l=V.q9l,w=V.q9w,h=V.q9h,sa=V.q9sa;
+  o.push(T(240,14,'Net of a Cuboid','#C0272D',13,'middle',true));
+  // auto-scale so the cross-shaped net fits in ~340×210 px
+  // net width = w + l + w, net height = h + w + h + w  (top,front,bottom,back + left/right wings)
+  // Actually standard cross: columns = l, rows = h+w+h+w, wings left/right width=w
+  var netW=w+l+w, netH=h+w+h+w;
+  var us=Math.min(Math.floor(200/netW), Math.floor(210/netH), 28);
+  var ox=Math.floor((480-netW*us)/2), oy=Math.floor((260-netH*us)/2)+8;
+  // face colours
+  var cTop='#fff5f0',cFront='#e8f0ff',cBot='#e8f8ee',cBack='#fff8ee',cSide='#f0e8ff';
+  var sTop='#C0272D',sFront='#1a5a8a',sBot='#1a7a3a',sBack='#C8922A',sSide='#7A1418';
+  // faces positions (x,y in grid units from ox,oy)
+  var faces=[
+    {x:w,y:0,    w:l,h:h, fill:cTop,  stroke:sTop,  label:'Top\n'+l+'\u00d7'+h},
+    {x:w,y:h,    w:l,h:w, fill:cFront,stroke:sFront,label:'Front\n'+l+'\u00d7'+w},
+    {x:w,y:h+w,  w:l,h:h, fill:cBot,  stroke:sBot,  label:'Bottom\n'+l+'\u00d7'+h},
+    {x:w,y:h+w+h,w:l,h:w, fill:cBack, stroke:sBack, label:'Back\n'+l+'\u00d7'+w},
+    {x:0,y:h,    w:w,h:w, fill:cSide, stroke:sSide,  label:'Left\n'+w+'\u00d7'+w},
+    {x:w+l,y:h,  w:w,h:w, fill:cSide, stroke:sSide,  label:'Right\n'+w+'\u00d7'+w}
+  ];
+  faces.forEach(function(f){
+    var px=ox+f.x*us,py=oy+f.y*us,pw=f.w*us,ph=f.h*us;
+    o.push(R(px,py,pw,ph,f.fill,f.stroke,1.5));
+    if(p>=1){
+      var lines2=f.label.split('\n');
+      o.push(T(px+pw/2,py+ph/2-(lines2.length-1)*6,lines2[0],f.stroke,8,'middle',true));
+      if(lines2[1])o.push(T(px+pw/2,py+ph/2+8,lines2[1],f.stroke,8,'middle',false));
+    }
+  });
+  if(p>=2){
+    o.push(R(8,224,464,30,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,235,'SA = 2(lw + lh + wh) = 2('+l*w+' + '+l*h+' + '+w*h+') = '+sa+' cm\u00b2','#1a7a3a',11,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var l=V.q10l,w=V.q10w,h=V.q10h,vol=V.q10vol,gb=V.q10given,ms=V.q10miss,vq=V.q10volQ;
-  o.push(T(240,20,'Volume of a Cuboid','#C0272D',14,'middle',true));
-  // isometric cuboid
-  var bx=180,by=160,sc=22;
-  var dx=sc*0.86,dy=sc*0.5;
-  // bottom face parallelogram
-  var pts=[[bx,by],[bx+l*dx,by-l*dy],[bx+l*dx+w*dx,by-l*dy+w*dy],[bx+w*dx,by+w*dy]];
-  o.push('<polygon points="'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ')+'" fill="#fff5f0" stroke="#C0272D" stroke-width="1.5"/>');
-  // top face
-  var top=[[bx,by-h*sc],[bx+l*dx,by-h*sc-l*dy],[bx+l*dx+w*dx,by-h*sc-l*dy+w*dy],[bx+w*dx,by-h*sc+w*dy]];
-  o.push('<polygon points="'+top.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ')+'" fill="#e8f0ff" stroke="#1a5a8a" stroke-width="1.5"/>');
-  // verticals
-  [[0],[3]].forEach(function(idx){var pp=pts[idx[0]],tp=top[idx[0]];o.push(L(pp[0],pp[1],tp[0],tp[1],'#888',1.5));});
-  o.push(L(pts[1][0],pts[1][1],top[1][0],top[1][1],'#C0272D',2));
-  if(p>=1){o.push(T(bx+l*dx/2+4,by-l*dy/2+14,l+' cm','#C0272D',10,'start',false));
-    o.push(T(bx+l*dx+w*dx/2+6,by-l*dy+w*dy/2+6,w+' cm','#888',10,'start',false));
-    o.push(T(bx+l*dx+4,by-h*sc/2-l*dy,h+' cm','#1a5a8a',10,'start',false));}
-  if(p>=2){o.push(R(20,186,440,36,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,200,'V = l \u00d7 w \u00d7 h = '+l+' \u00d7 '+w+' \u00d7 '+h,'#C0272D',13,'middle',false));
-    o.push(T(240,216,'= '+vol+' cm\u00b3','#C0272D',14,'middle',true));}
-  if(p>=3){o.push(R(20,228,440,26,'#e8f8ee','#1a7a3a',1));
-    o.push(T(240,245,'If base area = '+gb+' cm\u00b2 and h = '+ms+' cm, V = '+gb+' \u00d7 '+ms+' = '+vq+' cm\u00b3','#1a7a3a',11,'middle',false));}
-  s.innerHTML=o.join('');}
+  var l=V.q10l,w=V.q10w,h=V.q10h,vol=V.q10vol;
+  o.push(T(240,15,'Volume of a Cuboid','#C0272D',14,'middle',true));
+  // isometric cuboid — scale so it fits nicely
+  var sc=Math.min(Math.floor(110/l),Math.floor(80/w),Math.floor(100/h),22);
+  var dx=sc*0.82,dy=sc*0.46;
+  // anchor: bottom-left-front corner at (bx,by)
+  var bx=100,by=195;
+  // 8 vertices: front-bottom-left=A, front-bottom-right=B, back-bottom-right=C, back-bottom-left=D
+  //             above: E,F,G,H
+  function vt(li,wi,hi){return[bx+li*dx-wi*dx, by-li*dy-wi*dy-hi*sc];}
+  var A=vt(0,0,0),B=vt(l,0,0),C=vt(l,w,0),D=vt(0,w,0);
+  var E=vt(0,0,h),F=vt(l,0,h),G=vt(l,w,h),H=vt(0,w,h);
+  function pt(v){return v[0].toFixed(1)+','+v[1].toFixed(1);}
+  // hidden edges (dashed)
+  o.push('<line x1="'+D[0].toFixed(1)+'" y1="'+D[1].toFixed(1)+'" x2="'+A[0].toFixed(1)+'" y2="'+A[1].toFixed(1)+'" stroke="#bbb" stroke-width="1" stroke-dasharray="4,3"/>');
+  o.push('<line x1="'+D[0].toFixed(1)+'" y1="'+D[1].toFixed(1)+'" x2="'+C[0].toFixed(1)+'" y2="'+C[1].toFixed(1)+'" stroke="#bbb" stroke-width="1" stroke-dasharray="4,3"/>');
+  o.push('<line x1="'+D[0].toFixed(1)+'" y1="'+D[1].toFixed(1)+'" x2="'+H[0].toFixed(1)+'" y2="'+H[1].toFixed(1)+'" stroke="#bbb" stroke-width="1" stroke-dasharray="4,3"/>');
+  // visible bottom edges
+  o.push(L(A[0],A[1],B[0],B[1],'#C0272D',2));
+  o.push(L(B[0],B[1],C[0],C[1],'#C0272D',1.5));
+  // visible top face
+  o.push('<polygon points="'+[E,F,G,H].map(pt).join(' ')+'" fill="#e8f0ff" stroke="#1a5a8a" stroke-width="1.5"/>');
+  // visible side faces
+  o.push('<polygon points="'+[A,B,F,E].map(pt).join(' ')+'" fill="#fff5f0" stroke="#C0272D" stroke-width="1.5"/>');
+  o.push('<polygon points="'+[B,C,G,F].map(pt).join(' ')+'" fill="#fff8ee" stroke="#C8922A" stroke-width="1.5"/>');
+  // all 4 visible vertical edges
+  [[A,E],[B,F],[C,G]].forEach(function(pair){o.push(L(pair[0][0],pair[0][1],pair[1][0],pair[1][1],'#888',1.5));});
+  o.push(L(C[0],C[1],G[0],G[1],'#C8922A',1.5));
+  if(p>=1){
+    // dimension labels
+    var lmid=[(A[0]+B[0])/2,(A[1]+B[1])/2];
+    var wmid=[(B[0]+C[0])/2+6,(B[1]+C[1])/2+4];
+    var hmid=[(B[0]+F[0])/2+10,(B[1]+F[1])/2];
+    o.push(T(lmid[0],lmid[1]+14,l+' cm','#C0272D',10,'middle',true));
+    o.push(T(wmid[0],wmid[1],w+' cm','#C8922A',10,'start',false));
+    o.push(T(hmid[0],hmid[1],h+' cm','#1a5a8a',10,'start',false));
+  }
+  if(p>=2){
+    o.push(R(270,26,196,56,'#fff5f0','#C0272D',1.5));
+    o.push(T(368,42,'V = l \u00d7 w \u00d7 h','#C0272D',12,'middle',true));
+    o.push(T(368,60,'= '+l+' \u00d7 '+w+' \u00d7 '+h,'#888',11,'middle',false));
+  }
+  if(p>=3){
+    o.push(R(270,90,196,44,'#e8f8ee','#1a7a3a',2));
+    o.push(T(368,106,'= '+vol+' cm\u00b3','#1a7a3a',20,'middle',true));
+  }
+  if(p>=4){
+    o.push(R(270,142,196,48,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(368,156,'Base area = '+l+'\u00d7'+w+' = '+l*w+' cm\u00b2','#1a5a8a',10,'middle',false));
+    o.push(T(368,172,'V = '+l*w+' \u00d7 '+h+' = '+vol+' cm\u00b3','#1a5a8a',11,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ11(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var cm2=V.q11cm2,mm2=V.q11mm2,m2=V.q11m2,cm2b=V.q11cm2b;
-  o.push(T(240,22,'Area Units \u2014 cm\u00b2, mm\u00b2 and m\u00b2','#C0272D',14,'middle',true));
-  if(p>=1){o.push(R(20,40,440,44,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,58,'1 cm = 10 mm   \u2234   1 cm\u00b2 = 10 \u00d7 10 = 100 mm\u00b2','#C0272D',13,'middle',false));
-    o.push(T(240,76,cm2+' cm\u00b2 = '+cm2+' \u00d7 100 = '+mm2+' mm\u00b2','#888',12,'middle',false));}
-  if(p>=2){o.push(R(20,94,440,44,'#e8f0ff','#1a5a8a',1.5));
-    o.push(T(240,112,'1 m = 100 cm   \u2234   1 m\u00b2 = 100 \u00d7 100 = 10 000 cm\u00b2','#1a5a8a',13,'middle',false));
-    o.push(T(240,130,m2+' m\u00b2 = '+m2+' \u00d7 10 000 = '+cm2b.toLocaleString()+' cm\u00b2','#888',12,'middle',false));}
-  if(p>=3){o.push(R(20,150,440,44,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,168,'Key rule: multiply by 100 (cm\u00b2 \u2192 mm\u00b2)','#1a7a3a',13,'middle',false));
-    o.push(T(240,186,'multiply by 10 000 (m\u00b2 \u2192 cm\u00b2)','#1a7a3a',13,'middle',false));}
-  s.innerHTML=o.join('');}
+  o.push(T(240,14,'Area Unit Conversions','#C0272D',13,'middle',true));
+  // always show the conversion table
+  var cols4=['Unit','Relation to next','Multiply by'],cws=[100,180,130],cxs=[14,118,302];
+  cxs.forEach(function(x,i){
+    o.push(R(x,22,cws[i]-2,20,'#C0272D','#C0272D',0));
+    o.push(T(x+cws[i]/2-2,36,cols4[i],'#fff',9,'middle',true));
+  });
+  var rows4=[
+    ['mm\u00b2','100 mm\u00b2 = 1 cm\u00b2','\u00f7 100 to get cm\u00b2'],
+    ['cm\u00b2','10 000 cm\u00b2 = 1 m\u00b2','\u00f7 10 000 to get m\u00b2'],
+    ['m\u00b2','1 000 000 m\u00b2 = 1 km\u00b2','\u00f7 1 000 000 to get km\u00b2']
+  ];
+  var rcolors=['#C0272D','#1a5a8a','#1a7a3a'];
+  rows4.forEach(function(r,i){
+    var ry=44+i*36;var bg=i%2===0?'#fff5f0':'#fff';
+    cxs.forEach(function(x,j){
+      o.push(R(x,ry,cws[j]-2,34,bg,'#E4D6CE',1));
+      o.push(T(x+cws[j]/2-2,ry+20,r[j],rcolors[i],j===0?12:9,'middle',j===0));
+    });
+  });
+  // conversion arrows diagram
+  o.push(T(430,50,'mm\u00b2','#C0272D',11,'middle',true));
+  o.push(T(430,78,'\u00d7 100 \u2191','#888',8,'middle',false));
+  o.push(T(430,78,'\u00f7 100 \u2193','#ccc',7,'middle',false));
+  o.push(T(430,100,'cm\u00b2','#1a5a8a',11,'middle',true));
+  o.push(T(430,128,'\u00d7 10 000 \u2191','#888',8,'middle',false));
+  o.push(T(430,150,'m\u00b2','#1a7a3a',11,'middle',true));
+  // step 1: show cm2 to mm2
+  if(p>=1){
+    o.push(R(14,156,440,32,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,168,'Why? 1 cm = 10 mm, so 1 cm\u00b2 = 10 \u00d7 10 = 100 mm\u00b2','#C0272D',11,'middle',false));
+    o.push(T(240,180,cm2+' cm\u00b2 \u00d7 100 = '+mm2+' mm\u00b2','#C0272D',11,'middle',true));
+  }
+  if(p>=2){
+    o.push(R(14,194,440,32,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,206,'Why? 1 m = 100 cm, so 1 m\u00b2 = 100 \u00d7 100 = 10 000 cm\u00b2','#1a5a8a',11,'middle',false));
+    o.push(T(240,218,m2+' m\u00b2 \u00d7 10 000 = '+cm2b.toLocaleString()+' cm\u00b2','#1a5a8a',11,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(14,232,440,22,'#e8f8ee','#1a7a3a',1));
+    o.push(T(240,247,'To go backwards (smaller \u2192 larger unit): divide instead of multiply.','#1a7a3a',10,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ12(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var ha=V.q12hectares,m2=V.q12m2,km2=V.q12km2;
@@ -670,6 +1005,19 @@ function dQ20(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
 // ══════════════════════════════════════════════════════════════════════════
 function yt1(){var f=[rnd(3,11),rnd(2,9),rnd(4,12),rnd(1,8),rnd(2,10)];var tot=f.reduce(function(a,b){return a+b;},0);
   return tryIt({question:'A survey gives frequencies: 8, '+f[1]+', '+f[2]+', '+f[3]+', '+f[4]+'. What is the total?',hints:['Add all frequencies together'],ans:f[1]+f[2]+f[3]+f[4]+8,tol:0,unit:'',working:'Total = 8+'+f[1]+'+'+f[2]+'+'+f[3]+'+'+f[4]+' = '+(f[1]+f[2]+f[3]+f[4]+8)});}
+function yt1b(){
+  var raw=[];for(var _i=0;_i<6;_i++)raw.push(rnd(2,14));
+  raw.sort(function(a,b){return a-b;});
+  var sum=raw.reduce(function(a,b){return a+b;},0);
+  var med=round1((raw[2]+raw[3])/2);
+  var mean=round2(sum/6);
+  var rng=raw[5]-raw[0];
+  return tryIt({question:'Data (already sorted): <b>'+raw.join(', ')+'</b>. Find the mean (2 d.p.).',
+    hints:['Mean = sum \u00f7 number of values','Sum = '+sum+', count = 6'],
+    ans:mean,tol:0.01,unit:'',
+    working:'Sum = '+raw.join('+')+' = '+sum+'. Mean = '+sum+' \u00f7 6 = '+mean});
+}
+
 function yt2(){var s=[rnd(15,45),rnd(20,55),rnd(10,40),rnd(25,60)];var tot=s.reduce(function(a,b){return a+b;},0);
   return tryIt({question:'Four months of sales: '+s.join(', ')+'. Find the total.',hints:['Add all four values'],ans:tot,tol:0,unit:'',working:s.join(' + ')+' = '+tot});}
 function yt3(){var raw=[rnd(4,10),rnd(3,8),rnd(2,6),rnd(1,4)];var tot=raw.reduce(function(a,b){return a+b;},0);var ang=Math.round(raw[0]/tot*360);
@@ -713,121 +1061,177 @@ function yt20(){var ra2=rnd(1,4),rb2=rnd(1,5);while(ra2===rb2)rb2=rnd(1,5);var t
 // QUESTION SET
 // ══════════════════════════════════════════════════════════════════════════
 var QS=[
-  {ey:'Q1 \u00b7 Y7 AOC \u00b7 Data',ti:'Tally Charts &amp; Frequency Tables <span class="badge f">F</span>',su:'Favourite sport survey: '+V.q1subj.join(', ')+'.',steps:[
-    {lb:'Read the tally',dr:dQ1,ht:'<p>Each group of 5 tallies is written as &#8284;. Count groups of 5 first, then add the extras.</p>'},
-    {lb:'Frequency table',dr:dQ1,ht:'<p>The frequency is the total count for each sport. Read each row carefully.</p>'},
-    {lb:'Mode and range',dr:dQ1,ht:'<div class="fm">Total = '+V.q1total+'   Mode = '+V.q1mode+' (highest frequency)</div><div class="fm">Range = '+Math.max.apply(null,V.q1freqs)+' \u2212 '+Math.min.apply(null,V.q1freqs)+' = '+V.q1range+'</div>'},
+  {ey:'Q1 \u00b7 Y7 AOC \u00b7 Data',ti:'Tally Charts &amp; Frequency Tables <span class="badge f">F</span>',
+   su:'30 students were asked about their favourite sport. Results shown in a tally chart below.',steps:[
+    {lb:'What is a tally?',dr:dQ1,ht:'<p>A <b>tally chart</b> is used to count data as it is collected. We use vertical marks, and every 5th mark is a diagonal cross-stroke across the previous four. Each complete group of 5 is easy to count quickly.</p><p>The blank table is shown. The <b>Sport</b> column lists categories. The <b>Tally</b> column shows the marks. The <b>Freq.</b> column is the total count.</p>'},
+    {lb:'Read the tallies',dr:dQ1,ht:'<p>The tally marks are now filled in. Count each row by <b>counting complete groups of 5 first</b>, then adding the remaining marks.</p><p>For example: two full groups and one extra = 5 + 5 + 1 = <b>11</b>.</p>'},
+    {lb:'Mode and range',dr:dQ1,ht:'<div class="fm">Mode = '+V.q1mode+' (the sport with the highest frequency = '+Math.max.apply(null,V.q1freqs)+')</div><div class="fm">Range = highest \u2212 lowest = '+Math.max.apply(null,V.q1freqs)+' \u2212 '+Math.min.apply(null,V.q1freqs)+' = '+V.q1range+'</div><p>The <b>mode</b> is the most common value. The <b>range</b> shows how spread out the data is.</p>'},
     {lb:'Your turn',dr:dQ1,ht:yt1}
   ]},
-  {ey:'Q2 \u00b7 Y7 AOC \u00b7 Data',ti:'Reading a Bar Chart <span class="badge f">F</span>',su:'Monthly sales: '+V.q2months.join(', ')+'.',steps:[
-    {lb:'Read the bars',dr:dQ2,ht:'<p>Read each bar height against the scale on the left axis. Always check what each gridline represents.</p>'},
-    {lb:'Compare',dr:dQ2,ht:'<div class="fm">Highest month: '+V.q2maxMonth+' with '+V.q2max+' sales</div><div class="fm">March \u2212 January = '+V.q2sales[2]+' \u2212 '+V.q2sales[0]+' = '+V.q2diff+'</div>'},
-    {lb:'Total',dr:dQ2,ht:'<div class="fm">Total = '+V.q2sales.join(' + ')+' = '+V.q2total+'</div>'},
+  {ey:'Q2 \u00b7 Y7 AOC \u00b7 Data',ti:'Mean, Median, Mode and Range <span class="badge f">F</span>',
+   su:'Eight scores: '+V.q1b_data.join(', ')+'. Find the range, mode, median and mean.',steps:[
+    {lb:'Order the data',dr:dQ1b,ht:'<p>The data is shown sorted in order from smallest to largest above. Always sort data first before finding any average.</p><p>Sorted: <b>'+V.q1b_data.join(', ')+'</b></p><p>We have <b>'+V.q1b_n+' values</b>.</p>'},
+    {lb:'Range',dr:dQ1b,ht:'<div class="fm">Range = highest \u2212 lowest = '+V.q1b_max+' \u2212 '+V.q1b_min+' = '+V.q1b_range+'</div><p>The range tells us how <b>spread out</b> the data is. It is not an average — it measures spread.</p>'},
+    {lb:'Mode',dr:dQ1b,ht:'<div class="fm">Mode = '+V.q1b_mode+'</div><p>The mode is the value that appears <b>most often</b>. If all values appear the same number of times, there is no mode. There can be more than one mode.</p>'},
+    {lb:'Median',dr:dQ1b,ht:'<p>The median is the <b>middle value</b> when data is ordered. With 8 values (even number), the median is the mean of the 4th and 5th values (highlighted above).</p><div class="fm">Median = ('+V.q1b_data[3]+' + '+V.q1b_data[4]+') \u00f7 2 = '+V.q1b_sum12+' \u00f7 2 = '+V.q1b_med+'</div>'},
+    {lb:'Mean',dr:dQ1b,ht:'<div class="fm">Mean = sum of all values \u00f7 number of values</div><div class="fm">= '+V.q1b_sum+' \u00f7 '+V.q1b_n+' = '+V.q1b_mean+'</div><p>The mean uses <b>every</b> value in the list. A single very large or small value can pull the mean away from the "middle".</p>'},
+    {lb:'Your turn',dr:dQ1b,ht:yt1b}
+  ]},
+  {ey:'Q3 \u00b7 Y7 AOC \u00b7 Data',ti:'Reading a Bar Chart <span class="badge f">F</span>',
+   su:'The bar chart shows the number of books sold each month in a school library.',steps:[
+    {lb:'Reading the axes',dr:dQ2,ht:'<p>The bar chart axes are shown. The <b>x-axis</b> shows months. The <b>y-axis</b> shows number of books sold.</p><p>Before reading any bar, always ask: <b>what does each gridline represent?</b> Here each line increases by 10.</p>'},
+    {lb:'Reading the bars',dr:dQ2,ht:'<p>Bars are now drawn. To read a value, trace horizontally from the bar top to the y-axis. Values: '+V.q2months.map(function(m,i){return m+' = '+V.q2sales[i];}).join(', ')+'.</p>'},
+    {lb:'Highest month',dr:dQ2,ht:'<p>The highest bar is highlighted. The tallest bar = month with most sales.</p><div class="fm">Highest: '+V.q2maxMonth+' with '+V.q2max+' books sold</div>'},
+    {lb:'Total and difference',dr:dQ2,ht:'<div class="fm">Total = '+V.q2sales.join(' + ')+' = '+V.q2total+' books</div><div class="fm">Difference (Mar \u2212 Jan) = '+V.q2sales[2]+' \u2212 '+V.q2sales[0]+' = '+V.q2diff+'</div>'},
     {lb:'Your turn',dr:dQ2,ht:yt2}
   ]},
-  {ey:'Q3 \u00b7 Y7 AOC \u00b7 Data',ti:'Pie Charts <span class="badge f">F</span>',su:'Favourite colour: '+V.q3items.join(', ')+'. Total = '+V.q3tot+'.',steps:[
-    {lb:'Sector angles',dr:dQ3,ht:'<p>Each sector angle = (frequency \u00f7 total) \u00d7 360\u00b0.</p>'},
-    {lb:'Red sector',dr:dQ3,ht:'<div class="fm">Red angle = ('+V.q3freqs[0]+' \u00f7 '+V.q3tot+') \u00d7 360 = '+V.q3redAngle+'\u00b0</div>'},
-    {lb:'Check',dr:dQ3,ht:'<p>All angles should add up to 360\u00b0. The largest sector belongs to the most popular item.</p>'},
+  {ey:'Q4 \u00b7 Y7 AOC \u00b7 Data',ti:'Pie Charts <span class="badge f">F</span>',
+   su:''+V.q3tot+' students chose their favourite colour.',steps:[
+    {lb:'What is a pie chart?',dr:dQ3,ht:'<p>A <b>pie chart</b> shows data as slices of a circle. The whole circle = 360\u00b0 = all the data. Each sector is sized according to its share of the total.</p><p>The circle and key are shown. Sectors appear in the next step.</p>'},
+    {lb:'The sectors',dr:dQ3,ht:'<p>Sectors are now drawn. Larger sector = more students chose that colour. Formula:</p><div class="fm">Sector angle = (frequency \u00f7 total) \u00d7 360\u00b0</div>'},
+    {lb:'Red sector angle',dr:dQ3,ht:'<div class="fm">Red angle = ('+V.q3freqs[0]+' \u00f7 '+V.q3tot+') \u00d7 360 = '+round2(V.q3freqs[0]/V.q3tot)+' \u00d7 360 = '+V.q3redAngle+'\u00b0</div>'},
+    {lb:'All angles',dr:dQ3,ht:'<p>All angles are now labelled. They must add up to <b>360\u00b0</b>.</p><div class="fm">'+V.q3angles.join(' + ')+' = '+V.q3angles.reduce(function(a,b){return a+b;},0)+'\u00b0 \u2713</div>'},
     {lb:'Your turn',dr:dQ3,ht:yt3}
   ]},
-  {ey:'Q4 \u00b7 Y7 AOC \u00b7 Probability',ti:'Basic Probability <span class="badge f">F</span>',su:'Bag: '+V.q4r+' red, '+V.q4b+' blue, '+V.q4g+' green. Total = '+V.q4tot+'.',steps:[
-    {lb:'Write as a fraction',dr:dQ4,ht:'<p>Probability = number of favourable outcomes \u00f7 total outcomes.</p>'},
-    {lb:'P(red) and P(not red)',dr:dQ4,ht:'<div class="fm">P(red) = '+V.q4r+'/'+V.q4tot+'</div><div class="fm">P(not red) = '+V.q4pNotRed+'/'+V.q4tot+'</div>'},
-    {lb:'Simplify',dr:dQ4,ht:'<div class="fm">P(red) = '+V.q4pRedN+'/'+V.q4pRedD+' (divide numerator and denominator by HCF)</div><p>Note: P(red) + P(not red) = 1 always.</p>'},
+  {ey:'Q5 \u00b7 Y7 AOC \u00b7 Probability',ti:'Basic Probability <span class="badge f">F</span>',
+   su:'A bag contains '+V.q4r+' red, '+V.q4b+' blue and '+V.q4g+' green counters. One is picked at random.',steps:[
+    {lb:'What does P( ) mean?',dr:dQ4,ht:'<p>In maths, <b>P( )</b> is shorthand for <b>"the probability of..."</b>. For example: <b>P(Red)</b> means "the probability of picking a red counter".</p><p>Probability is always a value between 0 (impossible) and 1 (certain).</p><p>The '+V.q4tot+' counters are shown above.</p>'},
+    {lb:'Writing P(Red)',dr:dQ4,ht:'<div class="fm">P(event) = favourable outcomes \u00f7 total outcomes</div><p>There are <b>'+V.q4r+' red counters</b> out of <b>'+V.q4tot+' total</b>.</p>'},
+    {lb:'P(Red) as a fraction',dr:dQ4,ht:'<div class="fm">P(Red) = '+V.q4r+' / '+V.q4tot+'</div><p>Simplify: divide top and bottom by the HCF.</p>'},
+    {lb:'Simplify and check',dr:dQ4,ht:'<div class="fm">P(Red) = '+V.q4pRedN+'/'+V.q4pRedD+'</div><div class="fm">P(not Red) = '+(V.q4tot-V.q4r)+'/'+V.q4tot+'</div><div class="fm">'+V.q4r+'/'+V.q4tot+' + '+(V.q4tot-V.q4r)+'/'+V.q4tot+' = 1 \u2713</div><p>P(event) + P(not event) always = 1.</p>'},
     {lb:'Your turn',dr:dQ4,ht:yt4}
   ]},
-  {ey:'Q5 \u00b7 Y7 AOC \u00b7 Probability',ti:'Combined Events &amp; Sample Space <span class="badge f">F</span>',su:'Toss a coin and roll a die. List all outcomes.',steps:[
-    {lb:'List the sample space',dr:dQ5,ht:'<p>Write every possible outcome as a pair: (coin, die). There are 2 \u00d7 6 = 12 outcomes in total.</p>'},
-    {lb:'Find P(H and even number)',dr:dQ5,ht:'<p>Look for outcomes where the coin shows H <b>and</b> the die is even (2, 4, 6). These are highlighted red.</p>'},
-    {lb:'Calculate',dr:dQ5,ht:'<div class="fm">Favourable: H2, H4, H6 \u2192 3 outcomes</div><div class="fm">P(H and even) = 3/12 = 1/4</div>'},
+  {ey:'Q6 \u00b7 Y7 AOC \u00b7 Probability',ti:'Combined Events \u2014 Sample Space <span class="badge f">F</span>',
+   su:'A coin (H or T) is tossed and a dice (1\u20136) is rolled. List all possible outcomes.',steps:[
+    {lb:'What is a sample space?',dr:dQ5,ht:'<p>A <b>sample space</b> is a complete list of all possible outcomes. Here the coin gives 2 options and the dice gives 6, so there are:</p><div class="fm">2 \u00d7 6 = 12 outcomes in total</div><p>The grid above shows every combination. Each row is one dice value; each column is one coin result.</p>'},
+    {lb:'Find H and even',dr:dQ5,ht:'<p>We want outcomes where the coin shows <b>H</b> AND the dice shows an <b>even number</b> (2, 4 or 6). These are highlighted red in the H column.</p><div class="fm">H2, H4, H6 \u2192 3 favourable outcomes</div>'},
+    {lb:'Calculate the probability',dr:dQ5,ht:'<div class="fm">P(H and even) = 3 \u00f7 12 = 1/4</div><p>Simplify 3/12 by dividing top and bottom by 3. So the probability is <b>1 in 4</b>.</p>'},
     {lb:'Your turn',dr:dQ5,ht:yt5}
   ]},
-  {ey:'Q6 \u00b7 Y7 AOC \u00b7 Travel Graphs',ti:'Reading Travel Graphs <span class="badge f">F</span>',su:'Journey: '+V.q6dist+' km out in '+V.q6timeOut+' min, rest '+V.q6rest+' min, return in '+V.q6timeBack+' min.',steps:[
-    {lb:'Reading the graph',dr:dQ6,ht:'<p>The <b>slope</b> (steepness) of the line shows speed. A <b>horizontal</b> line means stopped. Going back to zero means returning.</p>'},
-    {lb:'Speed out',dr:dQ6,ht:'<div class="fm">Speed = distance \u00f7 time</div><div class="fm">= '+V.q6dist+' km \u00f7 '+(V.q6timeOut/60).toFixed(2)+' h = '+V.q6speedOut+' km/h</div>'},
-    {lb:'Speed back',dr:dQ6,ht:'<div class="fm">Return: '+V.q6dist+' km in '+V.q6timeBack+' min</div><div class="fm">= '+V.q6dist+' \u00f7 '+(V.q6timeBack/60).toFixed(2)+' = '+V.q6speedBack+' km/h</div>'},
+  {ey:'Q7 \u00b7 Y7 AOC \u00b7 Travel Graphs',ti:'Reading Travel Graphs <span class="badge f">F</span>',
+   su:'Ali cycles '+V.q6dist+' km to a friend\'s house, rests '+V.q6rest+' min, then cycles back.',steps:[
+    {lb:'The axes',dr:dQ6,ht:'<p>The axes are shown. The <b>x-axis</b> shows time in minutes from the start. The <b>y-axis</b> shows distance from home in km. We always start at (0, 0).</p>'},
+    {lb:'Outward journey',dr:dQ6,ht:'<p>The <b>red line</b> goes upward — distance from home is <b>increasing</b>. A steeper line = faster speed. Ali travels <b>'+V.q6dist+' km</b> in <b>'+V.q6timeOut+' minutes</b>.</p>'},
+    {lb:'The rest stop',dr:dQ6,ht:'<p>The <b>orange dashed horizontal line</b> shows Ali not moving. A <b>flat line</b> always means the person is <b>stopped</b>. Ali rests for <b>'+V.q6rest+' minutes</b>.</p>'},
+    {lb:'Return journey',dr:dQ6,ht:'<p>The <b>blue line</b> slopes <b>downward</b> — getting closer to home. It reaches zero = back home. Ali takes <b>'+V.q6timeBack+' minutes</b> to return.</p>'},
+    {lb:'Speed out',dr:dQ6,ht:'<div class="fm">Speed = Distance \u00f7 Time (in hours)</div><div class="fm">'+V.q6timeOut+' min \u00f7 60 = '+(V.q6timeOut/60).toFixed(2)+' h</div><div class="fm">Speed out = '+V.q6dist+' \u00f7 '+(V.q6timeOut/60).toFixed(2)+' = '+V.q6speedOut+' km/h</div>'},
+    {lb:'Speed back',dr:dQ6,ht:'<div class="fm">'+V.q6timeBack+' min \u00f7 60 = '+(V.q6timeBack/60).toFixed(2)+' h</div><div class="fm">Speed back = '+V.q6dist+' \u00f7 '+(V.q6timeBack/60).toFixed(2)+' = '+V.q6speedBack+' km/h</div><p>'+(V.q6speedBack>V.q6speedOut?'The return is faster \u2014 the blue line is steeper.':'The return is slower \u2014 the blue line is shallower.')+'</p>'},
     {lb:'Your turn',dr:dQ6,ht:yt6}
   ]},
-  {ey:'Q7 \u00b7 Y7 AOC \u00b7 Travel Graphs',ti:'Calculating Average Speed <span class="badge f">F</span>',su:'Total distance '+V.q7totalDist+' km in '+V.q7totalTime+' minutes.',steps:[
-    {lb:'The formula',dr:dQ7,ht:'<div class="fm">Speed = Distance \u00f7 Time</div><p>Always convert time to <b>hours</b> before calculating speed in km/h.</p>'},
-    {lb:'Convert time',dr:dQ7,ht:'<div class="fm">'+V.q7totalTime+' minutes \u00f7 60 = '+(V.q7totalTime/60).toFixed(2)+' hours</div>'},
-    {lb:'Calculate',dr:dQ7,ht:'<div class="fm">'+V.q7totalDist+' \u00f7 '+(V.q7totalTime/60).toFixed(2)+' = '+V.q7avgSpeed+' km/h</div>'},
+  {ey:'Q8 \u00b7 Y7 AOC \u00b7 Travel Graphs',ti:'Average Speed <span class="badge f">F</span>',
+   su:'Total distance '+V.q7totalDist+' km in '+V.q7totalTime+' minutes.',steps:[
+    {lb:'The DST triangle',dr:dQ7,ht:'<p>The <b>DST triangle</b> helps you remember all three formulas. Cover the quantity you want to find:</p><ul class="hl"><li>Cover D \u2192 Speed \u00d7 Time</li><li>Cover S \u2192 Distance \u00f7 Time</li><li>Cover T \u2192 Distance \u00f7 Speed</li></ul>'},
+    {lb:'Identify the values',dr:dQ7,ht:'<p>We are given distance and time. We want <b>speed</b>. Use:</p><div class="fm">Speed = Distance \u00f7 Time</div><p>Distance = '+V.q7totalDist+' km.  Time = '+V.q7totalTime+' min (not yet in hours).</p>'},
+    {lb:'Convert minutes to hours',dr:dQ7,ht:'<div class="fm">'+V.q7totalTime+' minutes \u00f7 60 = '+(V.q7totalTime/60).toFixed(2)+' hours</div><p>We must convert to hours because speed in km/h requires time in hours. There are 60 minutes in 1 hour.</p>'},
+    {lb:'Apply the formula',dr:dQ7,ht:'<div class="fm">Speed = '+V.q7totalDist+' \u00f7 '+(V.q7totalTime/60).toFixed(2)+' = '+V.q7avgSpeed+' km/h</div>'},
+    {lb:'Check your units',dr:dQ7,ht:'<div class="fm">km \u00f7 hours = km/h \u2713</div><p>Always check that your answer has the right units. If the question had asked for m/s you would need to convert again.</p>'},
     {lb:'Your turn',dr:dQ7,ht:yt7}
   ]},
-  {ey:'Q8 \u00b7 Y7 AOC \u00b7 Shape',ti:'Area of Compound Shapes <span class="badge f">F</span>',su:'L-shape: outer '+V.q8a+' \u00d7 '+V.q8b+' cm, cut-out '+V.q8c+' \u00d7 '+V.q8d+' cm.',steps:[
+  {ey:'Q9 \u00b7 Y7 AOC \u00b7 Shape',ti:'Area of Compound Shapes <span class="badge f">F</span>',
+   su:'Find the area of the L-shaped compound shape below.',steps:[
+    {lb:'Identify the method',dr:dQ8,ht:'<p>A <b>compound shape</b> is made from two or more rectangles. There are two methods:</p><ul class="hl"><li><b>Split method</b>: divide the shape into simpler rectangles and add their areas.</li><li><b>Subtraction method</b>: find the full bounding rectangle area, then subtract the cut-out piece.</li></ul><p>The L-shape is shown in green above.</p>'},
+    {lb:'Label the dimensions',dr:dQ8,ht:'<p>The full dimensions are labelled. The outer rectangle is <b>'+V.q8a+' \u00d7 '+V.q8b+'</b> cm. The cut-out corner is <b>'+V.q8c+' \u00d7 '+V.q8d+'</b> cm.</p>'},
+    {lb:'Full rectangle area',dr:dQ8,ht:'<p>Using the <b>subtraction method</b>: first find the full rectangle area (the red dashed outline).</p><div class="fm">Full rectangle = '+V.q8a+' \u00d7 '+V.q8b+' = '+V.q8a*V.q8b+' cm\u00b2</div>'},
+    {lb:'Subtract the cut-out',dr:dQ8,ht:'<p>Now subtract the red cut-out piece.</p><div class="fm">Cut-out = '+V.q8c+' \u00d7 '+V.q8d+' = '+V.q8c*V.q8d+' cm\u00b2</div>'},
+    {lb:'Final area',dr:dQ8,ht:'<div class="fm">Area = '+V.q8a*V.q8b+' \u2212 '+V.q8c*V.q8d+' = '+V.q8area+' cm\u00b2</div><p>Always include the unit: cm\u00b2 for area.</p>'},
+    {lb:'Your turn',dr:dQ8,ht:yt8}
+  ]},
+  {ey:'Q10 \u00b7 Y7 AOC \u00b7 Shape',ti:'Nets and Surface Area of Cuboids <span class="badge f">F</span>',
+   su:'A cuboid measures '+V.q9l+' \u00d7 '+V.q9w+' \u00d7 '+V.q9h+' cm.',steps:[
+    {lb:'What is a net?',dr:dQ9,ht:'<p>A <b>net</b> is the 2D shape that folds to make a 3D solid. Unfold a cardboard box and you get the net of a cuboid.</p><p>A cuboid always has <b>6 rectangular faces</b>. The net above shows all 6 faces unfolded into a cross shape.</p>'},
+    {lb:'Name the faces',dr:dQ9,ht:'<p>The 6 faces come in 3 identical pairs. The colours show which faces match each other:</p><ul class="hl"><li>Top &amp; Bottom: '+V.q9l+' \u00d7 '+V.q9h+' cm</li><li>Front &amp; Back: '+V.q9l+' \u00d7 '+V.q9w+' cm</li><li>Left &amp; Right: '+V.q9w+' \u00d7 '+V.q9w+' cm</li></ul>'},
+    {lb:'Surface area',dr:dQ9,ht:'<div class="fm">SA = 2(lw + lh + wh)</div><div class="fm">= 2('+V.q9l*V.q9w+' + '+V.q9l*V.q9h+' + '+V.q9w*V.q9h+')</div><div class="fm">= 2 \u00d7 '+(V.q9l*V.q9w+V.q9l*V.q9h+V.q9w*V.q9h)+' = '+V.q9sa+' cm\u00b2</div>'},
+    {lb:'Your turn',dr:dQ9,ht:yt9}
+  ]},
+  {ey:'Q11 \u00b7 Y7 AOC \u00b7 Shape',ti:'Volume of Cuboids <span class="badge f">F</span>',
+   su:'A cuboid measures '+V.q10l+' \u00d7 '+V.q10w+' \u00d7 '+V.q10h+' cm. Find its volume.',steps:[
+    {lb:'The cuboid',dr:dQ10,ht:'<p>The cuboid is shown above. Volume is the space it takes up, measured in <b>cubic units (cm\u00b3)</b>.</p><p>Think of it as stacking layers of unit cubes.</p>'},
+    {lb:'Label the dimensions',dr:dQ10,ht:'<p>The three dimensions are labelled: length <b>'+V.q10l+' cm</b>, width <b>'+V.q10w+' cm</b>, height <b>'+V.q10h+' cm</b>.</p>'},
+    {lb:'Apply the formula',dr:dQ10,ht:'<div class="fm">V = l \u00d7 w \u00d7 h = '+V.q10l+' \u00d7 '+V.q10w+' \u00d7 '+V.q10h+' = '+V.q10vol+' cm\u00b3</div>'},
+    {lb:'Using base area',dr:dQ10,ht:'<div class="fm">Base area = l \u00d7 w = '+V.q10l+' \u00d7 '+V.q10w+' = '+V.q10l*V.q10w+' cm\u00b2</div><div class="fm">V = base area \u00d7 height = '+V.q10l*V.q10w+' \u00d7 '+V.q10h+' = '+V.q10vol+' cm\u00b3</div>'},
+    {lb:'Your turn',dr:dQ10,ht:yt10}
+  ]},
+  {ey:'Q12 \u00b7 Y7 AOC \u00b7 Measure',ti:'Area Units: cm\u00b2, mm\u00b2 and m\u00b2 <span class="badge f">F</span>',
+   su:'Convert '+V.q11cm2+' cm\u00b2 to mm\u00b2, and '+V.q11m2+' m\u00b2 to cm\u00b2.',steps:[
+    {lb:'The conversion table',dr:dQ11,ht:'<p>The table above shows how area units relate to each other. Notice the pattern: going from a larger unit to a smaller one, you <b>multiply</b>. Going the other way, you <b>divide</b>.</p><p>The key facts to remember: 1 cm\u00b2 = 100 mm\u00b2 and 1 m\u00b2 = 10 000 cm\u00b2.</p>'},
+    {lb:'Why those numbers?',dr:dQ11,ht:'<p>The conversions are squared because area has two dimensions:</p><div class="fm">1 cm = 10 mm \u21d2 1 cm\u00b2 = 10 \u00d7 10 = 100 mm\u00b2</div><div class="fm">1 m = 100 cm \u21d2 1 m\u00b2 = 100 \u00d7 100 = 10 000 cm\u00b2</div>'},
+    {lb:'cm\u00b2 to mm\u00b2',dr:dQ11,ht:'<div class="fm">'+V.q11cm2+' cm\u00b2 \u00d7 100 = '+V.q11mm2+' mm\u00b2</div>'},
+    {lb:'m\u00b2 to cm\u00b2',dr:dQ11,ht:'<div class="fm">'+V.q11m2+' m\u00b2 \u00d7 10 000 = '+V.q11cm2b.toLocaleString()+' cm\u00b2</div>'},
+    {lb:'Your turn',dr:dQ11,ht:yt11}
+  ]},
+{ey:'Q9 \u00b7 Y7 AOC \u00b7 Shape',ti:'Area of Compound Shapes <span class="badge f">F</span>',su:'L-shape: outer '+V.q8a+' \u00d7 '+V.q8b+' cm, cut-out '+V.q8c+' \u00d7 '+V.q8d+' cm.',steps:[
     {lb:'Identify the shape',dr:dQ8,ht:'<p>Split a compound shape into simpler rectangles, or use the <b>subtraction method</b>: find the full rectangle area then subtract the missing piece.</p>'},
     {lb:'Perimeter',dr:dQ8,ht:'<div class="fm">Perimeter of L-shape = 2 \u00d7 ('+V.q8a+' + '+V.q8b+') = '+V.q8perim+' cm</div><p>The L-shape has the same perimeter as the bounding rectangle.</p>'},
     {lb:'Area',dr:dQ8,ht:'<div class="fm">Area = '+V.q8a+' \u00d7 '+V.q8b+' \u2212 '+V.q8c+' \u00d7 '+V.q8d+'</div><div class="fm">= '+V.q8a*V.q8b+' \u2212 '+V.q8c*V.q8d+' = '+V.q8area+' cm\u00b2</div>'},
     {lb:'Your turn',dr:dQ8,ht:yt8}
   ]},
-  {ey:'Q9 \u00b7 Y7 AOC \u00b7 Shape',ti:'Nets and Surface Area of Cuboids <span class="badge f">F</span>',su:'Cuboid '+V.q9l+' \u00d7 '+V.q9w+' \u00d7 '+V.q9h+' cm.',steps:[
+  {ey:'Q10 \u00b7 Y7 AOC \u00b7 Shape',ti:'Nets and Surface Area of Cuboids <span class="badge f">F</span>',su:'Cuboid '+V.q9l+' \u00d7 '+V.q9w+' \u00d7 '+V.q9h+' cm.',steps:[
     {lb:'The net',dr:dQ9,ht:'<p>A <b>net</b> is the 2D shape that folds into a 3D solid. A cuboid has <b>6 rectangular faces</b> arranged in a cross pattern.</p>'},
     {lb:'Name the faces',dr:dQ9,ht:'<p>Pairs of identical faces: top &amp; bottom ('+V.q9l+'\u00d7'+V.q9h+'), front &amp; back ('+V.q9l+'\u00d7'+V.q9w+'), left &amp; right ('+V.q9w+'\u00d7'+V.q9h+').</p>'},
     {lb:'Surface area',dr:dQ9,ht:'<div class="fm">SA = 2(lw + lh + wh)</div><div class="fm">= 2('+V.q9l*V.q9w+' + '+V.q9l*V.q9h+' + '+V.q9w*V.q9h+') = '+V.q9sa+' cm\u00b2</div>'},
     {lb:'Your turn',dr:dQ9,ht:yt9}
   ]},
-  {ey:'Q10 \u00b7 Y7 AOC \u00b7 Shape',ti:'Volume of Cuboids <span class="badge f">F</span>',su:'Cuboid '+V.q10l+' \u00d7 '+V.q10w+' \u00d7 '+V.q10h+' cm.',steps:[
+  {ey:'Q11 \u00b7 Y7 AOC \u00b7 Shape',ti:'Volume of Cuboids <span class="badge f">F</span>',su:'Cuboid '+V.q10l+' \u00d7 '+V.q10w+' \u00d7 '+V.q10h+' cm.',steps:[
     {lb:'The formula',dr:dQ10,ht:'<div class="fm">Volume = length \u00d7 width \u00d7 height</div><p>Volume is measured in <b>cubic units</b> (cm\u00b3, m\u00b3).</p>'},
     {lb:'Calculate',dr:dQ10,ht:'<div class="fm">V = '+V.q10l+' \u00d7 '+V.q10w+' \u00d7 '+V.q10h+' = '+V.q10vol+' cm\u00b3</div>'},
     {lb:'Using base area',dr:dQ10,ht:'<div class="fm">Base area = '+V.q10given+' cm\u00b2   Height = '+V.q10miss+' cm</div><div class="fm">V = '+V.q10given+' \u00d7 '+V.q10miss+' = '+V.q10volQ+' cm\u00b3</div>'},
     {lb:'Your turn',dr:dQ10,ht:yt10}
   ]},
-  {ey:'Q11 \u00b7 Y7 AOC \u00b7 Measure',ti:'Area Units: cm\u00b2, mm\u00b2 and m\u00b2 <span class="badge f">F</span>',su:'Convert '+V.q11cm2+' cm\u00b2 to mm\u00b2. Convert '+V.q11m2+' m\u00b2 to cm\u00b2.',steps:[
+  {ey:'Q12 \u00b7 Y7 AOC \u00b7 Measure',ti:'Area Units: cm\u00b2, mm\u00b2 and m\u00b2 <span class="badge f">F</span>',su:'Convert '+V.q11cm2+' cm\u00b2 to mm\u00b2. Convert '+V.q11m2+' m\u00b2 to cm\u00b2.',steps:[
     {lb:'Why the rule works',dr:dQ11,ht:'<p>1 cm = 10 mm, so 1 cm\u00b2 = 10 \u00d7 10 = <b>100 mm\u00b2</b>. Always square the linear conversion factor.</p>'},
     {lb:'cm\u00b2 to mm\u00b2',dr:dQ11,ht:'<div class="fm">'+V.q11cm2+' cm\u00b2 \u00d7 100 = '+V.q11mm2+' mm\u00b2</div>'},
     {lb:'m\u00b2 to cm\u00b2',dr:dQ11,ht:'<div class="fm">1 m = 100 cm \u2192 1 m\u00b2 = 10 000 cm\u00b2</div><div class="fm">'+V.q11m2+' m\u00b2 \u00d7 10 000 = '+V.q11cm2b.toLocaleString()+' cm\u00b2</div>'},
     {lb:'Your turn',dr:dQ11,ht:yt11}
   ]},
-  {ey:'Q12 \u00b7 Y7 AOC \u00b7 Measure',ti:'Area Units: Hectares and km\u00b2 <span class="badge f">F</span>',su:'Convert '+V.q12hectares+' hectares to m\u00b2 and km\u00b2.',steps:[
+  {ey:'Q13 \u00b7 Y7 AOC \u00b7 Measure',ti:'Area Units: Hectares and km\u00b2 <span class="badge f">F</span>',su:'Convert '+V.q12hectares+' hectares to m\u00b2 and km\u00b2.',steps:[
     {lb:'Key facts',dr:dQ12,ht:'<div class="fm">1 hectare = 10 000 m\u00b2</div><div class="fm">100 hectares = 1 km\u00b2</div>'},
     {lb:'To m\u00b2',dr:dQ12,ht:'<div class="fm">'+V.q12hectares+' \u00d7 10 000 = '+V.q12m2.toLocaleString()+' m\u00b2</div>'},
     {lb:'To km\u00b2',dr:dQ12,ht:'<div class="fm">'+V.q12hectares+' \u00f7 100 = '+V.q12km2+' km\u00b2</div>'},
     {lb:'Your turn',dr:dQ12,ht:yt12}
   ]},
-  {ey:'Q13 \u00b7 Y7 AOC \u00b7 Number',ti:'Fraction \u2192 Decimal \u2192 Percentage <span class="badge f">F</span>',su:'Convert '+V.q13n+'/'+V.q13d+' to a decimal and a percentage.',steps:[
+  {ey:'Q14 \u00b7 Y7 AOC \u00b7 Number',ti:'Fraction \u2192 Decimal \u2192 Percentage <span class="badge f">F</span>',su:'Convert '+V.q13n+'/'+V.q13d+' to a decimal and a percentage.',steps:[
     {lb:'Fraction to decimal',dr:dQ13,ht:'<div class="fm">Divide the top by the bottom: '+V.q13n+' \u00f7 '+V.q13d+' = '+V.q13dec+'</div>'},
     {lb:'Decimal to percentage',dr:dQ13,ht:'<div class="fm">Multiply by 100: '+V.q13dec+' \u00d7 100 = '+V.q13pct+'%</div>'},
     {lb:'Summary',dr:dQ13,ht:'<div class="fm">'+V.q13n+'/'+V.q13d+' = '+V.q13dec+' = '+V.q13pct+'%</div><p>Learn the common ones: \u00bd=0.5=50%, \u00bc=0.25=25%, \u00be=0.75=75%.</p>'},
     {lb:'Your turn',dr:dQ13,ht:yt13}
   ]},
-  {ey:'Q14 \u00b7 Y7 AOC \u00b7 Number',ti:'Percentage \u2192 Fraction \u2192 Decimal <span class="badge f">F</span>',su:'Convert '+V.q14pct+'% to a fraction and a decimal.',steps:[
+  {ey:'Q15 \u00b7 Y7 AOC \u00b7 Number',ti:'Percentage \u2192 Fraction \u2192 Decimal <span class="badge f">F</span>',su:'Convert '+V.q14pct+'% to a fraction and a decimal.',steps:[
     {lb:'Percentage to decimal',dr:dQ14,ht:'<div class="fm">Divide by 100: '+V.q14pct+' \u00f7 100 = '+V.q14dec+'</div>'},
     {lb:'Percentage to fraction',dr:dQ14,ht:'<div class="fm">Write over 100: '+V.q14pct+'/100</div><div class="fm">Simplify: \u00f7 '+gcd(V.q14pct,100)+' = '+V.q14fn+'/'+V.q14fd+'</div>'},
     {lb:'Summary',dr:dQ14,ht:'<div class="fm">'+V.q14pct+'% = '+V.q14dec+' = '+V.q14fn+'/'+V.q14fd+'</div>'},
     {lb:'Your turn',dr:dQ14,ht:yt14}
   ]},
-  {ey:'Q15 \u00b7 Y7 AOC \u00b7 Number',ti:'Integer Operations <span class="badge f">F</span>',su:'Work with positive and negative integers.',steps:[
+  {ey:'Q16 \u00b7 Y7 AOC \u00b7 Number',ti:'Integer Operations <span class="badge f">F</span>',su:'Work with positive and negative integers.',steps:[
     {lb:'Adding integers',dr:dQ15,ht:'<p>Use a number line. Moving <b>right</b> adds, moving <b>left</b> subtracts. Adding a negative is the same as subtracting.</p>'},
     {lb:'Calculate the sum',dr:dQ15,ht:'<div class="fm">'+V.q15a+' + '+V.q15b+' + ('+V.q15c+') = '+V.q15sum+'</div>'},
     {lb:'Multiplying integers',dr:dQ15,ht:'<p>Rules: positive \u00d7 positive = positive, negative \u00d7 negative = positive, positive \u00d7 negative = <b>negative</b>.</p><div class="fm">'+V.q15a+' \u00d7 '+V.q15b+' = '+V.q15prod+'</div>'},
     {lb:'Your turn',dr:dQ15,ht:yt15}
   ]},
-  {ey:'Q16 \u00b7 Y7 AOC \u00b7 Number',ti:'Decimal Operations <span class="badge f">F</span>',su:'Calculate '+V.q16a+' + '+V.q16b+',  '+V.q16a+' \u00d7 '+V.q16b+',  '+V.q16a+' \u00f7 '+V.q16b+'.',steps:[
+  {ey:'Q17 \u00b7 Y7 AOC \u00b7 Number',ti:'Decimal Operations <span class="badge f">F</span>',su:'Calculate '+V.q16a+' + '+V.q16b+',  '+V.q16a+' \u00d7 '+V.q16b+',  '+V.q16a+' \u00f7 '+V.q16b+'.',steps:[
     {lb:'Adding decimals',dr:dQ16,ht:'<p>Line up the <b>decimal points</b>, then add as normal whole numbers.</p><div class="fm">'+V.q16a+' + '+V.q16b+' = '+V.q16sum+'</div>'},
     {lb:'Multiplying decimals',dr:dQ16,ht:'<p>Multiply ignoring decimals, then count total decimal places in the question.</p><div class="fm">'+V.q16a+' \u00d7 '+V.q16b+' = '+V.q16prod+'</div>'},
     {lb:'Dividing decimals',dr:dQ16,ht:'<p>Multiply both numbers by 10 (or 100) to make the divisor a whole number.</p><div class="fm">'+V.q16a+' \u00f7 '+V.q16b+' = '+V.q16div+'</div>'},
     {lb:'Your turn',dr:dQ16,ht:yt16}
   ]},
-  {ey:'Q17 \u00b7 Y7 AOC \u00b7 Measure',ti:'Length, Mass and Capacity <span class="badge f">F</span>',su:'Convert km to m, kg to g, litres to ml.',steps:[
+  {ey:'Q18 \u00b7 Y7 AOC \u00b7 Measure',ti:'Length, Mass and Capacity <span class="badge f">F</span>',su:'Convert km to m, kg to g, litres to ml.',steps:[
     {lb:'The rule',dr:dQ17,ht:'<p>The key metric conversions all use <b>\u00d7 1000</b>: km \u2192 m, kg \u2192 g, litres \u2192 ml. Divide by 1000 to go back.</p>'},
     {lb:'Apply the conversions',dr:dQ17,ht:'<div class="fm">'+V.q17km+' km = '+V.q17m.toLocaleString()+' m</div><div class="fm">'+V.q17kg+' kg = '+V.q17g.toLocaleString()+' g</div><div class="fm">'+V.q17litres+' litres = '+V.q17ml.toLocaleString()+' ml</div>'},
     {lb:'Remember',dr:dQ17,ht:'<p>To convert <b>smaller</b> to <b>larger</b> units, divide. To convert <b>larger</b> to <b>smaller</b>, multiply.</p>'},
     {lb:'Your turn',dr:dQ17,ht:yt17}
   ]},
-  {ey:'Q18 \u00b7 Y7 AOC \u00b7 Measure',ti:'Capacity \u2014 Mixed Problem <span class="badge f">F</span>',su:V.q18count+' bottles each holding '+V.q18bottleML+' ml. Total in litres.',steps:[
+  {ey:'Q19 \u00b7 Y7 AOC \u00b7 Measure',ti:'Capacity \u2014 Mixed Problem <span class="badge f">F</span>',su:V.q18count+' bottles each holding '+V.q18bottleML+' ml. Total in litres.',steps:[
     {lb:'Find total in ml',dr:dQ18,ht:'<div class="fm">'+V.q18count+' \u00d7 '+V.q18bottleML+' ml = '+V.q18totalML.toLocaleString()+' ml</div>'},
     {lb:'Convert to litres',dr:dQ18,ht:'<div class="fm">'+V.q18totalML.toLocaleString()+' ml \u00f7 1000 = '+V.q18totalL+' litres</div>'},
     {lb:'Answer',dr:dQ18,ht:'<div class="fm">Total = '+V.q18totalL+' litres</div><p>Always check: is your answer a sensible size?</p>'},
     {lb:'Your turn',dr:dQ18,ht:yt18}
   ]},
-  {ey:'Q19 \u00b7 Y7 AOC \u00b7 Number',ti:'Percentage of a Quantity <span class="badge f">F</span>',su:'Find '+V.q19pct+'% of '+V.q19qty+'.',steps:[
+  {ey:'Q20 \u00b7 Y7 AOC \u00b7 Number',ti:'Percentage of a Quantity <span class="badge f">F</span>',su:'Find '+V.q19pct+'% of '+V.q19qty+'.',steps:[
     {lb:'Method: 1% first',dr:dQ19,ht:'<div class="fm">1% of '+V.q19qty+' = '+V.q19qty+' \u00f7 100 = '+V.q19qty/100+'</div><p>Then multiply by the percentage you need.</p>'},
     {lb:'Calculate',dr:dQ19,ht:'<div class="fm">'+V.q19pct+'% = '+V.q19qty/100+' \u00d7 '+V.q19pct+' = '+V.q19ans+'</div>'},
     {lb:'Shortcut',dr:dQ19,ht:'<div class="fm">Multiply by the decimal equivalent:</div><div class="fm">'+V.q19qty+' \u00d7 '+(V.q19pct/100)+' = '+V.q19ans+'</div>'},
     {lb:'Your turn',dr:dQ19,ht:yt19}
   ]},
-  {ey:'Q20 \u00b7 Y7 AOC \u00b7 Number',ti:'Ratio \u2014 Sharing in a Ratio <span class="badge f">F</span>',su:'Share '+V.q20total+' in ratio '+V.q20ra+' : '+V.q20rb+'.',steps:[
+  {ey:'Q21 \u00b7 Y7 AOC \u00b7 Number',ti:'Ratio \u2014 Sharing in a Ratio <span class="badge f">F</span>',su:'Share '+V.q20total+' in ratio '+V.q20ra+' : '+V.q20rb+'.',steps:[
     {lb:'Find total parts',dr:dQ20,ht:'<div class="fm">Total parts = '+V.q20ra+' + '+V.q20rb+' = '+(V.q20ra+V.q20rb)+'</div>'},
     {lb:'Find one part',dr:dQ20,ht:'<div class="fm">1 part = '+V.q20total+' \u00f7 '+(V.q20ra+V.q20rb)+' = '+V.q20pp+'</div>'},
     {lb:'Each share',dr:dQ20,ht:'<div class="fm">A = '+V.q20ra+' \u00d7 '+V.q20pp+' = '+V.q20shareA+'</div><div class="fm">B = '+V.q20rb+' \u00d7 '+V.q20pp+' = '+V.q20shareB+'</div><div class="fm">Check: '+V.q20shareA+' + '+V.q20shareB+' = '+(V.q20shareA+V.q20shareB)+' \u2713</div>'},
