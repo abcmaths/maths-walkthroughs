@@ -186,16 +186,31 @@ function dQ3(p){
 
 function dQ4(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var rx=100,ry=50,rw=280,rh=130,sp=rx+88;
-  o.push(R(rx,ry,rw,rh,'#fff5f0','#C0272D',2));
-  // problem always visible at step 0
   o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
-if(p>=1)o.push(L(sp,ry,sp,ry+rh,'#C0272D',1.5,'5,3'));
-  o.push(T(rx+rw/2,ry-16,'3','#C0272D',17));
-  o.push(T(rx-16,(2*ry+rh)/2,'x','#1a5a8a',16,'end'));
-  if(p>=1)o.push(T(rx-16,(2*ry+rh)/2+24,'+4','#1a7a3a',15,'end'));
-  if(p>=2)o.push(T((rx+sp)/2,(2*ry+rh)/2,'3x','#1a5a8a',22));
-  if(p>=3){o.push(T((sp+rx+rw)/2,(2*ry+rh)/2,'12','#1a7a3a',22));o.push(R(100,202,280,38,'#e8f8ee','#1a7a3a',2));o.push(T(240,226,'3(x + 4) = 3x + 12','#1a7a3a',17,'middle',true));}
+  o.push(T(240,30,'Expand  3(x + 4)','#C0272D',18,'middle',true));
+  // Rectangle: width = (x+4) split into x and 4; height label = 3
+  var rx=80,ry=60,rw=280,rh=100,sp=rx+180;  // split at x portion
+  o.push(R(rx,ry,rw,rh,'#fff8f4','#C0272D',2));
+  // height label "3" on left
+  o.push(T(rx-18,ry+rh/2,'3','#C0272D',18,'middle',true));
+  o.push(L(rx-28,ry,rx-28,ry+rh,'#C0272D',1.5));
+  o.push(L(rx-34,ry,rx-22,ry,'#C0272D',1.5));
+  o.push(L(rx-34,ry+rh,rx-22,ry+rh,'#C0272D',1.5));
+  // top label showing x and 4 sections
+  o.push(T(rx+sp/2-rx/2,ry-12,'x','#1a5a8a',15,'middle',true));
+  o.push(T(rx+rw-(rw-(sp-rx))/2,ry-12,'4','#1a7a3a',15,'middle',true));
+  if(p>=1){
+    // vertical divider
+    o.push(L(sp,ry,sp,ry+rh,'#888',1.5,'5,3'));
+    o.push(R(rx,ry,sp-rx,rh,'#e8f0ff','#1a5a8a',2));
+    o.push(R(sp,ry,rw-(sp-rx),rh,'#e8ffe8','#1a7a3a',2));
+  }
+  if(p>=2){o.push(T((rx+sp)/2,ry+rh/2,'3x','#1a5a8a',22,'middle',true));}
+  if(p>=3){
+    o.push(T((sp+(rx+rw))/2,ry+rh/2,'3×4=12','#1a7a3a',18,'middle',true));
+    o.push(R(100,176,280,40,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,200,'3(x + 4) = 3x + 12','#1a7a3a',17,'middle',true));
+  }
   s.innerHTML=o.join('');
 }
 
@@ -311,7 +326,7 @@ var QS=[
     {lb:'Group by type',dr:dQ3,ht:'<p>x-terms: 3x and 5x<br>y-terms: 2y and y (= 1y)</p>'},
     {lb:'Collect',dr:dQ3,ht:'<div class="fm">3x + 5x = 8x</div><div class="fm">2y + y = 3y</div>'},
     {lb:'Result',dr:dQ3,ht:'<div class="fm">3x + 2y + 5x + y = 8x + 3y</div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var a=rInt(2,7),b=rInt(2,6),c=rInt(1,5),d=rInt(1,5),rx=a+c,ry=b+d;return{question:'Simplify <b>'+a+'x + '+b+'y + '+c+'x + '+d+'y</b>. What is the coefficient of x in the simplified expression?',hints:['Collect x terms: '+a+'x + '+c+'x','Collect y terms: '+b+'y + '+d+'y'],ans:rx,tol:0,unit:'(x coefficient)',working:a+'x + '+c+'x = '+rx+'x,  '+b+'y + '+d+'y = '+ry+'y. Simplified: '+rx+'x + '+ry+'y'};})},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var a=rInt(2,7),b=rInt(2,6),c=rInt(1,5),d=rInt(1,5),rx=a+c,ry=b+d;return{question:'Simplify <b>'+a+'x + '+b+'y + '+c+'x + '+d+'y</b>. Enter the coefficient of x (we will check y coefficient in Show working).',hints:['Collect x terms: '+a+'x + '+c+'x = '+rx+'x','Collect y terms: '+b+'y + '+d+'y = '+ry+'y','Full answer: '+rx+'x + '+ry+'y'],ans:rx,tol:0,unit:'(x coefficient)',working:'Full answer: '+rx+'x + '+ry+'y  (x coeff = '+rx+', y coeff = '+ry+')'};})},
   ]},
   {ey:'Q4 \u00b7 Year 7 \u00b7 Algebra',ti:'Expanding Single Brackets',su:'Expand 3(x + 4).',steps:[
     {lb:'Rectangle method',dr:dQ4,ht:'<p>Multiply everything <b>inside</b> the bracket by the number <b>outside</b>. The rectangle shows the two areas.</p>'},

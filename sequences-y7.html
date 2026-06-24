@@ -219,100 +219,130 @@ function dQ2(p){
 /* Q3 Matchstick pattern */
 function dQ3(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var sc=28,my=140;
-  // Draw squares of matchsticks for patterns 1, 2, 3
-  function drawSquares(n,ox,col){
-    for(var sq=0;sq<n;sq++){
-      var x=ox+sq*sc;
-      o+=L(x,my,x+sc,my,col,2.5);// bottom
-      o+=L(x,my-sc,x+sc,my-sc,col,2.5);// top
-      o+=L(x,my,x,my-sc,col,2.5);// left
-      o+=L(x+sc,my,x+sc,my-sc,col,2.5);// right
+  o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,32,'Matchstick squares: how many sticks for n squares?','#C0272D',13,'middle',true));
+  // Draw squares progressively
+  var sq=function(x,y,n,col){
+    for(var i=0;i<n;i++){
+      o.push(L(x+i*28,y,x+i*28+28,y,col||'#C0272D',2));
+      o.push(L(x+i*28,y+28,x+i*28+28,y+28,col||'#C0272D',2));
+      o.push(L(x+i*28,y,x+i*28,y+28,col||'#C0272D',2));
     }
-    return 1+n*3;
+    o.push(L(x+n*28,y,x+n*28,y+28,col||'#C0272D',2));
+  };
+  if(p>=1){sq(40,56,1);o.push(T(54,100,'n=1','#888',10,'middle'));o.push(T(54,114,'4 sticks','#C0272D',10,'middle',true));}
+  if(p>=2){sq(130,56,2,'#1a5a8a');o.push(T(158,100,'n=2','#888',10,'middle'));o.push(T(158,114,'7 sticks','#1a5a8a',10,'middle',true));}
+  if(p>=3){sq(252,56,3,'#1a7a3a');o.push(T(294,100,'n=3','#888',10,'middle'));o.push(T(294,114,'10 sticks','#1a7a3a',10,'middle',true));}
+  if(p>=4){
+    o.push(T(240,140,'Pattern: each new square adds 3 sticks (left side already shared)','#241A17',11,'middle',false));
+    o.push(T(240,158,'n=1: 4   n=2: 4+3=7   n=3: 4+3+3=10','#888',11,'middle',false));
+    o.push(T(240,174,'That is 1 + 3n... but check: n=1 gives 1+3=4 ✓','#888',11,'middle',false));
+    o.push(R(130,182,220,36,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,204,'nth term = 3n + 1','#1a7a3a',16,'middle',true));
   }
-  var counts=[];
-  o+=T(240,22,'Matchstick pattern: how many sticks for pattern n?','#C0272D',13,'middle',true);
-  o+=R(14,10,452,28,'#fff5f0','#C0272D',1.5);
-if(p>=1){counts.push(drawSquares(1,60,'#C0272D'));o+=T(74,my+18,'n=1','#888',10,'middle',false);o+=T(74,my+30,counts[0]+' sticks','#C0272D',10,'middle',true);}
-  if(p>=2){counts.push(drawSquares(2,160,'#1a5a8a'));o+=T(188,my+18,'n=2','#888',10,'middle',false);o+=T(188,my+30,counts[1]+' sticks','#1a5a8a',10,'middle',true);}
-  if(p>=3){counts.push(drawSquares(3,270,'#1a7a3a'));o+=T(312,my+18,'n=3','#888',10,'middle',false);o+=T(312,my+30,counts[2]+' sticks','#1a7a3a',10,'middle',true);}
-  if(p>=1){o+=T(240,50,'Matchstick squares: how many sticks for n squares?','#241A17',12,'middle',false);}
-  if(p>=3){o+=T(240,200,'Sequence: 4, 7, 10\u2026  Rule: 3n + 1','#C0272D',13,'middle',true);}
-  s.innerHTML=o;
+  s.innerHTML=o.join('');
 }
 
-/* Q4 Square and triangle numbers */
 function dQ4(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  // Square numbers
-    o+=R(14,8,452,44,'#fff5f0','#C0272D',1.5);
-o+=T(240,22,'Square numbers: 1, 4, 9, 16, 25\u2026','#C0272D',14,'middle',true);
-  var sqSizes=[1,2,3,4,5];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,28,'Square and Triangle Numbers','#C0272D',13,'middle',true));
+  // Square numbers: grid dots
   if(p>=1){
-    sqSizes.forEach(function(n,i){
-      var x=40+i*80,y=40,sz=16;
-      for(var r=0;r<n;r++)for(var c=0;c<n;c++){o+=R(x+c*sz,y+r*sz,sz-1,sz-1,'#fce8d8','#C0272D',1);}
-      o+=T(x+n*sz/2,y+n*sz+14,n*n,'#C0272D',12,'middle',true);
+    [[1,1],[2,4],[3,9],[4,16],[5,25]].forEach(function(sq,i){
+      var gx=20+i*88,gy=60,n=sq[0];
+      for(var r=0;r<n;r++) for(var c=0;c<n;c++)
+        o.push('<circle cx="'+(gx+c*10)+'" cy="'+(gy+r*10)+'" r="3.5" fill="#C0272D"/>');
+      o.push(T(gx+n*5-5,gy+n*10+12,sq[1],'#C0272D',11,'middle',true));
+      o.push(T(gx+n*5-5,gy+n*10+24,n+'²','#888',9,'middle',false));
     });
+    o.push(T(240,52,'Square numbers (1, 4, 9, 16, 25…)','#C0272D',10,'middle',false));
   }
-  // Triangle numbers
-  o+=T(240,132,'Triangle numbers: 1, 3, 6, 10, 15\u2026','#1a5a8a',14,'middle',true);
-  var triNums=[1,3,6,10,15];
+  // Triangle numbers: triangular dot patterns
   if(p>=2){
-    triNums.forEach(function(t,i){
-      o+=R(40+i*80,148,60,40,(p>=3&&i===4)?'#e8f4ff':'#fff5f0','#1a5a8a',1.5);
-      o+=T(70+i*80,173,t,'#1a5a8a',16,'middle',true);
+    [[1,1],[2,3],[3,6],[4,10],[5,15]].forEach(function(tr,i){
+      var gx=20+i*88,gy=162,n=tr[0];
+      for(var r=0;r<n;r++){
+        var rowOff=(n-1-r)*5;
+        for(var c=0;c<=r;c++)
+          o.push('<circle cx="'+(gx+rowOff+c*10)+'" cy="'+(gy+r*10)+'" r="3.5" fill="#1a5a8a"/>');
+      }
+      o.push(T(gx+n*5-5,gy+n*10+10,tr[1],'#1a5a8a',11,'middle',true));
     });
-    o+=T(240,222,'Each is the sum 1+2+3+\u2026+n','#888',11,'middle',false);
+    o.push(T(240,152,'Triangle numbers (1, 3, 6, 10, 15…)','#1a5a8a',10,'middle',false));
   }
-  if(p>=3){o+=T(70+4*80,173,'15','#1a7a3a',18,'middle',true);o+=T(240,240,'T(n) = n(n+1)/2','#1a5a8a',12,'middle',false);}
-  s.innerHTML=o;
+  if(p>=3){
+    o.push(R(290,152,176,96,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(378,168,'T(n) = 1+2+3+…+n','#1a7a3a',11,'middle',true));
+    o.push(T(378,186,'n(n+1) ÷ 2','#1a7a3a',13,'middle',true));
+    o.push(T(378,208,'T(5) = 5×6÷2 = 15','#888',10,'middle',false));
+    o.push(T(378,224,'T(6) = 6×7÷2 = 21','#888',10,'middle',false));
+    o.push(T(378,240,'T(7) = 7×8÷2 = 28','#888',10,'middle',false));
+  }
+  s.innerHTML=o.join('');
 }
 
-/* Q5 Finding missing terms */
 function dQ5(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  // Sequence with gaps: 5, ?, 17, ?, 29
-  var terms=[5,null,17,null,29];
-  terms.forEach(function(v,i){
-    var x=40+i*84;
-    if(v!==null){o+=termBox(x,90,v,'#C0272D',true);}
-    else{o+=termBox(x,90,'?','#C8922A',p>=2);}
-  });
-  o+=T(240,22,'Find the missing terms in the sequence','#C0272D',13,'middle',true);
-  o+=R(14,10,452,28,'#fff5f0','#C0272D',1.5);
-if(p>=1){o+=T(240,50,'Find the common difference first: 17\u22125=12 across 2 gaps, so d=6','#241A17',12,'middle',false);}
-  if(p>=2){
-    o+=termBox(40+84,90,'11','#1a7a3a',true);
-    o+=termBox(40+3*84,90,'23','#1a7a3a',true);
-    o+=T(240,160,'d = 6. Missing terms: 5+6=11 and 17+6=23','#1a7a3a',13,'middle',true);
+  o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Find the missing term in: 5,  ?,  17,  23,  29','#C0272D',14,'middle',true));
+  var terms=[5,null,17,23,29];
+  var cx=[80,180,280,370,450];
+  if(p>=1){
+    terms.forEach(function(v,i){
+      var filled=(v!==null);
+      o.push(R(cx[i]-36,60,72,38,filled?'#fff5f0':'#f0f0f0',filled?'#C0272D':'#888',filled?2:1.5));
+      o.push(T(cx[i],83,filled?v:'?',filled?'#C0272D':'#888',filled?18:22,'middle',filled));
+    });
+    // Show only one gap arrow
+    o.push(L(cx[1]-36,100,cx[1]+36,100,'#C8922A',1));
+    o.push(T(cx[1],116,'find this','#C8922A',10,'middle',false));
   }
-  if(p>=3){o+=T(240,200,'Check: 5, 11, 17, 23, 29 \u2014 difference is always 6 \u2713','#888',11,'middle',false);}
-  s.innerHTML=o;
+  if(p>=2){
+    // Show the common difference from known neighbours
+    o.push(T(240,136,'Common difference: 23−17 = 6, or 29−23 = 6','#1a5a8a',12,'middle',false));
+    o.push(T(240,154,'So d = 6','#1a5a8a',14,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(cx[1]-42,60,84,38,'#e8f8ee','#1a7a3a',2));
+    o.push(T(cx[1],83,'11','#1a7a3a',20,'middle',true));
+    o.push(T(240,178,'Missing term = 17 − 6 = 11','#1a7a3a',14,'middle',true));
+    o.push(T(240,198,'Check: 5, 11, 17, 23, 29 ✓ (all differ by 6)','#888',11,'middle',false));
+  }
+  s.innerHTML=o.join('');
 }
 
-/* Q6 nth term arithmetic */
 function dQ6(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Sequence:  4,  7,  10,  13,  16, …','#C0272D',15,'middle',true));
   var seq=[4,7,10,13,16];
-  seq.forEach(function(v,i){o+=termBox(40+i*80,80,v,'#C0272D',p>=1);});
-  o+=T(240,22,'Find the nth term formula','#C0272D',13,'middle',true);
-  o+=R(14,10,452,28,'#fff5f0','#C0272D',1.5);
-if(p>=1){
-    for(var i=0;i<4;i++)o+=T(84+i*80,72,'+3','#C8922A',11,'middle',false);
-    o+=T(240,50,'d = 3,  a = 4','#241A17',13,'middle',false);
+  if(p>=1){
+    seq.forEach(function(v,i){
+      o.push(R(40+i*78,56,60,36,'#fff5f0','#C0272D',1.5));
+      o.push(T(70+i*78,79,v,'#C0272D',16,'middle',true));
+      o.push(T(40+i*78,50,'n='+(i+1),'#888',9,'start',false));
+    });
   }
-  if(p>=2){o+=T(240,150,'nth term = a + (n\u22121)d = 4 + (n\u22121)\u00d73','#241A17',14,'middle',false);}
+  if(p>=2){
+    // Show multiples of 3 underneath
+    o.push(T(40,108,'Multiples of 3:','#1a5a8a',11,'start',false));
+    [3,6,9,12,15].forEach(function(v,i){
+      o.push(R(40+i*78,114,60,34,'#e8f4ff','#1a5a8a',1.5));
+      o.push(T(70+i*78,135,v,'#1a5a8a',14,'middle',false));
+    });
+    o.push(T(240,102,'Common difference = 3, so compare to 3×n:','#241A17',11,'middle',false));
+  }
   if(p>=3){
-    o+=R(100,162,280,42,'#e8f8ee','#1a7a3a',2);
-    o+=T(240,188,'nth term = 3n + 1','#1a7a3a',18,'middle',true);
-    o+=T(240,230,'Check: n=1: 3+1=4\u2713  n=4: 12+1=13\u2713','#888',11,'middle',false);
+    o.push(T(240,164,'Each term is 1 MORE than the matching multiple of 3:','#241A17',11,'middle',false));
+    o.push(T(240,180,'4 = 3×1 + 1    7 = 3×2 + 1    10 = 3×3 + 1','#888',11,'middle',false));
+    o.push(R(130,192,220,38,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,215,'nth term = 3n + 1','#1a7a3a',16,'middle',true));
+    o.push(T(240,240,'The common difference (3) tells you the coefficient of n','#888',10,'middle',false));
   }
-  s.innerHTML=o;
+  s.innerHTML=o.join('');
 }
 
-/* Q7 Using nth term */
 function dQ7(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o+=T(240,28,'nth term = 3n + 1','#C0272D',18,'middle',true);
@@ -406,7 +436,7 @@ var QS=[
   {ey:'Q3 \u00b7 Year 7 \u00b7 Sequences',ti:'Sequences from Diagrams',su:'Matchstick squares: how many sticks are needed for n squares?',steps:[
     {lb:'Pattern 1',dr:dQ3,ht:'<p>Build up the diagram step by step. Count the sticks for each pattern number.</p>'},
     {lb:'Patterns 1, 2, 3',dr:dQ3,ht:'<div class="fm">n=1: 4 sticks,  n=2: 7 sticks,  n=3: 10 sticks</div>'},
-    {lb:'Find the rule',dr:dQ3,ht:'<p>Differences: +3, +3 \u2014 arithmetic. First term 4, common difference 3.</p><div class="fm">Sticks = 3n + 1</div>'},
+    {lb:'Where does 3n+1 come from?',dr:dQ3,ht:'<p>Each new square shares its left wall with the previous one, so only needs <b>3</b> new sticks. But the very first left wall is always there — that gives the <b>+1</b>:</p><div class="fm">Sticks = 3n + 1</div><p style="font-size:13px;color:#888;margin-top:6px;">Check: n=3 → 3×3+1 = 10 ✓</p>'},
     {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Using the formula <b>3n + 1</b>, how many sticks are needed for 10 squares?',hints:['Substitute n=10','3\u00d710 + 1'],ans:31,tol:0.05,unit:'sticks',working:'3\u00d710+1 = 31'})}
   ]},
   {ey:'Q4 \u00b7 Year 7 \u00b7 Sequences',ti:'Square and Triangle Numbers',su:'List the first 5 square numbers and first 5 triangle numbers.',steps:[
@@ -417,15 +447,14 @@ var QS=[
     {lb:'Your turn',dr:dQ4,ht:tryIt({question:'What is the 6th triangle number?',hints:['T(n) = 1+2+3+\u2026+n','T(6) = 1+2+3+4+5+6'],ans:21,tol:0.05,unit:'',working:'1+2+3+4+5+6 = 21'})}
   ]},
   {ey:'Q5 \u00b7 Year 7 \u00b7 Sequences',ti:'Finding Missing Terms',su:'Find the missing terms in: 5, ?, 17, ?, 29.',steps:[
-    {lb:'Identify the common difference',dr:dQ5,ht:'<p>The 1st and 3rd terms are given. There are 2 steps between them, so find the total increase and halve it.</p>'},
-    {lb:'Find d',dr:dQ5,ht:'<div class="fm">From 5 to 17 in 2 steps: 17\u22125=12, so d = 12\u00f72 = 6</div>'},
+    {lb:'One gap shown — find d from neighbours',dr:dQ5,ht:'<p>We show just one gap: 5, <b>?</b>, 17, 23, 29. Use consecutive known terms to find d:</p><div class="fm">23 − 17 = 6  →  d = 6</div>'},
+    {lb:'Fill in the gap',dr:dQ5,ht:'<div class="fm">? = 17 − 6 = 11</div><p style="font-size:13px;margin-top:6px;">Check: 5, 11, 17, 23, 29 ✓</p>'},
     {lb:'Fill in the gaps',dr:dQ5,ht:'<div class="fm">5, 11, 17, 23, 29</div>'},
     {lb:'Your turn',dr:dQ5,ht:tryIt({question:'Find the missing term in: <b>10, ?, 22</b>.',hints:['Two steps from 10 to 22','22\u221210=12, d=6','10+6 = ?'],ans:16,tol:0.05,unit:'',working:'d=6. Missing term = 10+6 = 16.'})}
   ]},
   {ey:'Q6 \u00b7 Year 7 \u00b7 Sequences',ti:'nth Term of an Arithmetic Sequence',su:'Find the nth term of: 4, 7, 10, 13, 16, \u2026',steps:[
-    {lb:'The formula',dr:dQ6,ht:'<p>For an arithmetic sequence with first term <b>a</b> and common difference <b>d</b>:</p><div class="fm">nth term = a + (n\u22121)d</div>'},
-    {lb:'Find a and d',dr:dQ6,ht:'<div class="fm">a = 4  (first term)</div><div class="fm">d = 3  (common difference)</div>'},
-    {lb:'Write the formula',dr:dQ6,ht:'<div class="fm">nth term = 4 + (n\u22121)\u00d73 = 4 + 3n \u2212 3 = 3n + 1</div>'},
+    {lb:'Common difference = coefficient of n',dr:dQ6,ht:'<p>Because d = 3, each term goes up by 3 each time — the same as multiples of 3. Compare:</p><div class="fm">Multiples of 3:&nbsp; 3, 6, 9, 12, 15…<br>Sequence: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4, 7, 10, 13, 16…<br>Difference: each term is <b>1 more</b></div>'},
+    {lb:'nth term = 3n + 1',dr:dQ6,ht:'<div class="fm">nth term = 3n + 1</div><p>Check: n=1 → 4 ✓&nbsp; n=5 → 16 ✓</p><p style="font-size:13px;margin-top:6px;color:#6b5750;">The common difference always gives the <b>coefficient of n</b>.</p>'},
     {lb:'Your turn',dr:dQ6,ht:tryIt({question:'Find the nth term of <b>2, 5, 8, 11, 14, \u2026</b>. What constant is added to 3n?',hints:['a=2, d=3','nth term = 2+(n\u22121)\u00d73 = 3n\u22121'],ans:-1,tol:0.05,unit:'(the constant)',working:'3n + (\u22121) = 3n\u22121. The constant is \u22121.'})}
   ]},
   {ey:'Q7 \u00b7 Year 7 \u00b7 Sequences',ti:'Using nth Term to Find Specific Terms',su:'nth term = 3n + 1. Find the 1st, 5th, 10th, 20th and 100th terms.',steps:[

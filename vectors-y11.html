@@ -53,6 +53,9 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
 .fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
 .fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.nq{margin-top:12px;font-size:13px;font-weight:600;padding:6px 14px;border-radius:3px;border:1px solid #aaa;background:#f5f5f5;color:#444;cursor:pointer;}
+.nq:hover{background:#e0e0e0;}
+.wk-ans{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
@@ -85,8 +88,69 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 </div>
 <script>
 var ST={};
-function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]=o;var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');return '<div class="try"><div class="try-t">Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="Answer ('+o.unit+')" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
-function ck(id){var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}if(Math.abs(v-o.ans)<=(o.exact||0.05)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}else{f.className='fb er';f.textContent='Not quite - check your working and try again.';}}
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rPick(a){return a[Math.floor(Math.random()*a.length)];}
+function tryIt(fn){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]=fn;
+  return genTry(id,fn());
+}
+function genTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  return '<div class="try" data-tryid="'+id+'">'+
+    '<div class="try-t">✔ Your Turn</div>'+
+    '<p>'+o.question+'</p>'+
+    '<div class="ar">'+
+      '<input type="number" step="any" placeholder="Your answer" id="'+id+'_i"/>'+
+      '<button class="ck" onclick="ck(\''+id+'\')">✓ Check</button>'+
+    '</div>'+
+    '<div class="fb" id="'+id+'_f"></div>'+
+    '<details class="wk">'+
+      '<summary>Show working</summary>'+
+      '<div class="wk-b">'+
+        (h?'<ul class="hl">'+h+'</ul>':'')+
+        '<div class="wk-ans">'+o.working+'</div>'+
+      '</div>'+
+    '</details>'+
+    '<button class="nq" data-tryid="'+id+'">New question</button>'+
+  '</div>';
+}
+function tryItStatic(o){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]=function(){return o;};
+  return genTry(id,o);
+}
+
+function ck(id){
+  var fn=ST[id];
+  var o=typeof fn==='function'?fn():fn;
+  var v=parseFloat(document.getElementById(id+'_i').value);
+  var f=document.getElementById(id+'_f');
+  if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}
+  var tol=o.tol!==undefined?o.tol:0.5;
+  if(Math.abs(v-o.ans)<=tol){
+    f.className='fb ok';f.textContent='✓ Correct! Answer: '+o.ans+(o.unit?' '+o.unit:'');
+  }else{
+    f.className='fb er';f.textContent='Not quite — check your working and try again.';
+  }
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.nq');
+  if(!b)return;
+  var id=b.getAttribute('data-tryid');
+  var fn=ST[id];
+  if(typeof fn!=='function')return;
+  var wrap=b.closest('.try');
+  if(wrap){
+    var fresh=genTry(id,fn());
+    var tmp=document.createElement('div');
+    tmp.innerHTML=fresh;
+    var nd=tmp.firstChild;
+    wrap.parentNode.replaceChild(nd,wrap);
+  }
+});
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
+
 function g(){return document.getElementById('dg');}
 function T(x,y,t,c,sz,a,b){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
@@ -356,75 +420,75 @@ var QS=[
     {lb:'What is a vector?',dr:dQ1,ht:'<p>A <b>vector</b> has both <b>magnitude</b> (size) and <b>direction</b>. We write it as a column: the top number is movement in x, the bottom is movement in y.</p>'},
     {lb:'Reading the column vector',dr:dQ1,ht:'<div class="fm">a = (4) means 4 right and 3 up<br>    (3)</div><p>Draw an arrow from the starting point, 4 right and 3 up.</p>'},
     {lb:'A second vector',dr:dQ1,ht:'<p>From the tip of a, draw vector b = (2, 2) — 2 right and 2 up.</p><div class="fm">b = (2)<br>    (2)</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Vector <b>c = (5, 2)</b>. How far to the right does it move?',hints:['The top number in a column vector is the horizontal (x) movement','(5) means 5 right, (2) means 2 up'],ans:5,exact:0.1,unit:'units right',working:'The top component of a column vector is the x-movement. c = (5, 2) moves <b>5</b> units right.'})}
+    {lb:'Your turn',dr:dQ1,ht:function(){var x=rInt(1,9),y=rInt(-5,5);return {question:'Vector <b>c = ('+x+', '+y+')</b>. How far to the right does it move?',hints:['The top number is the horizontal (x) movement'],ans:x,tol:0.01,unit:'units right',working:'c = ('+x+', '+y+') moves <b>'+x+'</b> units right'};}}
   ]},
   {ey:'Q2 \u2022 Year 11 \u2022 Foundation',ti:'Vector Addition',su:'If a = (3, 2) and b = (2, 3), find a + b and show it on a grid.',steps:[
     {lb:'The method',dr:dQ2,ht:'<p>To add vectors, place them <b>tip to tail</b>. The resultant goes from the start of the first to the tip of the second.</p>'},
     {lb:'Draw a',dr:dQ2,ht:'<div class="fm">a = (3) — 3 right, 2 up<br>    (2)</div><p>Draw a from the origin.</p>'},
     {lb:'Add b at the tip of a',dr:dQ2,ht:'<div class="fm">b = (2) — 2 right, 3 up<br>    (3)</div><p>Start b from where a ends. The resultant a+b goes from the origin to the final tip.</p>'},
     {lb:'The result',dr:dQ2,ht:'<div class="fm">a + b = (3+2) = (5)<br>         (2+3)   (5)</div><p>Add the components. The resultant arrow is the dashed line.</p>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'If a = (3, 2) and b = (2, 3), what is the y-component of a + b?',hints:['Add the y-components: 2 + 3','(3+2, 2+3)'],ans:5,exact:0.1,unit:'',working:'y-component: 2 + 3 = <b>5</b>. So a + b = (5, 5).'})}
+    {lb:'Your turn',dr:dQ2,ht:function(){var ax=rInt(1,6),ay=rInt(1,6),bx=rInt(1,6),by=rInt(1,6);return {question:'If a = ('+ax+', '+ay+') and b = ('+bx+', '+by+'), what is the y-component of a + b?',hints:['Add y-components: '+ay+' + '+by],ans:ay+by,tol:0.01,unit:'',working:'y: '+ay+' + '+by+' = <b>'+(ay+by)+'</b>. a+b = ('+(ax+bx)+', '+(ay+by)+')'};}}
   ]},
   {ey:'Q3 \u2022 Year 11 \u2022 Foundation',ti:'Scalar Multiplication',su:'Given v = (2, 1), draw v, 2v and 3v on the same grid.',steps:[
     {lb:'What is scalar multiplication?',dr:dQ3,ht:'<p>Multiplying a vector by a <b>scalar</b> (a number) scales its length. The direction stays the same. Multiplying by a negative scalar reverses the direction.</p>'},
     {lb:'Draw v',dr:dQ3,ht:'<div class="fm">v = (2) — 2 right, 1 up<br>    (1)</div>'},
     {lb:'Draw 2v',dr:dQ3,ht:'<div class="fm">2v = 2 x (2) = (4)<br>         (1)   (2)</div><p>Twice as long, same direction.</p>'},
     {lb:'Draw 3v',dr:dQ3,ht:'<div class="fm">3v = 3 x (2) = (6)<br>         (1)   (3)</div><p>Three times as long. All three vectors are parallel.</p>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'If v = (2, 1), what is the x-component of 4v?',hints:['Multiply the x-component by 4','2 × 4 = ?'],ans:8,exact:0.1,unit:'',working:'4v = 4 × (2, 1) = (8, 4). x-component = <b>8</b>.'})}
+    {lb:'Your turn',dr:dQ3,ht:function(){var vx=rInt(1,6),vy=rInt(1,5),k=rPick([2,3,4,5]),ans=k*vx;return {question:'If v = ('+vx+', '+vy+'), what is the x-component of '+k+'v?',hints:['Multiply x-component by '+k,vx+' × '+k+' = ?'],ans:ans,tol:0.01,unit:'',working:k+'v = ('+ans+', '+k*vy+'). x = <b>'+ans+'</b>'};}}
   ]},
   {ey:'Q4 \u2022 Year 11 \u2022 Foundation',ti:'Magnitude of a Vector',su:'Find the magnitude of v = (3, 4) using Pythagoras\' theorem.',steps:[
     {lb:'What is magnitude?',dr:dQ4,ht:'<p>The <b>magnitude</b> (or modulus) of a vector is its length. Written |v|. We use Pythagoras\' theorem on the x and y components.</p>'},
     {lb:'The right-angled triangle',dr:dQ4,ht:'<p>The vector (3, 4) forms the hypotenuse of a right-angled triangle with legs 3 (horizontal) and 4 (vertical).</p>'},
     {lb:'Apply Pythagoras',dr:dQ4,ht:'<div class="fm">|v| = sqrt(3\u00b2 + 4\u00b2)</div><div class="fm">    = sqrt(9 + 16) = sqrt(25) = 5</div><p>The 3-4-5 triple is worth remembering!</p>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'Find the magnitude of the vector (5, 12).',hints:['|v| = sqrt(x\u00b2 + y\u00b2)','5\u00b2 = 25, 12\u00b2 = 144','25 + 144 = 169'],ans:13,exact:0.1,unit:'',working:'|v| = sqrt(5\u00b2 + 12\u00b2) = sqrt(25+144) = sqrt(169) = <b>13</b>. (5-12-13 triple)'})}
+    {lb:'Your turn',dr:dQ4,ht:function(){return tryItStatic({question:'Find the magnitude of the vector (5, 12).',hints:['|v| = sqrt(x\u00b2 + y\u00b2)','5\u00b2 = 25, 12\u00b2 = 144','25 + 144 = 169'],ans:13,exact:0.1,unit:'',working:'|v| = sqrt(5\u00b2 + 12\u00b2) = sqrt(25+144) = sqrt(169) = <b>13</b>. (5-12-13 triple)'})}}
   ]},
   {ey:'Q5 \u2022 Year 11 \u2022 Extended',ti:'Vector Subtraction',su:'If a = (5, 4) and b = (2, 1), find a \u2212 b graphically and algebraically.',steps:[
     {lb:'The method',dr:dQ5,ht:'<p>Subtracting a vector means adding the <b>negative</b> of that vector. a \u2212 b = a + (\u2212b). Graphically, add \u2212b at the tip of a.</p>'},
     {lb:'Draw a and b',dr:dQ5,ht:'<div class="fm">a = (5,4)   b = (2,1)</div><p>Draw both from the origin.</p>'},
     {lb:'Apply \u2212b at tip of a',dr:dQ5,ht:'<p>From the tip of a, draw \u2212b = (\u22122, \u22121). The dashed arrow shows this.</p>'},
     {lb:'The result',dr:dQ5,ht:'<div class="fm">a \u2212 b = (5-2) = (3)<br>          (4-1)   (3)</div><p>The resultant (dashed orange) goes from origin to (3, 3).</p>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'If a = (5, 4) and b = (2, 1), what is the x-component of a \u2212 b?',hints:['Subtract x-components: 5 \u2212 2','(5\u22122, 4\u22121)'],ans:3,exact:0.1,unit:'',working:'x-component: 5 \u2212 2 = <b>3</b>. So a \u2212 b = (3, 3).'})}
+    {lb:'Your turn',dr:dQ5,ht:function(){return tryItStatic({question:'If a = (5, 4) and b = (2, 1), what is the x-component of a \u2212 b?',hints:['Subtract x-components: 5 \u2212 2','(5\u22122, 4\u22121)'],ans:3,exact:0.1,unit:'',working:'x-component: 5 \u2212 2 = <b>3</b>. So a \u2212 b = (3, 3).'})}}
   ]},
   {ey:'Q6 \u2022 Year 11 \u2022 Extended',ti:'Position Vectors',su:'A = (2, 3) and B = (6, 4). Find vector AB.',steps:[
     {lb:'What are position vectors?',dr:dQ6,ht:'<p>A <b>position vector</b> gives the position of a point relative to the origin O. OA is the vector from O to A.</p>'},
     {lb:'Draw OA and OB',dr:dQ6,ht:'<div class="fm">OA = (2)   OB = (6)<br>     (3)        (4)</div>'},
     {lb:'Find vector AB',dr:dQ6,ht:'<p>To get from A to B, go back to O then forward to B.</p><div class="fm">AB = AO + OB = -OA + OB = OB - OA</div>'},
     {lb:'Calculate AB',dr:dQ6,ht:'<div class="fm">AB = OB - OA = (6)-(2) = (4)<br>                (4) (3)   (1)</div><p>The orange arrow shows AB = (4, 1).</p>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'If OA = (2, 3) and OB = (6, 4), what is the y-component of AB?',hints:['AB = OB \u2212 OA','Subtract y-components: 4 \u2212 3'],ans:1,exact:0.1,unit:'',working:'AB = (6\u22122, 4\u22123) = (4, 1). y-component = <b>1</b>.'})}
+    {lb:'Your turn',dr:dQ6,ht:function(){return tryItStatic({question:'If OA = (2, 3) and OB = (6, 4), what is the y-component of AB?',hints:['AB = OB \u2212 OA','Subtract y-components: 4 \u2212 3'],ans:1,exact:0.1,unit:'',working:'AB = (6\u22122, 4\u22123) = (4, 1). y-component = <b>1</b>.'})}}
   ]},
   {ey:'Q7 \u2022 Year 11 \u2022 Extended',ti:'Parallel Vectors',su:'Show that vectors a = (2, 1), b = (4, 2) and c = (6, 3) are all parallel.',steps:[
     {lb:'What makes vectors parallel?',dr:dQ7,ht:'<p>Two vectors are <b>parallel</b> if one is a scalar multiple of the other. Their directions are the same (or exactly opposite for antiparallel).</p>'},
     {lb:'Compare a and b',dr:dQ7,ht:'<div class="fm">b = (4) = 2 \u00d7 (2) = 2a<br>    (2)       (1)</div><p>b is twice a, so b is parallel to a.</p>'},
     {lb:'Compare a and c',dr:dQ7,ht:'<div class="fm">c = (6) = 3 \u00d7 (2) = 3a<br>    (3)       (1)</div><p>c is three times a, confirming all three are parallel.</p>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'If a = (2, 1), which scalar k makes (10, 5) = k\u00b7a?',hints:['(10, 5) = k(2, 1)','10 = 2k, so k = ?'],ans:5,exact:0.1,unit:'',working:'10 = 2k \u2192 k = <b>5</b>. Check: 5\u00d7(2,1) = (10,5). \u2713'})}
+    {lb:'Your turn',dr:dQ7,ht:function(){return tryItStatic({question:'If a = (2, 1), which scalar k makes (10, 5) = k\u00b7a?',hints:['(10, 5) = k(2, 1)','10 = 2k, so k = ?'],ans:5,exact:0.1,unit:'',working:'10 = 2k \u2192 k = <b>5</b>. Check: 5\u00d7(2,1) = (10,5). \u2713'})}}
   ]},
   {ey:'Q8 \u2022 Year 11 \u2022 Extended',ti:'Midpoint Using Vectors',su:'A = (1, 5) and B = (7, 3). Find the position vector of the midpoint M.',steps:[
     {lb:'The formula',dr:dQ8,ht:'<p>The midpoint M of AB has position vector:</p><div class="fm">OM = \u00bd(OA + OB)</div><p>Add the position vectors then halve the result.</p>'},
     {lb:'Draw the points',dr:dQ8,ht:'<div class="fm">OA = (1)   OB = (7)<br>     (5)        (3)</div>'},
     {lb:'Join AB',dr:dQ8,ht:'<p>The midpoint M lies at the centre of the line segment AB.</p>'},
     {lb:'Calculate OM',dr:dQ8,ht:'<div class="fm">OM = \u00bd((1)+(7)) = \u00bd(8) = (4)<br>         ((5) (3))    (8)   (4)</div><p>M has coordinates (4, 4).</p>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'A = (1, 5), B = (7, 3). What is the x-coordinate of midpoint M?',hints:['OM = \u00bd(OA + OB)','x: \u00bd(1 + 7)'],ans:4,exact:0.1,unit:'',working:'\u00bd(1+7) = \u00bd \u00d7 8 = <b>4</b>. M = (4, 4).'})}
+    {lb:'Your turn',dr:dQ8,ht:function(){return tryItStatic({question:'A = (1, 5), B = (7, 3). What is the x-coordinate of midpoint M?',hints:['OM = \u00bd(OA + OB)','x: \u00bd(1 + 7)'],ans:4,exact:0.1,unit:'',working:'\u00bd(1+7) = \u00bd \u00d7 8 = <b>4</b>. M = (4, 4).'})}}
   ]},
   {ey:'Q9 \u2022 Year 11 \u2022 Extended',ti:'Route Vectors',su:'OA = a, OB = b. M is the midpoint of AB. Express OM in terms of a and b.',steps:[
     {lb:'Setting up the route',dr:dQ9,ht:'<p>To find a vector between two points, use a route via a known point. To get from O to M, we can go O \u2192 A \u2192 M.</p>'},
     {lb:'Draw OA and OB',dr:dQ9,ht:'<div class="fm">OA = a   OB = b</div><p>Both position vectors are drawn from O.</p>'},
     {lb:'Find AM',dr:dQ9,ht:'<p>M is the midpoint of AB, so AM = \u00bdAB.</p><div class="fm">AB = AO + OB = \u2212a + b = b \u2212 a</div><div class="fm">AM = \u00bd(b \u2212 a)</div>'},
     {lb:'Express OM',dr:dQ9,ht:'<div class="fm">OM = OA + AM</div><div class="fm">   = a + \u00bd(b \u2212 a)</div><div class="fm">   = a + \u00bdb \u2212 \u00bda</div><div class="fm">   = \u00bda + \u00bdb</div>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt({question:'If OA = a and OB = b, and N divides AB such that AN = \u00bdAB, the position vector ON = \u00bda + \u00bdb. What is the coefficient of b in this expression? (Enter as a decimal)',hints:['ON = OA + AN','AN = \u00bd(b \u2212 a)','Simplify: a + \u00bd(b\u2212a)'],ans:0.5,exact:0.01,unit:'',working:'ON = a + \u00bd(b\u2212a) = \u00bda + \u00bdb. Coefficient of b = <b>0.5</b>.'})}
+    {lb:'Your turn',dr:dQ9,ht:function(){return tryItStatic({question:'If OA = a and OB = b, and N divides AB such that AN = \u00bdAB, the position vector ON = \u00bda + \u00bdb. What is the coefficient of b in this expression? (Enter as a decimal)',hints:['ON = OA + AN','AN = \u00bd(b \u2212 a)','Simplify: a + \u00bd(b\u2212a)'],ans:0.5,exact:0.01,unit:'',working:'ON = a + \u00bd(b\u2212a) = \u00bda + \u00bdb. Coefficient of b = <b>0.5</b>.'})}}
   ]},
   {ey:'Q10 \u2022 Year 11 \u2022 Extended',ti:'Unit Vectors',su:'Find the unit vector in the direction of v = (3, 4).',steps:[
     {lb:'What is a unit vector?',dr:dQ10,ht:'<p>A <b>unit vector</b> has magnitude exactly 1. Written \u0302v (v-hat). It points in the same direction as v but with length 1.</p>'},
     {lb:'Find the magnitude',dr:dQ10,ht:'<div class="fm">|v| = sqrt(3\u00b2 + 4\u00b2) = sqrt(25) = 5</div>'},
     {lb:'Divide by the magnitude',dr:dQ10,ht:'<div class="fm">\u0302v = v / |v| = (3/5) = (0.6)</div><div class="fm">              (4/5)   (0.8)</div>'},
     {lb:'Verify',dr:dQ10,ht:'<div class="fm">|\u0302v| = sqrt(0.6\u00b2 + 0.8\u00b2) = sqrt(0.36+0.64) = sqrt(1) = 1 \u2713</div><p>The small orange arrow shows the unit vector \u0302v.</p>'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt({question:'Find the magnitude of the unit vector (0.6, 0.8). (Check it equals 1.)',hints:['|v| = sqrt(0.6\u00b2 + 0.8\u00b2)','0.36 + 0.64 = ?'],ans:1,exact:0.01,unit:'',working:'sqrt(0.36 + 0.64) = sqrt(1) = <b>1</b>. Unit vectors always have magnitude 1.'})}
+    {lb:'Your turn',dr:dQ10,ht:function(){return tryItStatic({question:'Find the magnitude of the unit vector (0.6, 0.8). (Check it equals 1.)',hints:['|v| = sqrt(0.6\u00b2 + 0.8\u00b2)','0.36 + 0.64 = ?'],ans:1,exact:0.01,unit:'',working:'sqrt(0.36 + 0.64) = sqrt(1) = <b>1</b>. Unit vectors always have magnitude 1.'})}}
   ]}
 ];
 
 var qi=0,si=0;
 function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
 function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
-function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');var _ht=typeof st.ht==='function'?st.ht():st.ht;if(typeof _ht==='object'&&_ht!==null){var _id='t'+Math.random().toString(36).slice(2);(function(o){ST[_id]=function(){return o;};}(_ht));_ht=genTry(_id,_ht);}p.innerHTML='<div class="sl">'+st.lb+'</div>'+_ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
 document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
 document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
 render();
