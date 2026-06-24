@@ -756,54 +756,67 @@ function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
 function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var l=V.q10l,w=V.q10w,h=V.q10h,vol=V.q10vol;
   o.push(T(240,15,'Volume of a Cuboid','#C0272D',14,'middle',true));
-  // isometric cuboid — scale so it fits nicely
-  var sc=Math.min(Math.floor(110/l),Math.floor(80/w),Math.floor(100/h),22);
-  var dx=sc*0.82,dy=sc*0.46;
-  // anchor: bottom-left-front corner at (bx,by)
-  var bx=100,by=195;
-  // 8 vertices: front-bottom-left=A, front-bottom-right=B, back-bottom-right=C, back-bottom-left=D
-  //             above: E,F,G,H
-  function vt(li,wi,hi){return[bx+li*dx-wi*dx, by-li*dy-wi*dy-hi*sc];}
-  var A=vt(0,0,0),B=vt(l,0,0),C=vt(l,w,0),D=vt(0,w,0);
-  var E=vt(0,0,h),F=vt(l,0,h),G=vt(l,w,h),H=vt(0,w,h);
+  // isometric scale — cap so cuboid fits in ~220×170 drawing area
+  var sc=Math.min(22, Math.floor(100/Math.max(l,1)), Math.floor(80/Math.max(w,1)), Math.floor(140/Math.max(h,1)));
+  // isometric unit vectors: right=(dx,dy), back=(-dx,dy), up=(0,-sc)
+  var dx=sc*0.87, dy=sc*0.50;
+  // drawing area centre ~(190,200) to leave room for panel on right
+  // bottom-front-left corner A
+  var Ax=90, Ay=205;
+  // 8 corners: l=length(right), w=width(back), h=height(up)
+  function V3(li,wi,hi){return [Ax+li*dx-wi*dx, Ay+li*dy+wi*dy-hi*sc];}
+  var A=V3(0,0,0), B=V3(l,0,0), C=V3(l,w,0), D=V3(0,w,0);
+  var E=V3(0,0,h), F=V3(l,0,h), G=V3(l,w,h), H=V3(0,w,h);
   function pt(v){return v[0].toFixed(1)+','+v[1].toFixed(1);}
-  // hidden edges (dashed)
-  o.push('<line x1="'+D[0].toFixed(1)+'" y1="'+D[1].toFixed(1)+'" x2="'+A[0].toFixed(1)+'" y2="'+A[1].toFixed(1)+'" stroke="#bbb" stroke-width="1" stroke-dasharray="4,3"/>');
-  o.push('<line x1="'+D[0].toFixed(1)+'" y1="'+D[1].toFixed(1)+'" x2="'+C[0].toFixed(1)+'" y2="'+C[1].toFixed(1)+'" stroke="#bbb" stroke-width="1" stroke-dasharray="4,3"/>');
-  o.push('<line x1="'+D[0].toFixed(1)+'" y1="'+D[1].toFixed(1)+'" x2="'+H[0].toFixed(1)+'" y2="'+H[1].toFixed(1)+'" stroke="#bbb" stroke-width="1" stroke-dasharray="4,3"/>');
+  function ln(v1,v2,col,wt,dash){
+    var d=dash?' stroke-dasharray="'+dash+'"':'';
+    return '<line x1="'+v1[0].toFixed(1)+'" y1="'+v1[1].toFixed(1)+'" x2="'+v2[0].toFixed(1)+'" y2="'+v2[1].toFixed(1)+'" stroke="'+col+'" stroke-width="'+wt+'"'+d+'/>';
+  }
+  // hidden edges first (behind faces)
+  o.push(ln(A,D,'#aaa',1,'4,3'));
+  o.push(ln(D,C,'#aaa',1,'4,3'));
+  o.push(ln(D,H,'#aaa',1,'4,3'));
+  // visible faces (draw before edges so edges sit on top)
+  o.push('<polygon points="'+[E,F,G,H].map(pt).join(' ')+'" fill="#d8e8ff" stroke="#1a5a8a" stroke-width="1.5"/>');// top
+  o.push('<polygon points="'+[A,B,F,E].map(pt).join(' ')+'" fill="#fff0ee" stroke="#C0272D" stroke-width="1.5"/>');// front
+  o.push('<polygon points="'+[B,C,G,F].map(pt).join(' ')+'" fill="#fff8e8" stroke="#C8922A" stroke-width="1.5"/>');// right side
   // visible bottom edges
-  o.push(L(A[0],A[1],B[0],B[1],'#C0272D',2));
-  o.push(L(B[0],B[1],C[0],C[1],'#C0272D',1.5));
-  // visible top face
-  o.push('<polygon points="'+[E,F,G,H].map(pt).join(' ')+'" fill="#e8f0ff" stroke="#1a5a8a" stroke-width="1.5"/>');
-  // visible side faces
-  o.push('<polygon points="'+[A,B,F,E].map(pt).join(' ')+'" fill="#fff5f0" stroke="#C0272D" stroke-width="1.5"/>');
-  o.push('<polygon points="'+[B,C,G,F].map(pt).join(' ')+'" fill="#fff8ee" stroke="#C8922A" stroke-width="1.5"/>');
-  // all 4 visible vertical edges
-  [[A,E],[B,F],[C,G]].forEach(function(pair){o.push(L(pair[0][0],pair[0][1],pair[1][0],pair[1][1],'#888',1.5));});
-  o.push(L(C[0],C[1],G[0],G[1],'#C8922A',1.5));
+  o.push(ln(A,B,'#C0272D',2,''));
+  o.push(ln(B,C,'#C8922A',1.5,''));
+  // vertical edges
+  o.push(ln(A,E,'#888',1.5,''));
+  o.push(ln(B,F,'#888',1.5,''));
+  o.push(ln(C,G,'#C8922A',1.5,''));
+  o.push(ln(F,G,'#1a5a8a',1.5,''));// top front-right
+  o.push(ln(E,H,'#1a5a8a',1.5,''));// top back-left
+  o.push(ln(G,H,'#1a5a8a',1.5,''));// top back
+  // corner dots
+  [A,B,C,E,F,G,H].forEach(function(v){o.push('<circle cx="'+v[0].toFixed(1)+'" cy="'+v[1].toFixed(1)+'" r="2.5" fill="#fff" stroke="#555" stroke-width="1"/>');});
+  // dimension labels (step 1)
   if(p>=1){
-    // dimension labels
-    var lmid=[(A[0]+B[0])/2,(A[1]+B[1])/2];
-    var wmid=[(B[0]+C[0])/2+6,(B[1]+C[1])/2+4];
-    var hmid=[(B[0]+F[0])/2+10,(B[1]+F[1])/2];
-    o.push(T(lmid[0],lmid[1]+14,l+' cm','#C0272D',10,'middle',true));
-    o.push(T(wmid[0],wmid[1],w+' cm','#C8922A',10,'start',false));
-    o.push(T(hmid[0],hmid[1],h+' cm','#1a5a8a',10,'start',false));
+    var lMid=[(A[0]+B[0])/2, A[1]+14];
+    var wMid=[(B[0]+C[0])/2+8, (B[1]+C[1])/2+6];
+    var hMid=[B[0]+12, (B[1]+F[1])/2];
+    o.push(T(lMid[0],lMid[1],l+' cm','#C0272D',11,'middle',true));
+    o.push(T(wMid[0],wMid[1],w+' cm','#C8922A',11,'start',true));
+    o.push(T(hMid[0],hMid[1],h+' cm','#1a5a8a',11,'start',true));
   }
+  // formula (step 2)
   if(p>=2){
-    o.push(R(270,26,196,56,'#fff5f0','#C0272D',1.5));
-    o.push(T(368,42,'V = l \u00d7 w \u00d7 h','#C0272D',12,'middle',true));
-    o.push(T(368,60,'= '+l+' \u00d7 '+w+' \u00d7 '+h,'#888',11,'middle',false));
+    o.push(R(272,32,192,56,'#fff5f0','#C0272D',1.5));
+    o.push(T(368,50,'V = l \u00d7 w \u00d7 h','#C0272D',13,'middle',true));
+    o.push(T(368,68,'= '+l+' \u00d7 '+w+' \u00d7 '+h,'#888',11,'middle',false));
   }
+  // answer (step 3)
   if(p>=3){
-    o.push(R(270,90,196,44,'#e8f8ee','#1a7a3a',2));
-    o.push(T(368,106,'= '+vol+' cm\u00b3','#1a7a3a',20,'middle',true));
+    o.push(R(272,96,192,48,'#e8f8ee','#1a7a3a',2));
+    o.push(T(368,116,'= '+vol+' cm\u00b3','#1a7a3a',22,'middle',true));
   }
+  // base area method (step 4)
   if(p>=4){
-    o.push(R(270,142,196,48,'#e8f0ff','#1a5a8a',1.5));
-    o.push(T(368,156,'Base area = '+l+'\u00d7'+w+' = '+l*w+' cm\u00b2','#1a5a8a',10,'middle',false));
-    o.push(T(368,172,'V = '+l*w+' \u00d7 '+h+' = '+vol+' cm\u00b3','#1a5a8a',11,'middle',true));
+    o.push(R(272,152,192,52,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(368,168,'Base area = '+l*w+' cm\u00b2','#1a5a8a',11,'middle',false));
+    o.push(T(368,186,'V = '+l*w+' \u00d7 '+h+' = '+vol+' cm\u00b3','#1a5a8a',11,'middle',true));
   }
   s.innerHTML=o.join('');
 }
@@ -868,19 +881,44 @@ function dQ12(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
     o.push(T(240,166,ha+' ha = '+m2.toLocaleString()+' m\u00b2 = '+km2+' km\u00b2','#1a7a3a',14,'middle',true));}
   s.innerHTML=o.join('');}
 
+function svgFrac(cx,cy,num,den,col,sz){
+  // draw a proper fraction centred at cx,cy
+  var sz2=sz||18;
+  var barW=sz2*1.6;
+  var o=[];
+  o.push(T(cx,cy-4,num,col,sz2,'middle',true));
+  o.push('<line x1="'+(cx-barW/2)+'" y1="'+cy+'" x2="'+(cx+barW/2)+'" y2="'+cy+'" stroke="'+col+'" stroke-width="1.5"/>');
+  o.push(T(cx,cy+sz2,den,col,sz2,'middle',true));
+  return o.join('');
+}
 function dQ13(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var n=V.q13n,d=V.q13d,pct=V.q13pct,dec=V.q13dec;
-  o.push(T(240,22,'Fractions, Decimals and Percentages','#C0272D',14,'middle',true));
-  if(p>=1){o.push(R(20,40,440,44,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,58,'Convert '+n+'/'+d+' to a decimal: divide numerator by denominator','#C0272D',13,'middle',false));
-    o.push(T(240,76,n+' \u00f7 '+d+' = '+dec,'#888',12,'middle',false));}
-  if(p>=2){o.push(R(20,94,440,44,'#e8f0ff','#1a5a8a',1.5));
-    o.push(T(240,112,'To convert to %: multiply decimal by 100','#1a5a8a',13,'middle',false));
-    o.push(T(240,130,dec+' \u00d7 100 = '+pct+'%','#888',12,'middle',false));}
-  if(p>=3){o.push(R(80,148,320,80,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,170,n+'/'+d+' = '+dec+' = '+pct+'%','#1a7a3a',18,'middle',true));
-    o.push(T(240,200,'fraction \u2192 decimal \u2192 percentage','#888',11,'middle',false));}
-  s.innerHTML=o.join('');}
+  o.push(T(240,16,'Fractions, Decimals and Percentages','#C0272D',13,'middle',true));
+  // always show the fraction prominently
+  o.push(R(160,28,160,70,'#fff5f0','#C0272D',2));
+  o.push(T(240,42,'Convert this fraction:','#888',10,'middle',false));
+  o.push(svgFrac(240,75,n,d,'#C0272D',24));
+  // conversion pathway shown always
+  o.push(T(60,180,'Fraction','#C0272D',10,'middle',true));
+  o.push(svgFrac(60,155,n,d,'#C0272D',13));
+  o.push(T(115,180,'\u2192','#888',14,'middle',false));
+  o.push(T(195,170,'Decimal','#1a5a8a',10,'middle',true));
+  o.push(T(195,185,p>=1?dec:'?','#1a5a8a',13,'middle',true));
+  o.push(T(255,180,'\u2192','#888',14,'middle',false));
+  o.push(T(330,170,'Percentage','#1a7a3a',10,'middle',true));
+  o.push(T(330,185,p>=2?pct+'%':'?','#1a7a3a',13,'middle',true));
+  // step 1: fraction to decimal
+  if(p>=1){
+    o.push(R(14,196,452,28,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,207,'Step 1: divide top by bottom \u2192 '+n+' \u00f7 '+d+' = '+dec,'#1a5a8a',11,'middle',false));
+  }
+  // step 2: decimal to percentage
+  if(p>=2){
+    o.push(R(14,228,452,28,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,239,'Step 2: \u00d7 100 \u2192 '+dec+' \u00d7 100 = '+pct+'%','#1a7a3a',11,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ14(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var pct=V.q14pct,dec=V.q14dec,fn=V.q14fn,fd=V.q14fd;
@@ -898,34 +936,121 @@ function dQ14(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
 
 function dQ15(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var a=V.q15a,b=V.q15b,c=V.q15c,sum=V.q15sum,prod=V.q15prod;
-  o.push(T(240,22,'Integer Operations','#C0272D',14,'middle',true));
-  if(p>=1){o.push(R(20,40,440,44,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,58,'Calculate: '+a+' + '+b+' + ('+c+')','#C0272D',13,'middle',false));
-    o.push(T(240,76,'Start with positive numbers, then apply negatives','#888',11,'middle',false));}
-  if(p>=2){o.push(R(120,94,240,36,'#e8f0ff','#1a5a8a',1.5));
-    o.push(T(240,117,'= '+sum,'#1a5a8a',22,'middle',true));}
-  if(p>=3){o.push(R(20,140,440,44,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,158,'Multiply: '+a+' \u00d7 '+b,'#C0272D',13,'middle',false));
-    o.push(T(240,176,'negative \u00d7 positive = negative','#888',11,'middle',false));}
-  if(p>=4){o.push(R(120,194,240,36,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,217,'= '+prod,'#1a7a3a',22,'middle',true));}
-  s.innerHTML=o.join('');}
+  o.push(T(240,16,'Integer Operations','#C0272D',14,'middle',true));
+  // number line — always visible
+  var nlx=30,nly=110,nlw=420,mid=Math.abs(a)+2;
+  var span=Math.abs(a)+b+Math.abs(c)+4;
+  var sc2=nlw/span;
+  var zero=nlx+mid*sc2;
+  o.push(L(nlx,nly,nlx+nlw,nly,'#333',1.5));
+  // ticks every integer
+  for(var t=-mid;t<=span-mid;t++){
+    var tx=zero+t*sc2;
+    if(tx>=nlx-2&&tx<=nlx+nlw+2){
+      o.push(L(tx,nly-4,tx,nly+4,'#888',t%5===0?1.5:1));
+      if(t%5===0||Math.abs(t)<=2)o.push(T(tx,nly+14,t,'#888',8,'middle',false));
+    }
+  }
+  // arrow: start at a
+  var startX=zero+a*sc2;
+  o.push('<circle cx="'+startX.toFixed(1)+'" cy="'+nly+'" r="5" fill="#C0272D" stroke="#C0272D" stroke-width="1"/>');
+  o.push(T(startX,nly-12,a,'#C0272D',10,'middle',true));
+  // step 1: add b (move right)
+  if(p>=1){
+    var endX1=zero+(a+b)*sc2;
+    o.push('<line x1="'+startX.toFixed(1)+'" y1="'+(nly-8)+'" x2="'+endX1.toFixed(1)+'" y2="'+(nly-8)+'" stroke="#1a5a8a" stroke-width="2" marker-end="url(#arr)"/>');
+    o.push(T((startX+endX1)/2,nly-22,'+'+b,'#1a5a8a',10,'middle',false));
+    o.push('<circle cx="'+endX1.toFixed(1)+'" cy="'+nly+'" r="5" fill="#1a5a8a" stroke="#1a5a8a" stroke-width="1"/>');
+    o.push(T(endX1,nly-12,(a+b),'#1a5a8a',10,'middle',true));
+  }
+  // step 2: add c (move left if c<0)
+  if(p>=2){
+    var endX1b=zero+(a+b)*sc2;
+    var endX2=zero+sum*sc2;
+    o.push('<line x1="'+endX1b.toFixed(1)+'" y1="'+(nly+8)+'" x2="'+endX2.toFixed(1)+'" y2="'+(nly+8)+'" stroke="#C8922A" stroke-width="2"/>');
+    o.push(T((endX1b+endX2)/2,nly+22,c,'#C8922A',10,'middle',false));
+    o.push('<circle cx="'+endX2.toFixed(1)+'" cy="'+nly+'" r="6" fill="#1a7a3a" stroke="#1a7a3a" stroke-width="1.5"/>');
+    o.push(T(endX2,nly-12,sum,'#1a7a3a',11,'middle',true));
+  }
+  // step 3: answer box
+  if(p>=3){
+    o.push(R(20,140,440,28,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,158,a+' + '+b+' + ('+c+') = '+sum,'#1a7a3a',13,'middle',true));
+  }
+  // step 4: multiply rule
+  if(p>=4){
+    o.push(R(20,176,440,76,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,192,'Multiply: '+a+' \u00d7 '+b+' = ?','#C0272D',12,'middle',true));
+    o.push(T(240,208,'Rule: negative \u00d7 positive = negative','#888',11,'middle',false));
+    o.push(T(240,224,'(different signs \u2192 negative result)','#888',10,'middle',false));
+    o.push(T(240,242,a+' \u00d7 '+b+' = '+prod,'#C0272D',13,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ16(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var a=V.q16a,b=V.q16b,sm=V.q16sum,pr=V.q16prod,dv=V.q16div;
-  o.push(T(240,22,'Decimal Operations','#C0272D',14,'middle',true));
-  if(p>=1){o.push(R(20,40,440,36,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,54,a+' + '+b+' = ?   \u2192 line up decimal points','#C0272D',13,'middle',false));
-    o.push(T(240,72,'= '+sm,'#888',12,'middle',true));}
-  if(p>=2){o.push(R(20,88,440,36,'#e8f0ff','#1a5a8a',1.5));
-    o.push(T(240,102,a+' \u00d7 '+b+' = ?   \u2192 multiply as integers, then place decimal','#1a5a8a',12,'middle',false));
-    o.push(T(240,120,'= '+pr,'#888',12,'middle',true));}
-  if(p>=3){o.push(R(20,136,440,36,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,150,a+' \u00f7 '+b+' = ?   \u2192 multiply both by 10 to clear decimal','#C0272D',12,'middle',false));
-    o.push(T(240,168,'= '+dv,'#888',12,'middle',true));}
-  if(p>=4){o.push(R(60,190,360,44,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,208,'Sum = '+sm+'   Product = '+pr+'   Quotient = '+dv,'#1a7a3a',13,'middle',true));}
-  s.innerHTML=o.join('');}
+  // Use fixed worked example 3.4 + 2.56 so decimal point alignment is clear
+  // Random values used only in Your Turn
+  var wa=3.4, wb=2.56, wsum=5.96;
+  o.push(T(240,16,'Decimal Addition \u2014 Line up the decimal points!','#C0272D',12,'middle',true));
+  // always show the two numbers
+  o.push(R(14,28,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,41,'We are going to add: 3.4 + 2.56','#241A17',13,'middle',false));
+  o.push(T(240,58,'First, write them in a column with decimal points lined up.','#888',10,'middle',false));
+  // column addition diagram — always visible
+  // column grid: ones | . | tenths | hundredths
+  var gx=160,gy=76,cw=38,rh=30;
+  var headers=['Ones','.','Tenths','Hths'],hcols=['#C0272D','#555','#1a5a8a','#1a7a3a'];
+  headers.forEach(function(h,i){
+    o.push(R(gx+i*cw,gy,cw,20,'#e0e0e0','#888',1));
+    o.push(T(gx+i*cw+cw/2,gy+14,h,hcols[i],7,'middle',false));
+  });
+  // row 1: 3.4 (ones=3, dec=., tenths=4, hths=0[blank])
+  var rows2=[
+    [['3','.','4','0 '],wa],
+    [['2','.','5','6'],wb]
+  ];
+  rows2.forEach(function(row,ri){
+    var digits=row[0];
+    digits.forEach(function(d,ci){
+      var bg=ri%2===0?'#fff':'#f8f8f8';
+      o.push(R(gx+ci*cw,gy+20+ri*rh,cw,rh,bg,'#ddd',1));
+      var col=ci===1?'#555':hcols[ci];
+      var isFaded=ci===3&&ri===0;
+      o.push(T(gx+ci*cw+cw/2,gy+20+ri*rh+20,d,isFaded?'#bbb':col,16,'middle',isFaded?false:true));
+    });
+    o.push(T(gx-16,gy+20+ri*rh+20,row[1],'#888',10,'end',false));
+  });
+  // total row
+  o.push(R(gx,gy+20+2*rh,cw*4,rh,'#e8f8ee','#1a7a3a',1.5));
+  o.push(T(gx-10,gy+20+2*rh+20,'=','#1a7a3a',14,'end',true));
+  // step 1: highlight decimal points aligned
+  if(p>=1){
+    // highlight the dot column
+    [0,1,2].forEach(function(ri){
+      o.push('<rect x="'+(gx+cw)+'" y="'+(gy+20+ri*rh)+'" width="'+cw+'" height="'+rh+'" fill="#C0272D22" stroke="#C0272D" stroke-width="2" rx="1"/>');
+    });
+    o.push(T(gx+4*cw+10,gy+50,'Decimal points\nmust line up!','#C0272D',9,'start',false));
+    o.push(T(240,232,'The 0 in the hundredths column of 3.4 is written as a placeholder.','#888',10,'middle',false));
+  }
+  // step 2: show the addition column by column
+  if(p>=2){
+    // fill answer row digits
+    var ans=['5','.','9','6'],acols=['#C0272D','#555','#1a5a8a','#1a7a3a'];
+    ans.forEach(function(d,ci){
+      o.push(T(gx+ci*cw+cw/2,gy+20+2*rh+20,d,acols[ci],16,'middle',true));
+    });
+    o.push(T(gx-16,gy+20+2*rh+20,wsum,'#1a7a3a',10,'end',true));
+    o.push(T(240,232,'Add column by column: hundredths 0+6=6, tenths 4+5=9, ones 3+2=5','#888',10,'middle',false));
+  }
+  // step 3: show how to check
+  if(p>=3){
+    o.push(R(14,218,452,36,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,230,'3.4 + 2.56 = 5.96','#1a7a3a',15,'middle',true));
+    o.push(T(240,248,'Check: roughly 3 + 3 = 6 \u2713 (estimate to check your answer)','#888',9,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ17(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var km=V.q17km,m=V.q17m,kg=V.q17kg,gr=V.q17g,lit=V.q17litres,ml=V.q17ml;
@@ -952,35 +1077,87 @@ function dQ17(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
 
 function dQ18(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var bml=V.q18bottleML,cnt=V.q18count,tML=V.q18totalML,tL=V.q18totalL;
-  o.push(T(240,22,'Capacity \u2014 Mixed Problem','#C0272D',14,'middle',true));
-  // draw bottles
-  for(var i=0;i<Math.min(cnt,8);i++){
-    var bx=50+i*46,by=80;
-    o.push(R(bx,by,30,60,'#1a5a8a33','#1a5a8a',1.5));
-    o.push(R(bx+8,by-12,14,14,'#1a5a8a33','#1a5a8a',1));
-    o.push(T(bx+15,by+76,bml+'ml','#1a5a8a',8,'middle',false));
+  o.push(T(240,16,'Capacity \u2014 Bottles of Water','#C0272D',13,'middle',true));
+  // problem statement always visible
+  o.push(R(14,28,452,40,'#fff8f0','#C0272D',1.5));
+  o.push(T(240,44,'There are '+cnt+' bottles. Each bottle holds '+bml+' ml.','#241A17',13,'middle',false));
+  o.push(T(240,62,'How many litres is that in total?','#C0272D',12,'middle',true));
+  // always draw bottles (up to 12, then show ×n)
+  var showN=Math.min(cnt,12);
+  var spacing=Math.floor(Math.min(380/showN, 36));
+  var startX=Math.floor((480-showN*spacing)/2)+spacing/2;
+  for(var i=0;i<showN;i++){
+    var bx=startX+i*spacing-10, by=80;
+    o.push(R(bx,by,20,45,'#1a5a8a44','#1a5a8a',1.5));
+    o.push(R(bx+4,by-9,12,10,'#1a5a8a44','#1a5a8a',1));
+    // fill level
+    o.push(R(bx+2,by+10,16,31,'#1a5a8a99','#1a5a8a',0));
+    if(i===0)o.push(T(bx+10,by+60,bml+'ml','#1a5a8a',7,'middle',false));
   }
-  if(cnt>8){o.push(T(400,110,'\u00d7'+cnt,'#1a5a8a',18,'start',true));}
-  if(p>=1){o.push(R(20,156,440,40,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,170,'Total = '+cnt+' \u00d7 '+bml+' ml = '+tML.toLocaleString()+' ml','#C0272D',13,'middle',false));
-    o.push(T(240,188,'= '+tML.toLocaleString()+' \u00f7 1000 = '+tL+' litres','#888',12,'middle',false));}
-  if(p>=2){o.push(R(100,206,280,40,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,231,'Total = '+tL+' litres','#1a7a3a',18,'middle',true));}
-  s.innerHTML=o.join('');}
+  if(cnt>12)o.push(T(460,108,'\u00d7'+cnt,'#1a5a8a',14,'start',true));
+  // step 1: multiply to get total ml
+  if(p>=1){
+    o.push(R(14,138,452,36,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,152,'Total = '+cnt+' \u00d7 '+bml+' ml','#C0272D',12,'middle',false));
+    o.push(T(240,168,'= '+tML.toLocaleString()+' ml','#C0272D',13,'middle',true));
+  }
+  // step 2: convert to litres
+  if(p>=2){
+    o.push(R(14,180,452,36,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,194,'Divide by 1000 to convert ml \u2192 litres','#1a5a8a',11,'middle',false));
+    o.push(T(240,210,tML.toLocaleString()+' \u00f7 1000 = '+tL+' litres','#1a5a8a',12,'middle',true));
+  }
+  // step 3: answer
+  if(p>=3){
+    o.push(R(120,220,240,34,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,242,'Total = '+tL+' litres','#1a7a3a',18,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ19(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var pct=V.q19pct,qty=V.q19qty,ans=V.q19ans;
-  o.push(T(240,22,'Percentage of a Quantity','#C0272D',14,'middle',true));
-  if(p>=1){o.push(R(20,40,440,44,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,58,'Find '+pct+'% of '+qty,'#C0272D',14,'middle',true));
-    o.push(T(240,76,'Method: \u00f7 100 to find 1%, then \u00d7 '+pct,'#888',12,'middle',false));}
-  if(p>=2){o.push(R(20,94,440,44,'#e8f0ff','#1a5a8a',1.5));
-    o.push(T(240,112,'1% of '+qty+' = '+qty+' \u00f7 100 = '+qty/100,'#1a5a8a',13,'middle',false));
-    o.push(T(240,130,pct+'% = '+qty/100+' \u00d7 '+pct,'#888',12,'middle',false));}
-  if(p>=3){o.push(R(120,148,240,44,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,175,pct+'% of '+qty+' = '+ans,'#1a7a3a',22,'middle',true));}
-  if(p>=4){o.push(T(240,226,'Shortcut: multiply by decimal \u2192 '+qty+' \u00d7 '+(pct/100)+' = '+ans,'#888',11,'middle',false));}
-  s.innerHTML=o.join('');}
+  o.push(T(240,16,'Percentage of a Quantity','#C0272D',13,'middle',true));
+  // always show the question
+  o.push(R(14,28,452,38,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,41,'Find '+pct+'% of '+qty,'#241A17',15,'middle',true));
+  o.push(T(240,58,'('+qty+' represents 100%)','#888',10,'middle',false));
+  // bar model — always visible, fills progressively
+  var bx=30,by=78,bw=420,bh=30;
+  // 100% bar outline
+  o.push(R(bx,by,bw,bh,'#f0f0f0','#888',1.5));
+  o.push(T(bx+bw/2,by-6,'100% = '+qty,'#888',9,'middle',false));
+  // filled portion
+  var fillW=Math.round(bw*pct/100);
+  if(p>=1){
+    o.push(R(bx,by,fillW,bh,'#C0272D99','#C0272D',1.5));
+    o.push(T(bx+fillW/2,by+bh/2+5,pct+'%','#fff',10,'middle',true));
+    // tick at the pct point
+    o.push(L(bx+fillW,by,bx+fillW,by+bh,'#C0272D',2));
+    o.push(T(bx+fillW,by+bh+12,pct+'%','#C0272D',9,'middle',false));
+    o.push(T(bx,by+bh+12,'0%','#888',9,'middle',false));
+    o.push(T(bx+bw,by+bh+12,'100%','#888',9,'middle',false));
+  }
+  // step 1: find 1%
+  if(p>=2){
+    o.push(R(14,126,452,30,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,136,'Step 1: find 1% \u2192 '+qty+' \u00f7 100 = '+qty/100,'#C0272D',12,'middle',false));
+    o.push(T(240,150,'(divide the total by 100)','#888',9,'middle',false));
+  }
+  // step 2: multiply
+  if(p>=3){
+    o.push(R(14,160,452,30,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,170,'Step 2: '+pct+'% = 1% \u00d7 '+pct+' = '+qty/100+' \u00d7 '+pct,'#1a5a8a',12,'middle',false));
+    o.push(T(240,184,'(multiply your 1% answer by the percentage needed)','#888',9,'middle',false));
+  }
+  // answer
+  if(p>=4){
+    o.push(R(120,196,240,38,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,208,'Answer:','#888',9,'middle',false));
+    o.push(T(240,228,pct+'% of '+qty+' = '+ans,'#1a7a3a',18,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ20(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var ra=V.q20ra,rb=V.q20rb,tot=V.q20total,pp=V.q20pp,sA=V.q20shareA,sB=V.q20shareB;
@@ -1189,10 +1366,10 @@ var QS=[
     {lb:'To km\u00b2',dr:dQ12,ht:'<div class="fm">'+V.q12hectares+' \u00f7 100 = '+V.q12km2+' km\u00b2</div>'},
     {lb:'Your turn',dr:dQ12,ht:yt12}
   ]},
-  {ey:'Q14 \u00b7 Y7 AOC \u00b7 Number',ti:'Fraction \u2192 Decimal \u2192 Percentage <span class="badge f">F</span>',su:'Convert '+V.q13n+'/'+V.q13d+' to a decimal and a percentage.',steps:[
-    {lb:'Fraction to decimal',dr:dQ13,ht:'<div class="fm">Divide the top by the bottom: '+V.q13n+' \u00f7 '+V.q13d+' = '+V.q13dec+'</div>'},
-    {lb:'Decimal to percentage',dr:dQ13,ht:'<div class="fm">Multiply by 100: '+V.q13dec+' \u00d7 100 = '+V.q13pct+'%</div>'},
-    {lb:'Summary',dr:dQ13,ht:'<div class="fm">'+V.q13n+'/'+V.q13d+' = '+V.q13dec+' = '+V.q13pct+'%</div><p>Learn the common ones: \u00bd=0.5=50%, \u00bc=0.25=25%, \u00be=0.75=75%.</p>'},
+  {ey:'Q14 \u00b7 Y7 AOC \u00b7 Number',ti:'Fraction → Decimal → Percentage <span class="badge f">F</span>',su:'Convert the fraction shown into a decimal and a percentage.',steps:[
+    {lb:'Read the fraction',dr:dQ13,ht:'<p>The fraction is shown clearly above: the <b>numerator</b> (top number) is '+V.q13n+' and the <b>denominator</b> (bottom number) is '+V.q13d+'.</p><p>The denominator tells us how many equal parts the whole has been split into. The numerator tells us how many of those parts we have.</p>'},
+    {lb:'Fraction to decimal',dr:dQ13,ht:'<p>To convert a fraction to a decimal, <b>divide the top by the bottom</b>.</p><div class="fm">'+V.q13n+' ÷ '+V.q13d+' = '+V.q13dec+'</div><p>Think of the fraction bar as a division sign.</p>'},
+    {lb:'Decimal to percentage',dr:dQ13,ht:'<p>To convert a decimal to a percentage, <b>multiply by 100</b>.</p><div class="fm">'+V.q13dec+' × 100 = '+V.q13pct+'%</div><p>Common ones to memorise: ½ = 0.5 = 50%, ¼ = 0.25 = 25%, ¾ = 0.75 = 75%.</p>'},
     {lb:'Your turn',dr:dQ13,ht:yt13}
   ]},
   {ey:'Q15 \u00b7 Y7 AOC \u00b7 Number',ti:'Percentage \u2192 Fraction \u2192 Decimal <span class="badge f">F</span>',su:'Convert '+V.q14pct+'% to a fraction and a decimal.',steps:[
@@ -1201,16 +1378,17 @@ var QS=[
     {lb:'Summary',dr:dQ14,ht:'<div class="fm">'+V.q14pct+'% = '+V.q14dec+' = '+V.q14fn+'/'+V.q14fd+'</div>'},
     {lb:'Your turn',dr:dQ14,ht:yt14}
   ]},
-  {ey:'Q16 \u00b7 Y7 AOC \u00b7 Number',ti:'Integer Operations <span class="badge f">F</span>',su:'Work with positive and negative integers.',steps:[
-    {lb:'Adding integers',dr:dQ15,ht:'<p>Use a number line. Moving <b>right</b> adds, moving <b>left</b> subtracts. Adding a negative is the same as subtracting.</p>'},
-    {lb:'Calculate the sum',dr:dQ15,ht:'<div class="fm">'+V.q15a+' + '+V.q15b+' + ('+V.q15c+') = '+V.q15sum+'</div>'},
-    {lb:'Multiplying integers',dr:dQ15,ht:'<p>Rules: positive \u00d7 positive = positive, negative \u00d7 negative = positive, positive \u00d7 negative = <b>negative</b>.</p><div class="fm">'+V.q15a+' \u00d7 '+V.q15b+' = '+V.q15prod+'</div>'},
+  {ey:'Q16 \u00b7 Y7 AOC \u00b7 Number',ti:'Integer Operations <span class="badge f">F</span>',su:'Calculate '+V.q15a+' + '+V.q15b+' + ('+V.q15c+'). Then find '+V.q15a+' × '+V.q15b+'.',steps:[
+    {lb:'The number line',dr:dQ15,ht:'<p>The number line is shown above. The <b>red dot</b> marks the starting value ('+V.q15a+'). Positive numbers are to the right of zero, negative numbers to the left.</p><p>Adding a positive number moves <b>right</b> (→). Adding a negative number moves <b>left</b> (←).</p>'},
+    {lb:'Step 1: add '+V.q15b,dr:dQ15,ht:'<p>Start at <b>'+V.q15a+'</b>. Move <b>'+V.q15b+' right</b> (blue arrow). We land on <b>'+(V.q15a+V.q15b)+'</b>.</p><div class="fm">'+V.q15a+' + '+V.q15b+' = '+(V.q15a+V.q15b)+'</div>'},
+    {lb:'Step 2: add '+V.q15c,dr:dQ15,ht:'<p>From <b>'+(V.q15a+V.q15b)+'</b>, move <b>'+Math.abs(V.q15c)+' left</b> (orange arrow, because '+V.q15c+' is negative). We land on <b>'+V.q15sum+'</b>.</p><div class="fm">'+V.q15a+' + '+V.q15b+' + ('+V.q15c+') = '+V.q15sum+'</div>'},
+    {lb:'Multiply: sign rules',dr:dQ15,ht:'<p>When multiplying integers, the <b>sign rule</b> decides whether the answer is positive or negative:</p><ul class="hl"><li>positive × positive = <b>positive</b></li><li>negative × negative = <b>positive</b></li><li>positive × negative = <b>negative</b></li></ul><div class="fm">'+V.q15a+' × '+V.q15b+' = '+V.q15prod+'</div>'},
     {lb:'Your turn',dr:dQ15,ht:yt15}
   ]},
-  {ey:'Q17 \u00b7 Y7 AOC \u00b7 Number',ti:'Decimal Operations <span class="badge f">F</span>',su:'Calculate '+V.q16a+' + '+V.q16b+',  '+V.q16a+' \u00d7 '+V.q16b+',  '+V.q16a+' \u00f7 '+V.q16b+'.',steps:[
-    {lb:'Adding decimals',dr:dQ16,ht:'<p>Line up the <b>decimal points</b>, then add as normal whole numbers.</p><div class="fm">'+V.q16a+' + '+V.q16b+' = '+V.q16sum+'</div>'},
-    {lb:'Multiplying decimals',dr:dQ16,ht:'<p>Multiply ignoring decimals, then count total decimal places in the question.</p><div class="fm">'+V.q16a+' \u00d7 '+V.q16b+' = '+V.q16prod+'</div>'},
-    {lb:'Dividing decimals',dr:dQ16,ht:'<p>Multiply both numbers by 10 (or 100) to make the divisor a whole number.</p><div class="fm">'+V.q16a+' \u00f7 '+V.q16b+' = '+V.q16div+'</div>'},
+  {ey:'Q17 \u00b7 Y7 AOC \u00b7 Number',ti:'Decimal Addition — Column Method <span class="badge f">F</span>',su:'Add 3.4 + 2.56 using the column method.',steps:[
+    {lb:'Write in columns',dr:dQ16,ht:'<p>The two numbers are written in a column above. Each digit goes into a place-value column: <b>ones | . | tenths | hundredths</b>.</p><p>Notice that 3.4 has no digit in the hundredths column, so we write a <b>0</b> as a placeholder: 3.40</p>'},
+    {lb:'Line up decimal points',dr:dQ16,ht:'<p>The decimal points are highlighted. They must be <b>exactly above each other</b> — this is the key rule for decimal addition.</p><p>If the points are not aligned, every digit will end up in the wrong column and give a wrong answer.</p>'},
+    {lb:'Add column by column',dr:dQ16,ht:'<p>Work from right to left:</p><ul class="hl"><li>Hundredths: 0 + 6 = 6</li><li>Tenths: 4 + 5 = 9</li><li>Ones: 3 + 2 = 5</li></ul><div class="fm">3.4 + 2.56 = 5.96</div>'},
     {lb:'Your turn',dr:dQ16,ht:yt16}
   ]},
   {ey:'Q18 \u00b7 Y7 AOC \u00b7 Measure',ti:'Length, Mass and Capacity <span class="badge f">F</span>',su:'Convert km to m, kg to g, litres to ml.',steps:[
@@ -1219,16 +1397,18 @@ var QS=[
     {lb:'Remember',dr:dQ17,ht:'<p>To convert <b>smaller</b> to <b>larger</b> units, divide. To convert <b>larger</b> to <b>smaller</b>, multiply.</p>'},
     {lb:'Your turn',dr:dQ17,ht:yt17}
   ]},
-  {ey:'Q19 \u00b7 Y7 AOC \u00b7 Measure',ti:'Capacity \u2014 Mixed Problem <span class="badge f">F</span>',su:V.q18count+' bottles each holding '+V.q18bottleML+' ml. Total in litres.',steps:[
-    {lb:'Find total in ml',dr:dQ18,ht:'<div class="fm">'+V.q18count+' \u00d7 '+V.q18bottleML+' ml = '+V.q18totalML.toLocaleString()+' ml</div>'},
-    {lb:'Convert to litres',dr:dQ18,ht:'<div class="fm">'+V.q18totalML.toLocaleString()+' ml \u00f7 1000 = '+V.q18totalL+' litres</div>'},
-    {lb:'Answer',dr:dQ18,ht:'<div class="fm">Total = '+V.q18totalL+' litres</div><p>Always check: is your answer a sensible size?</p>'},
+  {ey:'Q19 \u00b7 Y7 AOC \u00b7 Measure',ti:'Capacity — Mixed Problem <span class="badge f">F</span>',su:V.q18count+' bottles each holding '+V.q18bottleML+' ml. How many litres in total?',steps:[
+    {lb:'Read the question',dr:dQ18,ht:'<p>The question and bottles are shown above. We have <b>'+V.q18count+' bottles</b>, each holding <b>'+V.q18bottleML+' ml</b>.</p><p>We need to find the total volume, then convert from ml to litres.</p>'},
+    {lb:'Total in ml',dr:dQ18,ht:'<div class="fm">'+V.q18count+' × '+V.q18bottleML+' ml = '+V.q18totalML.toLocaleString()+' ml</div><p>Multiply the number of bottles by the volume of each one.</p>'},
+    {lb:'Convert ml to litres',dr:dQ18,ht:'<div class="fm">'+V.q18totalML.toLocaleString()+' ÷ 1000 = '+V.q18totalL+' litres</div><p>There are 1000 ml in 1 litre. Divide by 1000 to convert.</p>'},
+    {lb:'Answer',dr:dQ18,ht:'<div class="fm">Total = '+V.q18totalL+' litres</div><p>Check: '+V.q18totalML.toLocaleString()+' ml × 1000 = '+V.q18totalL+' ✓ (reasonable — '+V.q18count+' bottles of water).</p>'},
     {lb:'Your turn',dr:dQ18,ht:yt18}
   ]},
   {ey:'Q20 \u00b7 Y7 AOC \u00b7 Number',ti:'Percentage of a Quantity <span class="badge f">F</span>',su:'Find '+V.q19pct+'% of '+V.q19qty+'.',steps:[
-    {lb:'Method: 1% first',dr:dQ19,ht:'<div class="fm">1% of '+V.q19qty+' = '+V.q19qty+' \u00f7 100 = '+V.q19qty/100+'</div><p>Then multiply by the percentage you need.</p>'},
-    {lb:'Calculate',dr:dQ19,ht:'<div class="fm">'+V.q19pct+'% = '+V.q19qty/100+' \u00d7 '+V.q19pct+' = '+V.q19ans+'</div>'},
-    {lb:'Shortcut',dr:dQ19,ht:'<div class="fm">Multiply by the decimal equivalent:</div><div class="fm">'+V.q19qty+' \u00d7 '+(V.q19pct/100)+' = '+V.q19ans+'</div>'},
+    {lb:'The bar model',dr:dQ19,ht:'<p>The bar model is shown above. The whole bar represents <b>100% = '+V.q19qty+'</b>. We need to find what <b>'+V.q19pct+'%</b> of that total is.</p><p>The shaded region shows '+V.q19pct+'% of the bar. We need to find the value it represents.</p>'},
+    {lb:'Find 1%',dr:dQ19,ht:'<p>Start by finding <b>1%</b> of the quantity. To find 1%, divide by 100.</p><div class="fm">1% of '+V.q19qty+' = '+V.q19qty+' ÷ 100 = '+V.q19qty/100+'</div>'},
+    {lb:'Find '+V.q19pct+'%',dr:dQ19,ht:'<p>Now multiply the 1% value by the percentage needed.</p><div class="fm">'+V.q19pct+'% = '+V.q19qty/100+' × '+V.q19pct+' = '+V.q19ans+'</div>'},
+    {lb:'Answer',dr:dQ19,ht:'<div class="fm">'+V.q19pct+'% of '+V.q19qty+' = '+V.q19ans+'</div><p>Shortcut: '+V.q19qty+' × '+(V.q19pct/100)+' = '+V.q19ans+' (multiply by the decimal equivalent).</p>'},
     {lb:'Your turn',dr:dQ19,ht:yt19}
   ]},
   {ey:'Q21 \u00b7 Y7 AOC \u00b7 Number',ti:'Ratio \u2014 Sharing in a Ratio <span class="badge f">F</span>',su:'Share '+V.q20total+' in ratio '+V.q20ra+' : '+V.q20rb+'.',steps:[
