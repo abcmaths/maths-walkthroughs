@@ -671,47 +671,68 @@ function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
 
 function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var a=V.q8a,b=V.q8b,c=V.q8c,d=V.q8d,area=V.q8area;
-  var sc=Math.min(150/b,140/a);
-  var ox=30,oy=210,W=b*sc,H=a*sc,cw=c*sc,ch=d*sc;
-  o.push(T(160,14,'Compound Shape (L-shape)','#C0272D',12,'middle',true));
-  // step 0: always show the L-shape outline with dimensions
-  // Ghost rectangle (full rectangle, dashed) from step 2
-  if(p>=2){
-    o.push(R(ox,oy-H,W,H,'#fff0f0','#C0272D',1.5));
-    // dashed border
-    o.push('<rect x="'+ox+'" y="'+(oy-H)+'" width="'+W+'" height="'+H+'" fill="none" stroke="#C0272D" stroke-width="1.5" stroke-dasharray="6,3" rx="1"/>');
-  }
-  // Cut-out region (shown red from step 3)
-  if(p>=3){
-    o.push(R(ox+W-cw,oy-H,cw,ch,'#ffd0d0','#C0272D',1.5));
-    o.push(T(ox+W-cw/2,oy-H+ch/2,'Cut out','#C0272D',8,'middle',false));
-    o.push(T(ox+W-cw/2,oy-H+ch/2+12,c+'\u00d7'+d+'='+c*d,'#C0272D',8,'middle',false));
-  }
-  // L-shape filled (green from step 1, then changes to show the sum)
-  o.push('<path d="M '+ox+','+(oy-H)+' L '+(ox+W)+','+(oy-H)+' L '+(ox+W)+','+(oy-H+ch)+' L '+(ox+W-cw)+','+(oy-H+ch)+' L '+(ox+W-cw)+','+oy+' L '+ox+','+oy+' Z" fill="'+(p>=2?'#d0ffd8':'#e8f8ee')+'" stroke="#1a7a3a" stroke-width="2"/>');
-  // dimensions always
-  o.push(T(ox+W/2,oy+13,b+' cm','#555',9,'middle',false));
-  o.push(T(ox-12,oy-H/2,a+' cm','#555',9,'middle',false));
+  o.push(T(240,14,'Compound Shapes \u2014 Two Methods','#C0272D',12,'middle',true));
+  // Left side: SPLIT METHOD (addition of two rectangles)
+  // Right side: SUBTRACTION METHOD
+  // Use a fixed scale to fit both diagrams side by side in 480×260
+  var sc=Math.min(Math.floor(85/b),Math.floor(110/a),14);
+  var W=b*sc,H=a*sc,cw=c*sc,ch=d*sc;
+  // --- LEFT DIAGRAM: split method ---
+  var lox=18,loy=220;
+  // Rectangle 1: left part = b-c wide, full height a
+  var r1w=(b-c)*sc,r1h=H;
+  // Rectangle 2: right part = c wide, height a-d (bottom part)
+  var r2w=cw,r2h=H-ch;
+  // draw L outline first
+  o.push('<path d="M '+lox+','+(loy-H)+' L '+(lox+W)+','+(loy-H)+' L '+(lox+W)+','+(loy-H+ch)+' L '+(lox+W-cw)+','+(loy-H+ch)+' L '+(lox+W-cw)+','+loy+' L '+lox+','+loy+' Z" fill="#f8fff8" stroke="#1a7a3a" stroke-width="2"/>');
+  // split line (vertical dashed)
   if(p>=1){
-    o.push(T(ox+W+10,oy-H+ch/2,d+' cm','#888',8,'start',false));
-    o.push(T(ox+W-cw/2,oy-H-8,c+' cm','#888',8,'middle',false));
-    o.push(T(ox+W-cw+(-10),oy-H+ch+10,'missing','#888',7,'end',false));
+    o.push('<line x1="'+(lox+r1w)+'" y1="'+(loy-H)+'" x2="'+(lox+r1w)+'" y2="'+loy+'" stroke="#1a7a3a" stroke-width="1.5" stroke-dasharray="4,3"/>');
+    // colour rect 1
+    o.push('<rect x="'+lox+'" y="'+(loy-H)+'" width="'+r1w+'" height="'+H+'" fill="#90EE9066" stroke="#1a7a3a" stroke-width="1"/>');
+    // colour rect 2
+    o.push('<rect x="'+(lox+r1w)+'" y="'+(loy-r2h)+'" width="'+r2w+'" height="'+r2h+'" fill="#ADD8E666" stroke="#1a5a8a" stroke-width="1"/>');
+    // labels inside
+    o.push(T(lox+r1w/2,loy-H/2,'A','#1a7a3a',11,'middle',true));
+    o.push(T(lox+r1w+r2w/2,loy-r2h/2,'B','#1a5a8a',11,'middle',true));
   }
-  // working panel on the right
+  // dimension labels
+  o.push(T(lox+W/2,loy+12,b,'#555',8,'middle',false));
+  o.push(T(lox-8,loy-H/2,a,'#555',8,'middle',false));
+  if(p>=1){
+    o.push(T(lox+r1w/2,loy+12,(b-c),'#1a7a3a',8,'middle',false));
+    o.push(T(lox+r1w+r2w/2,loy+12,c,'#1a5a8a',8,'middle',false));
+  }
+  o.push(T(lox+W/2,loy+24,'Split method','#1a7a3a',9,'middle',true));
+  // --- RIGHT DIAGRAM: subtraction method ---
+  var rox=260,roy=220;
+  // full rectangle (always shown, dashed at p=0 to become solid at p>=2)
   if(p>=2){
-    o.push(R(290,26,180,70,'#fff5f0','#C0272D',1.5));
-    o.push(T(380,40,'Full rectangle:','#C0272D',10,'middle',true));
-    o.push(T(380,56,a+' \u00d7 '+b+' = '+a*b+' cm\u00b2','#C0272D',12,'middle',true));
+    // ghost full rectangle
+    o.push('<rect x="'+rox+'" y="'+(roy-H)+'" width="'+W+'" height="'+H+'" fill="#ffe8e8" stroke="#C0272D" stroke-width="1.5" stroke-dasharray="5,3"/>');
+    // cut-out (red)
+    o.push('<rect x="'+(rox+W-cw)+'" y="'+(roy-H)+'" width="'+cw+'" height="'+ch+'" fill="#ffaaaa" stroke="#C0272D" stroke-width="1.5"/>');
+    o.push(T(rox+W-cw/2,roy-H+ch/2,'CUT','#C0272D',8,'middle',true));
+    o.push(T(rox+W-cw/2,roy-H+ch/2+10,'OUT','#C0272D',8,'middle',true));
+  }
+  // L-shape green overlay
+  o.push('<path d="M '+rox+','+(roy-H)+' L '+(rox+W)+','+(roy-H)+' L '+(rox+W)+','+(roy-H+ch)+' L '+(rox+W-cw)+','+(roy-H+ch)+' L '+(rox+W-cw)+','+roy+' L '+rox+','+roy+' Z" fill="'+(p>=2?'#d0ffd8':'#f8fff8')+'" stroke="#1a7a3a" stroke-width="2"/>');
+  o.push(T(rox+W/2,roy+12,b,'#555',8,'middle',false));
+  o.push(T(rox-8,roy-H/2,a,'#555',8,'middle',false));
+  o.push(T(rox+W/2,roy+24,'Subtraction method','#C0272D',9,'middle',true));
+  // working panels
+  if(p>=1){
+    o.push(R(14,238,222,20,'#e8f8ee','#1a7a3a',1));
+    o.push(T(125,252,'A='+a+'×'+(b-c)+'='+a*(b-c)+'  B='+d+'×'+c+'='+(d*c)+'  Total='+area+' cm²','#1a7a3a',9,'middle',false));
+  }
+  if(p>=2){
+    o.push(R(258,238,208,20,'#fff5f0','#C0272D',1));
+    o.push(T(362,252,''+a+'×'+b+'='+a*b+' − '+c+'×'+d+'='+c*d+' → '+area+' cm²','#C0272D',9,'middle',false));
   }
   if(p>=3){
-    o.push(R(290,104,180,60,'#ffd0d0','#C0272D',1.5));
-    o.push(T(380,118,'Cut-out piece:','#C0272D',10,'middle',true));
-    o.push(T(380,134,c+' \u00d7 '+d+' = '+c*d+' cm\u00b2','#C0272D',12,'middle',true));
-  }
-  if(p>=4){
-    o.push(R(290,172,180,60,'#e8f8ee','#1a7a3a',2));
-    o.push(T(380,186,'L-shape area:','#1a7a3a',10,'middle',true));
-    o.push(T(380,202,a*b+' \u2212 '+c*d+' = '+area+' cm\u00b2','#1a7a3a',13,'middle',true));
+    o.push(R(100,200,280,34,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,212,'Both methods: Area = '+area+' cm\u00b2','#1a7a3a',13,'middle',true));
+    o.push(T(240,228,'They always give the same answer.','#888',9,'middle',false));
   }
   s.innerHTML=o.join('');
 }
@@ -756,67 +777,57 @@ function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
 function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var l=V.q10l,w=V.q10w,h=V.q10h,vol=V.q10vol;
   o.push(T(240,15,'Volume of a Cuboid','#C0272D',14,'middle',true));
-  // isometric scale — cap so cuboid fits in ~220×170 drawing area
-  var sc=Math.min(22, Math.floor(100/Math.max(l,1)), Math.floor(80/Math.max(w,1)), Math.floor(140/Math.max(h,1)));
-  // isometric unit vectors: right=(dx,dy), back=(-dx,dy), up=(0,-sc)
+  // auto-scale so cuboid fits in left 240px × 200px of canvas
+  var sc=Math.min(20, Math.floor(90/Math.max(l,1)), Math.floor(70/Math.max(w,1)), Math.floor(130/Math.max(h,1)));
   var dx=sc*0.87, dy=sc*0.50;
-  // drawing area centre ~(190,200) to leave room for panel on right
-  // bottom-front-left corner A
-  var Ax=90, Ay=205;
-  // 8 corners: l=length(right), w=width(back), h=height(up)
+  // compute cuboid width/depth/height in px to centre it in left 240px
+  var cubeW=l*dx+w*dx, cubeH=l*dy+w*dy+h*sc;
+  var Ax=Math.round((220-cubeW)/2)+w*dx, Ay=Math.round(30+(230-cubeH));
   function V3(li,wi,hi){return [Ax+li*dx-wi*dx, Ay+li*dy+wi*dy-hi*sc];}
-  var A=V3(0,0,0), B=V3(l,0,0), C=V3(l,w,0), D=V3(0,w,0);
-  var E=V3(0,0,h), F=V3(l,0,h), G=V3(l,w,h), H=V3(0,w,h);
+  var A=V3(0,0,0),B=V3(l,0,0),C=V3(l,w,0),D=V3(0,w,0);
+  var E=V3(0,0,h),F=V3(l,0,h),G=V3(l,w,h),H=V3(0,w,h);
   function pt(v){return v[0].toFixed(1)+','+v[1].toFixed(1);}
-  function ln(v1,v2,col,wt,dash){
-    var d=dash?' stroke-dasharray="'+dash+'"':'';
-    return '<line x1="'+v1[0].toFixed(1)+'" y1="'+v1[1].toFixed(1)+'" x2="'+v2[0].toFixed(1)+'" y2="'+v2[1].toFixed(1)+'" stroke="'+col+'" stroke-width="'+wt+'"'+d+'/>';
-  }
-  // hidden edges first (behind faces)
-  o.push(ln(A,D,'#aaa',1,'4,3'));
-  o.push(ln(D,C,'#aaa',1,'4,3'));
-  o.push(ln(D,H,'#aaa',1,'4,3'));
-  // visible faces (draw before edges so edges sit on top)
-  o.push('<polygon points="'+[E,F,G,H].map(pt).join(' ')+'" fill="#d8e8ff" stroke="#1a5a8a" stroke-width="1.5"/>');// top
-  o.push('<polygon points="'+[A,B,F,E].map(pt).join(' ')+'" fill="#fff0ee" stroke="#C0272D" stroke-width="1.5"/>');// front
-  o.push('<polygon points="'+[B,C,G,F].map(pt).join(' ')+'" fill="#fff8e8" stroke="#C8922A" stroke-width="1.5"/>');// right side
-  // visible bottom edges
-  o.push(ln(A,B,'#C0272D',2,''));
-  o.push(ln(B,C,'#C8922A',1.5,''));
-  // vertical edges
-  o.push(ln(A,E,'#888',1.5,''));
-  o.push(ln(B,F,'#888',1.5,''));
+  function ln(v1,v2,col,wt,dash){var d=dash?' stroke-dasharray="'+dash+'"':'';
+    return '<line x1="'+v1[0].toFixed(1)+'" y1="'+v1[1].toFixed(1)+'" x2="'+v2[0].toFixed(1)+'" y2="'+v2[1].toFixed(1)+'" stroke="'+col+'" stroke-width="'+wt+'"'+d+'/>';}
+  // hidden edges first
+  o.push(ln(A,D,'#bbb',1,'4,3'));o.push(ln(D,C,'#bbb',1,'4,3'));o.push(ln(D,H,'#bbb',1,'4,3'));
+  // visible faces
+  o.push('<polygon points="'+[E,F,G,H].map(pt).join(' ')+'" fill="#d8e8ff" stroke="#1a5a8a" stroke-width="1.5"/>');
+  o.push('<polygon points="'+[A,B,F,E].map(pt).join(' ')+'" fill="#fff0ee" stroke="#C0272D" stroke-width="1.5"/>');
+  o.push('<polygon points="'+[B,C,G,F].map(pt).join(' ')+'" fill="#fff8e8" stroke="#C8922A" stroke-width="1.5"/>');
+  // visible edges
+  o.push(ln(A,B,'#C0272D',2,''));o.push(ln(B,C,'#C8922A',1.5,''));
+  o.push(ln(A,E,'#888',1.5,''));o.push(ln(B,F,'#888',1.5,''));
   o.push(ln(C,G,'#C8922A',1.5,''));
-  o.push(ln(F,G,'#1a5a8a',1.5,''));// top front-right
-  o.push(ln(E,H,'#1a5a8a',1.5,''));// top back-left
-  o.push(ln(G,H,'#1a5a8a',1.5,''));// top back
-  // corner dots
+  o.push(ln(E,F,'#1a5a8a',1.5,''));o.push(ln(F,G,'#1a5a8a',1.5,''));
+  o.push(ln(G,H,'#1a5a8a',1.5,''));o.push(ln(E,H,'#1a5a8a',1.5,''));
+  // corner dots on all visible vertices
   [A,B,C,E,F,G,H].forEach(function(v){o.push('<circle cx="'+v[0].toFixed(1)+'" cy="'+v[1].toFixed(1)+'" r="2.5" fill="#fff" stroke="#555" stroke-width="1"/>');});
-  // dimension labels (step 1)
+  // step 1: dimension labels
   if(p>=1){
-    var lMid=[(A[0]+B[0])/2, A[1]+14];
-    var wMid=[(B[0]+C[0])/2+8, (B[1]+C[1])/2+6];
-    var hMid=[B[0]+12, (B[1]+F[1])/2];
+    var lMid=[(A[0]+B[0])/2, Math.max(A[1],B[1])+14];
+    var wMid=[(B[0]+C[0])/2+10,(B[1]+C[1])/2+5];
+    var hMid=[B[0]+12,(B[1]+F[1])/2];
     o.push(T(lMid[0],lMid[1],l+' cm','#C0272D',11,'middle',true));
     o.push(T(wMid[0],wMid[1],w+' cm','#C8922A',11,'start',true));
     o.push(T(hMid[0],hMid[1],h+' cm','#1a5a8a',11,'start',true));
   }
-  // formula (step 2)
+  // step 2: formula
   if(p>=2){
-    o.push(R(272,32,192,56,'#fff5f0','#C0272D',1.5));
-    o.push(T(368,50,'V = l \u00d7 w \u00d7 h','#C0272D',13,'middle',true));
-    o.push(T(368,68,'= '+l+' \u00d7 '+w+' \u00d7 '+h,'#888',11,'middle',false));
+    o.push(R(252,32,214,56,'#fff5f0','#C0272D',1.5));
+    o.push(T(359,50,'V = l \u00d7 w \u00d7 h','#C0272D',13,'middle',true));
+    o.push(T(359,68,'= '+l+' \u00d7 '+w+' \u00d7 '+h,'#888',11,'middle',false));
   }
-  // answer (step 3)
+  // step 3: answer
   if(p>=3){
-    o.push(R(272,96,192,48,'#e8f8ee','#1a7a3a',2));
-    o.push(T(368,116,'= '+vol+' cm\u00b3','#1a7a3a',22,'middle',true));
+    o.push(R(252,96,214,48,'#e8f8ee','#1a7a3a',2));
+    o.push(T(359,116,'= '+vol+' cm\u00b3','#1a7a3a',22,'middle',true));
   }
-  // base area method (step 4)
+  // step 4: base area alternative
   if(p>=4){
-    o.push(R(272,152,192,52,'#e8f0ff','#1a5a8a',1.5));
-    o.push(T(368,168,'Base area = '+l*w+' cm\u00b2','#1a5a8a',11,'middle',false));
-    o.push(T(368,186,'V = '+l*w+' \u00d7 '+h+' = '+vol+' cm\u00b3','#1a5a8a',11,'middle',true));
+    o.push(R(252,152,214,56,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(359,168,'Base area = '+l*w+' cm\u00b2','#1a5a8a',11,'middle',false));
+    o.push(T(359,186,'V = '+l*w+' \u00d7 '+h+' = '+vol+' cm\u00b3','#1a5a8a',12,'middle',true));
   }
   s.innerHTML=o.join('');
 }
@@ -824,46 +835,44 @@ function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
 function dQ11(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var cm2=V.q11cm2,mm2=V.q11mm2,m2=V.q11m2,cm2b=V.q11cm2b;
   o.push(T(240,14,'Area Unit Conversions','#C0272D',13,'middle',true));
-  // always show the conversion table
-  var cols4=['Unit','Relation to next','Multiply by'],cws=[100,180,130],cxs=[14,118,302];
-  cxs.forEach(function(x,i){
-    o.push(R(x,22,cws[i]-2,20,'#C0272D','#C0272D',0));
-    o.push(T(x+cws[i]/2-2,36,cols4[i],'#fff',9,'middle',true));
+  // table always shows header
+  var hx=[14,114,254,400],hw=[96,136,142,66],hlab=['Unit','Equals','To convert \u2191 (larger)','To go \u2193'];
+  hx.forEach(function(x,i){
+    o.push(R(x,24,hw[i]-2,20,'#C0272D','#C0272D',0));
+    o.push(T(x+hw[i]/2-2,38,hlab[i],'#fff',9,'middle',true));
   });
-  var rows4=[
-    ['mm\u00b2','100 mm\u00b2 = 1 cm\u00b2','\u00f7 100 to get cm\u00b2'],
-    ['cm\u00b2','10 000 cm\u00b2 = 1 m\u00b2','\u00f7 10 000 to get m\u00b2'],
-    ['m\u00b2','1 000 000 m\u00b2 = 1 km\u00b2','\u00f7 1 000 000 to get km\u00b2']
+  // row data: [unit, equals, multiply rule, divide rule, rowColour]
+  var rows=[
+    ['mm\u00b2','100 mm\u00b2 = 1 cm\u00b2','\u00d7 100 to get cm\u00b2','\u00f7 100 to get mm\u00b2','#C0272D'],
+    ['cm\u00b2','10 000 cm\u00b2 = 1 m\u00b2','\u00d7 10 000 to get m\u00b2','\u00f7 10 000 to get cm\u00b2','#1a5a8a'],
+    ['m\u00b2','1 000 000 m\u00b2 = 1 km\u00b2','\u00d7 1 000 000 to get km\u00b2','\u00f7 1 000 000 to get m\u00b2','#1a7a3a']
   ];
-  var rcolors=['#C0272D','#1a5a8a','#1a7a3a'];
-  rows4.forEach(function(r,i){
-    var ry=44+i*36;var bg=i%2===0?'#fff5f0':'#fff';
-    cxs.forEach(function(x,j){
-      o.push(R(x,ry,cws[j]-2,34,bg,'#E4D6CE',1));
-      o.push(T(x+cws[j]/2-2,ry+20,r[j],rcolors[i],j===0?12:9,'middle',j===0));
+  // reveal rows one per step
+  rows.forEach(function(r,i){
+    if(p<i+1)return;// only show row i at step i+1 onwards
+    var ry=46+i*40;var col=r[4];var bg=i%2===0?'#fff5f0':'#f0f8ff';
+    hx.forEach(function(x,j){
+      o.push(R(x,ry,hw[j]-2,38,bg,'#E4D6CE',1));
+      var txt=[r[0],r[1],r[2],r[3]][j];
+      o.push(T(x+hw[j]/2-2,ry+21,txt,j===0?col:'#241A17',j===0?13:8,'middle',j===0));
     });
   });
-  // conversion arrows diagram
-  o.push(T(430,50,'mm\u00b2','#C0272D',11,'middle',true));
-  o.push(T(430,78,'\u00d7 100 \u2191','#888',8,'middle',false));
-  o.push(T(430,78,'\u00f7 100 \u2193','#ccc',7,'middle',false));
-  o.push(T(430,100,'cm\u00b2','#1a5a8a',11,'middle',true));
-  o.push(T(430,128,'\u00d7 10 000 \u2191','#888',8,'middle',false));
-  o.push(T(430,150,'m\u00b2','#1a7a3a',11,'middle',true));
-  // step 1: show cm2 to mm2
+  // step 1 also explains why mm2 row
   if(p>=1){
-    o.push(R(14,156,440,32,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,168,'Why? 1 cm = 10 mm, so 1 cm\u00b2 = 10 \u00d7 10 = 100 mm\u00b2','#C0272D',11,'middle',false));
-    o.push(T(240,180,cm2+' cm\u00b2 \u00d7 100 = '+mm2+' mm\u00b2','#C0272D',11,'middle',true));
+    o.push(R(14,172,452,32,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,182,'Why? 1 cm = 10 mm, so 1 cm\u00b2 = 10 \u00d7 10 = 100 mm\u00b2  (the linear factor is squared)','#C0272D',10,'middle',false));
+    o.push(T(240,196,cm2+' cm\u00b2 \u00d7 100 = '+mm2+' mm\u00b2','#C0272D',11,'middle',true));
   }
+  // step 2 explains cm2
   if(p>=2){
-    o.push(R(14,194,440,32,'#e8f0ff','#1a5a8a',1.5));
-    o.push(T(240,206,'Why? 1 m = 100 cm, so 1 m\u00b2 = 100 \u00d7 100 = 10 000 cm\u00b2','#1a5a8a',11,'middle',false));
-    o.push(T(240,218,m2+' m\u00b2 \u00d7 10 000 = '+cm2b.toLocaleString()+' cm\u00b2','#1a5a8a',11,'middle',true));
+    o.push(R(14,208,452,32,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,218,'Why? 1 m = 100 cm, so 1 m\u00b2 = 100 \u00d7 100 = 10 000 cm\u00b2','#1a5a8a',10,'middle',false));
+    o.push(T(240,232,m2+' m\u00b2 \u00d7 10 000 = '+cm2b.toLocaleString()+' cm\u00b2','#1a5a8a',11,'middle',true));
   }
+  // step 3: m2 row + key rule
   if(p>=3){
-    o.push(R(14,232,440,22,'#e8f8ee','#1a7a3a',1));
-    o.push(T(240,247,'To go backwards (smaller \u2192 larger unit): divide instead of multiply.','#1a7a3a',10,'middle',false));
+    o.push(R(14,242,452,16,'#e8f8ee','#1a7a3a',1));
+    o.push(T(240,254,'Key rule: to convert to a SMALLER unit \u2192 multiply. To a LARGER unit \u2192 divide.','#1a7a3a',9,'middle',false));
   }
   s.innerHTML=o.join('');
 }
@@ -1305,12 +1314,11 @@ var QS=[
     {lb:'Your turn',dr:dQ7,ht:yt7}
   ]},
   {ey:'Q9 \u00b7 Y7 AOC \u00b7 Shape',ti:'Area of Compound Shapes <span class="badge f">F</span>',
-   su:'Find the area of the L-shaped compound shape below.',steps:[
-    {lb:'Identify the method',dr:dQ8,ht:'<p>A <b>compound shape</b> is made from two or more rectangles. There are two methods:</p><ul class="hl"><li><b>Split method</b>: divide the shape into simpler rectangles and add their areas.</li><li><b>Subtraction method</b>: find the full bounding rectangle area, then subtract the cut-out piece.</li></ul><p>The L-shape is shown in green above.</p>'},
-    {lb:'Label the dimensions',dr:dQ8,ht:'<p>The full dimensions are labelled. The outer rectangle is <b>'+V.q8a+' \u00d7 '+V.q8b+'</b> cm. The cut-out corner is <b>'+V.q8c+' \u00d7 '+V.q8d+'</b> cm.</p>'},
-    {lb:'Full rectangle area',dr:dQ8,ht:'<p>Using the <b>subtraction method</b>: first find the full rectangle area (the red dashed outline).</p><div class="fm">Full rectangle = '+V.q8a+' \u00d7 '+V.q8b+' = '+V.q8a*V.q8b+' cm\u00b2</div>'},
-    {lb:'Subtract the cut-out',dr:dQ8,ht:'<p>Now subtract the red cut-out piece.</p><div class="fm">Cut-out = '+V.q8c+' \u00d7 '+V.q8d+' = '+V.q8c*V.q8d+' cm\u00b2</div>'},
-    {lb:'Final area',dr:dQ8,ht:'<div class="fm">Area = '+V.q8a*V.q8b+' \u2212 '+V.q8c*V.q8d+' = '+V.q8area+' cm\u00b2</div><p>Always include the unit: cm\u00b2 for area.</p>'},
+   su:'Find the area of the L-shape: '+V.q8a+'\u00d7'+V.q8b+' cm outer, '+V.q8c+'\u00d7'+V.q8d+' cm cut out. Use both methods.',steps:[
+    {lb:'What is a compound shape?',dr:dQ8,ht:'<p>A <b>compound shape</b> is built from simpler rectangles. The L-shape is shown (green). There are two standard methods to find its area:</p><ul class="hl"><li><b>Split method:</b> cut the L into two rectangles and add their areas.</li><li><b>Subtraction method:</b> find the full bounding rectangle, then subtract the cut-out corner.</li></ul><p>Both methods always give the same answer.</p>'},
+    {lb:'Split method (addition)',dr:dQ8,ht:'<p>The <b>split method</b> divides the L into two rectangles (A and B) with the dashed line above.</p><ul class="hl"><li>Rectangle A (left part): '+V.q8a+' \u00d7 '+(V.q8b-V.q8c)+' = '+V.q8a*(V.q8b-V.q8c)+' cm\u00b2</li><li>Rectangle B (right part): '+V.q8d+' \u00d7 '+V.q8c+' = '+V.q8d*V.q8c+' cm\u00b2</li></ul><div class="fm">Area = '+V.q8a*(V.q8b-V.q8c)+' + '+V.q8d*V.q8c+' = '+V.q8area+' cm\u00b2</div>'},
+    {lb:'Subtraction method',dr:dQ8,ht:'<p>The <b>subtraction method</b> starts with the full bounding rectangle (dashed red) and removes the cut-out corner (solid red).</p><ul class="hl"><li>Full rectangle: '+V.q8a+' \u00d7 '+V.q8b+' = '+V.q8a*V.q8b+' cm\u00b2</li><li>Cut-out: '+V.q8c+' \u00d7 '+V.q8d+' = '+V.q8c*V.q8d+' cm\u00b2</li></ul><div class="fm">Area = '+V.q8a*V.q8b+' \u2212 '+V.q8c*V.q8d+' = '+V.q8area+' cm\u00b2</div>'},
+    {lb:'Why the same answer?',dr:dQ8,ht:'<div class="fm">Split: '+V.q8a*(V.q8b-V.q8c)+' + '+V.q8d*V.q8c+' = '+V.q8area+' cm\u00b2</div><div class="fm">Subtract: '+V.q8a*V.q8b+' \u2212 '+V.q8c*V.q8d+' = '+V.q8area+' cm\u00b2</div><p>They give the same result because you are counting the same region of area either way. In an exam, choose whichever method feels easier for you.</p>'},
     {lb:'Your turn',dr:dQ8,ht:yt8}
   ]},
   {ey:'Q10 \u00b7 Y7 AOC \u00b7 Shape',ti:'Nets and Surface Area of Cuboids <span class="badge f">F</span>',
@@ -1334,30 +1342,6 @@ var QS=[
     {lb:'Why those numbers?',dr:dQ11,ht:'<p>The conversions are squared because area has two dimensions:</p><div class="fm">1 cm = 10 mm \u21d2 1 cm\u00b2 = 10 \u00d7 10 = 100 mm\u00b2</div><div class="fm">1 m = 100 cm \u21d2 1 m\u00b2 = 100 \u00d7 100 = 10 000 cm\u00b2</div>'},
     {lb:'cm\u00b2 to mm\u00b2',dr:dQ11,ht:'<div class="fm">'+V.q11cm2+' cm\u00b2 \u00d7 100 = '+V.q11mm2+' mm\u00b2</div>'},
     {lb:'m\u00b2 to cm\u00b2',dr:dQ11,ht:'<div class="fm">'+V.q11m2+' m\u00b2 \u00d7 10 000 = '+V.q11cm2b.toLocaleString()+' cm\u00b2</div>'},
-    {lb:'Your turn',dr:dQ11,ht:yt11}
-  ]},
-{ey:'Q9 \u00b7 Y7 AOC \u00b7 Shape',ti:'Area of Compound Shapes <span class="badge f">F</span>',su:'L-shape: outer '+V.q8a+' \u00d7 '+V.q8b+' cm, cut-out '+V.q8c+' \u00d7 '+V.q8d+' cm.',steps:[
-    {lb:'Identify the shape',dr:dQ8,ht:'<p>Split a compound shape into simpler rectangles, or use the <b>subtraction method</b>: find the full rectangle area then subtract the missing piece.</p>'},
-    {lb:'Perimeter',dr:dQ8,ht:'<div class="fm">Perimeter of L-shape = 2 \u00d7 ('+V.q8a+' + '+V.q8b+') = '+V.q8perim+' cm</div><p>The L-shape has the same perimeter as the bounding rectangle.</p>'},
-    {lb:'Area',dr:dQ8,ht:'<div class="fm">Area = '+V.q8a+' \u00d7 '+V.q8b+' \u2212 '+V.q8c+' \u00d7 '+V.q8d+'</div><div class="fm">= '+V.q8a*V.q8b+' \u2212 '+V.q8c*V.q8d+' = '+V.q8area+' cm\u00b2</div>'},
-    {lb:'Your turn',dr:dQ8,ht:yt8}
-  ]},
-  {ey:'Q10 \u00b7 Y7 AOC \u00b7 Shape',ti:'Nets and Surface Area of Cuboids <span class="badge f">F</span>',su:'Cuboid '+V.q9l+' \u00d7 '+V.q9w+' \u00d7 '+V.q9h+' cm.',steps:[
-    {lb:'The net',dr:dQ9,ht:'<p>A <b>net</b> is the 2D shape that folds into a 3D solid. A cuboid has <b>6 rectangular faces</b> arranged in a cross pattern.</p>'},
-    {lb:'Name the faces',dr:dQ9,ht:'<p>Pairs of identical faces: top &amp; bottom ('+V.q9l+'\u00d7'+V.q9h+'), front &amp; back ('+V.q9l+'\u00d7'+V.q9w+'), left &amp; right ('+V.q9w+'\u00d7'+V.q9h+').</p>'},
-    {lb:'Surface area',dr:dQ9,ht:'<div class="fm">SA = 2(lw + lh + wh)</div><div class="fm">= 2('+V.q9l*V.q9w+' + '+V.q9l*V.q9h+' + '+V.q9w*V.q9h+') = '+V.q9sa+' cm\u00b2</div>'},
-    {lb:'Your turn',dr:dQ9,ht:yt9}
-  ]},
-  {ey:'Q11 \u00b7 Y7 AOC \u00b7 Shape',ti:'Volume of Cuboids <span class="badge f">F</span>',su:'Cuboid '+V.q10l+' \u00d7 '+V.q10w+' \u00d7 '+V.q10h+' cm.',steps:[
-    {lb:'The formula',dr:dQ10,ht:'<div class="fm">Volume = length \u00d7 width \u00d7 height</div><p>Volume is measured in <b>cubic units</b> (cm\u00b3, m\u00b3).</p>'},
-    {lb:'Calculate',dr:dQ10,ht:'<div class="fm">V = '+V.q10l+' \u00d7 '+V.q10w+' \u00d7 '+V.q10h+' = '+V.q10vol+' cm\u00b3</div>'},
-    {lb:'Using base area',dr:dQ10,ht:'<div class="fm">Base area = '+V.q10given+' cm\u00b2   Height = '+V.q10miss+' cm</div><div class="fm">V = '+V.q10given+' \u00d7 '+V.q10miss+' = '+V.q10volQ+' cm\u00b3</div>'},
-    {lb:'Your turn',dr:dQ10,ht:yt10}
-  ]},
-  {ey:'Q12 \u00b7 Y7 AOC \u00b7 Measure',ti:'Area Units: cm\u00b2, mm\u00b2 and m\u00b2 <span class="badge f">F</span>',su:'Convert '+V.q11cm2+' cm\u00b2 to mm\u00b2. Convert '+V.q11m2+' m\u00b2 to cm\u00b2.',steps:[
-    {lb:'Why the rule works',dr:dQ11,ht:'<p>1 cm = 10 mm, so 1 cm\u00b2 = 10 \u00d7 10 = <b>100 mm\u00b2</b>. Always square the linear conversion factor.</p>'},
-    {lb:'cm\u00b2 to mm\u00b2',dr:dQ11,ht:'<div class="fm">'+V.q11cm2+' cm\u00b2 \u00d7 100 = '+V.q11mm2+' mm\u00b2</div>'},
-    {lb:'m\u00b2 to cm\u00b2',dr:dQ11,ht:'<div class="fm">1 m = 100 cm \u2192 1 m\u00b2 = 10 000 cm\u00b2</div><div class="fm">'+V.q11m2+' m\u00b2 \u00d7 10 000 = '+V.q11cm2b.toLocaleString()+' cm\u00b2</div>'},
     {lb:'Your turn',dr:dQ11,ht:yt11}
   ]},
   {ey:'Q13 \u00b7 Y7 AOC \u00b7 Measure',ti:'Area Units: Hectares and km\u00b2 <span class="badge f">F</span>',su:'Convert '+V.q12hectares+' hectares to m\u00b2 and km\u00b2.',steps:[
