@@ -105,18 +105,28 @@ function tryIt(o){
     +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
     +'</div>';
 }
-function ck(id){
-  var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');
-  if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}
-  if(Math.abs(v-o.ans)<=(o.exact||0.1)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}
-  else{f.className='fb er';f.textContent='Not quite — check your working and try again.';}
-}
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('try-new')){render();return;}
+  if(e.target.classList.contains('try-ck')){
+    var id=e.target.getAttribute('data-tryid');
+    var o=ST[id];
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    if(!inp||!fb||!o)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+    var tol=o.tol!=null?o.tol:0.5;
+    if(Math.abs(v-o.ans)<=tol){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct!  '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}
+  }
+});
 function g(){return document.getElementById('dg');}
 function T(x,y,txt,c,sz,a,bold){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 
-/* Q1 — Mean median mode range */
+
 function dQ1(p){
   var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
   var data=[4,7,3,7,9,2,7,6];

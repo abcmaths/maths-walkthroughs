@@ -108,13 +108,22 @@ function tryIt(o){
     +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
     +'</div>';
 }
-function ck(id){
-  var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');
-  if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}
-  var tol=(o.tol||2)/100;
-  if(Math.abs(v-o.ans)<=Math.abs(o.ans*tol)+0.05){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}
-  else{f.className='fb er';f.textContent='Not quite — check your working and try again.';}
-}
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('try-new')){render();return;}
+  if(e.target.classList.contains('try-ck')){
+    var id=e.target.getAttribute('data-tryid');
+    var o=ST[id];
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    if(!inp||!fb||!o)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+    var tol=o.tol!=null?o.tol:0.5;
+    if(Math.abs(v-o.ans)<=tol){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct!  '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}
+  }
+});
 var D=Math.PI/180;
 function g(){return document.getElementById('dg');}
 function L(x,y,t,c,sz,a){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'">'+t+'</text>';}
