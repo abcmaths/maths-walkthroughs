@@ -97,14 +97,16 @@ var ST={};
 function tryIt(o){
   var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
-  return '<div class="try" data-tryid="'+id+'"><div class="try-t">✔ Your Turn</div>'
-    +'<div class="try-q">'+o.question+'</div>'+(h?'<ul class="hl">'+h+'</ul>':'')
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
     +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
-    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
-    +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
     +'</div>';
 }
 document.addEventListener('click',function(e){
@@ -390,10 +392,15 @@ function yt4(){var b=rnd(3,8),g=rnd(3,8),tot=b+g,likeB=rnd(1,b),likeG=rnd(1,g);
     working:(likeB+likeG)+'/'+tot+' ≈ '+((likeB+likeG)/tot).toFixed(2)});}
 
 function yt5(){
-  return tryIt({question:'Two fair coins are flipped. How many outcomes are in the full sample space?',
-    hints:['List all combinations: HH, HT, TH, TT'],
-    ans:4,tol:0,unit:'outcomes',
-    working:'HH, HT, TH, TT → 4 outcomes'});}
+  var scenarios=[
+    {q:'Two fair coins are flipped. How many outcomes are in the full sample space?',a:4,w:'HH, HT, TH, TT → 4 outcomes. (2 coins × 2 sides = 2² = 4)'},
+    {q:'A coin is flipped and a dice is rolled. How many outcomes are in the sample space?',a:12,w:'2 coin outcomes × 6 dice outcomes = 12 total outcomes.'},
+    {q:'Three fair coins are flipped. How many outcomes are in the full sample space?',a:8,w:'2³ = 8 outcomes: HHH, HHT, HTH, HTT, THH, THT, TTH, TTT.'},
+    {q:'A dice is rolled twice. How many outcomes are in the full sample space?',a:36,w:'6 × 6 = 36 outcomes (6 first dice outcomes × 6 second dice outcomes).'},
+    {q:'A fair coin is flipped. How many outcomes are in the sample space?',a:2,w:'Heads or Tails → 2 outcomes.'}
+  ];
+  var sc=pick(scenarios);
+  return tryIt({question:sc.q,hints:['Multiply the number of outcomes for each event','Or list all combinations systematically'],ans:sc.a,tol:0,unit:'outcomes',working:sc.w});}
 
 function yt6(){var pa=pick([0.1,0.15,0.2,0.25,0.3,0.35]),pb=pick([0.1,0.15,0.2,0.25]);
   var s=(pa+pb);
@@ -409,10 +416,20 @@ function yt7(){var p=pick([0.2,0.25,0.3,0.4,0.5]),n=pick([50,100,150,200,250]);
     working:p+' × '+n+' = '+p*n});}
 
 function yt8(){
-  return tryIt({question:'Two dice are rolled. How many outcomes give a total of 7?',
-    hints:['List pairs: 1+6, 2+5, 3+4, 4+3, 5+2, 6+1'],
-    ans:6,tol:0,unit:'outcomes',
-    working:'(1,6),(2,5),(3,4),(4,3),(5,2),(6,1) → 6 outcomes. P(7) = 6/36 = 1/6'});}
+  var targets=[
+    {t:7,pairs:[[1,6],[2,5],[3,4],[4,3],[5,2],[6,1]],n:6},
+    {t:8,pairs:[[2,6],[3,5],[4,4],[5,3],[6,2]],n:5},
+    {t:6,pairs:[[1,5],[2,4],[3,3],[4,2],[5,1]],n:5},
+    {t:9,pairs:[[3,6],[4,5],[5,4],[6,3]],n:4},
+    {t:10,pairs:[[4,6],[5,5],[6,4]],n:3},
+    {t:5,pairs:[[1,4],[2,3],[3,2],[4,1]],n:4}
+  ];
+  var sc=pick(targets);
+  var pairStr=sc.pairs.map(function(p){return '('+p[0]+','+p[1]+')';}).join(', ');
+  return tryIt({question:'Two dice are rolled. How many outcomes give a total of <b>'+sc.t+'</b>?',
+    hints:['List all pairs that add to '+sc.t,'Work systematically: start with the lowest first die'],
+    ans:sc.n,tol:0,unit:'outcomes',
+    working:pairStr+' → '+sc.n+' outcomes. P('+sc.t+') = '+sc.n+'/36'});}
 
 function yt9(){var r=rnd(2,5),b=rnd(1,4),tot=r+b;var pr=r/tot;
   return tryIt({question:'Bag: <b>'+r+' red, '+b+' blue</b>. Draw twice WITH replacement. Find P(both red) as a decimal (2 d.p.).',

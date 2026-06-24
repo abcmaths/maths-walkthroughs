@@ -94,16 +94,16 @@ var ST={};
 function tryIt(o){
   var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
   return '<div class="try" data-tryid="'+id+'">'
-    +'<div class="try-t">✔ Your Turn</div>'
+    +'<div class="try-t">\u2714 Your Turn</div>'
     +'<div class="try-q">'+o.question+'</div>'
-    +(h?'<ul class="hl">'+h+'</ul>':'')
     +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
-    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
-    +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
     +'</div>';
 }
 document.addEventListener('click',function(e){
@@ -219,7 +219,16 @@ function yt4(){var x1=rnd(0,3),y1=rnd(0,5),x2=x1+rnd(2,4),y2=y1+rnd(2,6);return 
 function yt5(){var a=rnd(2,5),r=rnd(2,4),n=rnd(3,6);return tryIt({question:'Geometric sequence starts <b>'+a+', '+(a*r)+'...</b> with ratio '+r+'. Find the <b>'+n+'th term</b>.',hints:['nth term = '+a+' × '+r+'^(n−1)','n = '+n],ans:a*Math.pow(r,n-1),tol:0,unit:'',working:a+' × '+r+'^'+(n-1)+' = '+a*Math.pow(r,n-1)});}
 function yt6(){var x=rnd(1,6),c1=rnd(1,5),c2=c1+x;return tryIt({question:'Solve simultaneously: <b>y = 3x + '+c1+'</b> and <b>y = 2x + '+c2+'</b>. Find x.',hints:['Set the two expressions equal','3x + '+c1+' = 2x + '+c2],ans:x,tol:0,unit:'',working:'3x+'+c1+' = 2x+'+c2+', x = '+x});}
 function yt7(){var x=rnd(-2,3);return tryIt({question:'For y = x² − 3, what is y when x = '+x+'?',hints:['Square x first: '+x+'² = '+x*x,'Then subtract 3'],ans:x*x-3,tol:0,unit:'',working:x+'² − 3 = '+x*x+' − 3 = '+(x*x-3)});}
-function yt8(){return tryIt({question:'On a distance-time graph, a horizontal section means the object is doing what? Enter 1 = moving, 2 = stopped, 3 = accelerating.',hints:['No change in distance over time'],ans:2,tol:0,unit:'',working:'Horizontal = stopped (distance not changing)'});}
+function yt8(){
+  var scenarios=[
+    {q:'On a distance-time graph, a <b>horizontal</b> section means the object is doing what?<br>Enter: <b>1</b> = moving forwards, <b>2</b> = stopped, <b>3</b> = moving backwards',ans:2,w:'Horizontal line = distance not changing = object is stopped.'},
+    {q:'On a distance-time graph, a <b>steeper</b> upward slope compared to an earlier section means the object is doing what?<br>Enter: <b>1</b> = slowing down, <b>2</b> = same speed, <b>3</b> = going faster',ans:3,w:'Steeper slope = greater change in distance per unit time = faster speed.'},
+    {q:'On a distance-time graph, a line <b>sloping downward</b> means the object is doing what?<br>Enter: <b>1</b> = returning towards the start, <b>2</b> = stopped, <b>3</b> = speeding up',ans:1,w:'Downward slope = distance from start is decreasing = returning towards origin.'},
+    {q:'On a distance-time graph, the <b>gradient</b> of the line represents what?<br>Enter: <b>1</b> = acceleration, <b>2</b> = speed, <b>3</b> = distance',ans:2,w:'Gradient = rise \u00f7 run = distance \u00f7 time = speed.'},
+    {q:'A distance-time graph shows a straight line from (0, 0) to (4, 20). What is the speed?<br>Enter the speed in km/h.',ans:5,tol:0,w:'Speed = distance \u00f7 time = 20 \u00f7 4 = 5 km/h. Gradient of the line gives speed.'}
+  ];
+  var sc=pick(scenarios);
+  return tryIt({question:sc.q,hints:['Think about what distance-time graphs show','Gradient = speed'],ans:sc.ans,tol:sc.tol||0,unit:sc.unit||'',working:sc.w});}
 function yt9(){var a=rnd(2,4),b=rnd(4,12),lim=Math.floor((b-1)/a);return tryIt({question:'Solve the inequality <b>'+a+'x + 1 < '+b+'</b>. What is the largest integer value of x?',hints:[a+'x < '+(b-1),'x < '+((b-1)/a).toFixed(2)],ans:lim,tol:0,unit:'',working:a+'x < '+(b-1)+', x < '+((b-1)/a).toFixed(2)+', largest integer = '+lim});}
 function yt10(){var n=rnd(4,8);return tryIt({question:'Find the <b>'+n+'th triangular number</b>. (Formula: ½n(n+1))',hints:['½ × '+n+' × '+(n+1)],ans:n*(n+1)/2,tol:0,unit:'',working:'½ × '+n+' × '+(n+1)+' = '+n*(n+1)/2});}
 var QS=[

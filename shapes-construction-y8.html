@@ -94,16 +94,16 @@ var ST={};
 function tryIt(o){
   var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
   return '<div class="try" data-tryid="'+id+'">'
-    +'<div class="try-t">✔ Your Turn</div>'
+    +'<div class="try-t">\u2714 Your Turn</div>'
     +'<div class="try-q">'+o.question+'</div>'
-    +(h?'<ul class="hl">'+h+'</ul>':'')
     +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
-    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
-    +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
     +'</div>';
 }
 document.addEventListener('click',function(e){
@@ -232,12 +232,32 @@ function yt1(){var shapes=[['equilateral triangle',3],['square',4],['regular pen
 function yt2(){var a=rnd(3,9),b=rnd(3,9),c=Math.sqrt(a*a+b*b);return tryIt({question:'Right-angled triangle: shorter sides <b>'+a+' cm</b> and <b>'+b+' cm</b>. Find the hypotenuse (1 d.p.).',hints:['c² = '+a+'² + '+b+'²','c² = '+a*a+' + '+b*b],ans:Math.round(c*10)/10,tol:0.2,unit:'cm',working:'c = √('+(a*a+b*b)+') = '+c.toFixed(1)+' cm'});}
 function yt3(){var c=pick([5,10,13,15,17]),a=pick([3,6,5,9,8]).valueOf();var b=Math.sqrt(c*c-a*a);if(b===Math.floor(b)){return tryIt({question:'Hypotenuse = <b>'+c+' cm</b>, one leg = <b>'+a+' cm</b>. Find the other leg.',hints:['b² = '+c+'² − '+a+'²','b² = '+(c*c-a*a)],ans:b,tol:0.1,unit:'cm',working:'b = √('+(c*c-a*a)+') = '+b+' cm'});}
   else{var a2=rnd(3,8),c2=Math.round(Math.sqrt(a2*a2+64)*10)/10;return tryIt({question:'Hypotenuse ≈ <b>'+c2+' cm</b>, one leg = <b>'+a2+' cm</b>. Find the other leg (1 d.p.).',hints:['b² = hyp² − leg²'],ans:8,tol:0.2,unit:'cm',working:'b = √('+c2+'² − '+a2+'²) ≈ 8 cm'});}}
-function yt4(){return tryIt({question:'What is the equidistant locus from two points A and B?',hints:['It is constructed using a compass','It crosses AB at the midpoint'],ans:1,tol:0,unit:'(enter 1)',working:'Perpendicular bisector of AB — equidistant from both points'});}
+function yt4(){
+  var scenarios=[
+    {q:'A point moves so it is always <b>equidistant from two fixed points A and B</b>. What is this locus? Enter <b>1</b> = perpendicular bisector, <b>2</b> = angle bisector, <b>3</b> = circle.',a:1,w:'The perpendicular bisector of AB — every point on it is equidistant from A and B.'},
+    {q:'A point moves so it is always <b>equidistant from two intersecting lines</b>. What is this locus? Enter <b>1</b> = perpendicular bisector, <b>2</b> = angle bisector, <b>3</b> = circle.',a:2,w:'The angle bisector — every point on it is equidistant from both lines.'},
+    {q:'A point moves so it is always a <b>fixed distance from a fixed point</b>. What is this locus? Enter <b>1</b> = straight line, <b>2</b> = angle bisector, <b>3</b> = circle.',a:3,w:'A circle centred on the fixed point, with radius equal to the fixed distance.'},
+    {q:'A point moves so it is always <b>equidistant from a fixed line</b>. What is this locus? Enter <b>1</b> = parallel line, <b>2</b> = angle bisector, <b>3</b> = circle.',a:1,w:'A line parallel to the fixed line, at the same distance on either side.'}
+  ];
+  var sc=pick(scenarios);
+  return tryIt({question:sc.q,hints:['Think about what “equidistant” means geometrically','Draw a sketch if it helps'],ans:sc.a,tol:0,unit:'',working:sc.w});}
 function yt5(){var n=pick([3,4,5,6,8]);return tryIt({question:'What is the order of rotational symmetry of a regular <b>'+n+'-sided polygon</b>?',hints:['Regular n-gon has order n'],ans:n,tol:0,unit:'',working:'Regular '+n+'-gon: order of rotational symmetry = '+n});}
 function yt6(){var l=rnd(3,8),w=rnd(2,5),h=rnd(2,4);return tryIt({question:'How many faces does a cuboid with l='+l+', w='+w+', h='+h+' have?',hints:['A cuboid has 3 pairs of rectangular faces'],ans:6,tol:0,unit:'faces',working:'All cuboids have 6 faces (3 pairs)'});}
 function yt7(){var sides=pick([3,4,5,6]);var name=['triangle','quadrilateral','pentagon','hexagon'][sides-3];return tryIt({question:'A <b>'+name+'</b> has '+sides+' sides. How many diagonals does it have? (Formula: n(n−3)/2)',hints:['n = '+sides,''+sides+'('+sides+'−3)/2'],ans:sides*(sides-3)/2,tol:0,unit:'diagonals',working:sides+'('+sides+'−3)/2 = '+sides*(sides-3)/2+' diagonals'});}
 function yt8(){var a=rnd(3,10),b=rnd(3,10),c=Math.sqrt(a*a+b*b);return tryIt({question:'Is a triangle with sides <b>'+a+', '+b+', '+Math.round(c)+'</b> right-angled? Enter 1 for yes, 0 for no.',hints:['Check: does a²+b² = c²?',a+'²+'+b+'² = '+(a*a+b*b)],ans:Math.abs(Math.round(c)-c)<0.01?1:0,tol:0,unit:'(1=yes,0=no)',working:a+'²+'+b+'² = '+(a*a+b*b)+', '+Math.round(c)+'² = '+Math.round(c)*Math.round(c)+'. '+(Math.abs(Math.round(c)-c)<0.01?'Yes, right-angled.':'Not exactly right-angled.')});}
-function yt9(){return tryIt({question:'How many faces does a triangular prism have?',hints:['2 triangular ends + 3 rectangular sides'],ans:5,tol:0,unit:'faces',working:'2 triangles + 3 rectangles = 5 faces'});}
+function yt9(){
+  var shapes=[
+    {n:'triangular prism',faces:5,w:'2 triangular ends + 3 rectangular sides = 5 faces.'},
+    {n:'cube',faces:6,w:'6 square faces (all identical).'},
+    {n:'square-based pyramid',faces:5,w:'1 square base + 4 triangular faces = 5 faces.'},
+    {n:'triangular-based pyramid (tetrahedron)',faces:4,w:'4 triangular faces (all faces are triangles).'},
+    {n:'cylinder',faces:3,w:'2 circular ends + 1 curved surface = 3 faces.'},
+    {n:'pentagonal prism',faces:7,w:'2 pentagonal ends + 5 rectangular sides = 7 faces.'}
+  ];
+  var sh=pick(shapes);
+  return tryIt({question:'How many faces does a <b>'+sh.n+'</b> have?',
+    hints:['Count the flat (and curved) surfaces separately','Prisms: 2 end faces + number of sides rectangular faces'],
+    ans:sh.faces,tol:0,unit:'faces',working:sh.w});}
 function yt10(){var n=pick([3,4,5,6,8]);return tryIt({question:'A regular <b>'+n+'-sided polygon</b>. What is its order of rotational symmetry?',hints:['Order = number of sides for regular polygons'],ans:n,tol:0,unit:'',working:'Regular '+n+'-gon: order '+n});}
 
 var QS=[

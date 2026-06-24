@@ -93,16 +93,16 @@ var ST={};
 function tryIt(o){
   var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
   return '<div class="try" data-tryid="'+id+'">'
-    +'<div class="try-t">✔ Your Turn</div>'
+    +'<div class="try-t">\u2714 Your Turn</div>'
     +'<div class="try-q">'+o.question+'</div>'
-    +(h?'<ul class="hl">'+h+'</ul>':'')
     +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
-    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
-    +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
     +'</div>';
 }
 document.addEventListener('click',function(e){
@@ -284,12 +284,25 @@ function yt7(){var side1=rnd(3,8),sf=rnd(2,4),side2=side1*sf;
   return tryIt({question:'Two similar triangles. Corresponding sides are <b>'+side1+' cm</b> and <b>'+side2+' cm</b>. What is the scale factor?',
     hints:['SF = larger ÷ smaller'],
     ans:sf,tol:0.01,unit:'',working:side2+' ÷ '+side1+' = '+sf});}
-function yt8(){return tryIt({question:'Two triangles are congruent. Triangle A has sides 3, 4, 5 cm. What is the longest side of Triangle B?',
-    hints:['Congruent means identical in size and shape'],
-    ans:5,tol:0,unit:'cm',working:'Congruent shapes are identical — longest side = 5 cm'});}
-function yt9(){return tryIt({question:'To fully describe a rotation you need 3 things. How many degrees is a half-turn?',
-    hints:['Half of 360°'],
-    ans:180,tol:0,unit:'°',working:'Half turn = 360 ÷ 2 = 180°'});}
+function yt8(){
+  var s1=rnd(3,7),s2=rnd(3,7),s3=rnd(3,7);
+  var sides=[s1,s2,s3].sort(function(a,b){return a-b;});
+  var sc=pick([
+    {q:'Two triangles are congruent. Triangle A has sides <b>'+sides[0]+', '+sides[1]+', '+sides[2]+'</b> cm. What is the longest side of Triangle B?',a:sides[2],w:'Congruent triangles are identical in size and shape — all sides match. Longest side = '+sides[2]+' cm.'},
+    {q:'Two rectangles are congruent. Rectangle A has area <b>'+(s1*s2)+'</b> cm². What is the area of Rectangle B?',a:s1*s2,w:'Congruent shapes are identical — same area. Area = '+s1*s2+' cm².'},
+    {q:'Two pentagons are congruent. Pentagon A has perimeter <b>'+(s1*5)+'</b> cm. What is the perimeter of Pentagon B?',a:s1*5,w:'Congruent shapes are identical — same perimeter. Perimeter = '+s1*5+' cm.'}
+  ]);
+  return tryIt({question:sc.q,hints:['Congruent means identical in size and shape','All corresponding sides and angles are equal'],ans:sc.a,tol:0,unit:'cm',working:sc.w});}
+function yt9(){
+  var scenarios=[
+    {q:'A shape is rotated by a <b>half-turn</b>. How many degrees is this?',a:180,w:'Half turn = 360 ÷ 2 = 180°.'},
+    {q:'A shape is rotated by a <b>quarter-turn clockwise</b>. How many degrees is this?',a:90,w:'Quarter turn = 360 ÷ 4 = 90°.'},
+    {q:'A shape is rotated by a <b>three-quarter turn</b>. How many degrees is this?',a:270,w:'Three-quarter turn = 3 × 90 = 270°.'},
+    {q:'A shape is rotated <b>90° clockwise</b>. What is the equivalent anticlockwise rotation in degrees?',a:270,w:'90° clockwise = 360 − 90 = 270° anticlockwise.'},
+    {q:'A rotation of <b>180°</b> clockwise is equivalent to how many degrees anticlockwise?',a:180,w:'180° clockwise = 180° anticlockwise (same either way for a half turn).'}
+  ];
+  var sc=pick(scenarios);
+  return tryIt({question:sc.q,hints:['A full turn = 360°','Half = 180°, Quarter = 90°, Three-quarter = 270°'],ans:sc.a,tol:0,unit:'°',working:sc.w});}
 function yt10(){var side=rnd(6,12),sf=0.5;
   return tryIt({question:'A rectangle has width <b>'+side+' cm</b>. It is enlarged by scale factor <b>0.5</b>. What is the new width?',
     hints:['Multiply by 0.5 (= divide by 2)'],

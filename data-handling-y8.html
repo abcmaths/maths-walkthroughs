@@ -101,14 +101,16 @@ var ST={};
 function tryIt(o){
   var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
-  return '<div class="try" data-tryid="'+id+'"><div class="try-t">✔ Your Turn</div>'
-    +'<div class="try-q">'+o.question+'</div>'+(h?'<ul class="hl">'+h+'</ul>':'')
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
     +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
-    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
-    +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
     +'</div>';
 }
 document.addEventListener('click',function(e){
@@ -352,11 +354,15 @@ function yt2(){var d2l=[{s:'Football',v:rnd(8,16),c:'#C0272D'},{s:'Cricket',v:rn
     ans:pc,tol:1,unit:'%',
     working:d2l[0].v+'/'+tot+' × 100 ≈ '+pc+'%'});}
 
-function yt3(){var data=[23,25,31,34,38,42,47];
-  return tryIt({question:'Stem-and-leaf data (tens|units): 2|3 5, 3|1 4 8, 4|2 7. Find the range.',
-    hints:['Largest value = 47, smallest = 23','Range = 47 − 23'],
-    ans:24,tol:0,unit:'',
-    working:'47 − 23 = 24'});}
+function yt3(){
+  var s1=rnd(1,3),s2=s1+1,s3=s2+1;
+  var l1=[rnd(1,4),rnd(5,9)].sort(function(a,b){return a-b;});
+  var l2=[rnd(0,3),rnd(4,6),rnd(7,9)].sort(function(a,b){return a-b;});
+  var l3=[rnd(1,4),rnd(5,8)].sort(function(a,b){return a-b;});
+  var mn=s1*10+l1[0],mx=s3*10+l3[1],rng=mx-mn;
+  var q='Stem-and-leaf: '+s1+'|'+l1.join(' ')+', '+s2+'|'+l2.join(' ')+', '+s3+'|'+l3.join(' ')+'. Find the range.';
+  return tryIt({question:q,hints:['Smallest value = '+mn,'Largest value = '+mx,'Range = largest \u2212 smallest'],
+    ans:rng,tol:0,unit:'',working:'Largest = '+mx+', Smallest = '+mn+', Range = '+mx+' \u2212 '+mn+' = '+rng});}
 
 function yt4(){var sz=[4,5,6],fr=[rnd(3,8),rnd(5,12),rnd(3,7)],tot2=fr[0]+fr[1]+fr[2];
   var sfx=sz[0]*fr[0]+sz[1]*fr[1]+sz[2]*fr[2];
@@ -373,10 +379,17 @@ function yt5(){var gs=['0-9','10-19','20-29'],fs=[rnd(3,8),rnd(5,12),rnd(4,9)],m
     working:'Σfm = '+sfm.toFixed(1)+', n = '+tot2+', mean ≈ '+(sfm/tot2).toFixed(1)});}
 
 function yt6(){
-  return tryIt({question:'A scatter graph shows study hours (1–8) vs exam score (30–85) with a clear positive trend. What type of correlation is this?<br><br>Enter: 1 = positive, 2 = negative, 3 = none',
-    hints:['As x increases, y increases'],
-    ans:1,tol:0,unit:'',
-    working:'Positive correlation: as study time increases, score increases'});}
+  var scenarios=[
+    {q:'A scatter graph shows hours of sunshine vs ice cream sales. As sunshine increases, sales increase. What type of correlation?',w:'As sunshine increases, ice cream sales increase \u2192 positive correlation.',ans:1},
+    {q:'A scatter graph shows temperature vs hot drink sales. As temperature rises, sales fall. What type of correlation?',w:'As temperature increases, hot drink sales decrease \u2192 negative correlation.',ans:2},
+    {q:'A scatter graph shows shoe size vs maths score. No clear pattern is visible. What type of correlation?',w:'No relationship between shoe size and maths score \u2192 no correlation.',ans:3},
+    {q:'A scatter graph shows revision hours vs exam score. Students who revise more score higher. What type of correlation?',w:'More revision \u2192 higher score \u2192 positive correlation.',ans:1},
+    {q:'A scatter graph shows speed vs journey time. Faster speed means shorter journey. What type of correlation?',w:'As speed increases, journey time decreases \u2192 negative correlation.',ans:2}
+  ];
+  var sc=pick(scenarios);
+  return tryIt({question:sc.q+'<br><br>Enter: <b>1</b> = positive, <b>2</b> = negative, <b>3</b> = none',
+    hints:['Positive: both variables increase together','Negative: one increases as the other decreases','None: no clear pattern'],
+    ans:sc.ans,tol:0,unit:'',working:sc.w});}
 
 function yt7(){var c=rnd(20,50),tot3=120;
   return tryIt({question:'In a pie chart of 120 students, '+c+' chose Maths. What angle does the Maths sector have? (nearest degree)',
@@ -391,10 +404,12 @@ function yt8(){var vals=[rnd(10,18),rnd(12,20),rnd(8,16),rnd(15,25),rnd(18,28)];
     working:'Max='+Math.max.apply(null,vals)+', Min='+Math.min.apply(null,vals)+', Range='+(Math.max.apply(null,vals)-Math.min.apply(null,vals))});}
 
 function yt9(){
-  return tryIt({question:'Box plot A has median = 15, IQR = 8. Box plot B has median = 20, IQR = 12. Which set is more spread out? Enter 1 for A, 2 for B.',
-    hints:['Larger IQR = more spread'],
-    ans:2,tol:0,unit:'',
-    working:'IQR of B (12) > IQR of A (8), so B is more spread out'});}
+  var mA=rnd(10,20),iqrA=rnd(4,8),mB=rnd(15,28),iqrB=rnd(9,15);
+  var more=iqrA>iqrB?1:2;
+  return tryIt({question:'Box plot A: median = '+mA+', IQR = '+iqrA+'. Box plot B: median = '+mB+', IQR = '+iqrB+'. Which data set is more spread out? Enter <b>1</b> for A, <b>2</b> for B.',
+    hints:['IQR (interquartile range) measures spread','Larger IQR = more spread out'],
+    ans:more,tol:0,unit:'',
+    working:'IQR of A = '+iqrA+', IQR of B = '+iqrB+'. '+(iqrA>iqrB?'A has larger IQR \u2192 A is more spread out.':'B has larger IQR \u2192 B is more spread out.')});}
 
 function yt10(){var d=[rnd(2,5),rnd(2,5),rnd(2,5),rnd(3,6),rnd(3,6),rnd(50,80)];
   return tryIt({question:'Data: '+d.join(', ')+'. Which average (mean or median) would be most misleading due to the outlier? Enter 1 for mean, 2 for median.',

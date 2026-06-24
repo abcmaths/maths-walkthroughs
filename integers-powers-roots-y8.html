@@ -94,16 +94,16 @@ var ST={};
 function tryIt(o){
   var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
   return '<div class="try" data-tryid="'+id+'">'
-    +'<div class="try-t">✔ Your Turn</div>'
+    +'<div class="try-t">\u2714 Your Turn</div>'
     +'<div class="try-q">'+o.question+'</div>'
-    +(h?'<ul class="hl">'+h+'</ul>':'')
     +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
-    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
-    +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
     +'</div>';
 }
 document.addEventListener('click',function(e){
@@ -220,7 +220,13 @@ function yt3(){var b=rnd(2,5),e=rnd(2,4);return tryIt({question:'Calculate <b>'+
 function yt4(){var n=rnd(12,48);var factors=[];for(var i=1;i<=n;i++)if(n%i===0)factors.push(i);return tryIt({question:'How many factors does <b>'+n+'</b> have?',hints:['Factors of '+n+': try dividing by 1,2,3,...'],ans:factors.length,tol:0,unit:'factors',working:'Factors of '+n+': '+factors.join(', ')+' → '+factors.length+' factors'});}
 function yt5(){var n=pick([12,18,20,24,30,36]);function primes(x){var f=[];var d=2;while(d*d<=x){while(x%d===0){f.push(d);x=Math.floor(x/d);}d++;}if(x>1)f.push(x);return f;}var pf=primes(n);return tryIt({question:'How many prime factors (with repetition) does <b>'+n+'</b> have? e.g. 12=2×2×3 has 3.',hints:['Build the factor tree for '+n],ans:pf.length,tol:0,unit:'',working:n+' = '+pf.join('×')+' → '+pf.length+' prime factors'});}
 function yt6(){var a=pick([6,8,10,12,15]),b=pick([9,10,12,15,18]);function gcd(x,y){return y===0?x:gcd(y,x%y);}return tryIt({question:'Find the HCF of <b>'+a+'</b> and <b>'+b+'</b>.',hints:['List factors of each','Find largest common one'],ans:gcd(a,b),tol:0,unit:'',working:'HCF('+a+','+b+') = '+gcd(a,b)});}
-function yt7(){return tryIt({question:'Calculate <b>5 + 3² × 2</b> using correct order of operations.',hints:['Indices first: 3² = 9','Then multiply: 9 × 2 = 18','Then add: 5 + 18'],ans:23,tol:0,unit:'',working:'5 + 9 × 2 = 5 + 18 = 23'});}
+function yt7(){
+  var b=rnd(2,6),e=2,m=rnd(2,5),a=rnd(2,9);
+  var bsq=b*b,prod=bsq*m,ans=a+prod;
+  return tryIt({question:'Calculate <b>'+a+' + '+b+'\u00b2 \u00d7 '+m+'</b> using the correct order of operations.',
+    hints:['Indices (powers) come before multiplication and addition','Step 1: '+b+'\u00b2 = '+bsq,'Step 2: '+bsq+' \u00d7 '+m+' = '+prod,'Step 3: '+a+' + '+prod+' = '+ans],
+    ans:ans,tol:0,unit:'',
+    working:'Indices first: '+b+'\u00b2 = '+bsq+'. Then multiply: '+bsq+' \u00d7 '+m+' = '+prod+'. Then add: '+a+' + '+prod+' = '+ans+'.'});}
 function yt8(){var a=pick([-6,-4,-3,-2]),b=pick([-4,-3,-2]);return tryIt({question:'Calculate <b>'+a+' ÷ '+b+'</b>.',hints:['Both negative → result is positive'],ans:a/b,tol:0.01,unit:'',working:a+' ÷ '+b+' = '+a/b});}
 function yt9(){var sq=pick([4,9,16,25,36,49,64,81,100,121,144,169]);return tryIt({question:'Find √'+sq+'.',hints:['Think: what number squared = '+sq+'?'],ans:Math.sqrt(sq),tol:0,unit:'',working:'√'+sq+' = '+Math.sqrt(sq)});}
 function yt10(){var a=pick([4,5,6,8]),b=pick([6,8,9,10,12]);function lcm(x,y){function gcd(a2,b2){return b2===0?a2:gcd(b2,a2%b2);}return x*y/gcd(x,y);}return tryIt({question:'Find the LCM of <b>'+a+'</b> and <b>'+b+'</b>.',hints:['List multiples of each','Find first common multiple'],ans:lcm(a,b),tol:0,unit:'',working:'LCM('+a+','+b+') = '+lcm(a,b)});}
