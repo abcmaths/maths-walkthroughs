@@ -84,28 +84,26 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
   </div>
 </div>
 <script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function round1(x){return Math.round(x*10)/10;}
+function round2(x){return Math.round(x*100)/100;}
+
 var ST={};
-function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]=o;var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');return '<div class="try"><div class="try-t">Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="Answer ('+o.unit+')" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
-function ck(id){var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}if(Math.abs(v-o.ans)<=(o.exact||0.05)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}else{f.className='fb er';f.textContent='Not quite - check your working and try again.';}}
-
-var g=function(){return document.getElementById('dg');};
-var D=Math.PI/180;
-
-/* SVG helpers */
-function Txt(x,y,t,c,sz,anc,bold){c=c||'#6b5750';sz=sz||12;anc=anc||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+anc+'" font-weight="'+(bold?700:400)+'">'+t+'</text>';}
-function Ln(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
-function Rc(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
-function Ci(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#C8922A')+'" stroke-width="'+(sw||1.5)+'" />';}
-
-/* Draw a partial arc from angle a1 to a2 (degrees, SVG coords where 0=right, clockwise) */
-function Arc(cx,cy,r,a1,a2,c,w,d){
-  var x1=cx+r*Math.cos(a1*D), y1=cy+r*Math.sin(a1*D);
-  var x2=cx+r*Math.cos(a2*D), y2=cy+r*Math.sin(a2*D);
-  var span=((a2-a1)+360)%360;
-  var lg=span>180?1:0;
-  c=c||'#C8922A'; w=w||1.5;
-  var ds=d?'stroke-dasharray="'+d+'"':'';
-  return '<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+r+','+r+' 0 '+lg+',1 '+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="'+c+'" stroke-width="'+w+'" '+ds+'/>';
+function tryIt(o){
+  var id='t'+Math.random().toString(36).slice(2);ST[id]=o;
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
+    +'</div>';
 }
 
 /* ═══════════════════════════════════════════
@@ -489,7 +487,7 @@ var QS=[
     {lb:'Step 1 - Arc from A',dr:dQ1,ht:'<p>Open the compass to <b>more than half the length of AB</b>. Place the point on A and draw an arc above and below the line.</p>'},
     {lb:'Step 2 - Arc from B, mark crossings',dr:dQ1,ht:'<p>Keep the <b>same compass width</b>. Place the point on B and draw arcs that cross the first pair. Mark both crossing points.</p>'},
     {lb:'Step 3 - Draw the bisector',dr:dQ1,ht:'<p>Draw a straight line through the two crossing points. This is the perpendicular bisector. The right angle box confirms 90 degrees.</p>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'The perpendicular bisector of a 10 cm line passes through the midpoint. How far is that midpoint from each endpoint?',hints:['The midpoint divides the line equally'],ans:5,exact:0.1,unit:'cm',working:'10 / 2 = <b>5 cm</b> from each endpoint.'})}
+    {lb:'Your turn',dr:dQ1,ht:tryIt((function(){var L=rnd(6,14)*2;return{question:'Line AB = '+L+' cm. How far is the midpoint from A?',hints:['Midpoint = length ÷ 2'],ans:L/2,tol:0,unit:'cm',working:L+' ÷ 2 = '+L/2+' cm'};})())}
   ]},
   {ey:'Q2 - Constructions',ti:'Angle Bisector',su:'Construct the bisector of a given angle using compass and ruler only.',steps:[
     {lb:'What it is',dr:dQ2,ht:'<p>The <b>angle bisector</b> cuts an angle exactly in half. Every point on it is equidistant from both sides (rays) of the angle.</p>'},
@@ -503,41 +501,41 @@ var QS=[
     {lb:'Step 1 - Draw base AB = 6 cm',dr:dQ3,ht:'<p>Draw a horizontal line AB = 6 cm. Label A and B clearly.</p>'},
     {lb:'Step 2 - Arc from A (5 cm)',dr:dQ3,ht:'<p>Set compass to 5 cm. Place on A and draw an arc above the baseline. All points on this arc are 5 cm from A.</p>'},
     {lb:'Step 3 - Arc from B (4 cm), find C',dr:dQ3,ht:'<p>Set compass to 4 cm. Place on B and draw an arc. Where the two arcs cross is point C. Draw AC and BC.</p>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'In a triangle with sides 6, 4 and 5 cm, which arc do you draw first from A?',hints:['From A you mark the side AC = 5 cm'],ans:5,exact:0.1,unit:'cm (arc from A)',working:'Draw an arc of radius <b>5 cm</b> from A.'})}
+    {lb:'Your turn',dr:dQ3,ht:tryIt((function(){var ang=pick([60,80,90,100,120]);return{question:'Angle of '+ang+'° is bisected. Size of each half?',hints:['Divide by 2'],ans:ang/2,tol:0,unit:'°',working:ang+' ÷ 2 = '+ang/2+'°'};})())}
   ]},
   {ey:'Q4 - Constructions',ti:'Constructing a Triangle: SAS',su:'Construct triangle ABC with AB = 7 cm, angle A = 50 degrees, AC = 5 cm.',steps:[
     {lb:'SAS: two sides and included angle',dr:dQ4,ht:'<p>Draw one side, use a protractor to mark the included angle at one end, then measure the second side along that ray.</p>'},
     {lb:'Step 1 - Draw AB = 7 cm',dr:dQ4,ht:'<p>Draw a horizontal line 7 cm long. Label A on the left and B on the right.</p>'},
     {lb:'Step 2 - Mark angle A = 50 degrees',dr:dQ4,ht:'<p>Place a protractor at A, aligned with AB. Mark a point at 50 degrees. Draw a ray from A through this mark.</p>'},
     {lb:'Step 3 - Mark C and complete',dr:dQ4,ht:'<p>Measure 5 cm along the ray from A. Mark this point C. Draw BC to complete the triangle.</p>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'In a SAS construction with angle A = 50 degrees, what size angle does the protractor read when marking point C?',hints:['You measure the given angle at A','The angle is 50 degrees'],ans:50,exact:1,unit:'degrees',working:'The protractor reads <b>50 degrees</b> at vertex A.'})}
+    {lb:'Your turn',dr:dQ4,ht:tryIt((function(){var a=rnd(4,8),b=rnd(4,8),c=rnd(4,8);var s=[a,b,c].sort(function(x,y){return y-x;});return{question:'Triangle sides '+a+', '+b+', '+c+' cm. What is the longest side?',hints:['Order the sides'],ans:s[0],tol:0,unit:'cm',working:'Longest = '+s[0]+' cm'};})())}
   ]},
   {ey:'Q5 - Loci',ti:'Locus: Equidistant from Two Points',su:'Describe and construct the locus of all points equidistant from A and B.',steps:[
     {lb:'What is a locus?',dr:dQ5,ht:'<p>A <b>locus</b> is the set of all points satisfying a given condition. Here we want every point P such that PA = PB.</p>'},
     {lb:'Step 1 - Arc from A',dr:dQ5,ht:'<p>Open compass to a radius <b>greater than half AB</b>. Draw an arc from A above and below the line.</p>'},
     {lb:'Step 2 - Same arc from B, mark crossings',dr:dQ5,ht:'<p>Keep the same radius. Draw arcs from B so they cross the arcs from A above and below. Mark both crossing points.</p>'},
     {lb:'Step 3 - The locus',dr:dQ5,ht:'<div class="fm">Locus = perpendicular bisector of AB</div><p>Every point on this line is exactly the same distance from A as from B.</p>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'If AB = 10 cm, how far is the midpoint of AB from each of A and B?',hints:['Midpoint divides AB equally'],ans:5,exact:0.1,unit:'cm',working:'The midpoint is <b>5 cm</b> from each end.'})}
+    {lb:'Your turn',dr:dQ5,ht:tryIt((function(){var a=rnd(5,9),b=rnd(4,8);return{question:'Two sides of a triangle are '+a+' cm and '+b+' cm. What is their sum?',hints:['Add the two known sides'],ans:a+b,tol:0,unit:'cm',working:a+' + '+b+' = '+(a+b)+' cm'};})())}
   ]},
   {ey:'Q6 - Loci',ti:'Locus: Equidistant from Two Lines',su:'Describe the locus of points equidistant from two intersecting lines.',steps:[
     {lb:'The condition',dr:dQ6,ht:'<p>We want all points equally far (perpendicular distance) from two straight lines that meet at a vertex V.</p>'},
     {lb:'Step 1 - Think about it',dr:dQ6,ht:'<p>Such a point lies in the middle of the angle — the same distance from each ray. This is exactly what an angle bisector does.</p>'},
     {lb:'Step 2 - Construct the bisector',dr:dQ6,ht:'<p>Use the angle bisector construction: arc from V, then equal arcs from the two crossing points, then draw the line through V and the intersection.</p>'},
     {lb:'Step 3 - The answer',dr:dQ6,ht:'<div class="fm">Locus = angle bisector of the angle between the two lines</div><p>There are actually two bisectors (for the two pairs of angles), perpendicular to each other.</p>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'Two lines meet at 80 degrees. The angle bisector divides this angle into two equal parts. What is each part?',hints:['80 / 2 = ?'],ans:40,exact:0.5,unit:'degrees',working:'80 / 2 = <b>40 degrees</b>.'})}
+    {lb:'Your turn',dr:dQ6,ht:tryIt((function(){var d=rnd(4,10);return{question:'A and B are '+2*d+' cm apart. How far is every point on the perpendicular bisector of AB from each point?',hints:['Every point on perpendicular bisector is equidistant from A and B'],ans:d,tol:0,unit:'cm',working:'Equidistant = '+d+' cm from both'};})())}
   ]},
   {ey:'Q7 - Loci',ti:'Locus: Fixed Distance from a Point',su:'Describe the locus of all points exactly r cm from a fixed point P.',steps:[
     {lb:'The condition',dr:dQ7,ht:'<p>We want every point at exactly distance r from P — in any direction. Think about what shape that makes.</p>'},
     {lb:'Step 1 - Consider all directions',dr:dQ7,ht:'<p>A point r away to the north qualifies. So does one r to the east, south, west, or any direction. Together they form a shape.</p>'},
     {lb:'Step 2 - The locus',dr:dQ7,ht:'<div class="fm">Locus = a circle, centre P, radius r</div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'A dog on a 3 m lead attached to a post. What is the area (in m^2) the dog can reach? Use pi = 3.14.',hints:['The boundary is a circle radius 3 m','Area = pi x r^2 = 3.14 x 9'],ans:28.3,exact:0.5,unit:'m^2',working:'Area = 3.14 x 9 = <b>28.3 m^2</b>'})}
+    {lb:'Your turn',dr:dQ7,ht:tryIt((function(){var ang=pick([60,70,80,90]);return{question:'Two lines meet at '+2*ang+'°. The angle bisector divides this into two angles. Size of each?',hints:['Bisector divides equally'],ans:ang,tol:0,unit:'°',working:2*ang+' ÷ 2 = '+ang+'°'};})())}
   ]},
   {ey:'Q8 - Loci',ti:'Combined Loci',su:'Shade the region within r of A AND closer to A than B.',steps:[
     {lb:'Two conditions',dr:dQ8,ht:'<p>When two conditions must both be satisfied, find each locus separately, then shade the <b>overlap</b> (intersection) of both regions.</p>'},
     {lb:'Condition 1 - Circle around A',dr:dQ8,ht:'<div class="fm">Region 1: inside the circle, centre A, radius r</div><p>The dashed circle shows the boundary. The region is everything inside it.</p>'},
     {lb:'Condition 2 - Closer to A than B',dr:dQ8,ht:'<div class="fm">Region 2: the A-side of the perpendicular bisector of AB</div><p>The dashed vertical line is the bisector. Points left of it are closer to A.</p>'},
     {lb:'Combined region',dr:dQ8,ht:'<p>The shaded region satisfies BOTH: it is inside the circle around A AND on A\'s side of the perpendicular bisector of AB. Note the circle crosses the bisector at two points.</p>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'A point is exactly on the perpendicular bisector of AB. Is it closer to A, closer to B, or equidistant? Enter 1 for equidistant, 0 for closer to one side.',hints:['The perpendicular bisector is the locus of equidistant points'],ans:1,exact:0.1,unit:'(1=equidistant)',working:'By definition every point on the perpendicular bisector is <b>equidistant</b> from A and B.'})}
+    {lb:'Your turn',dr:dQ8,ht:tryIt((function(){var r=rnd(3,8);return{question:'Locus of all points exactly '+r+' cm from point P is a circle. What is its radius?',hints:['The distance = radius'],ans:r,tol:0,unit:'cm',working:'Radius = '+r+' cm'};})())}
   ]}
 ];
 

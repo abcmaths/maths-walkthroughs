@@ -84,40 +84,26 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
   </div>
 </div>
 <script>
-var ST={};
-function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]=o;var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');return '<div class="try"><div class="try-t">Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="Answer ('+o.unit+')" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
-function ck(id){var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}if(Math.abs(v-o.ans)<=(o.tol||0.5)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}else{f.className='fb er';f.textContent='Not quite \u2014 check your working and try again.';}}
-function g(){return document.getElementById('dg');}
-function T(x,y,t,c,sz,a,b){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
-function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
-function arc(cx,cy,r,a1,a2,c,w){var x1=cx+r*Math.cos(a1*Math.PI/180),y1=cy-r*Math.sin(a1*Math.PI/180),x2=cx+r*Math.cos(a2*Math.PI/180),y2=cy-r*Math.sin(a2*Math.PI/180),laf=(a2-a1)>180?1:0;return '<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+r+','+r+' 0 '+laf+',0 '+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="'+(c||'#C8922A')+'" stroke-width="'+(w||1.5)+'"  />';}
-function angMark(cx,cy,r,a1,a2,c){return arc(cx,cy,r,a1,a2,c||'#C8922A',1.5);}
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function round1(x){return Math.round(x*10)/10;}
+function round2(x){return Math.round(x*100)/100;}
 
-/* Q1 Angles at a point and on a line */
-function dQ1(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
-  // straight line
-  o.push(L(60,200,420,200,'#241A17',2.5));
-  // ray upward-left at 50 deg from horizontal
-  var ang=130,rad=ang*Math.PI/180;
-  var ex=240+160*Math.cos(rad),ey=200-160*Math.sin(rad);
-  // problem always visible at step 0
-  o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
-if(p>=1){o.push(L(240,200,ex,ey,'#C0272D',2.5));}
-  // angle marks
-  if(p>=1){
-    o.push(angMark(240,200,40,0,ang,'#C8922A'));
-    o.push(T(240+55*Math.cos((ang/2)*Math.PI/180),200-55*Math.sin((ang/2)*Math.PI/180),'130\u00b0','#C8922A',13,'middle',true));
-  }
-  if(p>=2){
-    o.push(angMark(240,200,36,ang,180,'#1a5a8a'));
-    o.push(T(240+50*Math.cos(((ang+180)/2)*Math.PI/180),200-50*Math.sin(((ang+180)/2)*Math.PI/180),'x','#1a5a8a',14,'middle',true));
-  }
-  if(p>=3){
-    o.push(T(240,260,'x = 180 \u2212 130 = 50\u00b0','#C0272D',14,'middle',true));
-    o.push(T(240,20,'Angles on a straight line add to 180\u00b0','#241A17',13,'middle',true));
-  }
-  s.innerHTML=o.join('');
+var ST={};
+function tryIt(o){
+  var id='t'+Math.random().toString(36).slice(2);ST[id]=o;
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
+    +'</div>';
 }
 
 /* Q2 Vertically opposite */
@@ -376,19 +362,19 @@ var QS=[
     {lb:'The rule',dr:dQ1,ht:'<p>Angles on a <b>straight line</b> always add up to <b>180\u00b0</b>. This is sometimes called the supplementary angle rule.</p>'},
     {lb:'Mark the known angle',dr:dQ1,ht:'<div class="fm">Known angle = 130\u00b0</div><p>The angle is measured from the line to the ray.</p>'},
     {lb:'Find x',dr:dQ1,ht:'<div class="fm">x = 180 \u2212 130 = 50\u00b0</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Two angles on a straight line are <b>x</b> and <b>74\u00b0</b>. Find x.',hints:['Angles on a straight line sum to 180\u00b0','x = 180 \u2212 74'],ans:106,tol:0.5,unit:'\u00b0',working:'x = 180 \u2212 74 = <b>106\u00b0</b>'})}
+    {lb:'Your turn',dr:dQ1,ht:tryIt((function(){var a=rnd(30,150);return{question:'One angle on a straight line is <b>'+a+'°</b>. Find the other.',hints:['Angles on a straight line = 180°'],ans:180-a,tol:0,unit:'°',working:'180 − '+a+' = '+(180-a)+'°'};})())}
   ]},
   {ey:'Q2 \u2022 Year 10 \u2022 Foundation',ti:'Vertically Opposite Angles',su:'Two straight lines cross. One angle is 70\u00b0. Find the other three angles.',steps:[
     {lb:'The rule',dr:dQ2,ht:'<p>When two straight lines cross, <b>vertically opposite angles are equal</b>. The angles directly across from each other are the same size.</p>'},
     {lb:'The 70\u00b0 angles',dr:dQ2,ht:'<p>The angle of 70\u00b0 and the angle directly opposite it are both 70\u00b0 \u2014 they are vertically opposite.</p>'},
     {lb:'The other pair',dr:dQ2,ht:'<div class="fm">a = 180 \u2212 70 = 110\u00b0</div><p>Both remaining angles are 110\u00b0 (they are also vertically opposite each other).</p>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Two lines cross. One angle is <b>43\u00b0</b>. Find the size of the adjacent angle.',hints:['Adjacent angles on a straight line sum to 180\u00b0','180 \u2212 43'],ans:137,tol:0.5,unit:'\u00b0',working:'180 \u2212 43 = <b>137\u00b0</b>'})}
+    {lb:'Your turn',dr:dQ2,ht:tryIt((function(){var a=rnd(30,80);return{question:'Two lines cross. One angle is <b>'+a+'°</b>. Find the adjacent angle.',hints:['Adjacent angles on straight line sum to 180°'],ans:180-a,tol:0,unit:'°',working:'180 − '+a+' = '+(180-a)+'°'};})())}
   ]},
   {ey:'Q3 \u2022 Year 10 \u2022 Foundation',ti:'Angles in Parallel Lines',su:'A transversal crosses two parallel lines. One angle is 65\u00b0. Find the alternate and co-interior angles.',steps:[
     {lb:'The setup',dr:dQ3,ht:'<p>When a line (transversal) crosses two <b>parallel lines</b>, three angle relationships are formed: <b>alternate</b> (Z), <b>corresponding</b> (F) and <b>co-interior</b> (C).</p>'},
     {lb:'Alternate angles',dr:dQ3,ht:'<div class="fm">Alternate angles are equal: both = 65\u00b0</div><p>They are on opposite sides of the transversal, between the parallel lines \u2014 the Z-shape.</p>'},
     {lb:'Co-interior angles',dr:dQ3,ht:'<div class="fm">Co-interior (same-side) angles add to 180\u00b0</div><div class="fm">c = 180 \u2212 65 = 115\u00b0</div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'A transversal crosses two parallel lines. One angle is <b>112\u00b0</b>. Find the co-interior angle on the same side.',hints:['Co-interior angles add to 180\u00b0','180 \u2212 112'],ans:68,tol:0.5,unit:'\u00b0',working:'180 \u2212 112 = <b>68\u00b0</b>'})}
+    {lb:'Your turn',dr:dQ3,ht:tryIt((function(){var a=rnd(35,85);return{question:'A transversal crosses parallel lines. One angle is <b>'+a+'°</b>. Find the alternate angle.',hints:['Alternate angles are equal'],ans:a,tol:0,unit:'°',working:'Alternate angles: '+a+'°'};})())}
   ]},
   {ey:'Q4 \u2022 Year 10 \u2022 Foundation',ti:'Angles in a Triangle',su:'Triangle ABC has angles 52\u00b0 at A and 73\u00b0 at B. Find angle C.',steps:[
     {lb:'The rule',dr:dQ4,ht:'<p>The three interior angles of any triangle always add up to <b>180\u00b0</b>.</p>'},
@@ -400,40 +386,40 @@ var QS=[
     {lb:'The rule',dr:dQ5,ht:'<p>The interior angles of any quadrilateral add up to <b>360\u00b0</b>. This follows from splitting it into two triangles.</p>'},
     {lb:'The known angles',dr:dQ5,ht:'<div class="fm">85\u00b0 + 110\u00b0 + 72\u00b0 = 267\u00b0</div>'},
     {lb:'Find x',dr:dQ5,ht:'<div class="fm">x = 360 \u2212 267 = 93\u00b0</div>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'A quadrilateral has three angles: <b>104\u00b0</b>, <b>78\u00b0</b> and <b>91\u00b0</b>. Find the fourth angle.',hints:['Sum = 360\u00b0','360 \u2212 104 \u2212 78 \u2212 91'],ans:87,tol:0.5,unit:'\u00b0',working:'360 \u2212 273 = <b>87\u00b0</b>'})}
+    {lb:'Your turn',dr:dQ5,ht:tryIt((function(){var a=rnd(30,60),b=rnd(30,60);return{question:'Triangle angles: <b>'+a+'°</b> and <b>'+b+'°</b>. Find the third.',hints:['Angles in triangle = 180°'],ans:180-a-b,tol:0,unit:'°',working:'180 − '+a+' − '+b+' = '+(180-a-b)+'°'};})())}
   ]},
   {ey:'Q6 \u2022 Year 10 \u2022 Extended',ti:'Interior and Exterior Angles of Polygons',su:'Find the interior and exterior angles of a regular hexagon.',steps:[
     {lb:'The formula',dr:dQ6,ht:'<p>For any polygon with n sides:</p><div class="fm">Sum of interior angles = (n \u2212 2) \u00d7 180\u00b0</div><div class="fm">Each exterior angle = 360\u00b0 \u00f7 n  (regular polygon)</div>'},
     {lb:'Sum of interior angles',dr:dQ6,ht:'<div class="fm">(6 \u2212 2) \u00d7 180 = 4 \u00d7 180 = 720\u00b0</div>'},
     {lb:'Each interior angle',dr:dQ6,ht:'<div class="fm">720 \u00f7 6 = 120\u00b0</div>'},
     {lb:'Each exterior angle',dr:dQ6,ht:'<div class="fm">360 \u00f7 6 = 60\u00b0</div><p>Interior + exterior = 180\u00b0 (they are supplementary). \u2713 120 + 60 = 180.</p>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'Find the size of each interior angle of a regular <b>octagon</b> (8 sides).',hints:['Sum = (8\u22122)\u00d7180 = 1080\u00b0','Divide by 8'],ans:135,tol:0.5,unit:'\u00b0',working:'(8\u22122)\u00d7180 = 1080\u00b0. Each angle = 1080\u00f78 = <b>135\u00b0</b>'})}
+    {lb:'Your turn',dr:dQ6,ht:tryIt((function(){var a=rnd(70,110),b=rnd(70,110),c=rnd(70,110);return{question:'Three angles of a quadrilateral: <b>'+a+'°, '+b+'°, '+c+'°</b>. Find the fourth.',hints:['Quadrilateral angles = 360°'],ans:360-a-b-c,tol:0,unit:'°',working:'360 − '+a+' − '+b+' − '+c+' = '+(360-a-b-c)+'°'};})())}
   ]},
   {ey:'Q7 \u2022 Year 10 \u2022 Foundation',ti:'Line Symmetry in 2D Shapes',su:'Identify the number of lines of symmetry in a rectangle and an equilateral triangle.',steps:[
     {lb:'What is line symmetry?',dr:dQ7,ht:'<p>A shape has <b>line symmetry</b> if a mirror line divides it into two identical halves that are reflections of each other.</p>'},
     {lb:'Rectangle',dr:dQ7,ht:'<p>A rectangle has <b>2 lines of symmetry</b>: one through the midpoints of the long sides, one through the midpoints of the short sides. The diagonals are <b>not</b> lines of symmetry.</p>'},
     {lb:'Equilateral triangle',dr:dQ7,ht:'<p>An equilateral triangle has <b>3 lines of symmetry</b>: one from each vertex to the midpoint of the opposite side.</p>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'How many lines of symmetry does a regular pentagon have?',hints:['A regular polygon has the same number of lines of symmetry as it has sides'],ans:5,tol:0,unit:'',working:'A regular pentagon has <b>5</b> lines of symmetry \u2014 one through each vertex and the midpoint of the opposite side.'})}
+    {lb:'Your turn',dr:dQ7,ht:tryIt((function(){var n=pick([5,6,8,9,10,12]);return{question:'Exterior angle of a regular <b>'+n+'-sided polygon</b>?',hints:['Exterior angle = 360 ÷ n'],ans:360/n,tol:0,unit:'°',working:'360 ÷ '+n+' = '+(360/n)+'°'};})())}
   ]},
   {ey:'Q8 \u2022 Year 10 \u2022 Foundation',ti:'Order of Rotational Symmetry',su:'Find the order of rotational symmetry for a regular pentagon, rectangle and square.',steps:[
     {lb:'What is rotational symmetry?',dr:dQ8,ht:'<p>A shape has <b>rotational symmetry</b> if it looks the same after being rotated by less than 360\u00b0. The <b>order</b> is how many times it fits onto itself in one full turn.</p>'},
     {lb:'Regular pentagon',dr:dQ8,ht:'<div class="fm">Order = 5  (fits onto itself every 72\u00b0)</div>'},
     {lb:'Rectangle',dr:dQ8,ht:'<div class="fm">Order = 2  (fits onto itself every 180\u00b0)</div>'},
     {lb:'Square',dr:dQ8,ht:'<div class="fm">Order = 4  (fits onto itself every 90\u00b0)</div>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'What is the order of rotational symmetry of a regular hexagon?',hints:['It fits onto itself every 60\u00b0','360 \u00f7 60 = ?'],ans:6,tol:0,unit:'',working:'A regular hexagon has rotational symmetry of order <b>6</b>.'})}
+    {lb:'Your turn',dr:dQ8,ht:tryIt((function(){var shapes=[['rectangle',2],['equilateral triangle',3],['regular pentagon',5],['rhombus',2],['regular hexagon',6],['isosceles triangle',1]];var sh=pick(shapes);return{question:'Lines of symmetry of a <b>'+sh[0]+'</b>?',hints:['Count mirror lines'],ans:sh[1],tol:0,unit:'',working:'A '+sh[0]+' has '+sh[1]+' line(s) of symmetry'};})())}
   ]},
   {ey:'Q9 \u2022 Year 10 \u2022 Extended',ti:'Symmetry in 3D Solids',su:'Describe the planes of symmetry of a triangular prism and a cone.',steps:[
     {lb:'Planes of symmetry',dr:dQ9,ht:'<p>A <b>plane of symmetry</b> in a 3D solid divides it into two mirror-image halves. It is the 3D equivalent of a line of symmetry.</p>'},
     {lb:'Triangular prism',dr:dQ9,ht:'<p>A triangular prism (with equilateral triangle cross-section) has <b>4 planes of symmetry</b>: one through the midpoint of each rectangular face, and one through each vertex of the triangle along the length.</p>'},
     {lb:'Cone',dr:dQ9,ht:'<p>A cone has an <b>infinite number of planes of symmetry</b> \u2014 any vertical plane passing through the apex and the centre of the base is a plane of symmetry.</p>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt({question:'How many planes of symmetry does a cube have?',hints:['Count planes through pairs of opposite faces','Count planes through pairs of opposite edges (diagonal planes)','3 + 6 = ?'],ans:9,tol:0,unit:'',working:'A cube has <b>9</b> planes of symmetry: 3 parallel to faces, 6 through pairs of opposite edges.'})}
+    {lb:'Your turn',dr:dQ9,ht:tryIt((function(){var n=pick([3,4,5,6,8]);return{question:'Order of rotational symmetry of a regular <b>'+n+'-gon</b>?',hints:['Order = number of sides for regular polygons'],ans:n,tol:0,unit:'',working:'Regular '+n+'-gon: order '+n};})())}
   ]},
   {ey:'Q10 \u2022 Year 10 \u2022 Extended',ti:'Bearings',su:'B is north-east of A. Find the bearing of B from A, and the back bearing from B to A.',steps:[
     {lb:'What is a bearing?',dr:dQ10,ht:'<p>A <b>bearing</b> is an angle measured <b>clockwise from North</b>, always written as a <b>3-digit number</b> (e.g. 047\u00b0, not 47\u00b0).</p>'},
     {lb:'Mark North and the direction',dr:dQ10,ht:'<p>Draw a North line at A. Measure the angle clockwise from North to the direction of B.</p>'},
     {lb:'Bearing of B from A',dr:dQ10,ht:'<div class="fm">North-east = 045\u00b0</div>'},
     {lb:'Back bearing (B to A)',dr:dQ10,ht:'<div class="fm">Back bearing = 045 + 180 = 225\u00b0</div><p>If the bearing is less than 180\u00b0, add 180. If 180\u00b0 or more, subtract 180.</p>'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt({question:'The bearing of P from Q is <b>110\u00b0</b>. Find the bearing of Q from P (back bearing).',hints:['Add 180\u00b0 to find the back bearing','110 + 180'],ans:290,tol:0.5,unit:'\u00b0',working:'110 + 180 = <b>290\u00b0</b>'})}
+    {lb:'Your turn',dr:dQ10,ht:tryIt((function(){return{question:'How many planes of symmetry does a cuboid (all different dimensions) have?',hints:['One plane per pair of opposite faces'],ans:3,tol:0,unit:'',working:'3 planes of symmetry'};})())}
   ]}
 ];
 
