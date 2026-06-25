@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Geometry · Year 12 WAEC</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.nq-btn{font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.nq-btn:hover{background:var(--gold);color:#fff;}
+.try-q{font-size:15px;line-height:1.55;margin-bottom:8px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
+.try-fb.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.try-fb.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Geometry — Year 12 WAEC</div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 300"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+
+var ST={};
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function tryIt(genOrObj){
+  var genFn=typeof genOrObj==='function'?genOrObj:function(){return genOrObj;};
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn(); ST[id]={o:o,fn:genFn};
+  return buildTry(id,o);
+}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">✔ Your Turn'
+    +' <button class="nq-btn" data-tryid="'+id+'">↻ New</button></div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +'<ul class="hl">'+(h||'')+'</ul>'
+    +'<div class="ar">'
+    +'<input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'
+    +'<div class="wk-b">'+o.working+'</div></details>'
+    +'</div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('nq-btn')){
+    var id=el.getAttribute('data-tryid');
+    var en=ST[id]; if(!en)return;
+    var o=en.fn(); en.o=o; ST[id]={o:o,fn:en.fn};
+    var wrap=document.querySelector('.try[data-tryid="'+id+'"]');
+    if(!wrap)return;
+    var tmp=document.createElement('div');
+    tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+    return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');
+    var en=ST[id]; if(!en)return;
+    var o=en.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+    var tol=o.tol!=null?o.tol:0.5;
+    if(Math.abs(v-o.ans)<=tol){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct!  '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}
+  }
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
+
+
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('nq-btn')){
+    var id=el.getAttribute('data-tryid');
+    var en=ST[id]; if(!en)return;
+    var o=en.fn(); en.o=o; ST[id]={o:o,fn:en.fn};
+    var wrap=document.querySelector('.try[data-tryid="'+id+'"]');
+    if(!wrap)return;
+    var tmp=document.createElement('div');
+    tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+    return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');
+    var en=ST[id]; if(!en)return;
+    var o=en.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+    var tol=o.tol!=null?o.tol:0.5;
+    if(Math.abs(v-o.ans)<=tol){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct!  '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}
+  }
+})
+
+/* Q2 Similar triangles */
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('nq-btn')){
+    var id=el.getAttribute('data-tryid');
+    var en=ST[id]; if(!en)return;
+    var o=en.fn(); en.o=o; ST[id]={o:o,fn:en.fn};
+    var wrap=document.querySelector('.try[data-tryid="'+id+'"]');
+    if(!wrap)return;
+    var tmp=document.createElement('div');
+    tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+    return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');
+    var en=ST[id]; if(!en)return;
+    var o=en.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+    var tol=o.tol!=null?o.tol:0.5;
+    if(Math.abs(v-o.ans)<=tol){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct!  '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}
+  }
+})
+
+/* Q2 Similar triangles */
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Angle of elevation: tower 50 m away, \u03b8 = 35\u00b0','#C0272D',12,'middle',true));
+  // Ground line
+  o.push(L(40,230,420,230,'#241A17',2));
+  // Observer point A
+  o.push(T(60,248,'A','#C0272D',13,'middle',true));
+  // Tower
+  if(p>=1){
+    o.push(L(360,230,360,110,'#1a5a8a',3));
+    o.push(T(375,170,'h = ?','#1a5a8a',12,'start',true));
+    o.push(T(210,248,'50 m','#241A17',12,'middle',false));
+  }
+  // Horizontal line from A and elevation angle
+  if(p>=2){
+    o.push(L(60,230,200,230,'#C8922A',1.5,'4,3'));
+    // Elevation line from A to top of tower
+    o.push(L(60,230,360,110,'#C0272D',2));
+    // Arc for angle
+    var arcPts='';
+    for(var a=0;a>=(-35);a-=2){
+      var rad=a*Math.PI/180;
+      var ax=60+55*Math.cos(rad), ay=230+55*Math.sin(rad);
+      arcPts+=(a===0?'M':'L')+ax.toFixed(1)+','+ay.toFixed(1)+' ';
+    }
+    o.push('<path d="'+arcPts+'" fill="none" stroke="#C8922A" stroke-width="2"/>');
+    o.push(T(130,218,'35\u00b0','#C8922A',12,'middle',true));
+  }
+  // Working
+  if(p>=3){
+    o.push(R(30,56,200,64,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(130,72,'tan(35\u00b0) = h / 50','#1a5a8a',12,'middle',false));
+    o.push(T(130,92,'h = 50 \u00d7 tan(35\u00b0)','#1a5a8a',12,'middle',false));
+    o.push(T(130,110,'= 50 \u00d7 0.700 \u2248 35.0 m','#1a5a8a',12,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // Two similar triangles
+  var ax=60,ay=240,bx=200,by=240,cx=120,cy=100;
+  var dx=220,dy=240,ex=440,ey=240,fx=300,fy=60;
+  // scale factor ~1.6
+  o.push('<polygon points="'+ax+','+ay+' '+bx+','+by+' '+cx+','+cy+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  o.push('<polygon points="'+dx+','+dy+' '+ex+','+ey+' '+fx+','+fy+'" fill="#e8f4e8" stroke="#1a7a3a" stroke-width="2"/>');
+  if(p>=1){
+    o.push(T((ax+bx)/2,ay+16,'6 cm','#C0272D',12,'middle',true));
+    o.push(T((dx+ex)/2,dy+16,'9 cm','#1a7a3a',12,'middle',true));
+    o.push(T(ax-14,(ay+cy)/2,'5 cm','#C0272D',12,'end',false));
+  }
+  if(p>=2){
+    o.push(T(240,20,'Scale factor = 9/6 = 1.5','#241A17',13,'middle',true));
+    o.push(T(dx-14,(dy+fy)/2,'?','#1a7a3a',14,'end',true));
+  }
+  if(p>=3){
+    o.push(T(dx-14,(dy+fy)/2,'7.5 cm','#1a7a3a',12,'end',true));
+    o.push(T(240,280,'Corresponding side = 5 \u00d7 1.5 = 7.5 cm','#C0272D',13,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* Q3 Congruent triangles */
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // Two congruent triangles (different orientation)
+  var A=[80,240],B=[260,240],C=[140,80];
+  var D=[300,240],E=[420,80],F=[460,240];
+  o.push('<polygon points="'+A+' '+B+' '+C+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  o.push('<polygon points="'+D+' '+E+' '+F+'" fill="#e8e8ff" stroke="#6050a0" stroke-width="2"/>');
+  ['A','B','C'].forEach(function(lbl,i){var pt=[A,B,C][i];var off=[[-14,14],[10,14],[0,-12]][i];o.push(T(pt[0]+off[0],pt[1]+off[1],lbl,'#C0272D',12,'middle',true));});
+  ['D','E','F'].forEach(function(lbl,i){var pt=[D,E,F][i];var off=[[-14,14],[0,-12],[12,14]][i];o.push(T(pt[0]+off[0],pt[1]+off[1],lbl,'#6050a0',12,'middle',true));});
+  if(p>=1){
+    o.push(T(170,270,'Triangle 1','#C0272D',12,'middle',true));
+    o.push(T(380,270,'Triangle 2','#6050a0',12,'middle',true));
+    o.push(T(240,20,'Are these triangles congruent?','#241A17',13,'middle',true));
+  }
+  if(p>=2){
+    o.push(T(240,54,'Check: SSS, SAS, ASA, RHS','#241A17',12,'middle',false));
+    o.push(T(240,72,'All corresponding sides equal \u2192 SSS','#C0272D',12,'middle',true));
+  }
+  if(p>=3){
+    o.push(T(240,280,'Congruent: same shape AND same size (may be reflected/rotated)','#241A17',12,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* Q4 Properties of quadrilaterals */
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // Parallelogram
+  var px=60,py=220,pw=140,ph=80,sk=40;
+  var ppts=[[px+sk,py-ph],[px+sk+pw,py-ph],[px+pw,py],[px,py]];
+  o.push('<polygon points="'+ppts.map(function(v){return v[0]+','+v[1];}).join(' ')+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  o.push(T(px+sk+pw/2,py+16,'Parallelogram','#C0272D',11,'middle',false));
+  if(p>=1){
+    // tick marks on parallel sides
+    [[ppts[0],ppts[1]],[ppts[3],ppts[2]]].forEach(function(seg){var mx=(seg[0][0]+seg[1][0])/2,my=(seg[0][1]+seg[1][1])/2;o.push(T(mx,my-8,'\u2713','#C8922A',10,'middle',false));});
+    [[ppts[0],ppts[3]],[ppts[1],ppts[2]]].forEach(function(seg){var mx=(seg[0][0]+seg[1][0])/2,my=(seg[0][1]+seg[1][1])/2;o.push(T(mx-10,my,'\u2713\u2713','#C8922A',10,'end',false));});
+    o.push(T(px+sk+pw/2,py+28,'Opp sides parallel & equal','#888',10,'middle',false));
+    o.push(T(px+sk+pw/2,py+40,'Opp angles equal','#888',10,'middle',false));
+  }
+  // Rhombus
+  var rx=280,ry=160,rd=80;
+  var rpts=[[rx,ry-rd],[rx+rd,ry],[rx,ry+rd],[rx-rd,ry]];
+  o.push('<polygon points="'+rpts.map(function(v){return v[0]+','+v[1];}).join(' ')+'" fill="#e8f4e8" stroke="#1a7a3a" stroke-width="2"/>');
+  o.push(T(rx,ry+rd+16,'Rhombus','#1a7a3a',11,'middle',false));
+  if(p>=2){
+    o.push(L(rpts[0][0],rpts[0][1],rpts[2][0],rpts[2][1],'#C8922A',1.5,'4,3'));
+    o.push(L(rpts[1][0],rpts[1][1],rpts[3][0],rpts[3][1],'#C8922A',1.5,'4,3'));
+    o.push(T(rx,ry+rd+28,'All sides equal; diagonals bisect at 90\u00b0','#888',10,'middle',false));
+  }
+  if(p>=3){
+    o.push(T(240,20,'Key quadrilateral properties','#241A17',13,'middle',true));
+    o.push(T(240,280,'Kite: 1 axis symmetry; Trapezium: 1 pair parallel sides','#241A17',11,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* Q5 Polygon angle properties proof level */
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // Show triangulation of polygon
+  var cx=240,cy=150,r=110,n=7;
+  var verts=[];for(var i=0;i<n;i++){var a=(i*360/n-90)*Math.PI/180;verts.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]);}
+  o.push('<polygon points="'+verts.map(function(v){return v[0].toFixed(1)+','+v[1].toFixed(1);}).join(' ')+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  // problem always visible at step 0
+  o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
+if(p>=1){
+    // diagonals from first vertex to create n-2 triangles
+    for(var j=2;j<n-1;j++){o.push(L(verts[0][0],verts[0][1],verts[j][0],verts[j][1],'#C8922A',1,'4,3'));}
+    o.push(T(cx,cy,'n=7 polygon','#241A17',12,'middle',false));
+    o.push(T(cx,cy+18,'n\u22122 = 5 triangles','#C8922A',12,'middle',true));
+  }
+  if(p>=2){
+    o.push(T(cx,cy+40,'Sum = (n\u22122)\u00d7180 = 5\u00d7180 = 900\u00b0','#C0272D',13,'middle',true));
+  }
+  if(p>=3){
+    o.push(T(cx,cy+62,'Exterior angle sum = 360\u00b0 always','#1a5a8a',12,'middle',true));
+    o.push(T(cx,cy+80,'Each exterior (regular): 360\u00f7n = 360\u00f77 \u2248 51.4\u00b0','#888',11,'middle',false));
+    o.push(T(240,280,'Proof: exterior angles turn through a full revolution = 360\u00b0','#241A17',11,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* Q6 Locus */
+function dQ6(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ax=160,ay=200,bx=320,by=200;
+  o.push('<circle cx="'+ax+'" cy="'+ay+'" r="4" fill="#C0272D"/>');
+  o.push('<circle cx="'+bx+'" cy="'+by+'" r="4" fill="#C0272D"/>');
+  o.push(T(ax,ay+18,'A','#C0272D',13,'middle',true));
+  o.push(T(bx,by+18,'B','#C0272D',13,'middle',true));
+  o.push(L(ax,ay,bx,by,'#aaa',1,'4,3'));
+  o.push(T((ax+bx)/2,ay+18,'8 cm','#888',11,'middle',false));
+  if(p>=1){
+    // circle around A, r=5
+    o.push('<circle cx="'+ax+'" cy="'+ay+'" r="80" fill="rgba(192,39,45,0.07)" stroke="#C0272D" stroke-width="1.5" stroke-dasharray="5,3"/>');
+    o.push(T(ax-88,ay,'5 cm','#C0272D',11,'end',false));
+    o.push(T(ax,ay-88,'Locus from A','#C0272D',11,'middle',true));
+  }
+  if(p>=2){
+    // perpendicular bisector of AB
+    var mx=(ax+bx)/2,my=ay;
+    o.push(L(mx,my-100,mx,my+80,'#1a5a8a',1.5,'5,3'));
+    o.push(T(mx+8,my-90,'Perp bisector','#1a5a8a',11,'start',false));
+    o.push(T(mx+8,my-76,'(equidistant','#1a5a8a',11,'start',false));
+    o.push(T(mx+8,my-62,'from A & B)','#1a5a8a',11,'start',false));
+  }
+  if(p>=3){
+    o.push(T(240,20,'Locus = set of all points satisfying a condition','#241A17',13,'middle',true));
+    o.push(T(240,280,'Intersection of loci gives the exact point satisfying both conditions','#241A17',11,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* Q7 Combined geometry problem */
+function dQ7(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // Triangle with parallel line creating similar triangles
+  var ax=80,ay=260,bx=420,by=260,cx=250,cy=60;
+  o.push('<polygon points="'+ax+','+ay+' '+bx+','+by+' '+cx+','+cy+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  // DE parallel to AB, at midpoint
+  var t=0.55;
+  var dx=ax+(cx-ax)*t,dy=ay+(cy-ay)*t,ex=bx+(cx-bx)*t,ey=by+(cy-by)*t;
+  // problem always visible at step 0
+  o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
+if(p>=1){
+    o.push(L(dx,dy,ex,ey,'#1a5a8a',2));
+    o.push(T(dx-12,dy,'D','#1a5a8a',12,'end',true));
+    o.push(T(ex+10,ey,'E','#1a5a8a',12,'start',true));
+  }
+  o.push(T(ax-12,ay,'A','#C0272D',13,'end',true));
+  o.push(T(bx+12,by,'B','#C0272D',13,'start',true));
+  o.push(T(cx,cy-14,'C','#C0272D',13,'middle',true));
+  if(p>=2){
+    o.push(T(240,290,'DE \u2225 AB \u2192 triangles CDE and CAB are similar','#241A17',12,'middle',false));
+    o.push(T((dx+ex)/2,dy-14,'DE = AB \u00d7 (CD/CA)','#1a5a8a',12,'middle',true));
+  }
+  if(p>=3){
+    o.push(T(240,20,'If CD/CA = 0.55, then DE = 0.55 \u00d7 AB','#C0272D',13,'middle',true));
+    o.push(T((ax+bx)/2,ay+16,'AB = 12 cm','#888',11,'middle',false));
+    o.push(T((dx+ex)/2,dy+14,'DE \u2248 6.6 cm','#1a5a8a',12,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* Q8 Earth geometry — great circles and meridians */
+function dQ8(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var cx=240,cy=150,r=120;
+  // Globe outline
+  o.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="#deeeff" stroke="#4a88c8" stroke-width="2"/>');
+  // Equator
+  o.push('<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+r+'" ry="20" fill="none" stroke="#C0272D" stroke-width="2"/>');
+  o.push(T(cx+r+10,cy,'Equator','#C0272D',11,'start',true));
+  if(p>=1){
+    // Prime meridian (vertical ellipse)
+    o.push('<ellipse cx="'+cx+'" cy="'+cy+'" rx="20" ry="'+r+'" fill="none" stroke="#C8922A" stroke-width="2"/>');
+    o.push(T(cx,cy-r-12,'Prime Meridian (0\u00b0)','#C8922A',11,'middle',true));
+  }
+  if(p>=2){
+    // Another meridian at ~60 degrees (projected)
+    o.push('<ellipse cx="'+cx+'" cy="'+cy+'" rx="60" ry="'+r+'" fill="none" stroke="#1a5a8a" stroke-width="1.5" stroke-dasharray="6,3"/>');
+    o.push(T(cx+68,cy-r+20,'60\u00b0E','#1a5a8a',11,'start',false));
+    o.push(T(cx,cy-r/2,'Great circle: centre = Earth\u2019s centre','#241A17',11,'middle',false));
+  }
+  if(p>=3){
+    o.push(T(cx,cy+r+24,'Meridians are great circles. Parallels of latitude are NOT (except equator).','#241A17',11,'middle',false));
+    o.push(T(cx,cy+r+40,'Great circle = shortest path between two points on a sphere.','#888',11,'middle',false));
+  }
+  o.push(T(cx,cy+r+60,'R = 6371 km (Earth\u2019s radius)','#888',10,'middle',false));
+  s.innerHTML=o.join('');
+}
+
+/* Q9 Earth geometry — latitude, longitude and arc distance */
+function dQ9(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var cx=240,cy=160,r=120;
+  o.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="#deeeff" stroke="#4a88c8" stroke-width="2"/>');
+  // Equator
+  o.push('<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+r+'" ry="18" fill="none" stroke="#C0272D" stroke-width="1.5" stroke-dasharray="5,3"/>');
+  o.push(T(cx,cy+18,'Equator (0\u00b0)','#C0272D',10,'middle',false));
+  // Point A at 40°N
+  var latA=40,lonA=0;
+  var yA=cy-r*Math.sin(latA*Math.PI/180);
+  var xA=cx+r*Math.cos(latA*Math.PI/180)*Math.cos(lonA*Math.PI/180);
+  // Parallel of latitude through A
+  var rlatA=r*Math.cos(latA*Math.PI/180);
+  if(p>=1){
+    o.push('<ellipse cx="'+cx+'" cy="'+yA.toFixed(1)+'" rx="'+rlatA.toFixed(1)+'" ry="'+(rlatA*0.15).toFixed(1)+'" fill="none" stroke="#1a7a3a" stroke-width="1.5" stroke-dasharray="4,3"/>');
+    o.push('<circle cx="'+cx+'" cy="'+yA.toFixed(1)+'" r="4" fill="#1a7a3a"/>');
+    o.push(T(cx+rlatA+8,yA.toFixed(1),'40\u00b0N','#1a7a3a',11,'start',true));
+    // meridian arc from equator to A
+    o.push('<path d="M '+cx+','+(cy)+' A '+r+','+r+' 0 0,1 '+cx+','+yA.toFixed(1)+'" fill="none" stroke="#C8922A" stroke-width="2"/>');
+    o.push(T(cx+14,(cy+yA)/2,'40\u00b0','#C8922A',12,'start',true));
+  }
+  if(p>=2){
+    o.push(T(340,90,'Arc length (great circle):','#241A17',13,'start',true));
+    o.push(T(340,112,'d = (\u03b8/360) \u00d7 2\u03c0R','#241A17',13,'start',false));
+    o.push(T(340,136,'where \u03b8 is angle at centre','#888',11,'start',false));
+  }
+  if(p>=3){
+    o.push(T(340,164,'Example: 40\u00b0N along meridian:','#241A17',12,'start',true));
+    o.push(T(340,186,'d = (40/360)\u00d72\u03c0\u00d76371','#241A17',12,'start',false));
+    o.push(T(340,208,'  \u2248 4443 km','#C0272D',13,'start',true));
+    o.push(T(240,280,'Longitude: angle east/west of prime meridian','#241A17',11,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* Q10 Earth geometry — distance between two points, same latitude */
+function dQ10(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var cx=240,cy=160,r=120;
+  o.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="#deeeff" stroke="#4a88c8" stroke-width="2"/>');
+  o.push('<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+r+'" ry="18" fill="none" stroke="#C0272D" stroke-width="1" stroke-dasharray="4,3"/>');
+  // 50°N parallel
+  var lat=50,yLat=cy-r*Math.sin(lat*Math.PI/180);
+  var rLat=r*Math.cos(lat*Math.PI/180);
+  o.push('<ellipse cx="'+cx+'" cy="'+yLat.toFixed(1)+'" rx="'+rLat.toFixed(1)+'" ry="'+(rLat*0.15).toFixed(1)+'" fill="rgba(26,90,168,0.1)" stroke="#1a5a8a" stroke-width="2"/>');
+  o.push(T(cx-rLat-8,yLat,'50\u00b0N','#1a5a8a',11,'end',true));
+  if(p>=1){
+    // Two points on 50°N at lon 20°W and 40°E (diff = 60°)
+    var lonA=-20,lonB=40;
+    var xA=cx+rLat*Math.cos((lonA)*Math.PI/180)*Math.cos(0);
+    var xB=cx+rLat*Math.cos((lonB)*Math.PI/180)*Math.cos(0);
+    // approximate x positions for illustration
+    var xAp=cx+rLat*Math.sin(lonA*Math.PI/180);
+    var xBp=cx+rLat*Math.sin(lonB*Math.PI/180);
+    o.push('<circle cx="'+xAp.toFixed(1)+'" cy="'+yLat.toFixed(1)+'" r="5" fill="#C0272D"/>');
+    o.push('<circle cx="'+xBp.toFixed(1)+'" cy="'+yLat.toFixed(1)+'" r="5" fill="#C0272D"/>');
+    o.push(T(xAp,yLat-14,'A (20\u00b0W)','#C0272D',10,'middle',true));
+    o.push(T(xBp,yLat-14,'B (40\u00b0E)','#C0272D',10,'middle',true));
+    o.push(L(xAp,yLat,xBp,yLat,'#C0272D',1.5,'4,3'));
+  }
+  if(p>=2){
+    o.push(T(240,20,'Distance along parallel of latitude:','#241A17',13,'middle',true));
+    o.push(T(240,42,'Step 1: radius of latitude circle','#241A17',12,'middle',false));
+    o.push(T(240,60,'r\u2097 = R \u00d7 cos(latitude) = 6371 \u00d7 cos(50\u00b0) \u2248 4096 km','#1a5a8a',12,'middle',true));
+  }
+  if(p>=3){
+    o.push(T(240,90,'Step 2: difference in longitude = 20 + 40 = 60\u00b0','#241A17',12,'middle',false));
+    o.push(T(240,112,'Step 3: arc along the parallel:','#241A17',12,'middle',false));
+    o.push(T(240,134,'d = (60/360) \u00d7 2\u03c0 \u00d7 4096 \u2248 4295 km','#C0272D',13,'middle',true));
+    o.push(T(240,280,'NOTE: this is NOT the shortest path \u2014 great circle route is shorter.','#888',11,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
+var QS=[
+  {ey:'Q1 \u2022 Year 12 \u2022 WAEC',ti:'Angles of Elevation and Depression',su:'A tower is observed from point A. The angle of elevation to the top is 35\u00b0. If the distance from A to the base is 50 m, find the height.',steps:[
+    {lb:'Setting up',dr:dQ1,ht:'<p>The <b>angle of elevation</b> is measured upward from the horizontal to an object above. The <b>angle of depression</b> is measured downward from the horizontal to an object below.</p>'},
+    {lb:'Label the triangle',dr:dQ1,ht:'<div class="fm">Angle \u03b8 = 35\u00b0,  horizontal distance d = 50 m,  height h = ?</div>'},
+    {lb:'Apply trigonometry',dr:dQ1,ht:'<div class="fm">tan(\u03b8) = opposite/adjacent = h/d</div><div class="fm">h = d \u00d7 tan(35\u00b0) = 50 \u00d7 0.7002 \u2248 35.0 m</div>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'From a point 80 m from the base of a building, the angle of elevation to the top is <b>42\u00b0</b>. Find the height of the building (to 1 d.p.).',hints:['h = d \u00d7 tan(\u03b8)','= 80 \u00d7 tan(42\u00b0)','tan(42\u00b0) \u2248 0.9004'],ans:72,tol:1,unit:'m',working:'h = 80 \u00d7 tan(42\u00b0) \u2248 80 \u00d7 0.9004 \u2248 <b>72.0 m</b>'})}
+  ]},
+  {ey:'Q2 \u2022 Year 12 \u2022 WAEC',ti:'Similar Triangles',su:'Two similar triangles have bases 6 cm and 9 cm. The height of the smaller is 5 cm. Find the height of the larger.',steps:[
+    {lb:'What makes triangles similar?',dr:dQ2,ht:'<p><b>Similar triangles</b> have the same angles but different sizes. All corresponding sides are in the same ratio (the scale factor).</p>'},
+    {lb:'Find the scale factor',dr:dQ2,ht:'<div class="fm">Scale factor = 9/6 = 1.5</div>'},
+    {lb:'Apply to unknown side',dr:dQ2,ht:'<div class="fm">Height of larger = 5 \u00d7 1.5 = 7.5 cm</div>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Two similar triangles have corresponding sides 4 cm and 10 cm. A side of the smaller triangle is 6 cm. Find the corresponding side of the larger.',hints:['Scale factor = 10/4 = 2.5','Multiply by scale factor'],ans:15,tol:0.1,unit:'cm',working:'6 \u00d7 2.5 = <b>15 cm</b>'})}
+  ]},
+  {ey:'Q3 \u2022 Year 12 \u2022 WAEC',ti:'Congruent Triangles',su:'State the four conditions for congruency and identify which applies to two given triangles.',steps:[
+    {lb:'What is congruency?',dr:dQ3,ht:'<p><b>Congruent triangles</b> are identical in size and shape. They can be reflections or rotations of each other, but all corresponding sides and angles are equal.</p>'},
+    {lb:'The four conditions',dr:dQ3,ht:'<div class="fm">SSS \u2014 three sides equal</div><div class="fm">SAS \u2014 two sides and included angle equal</div><div class="fm">ASA \u2014 two angles and included side equal</div><div class="fm">RHS \u2014 right angle, hypotenuse and one side equal</div>'},
+    {lb:'Identify the condition',dr:dQ3,ht:'<p>For the triangles shown: all three sides can be verified equal \u2192 <b>SSS</b>.</p>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Two triangles have angles 40\u00b0, 70\u00b0 and a side between them of 8 cm each. Which condition proves congruency? Enter the number of sides checked (2 for SAS, 3 for SSS, enter 0 for ASA).',hints:['Two angles and the side between them are given','This is the ASA condition'],ans:0,tol:0,unit:'(0 = ASA)',working:'Two angles and the included side \u2192 <b>ASA</b> (enter 0).'})}
+  ]},
+  {ey:'Q4 \u2022 Year 12 \u2022 WAEC',ti:'Properties of Quadrilaterals',su:'State the key properties of a parallelogram and a rhombus. Use them to find a missing angle.',steps:[
+    {lb:'Parallelogram',dr:dQ4,ht:'<p>A <b>parallelogram</b> has: opposite sides parallel and equal; opposite angles equal; co-interior angles supplementary (sum to 180\u00b0); diagonals bisect each other.</p>'},
+    {lb:'Rhombus',dr:dQ4,ht:'<p>A <b>rhombus</b> is a parallelogram with all four sides equal. Its diagonals bisect each other at right angles and bisect the vertex angles.</p>'},
+    {lb:'Finding a missing angle',dr:dQ4,ht:'<p>In a parallelogram, if one angle is 70\u00b0:</p><div class="fm">Adjacent angle = 180 \u2212 70 = 110\u00b0</div><div class="fm">Opposite angle = 70\u00b0</div>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'In a parallelogram, one angle is <b>65\u00b0</b>. Find the size of an adjacent angle.',hints:['Co-interior angles sum to 180\u00b0','180 \u2212 65'],ans:115,tol:0.5,unit:'\u00b0',working:'180 \u2212 65 = <b>115\u00b0</b>'})}
+  ]},
+  {ey:'Q5 \u2022 Year 12 \u2022 WAEC',ti:'Angle Properties of Polygons',su:'A regular heptagon (7 sides). Find the sum of interior angles, each interior angle, and each exterior angle.',steps:[
+    {lb:'Triangulation proof',dr:dQ5,ht:'<p>Any polygon with n sides can be split into (n\u22122) triangles from one vertex. Each triangle has angle sum 180\u00b0, giving the formula for interior angles.</p>'},
+    {lb:'Sum of interior angles',dr:dQ5,ht:'<div class="fm">Sum = (n \u2212 2) \u00d7 180 = (7 \u2212 2) \u00d7 180 = 900\u00b0</div>'},
+    {lb:'Each interior angle',dr:dQ5,ht:'<div class="fm">Each = 900 \u00f7 7 \u2248 128.6\u00b0</div>'},
+    {lb:'Each exterior angle',dr:dQ5,ht:'<div class="fm">Each exterior = 360 \u00f7 7 \u2248 51.4\u00b0</div><p>The sum of exterior angles is always 360\u00b0 for any convex polygon.</p>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'Find the sum of interior angles of a <b>nonagon</b> (9 sides).',hints:['(n\u22122) \u00d7 180','(9\u22122) \u00d7 180'],ans:1260,tol:0.5,unit:'\u00b0',working:'7 \u00d7 180 = <b>1260\u00b0</b>'})}
+  ]},
+  {ey:'Q6 \u2022 Year 12 \u2022 WAEC',ti:'Locus Problems',su:'Describe the locus of points 5 cm from point A, and the locus equidistant from A and B (where AB = 8 cm).',steps:[
+    {lb:'What is a locus?',dr:dQ6,ht:'<p>A <b>locus</b> is the set of all points satisfying a given condition. It forms a line, curve, or region.</p>'},
+    {lb:'Locus from a point',dr:dQ6,ht:'<div class="fm">Locus equidistant from A = circle, centre A, radius 5 cm</div>'},
+    {lb:'Equidistant from two points',dr:dQ6,ht:'<div class="fm">Locus equidistant from A and B = perpendicular bisector of AB</div><p>This is a straight line through the midpoint of AB at 90\u00b0.</p>'},
+    {lb:'Combining loci',dr:dQ6,ht:'<p>To find a point that is simultaneously 5 cm from A AND equidistant from A and B: find the intersection of the circle and the perpendicular bisector.</p>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'A point P is equidistant from two parallel lines 10 cm apart. How far is P from each line?',hints:['Equidistant means halfway between the lines','10 \u00f7 2'],ans:5,tol:0.1,unit:'cm',working:'P is <b>5 cm</b> from each line \u2014 on the line midway between them.'})}
+  ]},
+  {ey:'Q7 \u2022 Year 12 \u2022 WAEC',ti:'Combined Geometry Problem',su:'In triangle ABC, DE is parallel to AB with D on AC and E on BC. CD = 4.4 cm, CA = 8 cm, AB = 12 cm. Find DE.',steps:[
+    {lb:'Identify similar triangles',dr:dQ7,ht:'<p>Because DE \u2225 AB, triangles CDE and CAB share angle C and have corresponding angles equal (parallel lines). So <b>triangles CDE and CAB are similar</b>.</p>'},
+    {lb:'Find the ratio',dr:dQ7,ht:'<div class="fm">CD/CA = 4.4/8 = 0.55</div>'},
+    {lb:'Find DE',dr:dQ7,ht:'<div class="fm">DE/AB = CD/CA = 0.55</div><div class="fm">DE = 0.55 \u00d7 12 = 6.6 cm</div>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'In a similar setup, CD = 3 cm, CA = 9 cm, AB = 15 cm. Find DE.',hints:['Ratio = CD/CA = 3/9 = 1/3','DE = (1/3) \u00d7 15'],ans:5,tol:0.1,unit:'cm',working:'DE = (3/9) \u00d7 15 = <b>5 cm</b>'})}
+  ]},
+  {ey:'Q8 \u2022 Year 12 \u2022 WAEC',ti:'Earth Geometry \u2014 Great Circles and Meridians',su:'Introduce the globe: great circles, meridians, the equator, and why they matter for distance.',steps:[
+    {lb:'The Earth as a sphere',dr:dQ8,ht:'<p>We model the Earth as a sphere with radius <b>R = 6371 km</b>. Positions are given by <b>latitude</b> (angle N/S of equator) and <b>longitude</b> (angle E/W of prime meridian).</p>'},
+    {lb:'Meridians',dr:dQ8,ht:'<p>A <b>meridian</b> is a great circle passing through both poles. The <b>prime meridian</b> is at 0\u00b0 longitude. All meridians are great circles.</p>'},
+    {lb:'Great circles',dr:dQ8,ht:'<p>A <b>great circle</b> is any circle on the surface of a sphere whose centre is the centre of the sphere. The equator is a great circle. Parallels of latitude (other than the equator) are <b>not</b> great circles.</p><div class="fm">Great circle = shortest surface path between two points.</div>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'What is the circumference of the Earth along the equator (R = 6371 km)? Give to the nearest km.',hints:['C = 2\u03c0R','= 2 \u00d7 \u03c0 \u00d7 6371'],ans:40030,tol:10,unit:'km',working:'C = 2\u03c0 \u00d7 6371 \u2248 <b>40030 km</b>'})}
+  ]},
+  {ey:'Q9 \u2022 Year 12 \u2022 WAEC',ti:'Earth Geometry \u2014 Latitude, Longitude and Arc Distance',su:'Find the distance along a meridian between two points at 15\u00b0N and 55\u00b0N (same longitude). R = 6371 km.',steps:[
+    {lb:'What we need',dr:dQ9,ht:'<p>When two points are on the <b>same meridian</b> (same longitude), the arc between them is a great circle arc. The angle between them at the Earth\u2019s centre is simply the difference in latitude.</p>'},
+    {lb:'Find the angle',dr:dQ9,ht:'<div class="fm">Angle at centre \u03b8 = 55\u00b0 \u2212 15\u00b0 = 40\u00b0</div>'},
+    {lb:'Calculate arc length',dr:dQ9,ht:'<div class="fm">d = (\u03b8/360) \u00d7 2\u03c0R</div><div class="fm">d = (40/360) \u00d7 2\u03c0 \u00d7 6371 \u2248 4443 km</div>'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt({question:'Two cities are on the same meridian at latitudes <b>10\u00b0S</b> and <b>50\u00b0N</b>. Find the distance between them. (R = 6371 km)',hints:['\u03b8 = 50 + 10 = 60\u00b0 (opposite hemispheres \u2014 add)','d = (60/360) \u00d7 2\u03c0 \u00d7 6371'],ans:6672,tol:10,unit:'km',working:'d = (60/360) \u00d7 2\u03c0 \u00d7 6371 \u2248 <b>6672 km</b>'})}
+  ]},
+  {ey:'Q10 \u2022 Year 12 \u2022 WAEC',ti:'Earth Geometry \u2014 Distance Along a Parallel of Latitude',su:'Points A (50\u00b0N, 20\u00b0W) and B (50\u00b0N, 40\u00b0E) are on the same latitude. Find the distance AB along the parallel.',steps:[
+    {lb:'Key idea',dr:dQ10,ht:'<p>Along a parallel of latitude \u03c6, the circle has a <b>smaller radius</b> than the Earth. The radius of the latitude circle is:</p><div class="fm">r\u2097 = R \u00d7 cos(\u03c6)</div>'},
+    {lb:'Radius of the 50\u00b0N parallel',dr:dQ10,ht:'<div class="fm">r\u2097 = 6371 \u00d7 cos(50\u00b0) = 6371 \u00d7 0.6428 \u2248 4096 km</div>'},
+    {lb:'Difference in longitude',dr:dQ10,ht:'<div class="fm">20\u00b0W to 40\u00b0E = 20 + 40 = 60\u00b0</div>'},
+    {lb:'Arc distance along the parallel',dr:dQ10,ht:'<div class="fm">d = (\u03b8/360) \u00d7 2\u03c0r\u2097</div><div class="fm">d = (60/360) \u00d7 2\u03c0 \u00d7 4096 \u2248 4295 km</div><p>This is the distance <b>along the parallel</b>. The great circle (shortest path) would be shorter.</p>'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt({question:'Two points are on latitude <b>60\u00b0N</b>, at longitudes <b>10\u00b0E</b> and <b>70\u00b0E</b>. Find the distance between them along the parallel. (R = 6371 km)',hints:['r\u2097 = 6371 \u00d7 cos(60\u00b0) = 6371 \u00d7 0.5 = 3185.5 km','\u03b8 = 70 \u2212 10 = 60\u00b0','d = (60/360) \u00d7 2\u03c0 \u00d7 3185.5'],ans:3336,tol:15,unit:'km',working:'r\u2097 = 3185.5 km<br>d = (1/6) \u00d7 2\u03c0 \u00d7 3185.5 \u2248 <b>3336 km</b>'})}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Handling &middot; Year 8 &middot; Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#6b5750;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
+.try-q{font-size:15px;margin:8px 0 10px;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;}
+.f{background:#1a5a8a;color:#fff;}.e{background:#C0272D;color:#fff;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Data Handling &mdash; Year 8</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function sorted(arr){return arr.slice().sort(function(a,b){return a-b;});}
+function sum(arr){return arr.reduce(function(a,b){return a+b;},0);}
+function mean(arr){return sum(arr)/arr.length;}
+function median(arr){var s=sorted(arr),n=s.length;return n%2===1?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2;}
+function mode(arr){var f={},mx=0,m=null;arr.forEach(function(v){f[v]=(f[v]||0)+1;if(f[v]>mx){mx=f[v];m=v;}});return mx>1?m:null;}
+function range(arr){var s=sorted(arr);return s[s.length-1]-s[0];}
+
+var ST={};
+function tryIt(o){
+  var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
+    +'</div>';
+}
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('try-new')){render();return;}
+  if(e.target.classList.contains('try-ck')){
+    var id=e.target.getAttribute('data-tryid'),o=ST[id].o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
+  }
+});
+
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){return '<text x="'+x+'" y="'+y+'" font-size="'+(sz||12)+'" font-family="Arial" fill="'+(c||'#241A17')+'" text-anchor="'+(a||'middle')+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" rx="2"/>';}
+
+// ── Fixed worked-example data ──
+var d1=[12,15,9,20,14];  // Q1 mean/median/mode/range
+var d2=[{s:'Maths',v:12,c:'#C0272D'},{s:'English',v:8,c:'#1a5a8a'},{s:'Science',v:14,c:'#1a7a3a'},{s:'Art',v:6,c:'#C8922A'}];  // Q2 bar chart
+// Q3 stem-and-leaf: 23,25,31,31,34,38,42,47
+var d3={stems:[2,3,4],leaves:[[3,5],[1,1,4,8],[2,7]]};
+// Q4 frequency table: shoe sizes
+var d4={sizes:[4,5,6,7,8],freqs:[3,7,10,5,5],tot:30};
+// Q5 grouped frequency
+var d5={groups:['10-19','20-29','30-39','40-49'],freqs:[4,9,12,5],mids:[14.5,24.5,34.5,44.5],tot:30};
+// Q6 scatter graph: study time vs score (8 points)
+var d6={pts:[[1,30],[2,45],[3,50],[4,60],[5,65],[6,72],[7,80],[8,85]]};
+// Q7 pie chart: 120 students, 4 subjects
+var d7={labels:['Maths','English','Science','Art'],counts:[40,30,30,20],tot:120};
+// Q8 time series (6 months)
+var d8={months:['Jan','Feb','Mar','Apr','May','Jun'],values:[12,15,11,18,20,17]};
+// Q9 comparing two data sets (box plots concept)
+var d9={A:[10,12,14,16,18,20,22],B:[8,10,14,18,22,24,28]};
+// Q10 misleading statistics / averages choice
+var d10={vals:[2,3,3,4,5,6,100]};
+
+// ── Draw functions ──
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  d1.forEach(function(v,i){o.push(R(20+i*88,18,74,46,'#fff5f0','#C0272D',1.5));o.push(T(57+i*88,47,v,'#C0272D',20,'middle',true));});
+  if(p>=1){o.push(T(240,92,'Sum = '+d1.join('+')+'= '+sum(d1),'#888',13,'middle',false));
+    o.push(R(110,102,260,38,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,126,'Mean = '+sum(d1)+' ÷ '+d1.length+' = '+mean(d1),'#1a7a3a',15,'middle',true));}
+  if(p>=2){var s2=sorted(d1);
+    o.push(T(240,156,'Sorted: '+s2.join(', '),'#888',13,'middle',false));
+    o.push(R(200,165,80,30,'#e8f8ee','#1a7a3a',2));o.push(T(240,185,median(d1),'#1a7a3a',14,'middle',true));
+    o.push(T(240,200,'Median (middle value)','#888',11,'middle',false));}
+  if(p>=3){o.push(T(240,220,'No repeated values → no mode','#888',12,'middle',false));
+    o.push(T(240,240,'Range = '+Math.max.apply(null,d1)+' − '+Math.min.apply(null,d1)+' = '+range(d1),'#C0272D',14,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(L(50,20,50,210,'#333',2));o.push(L(50,210,450,210,'#333',2));
+  for(var i=0;i<=3;i++){o.push(L(50,210-i*60,55,210-i*60,'#333',1));o.push(T(44,214-i*60,i*5,'#888',10,'end',false));}
+  d2.forEach(function(b,i){
+    var h=b.v*12,x=70+i*95,w=72;
+    if(p>=1){
+      o.push(R(x,210-h,w,h,b.c+'33',b.c,2));
+      o.push(T(x+w/2,210-h-8,b.v,b.c,12,'middle',true));
+      o.push(T(x+w/2,224,b.s,'#241A17',11,'middle',false));
+    }
+  });
+  if(p>=2){o.push(R(270,30,180,36,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(360,53,'Most popular: Science (14)','#1a7a3a',12,'middle',true));}
+  if(p>=3){o.push(T(240,248,'English: 8/40 = 1/5 &nbsp;&nbsp; Art: 6/40 × 360° = 54°','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,18,'Stem-and-Leaf Diagram','#C0272D',14,'middle',true));
+  var stems=d3.stems,leaves=d3.leaves;
+  o.push(R(60,30,360,200,'#fdf7f4','#E4D6CE',1));
+  o.push(L(200,30,200,230,'#C0272D',2));
+  o.push(T(130,28,'Stem','#888',11,'middle',false));o.push(T(310,28,'Leaves','#888',11,'middle',false));
+  stems.forEach(function(st,i){
+    if(p>=i+1){
+      o.push(T(170,66+i*56,st,'#C0272D',16,'end',true));
+      leaves[i].forEach(function(lf,j){o.push(T(220+j*24,66+i*56,lf,'#241A17',15,'middle',false));});
+    }
+  });
+  if(p>=3){var all=[];d3.leaves.forEach(function(row,si){row.forEach(function(lf){all.push(d3.stems[si]*10+lf);});});
+    o.push(T(240,220,'Data: '+all.join(', '),'#888',10,'middle',false));
+    o.push(T(240,238,'Median = '+median(all)+'  Range = '+range(all),'#1a7a3a',12,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  // Frequency table for shoe sizes
+  o.push(R(20,20,440,30,'#C0272D','#C0272D',1));
+  o.push(T(120,40,'Size','#fff',12,'middle',true));o.push(T(220,40,'Freq','#fff',12,'middle',true));
+  o.push(T(320,40,'f × x','#fff',12,'middle',true));o.push(T(420,40,'Cum. Freq.','#fff',12,'middle',true));
+  var cumf=0;
+  d4.sizes.forEach(function(sz,i){
+    if(p>=i+1){
+      cumf+=d4.freqs[i];
+      var y=54+i*36;
+      o.push(R(20,y,440,34,i%2===0?'#fff5f0':'#fff','#E4D6CE',1));
+      o.push(T(120,y+22,sz,'#241A17',12,'middle',false));
+      o.push(T(220,y+22,d4.freqs[i],'#241A17',12,'middle',false));
+      o.push(T(320,y+22,(sz*d4.freqs[i]),'#C0272D',12,'middle',true));
+      o.push(T(420,y+22,cumf,'#888',12,'middle',false));
+    }
+  });
+  if(p>=5){var fx=d4.sizes.reduce(function(acc,sz,i){return acc+sz*d4.freqs[i];},0);
+    o.push(R(20,234,440,24,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,250,'Mean = Σfx / n = '+fx+' / '+d4.tot+' = '+(fx/d4.tot).toFixed(1),'#1a7a3a',13,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(20,20,440,30,'#C0272D','#C0272D',1));
+  ['Group','Freq','Midpoint','f×m'].forEach(function(h,i){o.push(T(20+i*110+55,40,h,'#fff',11,'middle',true));});
+  d5.groups.forEach(function(g2,i){
+    if(p>=i+1){
+      var y=54+i*40;
+      o.push(R(20,y,440,38,i%2===0?'#fff5f0':'#fff','#E4D6CE',1));
+      o.push(T(75,y+24,g2,'#241A17',12,'middle',false));
+      o.push(T(185,y+24,d5.freqs[i],'#241A17',12,'middle',false));
+      o.push(T(295,y+24,d5.mids[i],'#888',12,'middle',false));
+      o.push(T(405,y+24,(d5.freqs[i]*d5.mids[i]).toFixed(1),'#C0272D',12,'middle',true));
+    }
+  });
+  if(p>=4){var sfm=d5.freqs.reduce(function(acc,f,i){return acc+f*d5.mids[i];},0);
+    o.push(R(20,214,440,38,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,237,'Estimated mean = '+sfm.toFixed(1)+' ÷ '+d5.tot+' = '+(sfm/d5.tot).toFixed(1),'#1a7a3a',13,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(L(50,220,450,220,'#333',2));o.push(L(50,20,50,220,'#333',2));
+  o.push(T(240,250,'Study time (hours)','#888',11,'middle',false));
+  o.push(T(18,130,'Score','#888',11,'middle',false));
+  for(var i=0;i<=8;i++){o.push(L(50+i*50,220,50+i*50,225,'#333',1));o.push(T(50+i*50,236,i,'#888',10,'middle',false));}
+  for(var j=0;j<=4;j++){o.push(L(50,220-j*50,45,220-j*50,'#333',1));o.push(T(40,224-j*50,j*25,'#888',10,'end',false));}
+  if(p>=1){d6.pts.forEach(function(pt){o.push('<circle cx="'+(50+pt[0]*50)+'" cy="'+(220-pt[1]*2.2)+'" r="5" fill="#C0272D" opacity="0.8"/>');}); }
+  if(p>=2){// Line of best fit (approx)
+    o.push(L(100,175,450,27,'#C8922A',2,'6,3'));
+    o.push(T(360,50,'Line of best fit','#C8922A',11,'middle',false));}
+  if(p>=3){o.push(T(240,30,'Positive correlation: more study → higher score','#1a7a3a',12,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  // Pie chart
+  var cx=150,cy=135,r=100;
+  var cols=['#C0272D','#1a5a8a','#1a7a3a','#C8922A'];
+  var ang=0;
+  d7.counts.forEach(function(c,i){
+    var slice=c/d7.tot*360;
+    var a1=ang-90,a2=ang+slice-90;
+    var r1=a1*Math.PI/180,r2=a2*Math.PI/180;
+    var laf=slice>180?1:0;
+    var x1=cx+r*Math.cos(r1),y1=cy+r*Math.sin(r1);
+    var x2=cx+r*Math.cos(r2),y2=cy+r*Math.sin(r2);
+    if(p>=i+1){
+      o.push('<path d="M '+cx+','+cy+' L '+x1.toFixed(1)+','+y1.toFixed(1)+' A '+r+','+r+' 0 '+laf+',1 '+x2.toFixed(1)+','+y2.toFixed(1)+' Z" fill="'+cols[i]+'88" stroke="'+cols[i]+'" stroke-width="2"/>');
+      var mid=(ang+slice/2-90)*Math.PI/180;
+      var rx=cx+(r*0.65)*Math.cos(mid),ry=cy+(r*0.65)*Math.sin(mid);
+      o.push(T(rx.toFixed(0),ry.toFixed(0),(c/d7.tot*360).toFixed(0)+'°',cols[i],10,'middle',true));
+    }
+    ang+=slice;
+  });
+  // Legend
+  d7.labels.forEach(function(lbl,i){
+    o.push(R(310,30+i*42,14,14,cols[i],cols[i],1));
+    o.push(T(332,42+i*42,lbl+': '+d7.counts[i],'#241A17',12,'start',false));
+  });
+  if(p>=4){o.push(T(360,205,'Angle = count/total × 360°','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(L(50,220,450,220,'#333',2));o.push(L(50,20,50,220,'#333',2));
+  for(var i=0;i<d8.months.length;i++){
+    var x=50+i*80+40;
+    o.push(T(x,236,d8.months[i],'#888',10,'middle',false));
+    if(p>=1&&i>0){
+      var px=50+(i-1)*80+40,py=220-d8.values[i-1]*9,cx2=50+i*80+40,cy2=220-d8.values[i]*9;
+      o.push(L(px,py,cx2,cy2,'#C0272D',2));
+    }
+    if(p>=1){o.push('<circle cx="'+(50+i*80+40)+'" cy="'+(220-d8.values[i]*9)+'" r="5" fill="#C0272D"/>');}
+    if(p>=2){o.push(T(50+i*80+40,220-d8.values[i]*9-12,d8.values[i],'#241A17',10,'middle',false));}
+  }
+  for(var j=0;j<=4;j++){o.push(L(50,220-j*50,45,220-j*50,'#333',1));o.push(T(44,224-j*50,j*6,'#888',10,'end',false));}
+  if(p>=3){o.push(T(240,30,'Overall upward trend with fluctuation in Mar','#1a7a3a',12,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  // Side-by-side box plot display
+  var mA=median(d9.A),q1A=d9.A[1],q3A=d9.A[5],minA=d9.A[0],maxA=d9.A[6];
+  var mB=median(d9.B),q1B=d9.B[1],q3B=d9.B[5],minB=d9.B[0],maxB=d9.B[6];
+  var sc=function(v){return 40+v*9;};
+  o.push(L(sc(0),240,sc(30),240,'#333',1));
+  for(var i=0;i<=30;i+=5){o.push(L(sc(i),235,sc(i),245,'#333',1));o.push(T(sc(i),255,i,'#888',9,'middle',false));}
+  // Box plot A
+  if(p>=1){
+    o.push(L(sc(minA),110,sc(q1A),110,'#C0272D',2));
+    o.push(R(sc(q1A),90,sc(q3A)-sc(q1A),40,'#fff5f0','#C0272D',2));
+    o.push(L(sc(mA),90,sc(mA),130,'#C0272D',3));
+    o.push(L(sc(q3A),110,sc(maxA),110,'#C0272D',2));
+    o.push(T(40,110,'A','#C0272D',13,'end',true));
+    o.push(T(240,75,'Median '+mA+'  IQR '+(q3A-q1A),'#C0272D',11,'middle',false));
+  }
+  // Box plot B
+  if(p>=2){
+    o.push(L(sc(minB),170,sc(q1B),170,'#1a5a8a',2));
+    o.push(R(sc(q1B),150,sc(q3B)-sc(q1B),40,'#e8f0ff','#1a5a8a',2));
+    o.push(L(sc(mB),150,sc(mB),190,'#1a5a8a',3));
+    o.push(L(sc(q3B),170,sc(maxB),170,'#1a5a8a',2));
+    o.push(T(40,170,'B','#1a5a8a',13,'end',true));
+    o.push(T(240,200,'Median '+mB+'  IQR '+(q3B-q1B),'#1a5a8a',11,'middle',false));
+  }
+  if(p>=3){o.push(T(240,30,'B has a higher median — generally larger values','#888',12,'middle',false));
+    o.push(T(240,48,'B has a larger IQR — more spread / less consistent','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Data: '+d10.vals.join(', '),'#C0272D',14,'middle',true));
+  if(p>=1){var m=mean(d10.vals);
+    o.push(R(20,36,440,42,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,64,'Mean = '+sum(d10.vals)+' ÷ '+d10.vals.length+' = '+m.toFixed(1)+' — pulled up by the outlier 100','#C0272D',12,'middle',false));}
+  if(p>=2){
+    o.push(R(20,88,440,42,'#e8f0ff','#1a5a8a',1.5));
+    o.push(T(240,116,'Median = '+median(d10.vals)+' — not affected by outlier','#1a5a8a',12,'middle',true));}
+  if(p>=3){
+    o.push(R(20,140,440,42,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,168,'Mode = '+mode(d10.vals)+' — most frequent value','#1a7a3a',12,'middle',false));}
+  if(p>=4){o.push(T(240,210,'With an outlier: median or mode is the better representative average','#888',12,'middle',false));
+    o.push(T(240,230,'Mean can be misleading when data is skewed','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// ── Your Turn generators ──
+function yt1(){var d=[rnd(4,12),rnd(4,12),rnd(4,12),rnd(4,12),rnd(4,12)];
+  return tryIt({question:'Data: <b>'+d.join(', ')+'</b>. Find the mean.',
+    hints:['Sum = '+sum(d),'Divide by '+d.length],
+    ans:mean(d),tol:0.05,unit:'',
+    working:'('+d.join('+')+') ÷ '+d.length+' = '+mean(d).toFixed(2)});}
+
+function yt2(){var d2l=[{s:'Football',v:rnd(8,16),c:'#C0272D'},{s:'Cricket',v:rnd(5,12),c:'#1a5a8a'},{s:'Tennis',v:rnd(4,10),c:'#1a7a3a'}];
+  var tot=d2l.reduce(function(a,b){return a+b.v;},0);
+  var pc=Math.round(d2l[0].v/tot*100);
+  return tryIt({question:'A bar chart shows: Football='+d2l[0].v+', Cricket='+d2l[1].v+', Tennis='+d2l[2].v+'. Total = '+tot+'. What percentage chose Football?',
+    hints:['Football/Total × 100',d2l[0].v+'/'+tot+' × 100'],
+    ans:pc,tol:1,unit:'%',
+    working:d2l[0].v+'/'+tot+' × 100 ≈ '+pc+'%'});}
+
+function yt3(){
+  var s1=rnd(1,3),s2=s1+1,s3=s2+1;
+  var l1=[rnd(1,4),rnd(5,9)].sort(function(a,b){return a-b;});
+  var l2=[rnd(0,3),rnd(4,6),rnd(7,9)].sort(function(a,b){return a-b;});
+  var l3=[rnd(1,4),rnd(5,8)].sort(function(a,b){return a-b;});
+  var mn=s1*10+l1[0],mx=s3*10+l3[1],rng=mx-mn;
+  var q='Stem-and-leaf: '+s1+'|'+l1.join(' ')+', '+s2+'|'+l2.join(' ')+', '+s3+'|'+l3.join(' ')+'. Find the range.';
+  return tryIt({question:q,hints:['Smallest value = '+mn,'Largest value = '+mx,'Range = largest \u2212 smallest'],
+    ans:rng,tol:0,unit:'',working:'Largest = '+mx+', Smallest = '+mn+', Range = '+mx+' \u2212 '+mn+' = '+rng});}
+
+function yt4(){var sz=[4,5,6],fr=[rnd(3,8),rnd(5,12),rnd(3,7)],tot2=fr[0]+fr[1]+fr[2];
+  var sfx=sz[0]*fr[0]+sz[1]*fr[1]+sz[2]*fr[2];
+  return tryIt({question:'Frequency table: Size 4 (freq '+fr[0]+'), Size 5 (freq '+fr[1]+'), Size 6 (freq '+fr[2]+'). Find the mean size.',
+    hints:['Σfx = '+(sz[0]+'×'+fr[0]+' + '+sz[1]+'×'+fr[1]+' + '+sz[2]+'×'+fr[2]),'Divide by total freq '+tot2],
+    ans:Math.round(sfx/tot2*10)/10,tol:0.05,unit:'',
+    working:'Σfx = '+sfx+', n = '+tot2+', mean = '+(sfx/tot2).toFixed(2)});}
+
+function yt5(){var gs=['0-9','10-19','20-29'],fs=[rnd(3,8),rnd(5,12),rnd(4,9)],ms=[4.5,14.5,24.5];
+  var tot2=fs[0]+fs[1]+fs[2],sfm=fs[0]*ms[0]+fs[1]*ms[1]+fs[2]*ms[2];
+  return tryIt({question:'Grouped data: 0-9 (freq '+fs[0]+'), 10-19 (freq '+fs[1]+'), 20-29 (freq '+fs[2]+'). Estimated mean?',
+    hints:['Use midpoints: 4.5, 14.5, 24.5','Σfm = '+fs[0]+'×4.5 + '+fs[1]+'×14.5 + '+fs[2]+'×24.5'],
+    ans:Math.round(sfm/tot2*10)/10,tol:0.2,unit:'',
+    working:'Σfm = '+sfm.toFixed(1)+', n = '+tot2+', mean ≈ '+(sfm/tot2).toFixed(1)});}
+
+function yt6(){
+  var scenarios=[
+    {q:'A scatter graph shows hours of sunshine vs ice cream sales. As sunshine increases, sales increase. What type of correlation?',w:'As sunshine increases, ice cream sales increase \u2192 positive correlation.',ans:1},
+    {q:'A scatter graph shows temperature vs hot drink sales. As temperature rises, sales fall. What type of correlation?',w:'As temperature increases, hot drink sales decrease \u2192 negative correlation.',ans:2},
+    {q:'A scatter graph shows shoe size vs maths score. No clear pattern is visible. What type of correlation?',w:'No relationship between shoe size and maths score \u2192 no correlation.',ans:3},
+    {q:'A scatter graph shows revision hours vs exam score. Students who revise more score higher. What type of correlation?',w:'More revision \u2192 higher score \u2192 positive correlation.',ans:1},
+    {q:'A scatter graph shows speed vs journey time. Faster speed means shorter journey. What type of correlation?',w:'As speed increases, journey time decreases \u2192 negative correlation.',ans:2}
+  ];
+  var sc=pick(scenarios);
+  return tryIt({question:sc.q+'<br><br>Enter: <b>1</b> = positive, <b>2</b> = negative, <b>3</b> = none',
+    hints:['Positive: both variables increase together','Negative: one increases as the other decreases','None: no clear pattern'],
+    ans:sc.ans,tol:0,unit:'',working:sc.w});}
+
+function yt7(){var c=rnd(20,50),tot3=120;
+  return tryIt({question:'In a pie chart of 120 students, '+c+' chose Maths. What angle does the Maths sector have? (nearest degree)',
+    hints:['Angle = count/total × 360°',c+'/120 × 360'],
+    ans:Math.round(c/tot3*360),tol:1,unit:'degrees',
+    working:c+'/120 × 360 = '+Math.round(c/tot3*360)+'°'});}
+
+function yt8(){var vals=[rnd(10,18),rnd(12,20),rnd(8,16),rnd(15,25),rnd(18,28)];
+  return tryIt({question:'Time series: Month 1='+vals[0]+', M2='+vals[1]+', M3='+vals[2]+', M4='+vals[3]+', M5='+vals[4]+'. Find the range.',
+    hints:['Range = max − min'],
+    ans:Math.max.apply(null,vals)-Math.min.apply(null,vals),tol:0,unit:'',
+    working:'Max='+Math.max.apply(null,vals)+', Min='+Math.min.apply(null,vals)+', Range='+(Math.max.apply(null,vals)-Math.min.apply(null,vals))});}
+
+function yt9(){
+  var mA=rnd(10,20),iqrA=rnd(4,8),mB=rnd(15,28),iqrB=rnd(9,15);
+  var more=iqrA>iqrB?1:2;
+  return tryIt({question:'Box plot A: median = '+mA+', IQR = '+iqrA+'. Box plot B: median = '+mB+', IQR = '+iqrB+'. Which data set is more spread out? Enter <b>1</b> for A, <b>2</b> for B.',
+    hints:['IQR (interquartile range) measures spread','Larger IQR = more spread out'],
+    ans:more,tol:0,unit:'',
+    working:'IQR of A = '+iqrA+', IQR of B = '+iqrB+'. '+(iqrA>iqrB?'A has larger IQR \u2192 A is more spread out.':'B has larger IQR \u2192 B is more spread out.')});}
+
+function yt10(){var d=[rnd(2,5),rnd(2,5),rnd(2,5),rnd(3,6),rnd(3,6),rnd(50,80)];
+  return tryIt({question:'Data: '+d.join(', ')+'. Which average (mean or median) would be most misleading due to the outlier? Enter 1 for mean, 2 for median.',
+    hints:['The outlier '+Math.max.apply(null,d)+' will pull up one of them'],
+    ans:1,tol:0,unit:'',
+    working:'The mean is pulled up by the large outlier. Median is more representative here.'});}
+
+var QS=[
+  {ey:'Q1 · Year 8 · Data Handling',ti:'Mean, Median, Mode, Range <span class="badge f">F</span>',
+   su:'Find the mean, median, mode and range of: '+d1.join(', '),steps:[
+    {lb:'Mean',dr:dQ1,ht:'<p><b>Mean</b> = sum ÷ number of values.</p><div class="fm">Mean = '+sum(d1)+' ÷ '+d1.length+' = '+mean(d1)+'</div>'},
+    {lb:'Median',dr:dQ1,ht:'<p><b>Median</b> = middle value when sorted: '+sorted(d1).join(', ')+'</p><div class="fm">Median = '+median(d1)+'</div>'},
+    {lb:'Mode and range',dr:dQ1,ht:'<p><b>Mode</b>: no value repeats → no mode.<br><b>Range</b> = largest − smallest.</p><div class="fm">Range = '+Math.max.apply(null,d1)+' − '+Math.min.apply(null,d1)+' = '+range(d1)+'</div>'},
+    {lb:'Your turn',dr:dQ1,ht:yt1}
+  ]},
+  {ey:'Q2 · Year 8 · Data Handling',ti:'Reading Bar Charts <span class="badge f">F</span>',
+   su:'The bar chart shows favourite subjects for 40 students.',steps:[
+    {lb:'Read the bar chart',dr:dQ2,ht:'<p>Read the height of each bar against the y-axis scale to find the frequency of each category.</p>'},
+    {lb:'Most popular subject',dr:dQ2,ht:'<p>Science has the tallest bar: <b>14 students</b>.</p>'},
+    {lb:'Fractions and pie chart angles',dr:dQ2,ht:'<p>English: 8/40 = <b>1/5</b>. Pie chart angle for Art: 6/40 × 360° = <b>54°</b>.</p>'},
+    {lb:'Your turn',dr:dQ2,ht:yt2}
+  ]},
+  {ey:'Q3 · Year 8 · Data Handling',ti:'Stem-and-Leaf Diagrams <span class="badge f">F</span>',
+   su:'Read a back-to-back stem-and-leaf diagram. Data: 23, 25, 31, 31, 34, 38, 42, 47.',steps:[
+    {lb:'Building the diagram',dr:dQ3,ht:'<p>The <b>stem</b> is the tens digit; the <b>leaf</b> is the units digit. Each data value is placed on the correct row.</p>'},
+    {lb:'Read stems 2 and 3',dr:dQ3,ht:'<p>Stem 2: leaves 3, 5 → values 23, 25.<br>Stem 3: leaves 1, 1, 4, 8 → values 31, 31, 34, 38.</p>'},
+    {lb:'Find statistics',dr:dQ3,ht:'<p>All values: 23, 25, 31, 31, 34, 38, 42, 47.</p><div class="fm">Median = (31+34)/2 = 32.5 &nbsp; Range = 47−23 = 24</div>'},
+    {lb:'Your turn',dr:dQ3,ht:yt3}
+  ]},
+  {ey:'Q4 · Year 8 · Data Handling',ti:'Frequency Tables & Mean <span class="badge f">F</span>',
+   su:'Shoe sizes for 30 students: use the frequency table to find the mean.',steps:[
+    {lb:'Complete the table',dr:dQ4,ht:'<p>Add an f×x column: multiply each value by its frequency. Also track cumulative frequency.</p>'},
+    {lb:'Build all rows',dr:dQ4,ht:'<p>Fill in f×x for each shoe size row.</p>'},
+    {lb:'Calculate the mean',dr:dQ4,ht:'<div class="fm">Mean = Σfx ÷ n</div><p>Σfx = sum of f×x column. n = total frequency = '+d4.tot+'</p>'},
+    {lb:'Your turn',dr:dQ4,ht:yt4}
+  ]},
+  {ey:'Q5 · Year 8 · Data Handling',ti:'Grouped Frequency & Estimated Mean <span class="badge e">E</span>',
+   su:'Grouped data for 30 values. Estimate the mean using midpoints.',steps:[
+    {lb:'Why use midpoints?',dr:dQ5,ht:'<p>In a grouped frequency table, we do not know individual values. We use the <b>midpoint</b> of each class as a representative value.</p>'},
+    {lb:'Build the f×m column',dr:dQ5,ht:'<p>Midpoints: 14.5, 24.5, 34.5, 44.5. Multiply each by its frequency.</p>'},
+    {lb:'Estimated mean',dr:dQ5,ht:'<div class="fm">Estimated mean = Σfm ÷ n</div>'},
+    {lb:'Your turn',dr:dQ5,ht:yt5}
+  ]},
+  {ey:'Q6 · Year 8 · Data Handling',ti:'Scatter Graphs & Correlation <span class="badge f">F</span>',
+   su:'A scatter graph shows study hours vs exam score for 8 students.',steps:[
+    {lb:'Plot the points',dr:dQ6,ht:'<p>Each point represents one student. The x-axis shows study time; y-axis shows score.</p>'},
+    {lb:'Draw a line of best fit',dr:dQ6,ht:'<p>The line of best fit passes through the middle of the points, with roughly equal numbers either side.</p>'},
+    {lb:'Describe the correlation',dr:dQ6,ht:'<p><b>Positive correlation</b>: as study time increases, score increases.<br>You can use the line to predict scores for given study times.</p>'},
+    {lb:'Your turn',dr:dQ6,ht:yt6}
+  ]},
+  {ey:'Q7 · Year 8 · Data Handling',ti:'Pie Charts <span class="badge f">F</span>',
+   su:''+d7.tot+' students chose a favourite subject. Draw a pie chart.',steps:[
+    {lb:'Calculate angles',dr:dQ7,ht:'<p>Each sector angle = (frequency ÷ total) × 360°.</p><div class="fm">Maths: '+d7.counts[0]+'/'+d7.tot+' × 360° = '+(d7.counts[0]/d7.tot*360).toFixed(0)+'°</div>'},
+    {lb:'Draw the first two sectors',dr:dQ7,ht:'<p>Start at 12 o\'clock. Mark each angle with a protractor.</p>'},
+    {lb:'Complete all sectors',dr:dQ7,ht:'<p>All angles should sum to 360°. Label each sector.</p>'},
+    {lb:'Your turn',dr:dQ7,ht:yt7}
+  ]},
+  {ey:'Q8 · Year 8 · Data Handling',ti:'Time Series <span class="badge f">F</span>',
+   su:'Monthly sales figures: Jan=12, Feb=15, Mar=11, Apr=18, May=20, Jun=17.',steps:[
+    {lb:'Plot the time series',dr:dQ8,ht:'<p>A <b>time series</b> shows how data changes over time. Plot each value at its time point and join with straight lines.</p>'},
+    {lb:'Read the values',dr:dQ8,ht:'<p>Read each point\'s value from the y-axis. Values are shown above each point.</p>'},
+    {lb:'Describe the trend',dr:dQ8,ht:'<p>The overall trend is <b>upward</b> (sales generally increasing), despite a dip in March.</p>'},
+    {lb:'Your turn',dr:dQ8,ht:yt8}
+  ]},
+  {ey:'Q9 · Year 8 · Data Handling',ti:'Comparing Data Sets (Box Plots) <span class="badge e">E</span>',
+   su:'Compare data sets A and B using box plots.',steps:[
+    {lb:'Box plot for A',dr:dQ9,ht:'<p>A box plot shows the minimum, Q1, median, Q3, and maximum. The box spans the IQR (middle 50% of data).</p>'},
+    {lb:'Box plot for B',dr:dQ9,ht:'<p>Draw B on the same scale for easy comparison.</p>'},
+    {lb:'Compare',dr:dQ9,ht:'<p><b>Median</b>: B > A → B has higher typical values.<br><b>IQR</b>: B > A → B is more spread out (less consistent).</p>'},
+    {lb:'Your turn',dr:dQ9,ht:yt9}
+  ]},
+  {ey:'Q10 · Year 8 · Data Handling',ti:'Choosing the Right Average <span class="badge e">E</span>',
+   su:'Data: 2, 3, 3, 4, 5, 6, 100. Which average best represents the data?',steps:[
+    {lb:'Calculate the mean',dr:dQ10,ht:'<p>The mean includes every value — including the outlier 100, which pulls it up significantly.</p>'},
+    {lb:'Find the median',dr:dQ10,ht:'<p>The median is the middle value when sorted. It is not affected by extreme values.</p><div class="fm">Median = 4</div>'},
+    {lb:'Mode and recommendation',dr:dQ10,ht:'<p>Mode = 3 (most frequent). With a large outlier, the <b>median</b> (or mode) is the most representative average.</p>'},
+    {lb:'Your turn',dr:dQ10,ht:yt10}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);
+  QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';
+  QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').innerHTML=q.ti;document.getElementById('su').textContent=q.su;
+  var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+  p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);st.dr(si);bDT();
+  document.getElementById('pb').disabled=si===0;
+  document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+</body>
+</html>

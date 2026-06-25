@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transformations - Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#6b5750;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.nq{margin-top:12px;font-size:13px;font-weight:600;padding:6px 14px;border-radius:3px;border:1px solid #aaa;background:#f5f5f5;color:#444;cursor:pointer;}
+.nq:hover{background:#e0e0e0;}
+.wk-ans{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Transformations</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 300"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rPick(a){return a[Math.floor(Math.random()*a.length)];}
+function tryIt(fn){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]=fn;
+  return genTry(id,fn());
+}
+function genTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  return '<div class="try" data-tryid="'+id+'">'+
+    '<div class="try-t">✔ Your Turn</div>'+
+    '<p>'+o.question+'</p>'+
+    '<div class="ar">'+
+      '<input type="number" step="any" placeholder="Your answer" id="'+id+'_i"/>'+
+      '<button class="ck" onclick="ck(\''+id+'\')">✓ Check</button>'+
+    '</div>'+
+    '<div class="fb" id="'+id+'_f"></div>'+
+    '<details class="wk">'+
+      '<summary>Show working</summary>'+
+      '<div class="wk-b">'+
+        (h?'<ul class="hl">'+h+'</ul>':'')+
+        '<div class="wk-ans">'+o.working+'</div>'+
+      '</div>'+
+    '</details>'+
+    '<button class="nq" data-tryid="'+id+'">New question</button>'+
+  '</div>';
+}
+function tryItStatic(o){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]=function(){return o;};
+  return genTry(id,o);
+}
+
+function ck(id){
+  var fn=ST[id];
+  var o=typeof fn==='function'?fn():fn;
+  var v=parseFloat(document.getElementById(id+'_i').value);
+  var f=document.getElementById(id+'_f');
+  if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}
+  var tol=o.tol!==undefined?o.tol:0.5;
+  if(Math.abs(v-o.ans)<=tol){
+    f.className='fb ok';f.textContent='✓ Correct! Answer: '+o.ans+(o.unit?' '+o.unit:'');
+  }else{
+    f.className='fb er';f.textContent='Not quite — check your working and try again.';
+  }
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.nq');
+  if(!b)return;
+  var id=b.getAttribute('data-tryid');
+  var fn=ST[id];
+  if(typeof fn!=='function')return;
+  var wrap=b.closest('.try');
+  if(wrap){
+    var fresh=genTry(id,fn());
+    var tmp=document.createElement('div');
+    tmp.innerHTML=fresh;
+    var nd=tmp.firstChild;
+    wrap.parentNode.replaceChild(nd,wrap);
+  }
+});
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
+
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function axes(ox,oy){var o=[];o.push(L(40,oy,440,oy,'#ddd',1.5));o.push(L(ox,20,ox,280,'#ddd',1.5));return o;}
+function grid(ox,oy,sc,cols,rows){var o=[];for(var i=-cols;i<=cols;i++)o.push(L(ox+i*sc,oy-rows*sc,ox+i*sc,oy+rows*sc,'#f0e8e4',1));for(var j=-rows;j<=rows;j++)o.push(L(ox-cols*sc,oy+j*sc,ox+cols*sc,oy+j*sc,'#f0e8e4',1));o=o.concat(axes(ox,oy));return o;}
+function labels(ox,oy,sc,range){var o=[];for(var i=-range;i<=range;i++){if(i!==0){o.push(T(ox+i*sc,oy+14,i,'#aaa',9));o.push(T(ox-10,oy-i*sc+4,i,'#aaa',9,'end'));}}return o;}
+function poly(pts,fill,stroke,sw){var pp=pts.map(function(p){return p[0]+','+p[1];}).join(' ');return '<polygon points="'+pp+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'" opacity="0.8"/>';}
+
+/* Q1 - Translation */
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=140,oy=180,sc=28;
+  o=o.concat(grid(ox,oy,sc,10,6));o=o.concat(labels(ox,oy,sc,4));
+  // Triangle A: (1,1),(3,1),(2,3)
+  var A=[[ox+1*sc,oy-1*sc],[ox+3*sc,oy-1*sc],[ox+2*sc,oy-3*sc]];
+  // Translated by (3,2): (4,3),(6,3),(5,5)
+  var B=[[ox+4*sc,oy-3*sc],[ox+6*sc,oy-3*sc],[ox+5*sc,oy-5*sc]];
+  // problem always visible at step 0
+    o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
+o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
+if(p>=1){o.push(poly(A,'#fde8e8','#C0272D'));o.push(T(ox+2*sc,oy-1.5*sc,'A','#C0272D',11,'middle',true));}
+  if(p>=2){
+    // show vector arrow
+    o.push(L(A[0][0],A[0][1],B[0][0],B[0][1],'#C8922A',1.5,'4,3'));
+    o.push(T((A[0][0]+B[0][0])/2-14,(A[0][1]+B[0][1])/2,'(3)','#C8922A',10,'end',true));
+    o.push(T((A[0][0]+B[0][0])/2-14,(A[0][1]+B[0][1])/2+14,'(2)','#C8922A',10,'end',true));
+  }
+  if(p>=3){o.push(poly(B,'#e8f4fe','#1a5a8a'));o.push(T(ox+5*sc,oy-3.5*sc,"A'","#1a5a8a",11,'middle',true));}
+  o.push(T(240,14,'Translation by vector (3, 2)','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q2 - Reflection in x-axis */
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=240,oy=150,sc=28;
+  o=o.concat(grid(ox,oy,sc,7,5));o=o.concat(labels(ox,oy,sc,4));
+  o.push(L(40,oy,440,oy,'#C8922A',1.5,'6,4'));
+  o.push(T(430,oy-8,'x-axis','#C8922A',10,'end',false));
+  var A=[[ox+1*sc,oy-2*sc],[ox+4*sc,oy-2*sc],[ox+2*sc,oy-4*sc]];
+  var B=[[ox+1*sc,oy+2*sc],[ox+4*sc,oy+2*sc],[ox+2*sc,oy+4*sc]];
+  if(p>=1){o.push(poly(A,'#fde8e8','#C0272D'));o.push(T(ox+2.3*sc,oy-2.8*sc,'A','#C0272D',11,'middle',true));}
+  if(p>=2){
+    A.forEach(function(pt,i){o.push(L(pt[0],pt[1],B[i][0],B[i][1],'#888',1,'4,3'));});
+  }
+  if(p>=3){o.push(poly(B,'#e8f4fe','#1a5a8a'));o.push(T(ox+2.3*sc,oy+2.8*sc,"A'","#1a5a8a",11,'middle',true));}
+  o.push(T(240,14,'Reflection in the x-axis','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q3 - Reflection in y-axis */
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=240,oy=150,sc=28;
+  o=o.concat(grid(ox,oy,sc,7,5));o=o.concat(labels(ox,oy,sc,4));
+  o.push(L(ox,20,ox,280,'#C8922A',1.5,'6,4'));
+  o.push(T(ox+4,24,'y-axis','#C8922A',10,'start',false));
+  var A=[[ox+1*sc,oy-1*sc],[ox+3*sc,oy-1*sc],[ox+1*sc,oy-4*sc]];
+  var B=[[ox-1*sc,oy-1*sc],[ox-3*sc,oy-1*sc],[ox-1*sc,oy-4*sc]];
+  if(p>=1){o.push(poly(A,'#fde8e8','#C0272D'));o.push(T(ox+1.7*sc,oy-2*sc,'A','#C0272D',11,'middle',true));}
+  if(p>=2){A.forEach(function(pt,i){o.push(L(pt[0],pt[1],B[i][0],B[i][1],'#888',1,'4,3'));});}
+  if(p>=3){o.push(poly(B,'#e8f4fe','#1a5a8a'));o.push(T(ox-1.7*sc,oy-2*sc,"A'","#1a5a8a",11,'middle',true));}
+  o.push(T(240,14,'Reflection in the y-axis','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q4 - Reflection in y=x */
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=240,oy=150,sc=28;
+  o=o.concat(grid(ox,oy,sc,7,5));o=o.concat(labels(ox,oy,sc,4));
+  // draw y=x
+  o.push(L(ox-4*sc,oy+4*sc,ox+4*sc,oy-4*sc,'#C8922A',1.5,'6,4'));
+  o.push(T(ox+4*sc+4,oy-4*sc-8,'y=x','#C8922A',10,'start',false));
+  // A: (1,3),(3,3),(1,1)  Reflection in y=x swaps x,y: (3,1),(3,3),(1,1)
+  var A=[[ox+1*sc,oy-3*sc],[ox+3*sc,oy-3*sc],[ox+1*sc,oy-1*sc]];
+  var B=[[ox+3*sc,oy-1*sc],[ox+3*sc,oy-3*sc],[ox+1*sc,oy-1*sc]];
+  if(p>=1){o.push(poly(A,'#fde8e8','#C0272D'));o.push(T(ox+1.7*sc,oy-2.3*sc,'A','#C0272D',11,'middle',true));}
+  if(p>=2){A.forEach(function(pt,i){o.push(L(pt[0],pt[1],B[i][0],B[i][1],'#888',1,'4,3'));});}
+  if(p>=3){o.push(poly(B,'#e8f4fe','#1a5a8a'));o.push(T(ox+2.8*sc,oy-1.8*sc,"A'","#1a5a8a",11,'end',true));}
+  o.push(T(240,14,'Reflection in the line y = x','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q5 - Rotation 90° anticlockwise about origin */
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=200,oy=200,sc=30;
+  o=o.concat(grid(ox,oy,sc,7,6));o=o.concat(labels(ox,oy,sc,4));
+  // A: (1,1),(3,1),(2,3). Rotation 90° ACW: (x,y)->(-y,x): (-1,1),(-1,3),(-3,2)
+  var A=[[ox+1*sc,oy-1*sc],[ox+3*sc,oy-1*sc],[ox+2*sc,oy-3*sc]];
+  var B=[[ox-1*sc,oy-1*sc],[ox-1*sc,oy-3*sc],[ox-3*sc,oy-2*sc]];
+  o.push('<circle cx="'+ox+'" cy="'+oy+'" r="4" fill="#888" stroke="#fff" stroke-width="1.5"/>');
+  o.push(T(ox-10,oy+14,'O','#888',10,'end',false));
+  if(p>=1){o.push(poly(A,'#fde8e8','#C0272D'));o.push(T(ox+2*sc,oy-1.7*sc,'A','#C0272D',11,'middle',true));}
+  if(p>=2){
+    // arc indicator
+    o.push('<path d="M '+(ox+sc*0.9)+','+(oy-sc*0.4)+' A '+(sc*1)+','+(sc*1)+' 0 0,0 '+(ox-sc*0.4)+','+(oy-sc*0.9)+'" fill="none" stroke="#C8922A" stroke-width="1.5" stroke-dasharray="4,3"/>');
+    o.push(T(ox-8,oy-sc-14,'90\u00b0 ACW','#C8922A',10,'end',false));
+  }
+  if(p>=3){o.push(poly(B,'#e8f4fe','#1a5a8a'));o.push(T(ox-1.8*sc,oy-1.8*sc,"A'","#1a5a8a",11,'middle',true));}
+  o.push(T(240,14,'Rotation 90\u00b0 Anticlockwise About O','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q6 - Rotation 180° about origin */
+function dQ6(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=240,oy=150,sc=28;
+  o=o.concat(grid(ox,oy,sc,7,5));o=o.concat(labels(ox,oy,sc,4));
+  // A: (1,1),(3,1),(2,3). 180° rotation: (-1,-1),(-3,-1),(-2,-3)
+  var A=[[ox+1*sc,oy-1*sc],[ox+3*sc,oy-1*sc],[ox+2*sc,oy-3*sc]];
+  var B=[[ox-1*sc,oy+1*sc],[ox-3*sc,oy+1*sc],[ox-2*sc,oy+3*sc]];
+  o.push('<circle cx="'+ox+'" cy="'+oy+'" r="4" fill="#888" stroke="#fff" stroke-width="1.5"/>');
+  // problem always visible at step 0
+  o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
+if(p>=1){o.push(poly(A,'#fde8e8','#C0272D'));o.push(T(ox+2*sc,oy-1.7*sc,'A','#C0272D',11,'middle',true));}
+  if(p>=2){
+    A.forEach(function(pt,i){o.push(L(pt[0],pt[1],B[i][0],B[i][1],'#888',1,'3,3'));});
+    o.push(T(ox+10,oy-24,'180\u00b0','#C8922A',10,'start',false));
+  }
+  if(p>=3){o.push(poly(B,'#e8f4fe','#1a5a8a'));o.push(T(ox-2*sc,oy+2*sc,"A'","#1a5a8a",11,'middle',true));}
+  o.push(T(240,14,'Rotation 180\u00b0 About the Origin','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q7 - Enlargement from origin */
+function dQ7(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=80,oy=260,sc=28;
+  o=o.concat(grid(ox,oy,sc,14,8));
+  [0,1,2,3,4,5,6,7,8].forEach(function(v){o.push(T(ox+v*sc,oy+14,v,'#aaa',9));});
+  [0,1,2,3,4,5,6,7].forEach(function(v){if(v>0)o.push(T(ox-10,oy-v*sc+4,v,'#aaa',9,'end'));});
+  o.push(L(ox,oy-8*sc,ox,oy+10,'#ccc',1.5));o.push(L(ox-10,oy,ox+14*sc+10,oy,'#ccc',1.5));
+  // A: (1,1),(2,1),(1,3). Scale factor 3 from O: (3,3),(6,3),(3,9)
+  var A=[[ox+1*sc,oy-1*sc],[ox+2*sc,oy-1*sc],[ox+1*sc,oy-3*sc]];
+  var B=[[ox+3*sc,oy-3*sc],[ox+6*sc,oy-3*sc],[ox+3*sc,oy-9*sc]];
+  o.push('<circle cx="'+ox+'" cy="'+oy+'" r="4" fill="#888" stroke="#fff" stroke-width="1.5"/>');
+  o.push(T(ox-8,oy+14,'O','#888',10,'end',false));
+  if(p>=1){o.push(poly(A,'#fde8e8','#C0272D'));o.push(T(ox+1.5*sc,oy-1.8*sc,'A','#C0272D',11,'middle',true));}
+  if(p>=2){
+    // Ray lines from O through each vertex
+    A.forEach(function(pt){o.push(L(ox,oy,pt[0]*3-ox*2,pt[1]*3-oy*2,'#C8922A',1,'4,3'));});
+  }
+  if(p>=3){
+    o.push(poly(B,'#e8f4fe','#1a5a8a'));
+    o.push(T(ox+4*sc,oy-5*sc,"A'","#1a5a8a",11,'middle',true));
+    o.push(T(300,200,'Scale factor 3:','#241A17',11,'start',false));
+    o.push(T(300,218,'Each distance from O','#241A17',11,'start',false));
+    o.push(T(300,236,'is multiplied by 3.','#241A17',11,'start',false));
+  }
+  o.push(T(240,14,'Enlargement, Scale Factor 3, Centre O','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q8 - Enlargement from a point */
+function dQ8(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=80,oy=260,sc=28;
+  o=o.concat(grid(ox,oy,sc,14,8));
+  [0,1,2,3,4,5,6,7,8,9,10].forEach(function(v){o.push(T(ox+v*sc,oy+14,v,'#aaa',9));});
+  [0,1,2,3,4,5,6,7].forEach(function(v){if(v>0)o.push(T(ox-10,oy-v*sc+4,v,'#aaa',9,'end'));});
+  o.push(L(ox,oy-8*sc,ox,oy+10,'#ccc',1.5));o.push(L(ox-10,oy,ox+14*sc+10,oy,'#ccc',1.5));
+  // Centre C=(1,1), A: (2,1),(3,1),(2,3). SF=2 from C: A'=(3,1),(5,1),(3,5)
+  var cx=ox+1*sc,cy=oy-1*sc;
+  var A=[[ox+2*sc,oy-1*sc],[ox+3*sc,oy-1*sc],[ox+2*sc,oy-3*sc]];
+  var B=[[ox+3*sc,oy-1*sc],[ox+5*sc,oy-1*sc],[ox+3*sc,oy-5*sc]];
+  o.push('<circle cx="'+cx+'" cy="'+cy+'" r="5" fill="#888" stroke="#fff" stroke-width="2"/>');
+  o.push(T(cx-8,cy+14,'C(1,1)','#888',10,'end',false));
+  if(p>=1){o.push(poly(A,'#fde8e8','#C0272D'));o.push(T(ox+2.5*sc,oy-1.8*sc,'A','#C0272D',11,'middle',true));}
+  if(p>=2){
+    // Rays from C through each vertex of A
+    A.forEach(function(pt){
+      var ex=cx+(pt[0]-cx)*2.5,ey=cy+(pt[1]-cy)*2.5;
+      o.push(L(cx,cy,ex,ey,'#C8922A',1,'4,3'));
+    });
+    o.push(T(240,250,'Draw rays from C through each vertex of A.','#6b5750',10,'middle',false));
+  }
+  if(p>=3){
+    o.push(poly(B,'#e8f4fe','#1a5a8a'));
+    o.push(T(ox+4*sc,oy-3*sc,"A'","#1a5a8a",11,'middle',true));
+    o.push(T(240,250,'Scale factor 2: each vertex is twice as far from C.','#6b5750',10,'middle',false));
+  }
+  o.push(T(240,14,'Enlargement, Scale Factor 2, Centre C(1,1)','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q9 - Fractional enlargement */
+function dQ9(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=60,oy=260,sc=28;
+  o=o.concat(grid(ox,oy,sc,14,8));
+  [0,2,4,6,8,10,12].forEach(function(v){o.push(T(ox+v*sc,oy+14,v,'#aaa',9));});
+  [0,2,4,6].forEach(function(v){if(v>0)o.push(T(ox-10,oy-v*sc+4,v,'#aaa',9,'end'));});
+  o.push(L(ox,oy-8*sc,ox,oy+10,'#ccc',1.5));o.push(L(ox-10,oy,ox+14*sc+10,oy,'#ccc',1.5));
+  // A: (2,2),(8,2),(2,6). SF=0.5 from O: (1,1),(4,1),(1,3)
+  var A=[[ox+2*sc,oy-2*sc],[ox+8*sc,oy-2*sc],[ox+2*sc,oy-6*sc]];
+  var B=[[ox+1*sc,oy-1*sc],[ox+4*sc,oy-1*sc],[ox+1*sc,oy-3*sc]];
+  o.push('<circle cx="'+ox+'" cy="'+oy+'" r="4" fill="#888" stroke="#fff" stroke-width="1.5"/>');
+  o.push(T(ox-8,oy+14,'O','#888',10,'end',false));
+  if(p>=1){o.push(poly(A,'#fde8e8','#C0272D'));o.push(T(ox+4*sc,oy-3*sc,'A','#C0272D',11,'middle',true));}
+  if(p>=2){A.forEach(function(pt){o.push(L(ox,oy,pt[0],pt[1],'#C8922A',1,'4,3'));});}
+  if(p>=3){
+    o.push(poly(B,'#e8f4fe','#1a5a8a'));
+    o.push(T(ox+2*sc,oy-1.5*sc,"A'","#1a5a8a",11,'middle',true));
+    o.push(T(300,200,'SF = 0.5: image is','#241A17',11,'start',false));
+    o.push(T(300,218,'half the size of A.','#241A17',11,'start',false));
+    o.push(T(300,236,'Closer to centre O.','#241A17',11,'start',false));
+  }
+  o.push(T(240,14,'Enlargement, Scale Factor 0.5, Centre O','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q10 - Describing transformations */
+function dQ10(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=200,oy=180,sc=28;
+  o=o.concat(grid(ox,oy,sc,7,6));o=o.concat(labels(ox,oy,sc,4));
+  // A: (1,1),(3,1),(2,3).  A': (-1,-1),(-3,-1),(-2,-3) = 180° rotation about O
+  var A=[[ox+1*sc,oy-1*sc],[ox+3*sc,oy-1*sc],[ox+2*sc,oy-3*sc]];
+  var Ap=[[ox-1*sc,oy+1*sc],[ox-3*sc,oy+1*sc],[ox-2*sc,oy+3*sc]];
+  o.push('<circle cx="'+ox+'" cy="'+oy+'" r="4" fill="#888" stroke="#fff" stroke-width="1.5"/>');
+  o.push(T(ox+8,oy+14,'O','#888',10,'start',false));
+  if(p>=1){
+    o.push(poly(A,'#fde8e8','#C0272D'));
+    o.push(T(ox+2*sc,oy-1.8*sc,'A','#C0272D',11,'middle',true));
+    o.push(poly(Ap,'#e8f4fe','#1a5a8a'));
+    o.push(T(ox-2*sc,oy+1.8*sc,"A'","#1a5a8a",11,'middle',true));
+  }
+  if(p>=2){
+    A.forEach(function(pt,i){o.push(L(pt[0],pt[1],Ap[i][0],Ap[i][1],'#888',1,'3,3'));});
+    o.push(T(330,80,'Is it a reflection?','#241A17',11,'start',false));
+    o.push(T(330,96,'No \u2014 shape flipped AND moved.','#6b5750',10,'start',false));
+    o.push(T(330,116,'Is it a rotation?','#241A17',11,'start',false));
+  }
+  if(p>=3){
+    o.push(T(330,132,'Each vertex is opposite O.','#6b5750',10,'start',false));
+    o.push(T(330,152,'Rotation 180\u00b0 about O.','#C0272D',12,'start',true));
+    o.push(T(240,260,'Always state: type, angle/direction, centre of rotation.','#6b5750',10,'middle',false));
+  }
+  o.push(T(240,14,'Describing a Transformation Fully','#C0272D',12,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+var QS=[
+  {ey:'Q1 \u2022 Year 11 \u2022 Foundation',ti:'Translation',su:'Translate triangle A by vector (3, 2). State the coordinates of the image.',steps:[
+    {lb:'What is a translation?',dr:dQ1,ht:'<p>A <b>translation</b> moves every point of a shape by the same amount in the same direction. We describe it with a <b>column vector</b>: top = right/left, bottom = up/down.</p>'},
+    {lb:'Draw the original shape',dr:dQ1,ht:'<p>Triangle A has vertices at (1,1), (3,1) and (2,3). It is drawn in red.</p>'},
+    {lb:'Apply the vector',dr:dQ1,ht:'<div class="fm">Vector (3) means 3 right and 2 up<br>      (2)</div><p>Each vertex moves 3 right and 2 up. The dashed orange arrow shows the movement.</p>'},
+    {lb:'Image A\'',dr:dQ1,ht:'<p>New vertices: (1+3,1+2)=(4,3), (3+3,1+2)=(6,3), (2+3,3+2)=(5,5).</p><div class="fm">Shape is congruent to original \u2014 same size, same shape.</div>'},
+    {lb:'Your turn',dr:dQ1,ht:function(){var x=rInt(-5,5),y=rInt(-5,5),tx=rInt(1,6),ty=rInt(-4,4),ans=x+tx;return {question:'Vertex ('+x+', '+y+') is translated by ('+tx+', '+ty+'). What is the new x-coordinate?',hints:['Add x-component: '+x+' + '+tx],ans:ans,tol:0.01,unit:'',working:x+' + '+tx+' = <b>'+ans+'</b>. New coords: ('+ans+', '+(y+ty)+')'};  }}
+  ]},
+  {ey:'Q2 \u2022 Year 11 \u2022 Foundation',ti:'Reflection in the x-axis',su:'Reflect triangle A in the x-axis.',steps:[
+    {lb:'What is a reflection?',dr:dQ2,ht:'<p>A <b>reflection</b> creates a mirror image of a shape in a given line (the <b>mirror line</b>). Every point is the same perpendicular distance from the mirror line on the other side.</p>'},
+    {lb:'Draw the shape',dr:dQ2,ht:'<p>Triangle A has vertices at (1,2), (4,2) and (2,4). The x-axis (y=0) is highlighted in gold.</p>'},
+    {lb:'Reflect each vertex',dr:dQ2,ht:'<p>For reflection in the x-axis: <b>(x, y) \u2192 (x, \u2212y)</b>. Dashed lines show each point\u2019s path to its image.</p>'},
+    {lb:'Image A\'',dr:dQ2,ht:'<div class="fm">(1,2) \u2192 (1,\u22122) &nbsp;|&nbsp; (4,2) \u2192 (4,\u22122) &nbsp;|&nbsp; (2,4) \u2192 (2,\u22124)</div><p>The image is the same size and shape \u2014 congruent.</p>'},
+    {lb:'Your turn',dr:dQ2,ht:function(){return tryItStatic({question:'Vertex (3, 5) is reflected in the x-axis. What is the new y-coordinate?',hints:['Reflection in x-axis: (x, y) \u2192 (x, -y)','Negate the y-coordinate'],ans:-5,exact:0.1,unit:'',working:'(3, 5) \u2192 (3, <b>-5</b>).'})}}
+  ]},
+  {ey:'Q3 \u2022 Year 11 \u2022 Foundation',ti:'Reflection in the y-axis',su:'Reflect triangle A in the y-axis.',steps:[
+    {lb:'The mirror line',dr:dQ3,ht:'<p>The y-axis is the vertical line x=0. For reflection in the y-axis: <b>(x, y) \u2192 (\u2212x, y)</b>. Only the x-coordinate changes sign.</p>'},
+    {lb:'Draw shape A',dr:dQ3,ht:'<p>Triangle A has vertices at (1,1), (3,1) and (1,4).</p>'},
+    {lb:'Reflect each vertex',dr:dQ3,ht:'<p>Dashed lines show perpendicular paths to the mirror line.</p><div class="fm">(1,1)\u2192(-1,1) &nbsp;|&nbsp; (3,1)\u2192(-3,1) &nbsp;|&nbsp; (1,4)\u2192(-1,4)</div>'},
+    {lb:'Image A\'',dr:dQ3,ht:'<p>The image A\u2019 is the blue shape. It is congruent but is a mirror image \u2014 it cannot be superimposed on A by translation or rotation alone.</p>'},
+    {lb:'Your turn',dr:dQ3,ht:function(){return tryItStatic({question:'Vertex (-4, 2) is reflected in the y-axis. What is the new x-coordinate?',hints:['Reflection in y-axis: (x, y) \u2192 (-x, y)','Negate the x-coordinate: -(-4)'],ans:4,exact:0.1,unit:'',working:'(\u22124, 2) \u2192 (<b>4</b>, 2).'})}}
+  ]},
+  {ey:'Q4 \u2022 Year 11 \u2022 Extended',ti:'Reflection in y = x',su:'Reflect triangle A in the line y = x.',steps:[
+    {lb:'The mirror line y = x',dr:dQ4,ht:'<p>The line y = x goes diagonally through the origin at 45\u00b0. Reflecting in it <b>swaps the x and y coordinates</b>: (x, y) \u2192 (y, x).</p>'},
+    {lb:'Draw shape A',dr:dQ4,ht:'<p>Triangle A has vertices at (1,3), (3,3) and (1,1).</p>'},
+    {lb:'Reflect each vertex',dr:dQ4,ht:'<div class="fm">(1,3)\u2192(3,1) &nbsp;|&nbsp; (3,3)\u2192(3,3) &nbsp;|&nbsp; (1,1)\u2192(1,1)</div><p>Dashed lines connect each vertex to its image.</p>'},
+    {lb:'Image A\'',dr:dQ4,ht:'<p>The vertex (3,3) lies on y=x, so it maps to itself. Image A\u2019 is the blue triangle.</p>'},
+    {lb:'Your turn',dr:dQ4,ht:function(){return tryItStatic({question:'Point (2, 7) is reflected in y = x. What is the new y-coordinate?',hints:['Reflection in y=x: (x, y) \u2192 (y, x)','The new point is (7, 2)'],ans:2,exact:0.1,unit:'',working:'(2, 7) \u2192 (7, 2). New y-coordinate = <b>2</b>.'})}}
+  ]},
+  {ey:'Q5 \u2022 Year 11 \u2022 Extended',ti:'Rotation 90\u00b0 Anticlockwise',su:'Rotate triangle A by 90\u00b0 anticlockwise about the origin.',steps:[
+    {lb:'The rule',dr:dQ5,ht:'<p>For a <b>90\u00b0 anticlockwise rotation</b> about the origin:<br><b>(x, y) \u2192 (\u2212y, x)</b></p><p>Negate the y-coordinate and swap.</p>'},
+    {lb:'Draw shape A',dr:dQ5,ht:'<p>Triangle A has vertices at (1,1), (3,1) and (2,3).</p>'},
+    {lb:'Centre and arc',dr:dQ5,ht:'<p>The centre of rotation is the origin O. The dashed arc shows the 90\u00b0 anticlockwise turn.</p>'},
+    {lb:'Apply the rule',dr:dQ5,ht:'<div class="fm">(1,1)\u2192(-1,1) | (3,1)\u2192(-1,3) | (2,3)\u2192(-3,2)</div><p>Image A\u2019 is shown in blue.</p>'},
+    {lb:'Your turn',dr:dQ5,ht:function(){return tryItStatic({question:'Point (4, 2) is rotated 90\u00b0 anticlockwise about O. What is the new x-coordinate?',hints:['Rule: (x, y) \u2192 (-y, x)','New x = -y = -2'],ans:-2,exact:0.1,unit:'',working:'(4, 2) \u2192 (-2, 4). New x-coordinate = <b>-2</b>.'})}}
+  ]},
+  {ey:'Q6 \u2022 Year 11 \u2022 Extended',ti:'Rotation 180\u00b0 About the Origin',su:'Rotate triangle A by 180\u00b0 about the origin O.',steps:[
+    {lb:'The rule',dr:dQ6,ht:'<p>For a <b>180\u00b0 rotation</b> about the origin (clockwise or anticlockwise \u2014 same result):<br><b>(x, y) \u2192 (\u2212x, \u2212y)</b></p><p>Both coordinates change sign.</p>'},
+    {lb:'Draw shape A',dr:dQ6,ht:'<p>Triangle A has vertices at (1,1), (3,1) and (2,3).</p>'},
+    {lb:'Connect through O',dr:dQ6,ht:'<p>Each vertex and its image are connected through the origin. Dashed lines show (x,y) and (-x,-y) are equidistant from O.</p>'},
+    {lb:'Apply the rule',dr:dQ6,ht:'<div class="fm">(1,1)\u2192(-1,-1) | (3,1)\u2192(-3,-1) | (2,3)\u2192(-2,-3)</div><p>Image A\u2019 is in blue.</p>'},
+    {lb:'Your turn',dr:dQ6,ht:function(){return tryItStatic({question:'Point (5, -3) is rotated 180\u00b0 about the origin. What is the new y-coordinate?',hints:['180\u00b0 rotation: (x, y) \u2192 (-x, -y)','New y = -(-3)'],ans:3,exact:0.1,unit:'',working:'(5, -3) \u2192 (-5, 3). New y = <b>3</b>.'})}}
+  ]},
+  {ey:'Q7 \u2022 Year 11 \u2022 Extended',ti:'Enlargement from the Origin',su:'Enlarge triangle A by scale factor 3, centre O.',steps:[
+    {lb:'What is enlargement?',dr:dQ7,ht:'<p>An <b>enlargement</b> changes the size of a shape. Each point moves away from (or towards) the <b>centre of enlargement</b> by the <b>scale factor</b>. Shape and angles are preserved \u2014 the image is <b>similar</b> to the original.</p>'},
+    {lb:'Draw shape A',dr:dQ7,ht:'<p>Triangle A has vertices at (1,1), (2,1) and (1,3).</p>'},
+    {lb:'Draw rays from centre',dr:dQ7,ht:'<p>From the origin O, draw rays (dashed) through each vertex of A. The image vertices lie on these rays, 3\u00d7 further from O.</p>'},
+    {lb:'Find the image',dr:dQ7,ht:'<div class="fm">SF 3 from O: (x,y) \u2192 (3x, 3y)</div><div class="fm">(1,1)\u2192(3,3) | (2,1)\u2192(6,3) | (1,3)\u2192(3,9)</div>'},
+    {lb:'Your turn',dr:dQ7,ht:function(){return tryItStatic({question:'Vertex (2, 1) is enlarged from the origin by scale factor 3. What is the new x-coordinate?',hints:['Multiply by the scale factor','2 \u00d7 3 = ?'],ans:6,exact:0.1,unit:'',working:'(2,1) \u00d7 3 = (6, 3). New x-coordinate = <b>6</b>.'})}}
+  ]},
+  {ey:'Q8 \u2022 Year 11 \u2022 Extended',ti:'Enlargement from a Given Centre',su:'Enlarge triangle A by scale factor 2, centre C(1,1).',steps:[
+    {lb:'The method',dr:dQ8,ht:'<p>When the centre of enlargement is not the origin, use rays from C. For each vertex P, the image P\u2019 satisfies: <b>CP\u2019 = SF \u00d7 CP</b>.</p>'},
+    {lb:'Draw the shape and centre',dr:dQ8,ht:'<p>Triangle A has vertices (2,1), (3,1) and (2,3). Centre C = (1,1) is marked in grey.</p>'},
+    {lb:'Draw rays from C',dr:dQ8,ht:'<p>Rays go from C through each vertex of A. Extend them beyond the vertices.</p>'},
+    {lb:'Find the image',dr:dQ8,ht:'<p>Each vertex is doubled in distance from C:</p><div class="fm">(2,1): C\u2192P = (1,0), so P\u2019 = C + 2(1,0) = (3,1)</div><div class="fm">(3,1): C\u2192P = (2,0), P\u2019 = (5,1)  &nbsp; (2,3): P\u2019 = (3,5)</div>'},
+    {lb:'Your turn',dr:dQ8,ht:function(){return tryItStatic({question:'Vertex (3,1) enlarged SF 2 from C(1,1). Vector from C to vertex = (2,0). What is the new x-coordinate of the image?',hints:['New point = C + 2 \u00d7 (vector)','C + 2\u00d7(2,0) = (1,1) + (4,0)'],ans:5,exact:0.1,unit:'',working:'C + 2(2,0) = (1+4, 1+0) = (<b>5</b>, 1).'})}}
+  ]},
+  {ey:'Q9 \u2022 Year 11 \u2022 Extended',ti:'Fractional Enlargement',su:'Enlarge triangle A by scale factor 0.5, centre O.',steps:[
+    {lb:'What does SF < 1 mean?',dr:dQ9,ht:'<p>A scale factor <b>between 0 and 1</b> produces an image <b>smaller</b> than the original, but still on the same side of the centre. The shape is similar \u2014 same angles, smaller sides.</p>'},
+    {lb:'Draw shape A',dr:dQ9,ht:'<p>Triangle A has vertices at (2,2), (8,2) and (2,6).</p>'},
+    {lb:'Draw rays from O',dr:dQ9,ht:'<p>Rays from O pass through each vertex. The image is <b>half</b> as far from O as the original vertex.</p>'},
+    {lb:'Find the image',dr:dQ9,ht:'<div class="fm">SF 0.5 from O: (x,y) \u2192 (0.5x, 0.5y)</div><div class="fm">(2,2)\u2192(1,1) | (8,2)\u2192(4,1) | (2,6)\u2192(1,3)</div>'},
+    {lb:'Your turn',dr:dQ9,ht:function(){return tryItStatic({question:'Vertex (8, 2) is enlarged from O by SF 0.5. What is the new x-coordinate?',hints:['Multiply by 0.5','8 \u00d7 0.5 = ?'],ans:4,exact:0.1,unit:'',working:'8 \u00d7 0.5 = <b>4</b>. Image vertex: (4, 1).'})}}
+  ]},
+  {ey:'Q10 \u2022 Year 11 \u2022 Extended',ti:'Describing Transformations',su:'Fully describe the single transformation that maps triangle A to A\'.',steps:[
+    {lb:'Identify the type',dr:dQ10,ht:'<p>You must identify one of: <b>Translation</b> (vector), <b>Reflection</b> (mirror line), <b>Rotation</b> (angle, direction, centre), or <b>Enlargement</b> (SF, centre).</p>'},
+    {lb:'Compare A and A\'',dr:dQ10,ht:'<p>A is at (1,1),(3,1),(2,3). A\u2019 is at (-1,-1),(-3,-1),(-2,-3). Same size and shape \u2014 not an enlargement. Check for reflection or rotation.</p>'},
+    {lb:'Test for rotation',dr:dQ10,ht:'<p>Connect corresponding vertices. Each line passes through the origin O. This suggests rotation about O. Both signs are negated \u2014 that matches 180\u00b0 rotation.</p>'},
+    {lb:'State the full transformation',dr:dQ10,ht:'<div class="fm">Rotation of 180\u00b0 about the origin O.</div><p>Always state: type, angle/direction if rotation, centre if rotation or enlargement, vector if translation, mirror line if reflection.</p>'},
+    {lb:'Your turn',dr:dQ10,ht:function(){return tryItStatic({question:'A shape is mapped from (2,3) to (-2,-3), preserving size. Which rotation angle (in degrees) describes this transformation about O?',hints:['Both coordinates negated: (x,y) \u2192 (-x,-y)','This matches 180\u00b0 rotation'],ans:180,exact:1,unit:'\u00b0',working:'(x,y) \u2192 (-x,-y) is a <b>180\u00b0</b> rotation about the origin.'})}}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');var _ht=typeof st.ht==='function'?st.ht():st.ht;if(typeof _ht==='object'&&_ht!==null){var _id='t'+Math.random().toString(36).slice(2);(function(o){ST[_id]=function(){return o;};}(_ht));_ht=genTry(_id,_ht);}p.innerHTML='<div class="sl">'+st.lb+'</div>'+_ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+</body>
+</html>
