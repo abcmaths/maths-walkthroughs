@@ -172,6 +172,52 @@
 
     <!-- IMPORT USERS -->
     <div class="tab-panel" id="tab-import">
+
+      <!-- Create individual user -->
+      <div class="section" style="margin-bottom:24px">
+        <div class="section-title" style="margin-bottom:20px">Create Individual User</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:16px">
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Full Name</label>
+            <input type="text" id="cu-name" placeholder="e.g. Amara Okafor" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Email</label>
+            <input type="email" id="cu-email" placeholder="s.firstname.surname@abc.sch.ng" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Password</label>
+            <input type="text" id="cu-password" value="ABC2026" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Role</label>
+            <select id="cu-role" onchange="toggleCUYear()" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;background:white">
+              <option value="student">Student</option>
+              <option value="teacher">Teacher</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div id="cu-year-row">
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Year Group</label>
+            <select id="cu-year" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;background:white">
+              <option value="7">Year 7</option>
+              <option value="8">Year 8</option>
+              <option value="9">Year 9</option>
+              <option value="10">Year 10</option>
+              <option value="11">Year 11</option>
+              <option value="12">Year 12</option>
+            </select>
+          </div>
+          <div id="cu-form-row">
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Form Class (optional)</label>
+            <input type="text" id="cu-form" placeholder="e.g. 10A" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
+          </div>
+        </div>
+        <button class="btn" style="width:auto;padding:10px 28px" onclick="createIndividualUser()">Create User</button>
+        <div class="message" id="cu-msg"></div>
+      </div>
+
+      <!-- CSV Import -->
       <div class="section">
         <div class="section-title" style="margin-bottom:8px">Import Students via CSV</div>
         <p style="font-size:0.85rem;color:#666;margin-bottom:16px">
@@ -202,6 +248,7 @@
         </div>
         <div class="import-log" id="import-log"></div>
       </div>
+    </div>
     </div>
 
   </div>
@@ -529,6 +576,64 @@
     el.className = 'message ' + type;
     el.textContent = text;
   }
+
+  window.toggleCUYear = function() {
+    const role = document.getElementById('cu-role').value;
+    const show = role === 'student';
+    document.getElementById('cu-year-row').style.display  = show ? 'block' : 'none';
+    document.getElementById('cu-form-row').style.display  = show ? 'block' : 'none';
+  };
+
+  window.createIndividualUser = async function() {
+    const name     = document.getElementById('cu-name').value.trim();
+    const email    = document.getElementById('cu-email').value.trim();
+    const password = document.getElementById('cu-password').value.trim();
+    const role     = document.getElementById('cu-role').value;
+    const year     = parseInt(document.getElementById('cu-year').value);
+    const form     = document.getElementById('cu-form').value.trim();
+    const msg      = document.getElementById('cu-msg');
+    const btn      = document.querySelector('#tab-import .btn');
+
+    if (!name || !email || !password) {
+      showMsg('cu-msg', 'error', 'Please fill in name, email and password.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Creating…';
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: name, role } }
+    });
+
+    if (error) {
+      showMsg('cu-msg', 'error', 'Error: ' + error.message);
+      btn.disabled = false;
+      btn.textContent = 'Create User';
+      return;
+    }
+
+    if (data.user) {
+      const update = { full_name: name, role };
+      if (role === 'student') {
+        update.year_group  = year;
+        update.form_class  = form || null;
+      }
+      await supabase.from('profiles').update(update).eq('id', data.user.id);
+    }
+
+    showMsg('cu-msg', 'success', `✓ ${name} created successfully. They can log in with ${email} / ${password}`);
+    btn.disabled = false;
+    btn.textContent = 'Create User';
+
+    // Clear form
+    document.getElementById('cu-name').value  = '';
+    document.getElementById('cu-email').value = '';
+    document.getElementById('cu-form').value  = '';
+    document.getElementById('cu-password').value = 'ABC2026';
+  };
 
   window.signOut = async function() {
     await supabase.auth.signOut();
