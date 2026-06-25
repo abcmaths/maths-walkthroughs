@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABC Maths — My Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #C0272D; color: white; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .logo { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; }
+    .subtitle { font-size: 0.85rem; opacity: 0.85; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 14px; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .user-name { font-size: 0.9rem; opacity: 0.9; }
+    .btn-signout { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; padding: 5px 12px; font-size: 0.82rem; cursor: pointer; }
+    .btn-signout:hover { background: rgba(255,255,255,0.3); }
+    main { flex: 1; max-width: 960px; width: 100%; margin: 0 auto; padding: 28px 16px; }
+    .welcome { margin-bottom: 24px; }
+    .welcome h1 { font-size: 1.5rem; color: #222; font-weight: 700; }
+    .welcome p { font-size: 0.9rem; color: #666; margin-top: 4px; }
+    .summary-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .summary-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); text-align: center; }
+    .summary-card .big { font-size: 2rem; font-weight: 700; color: #C0272D; line-height: 1; }
+    .summary-card .label { font-size: 0.8rem; color: #777; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .aoc-banner { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 28px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+    .aoc-banner h2 { font-size: 1rem; color: #333; font-weight: 700; flex: 1; min-width: 160px; }
+    .aoc-item { text-align: center; }
+    .aoc-item .val { font-size: 1.6rem; font-weight: 700; color: #C0272D; }
+    .aoc-item .lbl { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.4px; }
+    .aoc-none { color: #aaa; font-size: 0.88rem; font-style: italic; }
+    .section-title { font-size: 1rem; font-weight: 700; color: #333; margin-bottom: 14px; }
+    .strands { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 28px; }
+    .strand-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .strand-row:last-child { margin-bottom: 0; }
+    .strand-name { width: 130px; font-size: 0.85rem; color: #444; font-weight: 600; flex-shrink: 0; }
+    .bar-bg { flex: 1; background: #eee; border-radius: 99px; height: 10px; overflow: hidden; }
+    .bar-fill { height: 100%; background: #C0272D; border-radius: 99px; transition: width 0.6s ease; }
+    .strand-pct { width: 40px; text-align: right; font-size: 0.82rem; color: #888; flex-shrink: 0; }
+    .topics-section { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 28px; }
+    .topics-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+    .year-selector { display: flex; align-items: center; gap: 8px; }
+    .year-selector label { font-size: 0.82rem; font-weight: 600; color: #555; white-space: nowrap; }
+    .year-selector select { padding: 7px 10px; border: 1.5px solid #ddd; border-radius: 5px; font-size: 0.88rem; color: #333; background: white; cursor: pointer; }
+    .year-selector select:focus { outline: none; border-color: #C0272D; }
+    .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .topic-card { border: 1.5px solid #eee; border-radius: 6px; padding: 12px 14px; cursor: pointer; transition: all 0.18s; }
+    .topic-card:hover { border-color: #C0272D; box-shadow: 0 2px 8px rgba(192,39,45,0.12); transform: translateY(-1px); }
+    .topic-card.completed { border-color: #a5d6a7; background: #f1f8f1; }
+    .topic-card.started   { border-color: #ffe082; background: #fffde7; }
+    .topic-card .t-name   { font-size: 0.88rem; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .topic-card .t-strand { font-size: 0.75rem; color: #888; }
+    .topic-card .t-status { font-size: 0.72rem; font-weight: 700; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .topic-card.completed .t-status { color: #2e7d32; }
+    .topic-card.started   .t-status { color: #f57f17; }
+    .topic-card.not-started .t-status { color: #bbb; }
+    .no-topics { text-align: center; color: #aaa; padding: 32px; font-size: 0.9rem; font-style: italic; }
+    .loading { text-align: center; color: #aaa; padding: 40px; font-size: 0.95rem; }
+    .error-box { background: #fde8e8; color: #a01f24; border-radius: 8px; padding: 20px; margin: 20px 0; font-size: 0.9rem; }
+    footer { text-align: center; padding: 16px; font-size: 0.78rem; color: #aaa; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">ABC</div>
+    <div class="subtitle">Maths Portal</div>
+  </div>
+  <div class="header-right">
+    <span class="user-name" id="header-name"></span>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+</header>
+
+<main>
+  <div id="loading" class="loading">Loading your dashboard…</div>
+  <div id="error-section" style="display:none"><div class="error-box" id="error-msg"></div></div>
+  <div id="dashboard" style="display:none">
+
+    <div class="welcome">
+      <h1 id="welcome-name"></h1>
+      <p id="welcome-sub"></p>
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-card"><div class="big" id="stat-total">—</div><div class="label">My Topics</div></div>
+      <div class="summary-card"><div class="big" id="stat-completed">—</div><div class="label">Completed</div></div>
+      <div class="summary-card"><div class="big" id="stat-started">—</div><div class="label">In Progress</div></div>
+      <div class="summary-card"><div class="big" id="stat-pct">—</div><div class="label">My Progress</div></div>
+    </div>
+
+    <div class="aoc-banner">
+      <h2>End-of-Year Assessment (AOC)</h2>
+      <div id="aoc-content" class="aoc-none">No result recorded yet.</div>
+    </div>
+
+    <div class="strands">
+      <div class="section-title">My Progress by Strand</div>
+      <div id="strand-bars"></div>
+    </div>
+
+    <div class="topics-section">
+      <div class="topics-header">
+        <div class="section-title" style="margin-bottom:0">Browse Topics</div>
+        <div class="year-selector">
+          <label>Viewing:</label>
+          <select id="year-select" onchange="renderTopics()">
+            <option value="own">My Year</option>
+            <option value="7">Year 7</option>
+            <option value="8">Year 8</option>
+            <option value="9">Year 9</option>
+            <option value="10">Year 10</option>
+            <option value="11">Year 11</option>
+            <option value="12">Year 12</option>
+            <option value="13">Add Maths</option>
+          </select>
+        </div>
+      </div>
+      <div id="viewing-label" style="font-size:0.82rem;color:#888;margin-bottom:14px"></div>
+      <div class="topic-grid" id="topic-grid"></div>
+    </div>
+
+  </div>
+</main>
+
+<footer>© Adorable British College — ABC Maths Portal</footer>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  const WALKTHROUGH_FILES = {
+    // Year 7
+    'Y7-ALG-01': 'year07/algebra-y7.html',
+    'Y7-GEO-01': 'year07/geometry-y7.html',
+    'Y7-NUM-01': 'year07/number-y7.html',
+    'Y7-STA-01': 'year07/stats-y7.html',
+    'Y7-SEQ-01': 'year07/sequences-y7.html',
+    'Y7-MIS-01': 'year07/misconceptions-y7.html',
+    // Year 8
+    'Y8-NUM-01': 'year08/place-value-rounding-y8.html',
+    'Y8-NUM-02': 'year08/addition-subtraction-y8.html',
+    'Y8-NUM-03': 'year08/multiplication-y8.html',
+    'Y8-NUM-04': 'year08/division-y8.html',
+    'Y8-NUM-05': 'year08/integers-powers-roots-y8.html',
+    'Y8-NUM-06': 'year08/fractions-percentages-ratio-y8.html',
+    'Y8-NUM-07': 'year08/mixed-operations-y8.html',
+    'Y8-ALG-01': 'year08/algebra-y8.html',
+    'Y8-ALG-02': 'year08/manipulation-y8.html',
+    'Y8-ALG-03': 'year08/equations-sequences-graphs-y8.html',
+    'Y8-GEO-01': 'year08/angles-y8.html',
+    'Y8-GEO-02': 'year08/shapes-construction-y8.html',
+    'Y8-GEO-03': 'year08/perimeter-area-volume-y8.html',
+    'Y8-GEO-04': 'year08/transformations-y8.html',
+    'Y8-STA-01': 'year08/data-handling-y8.html',
+    'Y8-STA-02': 'year08/probability-y8.html',
+    'Y8-MEA-01': 'year08/units-measurement-y8.html',
+    'Y8-MIS-01': 'year08/misconceptions-y8.html',
+    // Year 9
+    'Y9-NUM-01': 'year09/number-y9.html',
+    'Y9-ALG-01': 'year09/algebra-y9.html',
+    'Y9-ALG-02': 'year09/sequences-y9.html',
+    'Y9-ALG-03': 'year09/graphs-y9.html',
+    'Y9-GEO-01': 'year09/geometry-y9.html',
+    'Y9-GEO-02': 'year09/mensuration-y9.html',
+    'Y9-GEO-03': 'year09/pythagoras-trig-y9.html',
+    'Y9-GEO-04': 'year09/transformations-y9.html',
+    'Y9-STA-01': 'year09/statistics-y9.html',
+    'Y9-STA-02': 'year09/probability-y9.html',
+    'Y9-MIS-01': 'year09/misconceptions-y9.html',
+    // Year 10
+    'Y10-NUM-01': 'year10/number-y10.html',
+    'Y10-ALG-01': 'year10/algebra-y10.html',
+    'Y10-ALG-02': 'year10/graphs-y10.html',
+    'Y10-GEO-01': 'year10/geometry-y10.html',
+    'Y10-GEO-02': 'year10/mensuration-y10.html',
+    'Y10-GEO-03': 'year10/constructions-y10.html',
+    'Y10-GEO-04': 'year10/trig-y10.html',
+    'Y10-CAL-01': 'year10/calculus-diff-y10.html',
+    'Y10-STA-01': 'year10/stats-y10.html',
+    'Y10-MIS-01': 'year10/misconceptions-y10.html',
+    // Year 11
+    'Y11-ALG-01': 'year11/algebra-y11.html',
+    'Y11-GEO-01': 'year11/geometry-y11.html',
+    'Y11-GEO-02': 'year11/mensuration-y11.html',
+    'Y11-GEO-03': 'year11/transformations-y11.html',
+    'Y11-NUM-01': 'year11/percentages-y11.html',
+    'Y11-ALG-02': 'year11/sets-y12.html',
+    'Y11-VEC-01': 'year11/vectors-y11.html',
+    'Y11-MIS-01': 'year11/misconceptions-y11.html',
+    // Year 12
+    'Y12-ALG-01': 'year12/algebra-y12.html',
+    'Y12-GEO-01': 'year12/geometry-y12.html',
+    'Y12-CAL-01': 'year12/calculus-y12.html',
+    'Y12-NUM-01': 'year12/number-bases-y12.html',
+    'Y12-NUM-02': 'year12/modulo-y12.html',
+    'Y12-ALG-02': 'year12/binary-operations-y12.html',
+    'Y12-ALG-03': 'year12/matrices-y12.html',
+    'Y12-ALG-04': 'year12/sets-y12.html',
+    // Add Maths
+    'AM-ALG-01': 'addmaths/algebra-addmaths.html',
+    'AM-ALG-02': 'addmaths/equations-inequalities-addmaths.html',
+    'AM-ALG-03': 'addmaths/quadratics-advanced-addmaths.html',
+    'AM-ALG-04': 'addmaths/polynomials-addmaths.html',
+    'AM-ALG-05': 'addmaths/partial-fractions-addmaths.html',
+    'AM-ALG-06': 'addmaths/simultaneous-advanced-addmaths.html',
+    'AM-ALG-07': 'addmaths/surds-addmaths.html',
+    'AM-ALG-08': 'addmaths/series-addmaths.html',
+    'AM-FUN-01': 'addmaths/functions-addmaths.html',
+    'AM-LOG-01': 'addmaths/log-exp-addmaths.html',
+    'AM-GEO-01': 'addmaths/straight-lines-addmaths.html',
+    'AM-GEO-02': 'addmaths/circle-equation-addmaths.html',
+    'AM-CAL-01': 'addmaths/differentiation-addmaths.html',
+    'AM-CAL-02': 'addmaths/integration-addmaths.html',
+    'AM-TRI-01': 'addmaths/trigonometry-addmaths.html',
+    'AM-TRI-02': 'addmaths/trig-identities-addmaths.html',
+    'AM-TRI-03': 'addmaths/circular-measure-addmaths.html',
+    'AM-STA-01': 'addmaths/permutation-combination-addmaths.html',
+  };
+
+  let allTopics   = [];
+  let progressMap = {};
+  let myYearGroup = 7;
+  let userId      = null;
+
+  function showError(msg) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error-msg').textContent = msg;
+    document.getElementById('error-section').style.display = 'block';
+  }
+
+  async function init() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { window.location.href = 'login.html'; return; }
+      userId = session.user.id;
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles').select('*').eq('id', userId).maybeSingle();
+
+      if (profileError) { showError('Error loading profile: ' + profileError.message); return; }
+      if (!profile)     { showError('No profile found. Please contact your teacher.'); return; }
+
+      if (profile.role === 'admin' || profile.role === 'teacher') {
+        window.location.href = 'dashboard-staff.html'; return;
+      }
+
+      myYearGroup = profile.year_group || 7;
+
+      document.getElementById('header-name').textContent = profile.full_name;
+      document.getElementById('welcome-name').textContent = 'Hello, ' + profile.full_name.split(' ')[0] + '!';
+      document.getElementById('welcome-sub').textContent = 'Year ' + myYearGroup + (profile.form_class ? ' · ' + profile.form_class : '') + ' · Maths';
+
+      // Load all topics
+      const { data: topics } = await supabase
+        .from('topics').select('*').order('year_group').order('sort_order');
+      allTopics = topics || [];
+
+      // Load progress
+      const { data: progress } = await supabase
+        .from('walkthrough_progress').select('*').eq('student_id', userId);
+      (progress || []).forEach(p => { progressMap[p.topic_id] = p.status; });
+
+      // AOC
+      const { data: aoc } = await supabase
+        .from('eoy_aoc_results').select('*').eq('student_id', userId)
+        .order('academic_year', { ascending: false }).limit(1).maybeSingle();
+
+      // Summary cards (own year)
+      const myTopics  = allTopics.filter(t => t.year_group === myYearGroup);
+      const total     = myTopics.length;
+      const completed = myTopics.filter(t => progressMap[t.id] === 'completed').length;
+      const started   = myTopics.filter(t => progressMap[t.id] === 'started').length;
+      const pct       = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      document.getElementById('stat-total').textContent     = total;
+      document.getElementById('stat-completed').textContent = completed;
+      document.getElementById('stat-started').textContent   = started;
+      document.getElementById('stat-pct').textContent       = pct + '%';
+
+      // AOC banner
+      if (aoc) {
+        const aocEl = document.getElementById('aoc-content');
+        aocEl.className = '';
+        aocEl.innerHTML = `
+          <div class="aoc-item"><div class="val">${aoc.total_marks}/${aoc.max_marks}</div><div class="lbl">Marks</div></div>
+          <div class="aoc-item"><div class="val">${aoc.percentage}%</div><div class="lbl">Percentage</div></div>
+          <div class="aoc-item"><div class="val">${aoc.grade || '—'}</div><div class="lbl">Grade</div></div>
+          <div class="aoc-item"><div class="val" style="font-size:0.9rem;color:#555">${aoc.academic_year}</div><div class="lbl">Academic Year</div></div>`;
+      }
+
+      // Strand bars (own year)
+      const strands = {};
+      myTopics.forEach(t => {
+        const s = t.strand || 'Other';
+        if (!strands[s]) strands[s] = { total: 0, completed: 0 };
+        strands[s].total++;
+        if (progressMap[t.id] === 'completed') strands[s].completed++;
+      });
+
+      document.getElementById('strand-bars').innerHTML = Object.entries(strands).length > 0
+        ? Object.entries(strands).map(([name, data]) => {
+            const p = data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0;
+            return `<div class="strand-row">
+              <div class="strand-name">${name}</div>
+              <div class="bar-bg"><div class="bar-fill" style="width:${p}%"></div></div>
+              <div class="strand-pct">${p}%</div>
+            </div>`;
+          }).join('')
+        : '<div class="no-topics">No topics added for your year group yet.</div>';
+
+      // Set default selector and render
+      document.getElementById('year-select').value = 'own';
+      window.renderTopics();
+
+      document.getElementById('loading').style.display  = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+
+    } catch(err) {
+      console.error('Dashboard error:', err);
+      showError('Something went wrong: ' + err.message);
+    }
+  }
+
+  window.renderTopics = function() {
+    const value = document.getElementById('year-select').value;
+    let filtered, label;
+
+    if (value === 'own') {
+      filtered = allTopics.filter(t => t.year_group === myYearGroup);
+      label    = 'Showing your Year ' + myYearGroup + ' topics';
+    } else if (value === '13') {
+      filtered = allTopics.filter(t => t.year_group === 13);
+      label    = 'Showing Add Maths topics';
+    } else {
+      const yr = parseInt(value);
+      filtered = allTopics.filter(t => t.year_group === yr);
+      label    = 'Showing Year ' + yr + ' topics' + (yr !== myYearGroup ? ' — browsing another year' : '');
+    }
+
+    document.getElementById('viewing-label').textContent = label;
+
+    const grid = document.getElementById('topic-grid');
+    if (filtered.length === 0) {
+      grid.innerHTML = '<div class="no-topics">No topics available here yet — check back soon!</div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map(t => {
+      const status = progressMap[t.id] || 'not-started';
+      const lbl    = status === 'completed' ? '✓ Completed' : status === 'started' ? '▶ In Progress' : '○ Not started';
+      const file   = WALKTHROUGH_FILES[t.topic_code] || '#';
+      return `<div class="topic-card ${status}" onclick="openTopic('${t.id}','${file}')">
+        <div class="t-name">${t.topic_name}</div>
+        <div class="t-strand">${t.strand || ''}</div>
+        <div class="t-status">${lbl}</div>
+      </div>`;
+    }).join('');
+  };
+
+  window.openTopic = async function(topicId, file) {
+    if (file === '#') { alert('This walkthrough is coming soon!'); return; }
+    if (progressMap[topicId] !== 'completed') {
+      await supabase.from('walkthrough_progress').upsert({
+        student_id: userId, topic_id: parseInt(topicId),
+        status: 'started', last_visited_at: new Date().toISOString(),
+      }, { onConflict: 'student_id,topic_id' });
+      progressMap[topicId] = 'started';
+    }
+    window.location.href = file;
+  };
+
+  window.signOut = async function() {
+    await supabase.auth.signOut();
+    window.location.href = 'login.html';
+  };
+
+  init();
+</script>
+
+</body>
+</html>

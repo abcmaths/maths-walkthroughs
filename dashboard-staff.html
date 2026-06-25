@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABC Maths — Staff Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #C0272D; color: white; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .logo { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; }
+    .subtitle { font-size: 0.85rem; opacity: 0.85; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 14px; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .user-name { font-size: 0.9rem; opacity: 0.9; }
+    .btn-signout { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; padding: 5px 12px; font-size: 0.82rem; cursor: pointer; }
+    .btn-signout:hover { background: rgba(255,255,255,0.3); }
+    .nav-tabs { background: white; border-bottom: 2px solid #eee; display: flex; padding: 0 24px; }
+    .nav-tab { padding: 14px 20px; font-size: 0.9rem; font-weight: 600; color: #888; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .nav-tab.active { color: #C0272D; border-bottom-color: #C0272D; }
+    .nav-tab:hover { color: #C0272D; }
+    main { flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 28px 16px; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .summary-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .summary-card { background: white; border-radius: 8px; padding: 18px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); text-align: center; }
+    .summary-card .big { font-size: 1.8rem; font-weight: 700; color: #C0272D; line-height: 1; }
+    .summary-card .label { font-size: 0.78rem; color: #777; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .section { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 24px; }
+    .section-title { font-size: 1rem; font-weight: 700; color: #333; }
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .filter-bar select, .filter-bar input { padding: 7px 10px; border: 1.5px solid #ddd; border-radius: 5px; font-size: 0.88rem; color: #333; background: white; }
+    .filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: #C0272D; }
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th { background: #f9f9f9; color: #555; font-weight: 700; padding: 10px 12px; text-align: left; border-bottom: 2px solid #eee; white-space: nowrap; }
+    td { padding: 9px 12px; border-bottom: 1px solid #f0f0f0; color: #333; }
+    tr:hover td { background: #fafafa; }
+    tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+    .badge-green  { background: #e8f5e9; color: #2e7d32; }
+    .badge-yellow { background: #fffde7; color: #f57f17; }
+    .badge-grey   { background: #f5f5f5; color: #999; }
+    .badge-red    { background: #fde8e8; color: #C0272D; }
+    .progress-cell { display: flex; align-items: center; gap: 8px; }
+    .mini-bar { flex: 1; background: #eee; border-radius: 99px; height: 7px; min-width: 60px; }
+    .mini-fill { height: 100%; background: #C0272D; border-radius: 99px; }
+    .pct-label { font-size: 0.78rem; color: #888; width: 32px; text-align: right; }
+    .btn-link { background: none; border: none; color: #C0272D; font-size: 0.82rem; font-weight: 600; cursor: pointer; text-decoration: underline; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: white; border-radius: 10px; width: 90%; max-width: 680px; max-height: 80vh; overflow-y: auto; padding: 28px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); }
+    .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .modal-header h2 { font-size: 1.1rem; color: #222; }
+    .modal-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #888; line-height: 1; }
+    .import-zone { border: 2px dashed #ddd; border-radius: 8px; padding: 40px; text-align: center; margin-bottom: 20px; transition: border-color 0.2s; cursor: pointer; }
+    .import-zone:hover, .import-zone.dragover { border-color: #C0272D; background: #fff5f5; }
+    .import-zone p { color: #888; font-size: 0.9rem; margin-top: 8px; }
+    .import-zone .icon { font-size: 2.5rem; }
+    .btn { padding: 10px 20px; background: #C0272D; color: white; border: none; border-radius: 5px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .btn:hover { background: #a01f24; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    .btn-outline { padding: 10px 20px; background: white; color: #C0272D; border: 2px solid #C0272D; border-radius: 5px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+    .import-log { background: #1e1e1e; color: #d4d4d4; border-radius: 6px; padding: 16px; font-family: monospace; font-size: 0.82rem; max-height: 240px; overflow-y: auto; display: none; }
+    .import-log .ok  { color: #6ec26e; }
+    .import-log .err { color: #f47e7e; }
+    .import-log .inf { color: #9cdcfe; }
+    .message { margin-top: 12px; padding: 10px 14px; border-radius: 5px; font-size: 0.88rem; display: none; }
+    .message.error   { background: #fde8e8; color: #a01f24; display: block; }
+    .message.success { background: #e8f5e9; color: #2e7d32; display: block; }
+    .loading { text-align: center; color: #aaa; padding: 40px; font-size: 0.95rem; }
+    footer { text-align: center; padding: 16px; font-size: 0.78rem; color: #aaa; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">ABC</div>
+    <div class="subtitle">Maths Portal — Staff</div>
+  </div>
+  <div class="header-right">
+    <span class="user-name" id="header-name"></span>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+</header>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="showTab('overview')">Overview</div>
+  <div class="nav-tab" onclick="showTab('progress')">Student Progress</div>
+  <div class="nav-tab" onclick="showTab('aoc')">AOC Results</div>
+  <div class="nav-tab" onclick="showTab('import')">Import Users</div>
+</div>
+
+<main>
+  <div id="loading" class="loading">Loading dashboard…</div>
+  <div id="content" style="display:none">
+
+    <!-- OVERVIEW -->
+    <div class="tab-panel active" id="tab-overview">
+      <div class="summary-row">
+        <div class="summary-card"><div class="big" id="ov-students">—</div><div class="label">Students</div></div>
+        <div class="summary-card"><div class="big" id="ov-teachers">—</div><div class="label">Teachers</div></div>
+        <div class="summary-card"><div class="big" id="ov-topics">—</div><div class="label">Topics</div></div>
+        <div class="summary-card"><div class="big" id="ov-completions">—</div><div class="label">Completions</div></div>
+        <div class="summary-card"><div class="big" id="ov-avg">—</div><div class="label">Avg Progress</div></div>
+      </div>
+      <div class="section">
+        <div class="section-title" style="margin-bottom:16px">Progress by Year Group</div>
+        <div id="year-bars"></div>
+      </div>
+    </div>
+
+    <!-- STUDENT PROGRESS -->
+    <div class="tab-panel" id="tab-progress">
+      <div class="filter-bar">
+        <select id="filter-year" onchange="renderProgressTable()">
+          <option value="">All Year Groups</option>
+          <option value="7">Year 7</option><option value="8">Year 8</option>
+          <option value="9">Year 9</option><option value="10">Year 10</option>
+          <option value="11">Year 11</option><option value="12">Year 12</option>
+        </select>
+        <input type="text" id="filter-search" placeholder="Search by name…" oninput="renderProgressTable()">
+      </div>
+      <div class="section">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Student</th><th>Year</th><th>Form</th><th>Topics Completed</th><th>Progress</th><th>Last Active</th><th></th></tr></thead>
+            <tbody id="progress-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- AOC RESULTS -->
+    <div class="tab-panel" id="tab-aoc">
+      <div class="filter-bar">
+        <select id="aoc-filter-year" onchange="renderAOCTable()">
+          <option value="">All Year Groups</option>
+          <option value="7">Year 7</option><option value="8">Year 8</option>
+          <option value="9">Year 9</option><option value="10">Year 10</option>
+          <option value="11">Year 11</option><option value="12">Year 12</option>
+        </select>
+        <input type="text" id="aoc-filter-search" placeholder="Search by name…" oninput="renderAOCTable()">
+      </div>
+      <div class="section">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Student</th><th>Year</th><th>Academic Year</th><th>Marks</th><th>Percentage</th><th>Grade</th><th>Notes</th></tr></thead>
+            <tbody id="aoc-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMPORT USERS -->
+    <div class="tab-panel" id="tab-import">
+      <div class="section">
+        <div class="section-title" style="margin-bottom:8px">Import Students via CSV</div>
+        <p style="font-size:0.85rem;color:#666;margin-bottom:16px">
+          CSV must have these column headers:<br>
+          <code style="background:#f5f5f5;padding:2px 6px;border-radius:3px">email, full_name, year_group, password</code>
+        </p>
+        <a href="#" onclick="downloadTemplate();return false;" style="font-size:0.85rem;color:#C0272D;font-weight:600;text-decoration:underline;display:inline-block;margin-bottom:20px">↓ Download CSV template</a>
+        <div class="import-zone" id="drop-zone" onclick="document.getElementById('csv-input').click()">
+          <div class="icon">📄</div>
+          <div style="font-size:1rem;font-weight:600;color:#555;margin-top:8px">Click to choose CSV file</div>
+          <p>or drag and drop here</p>
+        </div>
+        <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="handleCSV(this.files[0])">
+        <div id="preview-section" style="display:none">
+          <div class="section-title" style="margin-bottom:12px;margin-top:20px">Preview — <span id="preview-count"></span> students</div>
+          <div class="tbl-wrap" style="margin-bottom:16px">
+            <table>
+              <thead><tr><th>#</th><th>Email</th><th>Full Name</th><th>Year Group</th><th>Status</th></tr></thead>
+              <tbody id="preview-tbody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <button class="btn" id="import-btn" onclick="runImport()">Import All Students</button>
+            <button class="btn-outline" onclick="resetImport()">Clear</button>
+            <span id="import-progress" style="font-size:0.85rem;color:#888"></span>
+          </div>
+          <div class="message" id="import-msg"></div>
+        </div>
+        <div class="import-log" id="import-log"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Student Detail</h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<footer>© Adorable British College — Staff Portal</footer>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+  window._supabase = supabase;
+
+  let allStudents = [], allProgress = [], allTopics = [], allAOC = [];
+
+  // ── Use getSession directly — more reliable than onAuthStateChange for page loads ──
+  async function init() {
+    console.log('Checking session…');
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('Session:', session ? 'found' : 'none');
+
+    if (!session) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles').select('*').eq('id', session.user.id).single();
+
+    console.log('Profile:', profile, profileError);
+
+    if (!profile || profile.role === 'student') {
+      window.location.href = 'dashboard-student.html';
+      return;
+    }
+
+    document.getElementById('header-name').textContent = profile.full_name;
+
+    // ── Fetch all data in parallel ──
+    const [
+      { data: students },
+      { data: teachers },
+      { data: topics },
+      { data: progress },
+      { data: aoc }
+    ] = await Promise.all([
+      supabase.from('profiles').select('*').eq('role', 'student').order('full_name'),
+      supabase.from('profiles').select('*').in('role', ['teacher', 'admin']),
+      supabase.from('topics').select('*').order('year_group').order('sort_order'),
+      supabase.from('walkthrough_progress').select('*'),
+      supabase.from('eoy_aoc_results').select('*, profiles(full_name, year_group, form_class)')
+    ]);
+
+    console.log('Data loaded — students:', (students||[]).length, 'topics:', (topics||[]).length);
+
+    allStudents = students || [];
+    allTopics   = topics   || [];
+    allProgress = progress || [];
+    allAOC      = aoc      || [];
+
+    // ── Overview stats ──
+    document.getElementById('ov-students').textContent    = allStudents.length;
+    document.getElementById('ov-teachers').textContent    = (teachers || []).length;
+    document.getElementById('ov-topics').textContent      = allTopics.length;
+    document.getElementById('ov-completions').textContent = allProgress.filter(p => p.status === 'completed').length;
+
+    const avgPct = allStudents.length > 0 ? (() => {
+      const perStudent = allStudents.map(s => {
+        const yrTopics = allTopics.filter(t => t.year_group === s.year_group);
+        const done = allProgress.filter(p => p.student_id === s.id && p.status === 'completed').length;
+        return yrTopics.length > 0 ? (done / yrTopics.length) * 100 : 0;
+      });
+      return Math.round(perStudent.reduce((a,b) => a+b, 0) / perStudent.length);
+    })() : 0;
+    document.getElementById('ov-avg').textContent = avgPct + '%';
+
+    // ── Year group bars ──
+    document.getElementById('year-bars').innerHTML = [7,8,9,10,11,12].map(yr => {
+      const yrStudents = allStudents.filter(s => s.year_group === yr);
+      const yrTopics   = allTopics.filter(t => t.year_group === yr);
+      if (yrStudents.length === 0 || yrTopics.length === 0) return '';
+      const totalPossible = yrStudents.length * yrTopics.length;
+      const totalDone = allProgress.filter(p =>
+        p.status === 'completed' &&
+        yrStudents.some(s => s.id === p.student_id) &&
+        yrTopics.some(t => t.id === p.topic_id)
+      ).length;
+      const pct = Math.round((totalDone / totalPossible) * 100);
+      return `
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:70px;font-size:0.85rem;font-weight:600;color:#444">Year ${yr}</div>
+          <div style="flex:1;background:#eee;border-radius:99px;height:10px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:#C0272D;border-radius:99px"></div>
+          </div>
+          <div style="width:90px;font-size:0.82rem;color:#888">${pct}% · ${yrStudents.length} students</div>
+        </div>`;
+    }).join('');
+
+    window.renderProgressTable();
+    window.renderAOCTable();
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+  }
+
+  init();
+
+  // ── Progress table ──
+  window.renderProgressTable = function() {
+    const yearFilter   = document.getElementById('filter-year').value;
+    const searchFilter = document.getElementById('filter-search').value.toLowerCase();
+    const filtered = allStudents.filter(s => {
+      return (!yearFilter || String(s.year_group) === yearFilter) &&
+             (!searchFilter || s.full_name.toLowerCase().includes(searchFilter));
+    });
+    const tbody = document.getElementById('progress-tbody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px">No students found</td></tr>';
+      return;
+    }
+    tbody.innerHTML = filtered.map(s => {
+      const yrTopics = allTopics.filter(t => t.year_group === s.year_group);
+      const done     = allProgress.filter(p => p.student_id === s.id && p.status === 'completed').length;
+      const pct      = yrTopics.length > 0 ? Math.round((done / yrTopics.length) * 100) : 0;
+      const lastP    = allProgress.filter(p => p.student_id === s.id)
+                        .sort((a,b) => new Date(b.last_visited_at) - new Date(a.last_visited_at))[0];
+      const lastDate = lastP ? new Date(lastP.last_visited_at).toLocaleDateString('en-GB') : '—';
+      return `<tr>
+        <td><strong>${s.full_name}</strong></td>
+        <td>Year ${s.year_group || '—'}</td>
+        <td>${s.form_class || '—'}</td>
+        <td>${done} / ${yrTopics.length}</td>
+        <td><div class="progress-cell"><div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div><div class="pct-label">${pct}%</div></div></td>
+        <td>${lastDate}</td>
+        <td><button class="btn-link" onclick="openStudentModal('${s.id}')">View</button></td>
+      </tr>`;
+    }).join('');
+  };
+
+  // ── AOC table ──
+  window.renderAOCTable = function() {
+    const yearFilter   = document.getElementById('aoc-filter-year').value;
+    const searchFilter = document.getElementById('aoc-filter-search').value.toLowerCase();
+    const filtered = allAOC.filter(r => {
+      const name = r.profiles?.full_name || '';
+      return (!yearFilter || String(r.year_group) === yearFilter) &&
+             (!searchFilter || name.toLowerCase().includes(searchFilter));
+    });
+    const tbody = document.getElementById('aoc-tbody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px">No results recorded yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = filtered.map(r => {
+      const pct = r.percentage || 0;
+      const badgeClass = pct >= 70 ? 'badge-green' : pct >= 50 ? 'badge-yellow' : 'badge-red';
+      return `<tr>
+        <td><strong>${r.profiles?.full_name || '—'}</strong></td>
+        <td>Year ${r.year_group}</td>
+        <td>${r.academic_year}</td>
+        <td>${r.total_marks} / ${r.max_marks}</td>
+        <td><span class="badge ${badgeClass}">${pct}%</span></td>
+        <td>${r.grade || '—'}</td>
+        <td style="font-size:0.82rem;color:#666">${r.teacher_notes || '—'}</td>
+      </tr>`;
+    }).join('');
+  };
+
+  // ── Student modal ──
+  window.openStudentModal = function(studentId) {
+    const s = allStudents.find(s => s.id === studentId);
+    if (!s) return;
+    document.getElementById('modal-title').textContent = s.full_name;
+    const yrTopics = allTopics.filter(t => t.year_group === s.year_group);
+    const sProg    = allProgress.filter(p => p.student_id === s.id);
+    const progMap  = {};
+    sProg.forEach(p => { progMap[p.topic_id] = p.status; });
+    const aocR = allAOC.find(r => r.student_id === s.id);
+    const done = sProg.filter(p => p.status === 'completed').length;
+
+    document.getElementById('modal-body').innerHTML = `
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+        <div style="flex:1;min-width:120px;background:#f9f9f9;border-radius:6px;padding:14px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${done}/${yrTopics.length}</div>
+          <div style="font-size:0.75rem;color:#888;text-transform:uppercase;margin-top:4px">Topics Done</div>
+        </div>
+        <div style="flex:1;min-width:120px;background:#f9f9f9;border-radius:6px;padding:14px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${aocR ? aocR.percentage+'%' : '—'}</div>
+          <div style="font-size:0.75rem;color:#888;text-transform:uppercase;margin-top:4px">AOC Score</div>
+        </div>
+        <div style="flex:1;min-width:120px;background:#f9f9f9;border-radius:6px;padding:14px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${aocR ? aocR.grade || '—' : '—'}</div>
+          <div style="font-size:0.75rem;color:#888;text-transform:uppercase;margin-top:4px">AOC Grade</div>
+        </div>
+      </div>
+      <div style="font-weight:700;color:#333;margin-bottom:12px">Topic Progress</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">
+        ${yrTopics.map(t => {
+          const status = progMap[t.id] || 'not-started';
+          const badge  = status === 'completed' ? 'badge-green' : status === 'started' ? 'badge-yellow' : 'badge-grey';
+          const label  = status === 'completed' ? '✓ Done' : status === 'started' ? '▶ Started' : '○ Not started';
+          return `<div style="border:1.5px solid #eee;border-radius:6px;padding:10px">
+            <div style="font-size:0.82rem;font-weight:600;color:#333;margin-bottom:4px">${t.topic_name}</div>
+            <span class="badge ${badge}">${label}</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+    document.getElementById('modal').classList.add('open');
+  };
+
+  window.closeModal = function() { document.getElementById('modal').classList.remove('open'); };
+
+  // ── Tab switching ──
+  window.showTab = function(name) {
+    const names = ['overview','progress','aoc','import'];
+    document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+  };
+
+  // ── CSV template ──
+  window.downloadTemplate = function() {
+    const csv = 'email,full_name,year_group,password\njohn.doe@abc.edu,John Doe,7,Welcome123\njane.smith@abc.edu,Jane Smith,10,Welcome123';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'abc_students_template.csv';
+    a.click();
+  };
+
+  // ── CSV import ──
+  let parsedRows = [];
+
+  window.handleCSV = function(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const lines = e.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      const missing = ['email','full_name','year_group','password'].filter(r => !headers.includes(r));
+      if (missing.length > 0) { showMsg('import-msg','error','Missing columns: '+missing.join(', ')); return; }
+      parsedRows = lines.slice(1).map(line => {
+        const vals = line.split(',').map(v => v.trim());
+        const row = {};
+        headers.forEach((h,i) => { row[h] = vals[i] || ''; });
+        return row;
+      }).filter(r => r.email && r.full_name);
+      document.getElementById('preview-count').textContent = parsedRows.length;
+      document.getElementById('preview-tbody').innerHTML = parsedRows.map((r,i) => `
+        <tr><td>${i+1}</td><td>${r.email}</td><td>${r.full_name}</td><td>Year ${r.year_group}</td>
+        <td><span class="badge badge-grey">Pending</span></td></tr>`).join('');
+      document.getElementById('preview-section').style.display = 'block';
+    };
+    reader.readAsText(file);
+  };
+
+  const dropZone = document.getElementById('drop-zone');
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); window.handleCSV(e.dataTransfer.files[0]); });
+
+  window.runImport = async function() {
+    if (!parsedRows.length) return;
+    const btn  = document.getElementById('import-btn');
+    const log  = document.getElementById('import-log');
+    const prog = document.getElementById('import-progress');
+    btn.disabled = true;
+    log.style.display = 'block';
+    log.innerHTML = `<div class="inf">Starting import of ${parsedRows.length} students…</div>`;
+    let ok = 0, fail = 0;
+    for (let i = 0; i < parsedRows.length; i++) {
+      const row = parsedRows[i];
+      prog.textContent = `Processing ${i+1} of ${parsedRows.length}…`;
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: row.email, password: row.password,
+          options: { data: { full_name: row.full_name, role: 'student' } }
+        });
+        if (error) throw new Error(error.message);
+        if (data.user) {
+          await supabase.from('profiles').update({ year_group: parseInt(row.year_group) || null }).eq('id', data.user.id);
+        }
+        log.innerHTML += `<div class="ok">✓ ${row.full_name} (${row.email})</div>`;
+        ok++;
+        document.querySelectorAll('#preview-tbody tr')[i].querySelector('td:last-child').innerHTML = '<span class="badge badge-green">✓ Done</span>';
+      } catch(err) {
+        log.innerHTML += `<div class="err">✗ ${row.full_name} — ${err.message}</div>`;
+        fail++;
+        document.querySelectorAll('#preview-tbody tr')[i].querySelector('td:last-child').innerHTML = '<span class="badge badge-red">✗ Failed</span>';
+      }
+      log.scrollTop = log.scrollHeight;
+      await new Promise(r => setTimeout(r, 300));
+    }
+    log.innerHTML += `<div class="inf">─── Done: ${ok} imported, ${fail} failed ───</div>`;
+    prog.textContent = '';
+    btn.disabled = false;
+    showMsg('import-msg', ok > 0 ? 'success' : 'error', `Import complete: ${ok} added${fail>0?', '+fail+' failed':''}.`);
+  };
+
+  window.resetImport = function() {
+    parsedRows = [];
+    document.getElementById('preview-section').style.display = 'none';
+    document.getElementById('import-log').style.display = 'none';
+    document.getElementById('import-log').innerHTML = '';
+    document.getElementById('csv-input').value = '';
+    document.getElementById('import-msg').style.display = 'none';
+  };
+
+  function showMsg(id, type, text) {
+    const el = document.getElementById(id);
+    el.className = 'message ' + type;
+    el.textContent = text;
+  }
+
+  window.signOut = async function() {
+    await supabase.auth.signOut();
+    window.location.href = 'login.html';
+  };
+</script>
+
+</body>
+</html>

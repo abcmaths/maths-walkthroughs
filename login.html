@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABC Maths — Sign In</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #C0272D;
+      color: white;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .logo { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; }
+    .subtitle { font-size: 0.85rem; opacity: 0.85; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 14px; }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+      width: 100%;
+      max-width: 400px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: #C0272D;
+      color: white;
+      padding: 28px 32px 24px;
+      text-align: center;
+    }
+    .card-header h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+    .card-header p  { font-size: 0.85rem; opacity: 0.85; }
+
+    .card-body { padding: 32px; }
+
+    .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 28px; }
+    .tab {
+      flex: 1; text-align: center; padding: 10px;
+      cursor: pointer; font-size: 0.9rem; font-weight: 600; color: #888;
+      border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;
+    }
+    .tab.active { color: #C0272D; border-bottom-color: #C0272D; }
+
+    .form-group { margin-bottom: 18px; }
+    label {
+      display: block; font-size: 0.82rem; font-weight: 600; color: #444;
+      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    select {
+      width: 100%; padding: 10px 12px; border: 1.5px solid #ddd;
+      border-radius: 5px; font-size: 0.95rem; color: #222;
+      transition: border-color 0.2s; background: white;
+    }
+    input:focus, select:focus { outline: none; border-color: #C0272D; }
+
+    .btn {
+      width: 100%; padding: 12px; background: #C0272D; color: white;
+      border: none; border-radius: 5px; font-size: 1rem;
+      font-weight: 700; cursor: pointer; margin-top: 8px; transition: background 0.2s;
+    }
+    .btn:hover { background: #a01f24; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+    .message { margin-top: 16px; padding: 10px 14px; border-radius: 5px; font-size: 0.88rem; display: none; }
+    .message.error   { background: #fde8e8; color: #a01f24; display: block; }
+    .message.success { background: #e8f5e9; color: #2e7d32; display: block; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    footer { text-align: center; padding: 16px; font-size: 0.78rem; color: #aaa; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ABC</div>
+  <div class="subtitle">Adorable British College — Maths Portal</div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="card-header">
+      <h1>Welcome Back</h1>
+      <p>Sign in to access your maths walkthroughs</p>
+    </div>
+    <div class="card-body">
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('login')">Sign In</div>
+        <div class="tab" onclick="switchTab('register')">Register</div>
+      </div>
+
+      <!-- SIGN IN -->
+      <div class="panel active" id="panel-login">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••">
+        </div>
+        <button class="btn" id="login-btn" onclick="handleLogin()">Sign In</button>
+        <div class="message" id="login-msg"></div>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="panel" id="panel-register">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="reg-name" placeholder="e.g. Amara Okafor">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="At least 6 characters">
+        </div>
+        <div class="form-group">
+          <label>I am a…</label>
+          <select id="reg-role" onchange="toggleYearGroup()">
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+          </select>
+        </div>
+        <div class="form-group" id="year-group-row">
+          <label>Year Group</label>
+          <select id="reg-year">
+            <option value="7">Year 7</option>
+            <option value="8">Year 8</option>
+            <option value="9">Year 9</option>
+            <option value="10">Year 10</option>
+            <option value="11">Year 11</option>
+            <option value="12">Year 12</option>
+          </select>
+        </div>
+        <button class="btn" id="reg-btn" onclick="handleRegister()">Create Account</button>
+        <div class="message" id="reg-msg"></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer>© Adorable British College — ABC Maths Portal</footer>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  // ── If already logged in, redirect immediately ──
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    console.log('Already logged in, redirecting…');
+    await redirectByRole(session.user.id);
+  }
+
+  // ── Sign In ──
+  window.handleLogin = async function() {
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const msg      = document.getElementById('login-msg');
+    const btn      = document.getElementById('login-btn');
+
+    if (!email || !password) { showMsg(msg, 'error', 'Please enter your email and password.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      showMsg(msg, 'error', 'Incorrect email or password. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+      return;
+    }
+
+    showMsg(msg, 'success', 'Signed in! Redirecting…');
+    await redirectByRole(data.user.id);
+  };
+
+  // ── Register ──
+  window.handleRegister = async function() {
+    const name     = document.getElementById('reg-name').value.trim();
+    const email    = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const role     = document.getElementById('reg-role').value;
+    const year     = parseInt(document.getElementById('reg-year').value);
+    const msg      = document.getElementById('reg-msg');
+    const btn      = document.getElementById('reg-btn');
+
+    if (!name || !email || !password) { showMsg(msg, 'error', 'Please fill in all fields.'); return; }
+    if (password.length < 6) { showMsg(msg, 'error', 'Password must be at least 6 characters.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Creating account…';
+
+    const { data, error } = await supabase.auth.signUp({
+      email, password,
+      options: { data: { full_name: name, role } }
+    });
+
+    if (error) {
+      showMsg(msg, 'error', error.message);
+      btn.disabled = false;
+      btn.textContent = 'Create Account';
+      return;
+    }
+
+    if (role === 'student' && data.user) {
+      await supabase.from('profiles').update({ year_group: year }).eq('id', data.user.id);
+    }
+
+    showMsg(msg, 'success', 'Account created! You can now sign in.');
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+    switchTab('login');
+  };
+
+  // ── Redirect by role ──
+  async function redirectByRole(userId) {
+    console.log('Checking role for user:', userId);
+
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .maybeSingle();
+
+    console.log('Profile:', profile, 'Error:', error);
+
+    if (!profile) {
+      console.log('No profile found — staying on login page');
+      return;
+    }
+
+    if (profile.role === 'admin' || profile.role === 'teacher') {
+      window.location.href = 'dashboard-staff.html';
+    } else {
+      window.location.href = 'dashboard-student.html';
+    }
+  }
+
+  // ── Tab switching ──
+  window.switchTab = function(tab) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+    });
+    document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+    document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+  };
+
+  // ── Show/hide year group ──
+  window.toggleYearGroup = function() {
+    const role = document.getElementById('reg-role').value;
+    document.getElementById('year-group-row').style.display = role === 'student' ? 'block' : 'none';
+  };
+
+  // ── Helper ──
+  function showMsg(el, type, text) {
+    el.className = 'message ' + type;
+    el.textContent = text;
+  }
+</script>
+
+</body>
+</html>
