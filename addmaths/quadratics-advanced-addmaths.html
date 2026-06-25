@@ -134,7 +134,7 @@ document.addEventListener('click',function(e){
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
     var tol=o.tol!=null?o.tol:0.5;
-    if(Math.abs(v-o.ans)<=tol){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;}
+    if(Math.abs(v-o.ans)<=tol){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! <details class="wk" style="margin-top:6px"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>';}
     else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
   }
 });
@@ -282,31 +282,70 @@ function dQ4(p){
 }
 
 function dQ5(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
   o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Quadratic inequality: (x\u2212'+V.q5p+')(x\u2212'+V.q5q+') < 0','#C0272D',12,'middle',true));
-  var ox=240,oy=180,sx=36,sy=22;
-  o.push(L(ox-5*sx,oy,ox+5*sx,oy,'#888',1.5));o.push(L(ox,oy+sy,ox,oy-4*sy,'#888',1.5));
+  o.push(T(240,30,'Solve (x\u2212'+V.q5p+')(x\u2212'+V.q5q+') < 0','#C0272D',12,'middle',true));
+  // Centre x-origin on midpoint of roots so both arms show equally
+  var mx=r2((V.q5p+V.q5q)/2);
+  var sx=28,sy=20;
+  var ox=240-mx*sx;   // pixel x for x=0
+  var oy=175;         // pixel y for y=0
+  var xlo=mx-5.5,xhi=mx+5.5;
+  // Axes
+  o.push(L(14,oy,466,oy,'#888',1.5));
+  o.push(L(ox,52,ox,248,'#888',1.5));
+  o.push(T(470,oy+4,'x','#888',10,'start',false));
+  o.push(T(ox+4,50,'y','#888',10,'start',false));
+  // x-axis tick at x=0 if visible
+  if(ox>20&&ox<460){o.push(T(ox,oy+12,'0','#aaa',8,'middle',false));}
+  // p==0: dashed reference y=x\u00b2 shifted to same vertex as our parabola, to show the shape
+  if(p===0){
+    var vy=r2(-(V.q5p-mx)*(V.q5q-mx));  // vertex y of actual parabola (negative)
+    var refPts='';
+    for(var x=xlo;x<=xhi;x+=0.07){var y=(x-mx)*(x-mx)+vy;if(y>=-3.5&&y<=6)refPts+=(refPts===''?'M':'L')+(ox+x*sx)+','+(oy-y*sy)+' ';}
+    if(refPts)o.push('<path d="'+refPts+'" fill="none" stroke="#ccc" stroke-width="1.5" stroke-dasharray="6,4"/>');
+    o.push(T(ox+mx*sx+6,oy-5.5*sy,'y = x\u00b2 shape','#bbb',8,'start',false));
+    o.push(R(14,252,452,36,'#f8f8f8','#ccc',1));
+    o.push(T(240,274,'The expression (x\u2212'+V.q5p+')(x\u2212'+V.q5q+') is a quadratic: same U-shape as x\u00b2, shifted to cross at its roots.','#888',10,'middle',false));
+  }
+  // p>=1: actual parabola, roots marked
   if(p>=1){
-    plotParabola(o,ox,oy,sx,sy,1,r2((V.q5p+V.q5q)/2),r2(-(V.q5p-V.q5q)*(V.q5p-V.q5q)/4));
+    var pts='';
+    for(var x=xlo;x<=xhi;x+=0.04){var y=(x-V.q5p)*(x-V.q5q);if(y>=-3.5&&y<=6.5)pts+=(pts===''?'M':'L')+(ox+x*sx)+','+(oy-y*sy)+' ';}
+    if(pts)o.push('<path d="'+pts+'" fill="none" stroke="#C0272D" stroke-width="2.5"/>');
+    // roots
     o.push(C(ox+V.q5p*sx,oy,5,'#1a5a8a','#1a5a8a',0));
     o.push(C(ox+V.q5q*sx,oy,5,'#1a5a8a','#1a5a8a',0));
-    o.push(T(ox+V.q5p*sx,oy+14,''+V.q5p,'#1a5a8a',10,'middle',true));
-    o.push(T(ox+V.q5q*sx,oy+14,''+V.q5q,'#1a5a8a',10,'middle',true));
+    o.push(T(ox+V.q5p*sx,oy+14,'x='+V.q5p,'#1a5a8a',9,'middle',true));
+    o.push(T(ox+V.q5q*sx,oy+14,'x='+V.q5q,'#1a5a8a',9,'middle',true));
+    // curve label at top-left arm
+    var lx=xlo+0.4;
+    var ly=(lx-V.q5p)*(lx-V.q5q);
+    if(ly<=6.5)o.push(T(ox+lx*sx,oy-ly*sy-12,'y=(x\u2212'+V.q5p+')(x\u2212'+V.q5q+')','#C0272D',8,'middle',false));
   }
+  // p>=2: three region labels
   if(p>=2){
-    // shade region below x-axis between roots
-    o.push('<path d="M '+(ox+V.q5p*sx)+','+oy+' L '+(ox+V.q5q*sx)+','+oy+'" stroke="#1a7a3a" stroke-width="4" opacity="0.5"/>');
-    o.push(T(ox+r2((V.q5p+V.q5q)/2)*sx,oy-10,'y < 0 here','#1a7a3a',9,'middle',false));
+    var pL=ox+(V.q5p-1.4)*sx;
+    var pM=ox+mx*sx;
+    var pR=ox+(V.q5q+1.4)*sx;
+    var vy2=r2(-(V.q5p-mx)*(V.q5q-mx));
+    o.push(T(pL,oy-sy*0.6,'y > 0','#888',8,'middle',false));
+    o.push(T(pM,oy+vy2*sy-14,'y < 0','#1a7a3a',9,'middle',true));
+    o.push(T(pR,oy-sy*0.6,'y > 0','#888',8,'middle',false));
+    o.push(L(ox+V.q5p*sx,oy-4,ox+V.q5p*sx,oy+4,'#1a5a8a',2));
+    o.push(L(ox+V.q5q*sx,oy-4,ox+V.q5q*sx,oy+4,'#1a5a8a',2));
   }
+  // p>=3: shade below-zero arc + solution
   if(p>=3){
-    o.push(R(14,214,452,34,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,235),'Solution: '+V.q5p+' < x < '+V.q5q,'#1a7a3a',16,'middle',true);
+    var shade='M'+(ox+V.q5p*sx)+','+oy;
+    for(var x=V.q5p;x<=V.q5q;x+=0.04){var y=(x-V.q5p)*(x-V.q5q);shade+=' L'+(ox+x*sx)+','+(oy-y*sy);}
+    shade+=' L'+(ox+V.q5q*sx)+','+oy+' Z';
+    o.push('<path d="'+shade+'" fill="rgba(26,122,58,0.18)" stroke="none"/>');
+    o.push(R(14,254,452,34,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,275,'Solution: '+V.q5p+' < x < '+V.q5q,'#1a7a3a',15,'middle',true));
   }
   s.innerHTML=o.join('');
-}
-
-function dQ6(p){
+}function dQ6(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
   o.push(T(240,30),'Completing square with a\u22601: '+V.q6a+'x\u00b2 + '+V.q6b+'x + '+V.q6c,'#C0272D',12,'middle',true);
@@ -434,14 +473,15 @@ var QS=[
   {ey:'Q5 \u00b7 Add Maths 0606 \u00b7 Quadratic Functions',ti:'Quadratic Inequalities',
    su:'Solve (x\u2212'+V.q5p+')(x\u2212'+V.q5q+') < 0.',
    steps:[
-    {lb:'Find roots first',dr:dQ5,ht:'<div class="fm">Roots: x='+V.q5p+' and x='+V.q5q+'</div><p>These divide the number line into three regions. Test a point in each.</p>'},
-    {lb:'Sign diagram / graph',dr:dQ5,ht:'<p>The parabola opens upward (a>0). It is <b>below</b> the x-axis <b>between</b> the roots.</p>'},
-    {lb:'Solution',dr:dQ5,ht:'<div class="fm">'+V.q5p+' < x < '+V.q5q+'</div><p>For > 0: x < '+V.q5p+' or x > '+V.q5q+'. The inequality sign determines which region.</p>'},
+    {lb:'Start with the y = x\u00b2 shape',dr:dQ5,ht:'<p>Every expression like (x\u2212'+V.q5p+')(x\u2212'+V.q5q+') defines a <strong>parabola</strong> y = (x\u2212'+V.q5p+')(x\u2212'+V.q5q+'). Because it expands to x\u00b2 \u2212 '+(V.q5p+V.q5q)+'x + '+(V.q5p*V.q5q)+', the leading term is x\u00b2 so it opens <strong>upward</strong> \u2014 same U-shape as y = x\u00b2, just shifted.</p>'},
+    {lb:'Where does the parabola cross the x-axis?',dr:dQ5,ht:'<p>Setting y = 0: (x\u2212'+V.q5p+')(x\u2212'+V.q5q+') = 0 gives the <strong>roots</strong> x = '+V.q5p+' and x = '+V.q5q+'.</p><p style="margin-top:8px">These are exactly where the parabola <em>touches</em> the x-axis. They split the x-axis into three regions.</p>'},
+    {lb:'Which regions are above or below zero?',dr:dQ5,ht:'<p>Because the parabola opens <strong>upward</strong>:</p><ul style="font-size:15px;margin:8px 0 0 20px;line-height:1.8"><li>Left of x = '+V.q5p+' \u2192 curve is <em>above</em> x-axis \u21d2 y > 0</li><li>Between x = '+V.q5p+' and x = '+V.q5q+' \u2192 curve <em>dips below</em> x-axis \u21d2 <strong>y < 0</strong></li><li>Right of x = '+V.q5q+' \u2192 curve is <em>above</em> x-axis \u21d2 y > 0</li></ul>'},
+    {lb:'Read off the solution',dr:dQ5,ht:'<p>We need y < 0, so we want the region where the curve is <strong>below</strong> the x-axis \u2014 the shaded arc between the two roots.</p><div class="fm">'+V.q5p+' < x < '+V.q5q+'</div><p>If the inequality were <em>&gt; 0</em>, we\'d take the <em>outside</em> regions: x < '+V.q5p+' or x > '+V.q5q+'.</p>'},
     {lb:'Your turn',dr:dQ5,ht:tryIt(function(){
       var p=rnd(1,4),q=p+rnd(1,4);
-      return{question:'Solve (x\u2212'+p+')(x\u2212'+q+') > 0. What is the smaller boundary value?',
-        hints:['Parabola above x-axis outside the roots','x < '+p+' or x > '+q],
-        ans:p,tol:0,unit:'',working:'x<'+p+' or x>'+q+'. Smaller boundary: '+p};
+      return{question:'Solve (x\u2212'+p+')(x\u2212'+q+') > 0. The parabola opens upward. What is the smaller boundary of the solution?',
+        hints:['Find the roots by setting (x−p)(x−q)=0','An upward parabola is above zero outside its two roots','Which root is smaller?'],
+        ans:p,tol:0,unit:'',working:'x < '+p+' or x > '+q+'.  Smaller boundary = '+p};
     })}
   ]},
   {ey:'Q6 \u00b7 Add Maths 0606 \u00b7 Quadratic Functions',ti:'Completing the Square (a\u22601)',

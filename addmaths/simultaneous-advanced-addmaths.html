@@ -136,7 +136,7 @@ document.addEventListener('click',function(e){
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
     var tol=o.tol!=null?o.tol:0.5;
-    if(Math.abs(v-o.ans)<=tol){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;}
+    if(Math.abs(v-o.ans)<=tol){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! <details class="wk" style="margin-top:6px"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>';}
     else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
   }
 });
@@ -284,16 +284,27 @@ function dQ8(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
   o.push(T(240,30,'Three unknowns \u2014 systematic elimination','#C0272D',13,'middle',true));
-  if(p>=1){o.push(T(240,62,'x+y+z = '+V.s8A+'  \u00b7\u00b7\u00b7(1)','#241A17',12,'middle',false));
-    o.push(T(240,78,'x+2y+z = '+V.s8B+'  \u00b7\u00b7\u00b7(2)','#241A17',12,'middle',false));
-    o.push(T(240,94,'2x+y+z = '+V.s8C+'  \u00b7\u00b7\u00b7(3)','#241A17',12,'middle',false));}
-  if(p>=2){o.push(T(240,118,'(2)\u2212(1): y = '+(V.s8B-V.s8A)+'  \u21d2  y = '+V.s8y,'#1a5a8a',13,'middle',true));
-    o.push(T(240,136,'(3)\u2212(1): x = '+(V.s8C-V.s8A)+'  \u21d2  x = '+V.s8x,'#1a5a8a',13,'middle',true));}
-  if(p>=3){o.push(R(100,152,280,36,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,174,'x='+V.s8x+', y='+V.s8y+', z='+V.s8z,'#1a7a3a',18,'middle',true));}
+  o.push(T(240,54,'x + y + z = '+V.s8A+'   \u00b7\u00b7\u00b7(1)','#241A17',11,'middle',false));
+  o.push(T(240,70,'x + 2y + z = '+V.s8B+'   \u00b7\u00b7\u00b7(2)','#241A17',11,'middle',false));
+  o.push(T(240,86,'2x + y + z = '+V.s8C+'   \u00b7\u00b7\u00b7(3)','#241A17',11,'middle',false));
+  if(p>=1){
+    o.push(R(14,102,452,28,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(240,120,'(2)\u2212(1): (x+2y+z)\u2212(x+y+z) = '+V.s8B+'\u2212'+V.s8A,'#1a5a8a',11,'middle',false));
+  }
+  if(p>=2){
+    o.push(R(14,138,452,28,'rgba(26,90,138,0.12)','#1a5a8a',1));
+    o.push(T(240,156,'y = '+V.s8y+'   \u2714','#1a5a8a',14,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(14,172,452,28,'#fff8e8','#C8922A',1));
+    o.push(T(240,190,'(3)\u2212(1): (2x+y+z)\u2212(x+y+z) = '+V.s8C+'\u2212'+V.s8A,'#C8922A',11,'middle',false));
+  }
+  if(p>=4){
+    o.push(R(14,206,452,28,'rgba(200,146,42,0.12)','#C8922A',1));
+    o.push(T(240,224,'x = '+V.s8x+'  \u2714    z = '+V.s8A+'\u2212'+V.s8x+'\u2212'+V.s8y+' = '+V.s8z+'  \u2714','#C8922A',13,'middle',true));
+  }
   s.innerHTML=o.join('');
 }
-
 var QS=[
   {ey:'Q1 \u00b7 Add Maths 0606 \u00b7 Simultaneous Equations',ti:'Linear-Linear: Elimination',
    su:'Solve '+V.s1a+'x+'+V.s1b+'y='+V.s1c+' and x+y='+V.s1d+' by elimination.',
@@ -388,14 +399,15 @@ var QS=[
   {ey:'Q8 \u00b7 Add Maths 0606 \u00b7 Simultaneous Equations',ti:'Three Unknowns',
    su:'Solve: x+y+z='+V.s8A+', x+2y+z='+V.s8B+', 2x+y+z='+V.s8C+'.',
    steps:[
-    {lb:'Subtract pairs',dr:dQ8,ht:'<p>Subtract equation (1) from (2) to find y. Subtract (1) from (3) to find x. Then z from (1).</p>'},
-    {lb:'Find y then x',dr:dQ8,ht:'<div class="fm">y='+V.s8y+',  x='+V.s8x+'</div>'},
-    {lb:'Find z',dr:dQ8,ht:'<div class="fm">z = '+V.s8A+'\u2212'+V.s8x+'\u2212'+V.s8y+' = '+V.s8z+'</div>'},
+    {lb:'Strategy: subtract pairs to reduce to one unknown',dr:dQ8,ht:'<p>With three unknowns we need to <strong>eliminate</strong> two of them. Spot pairs of equations that share two identical terms — subtracting cancels those terms, leaving just one unknown.</p><p style="margin-top:8px">Equations (1) and (2) both have <em>x</em> and <em>z</em> with coefficient 1 — subtract to cancel both at once.</p>'},
+    {lb:'Step 1: (2)−(1) to find y',dr:dQ8,ht:'<div class="fm">(x+2y+z) − (x+y+z) = '+V.s8B+'−'+V.s8A+'</div><div class="fm">y = '+V.s8y+'</div><p>The x and z terms cancel exactly because their coefficients match in (1) and (2).</p>'},
+    {lb:'Step 2: (3)−(1) to find x',dr:dQ8,ht:'<div class="fm">(2x+y+z) − (x+y+z) = '+V.s8C+'−'+V.s8A+'</div><div class="fm">x = '+V.s8x+'</div><p>Now y and z cancel. We have x.</p>'},
+    {lb:'Step 3: substitute into (1) to find z',dr:dQ8,ht:'<div class="fm">'+V.s8x+' + '+V.s8y+' + z = '+V.s8A+'</div><div class="fm">z = '+V.s8A+'−'+V.s8x+'−'+V.s8y+' = '+V.s8z+'</div>'},
     {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var x=rnd(1,4),y=rnd(1,4),z=rnd(1,4);
       var A=x+y+z,B=x+2*y+z;
-      return{question:'x+y+z='+A+' and x+2y+z='+B+'. Find y.',
-        hints:['Subtract first from second'],
-        ans:y,tol:0,unit:'',working:'y = '+B+'\u2212'+A+' = '+y};
+      return{question:'x+y+z='+A+' and x+2y+z='+B+'. Which subtraction gives y directly, and what is y?',
+        hints:['Subtract first equation from second','y terms: 2y−y=y; x and z cancel'],
+        ans:y,tol:0,unit:'',working:'('+B+')−('+A+') = y = '+y};
     })}
   ]}
 ];
