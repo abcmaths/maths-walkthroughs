@@ -305,6 +305,75 @@ function dQ8(p){
   }
   s.innerHTML=o.join('');
 }
+
+// ── Q8 three-unknown Your Turn ────────────────────────────────────────────
+function makeQ8Try(){
+  var x=rnd(1,4),y=rnd(1,4),z=rnd(1,4);
+  var A=x+y+z, B=x+2*y+z, C=2*x+y+z;
+  var id='q8t'+Math.random().toString(36).slice(2);
+  // store answers keyed by id
+  window._q8ans=window._q8ans||{};
+  window._q8ans[id]={x:x,y:y,z:z,A:A,B:B,C:C};
+  return '<div class="try" id="'+id+'">'
+    +'<div class="try-t" style="display:flex;justify-content:space-between;align-items:center;">'
+    +'\u2714 Your Turn'
+    +' <button class="nq-btn" onclick="refreshQ8Try(\''+id+'\')"> \u21bb New</button>'
+    +'</div>'
+    +'<div class="try-q" style="font-size:15px;margin:10px 0 6px;">'
+    +'Solve this system. Find x, y and z.'
+    +'</div>'
+    +'<div class="fm" style="line-height:2;font-size:15px;">'
+    +'x + y + z = '+A+'<br>'
+    +'x + 2y + z = '+B+'<br>'
+    +'2x + y + z = '+C
+    +'</div>'
+    +'<div style="display:flex;gap:10px;margin:12px 0 8px;flex-wrap:wrap;">'
+    +'<label style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;">x =<input type="number" id="'+id+'_x" class="q8-inp" style="width:60px;font-size:15px;padding:6px 8px;border:1px solid #d4c4be;border-radius:3px;font-family:inherit;" step="any"/></label>'
+    +'<label style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;">y =<input type="number" id="'+id+'_y" class="q8-inp" style="width:60px;font-size:15px;padding:6px 8px;border:1px solid #d4c4be;border-radius:3px;font-family:inherit;" step="any"/></label>'
+    +'<label style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;">z =<input type="number" id="'+id+'_z" class="q8-inp" style="width:60px;font-size:15px;padding:6px 8px;border:1px solid #d4c4be;border-radius:3px;font-family:inherit;" step="any"/></label>'
+    +'<button class="ck" onclick="checkQ8Try(\''+id+'\')" style="padding:6px 16px;font-size:14px;">Check</button>'
+    +'</div>'
+    +'<div id="'+id+'_fb" style="font-size:14px;padding:0;margin-top:2px;"></div>'
+    +'<details class="wk" id="'+id+'_wk" style="margin-top:8px;display:none;">'
+    +'<summary>Show working</summary>'
+    +'<div class="wk-b">'
+    +'(2)\u2212(1): y = '+(B-A)+'<br>'
+    +'(3)\u2212(1): x = '+(C-A)+'<br>'
+    +'z = '+A+'\u2212'+x+'\u2212'+y+' = '+z
+    +'</div></details>'
+    +'</div>';
+}
+function refreshQ8Try(id){
+  var wrap=document.getElementById(id);
+  if(!wrap)return;
+  var tmp=document.createElement('div');
+  tmp.innerHTML=makeQ8Try();
+  wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+}
+function checkQ8Try(id){
+  var ans=window._q8ans&&window._q8ans[id];
+  if(!ans)return;
+  var vx=parseFloat(document.getElementById(id+'_x').value);
+  var vy=parseFloat(document.getElementById(id+'_y').value);
+  var vz=parseFloat(document.getElementById(id+'_z').value);
+  var fb=document.getElementById(id+'_fb');
+  var wk=document.getElementById(id+'_wk');
+  if(isNaN(vx)||isNaN(vy)||isNaN(vz)){
+    fb.style.cssText='color:#a01820;background:#fde8e8;border:1px solid #f0b8b8;padding:8px 12px;border-radius:3px;';
+    fb.textContent='Enter a value for x, y and z.';return;
+  }
+  var ok=vx===ans.x&&vy===ans.y&&vz===ans.z;
+  var partial=(vx===ans.x?1:0)+(vy===ans.y?1:0)+(vz===ans.z?1:0);
+  if(ok){
+    fb.style.cssText='color:#1a7a3a;background:#e8f8ee;border:1px solid #a8dbb8;padding:8px 12px;border-radius:3px;';
+    fb.textContent='\u2713 Correct!  x='+ans.x+', y='+ans.y+', z='+ans.z;
+    wk.style.display='block';
+  } else {
+    fb.style.cssText='color:#a01820;background:#fde8e8;border:1px solid #f0b8b8;padding:8px 12px;border-radius:3px;';
+    fb.textContent='Not quite \u2014 '+partial+' of 3 correct. Check your subtractions.';
+  }
+}
+
 var QS=[
   {ey:'Q1 \u00b7 Add Maths 0606 \u00b7 Simultaneous Equations',ti:'Linear-Linear: Elimination',
    su:'Solve '+V.s1a+'x+'+V.s1b+'y='+V.s1c+' and x+y='+V.s1d+' by elimination.',
@@ -403,12 +472,7 @@ var QS=[
     {lb:'Step 1: (2)−(1) to find y',dr:dQ8,ht:'<div class="fm">(x+2y+z) − (x+y+z) = '+V.s8B+'−'+V.s8A+'</div><div class="fm">y = '+V.s8y+'</div><p>The x and z terms cancel exactly because their coefficients match in (1) and (2).</p>'},
     {lb:'Step 2: (3)−(1) to find x',dr:dQ8,ht:'<div class="fm">(2x+y+z) − (x+y+z) = '+V.s8C+'−'+V.s8A+'</div><div class="fm">x = '+V.s8x+'</div><p>Now y and z cancel. We have x.</p>'},
     {lb:'Step 3: substitute into (1) to find z',dr:dQ8,ht:'<div class="fm">'+V.s8x+' + '+V.s8y+' + z = '+V.s8A+'</div><div class="fm">z = '+V.s8A+'−'+V.s8x+'−'+V.s8y+' = '+V.s8z+'</div>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var x=rnd(1,4),y=rnd(1,4),z=rnd(1,4);
-      var A=x+y+z,B=x+2*y+z;
-      return{question:'x+y+z='+A+' and x+2y+z='+B+'. Which subtraction gives y directly, and what is y?',
-        hints:['Subtract first equation from second','y terms: 2y−y=y; x and z cancel'],
-        ans:y,tol:0,unit:'',working:'('+B+')−('+A+') = y = '+y};
-    })}
+    {lb:'Your turn',dr:dQ8,ht:makeQ8Try}
   ]}
 ];
 
