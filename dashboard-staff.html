@@ -92,6 +92,7 @@
   <div class="nav-tab" onclick="showTab('topics')">Browse Topics</div>
   <div class="nav-tab" onclick="showTab('feedback')">Feedback</div>
   <div class="nav-tab" onclick="showTab('bugs')">Bug Reports</div>
+  <div class="nav-tab" onclick="showTab('users')">Users</div>
   <div class="nav-tab" onclick="showTab('import')">Import Users</div>
 </div>
 
@@ -275,6 +276,50 @@
               </tr>
             </thead>
             <tbody id="bug-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="tab-panel" id="tab-users">
+      <div class="filter-bar">
+        <select id="users-filter-role" onchange="renderUsersTab()">
+          <option value="">All Roles</option>
+          <option value="student">Students</option>
+          <option value="teacher">Teachers</option>
+          <option value="admin">Admin</option>
+        </select>
+        <select id="users-filter-year" onchange="renderUsersTab()">
+          <option value="">All Year Groups</option>
+          <option value="7">Year 7</option>
+          <option value="8">Year 8</option>
+          <option value="9">Year 9</option>
+          <option value="10">Year 10</option>
+          <option value="11">Year 11</option>
+          <option value="12">Year 12</option>
+        </select>
+        <input type="text" id="users-search" placeholder="Search by name or email…" oninput="renderUsersTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.88rem;color:#333;min-width:200px">
+        <button class="btn-outline" style="font-size:0.82rem;padding:6px 14px" onclick="exportUsers()">↓ Export CSV</button>
+      </div>
+      <div class="section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="section-title">All Users <span id="users-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Year</th>
+                <th>Form</th>
+                <th>Last Sign In</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -479,6 +524,7 @@
     window.renderAOCTable();
     await loadFeedback();
     await loadBugReports();
+    await loadUsersWithEmail();
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';
@@ -640,13 +686,14 @@
 
   // ── Tab switching ──
   window.showTab = function(name) {
-    const names = ['overview','progress','aoc','topics','feedback','bugs','import'];
+    const names = ['overview','progress','aoc','topics','feedback','bugs','users','import'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
     if (name === 'topics')   window.renderTopicsTab();
     if (name === 'feedback') window.renderFeedbackTab();
     if (name === 'bugs')     window.renderBugTab();
+    if (name === 'users')    window.renderUsersTab();
   };
 
   // ── CSV template ──
@@ -937,6 +984,84 @@
     const item = allBugReports.find(r => r.id === id);
     if (item) item.status = status;
     window.renderBugTab();
+  };
+
+  // ── Users tab ──
+  let allUsersWithEmail = [];
+
+  async function loadUsersWithEmail() {
+    const { data } = await supabase
+      .from('user_emails')
+      .select('*')
+      .order('full_name');
+    allUsersWithEmail = data || [];
+  }
+
+  window.renderUsersTab = function() {
+    const roleFilter   = document.getElementById('users-filter-role').value;
+    const yearFilter   = document.getElementById('users-filter-year').value;
+    const searchFilter = document.getElementById('users-search').value.toLowerCase();
+
+    const filtered = allUsersWithEmail.filter(u => {
+      const matchRole   = !roleFilter   || u.role === roleFilter;
+      const matchYear   = !yearFilter   || String(u.year_group) === yearFilter;
+      const matchSearch = !searchFilter || u.full_name.toLowerCase().includes(searchFilter);
+      return matchRole && matchYear && matchSearch;
+    });
+
+    document.getElementById('users-count').textContent = `— ${filtered.length} user${filtered.length !== 1 ? 's' : ''}`;
+
+    const tbody = document.getElementById('users-tbody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px">No users found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(u => {
+      const roleBadge = u.role === 'admin' ? 'badge-red' : u.role === 'teacher' ? 'badge-yellow' : 'badge-grey';
+      const lastSignIn = u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString('en-GB') : 'Never';
+      return `<tr>
+        <td><strong>${u.full_name}</strong></td>
+        <td style="font-size:0.82rem;color:#666">${u.email || '—'}</td>
+        <td><span class="badge ${roleBadge}">${u.role}</span></td>
+        <td>${u.year_group ? 'Year ' + u.year_group : '—'}</td>
+        <td>${u.form_class || '—'}</td>
+        <td style="font-size:0.82rem;color:#888">${lastSignIn}</td>
+        <td>
+          <button class="btn-link" onclick="openStudentModal('${u.id}')">View</button>
+        </td>
+      </tr>`;
+    }).join('');
+  };
+
+  window.exportUsers = function() {
+    const roleFilter   = document.getElementById('users-filter-role').value;
+    const yearFilter   = document.getElementById('users-filter-year').value;
+    const searchFilter = document.getElementById('users-search').value.toLowerCase();
+
+    const filtered = allUsersWithEmail.filter(u => {
+      return (!roleFilter   || u.role === roleFilter) &&
+             (!yearFilter   || String(u.year_group) === yearFilter) &&
+             (!searchFilter || u.full_name.toLowerCase().includes(searchFilter));
+    });
+
+    const rows = [['Full Name', 'Email', 'Role', 'Year Group', 'Form Class', 'Last Sign In']];
+    filtered.forEach(u => {
+      rows.push([
+        u.full_name,
+        u.email || '',
+        u.role,
+        u.year_group || '',
+        u.form_class || '',
+        u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString('en-GB') : 'Never'
+      ]);
+    });
+
+    const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'abc_users_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
   };
 
   window.toggleCUYear = function() {
