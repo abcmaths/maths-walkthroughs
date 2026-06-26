@@ -88,7 +88,6 @@
 <div class="nav-tabs">
   <div class="nav-tab active" onclick="showTab('overview')">Overview</div>
   <div class="nav-tab" onclick="showTab('progress')">Student Progress</div>
-  <div class="nav-tab" onclick="showTab('aoc')">AOC Results</div>
   <div class="nav-tab" onclick="showTab('tests')">Test Results</div>
   <div class="nav-tab" onclick="showTab('topics')">Browse Topics</div>
   <div class="nav-tab" onclick="showTab('feedback')">Feedback</div>
@@ -132,27 +131,6 @@
           <table>
             <thead><tr><th>Student</th><th>Year</th><th>Form</th><th>Topics Completed</th><th>Progress</th><th>Last Active</th><th></th></tr></thead>
             <tbody id="progress-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- AOC RESULTS -->
-    <div class="tab-panel" id="tab-aoc">
-      <div class="filter-bar">
-        <select id="aoc-filter-year" onchange="renderAOCTable()">
-          <option value="">All Year Groups</option>
-          <option value="7">Year 7</option><option value="8">Year 8</option>
-          <option value="9">Year 9</option><option value="10">Year 10</option>
-          <option value="11">Year 11</option><option value="12">Year 12</option>
-        </select>
-        <input type="text" id="aoc-filter-search" placeholder="Search by name…" oninput="renderAOCTable()">
-      </div>
-      <div class="section">
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Student</th><th>Year</th><th>Academic Year</th><th>Marks</th><th>Percentage</th><th>Grade</th><th>Notes</th></tr></thead>
-            <tbody id="aoc-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -539,7 +517,7 @@
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
   window._supabase = supabase;
 
-  let allStudents = [], allProgress = [], allTopics = [], allAOC = [];
+  let allStudents = [], allProgress = [], allTopics = [];
 
   // ── Use getSession directly — more reliable than onAuthStateChange for page loads ──
   async function init() {
@@ -569,14 +547,12 @@
       { data: students },
       { data: teachers },
       { data: topics },
-      { data: progress },
-      { data: aoc }
+      { data: progress }
     ] = await Promise.all([
       supabase.from('profiles').select('*').eq('role', 'student').order('full_name'),
       supabase.from('profiles').select('*').in('role', ['teacher', 'admin']),
       supabase.from('topics').select('*').order('year_group').order('sort_order'),
-      supabase.from('walkthrough_progress').select('*'),
-      supabase.from('eoy_aoc_results').select('*, profiles(full_name, year_group, form_class)')
+      supabase.from('walkthrough_progress').select('*')
     ]);
 
     console.log('Data loaded — students:', (students||[]).length, 'topics:', (topics||[]).length);
@@ -584,7 +560,6 @@
     allStudents = students || [];
     allTopics   = topics   || [];
     allProgress = progress || [];
-    allAOC      = aoc      || [];
 
     // ── Overview stats ──
     document.getElementById('ov-students').textContent    = allStudents.length;
@@ -625,7 +600,6 @@
     }).join('');
 
     window.renderProgressTable();
-    window.renderAOCTable();
     await loadFeedback();
     await loadBugReports();
     await loadUsersWithEmail();
@@ -669,35 +643,6 @@
     }).join('');
   };
 
-  // ── AOC table ──
-  window.renderAOCTable = function() {
-    const yearFilter   = document.getElementById('aoc-filter-year').value;
-    const searchFilter = document.getElementById('aoc-filter-search').value.toLowerCase();
-    const filtered = allAOC.filter(r => {
-      const name = r.profiles?.full_name || '';
-      return (!yearFilter || String(r.year_group) === yearFilter) &&
-             (!searchFilter || name.toLowerCase().includes(searchFilter));
-    });
-    const tbody = document.getElementById('aoc-tbody');
-    if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px">No results recorded yet</td></tr>';
-      return;
-    }
-    tbody.innerHTML = filtered.map(r => {
-      const pct = r.percentage || 0;
-      const badgeClass = pct >= 70 ? 'badge-green' : pct >= 50 ? 'badge-yellow' : 'badge-red';
-      return `<tr>
-        <td><strong>${r.profiles?.full_name || '—'}</strong></td>
-        <td>Year ${r.year_group}</td>
-        <td>${r.academic_year}</td>
-        <td>${r.total_marks} / ${r.max_marks}</td>
-        <td><span class="badge ${badgeClass}">${pct}%</span></td>
-        <td>${r.grade || '—'}</td>
-        <td style="font-size:0.82rem;color:#666">${r.teacher_notes || '—'}</td>
-      </tr>`;
-    }).join('');
-  };
-
   // ── Student modal ──
   let _currentModalStudentId = null;
 
@@ -711,7 +656,6 @@
     const sProg    = allProgress.filter(p => p.student_id === s.id);
     const progMap  = {};
     sProg.forEach(p => { progMap[p.topic_id] = p.status; });
-    const aocR = allAOC.find(r => r.student_id === s.id);
     const done = sProg.filter(p => p.status === 'completed').length;
 
     document.getElementById('modal-body').innerHTML = `
@@ -719,14 +663,6 @@
         <div style="flex:1;min-width:120px;background:#f9f9f9;border-radius:6px;padding:14px;text-align:center">
           <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${done}/${yrTopics.length}</div>
           <div style="font-size:0.75rem;color:#888;text-transform:uppercase;margin-top:4px">Topics Done</div>
-        </div>
-        <div style="flex:1;min-width:120px;background:#f9f9f9;border-radius:6px;padding:14px;text-align:center">
-          <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${aocR ? aocR.percentage+'%' : '—'}</div>
-          <div style="font-size:0.75rem;color:#888;text-transform:uppercase;margin-top:4px">AOC Score</div>
-        </div>
-        <div style="flex:1;min-width:120px;background:#f9f9f9;border-radius:6px;padding:14px;text-align:center">
-          <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${aocR ? aocR.grade || '—' : '—'}</div>
-          <div style="font-size:0.75rem;color:#888;text-transform:uppercase;margin-top:4px">AOC Grade</div>
         </div>
       </div>
       <div style="font-weight:700;color:#333;margin-bottom:12px">Topic Progress</div>
@@ -791,7 +727,7 @@
 
   // ── Tab switching ──
   window.showTab = function(name) {
-    const names = ['overview','progress','aoc','tests','topics','feedback','bugs','users','import'];
+    const names = ['overview','progress','tests','topics','feedback','bugs','users','import'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
