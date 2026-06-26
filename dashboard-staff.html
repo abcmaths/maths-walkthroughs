@@ -90,6 +90,7 @@
   <div class="nav-tab" onclick="showTab('progress')">Student Progress</div>
   <div class="nav-tab" onclick="showTab('aoc')">AOC Results</div>
   <div class="nav-tab" onclick="showTab('topics')">Browse Topics</div>
+  <div class="nav-tab" onclick="showTab('feedback')">Feedback</div>
   <div class="nav-tab" onclick="showTab('import')">Import Users</div>
 </div>
 
@@ -168,6 +169,60 @@
         </select>
       </div>
       <div id="topics-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;"></div>
+    </div>
+
+    <!-- FEEDBACK -->
+    <div class="tab-panel" id="tab-feedback">
+      <div class="filter-bar">
+        <select id="fb-filter-year" onchange="renderFeedbackTab()">
+          <option value="">All Year Groups</option>
+          <option value="7">Year 7</option>
+          <option value="8">Year 8</option>
+          <option value="9">Year 9</option>
+          <option value="10">Year 10</option>
+          <option value="11">Year 11</option>
+          <option value="12">Year 12</option>
+          <option value="13">Add Maths</option>
+        </select>
+        <select id="fb-filter-status" onchange="renderFeedbackTab()">
+          <option value="">All statuses</option>
+          <option value="pending">Pending moderation</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <select id="fb-filter-rating" onchange="renderFeedbackTab()">
+          <option value="">All ratings</option>
+          <option value="up">👍 Positive</option>
+          <option value="down">👎 Critical</option>
+        </select>
+      </div>
+
+      <!-- Needs improvement list -->
+      <div class="section" style="margin-bottom:24px">
+        <div class="section-title" style="margin-bottom:16px">Walkthroughs Needing Improvement <span style="font-size:0.78rem;font-weight:400;color:#888">(ranked by 👎 %)</span></div>
+        <div id="fb-improvement-list"></div>
+      </div>
+
+      <!-- All feedback -->
+      <div class="section">
+        <div class="section-title" style="margin-bottom:16px">All Feedback — moderate comments below</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Topic</th>
+                <th>Year</th>
+                <th>Student</th>
+                <th>Rating</th>
+                <th>Comment</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="fb-tbody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- IMPORT USERS -->
@@ -363,6 +418,7 @@
 
     window.renderProgressTable();
     window.renderAOCTable();
+    await loadFeedback();
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';
@@ -477,11 +533,12 @@
 
   // ── Tab switching ──
   window.showTab = function(name) {
-    const names = ['overview','progress','aoc','topics','import'];
+    const names = ['overview','progress','aoc','topics','feedback','import'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
-    if (name === 'topics') window.renderTopicsTab();
+    if (name === 'topics')   window.renderTopicsTab();
+    if (name === 'feedback') window.renderFeedbackTab();
   };
 
   // ── CSV template ──
@@ -576,6 +633,98 @@
     el.className = 'message ' + type;
     el.textContent = text;
   }
+
+  // ── Feedback tab ──
+  let allFeedback = [];
+
+  async function loadFeedback() {
+    const { data } = await supabase
+      .from('feedback')
+      .select('*, topics(topic_name, strand, year_group), profiles(full_name, year_group)')
+      .order('submitted_at', { ascending: false });
+    allFeedback = data || [];
+  }
+
+  window.renderFeedbackTab = function() {
+    const yearFilter   = document.getElementById('fb-filter-year').value;
+    const statusFilter = document.getElementById('fb-filter-status').value;
+    const ratingFilter = document.getElementById('fb-filter-rating').value;
+
+    let filtered = allFeedback.filter(f => {
+      const matchYear   = !yearFilter   || String(f.topics?.year_group) === yearFilter;
+      const matchStatus = !statusFilter || f.status === statusFilter;
+      const matchRating = !ratingFilter || f.rating === ratingFilter;
+      return matchYear && matchStatus && matchRating;
+    });
+
+    // ── Improvement list ──
+    const byTopic = {};
+    allFeedback.forEach(f => {
+      const tid = f.topic_id;
+      if (!byTopic[tid]) byTopic[tid] = { topic: f.topics, ups: 0, downs: 0 };
+      if (f.rating === 'up')   byTopic[tid].ups++;
+      if (f.rating === 'down') byTopic[tid].downs++;
+    });
+
+    const sorted = Object.values(byTopic)
+      .filter(t => t.downs > 0)
+      .sort((a, b) => {
+        const pctA = a.downs / (a.ups + a.downs);
+        const pctB = b.downs / (b.ups + b.downs);
+        return pctB - pctA;
+      });
+
+    document.getElementById('fb-improvement-list').innerHTML = sorted.length === 0
+      ? '<div style="color:#aaa;font-style:italic;font-size:0.88rem">No negative feedback yet — great work!</div>'
+      : sorted.map(t => {
+          const total  = t.ups + t.downs;
+          const downPct = Math.round((t.downs / total) * 100);
+          const yearLabel = t.topic?.year_group === 13 ? 'Add Maths' : `Year ${t.topic?.year_group}`;
+          return `
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+              <div style="width:180px;font-size:0.85rem;font-weight:600;color:#333">${t.topic?.topic_name || '—'}</div>
+              <div style="font-size:0.75rem;color:#888;width:80px">${yearLabel}</div>
+              <div style="flex:1;background:#eee;border-radius:99px;height:8px;overflow:hidden">
+                <div style="width:${downPct}%;height:100%;background:#C0272D;border-radius:99px"></div>
+              </div>
+              <div style="font-size:0.82rem;color:#C0272D;width:60px;text-align:right">${downPct}% 👎</div>
+              <div style="font-size:0.78rem;color:#aaa">${total} response${total!==1?'s':''}</div>
+            </div>`;
+        }).join('');
+
+    // ── Feedback table ──
+    const tbody = document.getElementById('fb-tbody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px">No feedback found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(f => {
+      const yearLabel = f.topics?.year_group === 13 ? 'Add Maths' : `Year ${f.topics?.year_group}`;
+      const statusBadge = f.status === 'approved' ? 'badge-green' : f.status === 'rejected' ? 'badge-red' : 'badge-grey';
+      return `<tr>
+        <td><strong>${f.topics?.topic_name || '—'}</strong></td>
+        <td>${yearLabel}</td>
+        <td>${f.profiles?.full_name || '—'}</td>
+        <td>${f.rating === 'up' ? '👍' : '👎'}</td>
+        <td style="font-size:0.82rem;color:#555;max-width:200px">${f.comment || '<em style="color:#ccc">No comment</em>'}</td>
+        <td><span class="badge ${statusBadge}">${f.status}</span></td>
+        <td>
+          ${f.status !== 'approved'  ? `<button class="btn-link" onclick="moderateFeedback(${f.id},'approved')">Approve</button> ` : ''}
+          ${f.status !== 'rejected'  ? `<button class="btn-link" style="color:#888" onclick="moderateFeedback(${f.id},'rejected')">Reject</button>` : ''}
+          ${f.status !== 'pending'   ? `<button class="btn-link" style="color:#aaa" onclick="moderateFeedback(${f.id},'pending')">Reset</button>` : ''}
+        </td>
+      </tr>`;
+    }).join('');
+  };
+
+  window.moderateFeedback = async function(id, status) {
+    await supabase.from('feedback').update({ status }).eq('id', id);
+    // Update local data
+    const item = allFeedback.find(f => f.id === id);
+    if (item) item.status = status;
+    window.renderFeedbackTab();
+  };
 
   window.toggleCUYear = function() {
     const role = document.getElementById('cu-role').value;

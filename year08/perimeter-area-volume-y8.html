@@ -249,37 +249,40 @@ document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];s
 render();
 </script>
 
-<!-- ABC Supabase Progress Tracking -->
+
+<!-- ABC Supabase Progress Tracking + Feedback -->
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
-const _tc = 'Y8-GEO-03';
+window._supabase = _sb;
+window._abcTopicCode = 'Y8-GEO-03';
 
 async function markComplete() {
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) return;
-  const { data: topic } = await _sb
-    .from('topics').select('id').eq('topic_code', _tc).maybeSingle();
+  const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', 'Y8-GEO-03').maybeSingle();
   if (!topic) return;
+  window._abcTopicId = topic.id;
   await _sb.from('walkthrough_progress').upsert({
-    student_id:   session.user.id,
-    topic_id:     topic.id,
-    status:       'completed',
-    completed_at: new Date().toISOString(),
+    student_id: session.user.id, topic_id: topic.id,
+    status: 'completed', completed_at: new Date().toISOString(),
     last_visited_at: new Date().toISOString(),
   }, { onConflict: 'student_id,topic_id' });
 }
 
-// Hook into the Next button — fires when student reaches last step
 document.addEventListener('DOMContentLoaded', function() {
   var nb = document.getElementById('nb');
   if (!nb) return;
   nb.addEventListener('click', function() {
     if (nb.textContent.trim() === 'Restart') {
       markComplete();
+      if (window.abcShowFeedback) window.abcShowFeedback();
     }
   });
 });
 </script>
+
+<!-- ABC Feedback Widget -->
+<script src="../abc_feedback_widget.js"></script>
 </body>
 </html>
