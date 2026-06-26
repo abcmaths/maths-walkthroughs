@@ -658,12 +658,33 @@
     sProg.forEach(p => { progMap[p.topic_id] = p.status; });
     const done = sProg.filter(p => p.status === 'completed').length;
 
+    // Get test results for this student
+    const { data: studentTests } = await supabase
+      .from('test_results')
+      .select('topic_id, grade, percentage, level')
+      .eq('student_id', s.id)
+      .order('percentage', { ascending: false });
+
+    const testMap = {};
+    (studentTests || []).forEach(t => {
+      if (!testMap[t.topic_id]) testMap[t.topic_id] = t;
+    });
+
     document.getElementById('modal-body').innerHTML = `
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px">
         <div style="flex:1;min-width:120px;background:#f9f9f9;border-radius:6px;padding:14px;text-align:center">
           <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${done}/${yrTopics.length}</div>
           <div style="font-size:0.75rem;color:#888;text-transform:uppercase;margin-top:4px">Topics Done</div>
         </div>
+        <div style="flex:1;min-width:120px;background:#f9f9f9;border-radius:6px;padding:14px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:700;color:#1a56b0">${Object.keys(testMap).length}</div>
+          <div style="font-size:0.75rem;color:#888;text-transform:uppercase;margin-top:4px">Tests Taken</div>
+        </div>
+        ${Object.keys(testMap).length > 0 ? `
+        <div style="flex:1;min-width:120px;background:#f9f9f9;border-radius:6px;padding:14px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:700;color:#1a56b0">${Math.round((studentTests||[]).reduce((a,t)=>a+t.percentage,0)/((studentTests||[]).length||1))}%</div>
+          <div style="font-size:0.75rem;color:#888;text-transform:uppercase;margin-top:4px">Avg Test Score</div>
+        </div>` : ''}
       </div>
       <div style="font-weight:700;color:#333;margin-bottom:12px">Topic Progress</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">
@@ -671,9 +692,13 @@
           const status = progMap[t.id] || 'not-started';
           const badge  = status === 'completed' ? 'badge-green' : status === 'started' ? 'badge-yellow' : 'badge-grey';
           const label  = status === 'completed' ? '✓ Done' : status === 'started' ? '▶ Started' : '○ Not started';
+          const test   = testMap[t.id];
+          const testBadge = test
+            ? `<span style="font-size:0.72rem;font-weight:700;background:#e8f0fe;color:#1a56b0;padding:2px 7px;border-radius:99px;margin-left:4px">Test: ${test.grade} (${test.percentage}%)</span>`
+            : '';
           return `<div style="border:1.5px solid #eee;border-radius:6px;padding:10px">
-            <div style="font-size:0.82rem;font-weight:600;color:#333;margin-bottom:4px">${t.topic_name}</div>
-            <span class="badge ${badge}">${label}</span>
+            <div style="font-size:0.82rem;font-weight:600;color:#333;margin-bottom:6px">${t.topic_name}</div>
+            <span class="badge ${badge}">${label}</span>${testBadge}
           </div>`;
         }).join('')}
       </div>`;
