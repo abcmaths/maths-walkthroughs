@@ -11,23 +11,25 @@
     const topicCode = window._abcTopicCode;
     if (!topicCode) return;
     try {
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const resp = await fetch(
-        `${SUPABASE_URL}/rest/v1/bug_reports?select=id&status=eq.fixed&fixed_at=gte.${thirtyDaysAgo}&topic_id=in.(select id from topics where topic_code=eq.${topicCode})&limit=1`,
-        { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
-      );
-      // Simpler approach — check via topic_id after we have it
+      // Step 1: get topic ID
       const topicResp = await fetch(
-        `${SUPABASE_URL}/rest/v1/topics?topic_code=eq.${topicCode}&select=id`,
-        { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+        SUPABASE_URL + '/rest/v1/topics?topic_code=eq.' + topicCode + '&select=id',
+        { headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON } }
       );
       const topics = await topicResp.json();
       if (!topics || !topics.length) return;
       const topicId = topics[0].id;
 
-      const bugResp = await fetch(
-        `${SUPABASE_URL}/rest/v1/bug_reports?status=eq.fixed&fixed_at=gte.${thirtyDaysAgo}&topic_id=eq.${topicId}&limit=1`,
-        { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+      // Step 2: get session token for authenticated request
+      const session = await getSession();
+      const authToken = session ? session.access_token : SUPABASE_ANON;
+
+      // Step 3: check for fixed bugs in last 30 days
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      if (!topicId) return;
+      const url = SUPABASE_URL + '/rest/v1/bug_reports?status=eq.fixed&topic_id=eq.' + topicId + '&limit=1';
+      const bugResp = await fetch(url,
+        { headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + authToken } }
       );
       const bugs = await bugResp.json();
       if (bugs && bugs.length > 0) {
@@ -36,11 +38,18 @@
         banner.innerHTML = '🔧 <strong>Recently updated</strong> — This walkthrough was improved following a student report.';
         document.body.insertBefore(banner, document.body.firstChild);
       }
-    } catch(e) {}
+    } catch(e) { console.error('Banner error:', e.message, e); }
   }
 
-  // Run on page load
-  document.addEventListener('DOMContentLoaded', checkRecentFix);
+  // Wait for topic code to be set by module script, then check
+  function waitForTopicCode(attempts) {
+    if (window._abcTopicCode) {
+      checkRecentFix();
+    } else if (attempts > 0) {
+      setTimeout(function() { waitForTopicCode(attempts - 1); }, 200);
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function() { waitForTopicCode(10); });
 
   // Capture JS errors automatically
   const _jsErrors = [];
