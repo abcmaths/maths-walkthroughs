@@ -1029,9 +1029,12 @@
   };
 
   window.updateBug = async function(id, status) {
-    await supabase.from('bug_reports').update({ status }).eq('id', id);
+    const update = { status };
+    if (status === 'fixed') update.fixed_at = new Date().toISOString();
+    if (status !== 'fixed') update.fixed_at = null;
+    await supabase.from('bug_reports').update(update).eq('id', id);
     const item = allBugReports.find(r => r.id === id);
-    if (item) item.status = status;
+    if (item) { item.status = status; item.fixed_at = update.fixed_at; }
     window.renderBugTab();
   };
 

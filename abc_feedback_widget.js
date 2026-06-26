@@ -6,6 +6,42 @@
   const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
 
+  // Check for recently fixed bugs and show banner
+  async function checkRecentFix() {
+    const topicCode = window._abcTopicCode;
+    if (!topicCode) return;
+    try {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const resp = await fetch(
+        `${SUPABASE_URL}/rest/v1/bug_reports?select=id&status=eq.fixed&fixed_at=gte.${thirtyDaysAgo}&topic_id=in.(select id from topics where topic_code=eq.${topicCode})&limit=1`,
+        { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+      );
+      // Simpler approach — check via topic_id after we have it
+      const topicResp = await fetch(
+        `${SUPABASE_URL}/rest/v1/topics?topic_code=eq.${topicCode}&select=id`,
+        { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+      );
+      const topics = await topicResp.json();
+      if (!topics || !topics.length) return;
+      const topicId = topics[0].id;
+
+      const bugResp = await fetch(
+        `${SUPABASE_URL}/rest/v1/bug_reports?status=eq.fixed&fixed_at=gte.${thirtyDaysAgo}&topic_id=eq.${topicId}&limit=1`,
+        { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+      );
+      const bugs = await bugResp.json();
+      if (bugs && bugs.length > 0) {
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background:#e8f0fe;border-left:4px solid #1a56b0;padding:10px 16px;font-size:0.85rem;color:#1a56b0;font-family:Segoe UI,Arial,sans-serif;margin-bottom:8px;';
+        banner.innerHTML = '🔧 <strong>Recently updated</strong> — This walkthrough was improved following a student report.';
+        document.body.insertBefore(banner, document.body.firstChild);
+      }
+    } catch(e) {}
+  }
+
+  // Run on page load
+  document.addEventListener('DOMContentLoaded', checkRecentFix);
+
   // Capture JS errors automatically
   const _jsErrors = [];
   window.addEventListener('error', function(e) {
