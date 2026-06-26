@@ -646,12 +646,14 @@
   // ── Student modal ──
   let _currentModalStudentId = null;
 
-  window.openStudentModal = function(studentId) {
+  window.openStudentModal = async function(studentId) {
     _currentModalStudentId = studentId;
     document.getElementById('modal-reset-msg').style.display = 'none';
     const s = allStudents.find(s => s.id === studentId) || allUsersWithEmail.find(u => u.id === studentId);
     if (!s) return;
     document.getElementById('modal-title').textContent = s.full_name;
+    document.getElementById('modal-body').innerHTML = '<div class="loading">Loading…</div>';
+    document.getElementById('modal').classList.add('open');
     const yrTopics = allTopics.filter(t => t.year_group === s.year_group);
     const sProg    = allProgress.filter(p => p.student_id === s.id);
     const progMap  = {};
@@ -659,16 +661,19 @@
     const done = sProg.filter(p => p.status === 'completed').length;
 
     // Get test results for this student
-    const { data: studentTests } = await supabase
-      .from('test_results')
-      .select('topic_id, grade, percentage, level')
-      .eq('student_id', s.id)
-      .order('percentage', { ascending: false });
-
-    const testMap = {};
-    (studentTests || []).forEach(t => {
-      if (!testMap[t.topic_id]) testMap[t.topic_id] = t;
-    });
+    let studentTests = [];
+    let testMap = {};
+    try {
+      const { data: tests } = await supabase
+        .from('test_results')
+        .select('topic_id, grade, percentage, level')
+        .eq('student_id', s.id)
+        .order('percentage', { ascending: false });
+      studentTests = tests || [];
+      studentTests.forEach(t => {
+        if (!testMap[t.topic_id]) testMap[t.topic_id] = t;
+      });
+    } catch(e) { console.error('Test results error:', e); }
 
     document.getElementById('modal-body').innerHTML = `
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px">
@@ -702,7 +707,6 @@
           </div>`;
         }).join('')}
       </div>`;
-    document.getElementById('modal').classList.add('open');
   };
 
   window.resetStudentPassword = async function() {
