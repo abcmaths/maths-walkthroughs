@@ -89,6 +89,7 @@
   <div class="nav-tab active" onclick="showTab('overview')">Overview</div>
   <div class="nav-tab" onclick="showTab('progress')">Student Progress</div>
   <div class="nav-tab" onclick="showTab('aoc')">AOC Results</div>
+  <div class="nav-tab" onclick="showTab('tests')">Test Results</div>
   <div class="nav-tab" onclick="showTab('topics')">Browse Topics</div>
   <div class="nav-tab" onclick="showTab('feedback')">Feedback</div>
   <div class="nav-tab" onclick="showTab('bugs')">Bug Reports</div>
@@ -152,6 +153,60 @@
           <table>
             <thead><tr><th>Student</th><th>Year</th><th>Academic Year</th><th>Marks</th><th>Percentage</th><th>Grade</th><th>Notes</th></tr></thead>
             <tbody id="aoc-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEST RESULTS -->
+    <div class="tab-panel" id="tab-tests">
+      <div class="filter-bar">
+        <select id="test-filter-year" onchange="renderTestsTab()">
+          <option value="">All Year Groups</option>
+          <option value="7">Year 7</option>
+          <option value="8">Year 8</option>
+          <option value="9">Year 9</option>
+          <option value="10">Year 10</option>
+          <option value="11">Year 11</option>
+          <option value="12">Year 12</option>
+          <option value="13">Add Maths</option>
+        </select>
+        <select id="test-filter-level" onchange="renderTestsTab()">
+          <option value="">All Levels</option>
+          <option value="F">Foundation</option>
+          <option value="E">Extended</option>
+        </select>
+        <input type="text" id="test-filter-search" placeholder="Search by name…" oninput="renderTestsTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.88rem;color:#333;min-width:200px">
+        <button class="btn-outline" style="font-size:0.82rem;padding:6px 14px" onclick="exportTests()">↓ Export CSV</button>
+      </div>
+
+      <!-- Summary cards -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px">
+        <div class="summary-card"><div class="big" id="test-stat-total">—</div><div class="label">Tests Taken</div></div>
+        <div class="summary-card"><div class="big" id="test-stat-avg">—</div><div class="label">Avg Score</div></div>
+        <div class="summary-card"><div class="big" id="test-stat-b">—</div><div class="label">Grade B+</div></div>
+        <div class="summary-card"><div class="big" id="test-stat-students">—</div><div class="label">Students Tested</div></div>
+      </div>
+
+      <!-- Results table -->
+      <div class="section">
+        <div class="section-title" style="margin-bottom:16px">All Test Results</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Year</th>
+                <th>Topic</th>
+                <th>Level</th>
+                <th>Score</th>
+                <th>%</th>
+                <th>Grade</th>
+                <th>Time</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="tests-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -574,6 +629,7 @@
     await loadFeedback();
     await loadBugReports();
     await loadUsersWithEmail();
+    await loadTestResults();
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';
@@ -735,7 +791,7 @@
 
   // ── Tab switching ──
   window.showTab = function(name) {
-    const names = ['overview','progress','aoc','topics','feedback','bugs','users','import'];
+    const names = ['overview','progress','aoc','tests','topics','feedback','bugs','users','import'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
@@ -743,6 +799,7 @@
     if (name === 'feedback') window.renderFeedbackTab();
     if (name === 'bugs')     window.renderBugTab();
     if (name === 'users')    window.renderUsersTab();
+    if (name === 'tests')    window.renderTestsTab();
   };
 
   // ── CSV template ──
@@ -837,6 +894,87 @@
     el.className = 'message ' + type;
     el.textContent = text;
   }
+
+  // ── Test Results tab ──
+  let allTestResults = [];
+
+  async function loadTestResults() {
+    const { data } = await supabase
+      .from('test_results')
+      .select('*, profiles(full_name, year_group), topics(topic_name, year_group)')
+      .order('completed_at', { ascending: false });
+    allTestResults = data || [];
+  }
+
+  window.renderTestsTab = function() {
+    const yearFilter   = document.getElementById('test-filter-year').value;
+    const levelFilter  = document.getElementById('test-filter-level').value;
+    const searchFilter = document.getElementById('test-filter-search').value.toLowerCase();
+
+    const filtered = allTestResults.filter(r => {
+      const matchYear   = !yearFilter  || String(r.topics?.year_group) === yearFilter;
+      const matchLevel  = !levelFilter || r.level === levelFilter;
+      const matchSearch = !searchFilter || (r.profiles?.full_name || '').toLowerCase().includes(searchFilter);
+      return matchYear && matchLevel && matchSearch;
+    });
+
+    // Summary stats
+    const total      = filtered.length;
+    const avgPct     = total > 0 ? Math.round(filtered.reduce((a,r) => a + r.percentage, 0) / total) : 0;
+    const gradeB     = filtered.filter(r => ['A*','A','B'].includes(r.grade)).length;
+    const students   = new Set(filtered.map(r => r.student_id)).size;
+
+    document.getElementById('test-stat-total').textContent    = total;
+    document.getElementById('test-stat-avg').textContent      = avgPct + '%';
+    document.getElementById('test-stat-b').textContent        = gradeB;
+    document.getElementById('test-stat-students').textContent = students;
+
+    const tbody = document.getElementById('tests-tbody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#aaa;padding:24px">No test results found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(r => {
+      const gradeBadge = r.grade === 'A*' ? 'badge-green' : r.grade === 'A' ? 'badge-green' : r.grade === 'B' ? 'badge-yellow' : 'badge-red';
+      const yearLabel  = r.topics?.year_group === 13 ? 'Add Maths' : 'Year ' + (r.topics?.year_group || '—');
+      const mins = Math.floor((r.time_taken_secs || 0) / 60);
+      const secs = (r.time_taken_secs || 0) % 60;
+      const date = new Date(r.completed_at).toLocaleDateString('en-GB');
+      return `<tr>
+        <td><strong>${r.profiles?.full_name || '—'}</strong></td>
+        <td>${yearLabel}</td>
+        <td>${r.topics?.topic_name || '—'}</td>
+        <td><span class="badge ${r.level === 'F' ? 'badge-grey' : 'badge-yellow'}">${r.level === 'F' ? 'Foundation' : 'Extended'}</span></td>
+        <td>${r.score}/${r.max_score}</td>
+        <td>${r.percentage}%</td>
+        <td><span class="badge ${gradeBadge}">${r.grade}</span></td>
+        <td style="font-size:0.82rem;color:#888">${mins}m ${secs}s</td>
+        <td style="font-size:0.82rem;color:#888">${date}</td>
+      </tr>`;
+    }).join('');
+  };
+
+  window.exportTests = function() {
+    const rows = [['Student', 'Year', 'Topic', 'Level', 'Score', 'Max', 'Percentage', 'Grade', 'Time (secs)', 'Date']];
+    allTestResults.forEach(r => {
+      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : 'Year ' + (r.topics?.year_group || '');
+      rows.push([
+        r.profiles?.full_name || '',
+        yearLabel,
+        r.topics?.topic_name || '',
+        r.level === 'F' ? 'Foundation' : 'Extended',
+        r.score, r.max_score, r.percentage, r.grade,
+        r.time_taken_secs || '',
+        new Date(r.completed_at).toLocaleDateString('en-GB')
+      ]);
+    });
+    const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'abc_test_results_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+  };
 
   // ── Feedback tab ──
   let allFeedback = [];
