@@ -369,8 +369,12 @@
   <div class="modal">
     <div class="modal-header">
       <h2 id="modal-title">Student Detail</h2>
-      <button class="modal-close" onclick="closeModal()">×</button>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn-outline" style="font-size:0.8rem;padding:5px 12px" id="modal-reset-btn" onclick="resetStudentPassword()">Reset Password</button>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
     </div>
+    <div id="modal-reset-msg" style="display:none;margin-bottom:12px;padding:8px 12px;border-radius:5px;font-size:0.85rem"></div>
     <div id="modal-body"></div>
   </div>
 </div>
@@ -544,7 +548,11 @@
   };
 
   // ── Student modal ──
+  let _currentModalStudentId = null;
+
   window.openStudentModal = function(studentId) {
+    _currentModalStudentId = studentId;
+    document.getElementById('modal-reset-msg').style.display = 'none';
     const s = allStudents.find(s => s.id === studentId);
     if (!s) return;
     document.getElementById('modal-title').textContent = s.full_name;
@@ -583,6 +591,49 @@
         }).join('')}
       </div>`;
     document.getElementById('modal').classList.add('open');
+  };
+
+  window.resetStudentPassword = async function() {
+    const btn = document.getElementById('modal-reset-btn');
+    const msg = document.getElementById('modal-reset-msg');
+    if (!_currentModalStudentId) return;
+
+    const s = allStudents.find(s => s.id === _currentModalStudentId);
+    if (!confirm(`Reset password for ${s?.full_name} to ABC2026?`)) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Resetting…';
+
+    try {
+      // Find user email
+      const { data: profile } = await supabase
+        .from('profiles').select('id').eq('id', _currentModalStudentId).single();
+
+      // Use admin API via edge function workaround — update via REST
+      const resp = await fetch(`https://lnwinoghbefmjpvmixzo.supabase.co/auth/v1/admin/users/${_currentModalStudentId}`, {
+        method: 'PUT',
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password: 'ABC2026', email_confirm: true })
+      });
+
+      if (resp.ok) {
+        msg.style.cssText = 'display:block;background:#e8f5e9;color:#2e7d32';
+        msg.textContent = `✓ Password reset to ABC2026 for ${s?.full_name}`;
+      } else {
+        msg.style.cssText = 'display:block;background:#fde8e8;color:#a01f24';
+        msg.textContent = 'Reset failed — please use the fix_student_logins.py script instead.';
+      }
+    } catch(e) {
+      msg.style.cssText = 'display:block;background:#fde8e8;color:#a01f24';
+      msg.textContent = 'Error: ' + e.message;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Reset Password';
   };
 
   window.closeModal = function() { document.getElementById('modal').classList.remove('open'); };
