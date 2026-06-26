@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABC Maths — Topic Test</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #C0272D; color: white; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .logo { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; }
+    .subtitle { font-size: 0.85rem; opacity: 0.85; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 14px; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .timer { font-size: 1.1rem; font-weight: 700; background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 6px; letter-spacing: 1px; }
+    .timer.warning { background: rgba(255,200,0,0.3); }
+    .timer.danger  { background: rgba(255,80,80,0.4); }
+
+    main { flex: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 28px 16px; }
+
+    /* Setup screen */
+    .setup-card { background: white; border-radius: 10px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; }
+    .setup-card h1 { font-size: 1.4rem; color: #222; font-weight: 700; margin-bottom: 8px; }
+    .setup-card p  { font-size: 0.9rem; color: #666; margin-bottom: 28px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #555; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .form-group select { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 5px; font-size: 0.95rem; color: #333; background: white; }
+    .form-group select:focus { outline: none; border-color: #C0272D; }
+    .level-btns { display: flex; gap: 12px; }
+    .level-btn { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; background: white; color: #555; transition: all 0.18s; text-align: center; }
+    .level-btn:hover { border-color: #C0272D; color: #C0272D; }
+    .level-btn.selected { border-color: #C0272D; background: #fde8e8; color: #C0272D; }
+    .start-btn { width: 100%; padding: 14px; background: #C0272D; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
+    .start-btn:hover { background: #a01f24; }
+    .start-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+    /* Test screen */
+    .test-card { background: white; border-radius: 10px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; display: none; }
+    .progress-bar-wrap { background: #eee; border-radius: 99px; height: 6px; margin-bottom: 24px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: #C0272D; border-radius: 99px; transition: width 0.4s; }
+    .q-counter { font-size: 0.82rem; color: #888; margin-bottom: 6px; }
+    .q-text { font-size: 1.05rem; color: #222; font-weight: 600; margin-bottom: 20px; line-height: 1.5; }
+    .hints { margin-bottom: 16px; }
+    .hint-btn { background: none; border: 1.5px solid #ddd; border-radius: 5px; padding: 6px 14px; font-size: 0.82rem; color: #888; cursor: pointer; margin-bottom: 8px; display: block; }
+    .hint-btn:hover { border-color: #C0272D; color: #C0272D; }
+    .hint-text { font-size: 0.85rem; color: #666; background: #f9f9f9; border-radius: 5px; padding: 8px 12px; margin-top: 4px; display: none; }
+    .answer-row { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; }
+    .answer-input { flex: 1; padding: 11px 14px; border: 2px solid #ddd; border-radius: 6px; font-size: 1.1rem; color: #333; }
+    .answer-input:focus { outline: none; border-color: #C0272D; }
+    .answer-input.correct { border-color: #2e7d32; background: #e8f5e9; }
+    .answer-input.wrong   { border-color: #C0272D; background: #fde8e8; }
+    .unit-label { font-size: 0.9rem; color: #888; white-space: nowrap; }
+    .check-btn { padding: 11px 24px; background: #C0272D; color: white; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .check-btn:disabled { background: #ccc; cursor: not-allowed; }
+    .feedback-row { font-size: 0.9rem; padding: 10px 14px; border-radius: 5px; margin-bottom: 16px; display: none; }
+    .feedback-row.correct { background: #e8f5e9; color: #2e7d32; }
+    .feedback-row.wrong   { background: #fde8e8; color: #a01f24; }
+    .next-btn { width: 100%; padding: 12px; background: #333; color: white; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: none; }
+    .next-btn:hover { background: #111; }
+
+    /* Results screen */
+    .results-card { background: white; border-radius: 10px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; display: none; text-align: center; }
+    .results-card h2 { font-size: 1.3rem; color: #222; margin-bottom: 8px; }
+    .score-big { font-size: 3.5rem; font-weight: 700; color: #C0272D; line-height: 1; margin: 20px 0 8px; }
+    .grade-badge { display: inline-block; font-size: 1.1rem; font-weight: 700; padding: 6px 20px; border-radius: 99px; margin-bottom: 20px; }
+    .grade-A-star { background: #ffd700; color: #333; }
+    .grade-A { background: #e8f5e9; color: #2e7d32; }
+    .grade-B { background: #e8f0fe; color: #1a56b0; }
+    .grade-C { background: #fffde7; color: #f57f17; }
+    .grade-D { background: #fde8e8; color: #C0272D; }
+    .grade-E { background: #f5f5f5; color: #888; }
+    .results-detail { text-align: left; margin: 20px 0; }
+    .result-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; }
+    .result-row:last-child { border-bottom: none; }
+    .result-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+    .result-q { flex: 1; color: #333; }
+    .result-working { color: #888; font-size: 0.8rem; margin-top: 2px; }
+    .results-btns { display: flex; gap: 12px; margin-top: 24px; }
+    .results-btns button { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+    .btn-retry { background: #C0272D; color: white; }
+    .btn-dash  { background: #333; color: white; }
+
+    .loading { text-align: center; color: #aaa; padding: 40px; }
+    footer { text-align: center; padding: 16px; font-size: 0.78rem; color: #aaa; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">ABC</div>
+    <div class="subtitle">Topic Test</div>
+  </div>
+  <div class="header-right">
+    <div class="timer" id="timer" style="display:none">30:00</div>
+  </div>
+</header>
+
+<main>
+  <!-- Setup screen -->
+  <div class="setup-card" id="setup-screen">
+    <h1>Topic Test</h1>
+    <p>Choose a topic and level. You'll get 10 questions and 30 minutes.</p>
+
+    <div class="form-group">
+      <label>Year Group</label>
+      <select id="year-select" onchange="loadTopics()">
+        <option value="">— Select year group —</option>
+        <option value="7">Year 7</option>
+        <option value="8">Year 8</option>
+        <option value="9">Year 9</option>
+        <option value="10">Year 10</option>
+        <option value="11">Year 11</option>
+        <option value="12">Year 12</option>
+        <option value="13">Add Maths</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Topic</label>
+      <select id="topic-select">
+        <option value="">— Select year group first —</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Level</label>
+      <div class="level-btns">
+        <div class="level-btn" id="btn-F" onclick="selectLevel('F')">
+          Foundation<br><span style="font-size:0.75rem;font-weight:400;color:#888">Grades B–E</span>
+        </div>
+        <div class="level-btn" id="btn-E" onclick="selectLevel('E')">
+          Extended<br><span style="font-size:0.75rem;font-weight:400;color:#888">Grades A*–D</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="start-btn" id="start-btn" onclick="startTest()" disabled>Start Test</button>
+    <div id="setup-msg" style="margin-top:12px;font-size:0.85rem;color:#C0272D;display:none"></div>
+  </div>
+
+  <!-- Test screen -->
+  <div class="test-card" id="test-screen">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="q-counter" id="q-counter">Question 1 of 10</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="hints" id="hints-container"></div>
+    <div class="answer-row">
+      <input type="number" class="answer-input" id="answer-input" placeholder="Your answer" step="any">
+      <span class="unit-label" id="unit-label"></span>
+      <button class="check-btn" id="check-btn" onclick="checkAnswer()">Check</button>
+    </div>
+    <div class="feedback-row" id="feedback-row"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question →</button>
+  </div>
+
+  <!-- Results screen -->
+  <div class="results-card" id="results-screen">
+    <h2 id="results-topic"></h2>
+    <div class="score-big" id="results-score"></div>
+    <div style="color:#888;font-size:0.9rem;margin-bottom:8px" id="results-pct"></div>
+    <div class="grade-badge" id="results-grade"></div>
+    <div style="font-size:0.85rem;color:#666;margin-bottom:16px" id="results-time"></div>
+    <div class="results-detail" id="results-detail"></div>
+    <div class="results-btns">
+      <button class="btn-retry" onclick="retryTest()">Try Again</button>
+      <button class="btn-dash" onclick="goToDashboard()">My Dashboard</button>
+    </div>
+  </div>
+
+  <div class="loading" id="loading" style="display:none">Loading questions…</div>
+</main>
+
+<footer>© Adorable British College — ABC Maths Portal</footer>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  // ── Helper functions available to generated questions ──
+  window.pick = function(arr) { return arr[Math.floor(Math.random() * arr.length)]; };
+  window.rnd  = function(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; };
+
+  // ── Grade boundaries ──
+  function getGrade(pct, level) {
+    if (level === 'F') {
+      if (pct >= 80) return 'B';
+      if (pct >= 65) return 'C';
+      if (pct >= 50) return 'D';
+      return 'E';
+    } else {
+      if (pct >= 90) return 'A*';
+      if (pct >= 75) return 'A';
+      if (pct >= 60) return 'B';
+      if (pct >= 45) return 'C';
+      return 'D';
+    }
+  }
+
+  function gradeClass(grade) {
+    if (grade === 'A*') return 'grade-A-star';
+    return 'grade-' + grade;
+  }
+
+  // ── State ──
+  let allTopics    = [];
+  let session      = null;
+  let selectedLevel = null;
+  let questions    = [];
+  let currentQ     = 0;
+  let answers      = [];
+  let timerInterval = null;
+  let secondsLeft  = 1800;
+  let startTime    = null;
+  let selectedTopicId = null;
+  let selectedTopicName = '';
+
+  // ── Question generators — loaded dynamically from walkthrough files ──
+  // Map topic_code -> array of generator functions
+  const QUESTION_GENERATORS = {};
+
+  // ── Walkthrough file map ──
+  const WALKTHROUGH_FILES = {
+    'Y7-ALG-01': 'year07/algebra-y7.html',
+    'Y7-GEO-01': 'year07/geometry-y7.html',
+    'Y7-NUM-01': 'year07/number-y7.html',
+    'Y7-STA-01': 'year07/stats-y7.html',
+    'Y7-SEQ-01': 'year07/sequences-y7.html',
+    'Y8-NUM-01': 'year08/place-value-rounding-y8.html',
+    'Y8-NUM-02': 'year08/addition-subtraction-y8.html',
+    'Y8-NUM-03': 'year08/multiplication-y8.html',
+    'Y8-NUM-04': 'year08/division-y8.html',
+    'Y8-NUM-05': 'year08/integers-powers-roots-y8.html',
+    'Y8-NUM-06': 'year08/fractions-percentages-ratio-y8.html',
+    'Y8-NUM-07': 'year08/mixed-operations-y8.html',
+    'Y8-ALG-01': 'year08/algebra-y8.html',
+    'Y8-ALG-02': 'year08/manipulation-y8.html',
+    'Y8-ALG-03': 'year08/equations-sequences-graphs-y8.html',
+    'Y8-GEO-01': 'year08/angles-y8.html',
+    'Y8-GEO-02': 'year08/shapes-construction-y8.html',
+    'Y8-GEO-03': 'year08/perimeter-area-volume-y8.html',
+    'Y8-GEO-04': 'year08/transformations-y8.html',
+    'Y8-STA-01': 'year08/data-handling-y8.html',
+    'Y8-STA-02': 'year08/probability-y8.html',
+    'Y8-MEA-01': 'year08/units-measurement-y8.html',
+    'Y9-NUM-01': 'year09/number-y9.html',
+    'Y9-ALG-01': 'year09/algebra-y9.html',
+    'Y9-ALG-02': 'year09/sequences-y9.html',
+    'Y9-ALG-03': 'year09/graphs-y9.html',
+    'Y9-GEO-01': 'year09/geometry-y9.html',
+    'Y9-GEO-02': 'year09/mensuration-y9.html',
+    'Y9-GEO-03': 'year09/pythagoras-trig-y9.html',
+    'Y9-GEO-04': 'year09/transformations-y9.html',
+    'Y9-STA-01': 'year09/statistics-y9.html',
+    'Y9-STA-02': 'year09/probability-y9.html',
+    'Y10-NUM-01': 'year10/number-y10.html',
+    'Y10-ALG-01': 'year10/algebra-y10.html',
+    'Y10-ALG-02': 'year10/graphs-y10.html',
+    'Y10-GEO-01': 'year10/geometry-y10.html',
+    'Y10-GEO-02': 'year10/mensuration-y10.html',
+    'Y10-GEO-03': 'year10/constructions-y10.html',
+    'Y10-GEO-04': 'year10/trig-y10.html',
+    'Y10-CAL-01': 'year10/calculus-diff-y10.html',
+    'Y10-STA-01': 'year10/stats-y10.html',
+    'Y11-ALG-01': 'year11/algebra-y11.html',
+    'Y11-GEO-01': 'year11/geometry-y11.html',
+    'Y11-GEO-02': 'year11/mensuration-y11.html',
+    'Y11-GEO-03': 'year11/transformations-y11.html',
+    'Y11-NUM-01': 'year11/percentages-y11.html',
+    'Y11-VEC-01': 'year11/vectors-y11.html',
+    'Y12-ALG-01': 'year12/algebra-y12.html',
+    'Y12-GEO-01': 'year12/geometry-y12.html',
+    'Y12-CAL-01': 'year12/calculus-y12.html',
+    'Y12-NUM-01': 'year12/number-bases-y12.html',
+    'Y12-NUM-02': 'year12/modulo-y12.html',
+    'Y12-ALG-02': 'year12/binary-operations-y12.html',
+    'Y12-ALG-03': 'year12/matrices-y12.html',
+    'AM-ALG-01': 'addmaths/algebra-addmaths.html',
+    'AM-ALG-02': 'addmaths/equations-inequalities-addmaths.html',
+    'AM-ALG-03': 'addmaths/quadratics-advanced-addmaths.html',
+    'AM-ALG-04': 'addmaths/polynomials-addmaths.html',
+    'AM-CAL-01': 'addmaths/differentiation-addmaths.html',
+    'AM-CAL-02': 'addmaths/integration-addmaths.html',
+    'AM-TRI-01': 'addmaths/trigonometry-addmaths.html',
+    'AM-TRI-02': 'addmaths/trig-identities-addmaths.html',
+    'AM-STA-01': 'addmaths/permutation-combination-addmaths.html',
+  };
+
+  // ── Extract tryIt generators from a walkthrough HTML file ──
+  async function extractGenerators(topicCode) {
+    const file = WALKTHROUGH_FILES[topicCode];
+    if (!file) return [];
+
+    try {
+      const resp = await fetch(file);
+      const html = await resp.text();
+
+      // Extract all tryIt(function(){...}) blocks
+      const generators = [];
+      const regex = /tryIt\(function\(\)\s*\{([\s\S]*?)\}\s*\)/g;
+      let match;
+      while ((match = regex.exec(html)) !== null) {
+        try {
+          // Create the generator function
+          const fnBody = match[1];
+          const genFn = new Function('pick', 'rnd', fnBody);
+          generators.push(() => genFn(window.pick, window.rnd));
+        } catch(e) {
+          // Skip malformed generators
+        }
+      }
+
+      // Also extract yt wrapper functions
+      const ytRegex = /function (yt\d+)\(\)\{([\s\S]*?)\n\}/g;
+      while ((match = ytRegex.exec(html)) !== null) {
+        try {
+          const fnBody = match[2];
+          const genFn = new Function('pick', 'rnd', 'tryIt', fnBody + '\nreturn result;');
+          // For yt functions we need a different approach — extract the return value
+          generators.push(() => {
+            // Execute the yt function body to get the tryIt call result
+            const tryItCapture = (genOrObj) => {
+              if (typeof genOrObj === 'function') return genOrObj();
+              return genOrObj;
+            };
+            try {
+              const fn = new Function('pick', 'rnd', 'tryIt', match[2]);
+              return fn(window.pick, window.rnd, tryItCapture);
+            } catch(e) { return null; }
+          });
+        } catch(e) {}
+      }
+
+      return generators.filter(g => g !== null);
+    } catch(e) {
+      console.error('Failed to load generators:', e);
+      return [];
+    }
+  }
+
+  // ── Auth ──
+  const { data: { session: s } } = await supabase.auth.getSession();
+  session = s;
+
+  // ── Load topics by year group ──
+  window.loadTopics = async function() {
+    const yr = parseInt(document.getElementById('year-select').value);
+    if (!yr) return;
+
+    const { data: topics } = await supabase
+      .from('topics').select('*').eq('year_group', yr).order('sort_order');
+    allTopics = topics || [];
+
+    const sel = document.getElementById('topic-select');
+    sel.innerHTML = allTopics.map(t =>
+      `<option value="${t.id}" data-code="${t.topic_code}">${t.topic_name}</option>`
+    ).join('');
+
+    checkReady();
+  };
+
+  window.selectLevel = function(level) {
+    selectedLevel = level;
+    document.getElementById('btn-F').classList.toggle('selected', level === 'F');
+    document.getElementById('btn-E').classList.toggle('selected', level === 'E');
+    checkReady();
+  };
+
+  function checkReady() {
+    const topicSel = document.getElementById('topic-select');
+    const ready = topicSel.value && selectedLevel;
+    document.getElementById('start-btn').disabled = !ready;
+  }
+
+  document.getElementById('topic-select').addEventListener('change', checkReady);
+
+  // ── Start test ──
+  window.startTest = async function() {
+    const topicSel = document.getElementById('topic-select');
+    const opt = topicSel.options[topicSel.selectedIndex];
+    selectedTopicId   = parseInt(topicSel.value);
+    selectedTopicName = opt.text;
+    const topicCode   = opt.getAttribute('data-code');
+
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+
+    // Load generators from walkthrough file
+    const generators = await extractGenerators(topicCode);
+
+    if (generators.length === 0) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('setup-screen').style.display = 'block';
+      document.getElementById('setup-msg').style.display = 'block';
+      document.getElementById('setup-msg').textContent = 'No questions available for this topic yet.';
+      return;
+    }
+
+    // Generate 10 questions
+    questions = [];
+    const shuffled = [...generators].sort(() => Math.random() - 0.5);
+    for (let i = 0; i < 10; i++) {
+      const gen = shuffled[i % shuffled.length];
+      try {
+        const q = gen();
+        if (q && q.question && q.ans !== undefined) {
+          questions.push(q);
+        }
+      } catch(e) {}
+    }
+
+    if (questions.length < 5) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('setup-screen').style.display = 'block';
+      document.getElementById('setup-msg').style.display = 'block';
+      document.getElementById('setup-msg').textContent = 'Not enough questions available. Please try another topic.';
+      return;
+    }
+
+    currentQ  = 0;
+    answers   = [];
+    secondsLeft = 1800;
+    startTime = Date.now();
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('test-screen').style.display = 'block';
+    document.getElementById('timer').style.display = 'block';
+
+    startTimer();
+    showQuestion();
+  };
+
+  // ── Timer ──
+  function startTimer() {
+    updateTimerDisplay();
+    timerInterval = setInterval(function() {
+      secondsLeft--;
+      updateTimerDisplay();
+      if (secondsLeft <= 0) {
+        clearInterval(timerInterval);
+        submitTest();
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const m = Math.floor(secondsLeft / 60);
+    const s = secondsLeft % 60;
+    const el = document.getElementById('timer');
+    el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    el.className = 'timer' + (secondsLeft <= 300 ? ' danger' : secondsLeft <= 600 ? ' warning' : '');
+  }
+
+  // ── Show question ──
+  function showQuestion() {
+    const q = questions[currentQ];
+    const pct = (currentQ / questions.length) * 100;
+
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('q-counter').textContent = 'Question ' + (currentQ + 1) + ' of ' + questions.length;
+    document.getElementById('q-text').innerHTML = q.question;
+    document.getElementById('unit-label').textContent = q.unit || '';
+    document.getElementById('answer-input').value = '';
+    document.getElementById('answer-input').className = 'answer-input';
+    document.getElementById('answer-input').disabled = false;
+    document.getElementById('check-btn').disabled = false;
+    document.getElementById('feedback-row').style.display = 'none';
+    document.getElementById('next-btn').style.display = 'none';
+
+    // Hints
+    const hintsEl = document.getElementById('hints-container');
+    hintsEl.innerHTML = (q.hints || []).map((h, i) =>
+      `<button class="hint-btn" onclick="showHint(this, '${h.replace(/'/g,"\\'")}')">💡 Hint ${i+1}</button>
+       <div class="hint-text">${h}</div>`
+    ).join('');
+
+    document.getElementById('answer-input').focus();
+  }
+
+  window.showHint = function(btn, text) {
+    const hint = btn.nextElementSibling;
+    hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+  };
+
+  // ── Check answer ──
+  window.checkAnswer = function() {
+    const q   = questions[currentQ];
+    const val = parseFloat(document.getElementById('answer-input').value);
+    const tol = q.tol !== undefined ? q.tol : 0.01;
+    const correct = !isNaN(val) && Math.abs(val - q.ans) <= Math.max(tol, 0.001);
+
+    const input = document.getElementById('answer-input');
+    const fb    = document.getElementById('feedback-row');
+
+    input.className = 'answer-input ' + (correct ? 'correct' : 'wrong');
+    input.disabled  = true;
+    document.getElementById('check-btn').disabled = true;
+
+    fb.style.display = 'block';
+    fb.className = 'feedback-row ' + (correct ? 'correct' : 'wrong');
+    fb.innerHTML = correct
+      ? '✓ Correct! ' + (q.working ? '<span style="opacity:0.8">— ' + q.working + '</span>' : '')
+      : '✗ Not quite. Answer: <strong>' + q.ans + (q.unit ? ' ' + q.unit : '') + '</strong>' + (q.working ? ' — ' + q.working : '');
+
+    answers.push({ q, correct, given: val });
+
+    const nextBtn = document.getElementById('next-btn');
+    nextBtn.style.display = 'block';
+    nextBtn.textContent = currentQ < questions.length - 1 ? 'Next Question →' : 'See Results';
+  };
+
+  // Handle Enter key
+  document.getElementById('answer-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !document.getElementById('check-btn').disabled) {
+      window.checkAnswer();
+    }
+  });
+
+  // ── Next question ──
+  window.nextQuestion = function() {
+    currentQ++;
+    if (currentQ >= questions.length) {
+      submitTest();
+    } else {
+      showQuestion();
+    }
+  };
+
+  // ── Submit and show results ──
+  async function submitTest() {
+    clearInterval(timerInterval);
+    document.getElementById('timer').style.display = 'none';
+    document.getElementById('test-screen').style.display = 'none';
+
+    const score    = answers.filter(a => a.correct).length;
+    const maxScore = questions.length;
+    const pct      = Math.round((score / maxScore) * 100);
+    const grade    = getGrade(pct, selectedLevel);
+    const timeTaken = Math.round((Date.now() - startTime) / 1000);
+    const mins = Math.floor(timeTaken / 60);
+    const secs = timeTaken % 60;
+
+    // Save to Supabase
+    if (session) {
+      await supabase.from('test_results').insert({
+        student_id:      session.user.id,
+        topic_id:        selectedTopicId,
+        level:           selectedLevel,
+        score,
+        max_score:       maxScore,
+        grade,
+        time_taken_secs: timeTaken,
+        completed_at:    new Date().toISOString()
+      });
+    }
+
+    // Show results
+    document.getElementById('results-topic').textContent = selectedTopicName + ' (' + (selectedLevel === 'F' ? 'Foundation' : 'Extended') + ')';
+    document.getElementById('results-score').textContent = score + '/' + maxScore;
+    document.getElementById('results-pct').textContent = pct + '%';
+    const gradeEl = document.getElementById('results-grade');
+    gradeEl.textContent = 'Grade ' + grade;
+    gradeEl.className = 'grade-badge ' + gradeClass(grade);
+    document.getElementById('results-time').textContent = 'Completed in ' + mins + 'm ' + secs + 's';
+
+    document.getElementById('results-detail').innerHTML = answers.map((a, i) => `
+      <div class="result-row">
+        <div class="result-icon">${a.correct ? '✓' : '✗'}</div>
+        <div class="result-q">
+          <div>${a.q.question}</div>
+          ${!a.correct ? `<div class="result-working">Answer: ${a.q.ans}${a.q.unit ? ' ' + a.q.unit : ''} — ${a.q.working || ''}</div>` : ''}
+        </div>
+      </div>`).join('');
+
+    document.getElementById('results-screen').style.display = 'block';
+  }
+
+  window.retryTest   = function() { window.location.reload(); };
+  window.goToDashboard = function() { window.location.href = 'dashboard-student.html'; };
+</script>
+
+</body>
+</html>
