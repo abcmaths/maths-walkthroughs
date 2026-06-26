@@ -676,33 +676,42 @@
     } catch(e) { console.error('Test results error:', e); }
 
     document.getElementById('modal-body').innerHTML = `
-      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px">
-        <div style="flex:1;min-width:120px;background:#f9f9f9;border-radius:6px;padding:14px;text-align:center">
+      <!-- Summary cards -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+        <div style="flex:1;min-width:110px;background:#f9f9f9;border-radius:6px;padding:12px;text-align:center">
           <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${done}/${yrTopics.length}</div>
-          <div style="font-size:0.75rem;color:#888;text-transform:uppercase;margin-top:4px">Topics Done</div>
+          <div style="font-size:0.72rem;color:#888;text-transform:uppercase;margin-top:3px">Topics Done</div>
         </div>
-        <div style="flex:1;min-width:120px;background:#f9f9f9;border-radius:6px;padding:14px;text-align:center">
+        <div style="flex:1;min-width:110px;background:#f9f9f9;border-radius:6px;padding:12px;text-align:center">
           <div style="font-size:1.4rem;font-weight:700;color:#1a56b0">${Object.keys(testMap).length}</div>
-          <div style="font-size:0.75rem;color:#888;text-transform:uppercase;margin-top:4px">Tests Taken</div>
+          <div style="font-size:0.72rem;color:#888;text-transform:uppercase;margin-top:3px">Tests Taken</div>
         </div>
-        ${Object.keys(testMap).length > 0 ? '<div style="flex:1;min-width:120px;background:#f9f9f9;border-radius:6px;padding:14px;text-align:center"><div style="font-size:1.4rem;font-weight:700;color:#1a56b0">' + Math.round((studentTests||[]).reduce((a,t)=>a+t.percentage,0)/((studentTests||[]).length||1)) + '%</div><div style="font-size:0.75rem;color:#888;text-transform:uppercase;margin-top:4px">Avg Test Score</div></div>' : ''}
+        ${Object.keys(testMap).length > 0 ? '<div style="flex:1;min-width:110px;background:#f9f9f9;border-radius:6px;padding:12px;text-align:center"><div style="font-size:1.4rem;font-weight:700;color:#1a56b0">' + Math.round((studentTests||[]).reduce((a,t)=>a+t.percentage,0)/((studentTests||[]).length||1)) + '%</div><div style="font-size:0.72rem;color:#888;text-transform:uppercase;margin-top:3px">Avg Test Score</div></div>' : ''}
       </div>
-      <div style="font-weight:700;color:#333;margin-bottom:12px">Topic Progress</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">
+
+      <!-- Walkthrough Progress -->
+      <div style="font-weight:700;color:#333;margin-bottom:10px;font-size:0.9rem;border-bottom:2px solid #eee;padding-bottom:6px">📖 Walkthrough Progress</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:20px">
         ${yrTopics.map(t => {
           const status = progMap[t.id] || 'not-started';
           const badge  = status === 'completed' ? 'badge-green' : status === 'started' ? 'badge-yellow' : 'badge-grey';
           const label  = status === 'completed' ? '✓ Done' : status === 'started' ? '▶ Started' : '○ Not started';
-          const test   = testMap[t.id];
-          const testBadge = test
-            ? '<span style="font-size:0.72rem;font-weight:700;background:#e8f0fe;color:#1a56b0;padding:2px 7px;border-radius:99px;margin-left:4px">Test: ' + test.grade + ' (' + test.percentage + '%)</span>'
-            : '';
-          return `<div style="border:1.5px solid #eee;border-radius:6px;padding:10px">
-            <div style="font-size:0.82rem;font-weight:600;color:#333;margin-bottom:6px">${t.topic_name}</div>
-            <span class="badge ${badge}">${label}</span>${testBadge}
-          </div>`;
+          return '<div style="border:1.5px solid #eee;border-radius:6px;padding:10px"><div style="font-size:0.82rem;font-weight:600;color:#333;margin-bottom:6px">' + t.topic_name + '</div><span class="badge ' + badge + '">' + label + '</span></div>';
         }).join('')}
-      </div>`;
+      </div>
+
+      <!-- Test Results -->
+      <div style="font-weight:700;color:#333;margin-bottom:10px;font-size:0.9rem;border-bottom:2px solid #eee;padding-bottom:6px">📝 Test Results</div>
+      ${Object.keys(testMap).length === 0
+        ? '<div style="color:#aaa;font-size:0.85rem;font-style:italic">No tests taken yet.</div>'
+        : '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">' +
+          yrTopics.filter(t => testMap[t.id]).map(t => {
+            const test = testMap[t.id];
+            const gradeCol = test.grade === 'A*' || test.grade === 'A' ? '#2e7d32' : test.grade === 'B' ? '#1a56b0' : '#C0272D';
+            return '<div style="border:1.5px solid #e8f0fe;border-radius:6px;padding:10px;background:#f8faff"><div style="font-size:0.82rem;font-weight:600;color:#333;margin-bottom:6px">' + t.topic_name + '</div><div style="font-size:1.1rem;font-weight:700;color:' + gradeCol + '">Grade ' + test.grade + '</div><div style="font-size:0.75rem;color:#888">' + test.percentage + '% · ' + (test.level === 'F' ? 'Foundation' : 'Extended') + '</div></div>';
+          }).join('') +
+          '</div>'
+      }`;
   };
 
   window.resetStudentPassword = async function() {
