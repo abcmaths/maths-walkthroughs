@@ -647,7 +647,7 @@
   window.openStudentModal = function(studentId) {
     _currentModalStudentId = studentId;
     document.getElementById('modal-reset-msg').style.display = 'none';
-    const s = allStudents.find(s => s.id === studentId);
+    const s = allStudents.find(s => s.id === studentId) || allUsersWithEmail.find(u => u.id === studentId);
     if (!s) return;
     document.getElementById('modal-title').textContent = s.full_name;
     const yrTopics = allTopics.filter(t => t.year_group === s.year_group);
@@ -1076,7 +1076,7 @@
         <td>${u.form_class || '—'}</td>
         <td style="font-size:0.82rem;color:#888">${lastSignIn}</td>
         <td>
-          <button class="btn-link" onclick="openStudentModal('${u.id}')">View</button>
+          ${u.role === 'student' ? `<button class="btn-link" onclick="openStudentModal('${u.id}')">View</button>` : ''}
           <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}','${u.role}','${u.year_group||''}','${u.form_class||''}')">Edit</button>
         </td>
       </tr>`;
