@@ -512,70 +512,25 @@ var QS=[
     {lb:'Step 2 - Find y values',dr:dQ2,ht:'<div class="fm">x=1: y=1-6+9+2=6  ->  (1,6)</div><div class="fm">x=3: y=27-54+27+2=2  ->  (3,2)</div>'},
     {lb:'Step 3 - Second derivative',dr:dQ2,ht:'<div class="fm">d^2y/dx^2 = 6x-12</div><div class="fm">x=1: 6-12=-6 < 0  ->  MAX</div><div class="fm">x=3: 18-12=+6 > 0  ->  MIN</div>'},
     {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
-  // Generate cubics of the form y = x^3 + bx^2 + cx + d
-  // with two stationary points, one being a minimum
-  // Use form y = x^3 - 3(a+b)x^2/2... easier: pick two roots p, q for dy/dx
-  // dy/dx = 3x^2 - 6(p+q)/2 x + 3pq = 3(x-p)(x-q)
-  // So a=1, dy/dx = 3x^2 - 3(p+q)x + 3pq
-  // Integrating: y = x^3 - 3(p+q)/2 x^2 + 3pq x + d
-
-  var configs = [
-    {p:1, q:3, d:2},
-    {p:1, q:4, d:0},
-    {p:2, q:4, d:1},
-    {p:1, q:5, d:3},
-    {p:2, q:5, d:0},
-    {p:1, q:2, d:4},
-    {p:2, q:6, d:1},
-    {p:3, q:5, d:2}
-  ];
-
-  var cfg = pick(configs);
-  var p = cfg.p, q = cfg.q, d = cfg.d;
-
-  // Coefficients: y = x^3 - 3(p+q)/2 x^2 + 3pq x + d
-  // To keep integers, dy/dx = 3(x-p)(x-q) = 3x^2 - 3(p+q)x + 3pq
-  // y = x^3 - 3(p+q)/2 x^2 + 3pq x + d
-  // This may not be integer coefficients if p+q is odd.
-  // Use instead: y = x^3 - (p+q)*3/2 x^2 ... let's just compute and check.
-
-  // Actually let's just use the specific form from the original more carefully.
-  // dy/dx = 3x^2 - 3(p+q)x + 3pq
-  // So B = -3(p+q)/2... use pick to ensure p+q is even.
-  // All configs above: p+q must be even for integer coeff
-  // Check: 1+3=4✓, 1+4=5✗ - fix configs
-
-  var configs2 = [
-    {p:1, q:3, d:2},
-    {p:2, q:4, d:1},
-    {p:1, q:5, d:3},
-    {p:2, q:6, d:0},
-    {p:3, q:5, d:2},
-    {p:1, q:3, d:5},
-    {p:2, q:4, d:3},
-    {p:3, q:5, d:0}
-  ];
-
-  cfg = pick(configs2);
-  p = cfg.p; q = cfg.q; d = cfg.d;
-  // p < q, minimum at x=q (second deriv = 6q - 3(p+q) = 3(q-p) > 0)
-
-  var B = -3*(p+q)/2;  // coefficient of x^2
-  var C = 3*p*q;       // coefficient of x
-
-  // y = x^3 + B*x^2 + C*x + d
-  function yVal(x) {
-    return x*x*x + B*x*x + C*x + d;
-  }
-
-  var minX = q;
-  var minY = yVal(minX);
-  var maxX = p;
-  var maxY = yVal(maxX);
-
-  // Format the equation nicely
-  var Bstr = (B < 0 ? ' - ' + Math.abs(B) : ' + ' + B);
-  var Cstr}
+  var a = pick([2,3,4,5,6]);
+  var n = pick([2,3,4]);
+  var b = pick([1,2,3,4,5]);
+  var dydx_term1 = a * n;
+  var dydx_term2 = b;
+  var ans = dydx_term1;
+  return {
+    question: 'Find dy/dx if y = ' + a + 'x^' + n + ' + ' + b + 'x.',
+    hints: [
+      'Differentiate each term separately',
+      'Power rule: d/dx(ax^n) = nax^(n-1)',
+      'Coefficient of x^' + (n-1) + ' term: ' + a + ' x ' + n
+    ],
+    ans: dydx_term1,
+    tol: 0,
+    unit: '(coefficient of x^' + (n-1) + ')',
+    working: 'dy/dx = ' + dydx_term1 + 'x^' + (n-1) + ' + ' + b
+  };
+})}
   ]},
   {ey:'Q3 - Integration',ti:'Basic Integration Rule',su:'Find the integral of (6x^2 + 4x + 3) dx.',cat:'i',steps:[
     {lb:'The rule',dr:dQ3,ht:'<p>Integration is the reverse of differentiation. If dy/dx = ax^n, then y = ax^(n+1)/(n+1) + C. Always add the <b>constant of integration C</b>.</p>'},
