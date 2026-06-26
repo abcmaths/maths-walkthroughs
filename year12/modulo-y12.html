@@ -290,26 +290,105 @@ var QS=[
     {lb:'What is modulo?',dr:dQ1,ht:'<p>Modulo arithmetic works like a clock. After reaching the modulus, you return to zero. <b>n mod m</b> is the remainder when n is divided by m.</p>'},
     {lb:'Step 1 - 29 mod 12',dr:dQ1,ht:'<div class="fm">29 = 2 x 12 + 5</div><div class="fm">29 mod 12 = <b>5</b></div>'},
     {lb:'Step 2 - 47 mod 5',dr:dQ1,ht:'<div class="fm">47 = 9 x 5 + 2</div><div class="fm">47 mod 5 = <b>2</b></div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Find <b>83 mod 7</b>.',hints:['83 = 11 x 7 + ?','The remainder is the answer'],ans:6,exact:0.1,unit:'',working:'83 = 11x7 + 6. Answer = <b>6</b>'})}
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
+  var m = pick([5,6,7,8,9,11,12,13]);
+  var n = rnd(m*3, m*15);
+  var q = Math.floor(n / m);
+  var ans = n % m;
+  return {
+    question: 'Find <b>' + n + ' mod ' + m + '</b>.',
+    hints: [n + ' = ' + q + ' x ' + m + ' + ?', 'The remainder is the answer'],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: n + ' = ' + q + 'x' + m + ' + ' + ans + '. Answer = <b>' + ans + '</b>'
+  };
+})}
   ]},
   {ey:'Q2 - Modulo Arithmetic',ti:'Addition Table Mod 5',su:'Complete and use an addition table in mod 5.',steps:[
     {lb:'The table',dr:dQ2,ht:'<p>In mod 5, the only values are <b>0, 1, 2, 3, 4</b>. Each entry = (row + column) mod 5. Values wrap around after 4.</p>'},
     {lb:'Step 1 - Fill it in',dr:dQ2,ht:'<p>For example: 3+4=7, and 7 mod 5=2. Diagonal entries (same row and column) are highlighted.</p>'},
     {lb:'Step 2 - Read it',dr:dQ2,ht:'<div class="fm">3+4 = 2 (mod 5)</div><div class="fm">4+4 = 3 (mod 5)</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Using mod 5, find <b>(4+3+3) mod 5</b>.',hints:['4+3=7, 7 mod 5=2','2+3=5, 5 mod 5=?'],ans:0,exact:0.1,unit:'',working:'4+3=7->2, 2+3=5->0. Answer = <b>0</b>'})}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
+  var mod = 5;
+  var a = rnd(1, 4);
+  var b = rnd(1, 4);
+  var c = rnd(1, 4);
+  var step1 = a + b;
+  var step1mod = step1 % mod;
+  var step2 = step1mod + c;
+  var ans = step2 % mod;
+  return {
+    question: 'Using mod ' + mod + ', find <b>(' + a + '+' + b + '+' + c + ') mod ' + mod + '</b>.',
+    hints: [
+      a + '+' + b + '=' + step1 + ', ' + step1 + ' mod ' + mod + '=' + step1mod,
+      step1mod + '+' + c + '=' + step2 + ', ' + step2 + ' mod ' + mod + '=?'
+    ],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: a + '+' + b + '=' + step1 + '->' + step1mod + ', ' + step1mod + '+' + c + '=' + step2 + '->' + ans + '. Answer = <b>' + ans + '</b>'
+  };
+})}
   ]},
   {ey:'Q3 - Modulo Arithmetic',ti:'Solving a Modulo Equation',su:'Find all values of x from 0 to 15 that satisfy x = 7 (mod 3).',steps:[
     {lb:'The problem',dr:dQ3,ht:'<p>Solving <b>x = 7 (mod 3)</b> means finding all x that give the same remainder as 7 when divided by 3.</p>'},
     {lb:'Step 1 - Find the target remainder',dr:dQ3,ht:'<div class="fm">7 mod 3 = 1 (since 7 = 2x3 + 1)</div><p>So we need all x where x mod 3 = 1.</p>'},
     {lb:'Step 2 - Identify solutions',dr:dQ3,ht:'<p>Scan 0 to 15 highlighting every number with remainder 1 when divided by 3.</p>'},
     {lb:'Step 3 - List solutions',dr:dQ3,ht:'<div class="fm">x = 1, 4, 7, 10, 13</div><p>Each solution = previous + modulus (3). Evenly spaced.</p>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'How many solutions does x = 5 (mod 4) have in the range 0 to 20?',hints:['5 mod 4 = 1','Find all x in 0-20 where x mod 4 = 1','1, 5, 9, 13, 17 ...'],ans:5,exact:0.1,unit:'solutions',working:'x = 1, 5, 9, 13, 17. That is <b>5</b> solutions.'})}
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
+  var modulus = pick([3, 4, 5, 6]);
+  var target = rnd(0, 20);
+  var remainder = target % modulus;
+
+  // Find all solutions in range 0 to 20
+  var solutions = [];
+  for (var x = 0; x <= 20; x++) {
+    if (x % modulus === remainder) {
+      solutions.push(x);
+    }
+  }
+  var ans = solutions.length;
+  var solList = solutions.join(', ');
+
+  return {
+    question: 'How many solutions does x ≡ ' + target + ' (mod ' + modulus + ') have in the range 0 to 20?',
+    hints: [
+      target + ' mod ' + modulus + ' = ' + remainder,
+      'Find all x in 0-20 where x mod ' + modulus + ' = ' + remainder,
+      remainder + ', ' + (remainder + modulus) + ', ' + (remainder + 2 * modulus) + ' ...'
+    ],
+    ans: ans,
+    tol: 0,
+    unit: 'solutions',
+    working: 'x = ' + solList + '. That is <b>' + ans + '</b> solution' + (ans !== 1 ? 's' : '') + '.'
+  };
+})}
   ]},
   {ey:'Q4 - Modulo Arithmetic',ti:'Multiplication Table Mod 4',su:'Complete a multiplication table in mod 4.',steps:[
     {lb:'The table',dr:dQ4,ht:'<p>Each entry = (row x column) mod 4. Digits in mod 4 are 0, 1, 2, 3 only.</p>'},
     {lb:'Step 1 - Fill it in',dr:dQ4,ht:'<p>For example: 3x3=9, and 9 mod 4=1. Blue entries show zeros (divisors of zero).</p>'},
     {lb:'Step 2 - Observe patterns',dr:dQ4,ht:'<p>Notice that 2x2=0 in mod 4 even though neither factor is zero. These are called <b>zero divisors</b> - they only exist in modular arithmetic, not in ordinary numbers.</p>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'In mod 6, what is 4 x 5?',hints:['4 x 5 = 20','20 mod 6 = ?','20 = 3x6 + ?'],ans:2,exact:0.1,unit:'',working:'4x5=20. 20=3x6+2. Answer = <b>2</b>'})}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
+  var mod = pick([5, 6, 7, 8, 9]);
+  var a = rnd(2, mod - 1);
+  var b = rnd(2, mod - 1);
+  var product = a * b;
+  var ans = product % mod;
+  var quotient = Math.floor(product / mod);
+  return {
+    question: 'In mod ' + mod + ', what is ' + a + ' x ' + b + '?',
+    hints: [
+      a + ' x ' + b + ' = ' + product,
+      product + ' mod ' + mod + ' = ?',
+      product + ' = ' + quotient + 'x' + mod + ' + ?'
+    ],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: a + 'x' + b + '=' + product + '. ' + product + '=' + quotient + 'x' + mod + '+' + ans + '. Answer = <b>' + ans + '</b>'
+  };
+})}
   ]}
 ];
 

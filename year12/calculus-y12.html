@@ -464,14 +464,109 @@ var QS=[
     {lb:'Term 2: 3x^2',dr:dQ1,ht:'<div class="fm">3x^2  ->  2 x 3 x x^1 = 6x</div>'},
     {lb:'Terms 3 and 4',dr:dQ1,ht:'<div class="fm">8x -> 8   |   5 -> 0</div>'},
     {lb:'Full answer',dr:dQ1,ht:'<div class="fm">dy/dx = 24x^3 + 6x + 8</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Differentiate <b>y = 5x^3 - 3x^2 + 4x - 7</b>. What is the constant term in dy/dx?',hints:['Differentiate 4x -> 4','The constant -7 becomes 0','The constant term is from the x term only'],ans:4,exact:0.1,unit:'',working:'dy/dx = 15x^2 - 6x + 4. Constant term = <b>4</b>'})}
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
+  var a = pick([2,3,4,5,6,7,8]);
+  var b = pick([2,3,4,5,6]);
+  var c = pick([2,3,4,5,6,7,8,9]);
+  var d = pick([1,2,3,4,5,6,7,8,9]);
+  var bSign = pick([1,-1]);
+  var dSign = pick([1,-1]);
+  var bCoeff = b * bSign;
+  var dVal = d * dSign;
+
+  var bStr = bCoeff >= 0 ? '+ ' + bCoeff + 'x^2' : '- ' + b + 'x^2';
+  var dStr = dVal >= 0 ? '+ ' + dVal : '- ' + d;
+
+  var da = 3 * a;
+  var db = 2 * b * bSign;
+  var dbStr = db >= 0 ? '+ ' + db + 'x' : '- ' + Math.abs(db) + 'x';
+
+  var ans = c;
+
+  return {
+    question: 'Differentiate <b>y = ' + a + 'x^3 ' + bStr + ' + ' + c + 'x ' + dStr + '</b>. What is the constant term in dy/dx?',
+    hints: [
+      'Differentiate ' + c + 'x → ' + c,
+      'The constant ' + dVal + ' becomes 0',
+      'The constant term comes from the x term only'
+    ],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: 'dy/dx = ' + da + 'x^2 ' + dbStr + ' + ' + c + '. Constant term = <b>' + c + '</b>'
+  };
+})}
   ]},
   {ey:'Q2 - Differentiation',ti:'Stationary Points and Nature',su:'Find and classify stationary points of y = x^3 - 6x^2 + 9x + 2.',cat:'d',steps:[
     {lb:'The curve',dr:dQ2,ht:'<p>Set dy/dx = 0 to find stationary points. Use the second derivative d^2y/dx^2 to classify them as maximum or minimum.</p>'},
     {lb:'Step 1 - Differentiate',dr:dQ2,ht:'<div class="fm">dy/dx = 3x^2 - 12x + 9 = 3(x-1)(x-3)</div><div class="fm">Stationary points at x=1 and x=3</div>'},
     {lb:'Step 2 - Find y values',dr:dQ2,ht:'<div class="fm">x=1: y=1-6+9+2=6  ->  (1,6)</div><div class="fm">x=3: y=27-54+27+2=2  ->  (3,2)</div>'},
     {lb:'Step 3 - Second derivative',dr:dQ2,ht:'<div class="fm">d^2y/dx^2 = 6x-12</div><div class="fm">x=1: 6-12=-6 < 0  ->  MAX</div><div class="fm">x=3: 18-12=+6 > 0  ->  MIN</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'For y = x^3 - 6x^2 + 9x + 2, what is the y-coordinate of the minimum point?',hints:['Minimum is at x=3','Substitute x=3: 27-54+27+2'],ans:2,exact:0.1,unit:'',working:'y = 27-54+27+2 = <b>2</b>. Minimum point is (3,2).'})}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
+  // Generate cubics of the form y = x^3 + bx^2 + cx + d
+  // with two stationary points, one being a minimum
+  // Use form y = x^3 - 3(a+b)x^2/2... easier: pick two roots p, q for dy/dx
+  // dy/dx = 3x^2 - 6(p+q)/2 x + 3pq = 3(x-p)(x-q)
+  // So a=1, dy/dx = 3x^2 - 3(p+q)x + 3pq
+  // Integrating: y = x^3 - 3(p+q)/2 x^2 + 3pq x + d
+
+  var configs = [
+    {p:1, q:3, d:2},
+    {p:1, q:4, d:0},
+    {p:2, q:4, d:1},
+    {p:1, q:5, d:3},
+    {p:2, q:5, d:0},
+    {p:1, q:2, d:4},
+    {p:2, q:6, d:1},
+    {p:3, q:5, d:2}
+  ];
+
+  var cfg = pick(configs);
+  var p = cfg.p, q = cfg.q, d = cfg.d;
+
+  // Coefficients: y = x^3 - 3(p+q)/2 x^2 + 3pq x + d
+  // To keep integers, dy/dx = 3(x-p)(x-q) = 3x^2 - 3(p+q)x + 3pq
+  // y = x^3 - 3(p+q)/2 x^2 + 3pq x + d
+  // This may not be integer coefficients if p+q is odd.
+  // Use instead: y = x^3 - (p+q)*3/2 x^2 ... let's just compute and check.
+
+  // Actually let's just use the specific form from the original more carefully.
+  // dy/dx = 3x^2 - 3(p+q)x + 3pq
+  // So B = -3(p+q)/2... use pick to ensure p+q is even.
+  // All configs above: p+q must be even for integer coeff
+  // Check: 1+3=4✓, 1+4=5✗ - fix configs
+
+  var configs2 = [
+    {p:1, q:3, d:2},
+    {p:2, q:4, d:1},
+    {p:1, q:5, d:3},
+    {p:2, q:6, d:0},
+    {p:3, q:5, d:2},
+    {p:1, q:3, d:5},
+    {p:2, q:4, d:3},
+    {p:3, q:5, d:0}
+  ];
+
+  cfg = pick(configs2);
+  p = cfg.p; q = cfg.q; d = cfg.d;
+  // p < q, minimum at x=q (second deriv = 6q - 3(p+q) = 3(q-p) > 0)
+
+  var B = -3*(p+q)/2;  // coefficient of x^2
+  var C = 3*p*q;       // coefficient of x
+
+  // y = x^3 + B*x^2 + C*x + d
+  function yVal(x) {
+    return x*x*x + B*x*x + C*x + d;
+  }
+
+  var minX = q;
+  var minY = yVal(minX);
+  var maxX = p;
+  var maxY = yVal(maxX);
+
+  // Format the equation nicely
+  var Bstr = (B < 0 ? ' - ' + Math.abs(B) : ' + ' + B);
+  var Cstr}
   ]},
   {ey:'Q3 - Integration',ti:'Basic Integration Rule',su:'Find the integral of (6x^2 + 4x + 3) dx.',cat:'i',steps:[
     {lb:'The rule',dr:dQ3,ht:'<p>Integration is the reverse of differentiation. If dy/dx = ax^n, then y = ax^(n+1)/(n+1) + C. Always add the <b>constant of integration C</b>.</p>'},
@@ -479,27 +574,126 @@ var QS=[
     {lb:'Term 2: 4x',dr:dQ3,ht:'<div class="fm">4x  ->  4x^2/(1+1) = 2x^2</div>'},
     {lb:'Term 3: 3',dr:dQ3,ht:'<div class="fm">3 = 3x^0  ->  3x^1/1 = 3x</div>'},
     {lb:'Full answer',dr:dQ3,ht:'<div class="fm">= 2x^3 + 2x^2 + 3x + C</div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Integrate <b>4x^3 - 6x + 2</b> dx. What is the coefficient of x^4 in the answer?',hints:['4x^3 -> 4x^4/(3+1) = x^4','The coefficient of x^4 is 1'],ans:1,exact:0.1,unit:'(coefficient of x^4)',working:'4x^3 -> x^4. Coefficient = <b>1</b>. Full answer: x^4 - 3x^2 + 2x + C'})}
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
+  var a = pick([2,3,4,5,6]);
+  var b = pick([2,4,6,8,10]);
+  var c = pick([1,2,3,4,5]);
+  var n = 3; // power of first term always x^3 so coefficient question is clear
+  var coeff = a / (n + 1);
+  var bCoeff = b / 2;
+  // ensure coeff is integer
+  var aOptions = [4,8,12,16,20];
+  a = pick(aOptions);
+  coeff = a / 4;
+  var bSign = pick(['+','-']);
+  var cSign = pick(['+','-']);
+  var bVal = pick([2,4,6,8]);
+  var cVal = pick([1,2,3,4,5]);
+  var bTerm = bSign === '+' ? '+ ' + bVal + 'x' : '- ' + bVal + 'x';
+  var cTerm = cSign === '+' ? '+ ' + cVal : '- ' + cVal;
+  var bCoeffAns = bSign === '+' ? -(bVal/2) : (bVal/2);
+  var cCoeffAns = cSign === '+' ? cVal : -cVal;
+  return {
+    question: 'Integrate <b>' + a + 'x^3 ' + bTerm + ' ' + cTerm + '</b> dx. What is the coefficient of x^4 in the answer?',
+    hints: [
+      a + 'x^3 -> ' + a + 'x^4/(3+1) = ' + coeff + 'x^4',
+      'The coefficient of x^4 is ' + coeff
+    ],
+    ans: coeff,
+    tol: 0.01,
+    unit: '(coefficient of x^4)',
+    working: a + 'x^3 -> ' + a + 'x^4/4 = ' + coeff + 'x^4. Coefficient = <b>' + coeff + '</b>. Full answer: ' + coeff + 'x^4 ' + (bSign === '+' ? '- ' : '+ ') + (bVal/2) + 'x^2 ' + cTerm + 'x + C'
+  };
+})}
   ]},
   {ey:'Q4 - Integration',ti:'Definite Integral and Area',su:'Find the area under y = x^2 between x = 1 and x = 3.',cat:'i',steps:[
     {lb:'What is a definite integral?',dr:dQ4,ht:'<p>A <b>definite integral</b> has limits and gives a numerical answer. It represents the <b>area under a curve</b> between two x-values. No constant C needed.</p>'},
     {lb:'Step 1 - Integrate',dr:dQ4,ht:'<div class="fm">Integral of x^2 dx = x^3/3</div>'},
     {lb:'Step 2 - Apply limits',dr:dQ4,ht:'<div class="fm">[x^3/3] from 1 to 3 = (27/3) - (1/3) = 9 - 1/3</div><div class="fm">= 26/3 = 8.67 square units</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'Find the area under <b>y = x^2</b> between x = 0 and x = 3.',hints:['Integrate x^2 dx = x^3/3','Apply limits: (27/3) - 0'],ans:9,exact:0.1,unit:'square units',working:'[x^3/3] from 0 to 3 = 27/3 - 0 = <b>9</b>'})}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
+  var a = pick([0, 0, 0, 1, 1, 2]);
+  var b = pick([2, 3, 4, 3, 4, 4]);
+  while (b <= a) { b = pick([2, 3, 4, 5]); }
+  var ans = (Math.pow(b, 3) / 3) - (Math.pow(a, 3) / 3);
+  var ansRounded = Math.round(ans * 100) / 100;
+  var upperVal = Math.pow(b, 3) + '/3';
+  var lowerVal = a === 0 ? '0' : (Math.pow(a, 3) + '/3');
+  var upperNum = Math.pow(b, 3) / 3;
+  var lowerNum = Math.pow(a, 3) / 3;
+  return {
+    question: 'Find the area under <b>y = x²</b> between x = ' + a + ' and x = ' + b + '.',
+    hints: [
+      'Integrate x² dx = x³/3',
+      'Apply limits: [x³/3] from ' + a + ' to ' + b + ' = ' + upperVal + ' - ' + (a === 0 ? '0' : lowerVal)
+    ],
+    ans: ansRounded,
+    tol: 0.01,
+    unit: 'square units',
+    working: '[x³/3] from ' + a + ' to ' + b + ' = ' + upperNum + ' - ' + lowerNum + ' = <b>' + ansRounded + '</b>'
+  };
+})}
   ]},
   {ey:'Q5 - Integration',ti:'Area Between Two Curves',su:'Find the area enclosed by y = 4x - x^2 and y = x.',cat:'i',steps:[
     {lb:'The method',dr:dQ5,ht:'<p>Area between two curves = integral of (top curve - bottom curve) between the intersection points. First find where the curves cross.</p>'},
     {lb:'Step 1 - Find intersections',dr:dQ5,ht:'<div class="fm">4x - x^2 = x  ->  3x - x^2 = 0  ->  x(3-x) = 0</div><div class="fm">Intersect at x=0 and x=3</div>'},
     {lb:'Step 2 - Identify top curve',dr:dQ5,ht:'<p>At x=1: parabola gives 3, line gives 1. Parabola is on top between x=0 and x=3.</p>'},
     {lb:'Step 3 - Integrate the difference',dr:dQ5,ht:'<div class="fm">Integral of (4x-x^2-x) dx = Integral of (3x-x^2) dx</div><div class="fm">= [3x^2/2 - x^3/3] from 0 to 3 = 13.5-9 = 4.5 sq units</div>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'The area between y = 4x - x^2 and y = x is 4.5 sq units. If all dimensions were doubled (x replaced by 2x), by what factor would the area scale?',hints:['Area scales by the square of the linear scale factor','Scale factor = 2','Area factor = 2^2'],ans:4,exact:0.1,unit:'(scale factor for area)',working:'Linear scale factor 2, so area scales by 2^2 = <b>4</b>. New area = 18 sq units.'})}
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){
+  var k = pick([2, 3, 4, 5]);
+  var areaSq = k * k;
+  var baseArea = 4.5;
+  var newArea = baseArea * areaSq;
+  return {
+    question: 'The area between y = 4x - x² and y = x is 4.5 sq units. If all dimensions were scaled by a factor of ' + k + ' (x replaced by ' + k + 'x), by what factor would the area scale?',
+    hints: [
+      'Area scales by the square of the linear scale factor',
+      'Scale factor = ' + k,
+      'Area factor = ' + k + '² = ' + areaSq
+    ],
+    ans: areaSq,
+    tol: 0,
+    unit: '(scale factor for area)',
+    working: 'Linear scale factor ' + k + ', so area scales by ' + k + '² = <b>' + areaSq + '</b>. New area = ' + newArea + ' sq units.'
+  };
+})}
   ]},
   {ey:'Q6 - Integration',ti:'Finding the Original Function',su:'Given dy/dx = 3x^2 - 4x + 1 and y = 3 when x = 1, find y.',cat:'i',steps:[
     {lb:'Why we need a boundary condition',dr:dQ6,ht:'<p>When integrating dy/dx, we get y + C. The constant C can be found if we know one point (x, y) that the curve passes through. This is called a <b>boundary condition</b>.</p>'},
     {lb:'Step 1 - Integrate',dr:dQ6,ht:'<div class="fm">y = x^3 - 2x^2 + x + C</div>'},
     {lb:'Step 2 - Find C using x=1, y=3',dr:dQ6,ht:'<div class="fm">3 = 1 - 2 + 1 + C  ->  C = 3</div>'},
     {lb:'Step 3 - Final answer',dr:dQ6,ht:'<div class="fm">y = x^3 - 2x^2 + x + 3</div>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'Given dy/dx = 4x - 3 and y = 5 when x = 1, find C.',hints:['Integrate: y = 2x^2 - 3x + C','Substitute x=1, y=5: 5 = 2-3+C'],ans:6,exact:0.1,unit:'',working:'5 = 2-3+C = -1+C  ->  C = <b>6</b>'})}
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){
+  var a = pick([2, 3, 4, 5, 6]);
+  var b = pick([1, 2, 3, 4, 5, 6]);
+  var x0 = pick([1, 2, 3]);
+  var y0 = rnd(1, 10);
+
+  // dy/dx = a*x - b  =>  y = (a/2)*x^2 - b*x + C
+  var halfA = a / 2;
+  var integrated_at_x0 = halfA * x0 * x0 - b * x0;
+  var C = y0 - integrated_at_x0;
+
+  var halfA_str = (a % 2 === 0) ? (a / 2).toString() : (a + '/2');
+  var integrated_val_str = (a % 2 === 0)
+    ? (a / 2) + '*' + x0 + '^2 - ' + b + '*' + x0
+    : '(' + a + '/2)*' + x0 + '^2 - ' + b + '*' + x0;
+
+  var integ_display = (a % 2 === 0)
+    ? (a/2) + 'x^2 - ' + b + 'x + C'
+    : '(' + a + '/2)x^2 - ' + b + 'x + C';
+
+  return {
+    question: 'Given dy/dx = ' + a + 'x - ' + b + ' and y = ' + y0 + ' when x = ' + x0 + ', find C.',
+    hints: [
+      'Integrate: y = ' + integ_display,
+      'Substitute x=' + x0 + ', y=' + y0 + ': ' + y0 + ' = ' + integrated_at_x0 + ' + C'
+    ],
+    ans: C,
+    tol: 0.1,
+    unit: '',
+    working: y0 + ' = ' + integrated_at_x0 + ' + C  ->  C = <b>' + C + '</b>'
+  };
+})}
   ]},
   {ey:'Q7 - Integration',ti:'Kinematics: Integrating Acceleration',su:'a = 6t - 2. At t=0: v=4 and s=0. Find v and s as functions of t.',cat:'i',steps:[
     {lb:'The chain',dr:dQ7,ht:'<p>Differentiating: s -> v -> a. Integrating (reversing): a -> v -> s. At each integration step a new constant appears, found from the given initial conditions.</p>'},
@@ -507,28 +701,119 @@ var QS=[
     {lb:'Step 2 - Find C1',dr:dQ7,ht:'<div class="fm">At t=0, v=4: 4 = 0 - 0 + C1  ->  C1 = 4</div><div class="fm">v = 3t^2 - 2t + 4</div>'},
     {lb:'Step 3 - Integrate v to get s',dr:dQ7,ht:'<div class="fm">s = t^3 - t^2 + 4t + C2</div>'},
     {lb:'Step 4 - Find C2',dr:dQ7,ht:'<div class="fm">At t=0, s=0: C2 = 0</div><div class="fm">s = t^3 - t^2 + 4t</div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'Using v = 3t^2 - 2t + 4, find the velocity when t = 2.',hints:['Substitute t=2 into v = 3t^2 - 2t + 4','3(4) - 2(2) + 4'],ans:12,exact:0.1,unit:'m/s',working:'v = 3(4)-2(2)+4 = 12-4+4 = <b>12 m/s</b>'})}
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){
+  var t = pick([2, 3, 4, 5]);
+  var a = pick([2, 3, 4]);
+  var b = pick([1, 2, 3]);
+  var c = pick([2, 3, 4, 5]);
+  var ans = a * t * t - b * t + c;
+  var t2 = t * t;
+  var at2 = a * t2;
+  var bt = b * t;
+  return {
+    question: 'Using v = ' + a + 't² - ' + b + 't + ' + c + ', find the velocity when t = ' + t + '.',
+    hints: [
+      'Substitute t=' + t + ' into v = ' + a + 't² - ' + b + 't + ' + c,
+      a + '(' + t2 + ') - ' + b + '(' + t + ') + ' + c
+    ],
+    ans: ans,
+    tol: 0,
+    unit: 'm/s',
+    working: 'v = ' + a + '(' + t2 + ') - ' + b + '(' + t + ') + ' + c + ' = ' + at2 + ' - ' + bt + ' + ' + c + ' = <b>' + ans + ' m/s</b>'
+  };
+})}
   ]},
   {ey:'Q8 - Integration',ti:'Distance from a Velocity-Time Graph',su:'Use v = 3t^2 - 2t + 4 to find the distance from t=0 to t=2.',cat:'i',steps:[
     {lb:'Area under v-t graph',dr:dQ8,ht:'<p>In a velocity-time graph, the <b>area under the curve</b> equals the <b>distance</b> travelled. Calculate this using a definite integral.</p>'},
     {lb:'Step 1 - Set up the integral',dr:dQ8,ht:'<div class="fm">Distance = integral from 0 to 2 of v dt</div><div class="fm">= integral from 0 to 2 of (3t^2-2t+4) dt</div>'},
     {lb:'Step 2 - Integrate',dr:dQ8,ht:'<div class="fm">= [t^3 - t^2 + 4t] from 0 to 2</div>'},
     {lb:'Step 3 - Apply limits',dr:dQ8,ht:'<div class="fm">= (8 - 4 + 8) - (0) = 12 m</div>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'Using v = 3t^2 - 2t + 4, find the distance from t=0 to t=1.',hints:['[t^3-t^2+4t] from 0 to 1','= (1-1+4) - 0'],ans:4,exact:0.1,unit:'m',working:'[t^3-t^2+4t] from 0 to 1 = (1-1+4)-0 = <b>4 m</b>'})}
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){
+  var a = pick([1, 2, 3, 4]);
+  var b = pick([1, 2, 3, 4]);
+  var c = pick([2, 3, 4, 5, 6]);
+  var t = pick([1, 2, 3]);
+
+  // v = a*t^2 - b*t + c
+  // integral from 0 to t of v dt = [a/3 * t^3 - b/2 * t^2 + c*t] from 0 to t
+  // ans = a/3 * t^3 - b/2 * t^2 + c*t
+  var ans = (a/3) * Math.pow(t, 3) - (b/2) * Math.pow(t, 2) + c * t;
+
+  var antideriv = 'a/' + 3 + '*t^3 - b/' + 2 + '*t^2 + ct';
+
+  var upperVal_part1 = (a/3) * Math.pow(t, 3);
+  var upperVal_part2 = (b/2) * Math.pow(t, 2);
+  var upperVal_part3 = c * t;
+
+  var frac_a = a % 3 === 0 ? (a/3) : a + '/3';
+  var frac_b = b % 2 === 0 ? (b/2) : b + '/2';
+
+  return {
+    question: 'Using v = ' + a + 't² - ' + b + 't + ' + c + ', find the distance from t=0 to t=' + t + '.',
+    hints: [
+      '[' + a + '/3·t³ - ' + b + '/2·t² + ' + c + 't] from 0 to ' + t,
+      '= (' + upperVal_part1 + ' - ' + upperVal_part2 + ' + ' + upperVal_part3 + ') - 0'
+    ],
+    ans: ans,
+    tol: 0.01,
+    unit: 'm',
+    working: '[' + a + '/3·t³ - ' + b + '/2·t² + ' + c + 't] from 0 to ' + t +
+             ' = (' + upperVal_part1 + ' - ' + upperVal_part2 + ' + ' + upperVal_part3 + ') - 0 = <b>' + ans + ' m</b>'
+  };
+})}
   ]},
   {ey:'Q9 - Integration',ti:'Volume of Revolution',su:'Find the volume when y = x^2 is rotated about the x-axis from x=0 to x=2.',cat:'i',steps:[
     {lb:'What is a volume of revolution?',dr:dQ9,ht:'<p>Rotating a curve about the x-axis generates a 3D solid. Each vertical slice is a circle with radius y. Volume = pi times integral of y^2 dx.</p>'},
     {lb:'Step 1 - Formula',dr:dQ9,ht:'<div class="fm">V = pi * integral from 0 to 2 of y^2 dx</div><div class="fm">= pi * integral from 0 to 2 of x^4 dx</div>'},
     {lb:'Step 2 - Integrate',dr:dQ9,ht:'<div class="fm">= pi * [x^5/5] from 0 to 2</div>'},
     {lb:'Step 3 - Apply limits',dr:dQ9,ht:'<div class="fm">= pi * (32/5 - 0) = 32pi/5</div><div class="fm">= 20.1 cubic units</div>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt({question:'y = x^2 is rotated about the x-axis from x=0 to x=1. Find the volume as a multiple of pi. Enter the numerator of the fraction.',hints:['V = pi * integral of x^4 dx from 0 to 1','= pi * [x^5/5] from 0 to 1','= pi/5'],ans:1,exact:0.1,unit:'over 5 (so pi/5)',working:'V = pi*[x^5/5] from 0 to 1 = pi/5. Numerator = <b>1</b>'})}
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){
+  var upper = pick([1, 2, 3]);
+  // y = x^2 rotated about x-axis from x=0 to x=upper
+  // V = pi * integral of x^4 dx from 0 to upper
+  // = pi * [x^5/5] from 0 to upper
+  // = pi * upper^5 / 5
+  var numerator = Math.pow(upper, 5);
+  var denominator = 5;
+  return {
+    question: 'y = x² is rotated about the x-axis from x = 0 to x = ' + upper + '. Find the volume as a multiple of pi. Enter the numerator of the fraction (with denominator ' + denominator + ').',
+    hints: [
+      'V = pi × integral of x⁴ dx from 0 to ' + upper,
+      '= pi × [x⁵/5] from 0 to ' + upper,
+      '= pi × ' + upper + '⁵ / 5 = ' + numerator + 'pi/' + denominator
+    ],
+    ans: numerator,
+    tol: 0,
+    unit: 'over ' + denominator + ' (so ' + numerator + 'pi/' + denominator + ')',
+    working: 'V = pi×[x⁵/5] from 0 to ' + upper + ' = ' + numerator + 'pi/' + denominator + '. Numerator = <b>' + numerator + '</b>'
+  };
+})}
   ]},
   {ey:'Q10 - Combined',ti:'Diff + Integration: Area Under a Parabola',su:'y = 3x - x^2. Find the maximum point, roots and enclosed area.',cat:'i',steps:[
     {lb:'Full problem',dr:dQ10,ht:'<p>Bring together differentiation and integration: use dy/dx to find the maximum, factorise to find roots, then integrate to find the enclosed area.</p>'},
     {lb:'Step 1 - Find roots',dr:dQ10,ht:'<div class="fm">3x - x^2 = 0  ->  x(3-x) = 0</div><div class="fm">Roots at x=0 and x=3</div>'},
     {lb:'Step 2 - Find maximum',dr:dQ10,ht:'<div class="fm">dy/dx = 3 - 2x = 0  ->  x = 1.5</div><div class="fm">y = 3(1.5)-(1.5)^2 = 4.5-2.25 = 2.25</div><div class="fm">Maximum at (1.5, 2.25)</div>'},
     {lb:'Step 3 - Area',dr:dQ10,ht:'<div class="fm">Area = integral from 0 to 3 of (3x-x^2) dx</div><div class="fm">= [3x^2/2 - x^3/3] from 0 to 3 = 13.5-9 = 4.5 sq units</div>'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt({question:'For y = 3x - x^2, what is the y-coordinate of the maximum point?',hints:['dy/dx = 3 - 2x = 0  ->  x = 1.5','Substitute x=1.5 into y = 3x-x^2'],ans:2.25,exact:0.05,unit:'',working:'y = 3(1.5)-(1.5)^2 = 4.5-2.25 = <b>2.25</b>'})}
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){
+  var a = pick([2,3,4,5,6]);
+  var b = pick([2,3,4,5,6]);
+  // y = ax - bx^2
+  // dy/dx = a - 2bx = 0 => x = a/(2b)
+  var xMax = a / (2 * b);
+  var yMax = a * xMax - b * xMax * xMax;
+  yMax = Math.round(yMax * 10000) / 10000;
+  return {
+    question: 'For y = ' + a + 'x - ' + b + 'x², what is the y-coordinate of the maximum point?',
+    hints: [
+      'dy/dx = ' + a + ' - ' + (2*b) + 'x = 0  →  x = ' + a + '/' + (2*b) + ' = ' + xMax,
+      'Substitute x = ' + xMax + ' into y = ' + a + 'x - ' + b + 'x²'
+    ],
+    ans: yMax,
+    tol: 0.01,
+    unit: '',
+    working: 'dy/dx = ' + a + ' - ' + (2*b) + 'x = 0 → x = ' + xMax + '<br>y = ' + a + '(' + xMax + ') - ' + b + '(' + xMax + ')² = ' + (a*xMax) + ' - ' + (b*xMax*xMax) + ' = <b>' + yMax + '</b>'
+  };
+})}
   ]}
 ];
 var qi=0,si=0;

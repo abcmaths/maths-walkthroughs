@@ -358,33 +358,174 @@ var QS=[
     {lb:'Step 1 - Label powers',dr:dQ1,ht:'<div class="fm">Positions: 2^3=8, 2^2=4, 2^1=2, 2^0=1</div>'},
     {lb:'Step 2 - Multiply',dr:dQ1,ht:'<div class="fm">1x8=8, 1x4=4, 0x2=0, 1x1=1</div>'},
     {lb:'Step 3 - Add',dr:dQ1,ht:'<div class="fm">8+4+0+1 = <b>13 (base 10)</b></div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Convert <b>10110 (base 2)</b> to base 10.',hints:['Place values: 16, 8, 4, 2, 1','Digits: 1, 0, 1, 1, 0'],ans:22,exact:0.1,unit:'(base 10)',working:'16+0+4+2+0 = <b>22</b>'})}
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
+  // Generate a random 5-bit binary number (16-31 range, ensuring leading 1)
+  var bits = [1, pick([0,1]), pick([0,1]), pick([0,1]), pick([0,1])];
+  var placeValues = [16, 8, 4, 2, 1];
+  var ans = 0;
+  for (var i = 0; i < 5; i++) ans += bits[i] * placeValues[i];
+  var binStr = bits.join('');
+  var workingParts = bits.map(function(b, i){ return b === 1 ? placeValues[i] : '0'; });
+  var working = workingParts.join('+') + ' = <b>' + ans + '</b>';
+  return {
+    question: 'Convert <b>' + binStr + ' (base 2)</b> to base 10.',
+    hints: [
+      'Place values: 16, 8, 4, 2, 1',
+      'Digits: ' + bits.join(', ')
+    ],
+    ans: ans,
+    tol: 0,
+    unit: '(base 10)',
+    working: working
+  };
+})}
   ]},
   {ey:'Q2 - Number Bases',ti:'Base 10 to Binary',su:'Convert 45 (base 10) to base 2 by repeated division.',steps:[
     {lb:'The method',dr:dQ2,ht:'<p>Repeatedly <b>divide by 2</b>. Record the remainder each time. Read remainders <b>from bottom to top</b>.</p>'},
     {lb:'Step 1 - Divide',dr:dQ2,ht:'<p>Divide 45 by 2 repeatedly until the quotient reaches 0, recording each remainder.</p>'},
     {lb:'Step 2 - Read answer',dr:dQ2,ht:'<div class="fm">101101 (base 2)</div><p>Check: 32+8+4+1 = 45</p>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Convert <b>26 (base 10)</b> to base 2. How many 1s appear?',hints:['26/2=13r0, 13/2=6r1, 6/2=3r0','3/2=1r1, 1/2=0r1','Read up: 11010'],ans:3,exact:0.1,unit:'ones',working:'26 = 11010(2). Three 1s appear.'})}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
+  var n = pick([13,14,17,19,22,25,26,28,35,37,41,44,50,53,57,58,61]);
+  
+  // Convert to binary and count 1s
+  var binary = n.toString(2);
+  var ones = binary.split('').filter(function(b){ return b === '1'; }).length;
+  
+  // Build division steps for hints
+  var steps = [];
+  var temp = n;
+  while(temp > 0){
+    steps.push(temp + '/2=' + Math.floor(temp/2) + 'r' + (temp%2));
+    temp = Math.floor(temp/2);
+  }
+  var hint1 = steps.slice(0, Math.ceil(steps.length/2)).join(', ');
+  var hint2 = steps.slice(Math.ceil(steps.length/2)).join(', ');
+  
+  return {
+    question: 'Convert <b>' + n + ' (base 10)</b> to base 2. How many 1s appear?',
+    hints: [
+      hint1,
+      hint2,
+      'Read up: ' + binary
+    ],
+    ans: ones,
+    tol: 0,
+    unit: 'ones',
+    working: n + ' = ' + binary + '(2). Contains ' + ones + ' one' + (ones !== 1 ? 's' : '') + '.'
+  };
+})}
   ]},
   {ey:'Q3 - Number Bases',ti:'Octal Addition',su:'Add 345(8) + 167(8), carrying when the sum reaches 8.',steps:[
     {lb:'Base 8 rules',dr:dQ3,ht:'<p>In base 8, digits run from <b>0 to 7</b> only. When a column sum is 8 or more, carry 1 to the next column.</p>'},
     {lb:'Step 1 - Units',dr:dQ3,ht:'<div class="fm">5+7=12. 12=1x8+4. Write 4, carry 1.</div>'},
     {lb:'Step 2 - Eights',dr:dQ3,ht:'<div class="fm">4+6+1=11. 11=1x8+3. Write 3, carry 1.</div>'},
     {lb:'Step 3 - Answer',dr:dQ3,ht:'<div class="fm">3+1+1=5. Write 5.</div><div class="fm">Answer: <b>534(8)</b></div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Convert <b>534(8)</b> to base 10 to verify the answer.',hints:['5x64 + 3x8 + 4x1','= 320+24+4'],ans:348,exact:0.5,unit:'(base 10)',working:'320+24+4 = <b>348</b>. Also 345(8)=229, 167(8)=119, 229+119=348.'})}
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
+  var d2 = pick([1,2,3,4,5,6,7]);
+  var d1 = pick([0,1,2,3,4,5,6,7]);
+  var d0 = pick([0,1,2,3,4,5,6,7]);
+  var ans = d2 * 64 + d1 * 8 + d0;
+  var oct = '' + d2 + d1 + d0;
+  return {
+    question: 'Convert <b>' + oct + '(8)</b> to base 10.',
+    hints: [
+      d2 + 'x64 + ' + d1 + 'x8 + ' + d0 + 'x1',
+      '= ' + (d2*64) + ' + ' + (d1*8) + ' + ' + d0
+    ],
+    ans: ans,
+    tol: 0,
+    unit: '(base 10)',
+    working: d2 + 'x64 + ' + d1 + 'x8 + ' + d0 + 'x1 = ' + (d2*64) + ' + ' + (d1*8) + ' + ' + d0 + ' = <b>' + ans + '</b>'
+  };
+})}
   ]},
   {ey:'Q4 - Number Bases',ti:'Octal to Binary',su:'Convert 37(8) to base 2, using base 10 as a bridge.',steps:[
     {lb:'Two methods',dr:dQ4,ht:'<p>Method 1: convert octal to base 10, then to base 2.<br>Method 2 (shortcut): replace each octal digit with its 3-digit binary equivalent.</p>'},
     {lb:'Step 1 - Octal to base 10',dr:dQ4,ht:'<div class="fm">3x8 + 7x1 = 24+7 = 31 (base 10)</div>'},
     {lb:'Step 2 - Base 10 to binary',dr:dQ4,ht:'<div class="fm">31 = 16+8+4+2+1 = 11111(2)</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'Convert <b>25(8)</b> to base 10.',hints:['2x8 + 5x1','= 16+5'],ans:21,exact:0.1,unit:'(base 10)',working:'2x8+5x1 = 16+5 = <b>21</b>'})}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
+  var d1 = rnd(1,7);
+  var d2 = rnd(0,7);
+  var ans = d1 * 8 + d2;
+  return {
+    question: 'Convert <b>' + d1 + '' + d2 + '(8)</b> to base 10.',
+    hints: [d1 + 'x8 + ' + d2 + 'x1', '= ' + (d1*8) + '+' + d2],
+    ans: ans,
+    tol: 0,
+    unit: '(base 10)',
+    working: d1 + 'x8+' + d2 + 'x1 = ' + (d1*8) + '+' + d2 + ' = <b>' + ans + '</b>'
+  };
+})}
   ]},
   {ey:'Q5 - Number Bases',ti:'Base 10 to Base 5',su:'Convert 26 (base 10) to base 5.',steps:[
     {lb:'The method',dr:dQ5,ht:'<p>Divide repeatedly by <b>5</b> this time. Record remainders and read from bottom to top. Digits in base 5 run from 0 to 4 only.</p>'},
     {lb:'Step 1 - Divide',dr:dQ5,ht:'<div class="fm">26/5=5r1, 5/5=1r0, 1/5=0r1</div>'},
     {lb:'Step 2 - Read answer',dr:dQ5,ht:'<div class="fm">Read up: <b>101(5)</b></div>'},
     {lb:'Step 3 - Check',dr:dQ5,ht:'<div class="fm">1x25 + 0x5 + 1x1 = 26 (correct)</div>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'Convert <b>43(10)</b> to base 5. What is the leading digit of your answer?',hints:['43/5=8r3, 8/5=1r3, 1/5=0r1','Read remainders bottom to top','Leading digit is the last remainder'],ans:1,exact:0.1,unit:'(leading digit)',working:'43=133(5). 1x25+3x5+3=25+15+3=43. Leading digit = <b>1</b>'})}
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){
+  // Pick numbers that convert to 3-digit base-5 numbers (range 25-124)
+  // to keep it interesting and consistent with the example
+  var candidates = [];
+  for (var n = 25; n <= 124; n++) {
+    // ensure all base-5 digits are valid (0-4) and result is exactly 3 digits
+    var temp = n;
+    var digits = [];
+    while (temp > 0) {
+      digits.push(temp % 5);
+      temp = Math.floor(temp / 5);
+    }
+    if (digits.length === 3) {
+      candidates.push(n);
+    }
+  }
+  var num = pick(candidates);
+
+  // Convert num to base 5
+  var temp = num;
+  var digits = [];
+  while (temp > 0) {
+    digits.push(temp % 5);
+    temp = Math.floor(temp / 5);
+  }
+  // digits are in reverse order (least significant first)
+  var base5Str = digits.slice().reverse().join('');
+  var leadingDigit = digits[digits.length - 1];
+
+  // Build division steps string
+  var steps = [];
+  var t = num;
+  while (t > 0) {
+    var q = Math.floor(t / 5);
+    var r = t % 5;
+    steps.push(t + '/5=' + q + 'r' + r);
+    t = q;
+  }
+  var stepsStr = steps.join(', ');
+
+  // Build check string
+  var checkParts = [];
+  var powers = [25, 5, 1];
+  var labels = ['1x25', '1x5', '1x1'];
+  var revDigits = digits.slice().reverse();
+  var checkTerms = revDigits.map(function(d, i) {
+    return d + 'x' + powers[i];
+  });
+  var checkSum = revDigits.reduce(function(acc, d, i) { return acc + d * powers[i]; }, 0);
+  var checkStr = checkTerms.join(' + ') + ' = ' + checkSum;
+
+  return {
+    question: 'Convert <b>' + num + '(10)</b> to base 5. What is the leading digit of your answer?',
+    hints: [
+      stepsStr,
+      'Read remainders bottom to top',
+      'Leading digit is the last remainder'
+    ],
+    ans: leadingDigit,
+    tol: 0,
+    unit: '(leading digit)',
+    working: num + ' = ' + base5Str + '(5). ' + checkStr + ' = ' + num + '. Leading digit = <b>' + leadingDigit + '</b>'
+  };
+})}
   ]},
   {ey:'Q6 · Number Bases · WAEC',ti:'Equations in Number Bases',su:'Solve: 2d₈ + 35₈ = 60₈. Find the digit d.',lv:'F',steps:[
     {lb:'The approach',dr:dQ6nb,ht:'<p>Convert all terms to <b>base 10</b>, set up an equation, solve for the unknown digit. Verify the digit is valid for that base (0 to base−1).</p>'},

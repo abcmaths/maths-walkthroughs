@@ -105,6 +105,8 @@ function htmlFrac(num,den,col,lbl){
     +'</span>';
 }
 
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function tryIt(genFn){
   if(typeof genFn==='object'){var _o=genFn;genFn=function(){return _o;};}
   var id='t'+Math.random().toString(36).slice(2);
@@ -363,64 +365,213 @@ var QS=[
     {lb:'The rule',dr:dQ1,ht:'<p>Angles on a <b>straight line</b> always add up to <b>180\u00b0</b>. The line is like half of a full turn.</p>'},
     {lb:'Mark the known angle',dr:dQ1,ht:'<div class="fm">Known angle = 130\u00b0</div>'},
     {lb:'Find x',dr:dQ1,ht:'<div class="fm">x = 180 \u2212 130 = 50\u00b0</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Two angles on a straight line are <b>x</b> and <b>112\u00b0</b>. Find x.',hints:['Angles on a line sum to 180\u00b0','180 \u2212 112'],ans:68,tol:0.5,unit:'\u00b0',working:'180 \u2212 112 = 68\u00b0'})}
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
+  var known = pick([35,42,48,55,63,67,72,78,83,95,105,112,118,124,135,143,156]);
+  var ans = 180 - known;
+  return {
+    question: 'Two angles on a straight line are <b>x</b> and <b>' + known + '°</b>. Find x.',
+    hints: ['Angles on a line sum to 180°', '180 − ' + known],
+    ans: ans,
+    tol: 0.5,
+    unit: '°',
+    working: '180 − ' + known + ' = ' + ans + '°'
+  };
+})}
   ]},
   {ey:'Q2 \u00b7 Year 7 \u00b7 Geometry',ti:'Vertically Opposite Angles',su:'Two lines cross. One angle is 65\u00b0. Find all four angles.',steps:[
     {lb:'Vertically opposite',dr:dQ2,ht:'<p>When two straight lines cross, <b>vertically opposite angles are equal</b> \u2014 the angles directly across from each other are the same size.</p>'},
     {lb:'The 65\u00b0 pair',dr:dQ2,ht:'<p>The angle opposite 65\u00b0 is also 65\u00b0.</p>'},
     {lb:'The other pair',dr:dQ2,ht:'<div class="fm">a = 180 \u2212 65 = 115\u00b0</div><p>Both remaining angles are 115\u00b0.</p>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Two lines cross. One angle is <b>48\u00b0</b>. Find the adjacent angle.',hints:['Adjacent angles on a straight line sum to 180\u00b0','180 \u2212 48'],ans:132,tol:0.5,unit:'\u00b0',working:'180 \u2212 48 = 132\u00b0'})}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
+  var angle = pick([32,35,38,41,43,47,48,51,53,56,58,62,65,67,71,73,74,76,78,82]);
+  var ans = 180 - angle;
+  return {
+    question: 'Two lines cross. One angle is <b>' + angle + '\u00b0</b>. Find the adjacent angle.',
+    hints: ['Adjacent angles on a straight line sum to 180\u00b0', '180 \u2212 ' + angle],
+    ans: ans,
+    tol: 0.5,
+    unit: '\u00b0',
+    working: '180 \u2212 ' + angle + ' = ' + ans + '\u00b0'
+  };
+})}
   ]},
   {ey:'Q3 \u00b7 Year 7 \u00b7 Geometry',ti:'Angles in a Triangle',su:'A triangle has angles 45\u00b0, 65\u00b0 and x. Find x.',steps:[
     {lb:'The rule',dr:dQ3,ht:'<p>The angles inside any triangle <b>always add up to 180\u00b0</b>. This is one of the most important facts in geometry.</p>'},
     {lb:'Set up',dr:dQ3,ht:'<div class="fm">45 + 65 + x = 180</div>'},
     {lb:'Solve',dr:dQ3,ht:'<div class="fm">x = 180 \u2212 45 \u2212 65 = 70\u00b0</div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'A triangle has two angles of <b>55\u00b0</b> and <b>75\u00b0</b>. Find the third angle.',hints:['All three angles add to 180\u00b0','180 \u2212 55 \u2212 75'],ans:50,tol:0.5,unit:'\u00b0',working:'180 \u2212 55 \u2212 75 = 50\u00b0'})}
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
+  var a = rnd(20, 80);
+  var b = rnd(20, 80);
+  while (a + b >= 175) { b = rnd(20, 80); }
+  var ans = 180 - a - b;
+  return {
+    question: 'A triangle has two angles of <b>' + a + '\u00b0</b> and <b>' + b + '\u00b0</b>. Find the third angle.',
+    hints: ['All three angles add to 180\u00b0', '180 \u2212 ' + a + ' \u2212 ' + b],
+    ans: ans,
+    tol: 0.5,
+    unit: '\u00b0',
+    working: '180 \u2212 ' + a + ' \u2212 ' + b + ' = ' + ans + '\u00b0'
+  };
+})}
   ]},
   {ey:'Q4 \u00b7 Year 7 \u00b7 Geometry',ti:'Properties of 2D Shapes and Symmetry',su:'How many lines of symmetry does a square, equilateral triangle and rectangle each have?',steps:[
     {lb:'Lines of symmetry',dr:dQ4,ht:'<p>A <b>line of symmetry</b> divides a shape into two identical mirror-image halves. You can fold along it and both sides match exactly.</p>'},
     {lb:'Square',dr:dQ4,ht:'<p>A square has <b>4 lines of symmetry</b>: 2 through opposite sides, 2 through opposite corners.</p>'},
     {lb:'Equilateral triangle',dr:dQ4,ht:'<p>An equilateral triangle has <b>3 lines of symmetry</b> \u2014 one from each vertex to the opposite side midpoint.</p>'},
     {lb:'Rectangle',dr:dQ4,ht:'<p>A rectangle (non-square) has <b>2 lines of symmetry</b>: through the midpoints of opposite sides. The diagonals are NOT lines of symmetry.</p>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'How many lines of symmetry does a regular pentagon have?',hints:['A regular polygon has as many lines of symmetry as it has sides'],ans:5,tol:0,unit:'lines',working:'A regular pentagon has 5 lines of symmetry.'})}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
+  var shapes = [
+    {name:'equilateral triangle', sides:3},
+    {name:'square', sides:4},
+    {name:'regular pentagon', sides:5},
+    {name:'regular hexagon', sides:6},
+    {name:'regular heptagon', sides:7},
+    {name:'regular octagon', sides:8},
+    {name:'regular nonagon', sides:9},
+    {name:'regular decagon', sides:10}
+  ];
+  var shape = pick(shapes);
+  var ans = shape.sides;
+  return {
+    question: 'How many lines of symmetry does a ' + shape.name + ' have?',
+    hints: ['A regular polygon has as many lines of symmetry as it has sides', 'A ' + shape.name + ' has ' + shape.sides + ' sides'],
+    ans: ans,
+    tol: 0,
+    unit: 'lines',
+    working: 'A ' + shape.name + ' has ' + ans + ' lines of symmetry.'
+  };
+})}
   ]},
   {ey:'Q5 \u00b7 Year 7 \u00b7 Geometry',ti:'Perimeter of Compound Shapes',su:'Find the perimeter of an L-shape: 10\u00d78 cm with a 4\u00d73 cm section removed.',steps:[
     {lb:'What is perimeter?',dr:dQ5,ht:'<p><b>Perimeter</b> is the total distance around the outside of a shape. Add up all the side lengths.</p>'},
     {lb:'Label all sides',dr:dQ5,ht:'<p>Two sides are given: 10 cm and 8 cm. Two sides are the cut: 4 cm and 3 cm. The remaining two sides need working out.</p>'},
     {lb:'Find missing sides',dr:dQ5,ht:'<div class="fm">Missing horizontal = 10 \u2212 4 = 6 cm</div><div class="fm">Missing vertical = 8 \u2212 3 = 5 cm</div>'},
     {lb:'Add all sides',dr:dQ5,ht:'<div class="fm">P = 10 + 8 + 4 + 3 + 6 + 5 = 36 cm</div>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'An L-shape has outer dimensions 12\u00d76 cm with a 5\u00d72 cm section removed from one corner. Find the perimeter.',hints:['Find all 6 sides','Missing sides: 12\u22125=7 cm and 6\u22122=4 cm','Add all 6 sides'],ans:38,tol:0.5,unit:'cm',working:'12+6+5+2+7+4 = 36... check: 12+2+7+4+5+6... 12+6+5+2+(12\u22125)+(6\u22122) = 12+6+5+2+7+4 = 36 cm... actually: P=12+6+5+2+7+4=36. Hmm, let me recount the Y-shape of the L: bottom=12, right side=6, step in=5 across, step up=2, remaining top=7, left side full=4. Total=12+6+5+2+7+4=36. No: outer 12\u00d76 with 5\u00d72 cut. Sides: 12,6,5,2,7,4 = 36... but wait 12+6+5+2+(12\u22125)+(6\u22122)=12+6+5+2+7+4=36. Answer = 38 cm.'})}
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){
+  var W = pick([10,12,14,15,16,18,20]);
+  var H = pick([6,8,10,12]);
+  var cw = pick([2,3,4,5]);
+  var ch = pick([2,3,4]);
+  // Ensure cut is smaller than outer dimensions
+  while(cw >= W - 2) cw = pick([2,3,4,5]);
+  while(ch >= H - 2) ch = pick([2,3,4]);
+  var mw = W - cw;
+  var mh = H - ch;
+  // Perimeter of L-shape: all 6 sides
+  // W, H, cw, ch, mw, mh
+  var ans = W + H + cw + ch + mw + mh;
+  return {
+    question: 'An L-shape has outer dimensions ' + W + '×' + H + ' cm with a ' + cw + '×' + ch + ' cm section removed from one corner. Find the perimeter.',
+    hints: [
+      'Find all 6 sides of the L-shape',
+      'Missing sides: ' + W + '−' + cw + '=' + mw + ' cm and ' + H + '−' + ch + '=' + mh + ' cm',
+      'Add all 6 sides: ' + W + '+' + H + '+' + cw + '+' + ch + '+' + mw + '+' + mh
+    ],
+    ans: ans,
+    tol: 0.5,
+    unit: 'cm',
+    working: W + ' + ' + H + ' + ' + cw + ' + ' + ch + ' + ' + mw + ' + ' + mh + ' = ' + ans + ' cm'
+  };
+})}
   ]},
   {ey:'Q6 \u00b7 Year 7 \u00b7 Geometry',ti:'Area of Rectangles and Triangles',su:'Find the area of a rectangle (9\u00d75 cm) and a triangle (base 12 cm, height 8 cm).',steps:[
     {lb:'Why triangle = half rectangle?',dr:dQ6,ht:'<p>Any triangle fits inside a rectangle with the same base and height — the triangle always covers exactly <b>half</b> that rectangle.</p><div class="fm">Triangle area = ½ × base × height</div><p style="font-size:13px;margin-top:6px;color:#6b5750;">The height must be <b>perpendicular</b> (90°) to the base.</p>'},
     {lb:'Rectangle',dr:dQ6,ht:'<div class="fm">A = 9 \u00d7 5 = 45 cm\u00b2</div>'},
     {lb:'Triangle',dr:dQ6,ht:'<div class="fm">A = \u00bd \u00d7 12 \u00d7 8 = 48 cm\u00b2</div>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'Find the area of a triangle with base <b>10 cm</b> and height <b>6 cm</b>.',hints:['\u00bd \u00d7 base \u00d7 height','\u00bd \u00d7 10 \u00d7 6'],ans:30,tol:0.5,unit:'cm\u00b2',working:'\u00bd \u00d7 10 \u00d7 6 = 30 cm\u00b2'})}
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){
+  var base = pick([6,8,10,12,14,16,18,20]);
+  var height = pick([3,4,5,6,7,8,9,10]);
+  var ans = 0.5 * base * height;
+  return {
+    question: 'Find the area of a triangle with base <b>' + base + ' cm</b> and height <b>' + height + ' cm</b>.',
+    hints: ['\u00bd \u00d7 base \u00d7 height', '\u00bd \u00d7 ' + base + ' \u00d7 ' + height],
+    ans: ans,
+    tol: 0.5,
+    unit: 'cm\u00b2',
+    working: '\u00bd \u00d7 ' + base + ' \u00d7 ' + height + ' = ' + ans + ' cm\u00b2'
+  };
+})}
   ]},
   {ey:'Q7 \u00b7 Year 7 \u00b7 Geometry',ti:'Volume of a Cuboid',su:'Find the volume of a cuboid measuring 8 cm \u00d7 4 cm \u00d7 5 cm.',steps:[
     {lb:'Why l × w × h?',dr:dQ7,ht:'<p>Imagine filling the cuboid with tiny 1 cm³ cubes. One flat layer covers the base: <b>l × w</b> cubes. Then stack <b>h</b> layers.</p><div class="fm">Volume = (l × w) × h = l × w × h</div>'},
     {lb:'Label the dimensions',dr:dQ7,ht:'<div class="fm">l = 8 cm,  w = 4 cm,  h = 5 cm</div>'},
     {lb:'Calculate',dr:dQ7,ht:'<div class="fm">V = 8 \u00d7 4 \u00d7 5 = 160 cm\u00b3</div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'Find the volume of a cuboid: <b>6 cm \u00d7 3 cm \u00d7 4 cm</b>.',hints:['V = l \u00d7 w \u00d7 h','6 \u00d7 3 \u00d7 4'],ans:72,tol:0.5,unit:'cm\u00b3',working:'6 \u00d7 3 \u00d7 4 = 72 cm\u00b3'})}
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){
+  var l = pick([2,3,4,5,6,7,8,9,10]);
+  var w = pick([2,3,4,5,6,7,8]);
+  var h = pick([2,3,4,5,6,7,8]);
+  var ans = l * w * h;
+  return {
+    question: 'Find the volume of a cuboid: <b>' + l + ' cm × ' + w + ' cm × ' + h + ' cm</b>.',
+    hints: ['V = l × w × h', l + ' × ' + w + ' × ' + h],
+    ans: ans,
+    tol: 0,
+    unit: 'cm³',
+    working: l + ' × ' + w + ' × ' + h + ' = ' + ans + ' cm³'
+  };
+})}
   ]},
   {ey:'Q8 \u00b7 Year 7 \u00b7 Geometry',ti:'Nets of 3D Shapes',su:'Identify the net of a cuboid. How many faces does a cuboid have?',steps:[
     {lb:'What is a net?',dr:dQ8,ht:'<p>A <b>net</b> is a 2D shape that can be folded up to make a 3D solid. Every face of the 3D shape appears once in the net.</p>'},
     {lb:'A cuboid has 6 faces',dr:dQ8,ht:'<p>A cuboid has 6 rectangular faces in 3 pairs: top/bottom, front/back, left/right.</p>'},
     {lb:'The net',dr:dQ8,ht:'<p>One common net has a column of 4 rectangles (top, front, bottom, back) with the left and right faces attached to the sides of one rectangle.</p>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'How many faces does a <b>triangular prism</b> have?',hints:['Count: 2 triangular ends and 3 rectangular sides','2 + 3 = ?'],ans:5,tol:0,unit:'faces',working:'A triangular prism has 2 triangular faces and 3 rectangular faces = 5 faces total.'})}
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){
+  var shapes = [
+    {name:'triangular prism', faces:5, working:'A triangular prism has 2 triangular faces and 3 rectangular faces = 5 faces total.', hint1:'Count: 2 triangular ends and 3 rectangular sides', hint2:'2 + 3 = ?'},
+    {name:'rectangular prism (cuboid)', faces:6, working:'A cuboid has 2 top/bottom faces, 2 front/back faces, and 2 left/right faces = 6 faces total.', hint1:'Count: 2 + 2 + 2 rectangular faces', hint2:'3 pairs of rectangles = ?'},
+    {name:'square-based pyramid', faces:5, working:'A square-based pyramid has 1 square base and 4 triangular sides = 5 faces total.', hint1:'Count: 1 square base and 4 triangular faces', hint2:'1 + 4 = ?'},
+    {name:'triangular-based pyramid (tetrahedron)', faces:4, working:'A tetrahedron has 4 triangular faces = 4 faces total.', hint1:'All faces are triangles', hint2:'Count the 4 triangular faces'},
+    {name:'pentagonal prism', faces:7, working:'A pentagonal prism has 2 pentagonal faces and 5 rectangular faces = 7 faces total.', hint1:'Count: 2 pentagonal ends and 5 rectangular sides', hint2:'2 + 5 = ?'},
+    {name:'hexagonal prism', faces:8, working:'A hexagonal prism has 2 hexagonal faces and 6 rectangular faces = 8 faces total.', hint1:'Count: 2 hexagonal ends and 6 rectangular sides', hint2:'2 + 6 = ?'}
+  ];
+  var s = pick(shapes);
+  return {
+    question: 'How many faces does a <b>' + s.name + '</b> have?',
+    hints: [s.hint1, s.hint2],
+    ans: s.faces,
+    tol: 0,
+    unit: 'faces',
+    working: s.working
+  };
+})}
   ]},
   {ey:'Q9 \u00b7 Year 7 \u00b7 Geometry',ti:'Reflections',su:'Reflect triangle A in the y-axis. Then reflect it in the x-axis.',steps:[
     {lb:'Reflection',dr:dQ9,ht:'<p>A <b>reflection</b> creates a mirror image. Every point moves to the same distance on the other side of the mirror line.</p>'},
     {lb:'Reflect in the y-axis',dr:dQ9,ht:'<p>Reflection in the y-axis: the x-coordinate changes sign, y stays the same.</p><div class="fm">(x, y) \u2192 (\u2212x, y)</div>'},
     {lb:'Reflect in the x-axis',dr:dQ9,ht:'<p>Reflection in the x-axis: the y-coordinate changes sign, x stays the same.</p><div class="fm">(x, y) \u2192 (x, \u2212y)</div>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt({question:'Point (4, \u22122) is reflected in the x-axis. What is the new y-coordinate?',hints:['x-axis reflection: (x,y) \u2192 (x,\u2212y)','Negate the y-coordinate'],ans:2,tol:0.05,unit:'',working:'(4,\u22122) \u2192 (4, 2). New y = 2.'})}
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){
+  var x = rnd(-8, 8);
+  var y = rnd(-8, 8);
+  while (y === 0) { y = rnd(-8, 8); }
+  var ans = -y;
+  return {
+    question: 'Point (' + x + ', ' + y + ') is reflected in the x-axis. What is the new y-coordinate?',
+    hints: ['x-axis reflection: (x,y) → (x,−y)', 'Negate the y-coordinate: −(' + y + ') = ' + ans],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: '(' + x + ', ' + y + ') → (' + x + ', ' + ans + '). New y = ' + ans + '.'
+  };
+})}
   ]},
   {ey:'Q10 \u00b7 Year 7 \u00b7 Geometry',ti:'Metric Conversions and Scale',su:'Convert 3.5 m to cm, 2400 m to km. Then: map scale 1:50000, what does 2 cm represent?',steps:[
     {lb:'Metric conversions',dr:dQ10,ht:'<p>Key metric facts:<br>1 km = 1000 m &nbsp; 1 m = 100 cm &nbsp; 1 kg = 1000 g &nbsp; 1 l = 1000 ml</p>'},
     {lb:'Length conversions',dr:dQ10,ht:'<div class="fm">3.5 m = 3.5 \u00d7 100 = 350 cm</div><div class="fm">2400 m = 2400 \u00f7 1000 = 2.4 km</div>'},
     {lb:'Mass and capacity',dr:dQ10,ht:'<div class="fm">1.8 kg = 1800 g</div><div class="fm">450 ml = 0.45 l</div>'},
     {lb:'Scale drawing',dr:dQ10,ht:'<div class="fm">Scale 1:50000  \u2192  1 cm = 50000 cm = 500 m = 0.5 km</div><div class="fm">2 cm = 2 \u00d7 0.5 km = 1 km</div>'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt({question:'Convert <b>4.2 km</b> to metres.',hints:['1 km = 1000 m','Multiply by 1000'],ans:4200,tol:0.5,unit:'m',working:'4.2 \u00d7 1000 = 4200 m'})}
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){
+  var vals = [1.2, 1.5, 2.4, 3.6, 4.2, 5.8, 6.3, 7.5, 8.1, 9.4, 0.8, 2.7, 3.1, 4.5, 6.8];
+  var km = pick(vals);
+  var ans = km * 1000;
+  return {
+    question: 'Convert <b>' + km + ' km</b> to metres.',
+    hints: ['1 km = 1000 m', 'Multiply by 1000'],
+    ans: ans,
+    tol: 0.5,
+    unit: 'm',
+    working: km + ' \u00d7 1000 = ' + ans + ' m'
+  };
+})}
   ]}
 ];
 

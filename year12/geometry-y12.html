@@ -518,64 +518,271 @@ var QS=[
     {lb:'Setting up',dr:dQ1,ht:'<p>The <b>angle of elevation</b> is measured upward from the horizontal to an object above. The <b>angle of depression</b> is measured downward from the horizontal to an object below.</p>'},
     {lb:'Label the triangle',dr:dQ1,ht:'<div class="fm">Angle \u03b8 = 35\u00b0,  horizontal distance d = 50 m,  height h = ?</div>'},
     {lb:'Apply trigonometry',dr:dQ1,ht:'<div class="fm">tan(\u03b8) = opposite/adjacent = h/d</div><div class="fm">h = d \u00d7 tan(35\u00b0) = 50 \u00d7 0.7002 \u2248 35.0 m</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'From a point 80 m from the base of a building, the angle of elevation to the top is <b>42\u00b0</b>. Find the height of the building (to 1 d.p.).',hints:['h = d \u00d7 tan(\u03b8)','= 80 \u00d7 tan(42\u00b0)','tan(42\u00b0) \u2248 0.9004'],ans:72,tol:1,unit:'m',working:'h = 80 \u00d7 tan(42\u00b0) \u2248 80 \u00d7 0.9004 \u2248 <b>72.0 m</b>'})}
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
+  var d = pick([60, 70, 80, 90, 100, 120]);
+  var theta = pick([30, 35, 38, 40, 42, 45, 50, 55]);
+  var tanVal = Math.tan(theta * Math.PI / 180);
+  var h = d * tanVal;
+  var hRounded = Math.round(h * 10) / 10;
+  var tanRounded = Math.round(tanVal * 10000) / 10000;
+  return {
+    question: 'From a point ' + d + ' m from the base of a building, the angle of elevation to the top is <b>' + theta + '°</b>. Find the height of the building (to 1 d.p.).',
+    hints: [
+      'h = d × tan(θ)',
+      '= ' + d + ' × tan(' + theta + '°)',
+      'tan(' + theta + '°) ≈ ' + tanRounded
+    ],
+    ans: hRounded,
+    tol: 0.2,
+    unit: 'm',
+    working: 'h = ' + d + ' × tan(' + theta + '°) ≈ ' + d + ' × ' + tanRounded + ' ≈ <b>' + hRounded + ' m</b>'
+  };
+})}
   ]},
   {ey:'Q2 \u2022 Year 12 \u2022 WAEC',ti:'Similar Triangles',su:'Two similar triangles have bases 6 cm and 9 cm. The height of the smaller is 5 cm. Find the height of the larger.',steps:[
     {lb:'What makes triangles similar?',dr:dQ2,ht:'<p><b>Similar triangles</b> have the same angles but different sizes. All corresponding sides are in the same ratio (the scale factor).</p>'},
     {lb:'Find the scale factor',dr:dQ2,ht:'<div class="fm">Scale factor = 9/6 = 1.5</div>'},
     {lb:'Apply to unknown side',dr:dQ2,ht:'<div class="fm">Height of larger = 5 \u00d7 1.5 = 7.5 cm</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Two similar triangles have corresponding sides 4 cm and 10 cm. A side of the smaller triangle is 6 cm. Find the corresponding side of the larger.',hints:['Scale factor = 10/4 = 2.5','Multiply by scale factor'],ans:15,tol:0.1,unit:'cm',working:'6 \u00d7 2.5 = <b>15 cm</b>'})}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
+  var pairs = [
+    [2, 6], [3, 9], [4, 10], [5, 15], [6, 12], [4, 8], [5, 20], [3, 12], [6, 15], [4, 12]
+  ];
+  var pair = pick(pairs);
+  var small = pair[0];
+  var large = pair[1];
+  var sf = large / small;
+  var side = pick([3, 4, 5, 6, 7, 8, 9, 10]);
+  var ans = side * sf;
+  var sfDisplay = (sf === Math.floor(sf)) ? sf : Math.round(sf * 100) / 100;
+  var ansDisplay = (ans === Math.floor(ans)) ? ans : Math.round(ans * 100) / 100;
+  return {
+    question: 'Two similar triangles have corresponding sides ' + small + ' cm and ' + large + ' cm. A side of the smaller triangle is ' + side + ' cm. Find the corresponding side of the larger.',
+    hints: [
+      'Scale factor = ' + large + '/' + small + ' = ' + sfDisplay,
+      'Multiply the known side by the scale factor'
+    ],
+    ans: ansDisplay,
+    tol: 0.1,
+    unit: 'cm',
+    working: side + ' \u00d7 ' + sfDisplay + ' = <b>' + ansDisplay + ' cm</b>'
+  };
+})}
   ]},
   {ey:'Q3 \u2022 Year 12 \u2022 WAEC',ti:'Congruent Triangles',su:'State the four conditions for congruency and identify which applies to two given triangles.',steps:[
     {lb:'What is congruency?',dr:dQ3,ht:'<p><b>Congruent triangles</b> are identical in size and shape. They can be reflections or rotations of each other, but all corresponding sides and angles are equal.</p>'},
     {lb:'The four conditions',dr:dQ3,ht:'<div class="fm">SSS \u2014 three sides equal</div><div class="fm">SAS \u2014 two sides and included angle equal</div><div class="fm">ASA \u2014 two angles and included side equal</div><div class="fm">RHS \u2014 right angle, hypotenuse and one side equal</div>'},
     {lb:'Identify the condition',dr:dQ3,ht:'<p>For the triangles shown: all three sides can be verified equal \u2192 <b>SSS</b>.</p>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Two triangles have angles 40\u00b0, 70\u00b0 and a side between them of 8 cm each. Which condition proves congruency? Enter the number of sides checked (2 for SAS, 3 for SSS, enter 0 for ASA).',hints:['Two angles and the side between them are given','This is the ASA condition'],ans:0,tol:0,unit:'(0 = ASA)',working:'Two angles and the included side \u2192 <b>ASA</b> (enter 0).'})}
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
+  // Pick a congruency condition: 0=ASA, 2=SAS, 3=SSS
+  var condition = pick([0, 2, 3]);
+
+  var a1 = pick([30, 35, 40, 45, 50, 55, 60]);
+  var a2 = pick([40, 45, 50, 55, 60, 65, 70]);
+  while (a1 + a2 >= 180) { a2 = pick([40, 45, 50, 55, 60, 65, 70]); }
+  var side = rnd(5, 12);
+
+  var question, hints, unit, working;
+
+  if (condition === 0) {
+    question = 'Two triangles have angles ' + a1 + '° and ' + a2 + '° with the side between them ' + side + ' cm each. Which condition proves congruency? Enter 0 for ASA, 2 for SAS, 3 for SSS.';
+    hints = ['Two angles and the side included between them are given', 'This is the ASA condition — enter 0'];
+    unit = '(0 = ASA)';
+    working = 'Two angles and the included side → <b>ASA</b> (enter 0).';
+  } else if (condition === 2) {
+    question = 'Two triangles have two sides of ' + side + ' cm and ' + (side + rnd(1,4)) + ' cm with the angle between them ' + a1 + '° each. Which condition proves congruency? Enter 0 for ASA, 2 for SAS, 3 for SSS.';
+    hints = ['Two sides and the angle included between them are given', 'This is the SAS condition — enter 2'];
+    unit = '(2 = SAS)';
+    working = 'Two sides and the included angle → <b>SAS</b> (enter 2).';
+  } else {
+    var s1 = side, s2 = side + rnd(1,3), s3 = side + rnd(4,6);
+    question = 'Two triangles have all three sides equal: ' + s1 + ' cm, ' + s2 + ' cm and ' + s3 + ' cm. Which condition proves congruency? Enter 0 for ASA, 2 for SAS, 3 for SSS.';
+    hints = ['All three sides of both triangles are equal', 'This is the SSS condition — enter 3'];
+    unit = '(3 = SSS)';
+    working = 'All three sides equal → <b>SSS</b> (enter 3).';
+  }
+
+  return {
+    question: question,
+    hints: hints,
+    ans: condition,
+    tol: 0,
+    unit: unit,
+    working: working
+  };
+})}
   ]},
   {ey:'Q4 \u2022 Year 12 \u2022 WAEC',ti:'Properties of Quadrilaterals',su:'State the key properties of a parallelogram and a rhombus. Use them to find a missing angle.',steps:[
     {lb:'Parallelogram',dr:dQ4,ht:'<p>A <b>parallelogram</b> has: opposite sides parallel and equal; opposite angles equal; co-interior angles supplementary (sum to 180\u00b0); diagonals bisect each other.</p>'},
     {lb:'Rhombus',dr:dQ4,ht:'<p>A <b>rhombus</b> is a parallelogram with all four sides equal. Its diagonals bisect each other at right angles and bisect the vertex angles.</p>'},
     {lb:'Finding a missing angle',dr:dQ4,ht:'<p>In a parallelogram, if one angle is 70\u00b0:</p><div class="fm">Adjacent angle = 180 \u2212 70 = 110\u00b0</div><div class="fm">Opposite angle = 70\u00b0</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'In a parallelogram, one angle is <b>65\u00b0</b>. Find the size of an adjacent angle.',hints:['Co-interior angles sum to 180\u00b0','180 \u2212 65'],ans:115,tol:0.5,unit:'\u00b0',working:'180 \u2212 65 = <b>115\u00b0</b>'})}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
+  var angle = pick([55, 60, 65, 70, 72, 75, 80, 85, 110, 115, 120]);
+  var ans = 180 - angle;
+  return {
+    question: 'In a parallelogram, one angle is <b>' + angle + '°</b>. Find the size of an adjacent angle.',
+    hints: ['Co-interior angles sum to 180°', '180 − ' + angle],
+    ans: ans,
+    tol: 0.5,
+    unit: '°',
+    working: '180 − ' + angle + ' = <b>' + ans + '°</b>'
+  };
+})}
   ]},
   {ey:'Q5 \u2022 Year 12 \u2022 WAEC',ti:'Angle Properties of Polygons',su:'A regular heptagon (7 sides). Find the sum of interior angles, each interior angle, and each exterior angle.',steps:[
     {lb:'Triangulation proof',dr:dQ5,ht:'<p>Any polygon with n sides can be split into (n\u22122) triangles from one vertex. Each triangle has angle sum 180\u00b0, giving the formula for interior angles.</p>'},
     {lb:'Sum of interior angles',dr:dQ5,ht:'<div class="fm">Sum = (n \u2212 2) \u00d7 180 = (7 \u2212 2) \u00d7 180 = 900\u00b0</div>'},
     {lb:'Each interior angle',dr:dQ5,ht:'<div class="fm">Each = 900 \u00f7 7 \u2248 128.6\u00b0</div>'},
     {lb:'Each exterior angle',dr:dQ5,ht:'<div class="fm">Each exterior = 360 \u00f7 7 \u2248 51.4\u00b0</div><p>The sum of exterior angles is always 360\u00b0 for any convex polygon.</p>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'Find the sum of interior angles of a <b>nonagon</b> (9 sides).',hints:['(n\u22122) \u00d7 180','(9\u22122) \u00d7 180'],ans:1260,tol:0.5,unit:'\u00b0',working:'7 \u00d7 180 = <b>1260\u00b0</b>'})}
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){
+  var polygons = [
+    {name:'pentagon', sides:5},
+    {name:'hexagon', sides:6},
+    {name:'heptagon', sides:7},
+    {name:'octagon', sides:8},
+    {name:'nonagon', sides:9},
+    {name:'decagon', sides:10},
+    {name:'dodecagon', sides:12}
+  ];
+  var poly = pick(polygons);
+  var n = poly.sides;
+  var ans = (n - 2) * 180;
+  return {
+    question: 'Find the sum of interior angles of a <b>' + poly.name + '</b> (' + n + ' sides).',
+    hints: ['(n\u22122) \u00d7 180', '(' + n + '\u22122) \u00d7 180'],
+    ans: ans,
+    tol: 0.5,
+    unit: '\u00b0',
+    working: '(' + n + ' \u2212 2) \u00d7 180 = ' + (n-2) + ' \u00d7 180 = <b>' + ans + '\u00b0</b>'
+  };
+})}
   ]},
   {ey:'Q6 \u2022 Year 12 \u2022 WAEC',ti:'Locus Problems',su:'Describe the locus of points 5 cm from point A, and the locus equidistant from A and B (where AB = 8 cm).',steps:[
     {lb:'What is a locus?',dr:dQ6,ht:'<p>A <b>locus</b> is the set of all points satisfying a given condition. It forms a line, curve, or region.</p>'},
     {lb:'Locus from a point',dr:dQ6,ht:'<div class="fm">Locus equidistant from A = circle, centre A, radius 5 cm</div>'},
     {lb:'Equidistant from two points',dr:dQ6,ht:'<div class="fm">Locus equidistant from A and B = perpendicular bisector of AB</div><p>This is a straight line through the midpoint of AB at 90\u00b0.</p>'},
     {lb:'Combining loci',dr:dQ6,ht:'<p>To find a point that is simultaneously 5 cm from A AND equidistant from A and B: find the intersection of the circle and the perpendicular bisector.</p>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'A point P is equidistant from two parallel lines 10 cm apart. How far is P from each line?',hints:['Equidistant means halfway between the lines','10 \u00f7 2'],ans:5,tol:0.1,unit:'cm',working:'P is <b>5 cm</b> from each line \u2014 on the line midway between them.'})}
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){
+  var d = pick([6, 8, 10, 12, 14, 16, 20]);
+  var ans = d / 2;
+  return {
+    question: 'A point P is equidistant from two parallel lines ' + d + ' cm apart. How far is P from each line?',
+    hints: [
+      'Equidistant means halfway between the lines',
+      d + ' \u00f7 2'
+    ],
+    ans: ans,
+    tol: 0.1,
+    unit: 'cm',
+    working: 'P is <b>' + ans + ' cm</b> from each line \u2014 on the line midway between them.'
+  };
+})}
   ]},
   {ey:'Q7 \u2022 Year 12 \u2022 WAEC',ti:'Combined Geometry Problem',su:'In triangle ABC, DE is parallel to AB with D on AC and E on BC. CD = 4.4 cm, CA = 8 cm, AB = 12 cm. Find DE.',steps:[
     {lb:'Identify similar triangles',dr:dQ7,ht:'<p>Because DE \u2225 AB, triangles CDE and CAB share angle C and have corresponding angles equal (parallel lines). So <b>triangles CDE and CAB are similar</b>.</p>'},
     {lb:'Find the ratio',dr:dQ7,ht:'<div class="fm">CD/CA = 4.4/8 = 0.55</div>'},
     {lb:'Find DE',dr:dQ7,ht:'<div class="fm">DE/AB = CD/CA = 0.55</div><div class="fm">DE = 0.55 \u00d7 12 = 6.6 cm</div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'In a similar setup, CD = 3 cm, CA = 9 cm, AB = 15 cm. Find DE.',hints:['Ratio = CD/CA = 3/9 = 1/3','DE = (1/3) \u00d7 15'],ans:5,tol:0.1,unit:'cm',working:'DE = (3/9) \u00d7 15 = <b>5 cm</b>'})}
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){
+  var CA = pick([6, 8, 9, 10, 12, 15, 18, 20]);
+  var CDOptions = [];
+  for (var i = 1; i < CA; i++) {
+    if ((i * 10) % CA === 0 || CA % i === 0) CDOptions.push(i);
+  }
+  if (CDOptions.length === 0) CDOptions = [CA / 2];
+  var CD = pick(CDOptions);
+  var ABOptions = [10, 12, 15, 18, 20, 24, 25, 30];
+  var AB = pick(ABOptions);
+  var ratio = CD / CA;
+  var DE = ratio * AB;
+  var ratioStr = CD + '/' + CA;
+  return {
+    question: 'In a similar setup, CD = ' + CD + ' cm, CA = ' + CA + ' cm, AB = ' + AB + ' cm. Find DE.',
+    hints: [
+      'Ratio = CD/CA = ' + ratioStr + ' = ' + ratio.toFixed(4).replace(/\.?0+$/, ''),
+      'DE = (' + ratioStr + ') × ' + AB
+    ],
+    ans: DE,
+    tol: 0.1,
+    unit: 'cm',
+    working: 'DE = (' + ratioStr + ') × ' + AB + ' = <b>' + DE + ' cm</b>'
+  };
+})}
   ]},
   {ey:'Q8 \u2022 Year 12 \u2022 WAEC',ti:'Earth Geometry \u2014 Great Circles and Meridians',su:'Introduce the globe: great circles, meridians, the equator, and why they matter for distance.',steps:[
     {lb:'The Earth as a sphere',dr:dQ8,ht:'<p>We model the Earth as a sphere with radius <b>R = 6371 km</b>. Positions are given by <b>latitude</b> (angle N/S of equator) and <b>longitude</b> (angle E/W of prime meridian).</p>'},
     {lb:'Meridians',dr:dQ8,ht:'<p>A <b>meridian</b> is a great circle passing through both poles. The <b>prime meridian</b> is at 0\u00b0 longitude. All meridians are great circles.</p>'},
     {lb:'Great circles',dr:dQ8,ht:'<p>A <b>great circle</b> is any circle on the surface of a sphere whose centre is the centre of the sphere. The equator is a great circle. Parallels of latitude (other than the equator) are <b>not</b> great circles.</p><div class="fm">Great circle = shortest surface path between two points.</div>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'What is the circumference of the Earth along the equator (R = 6371 km)? Give to the nearest km.',hints:['C = 2\u03c0R','= 2 \u00d7 \u03c0 \u00d7 6371'],ans:40030,tol:10,unit:'km',working:'C = 2\u03c0 \u00d7 6371 \u2248 <b>40030 km</b>'})}
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){
+  var R = pick([6371, 6350, 6400, 6378, 6360]);
+  var C = Math.round(2 * Math.PI * R);
+  return {
+    question: 'What is the circumference of the Earth along the equator (R = ' + R + ' km)? Give to the nearest km.',
+    hints: ['C = 2πR', '= 2 × π × ' + R],
+    ans: C,
+    tol: 10,
+    unit: 'km',
+    working: 'C = 2π × ' + R + ' ≈ <b>' + C + ' km</b>'
+  };
+})}
   ]},
   {ey:'Q9 \u2022 Year 12 \u2022 WAEC',ti:'Earth Geometry \u2014 Latitude, Longitude and Arc Distance',su:'Find the distance along a meridian between two points at 15\u00b0N and 55\u00b0N (same longitude). R = 6371 km.',steps:[
     {lb:'What we need',dr:dQ9,ht:'<p>When two points are on the <b>same meridian</b> (same longitude), the arc between them is a great circle arc. The angle between them at the Earth\u2019s centre is simply the difference in latitude.</p>'},
     {lb:'Find the angle',dr:dQ9,ht:'<div class="fm">Angle at centre \u03b8 = 55\u00b0 \u2212 15\u00b0 = 40\u00b0</div>'},
     {lb:'Calculate arc length',dr:dQ9,ht:'<div class="fm">d = (\u03b8/360) \u00d7 2\u03c0R</div><div class="fm">d = (40/360) \u00d7 2\u03c0 \u00d7 6371 \u2248 4443 km</div>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt({question:'Two cities are on the same meridian at latitudes <b>10\u00b0S</b> and <b>50\u00b0N</b>. Find the distance between them. (R = 6371 km)',hints:['\u03b8 = 50 + 10 = 60\u00b0 (opposite hemispheres \u2014 add)','d = (60/360) \u00d7 2\u03c0 \u00d7 6371'],ans:6672,tol:10,unit:'km',working:'d = (60/360) \u00d7 2\u03c0 \u00d7 6371 \u2248 <b>6672 km</b>'})}
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){
+  // Pick two latitudes in opposite hemispheres
+  var southLat = pick([5, 10, 15, 20, 25, 30]);
+  var northLat = pick([20, 25, 30, 35, 40, 45, 50, 55, 60]);
+  var theta = southLat + northLat;
+  var R = 6371;
+  var ans = Math.round((theta / 360) * 2 * Math.PI * R);
+  return {
+    question: 'Two cities are on the same meridian at latitudes <b>' + southLat + '°S</b> and <b>' + northLat + '°N</b>. Find the distance between them. (R = 6371 km)',
+    hints: [
+      'θ = ' + northLat + ' + ' + southLat + ' = ' + theta + '° (opposite hemispheres — add)',
+      'd = (' + theta + '/360) × 2π × 6371'
+    ],
+    ans: ans,
+    tol: 10,
+    unit: 'km',
+    working: 'd = (' + theta + '/360) × 2π × 6371 ≈ <b>' + ans + ' km</b>'
+  };
+})}
   ]},
   {ey:'Q10 \u2022 Year 12 \u2022 WAEC',ti:'Earth Geometry \u2014 Distance Along a Parallel of Latitude',su:'Points A (50\u00b0N, 20\u00b0W) and B (50\u00b0N, 40\u00b0E) are on the same latitude. Find the distance AB along the parallel.',steps:[
     {lb:'Key idea',dr:dQ10,ht:'<p>Along a parallel of latitude \u03c6, the circle has a <b>smaller radius</b> than the Earth. The radius of the latitude circle is:</p><div class="fm">r\u2097 = R \u00d7 cos(\u03c6)</div>'},
     {lb:'Radius of the 50\u00b0N parallel',dr:dQ10,ht:'<div class="fm">r\u2097 = 6371 \u00d7 cos(50\u00b0) = 6371 \u00d7 0.6428 \u2248 4096 km</div>'},
     {lb:'Difference in longitude',dr:dQ10,ht:'<div class="fm">20\u00b0W to 40\u00b0E = 20 + 40 = 60\u00b0</div>'},
     {lb:'Arc distance along the parallel',dr:dQ10,ht:'<div class="fm">d = (\u03b8/360) \u00d7 2\u03c0r\u2097</div><div class="fm">d = (60/360) \u00d7 2\u03c0 \u00d7 4096 \u2248 4295 km</div><p>This is the distance <b>along the parallel</b>. The great circle (shortest path) would be shorter.</p>'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt({question:'Two points are on latitude <b>60\u00b0N</b>, at longitudes <b>10\u00b0E</b> and <b>70\u00b0E</b>. Find the distance between them along the parallel. (R = 6371 km)',hints:['r\u2097 = 6371 \u00d7 cos(60\u00b0) = 6371 \u00d7 0.5 = 3185.5 km','\u03b8 = 70 \u2212 10 = 60\u00b0','d = (60/360) \u00d7 2\u03c0 \u00d7 3185.5'],ans:3336,tol:15,unit:'km',working:'r\u2097 = 3185.5 km<br>d = (1/6) \u00d7 2\u03c0 \u00d7 3185.5 \u2248 <b>3336 km</b>'})}
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){
+  var lat = pick([30, 45, 50, 60, 70]);
+  // Pick two longitudes ensuring a clean difference
+  var lonDiffs = [20, 30, 40, 45, 60, 90];
+  var dLon = pick(lonDiffs);
+  var lon1 = pick([0, 10, 20, 30]);
+  var lon2 = lon1 + dLon;
+
+  var cosLat = Math.cos(lat * Math.PI / 180);
+  var rL = 6371 * cosLat;
+  var rLRound = Math.round(rL * 10) / 10;
+  var ans = (dLon / 360) * 2 * Math.PI * rL;
+  var ansRound = Math.round(ans);
+
+  var lon1Str = lon1 === 0 ? '0\u00b0' : lon1 + '\u00b0E';
+  var lon2Str = lon2 + '\u00b0E';
+
+  return {
+    question: 'Two points are on latitude <b>' + lat + '\u00b0N</b>, at longitudes <b>' + lon1Str + '</b> and <b>' + lon2Str + '</b>. Find the distance between them along the parallel. (R = 6371 km)',
+    hints: [
+      'r\u2097 = 6371 \u00d7 cos(' + lat + '\u00b0) \u2248 ' + rLRound + ' km',
+      '\u03b8 = ' + lon2 + ' \u2212 ' + lon1 + ' = ' + dLon + '\u00b0',
+      'd = (' + dLon + '/360) \u00d7 2\u03c0 \u00d7 ' + rLRound
+    ],
+    ans: ansRound,
+    tol: 15,
+    unit: 'km',
+    working: 'r\u2097 = 6371 \u00d7 cos(' + lat + '\u00b0) \u2248 ' + rLRound + ' km<br>d = (' + dLon + '/360) \u00d7 2\u03c0 \u00d7 ' + rLRound + ' \u2248 <b>' + ansRound + ' km</b>'
+  };
+})}
   ]}
 ];
 

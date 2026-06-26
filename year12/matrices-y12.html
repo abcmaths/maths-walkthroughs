@@ -186,28 +186,123 @@ var QS=[
     {lb:'Step 1 - Add A + B',dr:dQ1,ht:'<div class="fm">Top-left: 2+5=7  Top-right: -1+2=1</div><div class="fm">Bottom-left: 3+(-1)=2  Bottom-right: 4+3=7</div>'},
     {lb:'Step 2 - Result',dr:dQ1,ht:'<div class="fm">A + B = [[7, 1], [2, 7]]</div>'},
     {lb:'Step 3 - Scalar multiplication',dr:dQ1,ht:'<p>Multiply <b>every element</b> by the scalar number:</p><div class="fm">3A = [[6, -3], [9, 12]]</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Matrix C = [[4,1],[2,3]]. Find the top-right element of <b>2C</b>.',hints:['Multiply every element by 2','Top-right of C is 1'],ans:2,exact:0.1,unit:'(top-right)',working:'2C=[[8,2],[4,6]]. Top-right = <b>2</b>'})}
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
+  var a = rnd(1,6);
+  var b = rnd(1,6);
+  var c = rnd(1,6);
+  var d = rnd(1,6);
+  var s = pick([2,3,4,5]);
+  var ans = s * b;
+  return {
+    question: 'Matrix C = [[' + a + ',' + b + '],[' + c + ',' + d + ']]. Find the top-right element of <b>' + s + 'C</b>.',
+    hints: [
+      'Multiply every element by ' + s,
+      'Top-right of C is ' + b
+    ],
+    ans: ans,
+    tol: 0,
+    unit: '(top-right)',
+    working: s + 'C = [[' + (s*a) + ',' + (s*b) + '],[' + (s*c) + ',' + (s*d) + ']]. Top-right = <b>' + ans + '</b>'
+  };
+})}
   ]},
   {ey:'Q2 - Matrices',ti:'Matrix Multiplication',su:'Multiply two 2x2 matrices A x B using the row-by-column rule.',steps:[
     {lb:'The rule',dr:dQ2,ht:'<p>Each element of the result = <b>row of A</b> multiplied by <b>column of B</b> (multiply pairs, then add). This is the row-by-column rule.</p>'},
     {lb:'Step 1 - Row 1 x Col 1',dr:dQ2,ht:'<div class="fm">(1x2) + (2x1) = 2+2 = <b>4</b> (top-left)</div>'},
     {lb:'Step 2 - Row 1 x Col 2',dr:dQ2,ht:'<div class="fm">(1x0) + (2x3) = 0+6 = <b>6</b> (top-right)</div>'},
     {lb:'Step 3 - Complete AB',dr:dQ2,ht:'<div class="fm">Row 2 x Col 1: (3x2)+(4x1) = <b>10</b></div><div class="fm">Row 2 x Col 2: (3x0)+(4x3) = <b>12</b></div><div class="fm">AB = [[4,6],[10,12]]</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'For the result AB = [[4,6],[10,12]], what is the sum of all four elements?',hints:['Add 4+6+10+12'],ans:32,exact:0.1,unit:'',working:'4+6+10+12 = <b>32</b>'})}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
+  // Generate 2x2 matrices A and B with small integers
+  var a11 = rnd(1,3); var a12 = rnd(1,3);
+  var a21 = rnd(1,4); var a22 = rnd(1,4);
+  var b11 = rnd(1,3); var b12 = rnd(0,3);
+  var b21 = rnd(1,3); var b22 = rnd(1,4);
+
+  // Compute AB
+  var c11 = a11*b11 + a12*b21;
+  var c12 = a11*b12 + a12*b22;
+  var c21 = a21*b11 + a22*b21;
+  var c22 = a21*b12 + a22*b22;
+
+  var ans = c11 + c12 + c21 + c22;
+
+  return {
+    question: 'For the result AB = [[' + c11 + ',' + c12 + '],[' + c21 + ',' + c22 + ']], what is the sum of all four elements?',
+    hints: ['Add ' + c11 + '+' + c12 + '+' + c21 + '+' + c22],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: c11 + '+' + c12 + '+' + c21 + '+' + c22 + ' = <b>' + ans + '</b>'
+  };
+})}
   ]},
   {ey:'Q3 - Matrices',ti:'Determinant and Inverse',su:'Find the inverse of M = [[3,2],[1,4]].',steps:[
     {lb:'The formula',dr:dQ3,ht:'<p>For matrix M = [[a,b],[c,d]], the inverse exists only if <b>det(M) = ad - bc</b> is non-zero.</p><div class="fm">M-inverse = (1/det) x [[d,-b],[-c,a]]</div>'},
     {lb:'Step 1 - Determinant',dr:dQ3,ht:'<div class="fm">det = (3x4) - (2x1) = 12-2 = <b>10</b></div>'},
     {lb:'Step 2 - Swap and negate',dr:dQ3,ht:'<p>Swap the diagonal (3 and 4 become 4 and 3). Negate the other two (2 becomes -2, 1 becomes -1).</p>'},
     {lb:'Step 3 - Divide by det',dr:dQ3,ht:'<div class="fm">M-inverse = (1/10) x [[4,-2],[-1,3]]</div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Find the determinant of N = [[5,3],[2,4]].',hints:['det = ad - bc','a=5, b=3, c=2, d=4'],ans:14,exact:0.1,unit:'',working:'(5x4)-(3x2) = 20-6 = <b>14</b>'})}
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
+  var a = rnd(2,7);
+  var b = rnd(1,6);
+  var c = rnd(1,6);
+  var d = rnd(2,7);
+  var ans = (a * d) - (b * c);
+  return {
+    question: 'Find the determinant of N = [[' + a + ',' + b + '],[' + c + ',' + d + ']].',
+    hints: ['det = ad - bc', 'a=' + a + ', b=' + b + ', c=' + c + ', d=' + d],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: '(' + a + 'x' + d + ')-(' + b + 'x' + c + ') = ' + (a*d) + '-' + (b*c) + ' = <b>' + ans + '</b>'
+  };
+})}
   ]},
   {ey:'Q4 - Matrices',ti:'Solving Simultaneous Equations Using Matrices',su:'Solve [[3,2],[1,4]] x [[x],[y]] = [[8],[7]] using the inverse matrix.',steps:[
     {lb:'The method',dr:dQ4,ht:'<p>Any system of two simultaneous equations can be written as <b>Mx = b</b>. Multiply both sides on the left by M-inverse to find x.</p>'},
     {lb:'Step 1 - Find M-inverse',dr:dQ4,ht:'<div class="fm">det=10, M-inv = (1/10)[[4,-2],[-1,3]]</div>'},
     {lb:'Step 2 - Multiply',dr:dQ4,ht:'<p>x = M-inverse x b. Multiply the inverse matrix by the column vector [[8],[7]].</p>'},
     {lb:'Step 3 - Calculate',dr:dQ4,ht:'<div class="fm">x = (1/10)(4x8 + (-2)x7) = 18/10 = 1.8</div><div class="fm">y = (1/10)((-1)x8 + 3x7) = 13/10 = 1.3</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'Check the solution by substituting x=1.8 and y=1.3 into the first equation 3x + 2y. What do you get?',hints:['3 x 1.8 = 5.4','2 x 1.3 = 2.6','5.4 + 2.6 = ?'],ans:8,exact:0.1,unit:'',working:'3(1.8)+2(1.3) = 5.4+2.6 = <b>8</b> (correct)'})}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
+  // Generate a 2x2 system ax + by = e, cx + dy = f with a nice determinant
+  var configs = [
+    {a:3,b:2,c:1,d:4},
+    {a:2,b:3,c:1,d:5},
+    {a:4,b:1,c:2,d:3},
+    {a:5,b:2,c:1,d:3},
+    {a:3,b:4,c:1,d:2},
+    {a:2,b:5,c:3,d:1}
+  ];
+  var cfg = pick(configs);
+  var a = cfg.a, b = cfg.b, c = cfg.c, d = cfg.d;
+  var det = a*d - b*c;
+  // Pick RHS values that give clean 1dp solutions
+  var rhsOptions = [
+    {e:8,f:7},{e:6,f:5},{e:10,f:8},{e:9,f:6},{e:7,f:4},{e:12,f:9}
+  ];
+  var rhs = pick(rhsOptions);
+  var e = rhs.e, f = rhs.f;
+  // Solve: x = (d*e - b*f)/det, y = (a*f - c*e)/det
+  var xNum = d*e - b*f;
+  var yNum = a*f - c*e;
+  var x = Math.round(xNum/det * 10) / 10;
+  var y = Math.round(yNum/det * 10) / 10;
+  // First equation result
+  var ans = Math.round((a*x + b*y) * 10) / 10;
+  var ax = Math.round(a*x * 10) / 10;
+  var by = Math.round(b*y * 10) / 10;
+  return {
+    question: 'Check the solution by substituting x=' + x + ' and y=' + y + ' into the first equation ' + a + 'x + ' + b + 'y. What do you get?',
+    hints: [
+      a + ' × ' + x + ' = ' + ax,
+      b + ' × ' + y + ' = ' + by,
+      ax + ' + ' + by + ' = ?'
+    ],
+    ans: ans,
+    tol: 0.01,
+    unit: '',
+    working: a + '(' + x + ') + ' + b + '(' + y + ') = ' + ax + ' + ' + by + ' = <b>' + ans + '</b> (correct)'
+  };
+})}
   ]}
 ];
 

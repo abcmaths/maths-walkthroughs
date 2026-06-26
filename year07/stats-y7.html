@@ -105,6 +105,8 @@ function htmlFrac(num,den,col,lbl){
     +'</span>';
 }
 
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function tryIt(genFn){
   if(typeof genFn==='object'){var _o=genFn;genFn=function(){return _o;};}
   var id='t'+Math.random().toString(36).slice(2);
@@ -422,25 +424,89 @@ var QS=[
     {lb:'Tally marks',dr:dQ1,ht:'<p><b>Tally marks</b> are drawn in groups of 5: four vertical lines then a diagonal cross through them (||||). Each group of 5 is easy to count quickly.</p>'},
     {lb:'Draw the tallies',dr:dQ1,ht:'<p>Draw tally marks for each colour. Group them in fives where possible.</p>'},
     {lb:'Count the frequencies',dr:dQ1,ht:'<p>The <b>frequency</b> is the total count. Count the tally marks to fill in the frequency column.</p>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'In a tally chart, a student draws 3 full groups of 5 and 2 extra marks. What is the frequency?',hints:['3 groups of 5 = 15','Plus 2 extra = ?'],ans:17,tol:0,unit:'',working:'3\u00d75 + 2 = 17'})}
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
+  var groups = rnd(1, 6);
+  var extra = rnd(0, 4);
+  var ans = groups * 5 + extra;
+  var extraText = extra === 0 ? 'no extra marks' : extra + ' extra mark' + (extra > 1 ? 's' : '');
+  return {
+    question: 'In a tally chart, a student draws ' + groups + ' full group' + (groups > 1 ? 's' : '') + ' of 5 and ' + extra + ' extra mark' + (extra !== 1 ? 's' : '') + '. What is the frequency?',
+    hints: [groups + ' groups of 5 = ' + (groups * 5), 'Plus ' + extra + ' extra = ?'],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: groups + '\u00d75 + ' + extra + ' = ' + ans
+  };
+})}
   ]},
   {ey:'Q2 \u00b7 Year 7 \u00b7 Statistics',ti:'Reading Bar Charts',su:'Read a bar chart showing students absent each day. Find the day with the most absences.',steps:[
     {lb:'Reading bar charts',dr:dQ2,ht:'<p>A <b>bar chart</b> uses the height of each bar to show the frequency. Read the height from the vertical axis.</p>'},
     {lb:'Read the bars',dr:dQ2,ht:'<p>Mon=8, Tue=12, Wed=6, Thu=15, Fri=10</p>'},
     {lb:'Find the maximum',dr:dQ2,ht:'<div class="fm">Highest bar = Thursday (15 absences)</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Using the bar chart, what is the total number of absences across all 5 days?',hints:['Add all five bars','8+12+6+15+10'],ans:51,tol:0,unit:'absences',working:'8+12+6+15+10 = 51'})}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
+  var mon = rnd(3,12);
+  var tue = rnd(3,12);
+  var wed = rnd(3,12);
+  var thu = rnd(3,12);
+  var fri = rnd(3,12);
+  var ans = mon + tue + wed + thu + fri;
+  return {
+    question: 'Using the bar chart, what is the total number of absences across all 5 days?',
+    hints: [
+      'Add all five bars together',
+      mon + '+' + tue + '+' + wed + '+' + thu + '+' + fri
+    ],
+    ans: ans,
+    tol: 0,
+    unit: 'absences',
+    working: mon + '+' + tue + '+' + wed + '+' + thu + '+' + fri + ' = ' + ans
+  };
+})}
   ]},
   {ey:'Q3 \u00b7 Year 7 \u00b7 Statistics',ti:'Reading Pie Charts',su:'30 students chose a sport. Football:12, Cricket:8, Tennis:6, Other:4. Find the angle for Football.',steps:[
     {lb:'Pie charts',dr:dQ3,ht:'<p>A <b>pie chart</b> shows data as slices of a circle. The whole circle = 360\u00b0, representing 100% of the data.</p>'},
     {lb:'Calculate the angle',dr:dQ3,ht:'<div class="fm">Angle = (frequency \u00f7 total) \u00d7 360</div><div class="fm">Football: (12 \u00f7 30) \u00d7 360 = 144\u00b0</div>'},
     {lb:'Read the chart',dr:dQ3,ht:'<p>Each slice is labelled with its frequency. The Football slice is the largest (nearly half the circle).</p>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'In the pie chart above, what angle represents Cricket (8 students out of 30)?',hints:['Angle = (8\u00f730) \u00d7 360','= 0.267 \u00d7 360'],ans:96,tol:0.5,unit:'\u00b0',working:'(8/30)\u00d7360 = 96\u00b0'})}
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
+  var total = pick([24, 30, 36, 40, 45, 60]);
+  var freq = rnd(2, total - 2);
+  var ans = Math.round((freq / total) * 360 * 10) / 10;
+  var ratio = Math.round((freq / total) * 1000) / 1000;
+  var sports = pick(['Cricket','Tennis','Swimming','Basketball','Rugby','Hockey']);
+  return {
+    question: 'In the pie chart, what angle represents ' + sports + ' (' + freq + ' students out of ' + total + ')?',
+    hints: [
+      'Angle = (' + freq + ' ÷ ' + total + ') × 360',
+      '= ' + ratio + ' × 360'
+    ],
+    ans: ans,
+    tol: 0.5,
+    unit: '°',
+    working: '(' + freq + '/' + total + ') × 360 = ' + ans + '°'
+  };
+})}
   ]},
   {ey:'Q4 \u00b7 Year 7 \u00b7 Statistics',ti:'Finding the Mean',su:'Find the mean of: 4, 7, 8, 9, 12.',steps:[
     {lb:'What is the mean?',dr:dQ4,ht:'<p>The <b>mean</b> is the most common type of average. It is found by adding all the values and dividing by how many there are.</p><div class="fm">Mean = sum \u00f7 count</div>'},
     {lb:'Find the sum',dr:dQ4,ht:'<div class="fm">4 + 7 + 8 + 9 + 12 = 40</div>'},
     {lb:'Divide by the count',dr:dQ4,ht:'<div class="fm">Mean = 40 \u00f7 5 = 8</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'Find the mean of: <b>6, 3, 9, 12, 5</b>.',hints:['Add all five values','Divide by 5'],ans:7,tol:0.05,unit:'',working:'6+3+9+12+5=35. 35\u00f75=7'})}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
+  var a = rnd(1,12);
+  var b = rnd(1,12);
+  var c = rnd(1,12);
+  var d = rnd(1,12);
+  var e = rnd(1,12);
+  var sum = a + b + c + d + e;
+  var ans = sum / 5;
+  return {
+    question: 'Find the mean of: <b>' + a + ', ' + b + ', ' + c + ', ' + d + ', ' + e + '</b>.',
+    hints: ['Add all five values: ' + a + '+' + b + '+' + c + '+' + d + '+' + e + ' = ' + sum, 'Divide by 5'],
+    ans: ans,
+    tol: 0.05,
+    unit: '',
+    working: a + '+' + b + '+' + c + '+' + d + '+' + e + '=' + sum + '. ' + sum + '\u00f75=' + ans
+  };
+})}
   ]},
   {ey:'Q5 \u00b7 Year 7 \u00b7 Statistics',ti:'Median and Mode',su:'Find the median, mode and range of: 3, 7, 4, 7, 2, 9, 7.',steps:[
     {lb:'Three measures of average',dr:dQ5,ht:'<p><b>Mode</b>: the most common value.<br><b>Median</b>: the middle value when in order.<br><b>Range</b>: largest minus smallest (spread, not average).</p>'},
@@ -454,33 +520,165 @@ var QS=[
     {lb:'Calculate ranges',dr:dQ6,ht:'<div class="fm">Range A = 11 \u2212 3 = 8</div><div class="fm">Range B = 8 \u2212 6 = 2</div>'},
     {lb:'Calculate means',dr:dQ6,ht:'<div class="fm">Mean A = 40 \u00f7 6 \u2248 6.67</div><div class="fm">Mean B = 41 \u00f7 6 \u2248 6.83</div>'},
     {lb:'Interpret',dr:dQ6,ht:'<p>Set B has a higher mean (slightly better on average) and a much smaller range (more consistent). Set A is more spread out.</p>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'What is the range of Set A: <b>3, 8, 5, 11, 4, 9</b>?',hints:['Largest value \u2212 smallest value','11 \u2212 3'],ans:8,tol:0.05,unit:'',working:'Range = 11 \u2212 3 = 8'})}
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){
+  var size = 6;
+  var nums = [];
+  while(nums.length < size){
+    var n = rnd(1,15);
+    if(nums.indexOf(n) === -1) nums.push(n);
+  }
+  var mn = Math.min.apply(null, nums);
+  var mx = Math.max.apply(null, nums);
+  var ans = mx - mn;
+  var display = nums.join(', ');
+  return {
+    question: 'What is the range of the set: <b>' + display + '</b>?',
+    hints: ['Largest value \u2212 smallest value', mx + ' \u2212 ' + mn],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: 'Range = ' + mx + ' \u2212 ' + mn + ' = ' + ans
+  };
+})}
   ]},
   {ey:'Q7 \u00b7 Year 7 \u00b7 Statistics',ti:'Mean from a Frequency Table',su:'Find the mean score from the frequency table.',steps:[
     {lb:'The method',dr:dQ7,ht:'<p>To find the mean from a frequency table: multiply each value by its frequency, add up all the products, then divide by the total frequency.</p><div class="fm">Mean = \u03a3(f\u00d7x) \u00f7 \u03a3f</div>'},
     {lb:'Calculate f\u00d7x',dr:dQ7,ht:'<div class="fm">1\u00d74=4,  2\u00d77=14,  3\u00d75=15,  4\u00d73=12,  5\u00d71=5</div>'},
     {lb:'Total',dr:dQ7,ht:'<div class="fm">\u03a3f = 4+7+5+3+1 = 20</div><div class="fm">\u03a3(fx) = 4+14+15+12+5 = 50... wait = 52? Let me check: 4+14=18, +15=33, +12=45, +5=50</div>'},
     {lb:'Mean',dr:dQ7,ht:'<div class="fm">Mean = 52 \u00f7 20 = 2.6</div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'In the frequency table, what is \u03a3(f\u00d7x) — the sum of all (score \u00d7 frequency) products?',hints:['1\u00d74 + 2\u00d77 + 3\u00d75 + 4\u00d73 + 5\u00d71','= 4 + 14 + 15 + 12 + 5'],ans:50,tol:0.5,unit:'',working:'4+14+15+12+5 = 50. (Mean = 50\u00f720 = 2.5)'})}
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){
+  // Generate random frequencies for scores 1-5
+  var f1 = rnd(2,8);
+  var f2 = rnd(2,8);
+  var f3 = rnd(2,8);
+  var f4 = rnd(2,8);
+  var f5 = rnd(1,5);
+  var totalF = f1 + f2 + f3 + f4 + f5;
+  var fx1 = 1 * f1;
+  var fx2 = 2 * f2;
+  var fx3 = 3 * f3;
+  var fx4 = 4 * f4;
+  var fx5 = 5 * f5;
+  var ans = fx1 + fx2 + fx3 + fx4 + fx5;
+  var mean = (ans / totalF).toFixed(2);
+  return {
+    question: 'In the frequency table (scores 1–5 with frequencies ' + f1 + ', ' + f2 + ', ' + f3 + ', ' + f4 + ', ' + f5 + '), what is \u03a3(f\u00d7x) — the sum of all (score \u00d7 frequency) products?',
+    hints: [
+      '1\u00d7' + f1 + ' + 2\u00d7' + f2 + ' + 3\u00d7' + f3 + ' + 4\u00d7' + f4 + ' + 5\u00d7' + f5,
+      '= ' + fx1 + ' + ' + fx2 + ' + ' + fx3 + ' + ' + fx4 + ' + ' + fx5
+    ],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: fx1 + '+' + fx2 + '+' + fx3 + '+' + fx4 + '+' + fx5 + ' = ' + ans + '. (Mean = ' + ans + '\u00f7' + totalF + ' = ' + mean + ')'
+  };
+})}
   ]},
   {ey:'Q8 \u00b7 Year 7 \u00b7 Statistics',ti:'Stem-and-Leaf Diagrams',su:'Read a stem-and-leaf diagram showing test scores. Find the median.',steps:[
     {lb:'What is a stem-and-leaf?',dr:dQ8,ht:'<p>A <b>stem-and-leaf diagram</b> shows data in order. The <b>stem</b> is the tens digit; the <b>leaves</b> are the units digits. Key: 2|3 means 23.</p>'},
     {lb:'Read the data',dr:dQ8,ht:'<p>Stems: 1, 2, 3, 4. Leaves shown for each stem. Reading the diagram gives individual values.</p>'},
     {lb:'Find the median',dr:dQ8,ht:'<p>Count all values in order. The middle one is the median. For an even count, average the two middle values.</p>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'A stem-and-leaf diagram has stems 2, 3, 4. Stem 2 has leaves 3 and 5 (meaning 23, 25). Stem 3 has leaves 1 and 7. Stem 4 has leaves 2 and 6. How many data values are there in total?',hints:['Count every leaf — each leaf is one data value','Stem 2: 2 leaves. Stem 3: 2 leaves. Stem 4: 2 leaves.'],ans:6,tol:0,unit:'values',working:'2+2+2 = 6 values total'})}
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){
+  var stems = [pick([1,2,3]), 0, 0, 0];
+  stems[1] = stems[0] + 1;
+  stems[2] = stems[0] + 2;
+
+  var s1 = stems[0], s2 = stems[1], s3 = stems[2];
+
+  // Generate random number of leaves for each stem (1-4 each)
+  var n1 = rnd(1, 4);
+  var n2 = rnd(1, 4);
+  var n3 = rnd(1, 4);
+  var total = n1 + n2 + n3;
+
+  // Generate distinct leaves for each stem
+  function makeLeaves(count) {
+    var pool = [0,1,2,3,4,5,6,7,8,9];
+    var chosen = [];
+    for (var i = 0; i < count; i++) {
+      var idx = rnd(0, pool.length - 1);
+      chosen.push(pool.splice(idx, 1)[0]);
+    }
+    chosen.sort(function(a,b){return a-b;});
+    return chosen;
+  }
+
+  var l1 = makeLeaves(n1);
+  var l2 = makeLeaves(n2);
+  var l3 = makeLeaves(n3);
+
+  var l1str = l1.join(', ');
+  var l2str = l2.join(', ');
+  var l3str = l3.join(', ');
+
+  var vals1 = l1.map(function(d){return s1+''+d;}).join(', ');
+  var vals2 = l2.map(function(d){return s2+''+d;}).join(', ');
+  var vals3 = l3.map(function(d){return s3+''+d;}).join(', ');
+
+  return {
+    question: 'A stem-and-leaf diagram has stems ' + s1 + ', ' + s2 + ', ' + s3 + '. '
+      + 'Stem ' + s1 + ' has leaves ' + l1str + ' (meaning ' + vals1 + '). '
+      + 'Stem ' + s2 + ' has leaves ' + l2str + ' (meaning ' + vals2 + '). '
+      + 'Stem ' + s3 + ' has leaves ' + l3str + ' (meaning ' + vals3 + '). '
+      + 'How many data values are there in total?',
+    hints: [
+      'Count every leaf — each leaf is one data value',
+      'Stem ' + s1 + ': ' + n1 + ' leaf/leaves. Stem ' + s2 + ': ' + n2 + ' leaf/leaves. Stem ' + s3 + ': ' + n3 + ' leaf/leaves.'
+    ],
+    ans: total,
+    tol: 0,
+    unit: 'values',
+    working: n1 + ' + ' + n2 + ' + ' + n3 + ' = ' + total + ' values total'
+  };
+})}
   ]},
   {ey:'Q9 \u00b7 Year 7 \u00b7 Statistics',ti:'Basic Probability',su:'A bag has 5 red and 3 blue counters. Find P(red) and P(blue).',steps:[
     {lb:'Probability',dr:dQ9,ht:'<p><b>Probability</b> measures how likely an event is. It is written as a fraction (or decimal or percentage):</p><div class="fm">P(event) = number of favourable outcomes \u00f7 total outcomes</div>'},
     {lb:'Total outcomes',dr:dQ9,ht:'<div class="fm">Total counters = 5 + 3 = 8</div>'},
     {lb:'Calculate probabilities',dr:dQ9,ht:'<div class="fm">P(red) = 5/8</div><div class="fm">P(blue) = 3/8</div><p>Check: 5/8 + 3/8 = 8/8 = 1 \u2713  (all probabilities must sum to 1)</p>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt({question:'A bag has 4 red, 3 blue, 3 green counters. What is the probability of picking a blue counter? Enter as a fraction \u2014 give the numerator.',hints:['Total = 4+3+3 = 10','P(blue) = 3/10'],ans:3,tol:0,unit:'out of 10',working:'P(blue) = 3/10. Numerator = 3.'})}
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){
+  var red = pick([2,3,4,5,6]);
+  var blue = pick([2,3,4,5,6]);
+  var green = pick([2,3,4,5,6]);
+  var total = red + blue + green;
+  var colour = pick(['red','blue','green']);
+  var ans = colour === 'red' ? red : colour === 'blue' ? blue : green;
+  return {
+    question: 'A bag has ' + red + ' red, ' + blue + ' blue, ' + green + ' green counters. What is the probability of picking a ' + colour + ' counter? Enter as a fraction \u2014 give the numerator.',
+    hints: [
+      'Total = ' + red + '+' + blue + '+' + green + ' = ' + total,
+      'P(' + colour + ') = ' + ans + '/' + total
+    ],
+    ans: ans,
+    tol: 0,
+    unit: 'out of ' + total,
+    working: 'P(' + colour + ') = ' + ans + '/' + total + '. Numerator = ' + ans + '.'
+  };
+})}
   ]},
   {ey:'Q10 \u00b7 Year 7 \u00b7 Statistics',ti:'Comparing Two Data Sets',su:'Compare Class A and Class B minutes reading using a dual bar chart.',steps:[
     {lb:'Reading a dual bar chart',dr:dQ10,ht:'<p>A <b>dual bar chart</b> shows two data sets side by side for easy comparison. Each day has two bars \u2014 one per class.</p>'},
     {lb:'The bars',dr:dQ10,ht:'<p>Red bars = Class A. Blue bars = Class B. Read each bar carefully from the vertical axis.</p>'},
     {lb:'Compare averages and spread',dr:dQ10,ht:'<div class="fm">Mean A = 41\u00f75 = 8.2 min</div><div class="fm">Mean B = 45\u00f75 = 9.0 min</div>'},
     {lb:'Interpret',dr:dQ10,ht:'<p>Class B reads more on average. To fully compare, also consider the range (consistency) of each class.</p>'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt({question:'From the chart, what is the total minutes read by Class B across all 5 days?',hints:['Read each Class B bar: 9,7,8,11,10','Add them up'],ans:45,tol:0.05,unit:'minutes',working:'9+7+8+11+10 = 45 minutes'})}
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){
+  var days = [];
+  for(var i=0;i<5;i++){
+    days.push(rnd(5,15));
+  }
+  var ans = days[0]+days[1]+days[2]+days[3]+days[4];
+  return {
+    question: 'From the chart, what is the total minutes read by Class B across all 5 days?',
+    hints: [
+      'Read each Class B bar: ' + days.join(','),
+      'Add them up: ' + days.join('+')
+    ],
+    ans: ans,
+    tol: 0,
+    unit: 'minutes',
+    working: days.join('+') + ' = ' + ans + ' minutes'
+  };
+})}
   ]}
 ];
 

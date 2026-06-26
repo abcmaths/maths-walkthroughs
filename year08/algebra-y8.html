@@ -85,6 +85,8 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 </div>
 <script>
 var ST={};
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function tryIt(o){var id='t'+Math.random().toString(36).slice(2);ST[id]=o;var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');return '<div class="try"><div class="try-t">&#10002; Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="Answer ('+o.unit+')" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
 function ck(id){var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}if(Math.abs(v-o.ans)<=(o.exact||0.05)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}else{f.className='fb er';f.textContent='Not quite \u2014 check your working and try again.';}}
 function g(){return document.getElementById('dg');}
@@ -353,28 +355,134 @@ var QS=[
     {lb:'Step 1 \u2014 Write it out',dr:dQ1,ht:'<div class="fm">3(\u22122)\u00b2 \u2212 2(4) + 5</div>'},
     {lb:'Step 2 \u2014 Square first',dr:dQ1,ht:'<div class="fm">(\u22122)\u00b2 = +4</div><div class="fm">3 \u00d7 4 \u2212 8 + 5</div>'},
     {lb:'Step 3 \u2014 Calculate',dr:dQ1,ht:'<div class="fm">12 \u2212 8 + 5 = <b>9</b></div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt({question:'Evaluate <b>2x\u00b2 + 3y \u2212 4</b> when <b>x = \u22123</b> and <b>y = 2</b>.',hints:['(\u22123)\u00b2 = 9','2 \u00d7 9 + 3 \u00d7 2 \u2212 4','BIDMAS: multiply before adding'],ans:14,exact:0.1,unit:'',working:'2(9)+3(2)\u22124 = 18+6\u22124 = <b>20</b>... wait: 18+6=24\u22124=<b>20</b>'})}
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
+  var xVals = [-4,-3,-2,2,3,4];
+  var yVals = [-3,-2,-1,1,2,3];
+  var aVals = [2,3,4,5];
+  var bVals = [2,3,4,5];
+  var cVals = [1,2,3,4,5,6];
+  var x = pick(xVals);
+  var y = pick(yVals);
+  var a = pick(aVals);
+  var b = pick(bVals);
+  var c = pick(cVals);
+  var xSq = x * x;
+  var ans = a * xSq + b * y - c;
+  var xStr = x < 0 ? '(' + x + ')' : '' + x;
+  var yStr = y < 0 ? '' + y : '' + y;
+  return {
+    question: 'Evaluate <b>' + a + 'x\u00b2 + ' + b + 'y \u2212 ' + c + '</b> when <b>x = ' + x + '</b> and <b>y = ' + y + '</b>.',
+    hints: [
+      xStr + '\u00b2 = ' + xSq,
+      a + ' \u00d7 ' + xSq + ' + ' + b + ' \u00d7 ' + y + ' \u2212 ' + c,
+      'BIDMAS: multiply before adding'
+    ],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: a + '(' + xSq + ') + ' + b + '(' + y + ') \u2212 ' + c + ' = ' + (a*xSq) + ' + ' + (b*y) + ' \u2212 ' + c + ' = <b>' + ans + '</b>'
+  };
+})}
   ]},
   {ey:'Q2 \u00b7 Expanding \u00b7 Foundation',ti:'Expanding and Simplifying',su:'Expand and simplify 3(2x + 4) + 2(x \u2212 3).',lv:'F',steps:[
     {lb:'The expression',dr:dQ2,ht:'<span class="lt lf">Foundation</span><p>Expand <b>3(2x + 4) + 2(x \u2212 3)</b>. Expand each bracket separately first, then collect like terms.</p>'},
     {lb:'Step 1 \u2014 Expand both brackets',dr:dQ2,ht:'<div class="fm">3(2x+4) = 6x + 12</div><div class="fm">2(x\u22123) = 2x \u2212 6</div>'},
     {lb:'Step 2 \u2014 Collect like terms',dr:dQ2,ht:'<div class="fm">6x + 12 + 2x \u2212 6</div><p>x terms: 6x + 2x = 8x. Numbers: 12 \u2212 6 = 6.</p>'},
     {lb:'Step 3 \u2014 Answer',dr:dQ2,ht:'<div class="fm">= <b>8x + 6</b></div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt({question:'Expand and simplify <b>4(x + 3) \u2212 2(x \u2212 1)</b>. What is the coefficient of x?',hints:['4(x+3) = 4x + 12','2(x\u22121) = 2x \u2212 2','4x + 12 \u2212 2x + 2'],ans:2,exact:0.1,unit:'(coefficient of x)',working:'4x+12\u22122x+2 = 2x+14. Coefficient = <b>2</b>'})}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
+  var a = pick([2,3,4,5,6]);
+  var b = pick([1,2,3,4,5]);
+  var c = pick([1,2,3,4,5]);
+  var d = pick([1,2,3,4,5]);
+  // a(x + b) - c(x - d)
+  // = ax + ab - cx + cd
+  var coeff = a - c;
+  var constant = a*b + c*d;
+  // Ensure coefficient is non-zero and interesting
+  while(coeff === 0) {
+    a = pick([2,3,4,5,6]);
+    c = pick([1,2,3,4,5]);
+    coeff = a - c;
+  }
+  var expr = 'Expand and simplify <b>' + a + '(x + ' + b + ') \u2212 ' + c + '(x \u2212 ' + d + ')</b>. What is the coefficient of x?';
+  return {
+    question: expr,
+    hints: [
+      a + '(x+' + b + ') = ' + a + 'x + ' + (a*b),
+      c + '(x\u2212' + d + ') = ' + c + 'x \u2212 ' + (c*d),
+      a + 'x + ' + (a*b) + ' \u2212 ' + c + 'x + ' + (c*d)
+    ],
+    ans: coeff,
+    tol: 0,
+    unit: '(coefficient of x)',
+    working: a + 'x+' + (a*b) + '\u2212' + c + 'x+' + (c*d) + ' = ' + coeff + 'x+' + constant + '. Coefficient = <b>' + coeff + '</b>'
+  };
+})}
   ]},
   {ey:'Q3 \u00b7 Factorising \u00b7 Foundation',ti:'Factorising into a Single Bracket',su:'Factorise fully: 12x\u00b2 + 8x.',lv:'F',steps:[
     {lb:'The expression',dr:dQ3,ht:'<span class="lt lf">Foundation</span><p>Factorise <b>12x\u00b2 + 8x</b> fully. First find the highest common factor (HCF) of all terms.</p>'},
     {lb:'Step 1 \u2014 Find the HCF',dr:dQ3,ht:'<p>12x\u00b2 = 4 \u00d7 3 \u00d7 x \u00d7 x and 8x = 4 \u00d7 2 \u00d7 x. HCF = <b>4x</b>.</p>'},
     {lb:'Step 2 \u2014 Divide each term',dr:dQ3,ht:'<div class="fm">12x\u00b2 \u00f7 4x = 3x &nbsp; &nbsp; 8x \u00f7 4x = 2</div>'},
     {lb:'Step 3 \u2014 Write the answer',dr:dQ3,ht:'<div class="fm">12x\u00b2 + 8x = <b>4x(3x + 2)</b></div><p>Check by expanding: 4x \u00d7 3x + 4x \u00d7 2 = 12x\u00b2 + 8x \u2713</p>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt({question:'Factorise fully <b>15y\u00b2 \u2212 10y</b>. What is the number outside the bracket?',hints:['HCF of 15y\u00b2 and 10y','HCF of 15 and 10 = 5, both have y','Divide each term by 5y'],ans:5,exact:0.1,unit:'(number outside bracket)',working:'HCF = 5y. 15y\u00b2\u00f75y=3y, 10y\u00f75y=2. Answer: <b>5y(3y\u22122)</b>. Number = 5'})}
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
+  var vars = pick(['x','y','m','n','t']);
+  var coefA = pick([2,3,4,5,6]);
+  var coefB = pick([2,3,4,5,6]);
+  while(coefB === coefA) coefB = pick([2,3,4,5,6]);
+  var hcfNum = pick([2,3,4,5,6]);
+  var a = hcfNum * coefA;
+  var b = hcfNum * coefB;
+  var sign = pick(['+','\u2212']);
+  var signWord = sign === '+' ? '+' : '-';
+  var v = vars;
+  return {
+    question: 'Factorise fully <b>' + a + v + '\u00b2 ' + sign + ' ' + b + v + '</b>. What is the number outside the bracket?',
+    hints: [
+      'Find the HCF of ' + a + v + '\u00b2 and ' + b + v,
+      'HCF of ' + a + ' and ' + b + ' = ' + hcfNum + ', both have ' + v,
+      'Divide each term by ' + hcfNum + v
+    ],
+    ans: hcfNum,
+    tol: 0,
+    unit: '(number outside bracket)',
+    working: 'HCF = ' + hcfNum + v + '. ' + a + v + '\u00b2\u00f7' + hcfNum + v + '=' + coefA + v + ', ' + b + v + '\u00f7' + hcfNum + v + '=' + coefB + '. Answer: <b>' + hcfNum + v + '(' + coefA + v + ' ' + sign + ' ' + coefB + ')</b>. Number = ' + hcfNum
+  };
+})}
   ]},
   {ey:'Q4 \u00b7 Equations \u00b7 Foundation',ti:'Equations with Unknowns on Both Sides',su:'Solve 5x \u2212 3 = 2x + 9.',lv:'F',steps:[
     {lb:'The equation',dr:dQ4,ht:'<span class="lt lf">Foundation</span><p>Solve <b>5x \u2212 3 = 2x + 9</b>. Collect all x terms on one side and all numbers on the other.</p>'},
     {lb:'Step 1 \u2014 Subtract 2x',dr:dQ4,ht:'<div class="fm">5x \u2212 3 \u2212 2x = 9  \u2192  3x \u2212 3 = 9</div>'},
     {lb:'Step 2 \u2014 Add 3',dr:dQ4,ht:'<div class="fm">3x = 12</div>'},
     {lb:'Step 3 \u2014 Divide',dr:dQ4,ht:'<div class="fm">x = 12 \u00f7 3 = <b>4</b></div><p>Check: 5(4)\u22123 = 17 and 2(4)+9 = 17 \u2713</p>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt({question:'Solve <b>6x + 1 = 3x + 13</b>.',hints:['Subtract 3x from both sides','Subtract 1 from both sides','Divide by 3'],ans:4,exact:0.1,unit:'(value of x)',working:'3x+1=13 \u2192 3x=12 \u2192 x=<b>4</b>. Check: 25=25 \u2713'})}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
+  var a = pick([2,3,4,5,6,7]);
+  var b = pick([2,3,4,5,6,7,8,9,10]);
+  var c = pick([2,3,4,5,6,7]);
+  // equation: (a+c)x + b = cx + (b + a*ans)
+  // pick a nice integer answer
+  var ans = pick([2,3,4,5,6,7,8]);
+  // build equation: (a+c)x + b = cx + rhs
+  var lCoeff = a + c;
+  var rhs = b + a * ans;
+  // lCoeff * x + b = c * x + rhs
+  // after subtracting cx: a*x + b = rhs
+  // after subtracting b: a*x = rhs - b
+  var diff = rhs - b;
+  var lhsCheck = lCoeff * ans + b;
+  var rhsCheck = c * ans + rhs;
+  return {
+    question: 'Solve <b>' + lCoeff + 'x + ' + b + ' = ' + c + 'x + ' + rhs + '</b>.',
+    hints: [
+      'Subtract ' + c + 'x from both sides to get ' + a + 'x + ' + b + ' = ' + rhs,
+      'Subtract ' + b + ' from both sides to get ' + a + 'x = ' + diff,
+      'Divide both sides by ' + a
+    ],
+    ans: ans,
+    tol: 0,
+    unit: '(value of x)',
+    working: lCoeff + 'x + ' + b + ' \u2212 ' + c + 'x = ' + rhs + ' \u2192 ' + a + 'x + ' + b + ' = ' + rhs + ' \u2192 ' + a + 'x = ' + diff + ' \u2192 x = <b>' + ans + '</b>. Check: ' + lhsCheck + ' = ' + rhsCheck + ' \u2713'
+  };
+})}
   ]},
   {ey:'Q5 \u00b7 Sequences \u00b7 Foundation',ti:'Finding the nth Term',su:'Sequence: 5, 9, 13, 17, 21, ... Find the nth term.',lv:'F',steps:[
     {lb:'The sequence',dr:dQ5,ht:'<span class="lt lf">Foundation</span><p>Sequence: <b>5, 9, 13, 17, 21, ...</b> Find the rule for the nth term so we can find any term directly.</p>'},
@@ -382,34 +490,146 @@ var QS=[
     {lb:'Step 2 \u2014 Find the constant',dr:dQ5,ht:'<p>When n = 1, the term is 5. So 4(1) + c = 5, which gives c = 1.</p>'},
     {lb:'Step 3 \u2014 nth term',dr:dQ5,ht:'<div class="fm">nth term = 4n + 1</div>'},
     {lb:'Step 4 \u2014 Use it',dr:dQ5,ht:'<div class="fm">Term 20 = 4(20) + 1 = <b>81</b></div><p>Is 65 in the sequence? (65\u22121)\u00f74 = 16 \u2714 yes, it is term 16.</p>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt({question:'Sequence: <b>3, 7, 11, 15, ...</b> Find term 15.',hints:['Difference = 4, so nth term = 4n + c','When n=1: 4+c=3, c=?','Term 15 = 4(15)+c'],ans:59,exact:0.1,unit:'',working:'nth term = 4n\u22121. Term 15 = 4(15)\u22121 = 60\u22121 = <b>59</b>'})}
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){
+  var d = pick([2,3,4,5,6]);
+  var a1 = pick([1,2,3,4,5,6,7,8,9]);
+  var c = a1 - d;
+  var n = pick([10,12,15,18,20]);
+  var ans = d * n + c;
+  var cStr = c >= 0 ? '+' + c : '' + c;
+  var nthTerm = c >= 0 ? d + 'n + ' + c : d + 'n \u2212 ' + Math.abs(c);
+  var a2 = a1 + d;
+  var a3 = a1 + 2*d;
+  var a4 = a1 + 3*d;
+  return {
+    question: 'Sequence: <b>' + a1 + ', ' + a2 + ', ' + a3 + ', ' + a4 + ', ...</b> Find term ' + n + '.',
+    hints: [
+      'Difference = ' + d + ', so nth term = ' + d + 'n + c',
+      'When n=1: ' + d + '+c=' + a1 + ', c=' + c,
+      'Term ' + n + ' = ' + d + '(' + n + ')' + cStr
+    ],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: 'nth term = ' + nthTerm + '. Term ' + n + ' = ' + d + '(' + n + ')' + cStr + ' = ' + (d*n) + cStr + ' = <b>' + ans + '</b>'
+  };
+})}
   ]},
   {ey:'Q6 \u00b7 Graphs \u00b7 Foundation',ti:'Straight Line Graphs',su:'Plot y = 2x + 1 and y = \u2212x + 4 and find where they meet.',lv:'F',steps:[
     {lb:'The equations',dr:dQ6,ht:'<span class="lt lf">Foundation</span><p>For <b>y = mx + c</b>, m is the gradient and c is the y-intercept. <b>y = 2x + 1</b>: gradient 2, crosses y-axis at 1.</p>'},
     {lb:'Step 1 \u2014 Plot y = 2x + 1',dr:dQ6,ht:'<p>Plot points: when x=0, y=1; when x=2, y=5. Draw a straight line through them.</p>'},
     {lb:'Step 2 \u2014 Plot y = \u2212x + 4',dr:dQ6,ht:'<p>Gradient is \u22121 (slopes downward). When x=0, y=4; when x=3, y=1.</p>'},
     {lb:'Step 3 \u2014 Intersection',dr:dQ6,ht:'<p>Set equal: 2x+1 = \u2212x+4  \u2192  3x = 3  \u2192  x = 1, y = 3.</p><div class="fm">Intersection: (1, 3)</div>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt({question:'Where do <b>y = 3x \u2212 2</b> and <b>y = x + 4</b> intersect? Give the x-coordinate.',hints:['Set equal: 3x\u22122 = x+4','2x = 6','x = ?'],ans:3,exact:0.1,unit:'(x-coordinate)',working:'2x=6 \u2192 x=3, y=7. Intersection at <b>(3, 7)</b>. x = 3'})}
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){
+  // y = ax + b and y = cx + d
+  // intersection: ax + b = cx + d => (a-c)x = d - b => x = (d-b)/(a-c)
+  var a = pick([2,3,4,5]);
+  var c = pick([1,2]);
+  while(c >= a) c = pick([1,2]);
+  var b = pick([-4,-3,-2,-1,0,1,2]);
+  var d = pick([1,2,3,4,5,6,7,8]);
+  while(b === d) d = pick([1,2,3,4,5,6,7,8]);
+  // x = (d - b) / (a - c), ensure integer answer
+  var diff = a - c;
+  // pick d-b to be a multiple of diff
+  var mult = pick([-3,-2,-1,1,2,3]);
+  d = b + diff * mult;
+  // avoid d === b (already handled by mult != 0)
+  var x = mult; // (d-b)/diff = mult
+  var y = a * x + b;
+
+  var bSign = b >= 0 ? '+' + b : '\u2212' + Math.abs(b);
+  var dSign = d >= 0 ? '+' + d : '\u2212' + Math.abs(d);
+  var line1 = 'y = ' + a + 'x ' + bSign;
+  var line2 = 'y = ' + c + 'x ' + dSign;
+
+  var lhs = a + 'x ' + bSign + ' = ' + c + 'x ' + dSign;
+  var coefDiff = diff;
+  var rhs = d - b;
+  var stepStr = coefDiff + 'x = ' + rhs;
+
+  return {
+    question: 'Where do <b>' + line1 + '</b> and <b>' + line2 + '</b> intersect? Give the x-coordinate.',
+    hints: [
+      'Set equal: ' + a + 'x ' + bSign + ' = ' + c + 'x ' + dSign,
+      stepStr,
+      'x = ?'
+    ],
+    ans: x,
+    tol: 0,
+    unit: '(x-coordinate)',
+    working: stepStr + ' \u2192 x = ' + x + ', y = ' + y + '. Intersection at <b>(' + x + ', ' + y + ')</b>. x = ' + x
+  };
+})}
   ]},
   {ey:'Q7 \u00b7 Inequalities \u00b7 Core',ti:'Solving Inequalities',su:'Solve 4 \u2212 3x \u2265 2 + x and show on a number line.',lv:'C',steps:[
     {lb:'The inequality',dr:dQ7,ht:'<span class="lt lc">Core</span><p>Solve <b>4 \u2212 3x \u2265 2 + x</b>. Treat it like an equation but keep the inequality sign. Be careful: if you multiply or divide by a negative number, the sign flips.</p>'},
     {lb:'Step 1 \u2014 Collect x terms',dr:dQ7,ht:'<div class="fm">4 \u2212 2 \u2265 x + 3x   \u2192   2 \u2265 4x</div>'},
     {lb:'Step 2 \u2014 Divide',dr:dQ7,ht:'<div class="fm">0.5 \u2265 x   which means   x \u2264 0.5</div>'},
     {lb:'Step 3 \u2014 Number line',dr:dQ7,ht:'<p>Filled circle at 0.5 (included because \u2264), arrow pointing left.</p>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt({question:'Solve <b>3x \u2212 5 > x + 3</b>. What is the boundary value?',hints:['Subtract x from both sides: 2x\u22125>3','Add 5: 2x>8','Divide by 2'],ans:4,exact:0.1,unit:'(boundary value)',working:'2x>8 \u2192 x>4. Boundary value = <b>4</b>'})}
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){
+  var a = pick([2,3,4,5,6]);
+  var b = pick([1,2,3,4,5,6,7,8,9,10]);
+  var c = pick([1,2,3,4,5,6,7,8,9,10]);
+  // Inequality: ax - b > x + c  =>  (a-1)x > b+c  =>  x > (b+c)/(a-1)
+  // Ensure a > 1 so coefficient is positive
+  while (a <= 1) { a = pick([2,3,4,5,6]); }
+  var coeff = a - 1;
+  var rhs = b + c;
+  var ans = rhs / coeff;
+  return {
+    question: 'Solve <b>' + a + 'x &minus; ' + b + ' &gt; x + ' + c + '</b>. What is the boundary value?',
+    hints: [
+      'Subtract x from both sides: ' + coeff + 'x &minus; ' + b + ' &gt; ' + c,
+      'Add ' + b + ': ' + coeff + 'x &gt; ' + rhs,
+      'Divide by ' + coeff
+    ],
+    ans: ans,
+    tol: 0.01,
+    unit: '(boundary value)',
+    working: coeff + 'x &gt; ' + rhs + ' &rarr; x &gt; ' + ans + '. Boundary value = <b>' + ans + '</b>'
+  };
+})}
   ]},
   {ey:'Q8 \u00b7 Formulae \u00b7 Foundation',ti:'Substituting into a Formula',su:'Use the speed, distance, time formula.',lv:'F',steps:[
     {lb:'The triangle',dr:dQ8,ht:'<span class="lt lf">Foundation</span><p>The speed-distance-time triangle helps you remember the three formulae. Cover the one you want with your finger.</p>'},
     {lb:'Step 1 \u2014 The three forms',dr:dQ8,ht:'<div class="fm">S = D \u00f7 T &nbsp; &nbsp; D = S \u00d7 T &nbsp; &nbsp; T = D \u00f7 S</div>'},
     {lb:'Step 2 \u2014 Worked example',dr:dQ8,ht:'<p>Distance = 150 km, Time = 2.5 hours. Find speed.</p><div class="fm">S = 150 \u00f7 2.5 = <b>60 km/h</b></div>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt({question:'A car travels at <b>80 km/h</b> for <b>3.5 hours</b>. How far does it travel?',hints:['Use D = S \u00d7 T','D = 80 \u00d7 3.5'],ans:280,exact:0.5,unit:'km',working:'D = 80 \u00d7 3.5 = <b>280 km</b>'})}
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){
+  var s = pick([40, 50, 60, 70, 80, 90, 100, 110, 120]);
+  var t = pick([1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]);
+  var ans = s * t;
+  return {
+    question: 'A car travels at <b>' + s + ' km/h</b> for <b>' + t + ' hours</b>. How far does it travel?',
+    hints: ['Use D = S \u00d7 T', 'D = ' + s + ' \u00d7 ' + t],
+    ans: ans,
+    tol: 0.01,
+    unit: 'km',
+    working: 'D = ' + s + ' \u00d7 ' + t + ' = <b>' + ans + ' km</b>'
+  };
+})}
   ]},
   {ey:'Q9 \u00b7 Special Products \u00b7 Core',ti:'Difference of Squares and Perfect Squares',su:'Expand (x+5)(x\u22125) and (2x+3)\u00b2.',lv:'C',steps:[
     {lb:'Two special patterns',dr:dQ9,ht:'<span class="lt lc">Core</span><p>Two important patterns that appear frequently in IGCSE: <b>difference of two squares</b> and <b>perfect square</b>.</p>'},
     {lb:'Step 1 \u2014 Difference of squares',dr:dQ9,ht:'<div class="fm">(x+5)(x\u22125) = x\u00b2 \u2212 25</div><p>The middle terms cancel. Pattern: (a+b)(a\u2212b) = a\u00b2 \u2212 b\u00b2</p>'},
     {lb:'Step 2 \u2014 Perfect square',dr:dQ9,ht:'<div class="fm">(2x+3)\u00b2 = 4x\u00b2 + 12x + 9</div><p>Pattern: (a+b)\u00b2 = a\u00b2 + 2ab + b\u00b2</p>'},
     {lb:'Step 3 \u2014 The patterns',dr:dQ9,ht:'<p>These are worth memorising \u2014 they appear in factorising and algebraic fractions.</p>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt({question:'Expand <b>(x + 6)(x \u2212 6)</b>. What is the constant term?',hints:['Use difference of two squares: (a+b)(a\u2212b) = a\u00b2 \u2212 b\u00b2','a = x, b = 6','x\u00b2 \u2212 ?'],ans:-36,exact:0.1,unit:'(constant term)',working:'(x+6)(x\u22126) = x\u00b2 \u2212 36. Constant = <b>\u221236</b>'})}
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){
+  var b = pick([3,4,5,6,7,8,9,10,11,12]);
+  var ans = -(b * b);
+  return {
+    question: 'Expand <b>(x + ' + b + ')(x \u2212 ' + b + ')</b>. What is the constant term?',
+    hints: [
+      'Use difference of two squares: (a+b)(a\u2212b) = a\u00b2 \u2212 b\u00b2',
+      'a = x, b = ' + b,
+      'x\u00b2 \u2212 ' + (b*b)
+    ],
+    ans: ans,
+    tol: 0,
+    unit: '(constant term)',
+    working: '(x+' + b + ')(x\u2212' + b + ') = x\u00b2 \u2212 ' + (b*b) + '. Constant = <b>\u2212' + (b*b) + '</b>'
+  };
+})}
   ]},
   {ey:'Q10 \u00b7 Forming Equations \u00b7 Core',ti:'Forming Equations from Geometry',su:'A triangle has angles (3x+10)\u00b0, (2x\u22125)\u00b0 and (x+15)\u00b0. Find x.',lv:'C',steps:[
     {lb:'The triangle',dr:dQ10,ht:'<span class="lt lc">Core</span><p>The three angles of the triangle are <b>(3x+10)\u00b0</b>, <b>(2x\u22125)\u00b0</b> and <b>(x+15)\u00b0</b>. Use the angle sum of a triangle to form an equation.</p>'},
@@ -417,7 +637,48 @@ var QS=[
     {lb:'Step 2 \u2014 Simplify',dr:dQ10,ht:'<div class="fm">6x + 20 = 180</div>'},
     {lb:'Step 3 \u2014 Solve',dr:dQ10,ht:'<div class="fm">6x = 160   \u2192   x = 160/6 \u2248 26.7\u00b0</div>'},
     {lb:'Step 4 \u2014 Check',dr:dQ10,ht:'<p>Angles \u2248 90.1\u00b0, 48.3\u00b0, 41.7\u00b0. Sum \u2248 180\u00b0 \u2713</p>'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt({question:'A triangle has angles <b>(2x+10)\u00b0</b>, <b>(3x\u22120)\u00b0</b> and <b>(x+20)\u00b0</b>. Find x.',hints:['(2x+10)+(3x)+(x+20) = 180','6x + 30 = 180','6x = 150'],ans:25,exact:0.1,unit:'\u00b0',working:'6x+30=180 \u2192 6x=150 \u2192 x=<b>25</b>'})}
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){
+  var a1 = rnd(5,20);
+  var b1 = rnd(1,3)*5;
+  var a2 = rnd(5,20);
+  var b2 = rnd(0,15);
+  var a3 = rnd(5,20);
+  var b3 = rnd(5,20);
+  // coefficients sum to 6 (2x + 3x + x), constants sum to b1+b2+b3
+  // angles: (2x+b1), (3x+b2), (x+b3)
+  // sum = 6x + (b1+b2+b3) = 180
+  var sumB = b1 + b2 + b3;
+  var ans = (180 - sumB) / 6;
+  // ensure ans is a nice number
+  var options = [];
+  for(var i=0;i<20;i++){
+    var tb1=rnd(5,20), tb2=rnd(0,15), tb3=rnd(5,25);
+    var ts=tb1+tb2+tb3;
+    if((180-ts)%6===0 && (180-ts)>0){
+      options.push([tb1,tb2,tb3]);
+    }
+  }
+  if(options.length>0){
+    var chosen=pick(options);
+    b1=chosen[0]; b2=chosen[1]; b3=chosen[2];
+    sumB=b1+b2+b3;
+    ans=(180-sumB)/6;
+  }
+  var sign2 = b2>=0 ? '+'+b2 : '\u2212'+Math.abs(b2);
+  var eq2 = b2===0 ? '3x' : ('(3x'+sign2+')');
+  return {
+    question: 'A triangle has angles <b>(2x+' + b1 + ')\u00b0</b>, <b>' + eq2 + '\u00b0</b> and <b>(x+' + b3 + ')\u00b0</b>. Find x.',
+    hints: [
+      '(2x+' + b1 + ')+(3x' + (b2>=0?'+'+b2:'\u2212'+Math.abs(b2)) + ')+(x+' + b3 + ') = 180',
+      '6x + ' + sumB + ' = 180',
+      '6x = ' + (180 - sumB)
+    ],
+    ans: ans,
+    tol: 0.01,
+    unit: '\u00b0',
+    working: '6x+' + sumB + '=180 \u2192 6x=' + (180-sumB) + ' \u2192 x=<b>' + ans + '</b>'
+  };
+})}
   ]}
 ];
 
