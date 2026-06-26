@@ -156,7 +156,20 @@
     <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question →</button>
   </div>
 
-  <!-- Results screen -->
+  <!-- Report question modal -->
+  <div id="report-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;font-family:'Segoe UI',Arial,sans-serif;">
+    <div style="background:white;border-radius:10px;width:90%;max-width:420px;padding:24px;box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+      <h3 style="font-size:1rem;font-weight:700;color:#333;margin-bottom:8px">⚑ Report a Problem</h3>
+      <p style="font-size:0.82rem;color:#888;margin-bottom:16px">Tell us what's wrong with this question.</p>
+      <div id="report-q-preview" style="font-size:0.85rem;background:#f9f9f9;border-radius:5px;padding:10px 12px;margin-bottom:14px;color:#555;"></div>
+      <textarea id="report-desc" placeholder="e.g. My answer was marked wrong but it looks correct, the answer shown seems wrong…" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.88rem;font-family:inherit;resize:vertical;min-height:70px;margin-bottom:12px;box-sizing:border-box;"></textarea>
+      <div style="display:flex;gap:10px;">
+        <button onclick="submitQuestionReport()" style="background:#C0272D;color:white;border:none;border-radius:5px;padding:9px 20px;font-size:0.88rem;font-weight:700;cursor:pointer;">Send Report</button>
+        <button onclick="document.getElementById('report-overlay').style.display='none'" style="background:none;border:1.5px solid #ddd;border-radius:5px;padding:9px 14px;font-size:0.88rem;color:#888;cursor:pointer;">Cancel</button>
+      </div>
+      <div id="report-done" style="display:none;color:#2e7d32;font-weight:600;font-size:0.88rem;margin-top:10px">✓ Report sent — thank you!</div>
+    </div>
+  </div>
   <div class="results-card" id="results-screen">
     <h2 id="results-topic"></h2>
     <div class="score-big" id="results-score"></div>
@@ -512,7 +525,9 @@
     const q   = questions[currentQ];
     const val = parseFloat(document.getElementById('answer-input').value);
     const tol = q.tol !== undefined ? q.tol : 0.01;
-    const correct = !isNaN(val) && Math.abs(val - q.ans) <= Math.max(tol, 0.001);
+    const ansRounded = Math.round(q.ans * 10000) / 10000;
+    const valRounded = Math.round(val * 10000) / 10000;
+    const correct = !isNaN(val) && Math.abs(valRounded - ansRounded) <= Math.max(tol, 0.01);
 
     const input = document.getElementById('answer-input');
     const fb    = document.getElementById('feedback-row');
@@ -526,6 +541,12 @@
     fb.innerHTML = correct
       ? '✓ Correct! ' + (q.working ? '<span style="opacity:0.8">— ' + q.working + '</span>' : '')
       : '✗ Not quite. Answer: <strong>' + q.ans + (q.unit ? ' ' + q.unit : '') + '</strong>' + (q.working ? ' — ' + q.working : '');
+
+    // Add report button
+    const reportDiv = document.createElement('div');
+    reportDiv.style.cssText = 'margin-top:8px;';
+    reportDiv.innerHTML = '<button onclick="reportQuestion()" style="background:none;border:none;color:#aaa;font-size:0.78rem;cursor:pointer;text-decoration:underline;padding:0">⚑ Report a problem with this question</button>';
+    fb.appendChild(reportDiv);
 
     answers.push({ q, correct, given: val });
 
@@ -599,6 +620,50 @@
 
     document.getElementById('results-screen').style.display = 'block';
   }
+
+  window.reportQuestion = function() {
+    const q = questions[currentQ];
+    document.getElementById('report-q-preview').innerHTML = 
+      '<strong>Q' + (currentQ + 1) + ':</strong> ' + q.question + 
+      '<br><span style="color:#C0272D">Expected answer: ' + q.ans + (q.unit ? ' ' + q.unit : '') + '</span>';
+    document.getElementById('report-desc').value = '';
+    document.getElementById('report-done').style.display = 'none';
+    document.getElementById('report-overlay').style.display = 'flex';
+  };
+
+  window.submitQuestionReport = async function() {
+    const q    = questions[currentQ];
+    const desc = document.getElementById('report-desc').value.trim();
+    const btn  = document.querySelector('#report-overlay button');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    try {
+      const topicOpt = document.getElementById('topic-select').options[document.getElementById('topic-select').selectedIndex];
+      const topicId  = parseInt(topicOpt.value);
+
+      await supabase.from('bug_reports').insert({
+        student_id:      session ? session.user.id : null,
+        topic_id:        topicId,
+        question_number: currentQ + 1,
+        question_title:  'Test question: ' + q.question.replace(/<[^>]+>/g, '').slice(0, 60),
+        description:     (desc || 'Student reported issue during test') + 
+                         '\nExpected: ' + q.ans + (q.unit ? ' ' + q.unit : '') +
+                         '\nStudent answered: ' + document.getElementById('answer-input').value,
+        js_error:        null,
+        status:          'open',
+        reported_at:     new Date().toISOString()
+      });
+
+      document.getElementById('report-done').style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Send Report';
+      setTimeout(() => { document.getElementById('report-overlay').style.display = 'none'; }, 2000);
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = 'Send Report';
+    }
+  };
 
   window.retryTest   = function() { window.location.reload(); };
   window.goToDashboard = function() { window.location.href = 'dashboard-student.html'; };
