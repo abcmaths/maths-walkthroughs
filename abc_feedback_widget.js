@@ -1,7 +1,6 @@
 // ============================================================
-// ABC Maths — Feedback Widget
-// Add this script to each walkthrough file, or include via
-// the add_tracking.py script update
+// ABC Maths — Progress Tracking + Feedback Widget
+// Adds a "Mark as Complete" button to every walkthrough
 // ============================================================
 
 (function() {
@@ -11,14 +10,56 @@
   // Inject CSS
   const style = document.createElement('style');
   style.textContent = `
+    #abc-complete-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 2px solid #eee;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 999;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+    }
+    #abc-complete-btn {
+      background: #C0272D;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 28px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+    #abc-complete-btn:hover { background: #a01f24; }
+    #abc-complete-btn:disabled { background: #ccc; cursor: not-allowed; }
+    #abc-complete-done {
+      color: #2e7d32;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: none;
+    }
     #abc-feedback-panel {
       display: none;
-      margin: 20px auto;
-      max-width: 520px;
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 480px;
       background: white;
       border: 1.5px solid #eee;
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 20px 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      z-index: 1000;
       font-family: 'Segoe UI', Arial, sans-serif;
     }
     #abc-feedback-panel h3 {
@@ -42,6 +83,7 @@
       cursor: pointer;
       transition: all 0.18s;
       background: white;
+      font-family: inherit;
     }
     .abc-thumb:hover { border-color: #C0272D; }
     .abc-thumb.selected-up   { border-color: #2e7d32; background: #e8f5e9; }
@@ -55,11 +97,12 @@
       font-size: 0.88rem;
       font-family: inherit;
       resize: vertical;
-      min-height: 70px;
+      min-height: 60px;
       margin-bottom: 12px;
       box-sizing: border-box;
     }
     #abc-feedback-comment:focus { outline: none; border-color: #C0272D; }
+    .abc-fb-btns { display: flex; gap: 10px; align-items: center; }
     #abc-feedback-submit {
       background: #C0272D;
       color: white;
@@ -69,19 +112,40 @@
       font-size: 0.88rem;
       font-weight: 700;
       cursor: pointer;
+      font-family: inherit;
     }
     #abc-feedback-submit:disabled { background: #ccc; cursor: not-allowed; }
+    #abc-feedback-skip {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    #abc-feedback-skip:hover { color: #888; }
     #abc-feedback-done {
       text-align: center;
       color: #2e7d32;
       font-weight: 600;
       font-size: 0.9rem;
       padding: 8px 0;
+      display: none;
     }
+    body { padding-bottom: 70px; }
   `;
   document.head.appendChild(style);
 
-  // Inject HTML panel
+  // Inject complete bar
+  const bar = document.createElement('div');
+  bar.id = 'abc-complete-bar';
+  bar.innerHTML = `
+    <button id="abc-complete-btn" onclick="abcMarkComplete()">✓ Mark as Complete</button>
+    <div id="abc-complete-done">✓ Topic marked as complete!</div>
+  `;
+  document.body.appendChild(bar);
+
+  // Inject feedback panel
   const panel = document.createElement('div');
   panel.id = 'abc-feedback-panel';
   panel.innerHTML = `
@@ -95,13 +159,15 @@
       </button>
     </div>
     <textarea id="abc-feedback-comment" placeholder="Any comments? (optional)"></textarea>
-    <button id="abc-feedback-submit" onclick="abcSubmitFeedback()">Submit Feedback</button>
-    <div id="abc-feedback-done" style="display:none">✓ Thanks for your feedback!</div>
+    <div class="abc-fb-btns">
+      <button id="abc-feedback-submit" onclick="abcSubmitFeedback()">Submit Feedback</button>
+      <button id="abc-feedback-skip" onclick="abcCloseFeedback()">Skip</button>
+    </div>
+    <div id="abc-feedback-done">✓ Thanks for your feedback!</div>
   `;
   document.body.appendChild(panel);
 
   let selectedRating = null;
-  let topicCode = window._abcTopicCode || null;
 
   window.abcSetRating = function(rating) {
     selectedRating = rating;
@@ -109,25 +175,60 @@
     document.getElementById('abc-thumb-down').className = 'abc-thumb' + (rating === 'down' ? ' selected-down' : '');
   };
 
-  window.abcShowFeedback = async function() {
-    const panel = document.getElementById('abc-feedback-panel');
-    panel.style.display = 'block';
+  window.abcMarkComplete = async function() {
+    const btn = document.getElementById('abc-complete-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
 
-    // Check if already submitted
     try {
-      const resp = await fetch(`${SUPABASE_URL}/rest/v1/feedback?topic_id=eq.${window._abcTopicId}&select=rating,comment`, {
+      const session = await getSession();
+      if (!session) {
+        btn.disabled = false;
+        btn.textContent = '✓ Mark as Complete';
+        alert('Please log in to track your progress.');
+        return;
+      }
+
+      const topicCode = window._abcTopicCode;
+      if (!topicCode) { btn.disabled = false; return; }
+
+      // Get topic ID
+      const topicResp = await fetch(
+        `${SUPABASE_URL}/rest/v1/topics?topic_code=eq.${topicCode}&select=id`,
+        { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${session.access_token}` } }
+      );
+      const topics = await topicResp.json();
+      if (!topics || !topics.length) { btn.disabled = false; return; }
+      window._abcTopicId = topics[0].id;
+
+      // Mark as completed
+      await fetch(`${SUPABASE_URL}/rest/v1/walkthrough_progress`, {
+        method: 'POST',
         headers: {
           'apikey': SUPABASE_ANON,
-          'Authorization': `Bearer ${(await getSession()).access_token}`
-        }
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({
+          student_id:      session.user.id,
+          topic_id:        window._abcTopicId,
+          status:          'completed',
+          completed_at:    new Date().toISOString(),
+          last_visited_at: new Date().toISOString()
+        })
       });
-      const data = await resp.json();
-      if (data && data.length > 0) {
-        abcSetRating(data[0].rating);
-        document.getElementById('abc-feedback-comment').value = data[0].comment || '';
-        document.getElementById('abc-feedback-submit').textContent = 'Update Feedback';
-      }
-    } catch(e) {}
+
+      // Show done message and feedback panel
+      document.getElementById('abc-complete-btn').style.display = 'none';
+      document.getElementById('abc-complete-done').style.display = 'block';
+      document.getElementById('abc-feedback-panel').style.display = 'block';
+
+    } catch(e) {
+      console.error('Complete error:', e);
+      btn.disabled = false;
+      btn.textContent = '✓ Mark as Complete';
+    }
   };
 
   window.abcSubmitFeedback = async function() {
@@ -142,15 +243,7 @@
 
     try {
       const session = await getSession();
-      if (!session) { btn.disabled = false; btn.textContent = 'Submit Feedback'; return; }
-
-      // Get topic ID from topic code
-      const topicResp = await fetch(`${SUPABASE_URL}/rest/v1/topics?topic_code=eq.${topicCode}&select=id`, {
-        headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${session.access_token}` }
-      });
-      const topics = await topicResp.json();
-      if (!topics || !topics.length) return;
-      const topicId = topics[0].id;
+      if (!session || !window._abcTopicId) { abcCloseFeedback(); return; }
 
       await fetch(`${SUPABASE_URL}/rest/v1/feedback`, {
         method: 'POST',
@@ -162,7 +255,7 @@
         },
         body: JSON.stringify({
           student_id:   session.user.id,
-          topic_id:     topicId,
+          topic_id:     window._abcTopicId,
           rating:       selectedRating,
           comment:      comment || null,
           status:       'pending',
@@ -171,11 +264,21 @@
       });
 
       document.getElementById('abc-feedback-submit').style.display = 'none';
+      document.getElementById('abc-feedback-skip').style.display   = 'none';
       document.getElementById('abc-feedback-done').style.display   = 'block';
+      setTimeout(abcCloseFeedback, 2000);
+
     } catch(e) {
-      btn.disabled = false;
-      btn.textContent = 'Submit Feedback';
+      abcCloseFeedback();
     }
+  };
+
+  window.abcCloseFeedback = function() {
+    document.getElementById('abc-feedback-panel').style.display = 'none';
+  };
+
+  window.abcShowFeedback = function() {
+    document.getElementById('abc-feedback-panel').style.display = 'block';
   };
 
   async function getSession() {
@@ -188,14 +291,4 @@
     return null;
   }
 
-  // Show feedback panel when student reaches last step
-  document.addEventListener('DOMContentLoaded', function() {
-    var nb = document.getElementById('nb');
-    if (!nb) return;
-    nb.addEventListener('click', function() {
-      if (nb.textContent.trim() === 'Restart') {
-        window.abcShowFeedback();
-      }
-    });
-  });
 })();

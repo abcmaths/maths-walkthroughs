@@ -512,17 +512,16 @@ document.getElementById('nb').addEventListener('click',function(){
 render();
 </script>
 
-<!-- ABC Supabase Progress Tracking + Feedback -->
+<!-- ABC Supabase Progress Tracking -->
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
 window._supabase = _sb;
 window._abcTopicCode = 'AM-ALG-06';
-
-async function markComplete() {
+window.markComplete = async function() {
   const { data: { session } } = await _sb.auth.getSession();
   if (!session) return;
-  const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', 'AM-ALG-06').maybeSingle();
+  const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', window._abcTopicCode).maybeSingle();
   if (!topic) return;
   window._abcTopicId = topic.id;
   await _sb.from('walkthrough_progress').upsert({
@@ -530,20 +529,7 @@ async function markComplete() {
     status: 'completed', completed_at: new Date().toISOString(),
     last_visited_at: new Date().toISOString(),
   }, { onConflict: 'student_id,topic_id' });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  var nb = document.getElementById('nb');
-  if (!nb) return;
-  nb.addEventListener('click', function() {
-    if (nb.textContent.trim() === 'Restart') {
-      markComplete();
-      if (window.abcShowFeedback) window.abcShowFeedback();
-    }
-  });
-});
+};
 </script>
-
-<!-- ABC Feedback Widget -->
 <script src="../abc_feedback_widget.js"></script>
 </body></html>
