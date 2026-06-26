@@ -91,6 +91,7 @@
   <div class="nav-tab" onclick="showTab('aoc')">AOC Results</div>
   <div class="nav-tab" onclick="showTab('topics')">Browse Topics</div>
   <div class="nav-tab" onclick="showTab('feedback')">Feedback</div>
+  <div class="nav-tab" onclick="showTab('bugs')">Bug Reports</div>
   <div class="nav-tab" onclick="showTab('import')">Import Users</div>
 </div>
 
@@ -220,6 +221,57 @@
               </tr>
             </thead>
             <tbody id="fb-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUG REPORTS -->
+    <div class="tab-panel" id="tab-bugs">
+      <div class="filter-bar">
+        <select id="bug-filter-status" onchange="renderBugTab()">
+          <option value="">All statuses</option>
+          <option value="open">Open</option>
+          <option value="fixed">Fixed</option>
+          <option value="wontfix">Won't fix</option>
+        </select>
+        <select id="bug-filter-year" onchange="renderBugTab()">
+          <option value="">All Year Groups</option>
+          <option value="7">Year 7</option>
+          <option value="8">Year 8</option>
+          <option value="9">Year 9</option>
+          <option value="10">Year 10</option>
+          <option value="11">Year 11</option>
+          <option value="12">Year 12</option>
+          <option value="13">Add Maths</option>
+        </select>
+      </div>
+
+      <!-- Most reported topics -->
+      <div class="section" style="margin-bottom:24px">
+        <div class="section-title" style="margin-bottom:16px">Most Reported Topics</div>
+        <div id="bug-topic-list"></div>
+      </div>
+
+      <!-- All reports -->
+      <div class="section">
+        <div class="section-title" style="margin-bottom:16px">All Bug Reports</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Topic</th>
+                <th>Year</th>
+                <th>Question</th>
+                <th>Description</th>
+                <th>JS Error</th>
+                <th>Student</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bug-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -419,6 +471,7 @@
     window.renderProgressTable();
     window.renderAOCTable();
     await loadFeedback();
+    await loadBugReports();
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';
@@ -533,12 +586,13 @@
 
   // ── Tab switching ──
   window.showTab = function(name) {
-    const names = ['overview','progress','aoc','topics','feedback','import'];
+    const names = ['overview','progress','aoc','topics','feedback','bugs','import'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
     if (name === 'topics')   window.renderTopicsTab();
     if (name === 'feedback') window.renderFeedbackTab();
+    if (name === 'bugs')     window.renderBugTab();
   };
 
   // ── CSV template ──
@@ -724,6 +778,88 @@
     const item = allFeedback.find(f => f.id === id);
     if (item) item.status = status;
     window.renderFeedbackTab();
+  };
+
+  // ── Bug Reports tab ──
+  let allBugReports = [];
+
+  async function loadBugReports() {
+    const { data } = await supabase
+      .from('bug_reports')
+      .select('*, topics(topic_name, year_group), profiles(full_name)')
+      .order('reported_at', { ascending: false });
+    allBugReports = data || [];
+  }
+
+  window.renderBugTab = function() {
+    const statusFilter = document.getElementById('bug-filter-status').value;
+    const yearFilter   = document.getElementById('bug-filter-year').value;
+
+    let filtered = allBugReports.filter(r => {
+      const matchStatus = !statusFilter || r.status === statusFilter;
+      const matchYear   = !yearFilter   || String(r.topics?.year_group) === yearFilter;
+      return matchStatus && matchYear;
+    });
+
+    // Most reported topics
+    const byTopic = {};
+    allBugReports.forEach(r => {
+      if (!r.topic_id) return;
+      const tid = r.topic_id;
+      if (!byTopic[tid]) byTopic[tid] = { topic: r.topics, count: 0, open: 0 };
+      byTopic[tid].count++;
+      if (r.status === 'open') byTopic[tid].open++;
+    });
+
+    const sorted = Object.values(byTopic).sort((a,b) => b.count - a.count).slice(0, 10);
+
+    document.getElementById('bug-topic-list').innerHTML = sorted.length === 0
+      ? '<div style="color:#aaa;font-style:italic;font-size:0.88rem">No bug reports yet.</div>'
+      : sorted.map(t => {
+          const yearLabel = t.topic?.year_group === 13 ? 'Add Maths' : `Year ${t.topic?.year_group}`;
+          return `
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+              <div style="width:180px;font-size:0.85rem;font-weight:600;color:#333">${t.topic?.topic_name || '—'}</div>
+              <div style="font-size:0.75rem;color:#888;width:80px">${yearLabel}</div>
+              <span style="background:#fde8e8;color:#C0272D;font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:99px">${t.count} report${t.count!==1?'s':''}</span>
+              ${t.open > 0 ? `<span style="background:#fffde7;color:#f57f17;font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:99px">${t.open} open</span>` : ''}
+            </div>`;
+        }).join('');
+
+    // All reports table
+    const tbody = document.getElementById('bug-tbody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#aaa;padding:24px">No bug reports found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(r => {
+      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : `Year ${r.topics?.year_group || '—'}`;
+      const statusBadge = r.status === 'fixed' ? 'badge-green' : r.status === 'wontfix' ? 'badge-grey' : 'badge-red';
+      const date = new Date(r.reported_at).toLocaleDateString('en-GB');
+      return `<tr>
+        <td><strong>${r.topics?.topic_name || '—'}</strong></td>
+        <td>${yearLabel}</td>
+        <td style="font-size:0.82rem">${r.question_number ? 'Q' + r.question_number + (r.question_title ? ' · ' + r.question_title : '') : '—'}</td>
+        <td style="font-size:0.82rem;color:#555;max-width:180px">${r.description || '<em style="color:#ccc">No description</em>'}</td>
+        <td style="font-size:0.75rem;color:#C0272D;max-width:160px;word-break:break-all">${r.js_error || '—'}</td>
+        <td style="font-size:0.82rem">${r.profiles?.full_name || 'Anonymous'}</td>
+        <td style="font-size:0.82rem;color:#888">${date}</td>
+        <td><span class="badge ${statusBadge}">${r.status}</span></td>
+        <td>
+          ${r.status !== 'fixed'    ? `<button class="btn-link" onclick="updateBug(${r.id},'fixed')">Fixed</button> ` : ''}
+          ${r.status !== 'wontfix'  ? `<button class="btn-link" style="color:#888" onclick="updateBug(${r.id},'wontfix')">Won't fix</button> ` : ''}
+          ${r.status !== 'open'     ? `<button class="btn-link" style="color:#aaa" onclick="updateBug(${r.id},'open')">Reopen</button>` : ''}
+        </td>
+      </tr>`;
+    }).join('');
+  };
+
+  window.updateBug = async function(id, status) {
+    await supabase.from('bug_reports').update({ status }).eq('id', id);
+    const item = allBugReports.find(r => r.id === id);
+    if (item) item.status = status;
+    window.renderBugTab();
   };
 
   window.toggleCUYear = function() {
