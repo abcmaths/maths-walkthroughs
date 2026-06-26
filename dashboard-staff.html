@@ -255,7 +255,10 @@
 
       <!-- All reports -->
       <div class="section">
-        <div class="section-title" style="margin-bottom:16px">All Bug Reports</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="section-title">All Bug Reports</div>
+          <button class="btn-outline" style="font-size:0.82rem;padding:6px 14px" onclick="exportBugs()">↓ Export CSV</button>
+        </div>
         <div class="tbl-wrap">
           <table>
             <thead>
@@ -853,6 +856,29 @@
         </td>
       </tr>`;
     }).join('');
+  };
+
+  window.exportBugs = function() {
+    const rows = [['Topic', 'Year', 'Question', 'Description', 'JS Error', 'Student', 'Date', 'Status']];
+    allBugReports.forEach(r => {
+      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : `Year ${r.topics?.year_group || '—'}`;
+      const qLabel = r.question_number ? 'Q' + r.question_number + (r.question_title ? ' - ' + r.question_title : '') : '—';
+      rows.push([
+        r.topics?.topic_name || '—',
+        yearLabel,
+        qLabel,
+        r.description || '',
+        r.js_error || '',
+        r.profiles?.full_name || 'Anonymous',
+        new Date(r.reported_at).toLocaleDateString('en-GB'),
+        r.status
+      ]);
+    });
+    const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'abc_bug_reports_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
   };
 
   window.updateBug = async function(id, status) {
