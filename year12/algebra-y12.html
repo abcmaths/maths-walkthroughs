@@ -419,56 +419,23 @@ var QS=[
     {lb:'Convert',dr:dQ7,ht:'<div class="fm">8x\u00b2 = 2\u2077 = 128  \u2192  x\u00b2 = 16</div>'},
     {lb:'Solve',dr:dQ7,ht:'<div class="fm">x = 4  (take positive root as x must be > 0 for log to exist)</div>'},
     {lb:'Your turn',dr:dQ7,ht:tryIt(function(){
-  // Pick base and a shift value so equation has nice positive integer solution
-  // log_b(x) + log_b(x - k) = 1  means x(x-k) = b^1 = b
-  // x^2 - kx - b = 0, discriminant = k^2 + 4b must be perfect square
-  // and positive root must be integer > k
-
-  var combos = [
-    {base:3, k:2, ans:3},   // x^2-2x-3=0 -> (x-3)(x+1)=0
-    {base:4, k:3, ans:4},   // x^2-3x-4=0 -> (x-4)(x+1)=0
-    {base:5, k:4, ans:5},   // x^2-4x-5=0 -> (x-5)(x+1)=0
-    {base:6, k:5, ans:6},   // x^2-5x-6=0 -> (x-6)(x+1)=0
-    {base:7, k:6, ans:7},   // x^2-6x-7=0 -> (x-7)(x+1)=0
-    {base:3, k:0, ans:3},   // log_3(x)+log_3(x)=log_3(x^2)=1 -> x^2=3, not integer, skip
-    {base:2, k:1, ans:2},   // x^2-x-2=0 -> (x-2)(x+1)=0
-    {base:4, k:0, ans:2},   // 2log_b(x)=1 different form, skip
-  ];
-
-  // Use only the clean integer combos
-  var valid = [
-    {base:2, k:1, ans:2},
-    {base:3, k:2, ans:3},
-    {base:4, k:3, ans:4},
-    {base:5, k:4, ans:5},
-    {base:6, k:5, ans:6},
-    {base:7, k:6, ans:7},
-  ];
-
-  var c = pick(valid);
-  var b = c.base;
-  var k = c.k;
-  var ans = c.ans;
-  var neg = -(ans - 1); // the negative root: x^2 - kx - b = 0, roots are ans and -(1)
-  // Actually negative root: product of roots = -b, sum = k
-  // roots: ans and (k - ans) = k - ans
-  var negRoot = k - ans; // this will be negative
-
-  var baseStr = b;
-  var kStr = k === 0 ? '' : '\u2212' + k;
-  var xTermStr = k === 0 ? 'x\u00b2' : 'x\u00b2\u2212' + k + 'x\u2212' + b;
-  var factorStr = '(x\u2212' + ans + ')(x\u2212(' + negRoot + '))';
-  // cleaner factor string
-  var factor2 = negRoot < 0 ? '(x+' + Math.abs(negRoot) + ')' : '(x\u2212' + negRoot + ')';
-  var factorClean = '(x\u2212' + ans + ')' + factor2;
-
+  var bases = [2, 3];
+  var base = pick(bases);
+  var k = pick([2, 3, 4]);
+  var ans = pick([3, 4, 5, 6]);
   return {
-    question: 'Solve log\u2082\u200b'.replace('\u2082\u200b', '\u2082'.replace('2', baseStr)) +
-      'log\u2083(x)'.replace('3', baseStr) +
-      ' + log\u2083(x\u2212'.replace('3', baseStr) + k + ') = 1.',
+    question: 'Solve log(' + base + ', x) + log(' + base + ', x-' + k + ') = 1.',
     hints: [
-      'log\u2083(x(x\u2212'.replace('3', baseStr) + k + ')) = 1',
-      'x(x\u2}
+      'Combine logs: log(' + base + ', x(x-' + k + ')) = 1',
+      'x(x-' + k + ') = ' + base,
+      'Solve the quadratic and take positive root'
+    ],
+    ans: ans,
+    tol: 0,
+    unit: '',
+    working: 'x(x-' + k + ')=' + base + '. Positive solution x=' + ans
+  };
+})}
   ]},
   {ey:'Q8 \u00b7 Indices \u00b7 WAEC',ti:'Exponential Equations',su:'Solve 3^(2x\u22121) = 27.',lv:'F',steps:[
     {lb:'Same base method',dr:dQ8,ht:'<span class="lt lf">Foundation</span><p>If both sides can be written as powers of the same base, equate the exponents.</p>'},
