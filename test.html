@@ -343,6 +343,10 @@
     }
   }
 
+  // ── Check for topic pre-selection from URL ──
+  const urlParams = new URLSearchParams(window.location.search);
+  const preselectedTopicId = urlParams.get('topic');
+
   // ── Auth ──
   const { data: { session: s } } = await supabase.auth.getSession();
   session = s;
@@ -361,8 +365,24 @@
       `<option value="${t.id}" data-code="${t.topic_code}">${t.topic_name}</option>`
     ).join('');
 
+    // Pre-select topic from URL if present
+    if (preselectedTopicId) {
+      sel.value = preselectedTopicId;
+    }
+
     checkReady();
   };
+
+  // Auto-load if topic pre-selected
+  if (preselectedTopicId) {
+    // Find which year group this topic belongs to
+    const { data: topic } = await supabase
+      .from('topics').select('year_group').eq('id', preselectedTopicId).maybeSingle();
+    if (topic) {
+      document.getElementById('year-select').value = topic.year_group === 13 ? '13' : String(topic.year_group);
+      await window.loadTopics();
+    }
+  }
 
   window.selectLevel = function(level) {
     selectedLevel = level;

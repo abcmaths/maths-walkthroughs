@@ -67,7 +67,12 @@
     .topic-card.started   { border-color: #ffe082; background: #fffde7; }
     .topic-card .t-name   { font-size: 0.88rem; font-weight: 600; color: #333; margin-bottom: 4px; }
     .topic-card .t-strand { font-size: 0.75rem; color: #888; }
-    .topic-card .t-status { font-size: 0.72rem; font-weight: 700; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .topic-card .t-test { font-size: 0.72rem; color: #1a56b0; margin-top: 4px; }
+    .t-btns { display: flex; gap: 6px; margin-top: 8px; }
+    .t-btn-walk { flex: 1; padding: 5px 8px; background: #C0272D; color: white; border: none; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+    .t-btn-walk:hover { background: #a01f24; }
+    .t-btn-test { flex: 1; padding: 5px 8px; background: white; color: #C0272D; border: 1.5px solid #C0272D; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+    .t-btn-test:hover { background: #fde8e8; }
     .topic-card.completed .t-status { color: #2e7d32; }
     .topic-card.started   .t-status { color: #f57f17; }
     .topic-card.not-started .t-status { color: #bbb; }
@@ -259,6 +264,7 @@
 
   let allTopics   = [];
   let progressMap = {};
+  let testResultsMap = {};
   let myYearGroup = 7;
   let userId      = null;
 
@@ -299,6 +305,14 @@
       const { data: progress } = await supabase
         .from('walkthrough_progress').select('*').eq('student_id', userId);
       (progress || []).forEach(p => { progressMap[p.topic_id] = p.status; });
+
+      // Load best test result per topic
+      const { data: testResults } = await supabase
+        .from('test_results').select('topic_id, grade, percentage, level')
+        .eq('student_id', userId).order('percentage', { ascending: false });
+      (testResults || []).forEach(r => {
+        if (!testResultsMap[r.topic_id]) testResultsMap[r.topic_id] = r;
+      });
 
       // AOC
       const { data: aoc } = await supabase
@@ -389,12 +403,26 @@
       const status = progressMap[t.id] || 'not-started';
       const lbl    = status === 'completed' ? '✓ Completed' : status === 'started' ? '▶ In Progress' : '○ Not started';
       const file   = WALKTHROUGH_FILES[t.topic_code] || '#';
-      return `<div class="topic-card ${status}" onclick="openTopic('${t.id}','${file}')">
+      const testResult = testResultsMap[t.id];
+      const testBadge  = testResult
+        ? `<div class="t-test">Last test: <strong>${testResult.grade}</strong> (${testResult.percentage}%)</div>`
+        : '';
+      return `<div class="topic-card ${status}">
         <div class="t-name">${t.topic_name}</div>
         <div class="t-strand">${t.strand || ''}</div>
         <div class="t-status">${lbl}</div>
+        ${testBadge}
+        <div class="t-btns">
+          <button class="t-btn-walk" onclick="openTopic('${t.id}','${file}')">Walkthrough</button>
+          <button class="t-btn-test" onclick="openTest('${t.id}')">Take a Test</button>
+        </div>
       </div>`;
     }).join('');
+  };
+
+  window.openTest = function(topicId) {
+    // Pass topic ID to test page via URL parameter
+    window.location.href = 'test.html?topic=' + topicId;
   };
 
   window.openTopic = async function(topicId, file) {
