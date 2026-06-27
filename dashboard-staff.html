@@ -1265,7 +1265,11 @@
       const resp = await fetch(file);
       const html = await resp.text();
       const matches = [...html.matchAll(/\{ey:'([^']+)'/g)];
-      return matches.map((m, i) => ({ num: i + 1, title: m[1] }));
+      return matches.map((m, i) => {
+        // Decode unicode escapes like \u00b7
+        const title = m[1].replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+        return { num: i + 1, title };
+      });
     } catch(e) { return []; }
   }
 
