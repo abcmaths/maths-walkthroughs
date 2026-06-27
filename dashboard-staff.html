@@ -767,48 +767,69 @@
       }`;
   };
 
+  
   window.resetStudentPassword = async function() {
-    const btn = document.getElementById('modal-reset-btn');
-    const msg = document.getElementById('modal-reset-msg');
-    if (!_currentModalStudentId) return;
+  const btn = document.getElementById('modal-reset-btn');
+  const msg = document.getElementById('modal-reset-msg');
+  if (!_currentModalStudentId) return;
 
-    const s = allStudents.find(s => s.id === _currentModalStudentId);
-    if (!confirm(`Reset password for ${s?.full_name} to ABC2026?`)) return;
+  const s = allStudents.find(s => s.id === _currentModalStudentId);
+  if (!confirm(`Reset password for ${s?.full_name} to ABC2026?`)) return;
 
-    btn.disabled = true;
-    btn.textContent = 'Resetting…';
+  btn.disabled = true;
+  btn.textContent = 'Resetting…';
 
-    try {
-      // Find user email
-      const { data: profile } = await supabase
-        .from('profiles').select('id').eq('id', _currentModalStudentId).single();
-
-      // Use admin API via edge function workaround — update via REST
-      const resp = await fetch(`https://lnwinoghbefmjpvmixzo.supabase.co/auth/v1/admin/users/${_currentModalStudentId}`, {
-        method: 'PUT',
+  try {
+    const session = (await supabase.auth.getSession()).data.session;
+    const resp = await fetch(
+      'https://lnwinoghbefmjpvmixzo.supabase.co/functions/v1/reset-student-password',
+      {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
           'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session.access_token}`,
-          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ password: 'ABC2026', email_confirm: true })
-      });
-
-      if (resp.ok) {
-        msg.style.cssText = 'display:block;background:#e8f5e9;color:#2e7d32';
-        msg.textContent = `✓ Password reset to ABC2026 for ${s?.full_name}`;
-      } else {
-        msg.style.cssText = 'display:block;background:#fde8e8;color:#a01f24';
-        msg.textContent = 'Reset failed — please use the fix_student_logins.py script instead.';
+        body: JSON.stringify({ userId: _currentModalStudentId, newPassword: 'ABC2026' })
       }
-    } catch(e) {
-      msg.style.cssText = 'display:block;background:#fde8e8;color:#a01f24';
-      msg.textContent = 'Error: ' + e.message;
-    }
+    );
 
-    btn.disabled = false;
-    btn.textContent = 'Reset Password';
-  };
+    const result = await resp.json();
+    if (resp.ok && result.success) {
+      msg.style.cssText = 'display:block;background:#e8f5e9;color:#2e7d32';
+      msg.textContent = `✓ Password reset to ABC2026 for ${s?.full_name}`;
+    } else {
+      msg.style.cssText = 'display:block;background:#fde8e8;color:#a01f24';
+      msg.textContent = 'Reset failed: ' + (result.error || 'Unknown error');
+    }
+  } catch(e) {
+    msg.style.cssText = 'display:block;background:#fde8e8;color:#a01f24';
+    msg.textContent = 'Error: ' + e.message;
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Reset Password';
+};
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
   window.closeModal = function() { document.getElementById('modal').classList.remove('open'); };
 
