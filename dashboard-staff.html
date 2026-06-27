@@ -93,6 +93,7 @@
   <div class="nav-tab" onclick="showTab('feedback')">Feedback</div>
   <div class="nav-tab" onclick="showTab('bugs')">Bug Reports</div>
   <div class="nav-tab" onclick="showTab('users')">Users</div>
+  <div class="nav-tab" onclick="showTab('reviews')">Review Walkthroughs</div>
   <div class="nav-tab" onclick="showTab('import')">Import Users</div>
 </div>
 
@@ -362,6 +363,57 @@
       </div>
     </div>
 
+    <!-- REVIEW WALKTHROUGHS -->
+    <div class="tab-panel" id="tab-reviews">
+
+      <!-- Teacher progress summary -->
+      <div class="section" style="margin-bottom:24px">
+        <div class="section-title" style="margin-bottom:16px">Teacher Review Progress</div>
+        <div id="review-teacher-summary"></div>
+      </div>
+
+      <!-- Walkthrough list -->
+      <div class="section">
+        <div class="filter-bar" style="margin-bottom:16px">
+          <select id="review-filter-year" onchange="renderReviewTab()">
+            <option value="">All Year Groups</option>
+            <option value="7">Year 7</option>
+            <option value="8">Year 8</option>
+            <option value="9">Year 9</option>
+            <option value="10">Year 10</option>
+            <option value="11">Year 11</option>
+            <option value="12">Year 12</option>
+            <option value="13">Add Maths</option>
+          </select>
+          <select id="review-filter-status" onchange="renderReviewTab()">
+            <option value="">All statuses</option>
+            <option value="not_reviewed">Not reviewed</option>
+            <option value="good">Good</option>
+            <option value="needs_improvement">Needs improvement</option>
+            <option value="not_good">Not good</option>
+            <option value="partial">Partially reviewed</option>
+          </select>
+        </div>
+        <div class="section-title" style="margin-bottom:16px">Walkthroughs <span id="review-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></div>
+        <div id="review-list"></div>
+      </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div class="modal-overlay" id="review-modal">
+      <div class="modal" style="max-width:680px">
+        <div class="modal-header">
+          <h2 id="review-modal-title">Review Walkthrough</h2>
+          <button class="modal-close" onclick="closeReviewModal()">×</button>
+        </div>
+        <div id="review-modal-body"></div>
+        <div style="margin-top:20px;display:flex;gap:10px;align-items:center">
+          <button class="btn" id="review-submit-btn" onclick="submitReview()" style="width:auto;padding:10px 28px">Submit Review</button>
+          <span id="review-submit-msg" style="font-size:0.85rem"></span>
+        </div>
+      </div>
+    </div>
+
     <!-- IMPORT USERS -->
     <div class="tab-panel" id="tab-import">
 
@@ -604,6 +656,7 @@
     await loadBugReports();
     await loadUsersWithEmail();
     await loadTestResults();
+    await loadReviews();
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('content').style.display = 'block';
@@ -761,7 +814,7 @@
 
   // ── Tab switching ──
   window.showTab = function(name) {
-    const names = ['overview','progress','tests','topics','feedback','bugs','users','import'];
+    const names = ['overview','progress','tests','topics','feedback','bugs','users','reviews','import'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
@@ -770,6 +823,7 @@
     if (name === 'bugs')     window.renderBugTab();
     if (name === 'users')    window.renderUsersTab();
     if (name === 'tests')    window.renderTestsTab();
+    if (name === 'reviews')  window.renderReviewTab();
   };
 
   // ── CSV template ──
@@ -1148,6 +1202,294 @@
     const item = allBugReports.find(r => r.id === id);
     if (item) { item.status = status; item.fixed_at = update.fixed_at; }
     window.renderBugTab();
+  };
+
+  // ── Review Walkthroughs ──
+  let allReviews = [];
+  let currentReviewTopicId = null;
+  let currentReviewQuestions = [];
+
+  const WALKTHROUGH_FILES = {
+    'Y7-ALG-01': 'year07/algebra-y7.html', 'Y7-GEO-01': 'year07/geometry-y7.html',
+    'Y7-NUM-01': 'year07/number-y7.html', 'Y7-STA-01': 'year07/stats-y7.html',
+    'Y7-SEQ-01': 'year07/sequences-y7.html', 'Y7-MIS-01': 'year07/misconceptions-y7.html',
+    'Y8-NUM-01': 'year08/place-value-rounding-y8.html', 'Y8-NUM-02': 'year08/addition-subtraction-y8.html',
+    'Y8-NUM-03': 'year08/multiplication-y8.html', 'Y8-NUM-04': 'year08/division-y8.html',
+    'Y8-NUM-05': 'year08/integers-powers-roots-y8.html', 'Y8-NUM-06': 'year08/fractions-percentages-ratio-y8.html',
+    'Y8-NUM-07': 'year08/mixed-operations-y8.html', 'Y8-ALG-01': 'year08/algebra-y8.html',
+    'Y8-ALG-02': 'year08/manipulation-y8.html', 'Y8-ALG-03': 'year08/equations-sequences-graphs-y8.html',
+    'Y8-GEO-01': 'year08/angles-y8.html', 'Y8-GEO-02': 'year08/shapes-construction-y8.html',
+    'Y8-GEO-03': 'year08/perimeter-area-volume-y8.html', 'Y8-GEO-04': 'year08/transformations-y8.html',
+    'Y8-STA-01': 'year08/data-handling-y8.html', 'Y8-STA-02': 'year08/probability-y8.html',
+    'Y8-MEA-01': 'year08/units-measurement-y8.html',
+    'Y9-NUM-01': 'year09/number-y9.html', 'Y9-ALG-01': 'year09/algebra-y9.html',
+    'Y9-ALG-02': 'year09/sequences-y9.html', 'Y9-ALG-03': 'year09/graphs-y9.html',
+    'Y9-GEO-01': 'year09/geometry-y9.html', 'Y9-GEO-02': 'year09/mensuration-y9.html',
+    'Y9-GEO-03': 'year09/pythagoras-trig-y9.html', 'Y9-GEO-04': 'year09/transformations-y9.html',
+    'Y9-STA-01': 'year09/statistics-y9.html', 'Y9-STA-02': 'year09/probability-y9.html', 'Y9-MIS-01': 'year09/misconceptions-y9.html',
+    'Y10-NUM-01': 'year10/number-y10.html', 'Y10-ALG-01': 'year10/algebra-y10.html',
+    'Y10-ALG-02': 'year10/graphs-y10.html', 'Y10-GEO-01': 'year10/geometry-y10.html',
+    'Y10-GEO-02': 'year10/mensuration-y10.html', 'Y10-GEO-03': 'year10/constructions-y10.html',
+    'Y10-GEO-04': 'year10/trig-y10.html', 'Y10-CAL-01': 'year10/calculus-diff-y10.html',
+    'Y10-STA-01': 'year10/stats-y10.html', 'Y10-MIS-01': 'year10/misconceptions-y10.html',
+    'Y11-ALG-01': 'year11/algebra-y11.html', 'Y11-GEO-01': 'year11/geometry-y11.html',
+    'Y11-GEO-02': 'year11/mensuration-y11.html', 'Y11-GEO-03': 'year11/transformations-y11.html',
+    'Y11-NUM-01': 'year11/percentages-y11.html', 'Y11-VEC-01': 'year11/vectors-y11.html', 'Y11-MIS-01': 'year11/misconceptions-y11.html',
+    'Y12-ALG-01': 'year12/algebra-y12.html', 'Y12-GEO-01': 'year12/geometry-y12.html',
+    'Y12-CAL-01': 'year12/calculus-y12.html', 'Y12-NUM-01': 'year12/number-bases-y12.html',
+    'Y12-NUM-02': 'year12/modulo-y12.html', 'Y12-ALG-02': 'year12/binary-operations-y12.html',
+    'Y12-ALG-03': 'year12/matrices-y12.html', 'Y12-ALG-04': 'year12/algebra-y12.html', 'Y12-MIS-01': 'year12/misconceptions-y12.html',
+    'AM-ALG-01': 'addmaths/algebra-addmaths.html', 'AM-ALG-02': 'addmaths/equations-inequalities-addmaths.html',
+    'AM-CAL-01': 'addmaths/differentiation-addmaths.html', 'AM-CAL-02': 'addmaths/integration-addmaths.html',
+    'AM-TRI-01': 'addmaths/trigonometry-addmaths.html', 'AM-STA-01': 'addmaths/permutation-combination-addmaths.html',
+    'AM-FUN-01': 'addmaths/functions-addmaths.html', 'AM-LOG-01': 'addmaths/logarithms-addmaths.html',
+    'AM-GEO-01': 'addmaths/coordinate-geometry-addmaths.html', 'AM-GEO-02': 'addmaths/straight-lines-addmaths.html',
+    'AM-TRI-02': 'addmaths/trig-identities-addmaths.html', 'AM-TRI-03': 'addmaths/circular-measure-addmaths.html',
+    'AM-ALG-03': 'addmaths/simultaneous-advanced-addmaths.html', 'AM-ALG-04': 'addmaths/quadratics-advanced-addmaths.html',
+    'AM-ALG-05': 'addmaths/polynomials-addmaths.html', 'AM-ALG-06': 'addmaths/binomial-addmaths.html',
+    'AM-ALG-07': 'addmaths/progressions-addmaths.html', 'AM-ALG-08': 'addmaths/indices-surds-addmaths.html'
+  };
+
+  async function loadReviews() {
+    const { data } = await supabase
+      .from('walkthrough_reviews')
+      .select('*, profiles(full_name)');
+    allReviews = data || [];
+  }
+
+  // Extract question titles from a walkthrough file
+  async function getQuestions(topicCode) {
+    const file = WALKTHROUGH_FILES[topicCode];
+    if (!file) return [];
+    try {
+      const resp = await fetch(file);
+      const html = await resp.text();
+      const matches = [...html.matchAll(/\{ey:'([^']+)'/g)];
+      return matches.map((m, i) => ({ num: i + 1, title: m[1] }));
+    } catch(e) { return []; }
+  }
+
+  window.renderReviewTab = function() {
+    const yearFilter   = document.getElementById('review-filter-year').value;
+    const statusFilter = document.getElementById('review-filter-status').value;
+
+    // Build review map: topicId -> { reviewerIds, ratings }
+    const reviewMap = {};
+    allReviews.forEach(r => {
+      if (!reviewMap[r.topic_id]) reviewMap[r.topic_id] = { reviewers: new Set(), ratings: [], questions: new Set() };
+      reviewMap[r.topic_id].reviewers.add(r.reviewer_id);
+      reviewMap[r.topic_id].ratings.push(r.rating);
+      reviewMap[r.topic_id].questions.add(r.question_number);
+    });
+
+    // Teacher summary
+    const teacherMap = {};
+    allReviews.forEach(r => {
+      if (!teacherMap[r.reviewer_id]) teacherMap[r.reviewer_id] = { name: r.profiles?.full_name || '—', count: 0, topics: new Set() };
+      teacherMap[r.reviewer_id].topics.add(r.topic_id);
+      teacherMap[r.reviewer_id].count++;
+    });
+
+    const summaryEl = document.getElementById('review-teacher-summary');
+    if (Object.keys(teacherMap).length === 0) {
+      summaryEl.innerHTML = '<div style="color:#aaa;font-style:italic;font-size:0.85rem">No reviews submitted yet.</div>';
+    } else {
+      summaryEl.innerHTML = Object.values(teacherMap).map(t => `
+        <div style="display:inline-flex;align-items:center;gap:10px;background:#f9f9f9;border-radius:6px;padding:10px 16px;margin:0 8px 8px 0">
+          <div style="font-weight:600;font-size:0.88rem">${t.name}</div>
+          <div style="background:#C0272D;color:white;border-radius:99px;padding:2px 10px;font-size:0.78rem;font-weight:700">${t.topics.size} walkthroughs</div>
+          <div style="color:#888;font-size:0.78rem">${t.count} questions</div>
+        </div>`).join('');
+    }
+
+    // Filter topics
+    let filtered = allTopics.filter(t => {
+      const matchYear = !yearFilter || String(t.year_group) === yearFilter;
+      if (!matchYear) return false;
+      if (!statusFilter) return true;
+      const rm = reviewMap[t.id];
+      if (statusFilter === 'not_reviewed') return !rm;
+      if (statusFilter === 'partial') return rm && rm.questions.size > 0 && rm.questions.size < 10;
+      if (!rm) return false;
+      const dominant = getDominantRating(rm.ratings);
+      return dominant === statusFilter;
+    });
+
+    document.getElementById('review-count').textContent = `— ${filtered.length} walkthrough${filtered.length !== 1 ? 's' : ''}`;
+
+    const listEl = document.getElementById('review-list');
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div style="color:#aaa;font-style:italic;font-size:0.85rem">No walkthroughs found.</div>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(t => {
+      const rm = reviewMap[t.id];
+      const yearLabel = t.year_group === 13 ? 'Add Maths' : 'Year ' + t.year_group;
+      const reviewerCount = rm ? rm.reviewers.size : 0;
+      const qCount = rm ? rm.questions.size : 0;
+      const dominant = rm ? getDominantRating(rm.ratings) : null;
+      const statusBadge = dominant
+        ? (dominant === 'good' ? '<span class="badge badge-green">✓ Good</span>' :
+           dominant === 'needs_improvement' ? '<span class="badge badge-yellow">⚠ Needs work</span>' :
+           '<span class="badge badge-red">✗ Not good</span>')
+        : '<span class="badge badge-grey">Not reviewed</span>';
+      return `<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="font-weight:600;font-size:0.88rem;color:#333">${t.topic_name}</div>
+          <div style="font-size:0.75rem;color:#888">${yearLabel}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${statusBadge}
+          ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} · ${qCount} Qs</span>` : ''}
+        </div>
+        <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}')">
+          ${rm ? 'Add/Edit Review' : 'Review'}
+        </button>
+      </div>`;
+    }).join('');
+  };
+
+  function getDominantRating(ratings) {
+    if (!ratings || ratings.length === 0) return null;
+    const counts = { good: 0, needs_improvement: 0, not_good: 0 };
+    ratings.forEach(r => { if (counts[r] !== undefined) counts[r]++; });
+    return Object.entries(counts).sort((a,b) => b[1]-a[1])[0][0];
+  }
+
+  window.openReviewModal = async function(topicId, topicCode, topicName) {
+    currentReviewTopicId = topicId;
+    document.getElementById('review-modal-title').textContent = 'Review: ' + topicName;
+    document.getElementById('review-modal-body').innerHTML = '<div class="loading">Loading questions…</div>';
+    document.getElementById('review-modal').classList.add('open');
+    document.getElementById('review-submit-msg').textContent = '';
+
+    // Load questions from walkthrough file
+    const questions = await getQuestions(topicCode);
+    currentReviewQuestions = questions;
+
+    if (questions.length === 0) {
+      document.getElementById('review-modal-body').innerHTML = '<div style="color:#aaa">Could not load questions from this walkthrough.</div>';
+      return;
+    }
+
+    // Get existing reviews for this topic by current user
+    const { data: { session } } = await supabase.auth.getSession();
+    const myReviews = allReviews.filter(r => r.topic_id === topicId && r.reviewer_id === session.user.id);
+    const myReviewMap = {};
+    myReviews.forEach(r => { myReviewMap[r.question_number] = r; });
+
+    document.getElementById('review-modal-body').innerHTML = `
+      <p style="font-size:0.85rem;color:#666;margin-bottom:16px">Rate each question and leave a comment. All fields are required.</p>
+      ${questions.map(q => {
+        const existing = myReviewMap[q.num];
+        return `<div style="border:1.5px solid #eee;border-radius:6px;padding:14px;margin-bottom:12px">
+          <div style="font-size:0.85rem;font-weight:600;color:#333;margin-bottom:10px">Q${q.num} · ${q.title}</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <button class="review-rating-btn ${existing?.rating === 'good' ? 'selected-good' : ''}"
+              onclick="selectRating(${q.num}, 'good', this)" data-q="${q.num}" data-rating="good"
+              style="flex:1;padding:7px;border:2px solid #ddd;border-radius:5px;cursor:pointer;font-size:0.8rem;font-weight:600;background:white">
+              ✓ Good
+            </button>
+            <button class="review-rating-btn ${existing?.rating === 'needs_improvement' ? 'selected-needs' : ''}"
+              onclick="selectRating(${q.num}, 'needs_improvement', this)" data-q="${q.num}" data-rating="needs_improvement"
+              style="flex:1;padding:7px;border:2px solid #ddd;border-radius:5px;cursor:pointer;font-size:0.8rem;font-weight:600;background:white">
+              ⚠ Needs Work
+            </button>
+            <button class="review-rating-btn ${existing?.rating === 'not_good' ? 'selected-bad' : ''}"
+              onclick="selectRating(${q.num}, 'not_good', this)" data-q="${q.num}" data-rating="not_good"
+              style="flex:1;padding:7px;border:2px solid #ddd;border-radius:5px;cursor:pointer;font-size:0.8rem;font-weight:600;background:white">
+              ✗ Not Good
+            </button>
+          </div>
+          <textarea id="comment-${q.num}" placeholder="Comment required…"
+            style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.82rem;font-family:inherit;resize:vertical;min-height:50px;box-sizing:border-box"
+          >${existing?.comment || ''}</textarea>
+        </div>`;
+      }).join('')}`;
+
+    // Apply existing rating styles
+    myReviews.forEach(r => {
+      const btn = document.querySelector(`[data-q="${r.question_number}"][data-rating="${r.rating}"]`);
+      if (btn) applyRatingStyle(btn, r.rating);
+    });
+
+    // Store selected ratings
+    window._reviewRatings = {};
+    myReviews.forEach(r => { window._reviewRatings[r.question_number] = r.rating; });
+  };
+
+  window.selectRating = function(qNum, rating, btn) {
+    // Clear other buttons for this question
+    document.querySelectorAll(`[data-q="${qNum}"]`).forEach(b => {
+      b.style.borderColor = '#ddd';
+      b.style.background = 'white';
+      b.style.color = '#333';
+    });
+    applyRatingStyle(btn, rating);
+    if (!window._reviewRatings) window._reviewRatings = {};
+    window._reviewRatings[qNum] = rating;
+  };
+
+  function applyRatingStyle(btn, rating) {
+    if (rating === 'good')             { btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9'; btn.style.color = '#2e7d32'; }
+    else if (rating === 'needs_improvement') { btn.style.borderColor = '#f57f17'; btn.style.background = '#fffde7'; btn.style.color = '#f57f17'; }
+    else if (rating === 'not_good')    { btn.style.borderColor = '#C0272D'; btn.style.background = '#fde8e8'; btn.style.color = '#C0272D'; }
+  }
+
+  window.closeReviewModal = function() {
+    document.getElementById('review-modal').classList.remove('open');
+  };
+
+  window.submitReview = async function() {
+    const btn = document.getElementById('review-submit-btn');
+    const msg = document.getElementById('review-submit-msg');
+    const ratings = window._reviewRatings || {};
+
+    // Validate all questions rated and commented
+    let valid = true;
+    for (const q of currentReviewQuestions) {
+      if (!ratings[q.num]) {
+        msg.style.color = '#C0272D';
+        msg.textContent = `Please rate Q${q.num} before submitting.`;
+        valid = false; break;
+      }
+      const comment = document.getElementById('comment-' + q.num)?.value.trim();
+      if (!comment) {
+        msg.style.color = '#C0272D';
+        msg.textContent = `Please add a comment for Q${q.num}.`;
+        valid = false; break;
+      }
+    }
+    if (!valid) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    const { data: { session } } = await supabase.auth.getSession();
+
+    // Upsert each question review
+    for (const q of currentReviewQuestions) {
+      const comment = document.getElementById('comment-' + q.num)?.value.trim();
+      await supabase.from('walkthrough_reviews').upsert({
+        topic_id:        currentReviewTopicId,
+        question_number: q.num,
+        reviewer_id:     session.user.id,
+        rating:          ratings[q.num],
+        comment,
+        reviewed_at:     new Date().toISOString()
+      }, { onConflict: 'topic_id,question_number,reviewer_id' });
+    }
+
+    // Reload reviews
+    await loadReviews();
+    window.renderReviewTab();
+
+    msg.style.color = '#2e7d32';
+    msg.textContent = '✓ Review submitted!';
+    btn.disabled = false;
+    btn.textContent = 'Submit Review';
+    setTimeout(closeReviewModal, 1500);
   };
 
   // ── Users tab ──
