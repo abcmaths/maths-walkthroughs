@@ -1264,9 +1264,9 @@
     try {
       const resp = await fetch(file);
       const html = await resp.text();
-      const matches = [...html.matchAll(/\{ey:'([^']+)'/g)];
+      // Extract ti: field (question title) from each QS entry
+      const matches = [...html.matchAll(/\{ey:'[^']+',ti:'([^']+)'/g)];
       return matches.map((m, i) => {
-        // Decode unicode escapes like \u00b7
         const title = m[1].replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
         return { num: i + 1, title };
       });
@@ -1384,7 +1384,8 @@
     myReviews.forEach(r => { myReviewMap[r.question_number] = r; });
 
     document.getElementById('review-modal-body').innerHTML = `
-      <p style="font-size:0.85rem;color:#666;margin-bottom:16px">Rate each question and leave a comment. All fields are required.</p>
+      <p style="font-size:0.85rem;color:#666;margin-bottom:8px">Rate each question and leave a comment. All fields are required.</p>
+      <p style="margin-bottom:16px"><a href="${WALKTHROUGH_FILES[topicCode] || '#'}" target="_blank" style="font-size:0.85rem;color:#C0272D;font-weight:600;text-decoration:none">↗ Open walkthrough in new tab</a> <span style="font-size:0.78rem;color:#aaa">(review each question as you go)</span></p>
       ${questions.map(q => {
         const existing = myReviewMap[q.num];
         return `<div style="border:1.5px solid #eee;border-radius:6px;padding:14px;margin-bottom:12px">
