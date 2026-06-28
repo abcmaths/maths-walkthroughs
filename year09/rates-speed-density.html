@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rates, Speed &amp; Density · Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-top:3px;}
+.bf{background:#e8f4ff;color:#1a5a8a;}.be{background:#fce8d8;color:#7A1418;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.lt{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:8px;}
+.lf{background:#e8f4ff;color:#1a5a8a;}.le{background:#fce8d8;color:#7A1418;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">← All Topics</a>
+  <div class="ht">Rates, Speed &amp; Density</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">← Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next →</button>
+    </div>
+  </div>
+</div>
+<script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function round1(x){return Math.round(x*10)/10;}
+function round2(x){return Math.round(x*100)/100;}
+var ST={};
+function tryIt(fn){var id='t'+Math.random().toString(36).slice(2);var o=fn();ST[id]={o:o,genFn:fn};return bT(id,o);}
+function bT(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">✔ Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.genFn();entry.o=o;var wrap=el.closest('.try');if(!wrap)return;var tmp=document.createElement('div');tmp.innerHTML=bT(id,o);wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;}
+  if(el.classList.contains('try-ck')){var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}var tol=o.tol!=null?o.tol:0.5;if(Math.abs(v-o.ans)<=tol){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! &nbsp;'+o.working;}else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}}
+});
+
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a){return '<text x="'+x+'" y="'+y+'" font-size="'+(sz||12)+'" font-family="Arial" fill="'+(c||'#6b5750')+'" text-anchor="'+(a||'middle')+'">'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||1.5)+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#aaa')+'" stroke-width="'+(w||1.5)+'"/>';}
+
+// SDT triangle diagram helper
+function sdtTriangle(cx,cy,sz,top,bl,br,revTop,revBl,revBr,p){
+  var o=[];
+  var tx=cx,ty=cy-sz*0.7;
+  var lx=cx-sz*0.75,ly=cy+sz*0.45;
+  var rx=cx+sz*0.75,ry=cy+sz*0.45;
+  // Triangle outline
+  o.push('<polygon points="'+tx+','+(ty-4)+' '+lx+','+ly+' '+rx+','+ry+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  // Dividing line
+  o.push(L(lx,ly,rx,ry,'#C0272D',1.5));
+  // Labels
+  o.push(T(tx,ty-14,top,'#C0272D',15,'middle'));
+  o.push(T(cx-sz*0.38,ly+16,bl,'#1a5a8a',14,'middle'));
+  o.push(T(cx+sz*0.38,ly+16,br,'#1a5a8a',14,'middle'));
+  // Cover highlights
+  if(revTop&&p>=1)o.push('<rect x="'+(tx-30)+'" y="'+(ty-32)+'" width="60" height="26" fill="#C0272D" rx="4"/>'+T(tx,ty-14,'?','#fff',16,'middle'));
+  if(revBl&&p>=1)o.push('<rect x="'+(lx-30)+'" y="'+(ly+2)+'" width="60" height="22" fill="#1a5a8a" rx="4"/>'+T(lx,ly+16,'?','#fff',14,'middle'));
+  if(revBr&&p>=1)o.push('<rect x="'+(rx-30)+'" y="'+(ry+2)+'" width="60" height="22" fill="#1a5a8a" rx="4"/>'+T(rx,ry+16,'?','#fff',14,'middle'));
+  return o;
+}
+
+// Q1: Speed = Distance / Time — the formula triangle
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'The Speed–Distance–Time Triangle','#C0272D',14,'middle'));
+  o=o.concat(sdtTriangle(240,150,120,'S','D','T',false,false,false,p));
+  if(p>=1){o.push(R(30,192,420,30,'#fff5f0','#C0272D'));o.push(T(240,212,'Cover S → D ÷ T    Cover D → S × T    Cover T → D ÷ S','#241A17',11,'middle'));}
+  if(p>=2){o.push(R(30,226,420,28,'#e8f8ee','#1a7a3a',1));o.push(T(240,245,'Units must match: km with h gives km/h; m with s gives m/s','#1a7a3a',11,'middle'));}
+  s.innerHTML=o.join('');}
+
+// Q2: Find speed
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Find the Speed','#C0272D',14,'middle'));
+  o.push(T(240,46,'Distance = 180 km     Time = 3 hours','#241A17',13,'middle'));
+  o=o.concat(sdtTriangle(240,155,110,'S','D','T',true,false,false,p));
+  if(p>=1){o.push(R(80,210,320,30,'#fff5f0','#C0272D'));o.push(T(240,230,'S = D ÷ T','#C0272D',14,'middle'));}
+  if(p>=2){o.push(R(80,212,320,28,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,230,'S = 180 ÷ 3 = 60 km/h','#1a7a3a',14,'middle'));}
+  s.innerHTML=o.join('');}
+
+// Q3: Find distance
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Find the Distance','#C0272D',14,'middle'));
+  o.push(T(240,46,'Speed = 80 km/h     Time = 2.5 hours','#241A17',13,'middle'));
+  o=o.concat(sdtTriangle(240,155,110,'S','D','T',false,true,false,p));
+  if(p>=1){o.push(R(80,210,320,30,'#fff5f0','#C0272D'));o.push(T(240,230,'D = S × T','#C0272D',14,'middle'));}
+  if(p>=2){o.push(R(80,212,320,28,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,230,'D = 80 × 2.5 = 200 km','#1a7a3a',14,'middle'));}
+  s.innerHTML=o.join('');}
+
+// Q4: Find time — convert minutes
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Find the Time (watch the units!)','#C0272D',14,'middle'));
+  o.push(T(240,46,'Distance = 45 km     Speed = 60 km/h','#241A17',13,'middle'));
+  o=o.concat(sdtTriangle(240,148,110,'S','D','T',false,false,true,p));
+  if(p>=1){o.push(R(60,206,360,28,'#fff5f0','#C0272D'));o.push(T(240,225,'T = D ÷ S = 45 ÷ 60 = 0.75 hours','#C0272D',13,'middle'));}
+  if(p>=2){o.push(R(60,206,360,28,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,225,'0.75 hours = 0.75 × 60 = 45 minutes','#1a7a3a',13,'middle'));}
+  if(p>=3){o.push(T(240,248,'Always convert decimal hours to minutes by × 60','#888',11,'middle'));}
+  s.innerHTML=o.join('');}
+
+// Q5: Density = Mass / Volume
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'The Density–Mass–Volume Triangle','#C0272D',14,'middle'));
+  o=o.concat(sdtTriangle(240,150,120,'D','M','V',false,false,false,p));
+  if(p>=1){o.push(R(30,192,420,30,'#fff5f0','#C0272D'));o.push(T(240,212,'Cover D → M ÷ V    Cover M → D × V    Cover V → M ÷ D','#241A17',11,'middle'));}
+  if(p>=2){o.push(R(30,226,420,28,'#e8f4ff','#1a5a8a',1));o.push(T(240,245,'Density units: g/cm³ or kg/m³  (formula given in exam)','#1a5a8a',11,'middle'));}
+  s.innerHTML=o.join('');}
+
+// Q6: Find density
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Find the Density','#C0272D',14,'middle'));
+  o.push(T(240,46,'Mass = 270 g     Volume = 30 cm³','#241A17',13,'middle'));
+  o=o.concat(sdtTriangle(240,155,110,'D','M','V',true,false,false,p));
+  if(p>=1){o.push(R(80,210,320,30,'#fff5f0','#C0272D'));o.push(T(240,230,'D = M ÷ V','#C0272D',14,'middle'));}
+  if(p>=2){o.push(R(80,212,320,28,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,230,'D = 270 ÷ 30 = 9 g/cm³','#1a7a3a',14,'middle'));}
+  s.innerHTML=o.join('');}
+
+// Q7: Find mass from density
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Find the Mass','#C0272D',14,'middle'));
+  o.push(T(240,46,'Density = 8 g/cm³     Volume = 25 cm³','#241A17',13,'middle'));
+  o=o.concat(sdtTriangle(240,155,110,'D','M','V',false,true,false,p));
+  if(p>=1){o.push(R(80,210,320,30,'#fff5f0','#C0272D'));o.push(T(240,230,'M = D × V','#C0272D',14,'middle'));}
+  if(p>=2){o.push(R(80,212,320,28,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,230,'M = 8 × 25 = 200 g','#1a7a3a',14,'middle'));}
+  s.innerHTML=o.join('');}
+
+// Q8: Pressure = Force / Area
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'The Pressure–Force–Area Triangle','#C0272D',14,'middle'));
+  o=o.concat(sdtTriangle(240,150,120,'P','F','A',false,false,false,p));
+  if(p>=1){o.push(R(30,192,420,30,'#fff5f0','#C0272D'));o.push(T(240,212,'Cover P → F ÷ A    Cover F → P × A    Cover A → F ÷ P','#241A17',11,'middle'));}
+  if(p>=2){o.push(R(30,226,420,28,'#e8f4ff','#1a5a8a',1));o.push(T(240,245,'Pressure units: N/m² (Pascals)  (formula given in exam)','#1a5a8a',11,'middle'));}
+  s.innerHTML=o.join('');}
+
+// Q9: Mixed — unit conversion then speed
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Mixed Units — Convert First','#C0272D',14,'middle'));
+  o.push(T(240,44,'A train travels 2 hours 30 minutes at 120 km/h. Distance?','#241A17',12,'middle'));
+  if(p>=1){o.push(R(60,58,360,30,'#fff5f0','#C0272D'));o.push(T(240,78,'Convert time: 2 h 30 min = 2.5 hours','#C0272D',13,'middle'));}
+  if(p>=2){o.push(R(60,92,360,30,'#e8f4ff','#1a5a8a'));o.push(T(240,112,'D = S × T = 120 × 2.5','#1a5a8a',13,'middle'));}
+  if(p>=3){o.push(R(120,126,240,34,'#e8f8ee','#1a7a3a',2));o.push(T(240,148,'D = 300 km','#1a7a3a',16,'middle'));}
+  if(p>=4){o.push(T(240,182,'Key: 30 min = 0.5 h  |  15 min = 0.25 h  |  45 min = 0.75 h','#555',11,'middle'));}
+  // Triangle small
+  o=o.concat(sdtTriangle(380,210,60,'S','D','T',false,true,false,0));
+  s.innerHTML=o.join('');}
+
+// Q10: Exchange rate / fuel — other rates
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Other Rates — Exchange & Fuel','#C0272D',14,'middle'));
+  // Exchange rate box
+  o.push(R(30,36,200,80,'#fff5f0','#C0272D'));
+  o.push(T(130,56,'Exchange rate','#C0272D',12,'middle'));
+  o.push(T(130,76,'£1 = ₦2200','#241A17',13,'middle'));
+  if(p>=1)o.push(T(130,98,'£450 = 450 × 2200','#1a5a8a',12,'middle'));
+  if(p>=2)o.push(T(130,116,'= ₦990,000','#1a7a3a',13,'middle'));
+  // Fuel rate box
+  o.push(R(250,36,200,80,'#e8f4ff','#1a5a8a'));
+  o.push(T(350,56,'Fuel consumption','#1a5a8a',12,'middle'));
+  o.push(T(350,76,'12 litres per 100 km','#241A17',12,'middle'));
+  if(p>=3)o.push(T(350,98,'For 250 km: 12/100 × 250','#C0272D',11,'middle'));
+  if(p>=4)o.push(T(350,116,'= 30 litres','#1a7a3a',13,'middle'));
+  o.push(T(240,140,'Rate = quantity per unit  →  multiply or divide as needed','#555',11,'middle'));
+  s.innerHTML=o.join('');}
+
+var QS=[
+  {ey:'Q1 · Rates · Foundation',ti:'The Speed–Distance–Time Formula',su:'Learn the SDT triangle and the three formulas it contains.',lv:'F',steps:[
+    {lb:'The triangle',dr:dQ1,ht:'<span class="lt lf">Foundation</span><p>The <b>SDT triangle</b> is a memory tool. Cover the quantity you want to find — the triangle shows the formula.</p>'},
+    {lb:'Reading the triangle',dr:dQ1,ht:'<div class="fm">Speed = Distance ÷ Time</div><div class="fm">Distance = Speed × Time</div><div class="fm">Time = Distance ÷ Speed</div>'},
+    {lb:'Units',dr:dQ1,ht:'<p>Units must be <b>consistent</b>: if speed is in km/h, distance must be in km and time in hours. If speed is in m/s, distance in metres and time in seconds.</p>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var s=pick([40,50,60,80,100]);var t=pick([2,3,4,5]);var d=s*t;return{question:'Speed = '+s+' km/h, Time = '+t+' h. Find the distance.',hints:['D = S × T'],ans:d,tol:0,unit:'km',working:'D = '+s+' × '+t+' = '+d+' km'};})}
+  ]},
+  {ey:'Q2 · Rates · Foundation',ti:'Finding Speed',su:'A car travels 180 km in 3 hours. Find the average speed.',lv:'F',steps:[
+    {lb:'Cover S',dr:dQ2,ht:'<span class="lt lf">Foundation</span><p>Cover the <b>S</b> in the triangle. What remains is D over T — so <b>Speed = Distance ÷ Time</b>.</p>'},
+    {lb:'Substitute',dr:dQ2,ht:'<div class="fm">S = 180 ÷ 3 = 60 km/h</div>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var s=pick([30,40,50,60,75,80,90,100]);var t=pick([2,3,4,5]);return{question:'Distance = '+s*t+' km, Time = '+t+' h. Find the speed.',hints:['S = D ÷ T'],ans:s,tol:0,unit:'km/h',working:'S = '+(s*t)+' ÷ '+t+' = '+s+' km/h'};})}
+  ]},
+  {ey:'Q3 · Rates · Foundation',ti:'Finding Distance',su:'Speed = 80 km/h, Time = 2.5 hours. Find the distance.',lv:'F',steps:[
+    {lb:'Cover D',dr:dQ3,ht:'<span class="lt lf">Foundation</span><p>Cover the <b>D</b> in the triangle. What remains is S × T — so <b>Distance = Speed × Time</b>.</p>'},
+    {lb:'Substitute',dr:dQ3,ht:'<div class="fm">D = 80 × 2.5 = 200 km</div>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var s=pick([30,40,50,60,80,100]);var t=pick([1.5,2,2.5,3,3.5,4]);return{question:'Speed = '+s+' km/h, Time = '+t+' h. Find the distance.',hints:['D = S × T'],ans:s*t,tol:0.1,unit:'km',working:'D = '+s+' × '+t+' = '+s*t+' km'};})}
+  ]},
+  {ey:'Q4 · Rates · Foundation',ti:'Finding Time — Decimal Hours',su:'Distance = 45 km, Speed = 60 km/h. Find the time in minutes.',lv:'F',steps:[
+    {lb:'Cover T',dr:dQ4,ht:'<span class="lt lf">Foundation</span><p>Cover <b>T</b> → Time = Distance ÷ Speed. The answer comes out in hours — then convert to minutes.</p>'},
+    {lb:'Calculate',dr:dQ4,ht:'<div class="fm">T = 45 ÷ 60 = 0.75 hours</div>'},
+    {lb:'Convert to minutes',dr:dQ4,ht:'<div class="fm">0.75 × 60 = 45 minutes</div><p>To convert decimal hours → minutes, multiply by 60.</p>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var s=pick([40,60,80,120]);var mins=pick([15,20,30,45]);var d=s*mins/60;return{question:'Distance = '+d+' km, Speed = '+s+' km/h. Find the time in minutes.',hints:['T = D ÷ S = '+d+' ÷ '+s+' hours','Then × 60 for minutes'],ans:mins,tol:0,unit:'minutes',working:'T = '+d+'/'+s+' = '+(d/s).toFixed(2)+' h = '+mins+' min'};})}
+  ]},
+  {ey:'Q5 · Rates · Foundation',ti:'The Density–Mass–Volume Formula',su:'Learn the DMV triangle.',lv:'F',steps:[
+    {lb:'The triangle',dr:dQ5,ht:'<span class="lt lf">Foundation</span><p>The same triangle idea works for density. The formula is given in the exam, but the triangle helps you rearrange it quickly.</p>'},
+    {lb:'The three formulas',dr:dQ5,ht:'<div class="fm">Density = Mass ÷ Volume</div><div class="fm">Mass = Density × Volume</div><div class="fm">Volume = Mass ÷ Density</div>'},
+    {lb:'Units',dr:dQ5,ht:'<p>Common units: <b>g/cm³</b> (grams per cubic centimetre) or <b>kg/m³</b>. Make sure mass and volume units match the density unit.</p>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var d=pick([2,4,5,8,10]);var v=pick([5,10,15,20,25,30]);return{question:'Density = '+d+' g/cm³, Volume = '+v+' cm³. Find the mass.',hints:['M = D × V'],ans:d*v,tol:0,unit:'g',working:'M = '+d+' × '+v+' = '+d*v+' g'};})}
+  ]},
+  {ey:'Q6 · Rates · Foundation',ti:'Finding Density',su:'Mass = 270 g, Volume = 30 cm³. Find the density.',lv:'F',steps:[
+    {lb:'Cover D',dr:dQ6,ht:'<span class="lt lf">Foundation</span><p>Cover <b>D</b> → Density = Mass ÷ Volume.</p>'},
+    {lb:'Substitute',dr:dQ6,ht:'<div class="fm">D = 270 ÷ 30 = 9 g/cm³</div>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var d=pick([2,3,4,5,6,8,10]);var v=pick([5,10,15,20,25]);return{question:'Mass = '+d*v+' g, Volume = '+v+' cm³. Find the density.',hints:['D = M ÷ V'],ans:d,tol:0,unit:'g/cm³',working:'D = '+(d*v)+' ÷ '+v+' = '+d+' g/cm³'};})}
+  ]},
+  {ey:'Q7 · Rates · Foundation',ti:'Finding Mass from Density',su:'Density = 8 g/cm³, Volume = 25 cm³. Find the mass.',lv:'F',steps:[
+    {lb:'Cover M',dr:dQ7,ht:'<span class="lt lf">Foundation</span><p>Cover <b>M</b> → Mass = Density × Volume.</p>'},
+    {lb:'Substitute',dr:dQ7,ht:'<div class="fm">M = 8 × 25 = 200 g</div>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var d=pick([3,4,5,6,7,8,9]);var v=pick([10,15,20,25,30,40,50]);return{question:'Density = '+d+' g/cm³, Volume = '+v+' cm³. Find the mass.',hints:['M = D × V'],ans:d*v,tol:0,unit:'g',working:'M = '+d+' × '+v+' = '+d*v+' g'};})}
+  ]},
+  {ey:'Q8 · Rates · Extended',ti:'The Pressure–Force–Area Formula',su:'Learn the PFA triangle and use it to find pressure.',lv:'E',steps:[
+    {lb:'The triangle',dr:dQ8,ht:'<span class="lt le">Extended</span><p>Pressure is force per unit area. The formula is always given in the exam but you need to rearrange it confidently.</p>'},
+    {lb:'The three formulas',dr:dQ8,ht:'<div class="fm">Pressure = Force ÷ Area</div><div class="fm">Force = Pressure × Area</div><div class="fm">Area = Force ÷ Pressure</div>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var p=pick([4,5,6,8,10,12]);var a=pick([3,4,5,6,8,10]);return{question:'Force = '+p*a+' N, Area = '+a+' m². Find the pressure.',hints:['P = F ÷ A'],ans:p,tol:0,unit:'N/m²',working:'P = '+(p*a)+' ÷ '+a+' = '+p+' N/m²'};})}
+  ]},
+  {ey:'Q9 · Rates · Foundation',ti:'Mixed Units — Convert First',su:'A train travels for 2 hours 30 minutes at 120 km/h. How far does it travel?',lv:'F',steps:[
+    {lb:'The problem',dr:dQ9,ht:'<span class="lt lf">Foundation</span><p>The time is given in hours and minutes. Before using D = S × T you must convert the time to <b>decimal hours</b>.</p>'},
+    {lb:'Convert time',dr:dQ9,ht:'<div class="fm">2 h 30 min = 2 + 30/60 = 2.5 hours</div>'},
+    {lb:'Calculate distance',dr:dQ9,ht:'<div class="fm">D = 120 × 2.5 = 300 km</div>'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var s=pick([60,80,90,100,120]);var h=pick([1,2,3]);var m=pick([15,20,30,45]);var t=h+m/60;var d=s*t;return{question:'Speed = '+s+' km/h, Time = '+h+' h '+m+' min. Find the distance.',hints:['Convert: '+h+' h '+m+' min = '+(h+m/60)+' h','D = S × T'],ans:d,tol:0.5,unit:'km',working:'T = '+(h+m/60).toFixed(2)+'h, D = '+s+'×'+(h+m/60).toFixed(2)+' = '+d+' km'};})}
+  ]},
+  {ey:'Q10 · Rates · Foundation',ti:'Other Rates — Exchange & Fuel',su:'Use rates in practical contexts: currency exchange and fuel consumption.',lv:'F',steps:[
+    {lb:'Exchange rates',dr:dQ10,ht:'<span class="lt lf">Foundation</span><p>A <b>rate</b> is any quantity per unit — not just speed or density. Exchange rates work the same way: multiply to convert.</p>'},
+    {lb:'Exchange rate example',dr:dQ10,ht:'<div class="fm">£1 = ₦2200 → £450 = 450 × 2200 = ₦990,000</div>'},
+    {lb:'Fuel consumption',dr:dQ10,ht:'<div class="fm">12 litres per 100 km → 250 km needs 12/100 × 250 = 30 litres</div>'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var rate=pick([1500,1800,2000,2200,2500]);var pounds=pick([100,200,250,300,400,500]);return{question:'Exchange rate: £1 = ₦'+rate.toLocaleString()+'. Convert £'+pounds+' to naira.',hints:['Multiply: '+pounds+' × '+rate],ans:pounds*rate,tol:0,unit:'₦',working:'£'+pounds+' × '+rate+' = ₦'+(pounds*rate).toLocaleString()};})}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti+'<br><span class="badge '+(q.lv==='F'?'bf':'be')+'">'+(q.lv==='F'?'Foundation':'Extended')+'</span>';b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+
+<!-- ABC Supabase Progress Tracking — year-aware: Y9-NUM-02 or Y10-NUM-03 -->
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase = _sb;
+window._abcUpdated = '2026-06-28';
+
+// Resolve topic code from student's year group
+async function resolveTopicCode() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) return null;
+  const { data: profile } = await _sb.from('profiles').select('year_group').eq('id', session.user.id).maybeSingle();
+  const yr = profile?.year_group;
+  return yr <= 9 ? 'Y9-NUM-02' : 'Y10-NUM-03';
+}
+
+window.markComplete = async function() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) return;
+  const code = await resolveTopicCode();
+  if (!code) return;
+  const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', code).maybeSingle();
+  if (!topic) return;
+  window._abcTopicId = topic.id;
+  await _sb.from('walkthrough_progress').upsert({
+    student_id: session.user.id, topic_id: topic.id,
+    status: 'completed', completed_at: new Date().toISOString(),
+    last_visited_at: new Date().toISOString(),
+  }, { onConflict: 'student_id,topic_id' });
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>
