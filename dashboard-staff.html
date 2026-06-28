@@ -593,6 +593,7 @@
     }
 
     document.getElementById('header-name').textContent = profile.full_name;
+    _currentUserIsAdmin = profile.role === 'admin';
 
     // ── Fetch all data in parallel ──
     const [
@@ -1354,6 +1355,7 @@
       const reviewerCount = rm ? rm.reviewers.size : 0;
       const qCount = rm ? rm.questions.size : 0;
       const dominant = rm ? getDominantRating(rm.ratings) : null;
+      const showCopyBtn = _currentUserIsAdmin && reviewerCount >= 2;
       const statusBadge = dominant
         ? (dominant === 'good' ? '<span class="badge badge-green">✓ Good</span>' :
            dominant === 'needs_improvement' ? '<span class="badge badge-yellow">⚠ Needs work</span>' :
@@ -1368,9 +1370,10 @@
           ${statusBadge}
           ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} · ${qCount} Qs</span>` : ''}
         </div>
-        <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}')">
+        <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name.replace(/'/g,"\\'")}')">
           ${rm ? 'Add/Edit Review' : 'Review'}
         </button>
+        ${showCopyBtn ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;border-color:#1a56b0;color:#1a56b0" onclick="copyForClaude(${t.id},'${t.topic_name.replace(/'/g,"\\'")}','${t.topic_code}')">📋 Copy for Claude</button>` : ''}
       </div>`;
     }).join('');
   };
@@ -1381,6 +1384,71 @@
     ratings.forEach(r => { if (counts[r] !== undefined) counts[r]++; });
     return Object.entries(counts).sort((a,b) => b[1]-a[1])[0][0];
   }
+
+  let _currentUserIsAdmin = false;
+
+  window.copyForClaude = async function(topicId, topicName, topicCode) {
+    const btn = event.target;
+    const origText = btn.textContent;
+    btn.textContent = 'Copying…';
+    btn.disabled = true;
+
+    try {
+      const { data: reviews } = await supabase
+        .from('walkthrough_reviews')
+        .select('*, profiles(full_name)')
+        .eq('topic_id', topicId)
+        .order('reviewer_id')
+        .order('question_number');
+
+      if (!reviews || reviews.length === 0) {
+        alert('No reviews found for this walkthrough.');
+        return;
+      }
+
+      const byReviewer = {};
+      reviews.forEach(r => {
+        const name = r.profiles?.full_name || r.reviewer_id;
+        if (!byReviewer[name]) byReviewer[name] = [];
+        byReviewer[name].push(r);
+      });
+
+      const ratingLabel = { good: '✓ Good', needs_improvement: '⚠ Needs Improvement', not_good: '✗ Not Good' };
+
+      let text = `WALKTHROUGH REVIEW SUMMARY\n`;
+      text += `Topic: ${topicName} (${topicCode})\n`;
+      text += `Reviewers: ${Object.keys(byReviewer).join(', ')}\n`;
+      text += `Date exported: ${new Date().toLocaleDateString('en-GB')}\n`;
+      text += `${'─'.repeat(60)}\n\n`;
+
+      Object.entries(byReviewer).forEach(([reviewer, qs]) => {
+        text += `REVIEWER: ${reviewer}\n${'─'.repeat(40)}\n`;
+        qs.forEach(q => {
+          text += `Q${q.question_number}: ${ratingLabel[q.rating] || q.rating}\n`;
+          if (q.comment) text += `Comment: ${q.comment}\n`;
+          text += '\n';
+        });
+      });
+
+      text += `${'─'.repeat(60)}\n`;
+      text += `Please rebuild this walkthrough addressing the reviewer feedback above.\n`;
+
+      await navigator.clipboard.writeText(text);
+      btn.textContent = '✓ Copied!';
+      btn.style.borderColor = '#2e7d32';
+      btn.style.color = '#2e7d32';
+      setTimeout(() => {
+        btn.textContent = origText;
+        btn.style.borderColor = '#1a56b0';
+        btn.style.color = '#1a56b0';
+        btn.disabled = false;
+      }, 2000);
+    } catch(e) {
+      alert('Copy failed: ' + e.message);
+      btn.textContent = origText;
+      btn.disabled = false;
+    }
+  };
 
   window.openReviewModal = async function(topicId, topicCode, topicName) {
     currentReviewTopicId = topicId;
