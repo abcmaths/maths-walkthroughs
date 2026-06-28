@@ -115,15 +115,35 @@ function growthCurve(ox,oy,sx,sy,start,r,n,c){
   return '<path d="'+d+'" fill="none" stroke="'+(c||'#C0272D')+'" stroke-width="2.5"/>';
 }
 
-// Q1: The formula — growth
+// Q1: The formula — growth, revealed point by point
 function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var ox=60,oy=220,sx=60,sy=0.8;
-  o.push(L(ox,oy,ox+5*sx+20,oy,'#aaa',1.5));o.push(L(ox,10,ox,oy,'#aaa',1.5));
+  var vals=[100,120,144,173,207,249]; // 100 × 1.2^n
+  var labels=['Year 0\n£100','Year 1\n£120','Year 2\n£144','Year 3\n£173','Year 4\n£207','Year 5\n£249'];
+  // Axes
+  o.push(L(ox,oy,ox+5*sx+30,oy,'#aaa',1.5));o.push(L(ox,10,ox,oy,'#aaa',1.5));
   for(var i=0;i<=5;i++){o.push(L(ox+i*sx,oy-3,ox+i*sx,oy+3,'#aaa',1));o.push(T(ox+i*sx,oy+14,''+i,'#555',10));}
   [50,100,150,200].forEach(function(v){o.push(L(ox-3,oy-v*sy,ox+3,oy-v*sy,'#aaa',1));o.push(T(ox-6,oy-v*sy+4,''+v,'#555',9,'end'));});
-  o.push(T(ox+160,oy+28,'Time (years)','#555',11));o.push(T(ox-16,oy-110,'Value','#555',11));
-  if(p>=1){o.push(growthCurve(ox,oy,sx,sy,100,1.2,5,'#C0272D'));o.push(T(ox+5*sx+14,oy-Math.pow(1.2,5)*100*sy,'×1.2','#C0272D',11,'start'));}
-  if(p>=2){o.push(R(10,8,300,32,'#fff5f0','#C0272D'));o.push(T(155,30,'V = P × (1 + r/100)ⁿ','#C0272D',13));}
+  o.push(T(ox+160,oy+28,'Time (years)','#555',11));o.push(T(ox-16,oy-110,'Value (£)','#555',11));
+  // Plot points progressively — each step reveals one more year
+  var showTo=Math.min(p,5);
+  for(var i=0;i<=showTo;i++){
+    var px=ox+i*sx,py=oy-vals[i]*sy;
+    o.push('<circle cx="'+px+'" cy="'+py+'" r="5" fill="#C0272D" stroke="#fff" stroke-width="1.5"/>');
+    o.push(T(px,py-12,'£'+vals[i],'#C0272D',10));
+  }
+  // Connect points with line segments once we have at least 2
+  if(showTo>=1){
+    var path='M'+(ox)+','+(oy-vals[0]*sy);
+    for(var i=1;i<=showTo;i++)path+=' L'+(ox+i*sx)+','+(oy-vals[i]*sy);
+    o.push('<path d="'+path+'" fill="none" stroke="#C0272D" stroke-width="2" stroke-dasharray="4,2"/>');
+  }
+  // After all points, show smooth curve underneath
+  if(p>=6){o.push(growthCurve(ox,oy,sx,sy,100,1.2,5,'rgba(192,39,45,0.35)'));}
+  // Multiplier annotation appears at step 2+
+  if(p>=2){o.push(T(ox+sx*0.5,oy-110,'×1.2 each year','#C8922A',11));}
+  // Formula at final step
+  if(p>=6){o.push(R(10,8,300,28,'#fff5f0','#C0272D'));o.push(T(155,26,'V = 100 × 1.2ⁿ','#C0272D',13));}
   s.innerHTML=o.join('');}
 
 // Q2: Compound interest growth
@@ -248,9 +268,14 @@ function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   s.innerHTML=o.join('');}
 
 var QS=[
-  {ey:'Q1 · Growth & Decay · Extended',ti:'The Exponential Growth Formula',su:'Understand how exponential growth works and what the formula means.',lv:'E',steps:[
-    {lb:'The curve',dr:dQ1,ht:'<span class="lt le">Extended</span><p>Exponential growth means a quantity increases by the <b>same percentage</b> each time period — not the same amount. The result is a curve that gets steeper.</p>'},
-    {lb:'The formula',dr:dQ1,ht:'<div class="fm">V = P × (1 + r/100)ⁿ</div><p><b>V</b> = final value, <b>P</b> = initial value, <b>r</b> = percentage rate, <b>n</b> = number of periods.</p>'},
+  {ey:'Q1 · Growth & Decay · Extended',ti:'The Exponential Growth Formula',su:'Start with £100, growing at 20% per year. Build the graph year by year.',lv:'E',steps:[
+    {lb:'The starting point',dr:dQ1,ht:'<span class="lt le">Extended</span><p>We start with <b>£100</b> at Year 0. Each year the value increases by <b>20%</b> — not a fixed amount, but 20% of whatever the current value is.</p>'},
+    {lb:'Year 1',dr:dQ1,ht:'<div class="fm">£100 × 1.20 = £120</div><p>After 1 year: <b>£120</b>. The multiplier 1.20 represents a 20% increase.</p>'},
+    {lb:'Year 2',dr:dQ1,ht:'<div class="fm">£120 × 1.20 = £144</div><p>We multiply the <b>new</b> value by 1.20 — not the original. This is what makes it exponential.</p>'},
+    {lb:'Year 3',dr:dQ1,ht:'<div class="fm">£144 × 1.20 = £172.80 ≈ £173</div><p>Each step is bigger than the last — the growth accelerates.</p>'},
+    {lb:'Year 4',dr:dQ1,ht:'<div class="fm">£173 × 1.20 ≈ £207</div>'},
+    {lb:'Year 5',dr:dQ1,ht:'<div class="fm">£207 × 1.20 ≈ £249</div><p>All 5 points are now plotted. Notice the curve bends upward — this is the characteristic shape of exponential growth.</p>'},
+    {lb:'The formula',dr:dQ1,ht:'<div class="fm">V = 100 × 1.2ⁿ = P × (1 + r/100)ⁿ</div><p>Instead of multiplying step by step, raise the multiplier to the power n. <b>P</b> = initial value, <b>r</b> = rate %, <b>n</b> = number of periods.</p>'},
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var p=pick([1000,2000,5000]);var r=pick([5,10,20]);var n=rnd(2,4);var v=Math.round(p*Math.pow(1+r/100,n));return{question:'P = £'+p+', r = '+r+'%, n = '+n+' years. Find V (nearest £).',hints:['V = '+p+' × '+((100+r)/100)+'^'+n],ans:v,tol:5,unit:'£',working:p+' × '+(1+r/100)+'^'+n+' = £'+v};})}
   ]},
   {ey:'Q2 · Growth & Decay · Extended',ti:'Compound Interest',su:'£2000 invested at 5% compound interest. Value after 3 years?',lv:'E',steps:[
