@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exponential Growth &amp; Decay · Year 11 · Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-top:3px;}
+.bf{background:#e8f4ff;color:#1a5a8a;}.be{background:#fce8d8;color:#7A1418;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.lt{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:8px;}
+.lf{background:#e8f4ff;color:#1a5a8a;}.le{background:#fce8d8;color:#7A1418;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">← All Topics</a>
+  <div class="ht">Exponential Growth &amp; Decay — Year 11</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">← Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next →</button>
+    </div>
+  </div>
+</div>
+<script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function round2(x){return Math.round(x*100)/100;}
+var ST={};
+function tryIt(fn){var id='t'+Math.random().toString(36).slice(2);var o=fn();ST[id]={o:o,genFn:fn};return bT(id,o);}
+function bT(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">✔ Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.genFn();entry.o=o;var wrap=el.closest('.try');if(!wrap)return;var tmp=document.createElement('div');tmp.innerHTML=bT(id,o);wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;}
+  if(el.classList.contains('try-ck')){var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}var tol=o.tol!=null?o.tol:0.5;if(Math.abs(v-o.ans)<=tol){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! &nbsp;'+o.working;}else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}  }
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a){return '<text x="'+x+'" y="'+y+'" font-size="'+(sz||12)+'" font-family="Arial" fill="'+(c||'#6b5750')+'" text-anchor="'+(a||'middle')+'">'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||1.5)+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#aaa')+'" stroke-width="'+(w||1.5)+'"/>';}
+
+function growthCurve(ox,oy,sx,sy,start,r,n,c){
+  var d='M'+ox+','+oy;
+  for(var i=0;i<=n;i++){var val=start*Math.pow(r,i);var px=ox+i*sx,py=oy-val*sy;d+=' L'+Math.round(px)+','+Math.round(py);}
+  return '<path d="'+d+'" fill="none" stroke="'+(c||'#C0272D')+'" stroke-width="2.5"/>';
+}
+
+// Q1: The formula — growth
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var ox=60,oy=220,sx=60,sy=0.8;
+  o.push(L(ox,oy,ox+5*sx+20,oy,'#aaa',1.5));o.push(L(ox,10,ox,oy,'#aaa',1.5));
+  for(var i=0;i<=5;i++){o.push(L(ox+i*sx,oy-3,ox+i*sx,oy+3,'#aaa',1));o.push(T(ox+i*sx,oy+14,''+i,'#555',10));}
+  [50,100,150,200].forEach(function(v){o.push(L(ox-3,oy-v*sy,ox+3,oy-v*sy,'#aaa',1));o.push(T(ox-6,oy-v*sy+4,''+v,'#555',9,'end'));});
+  o.push(T(ox+160,oy+28,'Time (years)','#555',11));o.push(T(ox-16,oy-110,'Value','#555',11));
+  if(p>=1){o.push(growthCurve(ox,oy,sx,sy,100,1.2,5,'#C0272D'));o.push(T(ox+5*sx+14,oy-Math.pow(1.2,5)*100*sy,'×1.2','#C0272D',11,'start'));}
+  if(p>=2){o.push(R(10,8,300,32,'#fff5f0','#C0272D'));o.push(T(155,30,'V = P × (1 + r/100)ⁿ','#C0272D',13));}
+  s.innerHTML=o.join('');}
+
+// Q2: Compound interest growth
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  // £2000 at 5% for 3 years
+  var vals=[2000,2100,2205,2315.25];
+  var ox=60,oy=220,sx=90,sy=0.08;
+  o.push(L(ox,oy,ox+4*sx,oy,'#aaa',1.5));o.push(L(ox,20,ox,oy,'#aaa',1.5));
+  for(var i=0;i<=3;i++){o.push(L(ox+i*sx,oy-3,ox+i*sx,oy+3,'#aaa',1));o.push(T(ox+i*sx,oy+14,'Yr '+i,'#555',10));}
+  o.push(T(240,22,'Compound Interest: £2000 at 5% for 3 years','#C0272D',12));
+  if(p>=1){vals.forEach(function(v,i){o.push('<circle cx="'+(ox+i*sx)+'" cy="'+(oy-v*sy)+'" r="5" fill="#C0272D"/>');o.push(T(ox+i*sx,oy-v*sy-10,'£'+v.toFixed(2),'#241A17',10));});}
+  if(p>=2){o.push(R(50,200,380,30,'#e8f8ee','#1a7a3a',1));o.push(T(240,220,'2000 × 1.05³ = £2315.25','#1a7a3a',13));}
+  s.innerHTML=o.join('');}
+
+// Q3: Depreciation decay curve
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var ox=60,oy=40,sx=70,sy=1.8;
+  o.push(L(ox,oy+5*sy*50,ox+5*sx+20,oy+5*sy*50,'#aaa',1.5));o.push(L(ox,oy,ox,oy+5*sy*50+20,'#aaa',1.5));
+  for(var i=0;i<=5;i++){o.push(L(ox+i*sx,oy+5*sy*50-3,ox+i*sx,oy+5*sy*50+3,'#aaa',1));o.push(T(ox+i*sx,oy+5*sy*50+14,''+i,'#555',10));}
+  [0,25,50,75,100].forEach(function(v){var py=oy+(100-v)*sy;o.push(L(ox-3,py,ox+3,py,'#aaa',1));o.push(T(ox-6,py+4,''+v,'#555',9,'end'));});
+  o.push(T(240,oy+5*sy*50+28,'Time (years)','#555',11));
+  // Decay: 100 × 0.8^n
+  if(p>=1){
+    var d='M'+ox+','+(oy);
+    for(var i=0;i<=5;i++){var v=100*Math.pow(0.8,i);var px=ox+i*sx,py=oy+(100-v)*sy;if(i===0)d='M'+px+','+py;else d+=' L'+Math.round(px)+','+Math.round(py);}
+    o.push('<path d="'+d+'" fill="none" stroke="#1a5a8a" stroke-width="2.5"/>');
+    o.push(T(ox+5*sx+14,oy+(100-100*Math.pow(0.8,5))*sy,'×0.8','#1a5a8a',11,'start'));
+  }
+  if(p>=2){o.push(R(10,8,300,28,'#e8f4ff','#1a5a8a'));o.push(T(155,27,'V = P × (1 − r/100)ⁿ','#1a5a8a',13));}
+  s.innerHTML=o.join('');}
+
+// Q4: Multiplier method
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'The Multiplier Method','#C0272D',14));
+  var rows=[['Increase by 5%','× 1.05'],['Increase by 20%','× 1.20'],['Decrease by 10%','× 0.90'],['Decrease by 15%','× 0.85'],['Decrease by 3.5%','× 0.965']];
+  rows.forEach(function(r,i){
+    if(p>=i+1){
+      o.push(R(40,40+i*40,400,36,i%2===0?'#fff5f0':'#fdf7f4','#E4D6CE',1));
+      o.push(T(200,63+i*40,r[0],'#241A17',13,'middle'));
+      o.push(T(380,63+i*40,r[1],'#C0272D',14,'middle'));
+    }
+  });
+  if(p>=5){o.push(R(40,244,400,12,'#e8f8ee','#1a7a3a',1));o.push(T(240,252,'Growth multiplier > 1.  Decay multiplier < 1.','#1a7a3a',10));}
+  s.innerHTML=o.join('');}
+
+// Q5: Population growth
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Population Growth','#C0272D',14));
+  o.push(T(240,42,'Town: 50,000 people, growing at 3% per year.','#241A17',12));
+  o.push(R(60,56,360,36,'#fff5f0','#C0272D'));o.push(T(240,80,'V = 50000 × 1.03ⁿ','#C0272D',14));
+  if(p>=1){o.push(L(240,92,240,112,'#aaa',1));o.push(R(60,112,360,36,'#e8f4ff','#1a5a8a'));o.push(T(240,136,'After 5 years: 50000 × 1.03⁵','#1a5a8a',13));}
+  if(p>=2){o.push(L(240,148,240,168,'#aaa',1));o.push(R(60,168,360,36,'#e8f4ff','#1a5a8a'));o.push(T(240,192,'= 50000 × 1.1593 = 57,964','#1a5a8a',13));}
+  if(p>=3){o.push(R(120,212,240,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,236,'≈ 57,964 people','#1a7a3a',14));}
+  s.innerHTML=o.join('');}
+
+// Q6: Depreciation
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Car Depreciation','#C0272D',14));
+  o.push(T(240,42,'Car bought for £18,000. Depreciates at 12% per year.','#241A17',12));
+  o.push(R(60,56,360,36,'#fff5f0','#C0272D'));o.push(T(240,80,'V = 18000 × 0.88ⁿ','#C0272D',14));
+  if(p>=1){o.push(L(240,92,240,112,'#aaa',1));o.push(R(60,112,360,36,'#e8f4ff','#1a5a8a'));o.push(T(240,136,'After 4 years: 18000 × 0.88⁴','#1a5a8a',13));}
+  if(p>=2){o.push(L(240,148,240,168,'#aaa',1));o.push(R(60,168,360,36,'#e8f4ff','#1a5a8a'));o.push(T(240,192,'= 18000 × 0.5997 = £10,794','#1a5a8a',13));}
+  if(p>=3){o.push(R(120,212,240,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,236,'≈ £10,794 after 4 years','#1a7a3a',14));}
+  s.innerHTML=o.join('');}
+
+// Q7: Repeated percentage change
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Repeated Percentage Change','#C0272D',14));
+  o.push(T(240,42,'Price rises 10% then falls 10%. Is it back to the start?','#241A17',12));
+  if(p>=1){o.push(R(60,56,360,36,'#fff5f0','#C0272D'));o.push(T(240,80,'Rise 10%: £100 × 1.10 = £110','#C0272D',13));}
+  if(p>=2){o.push(R(60,98,360,36,'#e8f4ff','#1a5a8a'));o.push(T(240,122,'Fall 10%: £110 × 0.90 = £99','#1a5a8a',13));}
+  if(p>=3){o.push(R(60,140,360,36,'#fef8ee','#C8922A'));o.push(T(240,164,'Net multiplier: 1.10 × 0.90 = 0.99 → 1% loss overall','#C8922A',12));}
+  if(p>=4){o.push(R(60,182,360,36,'#e8f8ee','#1a7a3a',1));o.push(T(240,206,'Key: % increase then same % decrease ≠ no change','#1a7a3a',12));}
+  s.innerHTML=o.join('');}
+
+// Q8: Find the original value (reverse)
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Finding the Original Value','#C0272D',14));
+  o.push(T(240,42,'After 3 years at 5% growth, value = £23,152.50. Find original.','#241A17',12));
+  o.push(R(60,56,360,36,'#fff5f0','#C0272D'));o.push(T(240,80,'P × 1.05³ = 23152.50','#C0272D',13));
+  if(p>=1){o.push(L(240,92,240,112,'#aaa',1));o.push(R(60,112,360,36,'#e8f4ff','#1a5a8a'));o.push(T(240,136,'P = 23152.50 ÷ 1.05³ = 23152.50 ÷ 1.157625','#1a5a8a',12));}
+  if(p>=2){o.push(L(240,148,240,168,'#aaa',1));o.push(R(120,168,240,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,192,'P = £20,000','#1a7a3a',16));}
+  if(p>=3){o.push(T(240,222,'Always divide by the multiplier to reverse growth','#555',11));}
+  s.innerHTML=o.join('');}
+
+// Q9: Half-life (radioactive decay)
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Half-Life — Radioactive Decay','#C0272D',14));
+  o.push(T(240,40,'A substance has half-life of 10 years. Start: 800g.','#241A17',12));
+  // Table
+  var rows=[['0','800g'],['10','400g'],['20','200g'],['30','100g'],['40','50g']];
+  rows.forEach(function(r,i){
+    if(p>=i){
+      o.push(R(100,56+i*36,130,32,i%2===0?'#fff5f0':'#fdf7f4','#E4D6CE',1));
+      o.push(T(165,77+i*36,'t = '+r[0]+' yrs','#241A17',12,'middle'));
+      o.push(R(232,56+i*36,148,32,i%2===0?'#fff5f0':'#fdf7f4','#E4D6CE',1));
+      o.push(T(306,77+i*36,r[1],'#C0272D',12,'middle'));
+    }
+  });
+  if(p>=5){o.push(R(60,240,360,14,'#e8f8ee','#1a7a3a',1));o.push(T(240,250,'V = 800 × (0.5)^(t/10)','#1a7a3a',11));}
+  s.innerHTML=o.join('');}
+
+// Q10: Compare growth and decay on one graph
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var ox=60,oy=220,sx=60,sy=1.5;
+  o.push(L(ox,oy,ox+5*sx+20,oy,'#aaa',1.5));o.push(L(ox,10,ox,oy,'#aaa',1.5));
+  for(var i=0;i<=5;i++){o.push(L(ox+i*sx,oy-3,ox+i*sx,oy+3,'#aaa',1));o.push(T(ox+i*sx,oy+14,''+i,'#555',10));}
+  [50,100,150].forEach(function(v){o.push(L(ox-3,oy-v*sy,ox+3,oy-v*sy,'#aaa',1));o.push(T(ox-6,oy-v*sy+4,''+v,'#555',9,'end'));});
+  if(p>=1){
+    // Growth: 50 × 1.2^n
+    var dg='';for(var i=0;i<=5;i++){var v=50*Math.pow(1.2,i);var px=ox+i*sx,py=oy-v*sy;dg+=(i===0?'M':'L')+Math.round(px)+','+Math.round(py)+' ';}
+    o.push('<path d="'+dg+'" fill="none" stroke="#C0272D" stroke-width="2.5"/>');
+    o.push(T(ox+5*sx+14,oy-50*Math.pow(1.2,5)*sy,'Growth','#C0272D',10,'start'));
+  }
+  if(p>=2){
+    // Decay: 150 × 0.8^n
+    var dd='';for(var i=0;i<=5;i++){var v=150*Math.pow(0.8,i);var px=ox+i*sx,py=oy-v*sy;dd+=(i===0?'M':'L')+Math.round(px)+','+Math.round(py)+' ';}
+    o.push('<path d="'+dd+'" fill="none" stroke="#1a5a8a" stroke-width="2.5"/>');
+    o.push(T(ox+5*sx+14,oy-150*Math.pow(0.8,5)*sy,'Decay','#1a5a8a',10,'start'));
+  }
+  if(p>=3){o.push(R(10,8,320,26,'#fff5f0','#C0272D'));o.push(T(165,25,'Growth: multiplier > 1.  Decay: multiplier < 1.','#C0272D',11));}
+  s.innerHTML=o.join('');}
+
+var QS=[
+  {ey:'Q1 · Growth & Decay · Extended',ti:'The Exponential Growth Formula',su:'Understand how exponential growth works and what the formula means.',lv:'E',steps:[
+    {lb:'The curve',dr:dQ1,ht:'<span class="lt le">Extended</span><p>Exponential growth means a quantity increases by the <b>same percentage</b> each time period — not the same amount. The result is a curve that gets steeper.</p>'},
+    {lb:'The formula',dr:dQ1,ht:'<div class="fm">V = P × (1 + r/100)ⁿ</div><p><b>V</b> = final value, <b>P</b> = initial value, <b>r</b> = percentage rate, <b>n</b> = number of periods.</p>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var p=pick([1000,2000,5000]);var r=pick([5,10,20]);var n=rnd(2,4);var v=Math.round(p*Math.pow(1+r/100,n));return{question:'P = £'+p+', r = '+r+'%, n = '+n+' years. Find V (nearest £).',hints:['V = '+p+' × '+((100+r)/100)+'^'+n],ans:v,tol:5,unit:'£',working:p+' × '+(1+r/100)+'^'+n+' = £'+v};})}
+  ]},
+  {ey:'Q2 · Growth & Decay · Extended',ti:'Compound Interest',su:'£2000 invested at 5% compound interest. Value after 3 years?',lv:'E',steps:[
+    {lb:'The problem',dr:dQ2,ht:'<span class="lt le">Extended</span><p>Compound interest applies the percentage to the <b>new total each year</b>, not the original amount. This is exponential growth.</p>'},
+    {lb:'The multiplier',dr:dQ2,ht:'<p>5% growth → multiply by <b>1.05</b> each year. For 3 years, multiply by 1.05 three times.</p>'},
+    {lb:'Calculate',dr:dQ2,ht:'<div class="fm">V = 2000 × 1.05³ = 2000 × 1.1576 = £2315.25</div>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var p=pick([1000,2000,3000,5000]);var r=pick([3,4,5,6,8]);var n=rnd(2,5);var v=round2(p*Math.pow(1+r/100,n));return{question:'£'+p+' at '+r+'% compound interest for '+n+' years. Find V (to nearest penny).',hints:['V = '+p+' × '+(1+r/100)+'^'+n],ans:v,tol:0.1,unit:'£',working:p+' × '+(1+r/100)+'^'+n+' = £'+v};})}
+  ]},
+  {ey:'Q3 · Growth & Decay · Extended',ti:'Exponential Decay — The Formula',su:'Understand the decay formula and its graph.',lv:'E',steps:[
+    {lb:'The decay curve',dr:dQ3,ht:'<span class="lt le">Extended</span><p>Exponential decay means a quantity <b>decreases</b> by the same percentage each period. The curve falls steeply at first, then more slowly — it never reaches zero.</p>'},
+    {lb:'The formula',dr:dQ3,ht:'<div class="fm">V = P × (1 − r/100)ⁿ</div><p>The only difference from growth is <b>minus</b> instead of plus. The multiplier is less than 1.</p>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var p=pick([1000,2000,5000,10000]);var r=pick([10,15,20,25]);var n=rnd(2,4);var v=Math.round(p*Math.pow(1-r/100,n));return{question:'P = £'+p+', r = '+r+'% decay per year, n = '+n+' years. Find V (nearest £).',hints:['V = '+p+' × '+(1-r/100)+'^'+n],ans:v,tol:5,unit:'£',working:p+' × '+(1-r/100)+'^'+n+' = £'+v};})}
+  ]},
+  {ey:'Q4 · Growth & Decay · Extended',ti:'The Multiplier Method',su:'Write the multiplier for different percentage changes.',lv:'E',steps:[
+    {lb:'Growth multipliers',dr:dQ4,ht:'<span class="lt le">Extended</span><p>Instead of adding/subtracting percentages step by step, use a single <b>multiplier</b> raised to a power.</p>'},
+    {lb:'Growth examples',dr:dQ4,ht:'<p>+5% → ×1.05. &nbsp;+20% → ×1.20. The multiplier = 1 + (rate/100).</p>'},
+    {lb:'Decay examples',dr:dQ4,ht:'<p>−10% → ×0.90. &nbsp;−15% → ×0.85. The multiplier = 1 − (rate/100).</p>'},
+    {lb:'The rule',dr:dQ4,ht:'<div class="fm">Growth multiplier = (100 + r) / 100</div><div class="fm">Decay multiplier = (100 − r) / 100</div>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var r=pick([5,8,12,15,20,25]);var type=pick(['growth','decay']);var m=type==='growth'?(100+r)/100:(100-r)/100;return{question:'What is the multiplier for a '+r+'% '+type+'? (enter as a decimal)',hints:[type==='growth'?'1 + '+r+'/100':'1 − '+r+'/100'],ans:m,tol:0.001,unit:'',working:'Multiplier = '+m};})}
+  ]},
+  {ey:'Q5 · Growth & Decay · Extended',ti:'Population Growth',su:'Town of 50,000 growing at 3% per year. Population after 5 years?',lv:'E',steps:[
+    {lb:'Set up',dr:dQ5,ht:'<span class="lt le">Extended</span><p>Identify P, r and n then substitute into V = P × (1 + r/100)ⁿ.</p>'},
+    {lb:'Calculate',dr:dQ5,ht:'<div class="fm">V = 50000 × 1.03⁵ = 50000 × 1.1593</div>'},
+    {lb:'Result',dr:dQ5,ht:'<div class="fm">≈ 57,964 people</div>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var p=pick([10000,20000,50000,100000]);var r=pick([2,3,4,5]);var n=rnd(3,6);var v=Math.round(p*Math.pow(1+r/100,n));return{question:'Population of '+p.toLocaleString()+' grows at '+r+'% per year. After '+n+' years?',hints:['V = '+p+' × '+(1+r/100)+'^'+n],ans:v,tol:50,unit:'people',working:p+' × '+(1+r/100)+'^'+n+' ≈ '+v};})}
+  ]},
+  {ey:'Q6 · Growth & Decay · Extended',ti:'Car Depreciation',su:'Car bought for £18,000. Depreciates at 12% per year. Value after 4 years?',lv:'E',steps:[
+    {lb:'Set up',dr:dQ6,ht:'<span class="lt le">Extended</span><p>12% decrease per year → multiplier = 0.88. Apply for 4 years.</p>'},
+    {lb:'Calculate',dr:dQ6,ht:'<div class="fm">V = 18000 × 0.88⁴ = 18000 × 0.5997</div>'},
+    {lb:'Result',dr:dQ6,ht:'<div class="fm">≈ £10,794</div>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var p=pick([8000,10000,12000,15000,20000]);var r=pick([10,12,15,20]);var n=rnd(2,5);var v=Math.round(p*Math.pow(1-r/100,n));return{question:'Car bought for £'+p.toLocaleString()+'. Depreciates '+r+'% per year. Value after '+n+' years (nearest £)?',hints:['Multiplier = '+(1-r/100),'V = '+p+' × '+(1-r/100)+'^'+n],ans:v,tol:20,unit:'£',working:p+' × '+(1-r/100)+'^'+n+' = £'+v};})}
+  ]},
+  {ey:'Q7 · Growth & Decay · Extended',ti:'Repeated Percentage Change',su:'A price rises 10% then falls 10%. What is the overall change?',lv:'E',steps:[
+    {lb:'The surprise',dr:dQ7,ht:'<span class="lt le">Extended</span><p>Many people assume a 10% rise followed by a 10% fall returns to the original. It does <b>not</b> — the percentages apply to different amounts.</p>'},
+    {lb:'Calculate',dr:dQ7,ht:'<div class="fm">£100 × 1.10 × 0.90 = £99</div>'},
+    {lb:'Net multiplier',dr:dQ7,ht:'<div class="fm">1.10 × 0.90 = 0.99 → 1% overall decrease</div>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var r1=pick([5,10,20,25]);var r2=pick([5,10,20,25]);var m=round2((1+r1/100)*(1-r2/100));var change=round2((m-1)*100);return{question:'Price rises '+r1+'% then falls '+r2+'%. Net multiplier? (2 d.p.)',hints:['Multiply: '+(1+r1/100)+' × '+(1-r2/100)],ans:m,tol:0.01,unit:'',working:(1+r1/100)+' × '+(1-r2/100)+' = '+m+' ('+change+'% overall)'};})}
+  ]},
+  {ey:'Q8 · Growth & Decay · Extended',ti:'Finding the Original Value',su:'After 3 years at 5% growth, value = £23,152.50. Find the original.',lv:'E',steps:[
+    {lb:'Reverse the formula',dr:dQ8,ht:'<span class="lt le">Extended</span><p>If you know the final value and need the original, <b>divide</b> by the multiplier instead of multiplying.</p>'},
+    {lb:'Set up',dr:dQ8,ht:'<div class="fm">P × 1.05³ = 23152.50</div><div class="fm">P = 23152.50 ÷ 1.05³</div>'},
+    {lb:'Calculate',dr:dQ8,ht:'<div class="fm">P = 23152.50 ÷ 1.157625 = £20,000</div>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var p=pick([1000,2000,5000,10000,20000]);var r=pick([5,10,20]);var n=rnd(2,4);var v=round2(p*Math.pow(1+r/100,n));return{question:'After '+n+' years at '+r+'% growth, value = £'+v+'. Find original (nearest £).',hints:['Divide by '+(1+r/100)+'^'+n+' = '+round2(Math.pow(1+r/100,n))],ans:p,tol:5,unit:'£',working:v+' ÷ '+round2(Math.pow(1+r/100,n))+' = £'+p};})}
+  ]},
+  {ey:'Q9 · Growth & Decay · Extended',ti:'Half-Life',su:'Radioactive substance: half-life 10 years, start 800g. Find mass after 30 years.',lv:'E',steps:[
+    {lb:'What is half-life?',dr:dQ9,ht:'<span class="lt le">Extended</span><p>Half-life is the time for a quantity to halve. It is exponential decay with a multiplier of <b>0.5 per half-life period</b>.</p>'},
+    {lb:'Count the half-lives',dr:dQ9,ht:'<p>30 years = 3 × 10-year half-lives. So multiply by 0.5 three times.</p>'},
+    {lb:'Calculate',dr:dQ9,ht:'<div class="fm">800 × 0.5³ = 800 × 0.125 = 100g</div>'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var start=pick([400,800,1600,3200]);var hl=pick([5,10,20]);var periods=rnd(2,4);var t=hl*periods;var v=start*Math.pow(0.5,periods);return{question:'Start: '+start+'g, half-life = '+hl+' years. Mass after '+t+' years?',hints:[t+' years = '+periods+' half-lives','Multiply by 0.5^'+periods],ans:v,tol:0,unit:'g',working:start+' × 0.5^'+periods+' = '+v+'g'};})}
+  ]},
+  {ey:'Q10 · Growth & Decay · Extended',ti:'Growth vs Decay — Comparing Graphs',su:'Identify the multiplier from a context and sketch the behaviour.',lv:'E',steps:[
+    {lb:'The two curves',dr:dQ10,ht:'<span class="lt le">Extended</span><p>Growth curves rise and get steeper. Decay curves fall and flatten. Both are <b>smooth curves</b> — never straight lines.</p>'},
+    {lb:'Growth (red)',dr:dQ10,ht:'<p>Red: starts at 50, multiplier 1.2 each year. Increases without bound.</p>'},
+    {lb:'Decay (blue)',dr:dQ10,ht:'<p>Blue: starts at 150, multiplier 0.8 each year. Decreases towards (but never reaches) zero.</p>'},
+    {lb:'Key facts',dr:dQ10,ht:'<div class="fm">Multiplier > 1 → growth</div><div class="fm">Multiplier < 1 (but > 0) → decay</div>'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var p=pick([500,1000,2000]);var r=pick([5,8,10,15,20,25]);var type=pick(['growth','decay']);var n=rnd(2,4);var m=type==='growth'?1+r/100:1-r/100;var v=Math.round(p*Math.pow(m,n));return{question:'P = £'+p+', '+r+'% '+type+' per year, '+n+' years. Find V (nearest £).',hints:['Multiplier = '+m,'V = '+p+' × '+m+'^'+n],ans:v,tol:10,unit:'£',working:p+' × '+m+'^'+n+' = £'+v};})}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti+'<br><span class="badge be">Extended</span>';b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcUpdated='2026-06-28';window._abcTopicCode='Y11-NUM-02';
+window.markComplete=async function(){const{data:{session}}=await _sb.auth.getSession();if(!session)return;const{data:topic}=await _sb.from('topics').select('id').eq('topic_code',window._abcTopicCode).maybeSingle();if(!topic)return;window._abcTopicId=topic.id;await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>
