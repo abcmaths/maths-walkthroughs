@@ -158,6 +158,7 @@ function g(){return document.getElementById('dg');}
 function L(x,y,t,c,sz,a){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'">'+t+'</text>';}
 function l(x1,y1,x2,y2,c,w,d){c=c||'#C0272D';w=w||2;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>'; }
 function ra(x,y,sz){sz=sz||10;return '<rect x="'+x+'" y="'+(y-sz)+'" width="'+sz+'" height="'+sz+'" fill="none" stroke="#888" stroke-width="1.2"/>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function arc(cx,cy,r,a1,a2,c){c=c||'#C8922A';var x1=cx+r*Math.cos(a1*D),y1=cy-r*Math.sin(a1*D),x2=cx+r*Math.cos(a2*D),y2=cy-r*Math.sin(a2*D);return '<path d="M'+x1+','+y1+' A'+r+','+r+' 0 0,0 '+x2+','+y2+'" fill="none" stroke="'+c+'" stroke-width="1.5"/>';}
 
 function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];var Ax=100,Ay=240,Bx=340,By=240,Cx=340,Cy=80;o.push('<polygon points="'+Ax+','+Ay+' '+Bx+','+By+' '+Cx+','+Cy+'" fill="'+(p>=1?'#fff5f0':'#fff')+'" stroke="#C0272D" stroke-width="2"/>');o.push(ra(Bx-10,By));o.push(L(Ax-16,Ay+5,'A','#C0272D',13,'end'));o.push(L(Bx+16,By+5,'B','#C0272D',13,'start'));o.push(L(Cx+16,Cy,'C','#C0272D',13,'start'));o.push(L((Ax+Bx)/2,Ay+18,'8 cm'));o.push(L(Bx+22,(By+Cy)/2,'6 cm'));if(p>=1)o.push(L((Ax+Cx)/2-22,(Ay+Cy)/2,'AC = ?','#C0272D',13));if(p>=2){o.push(arc(Ax,Ay,36,0,34));o.push(L(Ax+48,Ay-12,'θ','#C8922A',14));}if(p>=3)o.push(L(240,285,'AC = √(64+36) = √100 = 10 cm','#C0272D',13));s.innerHTML=o.join('');}
@@ -226,7 +227,7 @@ var QS=[
   {ey:'Q7 · Sine Rule · Extended',ti:'Sine Rule — Finding an Angle',su:'Angle A = 35°, a = 14 cm, c = 18 cm. Find angle B.',lv:'E',steps:[
     {lb:'The triangle',dr:dQ7,ht:'<span class="lt le">Extended</span><p><b>Angle A = 35°</b>, <b>a = BC = 14 cm</b>, <b>c = AB = 18 cm</b>. Find <b>angle B</b>.</p>'},
     {lb:'Step 1 — Find C',dr:dQ7,ht:'<div class="fm">sinC / 18 = sin35° / 14</div><div class="fm">sinC = 18 × 0.574 / 14 = 0.737</div>'},
-    {lb:'Step 2 — Solve C',dr:dQ7,ht:'<div class="fm">C = sin⁻¹(0.737) = <b>47.5°</b></div><p style="font-size:14px;color:#C8922A"><b>Note:</b> the sine rule can give two possible angles (C or 180°−C). Here 180°−47.5°=132.5° is also possible — check whether A+C≤180° in each case.</p>'},'
+    {lb:'Step 2 — Solve C',dr:dQ7,ht:'<div class="fm">C = sin⁻¹(0.737) = <b>47.5°</b></div><p style="font-size:14px;color:#C8922A"><b>Note:</b> the sine rule can give two possible angles (C or 180°−C). Here 180°−47.5°=132.5° is also possible — check whether A+C≤180° in each case.</p>'},
     {lb:'Step 3 — Find B',dr:dQ7,ht:'<div class="fm">B = 180° − 35° − 47.5° = <b>97.5°</b></div>'},
     {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var A=pick([30,35,40,45]);var a=rnd(10,16);var c=rnd(5,a-2);var sinC=c*Math.sin(A*Math.PI/180)/a;var C=Math.round(Math.asin(sinC)*180/Math.PI);return{question:'A='+A+'°, a='+a+' cm, c='+c+' cm. Find angle C (nearest °). <em>Note: c < a so C is acute.</em>',hints:['sinC/c = sinA/a','sinC = '+c+'×sin('+A+'°)/'+a+' = '+Math.round(sinC*1000)/1000,'C = sin⁻¹('+Math.round(sinC*1000)/1000+')'],ans:C,tol:1,unit:'°',working:'C = sin⁻¹('+c+'×sin('+A+'°)/'+a+') = '+C+'° (acute, since c < a)'};})}
   ]},
@@ -279,6 +280,7 @@ render();
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
 window._supabase = _sb;
+window._abcUpdated = '2026-06-28';
 window._abcTopicCode = 'Y10-GEO-04';
 window.markComplete = async function() {
   const { data: { session } } = await _sb.auth.getSession();
