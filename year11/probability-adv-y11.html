@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conditional Probability · Year 11 · Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-top:3px;}
+.bf{background:#e8f4ff;color:#1a5a8a;}.be{background:#fce8d8;color:#7A1418;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.lt{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:8px;}
+.lf{background:#e8f4ff;color:#1a5a8a;}.le{background:#fce8d8;color:#7A1418;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">← All Topics</a>
+  <div class="ht">Conditional Probability — Year 11</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 280"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">← Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next →</button>
+    </div>
+  </div>
+</div>
+<script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function round2(x){return Math.round(x*100)/100;}
+function frac(n,d){var g=function gcd(a,b){return b?gcd(b,a%b):a;}(Math.abs(n),Math.abs(d));return (n/g)+'/'+(d/g);}
+var ST={};
+function tryIt(fn){var id='t'+Math.random().toString(36).slice(2);var o=fn();ST[id]={o:o,genFn:fn};return bT(id,o);}
+function bT(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  var ph='Answer (decimal, 2 d.p.)';
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">✔ Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="0.01" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.genFn();entry.o=o;var wrap=el.closest('.try');if(!wrap)return;var tmp=document.createElement('div');tmp.innerHTML=bT(id,o);wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;}
+  if(el.classList.contains('try-ck')){var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a decimal.';return;}var tol=o.tol!=null?o.tol:0.01;if(Math.abs(v-o.ans)<=tol){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! &nbsp;'+o.working;}else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}  }
+});
+
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a){return '<text x="'+x+'" y="'+y+'" font-size="'+(sz||12)+'" font-family="Arial" fill="'+(c||'#6b5750')+'" text-anchor="'+(a||'middle')+'">'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||1.5)+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#aaa')+'" stroke-width="'+(w||1.5)+'"/>';}
+
+// Tree diagram helper
+function tree(ox,oy,branches,p){
+  var o=[];
+  var bh=60; // branch vertical spacing
+  branches.forEach(function(b,bi){
+    var by=oy+(bi-(branches.length-1)/2)*bh;
+    o.push(L(ox,oy,ox+120,by,'#aaa',1.5));
+    if(p>=1){
+      o.push(R(ox+122,by-14,80,26,(bi===0?'#fff5f0':'#e8f4ff'),(bi===0?'#C0272D':'#1a5a8a'),1.5));
+      o.push(T(ox+162,by+4,b.label,(bi===0?'#C0272D':'#1a5a8a'),12));
+      o.push(T(ox+60,by-10,b.prob,'#C8922A',11));
+    }
+    if(p>=2&&b.sub){
+      b.sub.forEach(function(s,si){
+        var sy=by+(si-(b.sub.length-1)/2)*30;
+        o.push(L(ox+200,by,ox+320,sy,'#aaa',1));
+        o.push(R(ox+322,sy-12,80,22,(si===0?'#fff5f0':'#e8f4ff'),(si===0?'#C0272D':'#1a5a8a'),1));
+        o.push(T(ox+362,sy+4,s.label,(si===0?'#C0272D':'#1a5a8a'),11));
+        o.push(T(ox+258,sy-8,s.prob,'#C8922A',10));
+        if(p>=3&&s.result){
+          o.push(T(ox+412,sy+4,s.result,'#241A17',10,'start'));
+        }
+      });
+    }
+  });
+  return o;
+}
+
+// Q1: Without replacement — tree diagram
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];
+  o.push(T(240,18,'Bag: 4 red, 3 blue (7 total) — draw 2 without replacement','#C0272D',12));
+  o=o.concat(tree(20,140,[
+    {label:'Red',prob:'4/7',sub:[{label:'Red',prob:'3/6',result:'P = 4/7 × 3/6 = 12/42'},{label:'Blue',prob:'3/6',result:'P = 4/7 × 3/6 = 12/42'}]},
+    {label:'Blue',prob:'3/7',sub:[{label:'Red',prob:'4/6',result:'P = 3/7 × 4/6 = 12/42'},{label:'Blue',prob:'2/6',result:'P = 3/7 × 2/6 = 6/42'}]}
+  ],p));
+  s.innerHTML=o.join('');}
+
+// Q2: Conditional — given first is red
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];
+  o.push(T(240,18,'P(2nd is red | 1st was red) — conditional probability','#C0272D',12));
+  if(p>=1){o.push(R(30,36,420,36,'#fff5f0','#C0272D'));o.push(T(240,60,'"Given the 1st was red, the bag now has 3R and 3B (6 total)"','#241A17',12));}
+  if(p>=2){o.push(R(30,78,420,36,'#e8f4ff','#1a5a8a'));o.push(T(240,102,'P(2nd red | 1st red) = 3/6 = 1/2','#1a5a8a',14));}
+  if(p>=3){o.push(R(30,122,420,64,'#fef8ee','#C8922A',1));
+    o.push(T(240,144,'The condition changes the denominator.','#241A17',12));
+    o.push(T(240,164,'Always ask: what is left in the bag after the condition?','#C8922A',12));}
+  s.innerHTML=o.join('');}
+
+// Q3: Two-way table for conditional probability
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];
+  o.push(T(240,16,'Two-Way Table','#C0272D',13));
+  var cols=['','Sport','Music','Total'],rows=[['Boys',15,10,25],['Girls',12,13,25],['Total',27,23,50]];
+  var cw=90,ch=36,ox=50,oy=30;
+  cols.forEach(function(c,i){o.push(R(ox+i*cw,oy,cw,ch,'#C0272D','#C0272D',1));o.push(T(ox+i*cw+cw/2,oy+22,c,'#fff',11));});
+  rows.forEach(function(r,ri){
+    r.forEach(function(cell,ci){
+      var hilite=p>=2&&ri===0&&ci===1; // Boys+Sport
+      o.push(R(ox+ci*cw,oy+(ri+1)*ch,cw,ch,hilite?'#fef3cd':ri%2===0?'#fdf7f4':'#fff','#E4D6CE',1));
+      o.push(T(ox+ci*cw+cw/2,oy+(ri+1)*ch+22,''+cell,hilite?'#C8922A':'#241A17',hilite?13:11));
+    });
+  });
+  if(p>=1){o.push(R(30,152,420,30,'#fff5f0','#C0272D'));o.push(T(240,172,'P(Sport | Boy) = P(Boy AND Sport) / P(Boy)','#C0272D',12));}
+  if(p>=2){o.push(R(30,186,420,30,'#e8f4ff','#1a5a8a'));o.push(T(240,206,'= 15/25 = 3/5 = 0.6  (restrict to the Boys row)','#1a5a8a',13));}
+  if(p>=3){o.push(T(240,234,'Conditional: restrict to the given row or column','#888',11));}
+  s.innerHTML=o.join('');}
+
+// Q4: Venn diagram conditional
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];
+  o.push(T(240,16,'Venn Diagram — Conditional Probability','#C0272D',13));
+  // Universal: 40 students. A=Algebra(22), B=Biology(18), both=8
+  o.push(R(20,30,440,200,'#fdf7f4','#aaa',1));
+  o.push('<ellipse cx="190" cy="140" rx="100" ry="80" fill="rgba(192,39,45,0.12)" stroke="#C0272D" stroke-width="2"/>');
+  o.push('<ellipse cx="290" cy="140" rx="100" ry="80" fill="rgba(26,90,138,0.12)" stroke="#1a5a8a" stroke-width="2"/>');
+  o.push(T(155,130,'A','#C0272D',14));o.push(T(325,130,'B','#1a5a8a',14));
+  if(p>=1){o.push(T(155,155,'14','#C0272D',16));o.push(T(240,155,'8','#888',16));o.push(T(325,155,'10','#1a5a8a',16));o.push(T(60,50,'ξ=40','#888',11,'start'));}
+  if(p>=2){o.push(R(30,238,420,30,'#fff5f0','#C0272D'));o.push(T(240,258,'P(B | A) = P(A∩B) / P(A) = 8/22 = 4/11','#C0272D',13));}
+  if(p>=3){o.push(T(240,210,'Given A, restrict to circle A only (14+8=22)','#888',11));}
+  s.innerHTML=o.join('');}
+
+// Q5: Without replacement — 3 draws
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];
+  o.push(T(240,18,'Three draws without replacement','#C0272D',12));
+  o.push(T(240,38,'Bag: 5 red, 3 blue (8 total). P(all 3 red)?','#241A17',12));
+  if(p>=1){o.push(R(30,54,420,32,'#fff5f0','#C0272D'));o.push(T(240,75,'Draw 1: P(R) = 5/8','#C0272D',13));}
+  if(p>=2){o.push(R(30,90,420,32,'#e8f4ff','#1a5a8a'));o.push(T(240,111,'Draw 2: P(R|R already drawn) = 4/7','#1a5a8a',13));}
+  if(p>=3){o.push(R(30,126,420,32,'#fef8ee','#C8922A'));o.push(T(240,147,'Draw 3: P(R|2R already drawn) = 3/6','#C8922A',13));}
+  if(p>=4){o.push(R(80,166,320,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,190,'P(RRR) = 5/8 × 4/7 × 3/6 = 60/336 = 5/28','#1a7a3a',13));}
+  s.innerHTML=o.join('');}
+
+// Q6: P(at least one) using complement
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];
+  o.push(T(240,18,'P(at least one) = 1 − P(none)','#C0272D',14));
+  o.push(T(240,40,'Bag: 4 red, 6 blue. Two draws without replacement.','#241A17',12));
+  o.push(T(240,58,'Find P(at least one red).','#241A17',12));
+  if(p>=1){o.push(R(30,70,420,32,'#fff5f0','#C0272D'));o.push(T(240,91,'P(no red) = P(BB) = 6/10 × 5/9 = 30/90 = 1/3','#C0272D',13));}
+  if(p>=2){o.push(R(80,110,320,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,134,'P(at least 1 red) = 1 − 1/3 = 2/3','#1a7a3a',15));}
+  if(p>=3){o.push(R(30,156,420,40,'#fef8ee','#C8922A',1));
+    o.push(T(240,172,'The complement method is often quicker than','#241A17',11));
+    o.push(T(240,188,'listing P(RB)+P(BR)+P(RR) separately.','#241A17',11));}
+  s.innerHTML=o.join('');}
+
+// Q7: Conditional from tree — given one colour, find next
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];
+  o.push(T(240,18,'Bag: 3 red, 2 blue. Two draws without replacement.','#C0272D',12));
+  o=o.concat(tree(20,140,[
+    {label:'R (3/5)',prob:'3/5',sub:[{label:'R (2/4)',prob:'2/4',result:'6/20'},{label:'B (2/4)',prob:'2/4',result:'6/20'}]},
+    {label:'B (2/5)',prob:'2/5',sub:[{label:'R (3/4)',prob:'3/4',result:'6/20'},{label:'B (1/4)',prob:'1/4',result:'2/20'}]}
+  ],p));
+  if(p>=3){o.push(R(30,252,420,22,'#e8f8ee','#1a7a3a',1));o.push(T(240,267,'P(2nd red | 1st blue) = 3/4 — read from the B branch','#1a7a3a',11));}
+  s.innerHTML=o.join('');}
+
+// Q8: Conditional from table
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];
+  o.push(T(240,16,'Conditional from a Table','#C0272D',13));
+  var cols=['','Pass','Fail','Total'],rows=[['Revised',36,4,40],['Did not',12,18,30],['Total',48,22,70]];
+  var cw=90,ch=36,ox=50,oy=28;
+  cols.forEach(function(c,i){o.push(R(ox+i*cw,oy,cw,ch,'#C0272D','#C0272D',1));o.push(T(ox+i*cw+cw/2,oy+22,c,'#fff',11));});
+  rows.forEach(function(r,ri){
+    r.forEach(function(cell,ci){
+      var hilite=p>=2&&ri===1&&ci===1;
+      o.push(R(ox+ci*cw,oy+(ri+1)*ch,cw,ch,hilite?'#fef3cd':ri%2===0?'#fdf7f4':'#fff','#E4D6CE',1));
+      o.push(T(ox+ci*cw+cw/2,oy+(ri+1)*ch+22,''+cell,hilite?'#C8922A':'#241A17',11));
+    });
+  });
+  if(p>=1){o.push(R(30,152,420,30,'#fff5f0','#C0272D'));o.push(T(240,172,'P(Fail | Did not revise) = ?','#C0272D',12));}
+  if(p>=2){o.push(R(30,186,420,30,'#e8f4ff','#1a5a8a'));o.push(T(240,206,'Restrict to "Did not" row (30 total): 18/30 = 3/5 = 0.6','#1a5a8a',13));}
+  s.innerHTML=o.join('');}
+
+// Q9: Independent vs dependent
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];
+  o.push(T(240,18,'Independent vs Dependent Events','#C0272D',13));
+  if(p>=1){
+    o.push(R(30,32,420,56,'#fff5f0','#C0272D'));
+    o.push(T(240,52,'INDEPENDENT: P(A and B) = P(A) × P(B)','#C0272D',12));
+    o.push(T(240,72,'e.g. rolling a die twice — 1st roll doesn\'t affect 2nd','#241A17',11));
+  }
+  if(p>=2){
+    o.push(R(30,96,420,56,'#e8f4ff','#1a5a8a'));
+    o.push(T(240,116,'DEPENDENT: P(A and B) = P(A) × P(B|A)','#1a5a8a',12));
+    o.push(T(240,136,'e.g. drawing without replacement — total changes','#241A17',11));
+  }
+  if(p>=3){
+    o.push(R(30,160,420,36,'#e8f8ee','#1a7a3a',1));
+    o.push(T(240,172,'TEST: are the conditional probabilities the same as the originals?','#241A17',11));
+    o.push(T(240,188,'If P(B|A) = P(B) → independent. If different → dependent.','#1a7a3a',11));
+  }
+  if(p>=4){
+    o.push(R(30,202,420,56,'#fef8ee','#C8922A',1));
+    o.push(T(240,222,'Coin flip twice: P(H)=0.5 always → independent','#241A17',11));
+    o.push(T(240,242,'Cards without replacement: denominator shrinks → dependent','#241A17',11));
+  }
+  s.innerHTML=o.join('');}
+
+// Q10: Full problem — P(exactly one red)
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];
+  o.push(T(240,18,'Bag: 4 red, 3 blue (7). Two draws without replacement.','#C0272D',12));
+  o.push(T(240,36,'Find P(exactly one red).','#241A17',12));
+  if(p>=1){o.push(R(30,50,420,30,'#fff5f0','#C0272D'));o.push(T(240,70,'"Exactly one red" = RB or BR','#C0272D',13));}
+  if(p>=2){o.push(R(30,84,420,30,'#e8f4ff','#1a5a8a'));o.push(T(240,104,'P(RB) = 4/7 × 3/6 = 12/42','#1a5a8a',13));}
+  if(p>=3){o.push(R(30,118,420,30,'#e8f4ff','#1a5a8a'));o.push(T(240,138,'P(BR) = 3/7 × 4/6 = 12/42','#1a5a8a',13));}
+  if(p>=4){o.push(R(80,156,320,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,180,'P(exactly 1 red) = 12/42 + 12/42 = 24/42 = 4/7','#1a7a3a',14));}
+  if(p>=5){o.push(T(240,214,'Note: P(RB) = P(BR) here because 4×3 = 3×4 (symmetry)','#555',11));}
+  s.innerHTML=o.join('');}
+
+var QS=[
+  {ey:'Q1 · Probability · Extended',ti:'Without Replacement — Tree Diagram',su:'Bag: 4 red, 3 blue. Draw 2 without replacement. Build the tree.',lv:'E',steps:[
+    {lb:'The tree',dr:dQ1,ht:'<span class="lt le">Extended</span><p><b>Without replacement</b> means after each draw, the total decreases by 1. The second-branch probabilities <b>depend on the first draw</b>.</p>'},
+    {lb:'First branches',dr:dQ1,ht:'<p>P(Red first) = 4/7 &nbsp;&nbsp; P(Blue first) = 3/7. These are straightforward — 7 items in the bag.</p>'},
+    {lb:'Second branches',dr:dQ1,ht:'<p>If Red was first: bag now has 3R, 3B (6 total). If Blue was first: bag has 4R, 2B (6 total). Each path uses its own denominator of 6.</p>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var r=rnd(3,6),b=rnd(2,4),tot=r+b;var p=round2((r/tot)*((r-1)/(tot-1)));return{question:'Bag: '+r+' red, '+b+' blue. P(both red) without replacement? (2 d.p.)',hints:['P(RR) = '+r+'/'+tot+' × '+(r-1)+'/'+(tot-1)],ans:p,tol:0.01,unit:'',working:r+'/'+tot+' × '+(r-1)+'/'+(tot-1)+' = '+p};})}
+  ]},
+  {ey:'Q2 · Probability · Extended',ti:'Conditional Probability — Reading from a Tree',su:'Given the first draw was red, what is P(2nd is red)?',lv:'E',steps:[
+    {lb:'The condition',dr:dQ2,ht:'<span class="lt le">Extended</span><p><b>Conditional probability</b> means we already know something happened. The question "given the first was red" means we <b>only look at the Red branch</b> of the tree.</p>'},
+    {lb:'Adjust the bag',dr:dQ2,ht:'<p>The bag started with 4R, 3B. The first ball was red and not replaced. Now: 3R, 3B — total 6.</p>'},
+    {lb:'P(2nd red | 1st red)',dr:dQ2,ht:'<div class="fm">P(2nd red | 1st red) = 3/6 = 1/2</div><p>The condition tells us which branch we are on. The denominator is the new total after the first draw.</p>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var r=rnd(4,7),b=rnd(3,6),tot=r+b;var p=round2((r-1)/(tot-1));return{question:'Bag: '+r+' red, '+b+' blue. Given 1st draw was red, P(2nd is red)? (2 d.p.)',hints:['After 1 red removed: '+(r-1)+'R, '+b+'B ('+(tot-1)+' total)'],ans:p,tol:0.01,unit:'',working:(r-1)+'/'+(tot-1)+' = '+p};})}
+  ]},
+  {ey:'Q3 · Probability · Extended',ti:'Conditional from a Two-Way Table',su:'P(chose Sport | is a Boy) using the two-way table.',lv:'E',steps:[
+    {lb:'The table',dr:dQ3,ht:'<span class="lt le">Extended</span><p>Two-way tables are another way to find conditional probabilities. The condition tells you which <b>row or column to restrict to</b>.</p>'},
+    {lb:'Identify the condition',dr:dQ3,ht:'<p>"Given it is a Boy" means we only look at the Boys row. There are 25 boys total.</p>'},
+    {lb:'Find P(Sport | Boy)',dr:dQ3,ht:'<div class="fm">P(Sport | Boy) = 15/25 = 3/5 = 0.6</div><p>15 boys chose sport, out of 25 boys total.</p>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var bg=rnd(10,20),bm=rnd(5,12),gg=rnd(8,16),gm=rnd(6,14);var p=round2(gg/(gg+gm));return{question:'Boys: '+bg+' sport, '+bm+' music. Girls: '+gg+' sport, '+gm+' music. P(Sport | Girl)? (2 d.p.)',hints:['Girls total = '+(gg+gm),'P = '+gg+'/'+(gg+gm)],ans:p,tol:0.01,unit:'',working:gg+'/'+(gg+gm)+' = '+p};})}
+  ]},
+  {ey:'Q4 · Probability · Extended',ti:'Conditional from a Venn Diagram',su:'Use the Venn diagram to find P(Biology | Algebra).',lv:'E',steps:[
+    {lb:'The Venn diagram',dr:dQ4,ht:'<span class="lt le">Extended</span><p>The Venn shows: Algebra only = 14, Both = 8, Biology only = 10, Neither = 8. Total = 40.</p>'},
+    {lb:'The condition',dr:dQ4,ht:'<p>"Given Algebra" means we restrict to the Algebra circle: 14 + 8 = 22 students.</p>'},
+    {lb:'P(Biology | Algebra)',dr:dQ4,ht:'<div class="fm">P(B | A) = n(A∩B) / n(A) = 8/22 = 4/11 ≈ 0.36</div>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var both=rnd(5,12),aOnly=rnd(8,18),bOnly=rnd(6,15),nei=rnd(4,10);var tot=both+aOnly+bOnly+nei;var p=round2(both/(both+aOnly));return{question:'Venn: A only='+aOnly+', both='+both+', B only='+bOnly+', neither='+nei+'. P(B|A)? (2 d.p.)',hints:['n(A) = '+aOnly+'+'+both+' = '+(aOnly+both),'P = '+both+'/'+(aOnly+both)],ans:p,tol:0.01,unit:'',working:both+'/'+(aOnly+both)+' = '+p};})}
+  ]},
+  {ey:'Q5 · Probability · Extended',ti:'Three Draws Without Replacement',su:'Bag: 5 red, 3 blue (8 total). Find P(all three draws are red).',lv:'E',steps:[
+    {lb:'The approach',dr:dQ5,ht:'<span class="lt le">Extended</span><p>Multiply the conditional probabilities along the path. After each red draw, the numerator <b>and</b> denominator both decrease by 1.</p>'},
+    {lb:'Draw 1',dr:dQ5,ht:'<div class="fm">P(R) = 5/8</div>'},
+    {lb:'Draw 2 given first was red',dr:dQ5,ht:'<div class="fm">P(R|R) = 4/7</div>'},
+    {lb:'Draw 3 given first two were red',dr:dQ5,ht:'<div class="fm">P(R|RR) = 3/6 = 1/2</div><div class="fm">P(RRR) = 5/8 × 4/7 × 3/6 = 60/336 = 5/28 ≈ 0.18</div>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var r=rnd(5,8),b=rnd(2,4),tot=r+b;var p=round2((r/tot)*((r-1)/(tot-1))*((r-2)/(tot-2)));return{question:'Bag: '+r+' red, '+b+' blue. P(3 reds in a row) without replacement? (2 d.p.)',hints:['Multiply: '+r+'/'+tot+' × '+(r-1)+'/'+(tot-1)+' × '+(r-2)+'/'+(tot-2)],ans:p,tol:0.01,unit:'',working:r+'/'+tot+' × '+(r-1)+'/'+(tot-1)+' × '+(r-2)+'/'+(tot-2)+' = '+p};})}
+  ]},
+  {ey:'Q6 · Probability · Extended',ti:'P(at least one) using the Complement',su:'Bag: 4 red, 6 blue. Two draws without replacement. P(at least one red).',lv:'E',steps:[
+    {lb:'The complement method',dr:dQ6,ht:'<span class="lt le">Extended</span><p><b>At least one</b> is easiest with the complement: P(at least one red) = 1 − P(no reds at all).</p>'},
+    {lb:'P(no reds)',dr:dQ6,ht:'<div class="fm">P(BB) = 6/10 × 5/9 = 30/90 = 1/3</div>'},
+    {lb:'Apply complement',dr:dQ6,ht:'<div class="fm">P(at least 1 red) = 1 − 1/3 = 2/3 ≈ 0.67</div>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var r=rnd(3,6),b=rnd(3,6),tot=r+b;var pNone=round2((b/tot)*((b-1)/(tot-1)));var p=round2(1-pNone);return{question:'Bag: '+r+' red, '+b+' blue. P(at least 1 red) in 2 draws without replacement? (2 d.p.)',hints:['P(no red) = P(BB) = '+b+'/'+tot+' × '+(b-1)+'/'+(tot-1)+' = '+pNone,'P(at least 1) = 1 − '+pNone],ans:p,tol:0.01,unit:'',working:'1 − '+pNone+' = '+p};})}
+  ]},
+  {ey:'Q7 · Probability · Extended',ti:'Reading Conditional Probability from a Tree',su:'Bag: 3 red, 2 blue. P(2nd blue | 1st red)?',lv:'E',steps:[
+    {lb:'Build the tree',dr:dQ7,ht:'<span class="lt le">Extended</span><p>Draw the full tree first. Then find the branch that satisfies the condition.</p>'},
+    {lb:'First branches',dr:dQ7,ht:'<p>P(R) = 3/5, P(B) = 2/5.</p>'},
+    {lb:'Second branches from Red',dr:dQ7,ht:'<div class="fm">After Red: 2R, 2B remain (4 total)</div><div class="fm">P(B | R first) = 2/4 = 1/2</div>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var r=rnd(3,6),b=rnd(2,5),tot=r+b;var p=round2(b/(tot-1));return{question:'Bag: '+r+' red, '+b+' blue. P(2nd is blue | 1st was red)? (2 d.p.)',hints:['After 1 red removed: '+r-1+'R, '+b+'B ('+(tot-1)+' total)'],ans:p,tol:0.01,unit:'',working:b+'/'+(tot-1)+' = '+p};})}
+  ]},
+  {ey:'Q8 · Probability · Extended',ti:'Conditional from a Results Table',su:'P(Fail | Did not revise) from the table.',lv:'E',steps:[
+    {lb:'The table',dr:dQ8,ht:'<span class="lt le">Extended</span><p>A results table works the same way as a two-way table. Identify which row or column the condition refers to.</p>'},
+    {lb:'The condition',dr:dQ8,ht:'<p>"Given did not revise" means look only at the "Did not" row. Total = 30 students.</p>'},
+    {lb:'P(Fail | Did not revise)',dr:dQ8,ht:'<div class="fm">= 18/30 = 3/5 = 0.6</div>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var rp=rnd(20,40),rf=rnd(3,10),np=rnd(8,18),nf=rnd(10,22);var p=round2(nf/(np+nf));return{question:'Revised: '+rp+' pass, '+rf+' fail. Did not: '+np+' pass, '+nf+' fail. P(Fail | Did not revise)? (2 d.p.)',hints:['Did-not-revise total = '+(np+nf),'P = '+nf+'/'+(np+nf)],ans:p,tol:0.01,unit:'',working:nf+'/'+(np+nf)+' = '+p};})}
+  ]},
+  {ey:'Q9 · Probability · Extended',ti:'Independent vs Dependent Events',su:'Understand when events affect each other.',lv:'E',steps:[
+    {lb:'The distinction',dr:dQ9,ht:'<span class="lt le">Extended</span><p><b>Independent events</b>: the outcome of one does not affect the probability of the other (e.g. rolling dice, flipping coins, drawing <b>with</b> replacement).</p>'},
+    {lb:'Independent formula',dr:dQ9,ht:'<div class="fm">P(A and B) = P(A) × P(B)</div><p>The probabilities stay the same each time.</p>'},
+    {lb:'Dependent events',dr:dQ9,ht:'<div class="fm">P(A and B) = P(A) × P(B|A)</div><p>Drawing <b>without</b> replacement makes events dependent — the denominator shrinks.</p>'},
+    {lb:'The test',dr:dQ9,ht:'<p>Ask: does knowing A happened change the probability of B? If yes → dependent. If P(B|A) = P(B) → independent.</p>'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var p1=pick([0.4,0.5,0.6,0.3]);var p2=pick([0.5,0.3,0.4,0.7]);var p=round2(p1*p2);return{question:'Two independent events: P(A)='+p1+', P(B)='+p2+'. P(A and B)? (2 d.p.)',hints:['Independent: multiply P(A) × P(B)'],ans:p,tol:0.01,unit:'',working:p1+' × '+p2+' = '+p};})}
+  ]},
+  {ey:'Q10 · Probability · Extended',ti:'P(Exactly One Red)',su:'Bag: 4 red, 3 blue. Two draws without replacement. P(exactly one red).',lv:'E',steps:[
+    {lb:'List the outcomes',dr:dQ10,ht:'<span class="lt le">Extended</span><p>"Exactly one red" in two draws means: Red then Blue, OR Blue then Red. Add their probabilities.</p>'},
+    {lb:'P(RB)',dr:dQ10,ht:'<div class="fm">P(RB) = 4/7 × 3/6 = 12/42</div>'},
+    {lb:'P(BR)',dr:dQ10,ht:'<div class="fm">P(BR) = 3/7 × 4/6 = 12/42</div>'},
+    {lb:'Add',dr:dQ10,ht:'<div class="fm">P(exactly 1 red) = 12/42 + 12/42 = 24/42 = 4/7 ≈ 0.57</div>'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var r=rnd(3,6),b=rnd(3,6),tot=r+b;var prb=r/tot*b/(tot-1);var pbr=b/tot*r/(tot-1);var p=round2(prb+pbr);return{question:'Bag: '+r+' red, '+b+' blue. P(exactly 1 red) in 2 draws? (2 d.p.)',hints:['P(RB) + P(BR)','P(RB) = '+r+'/'+tot+' × '+b+'/'+(tot-1)],ans:p,tol:0.01,unit:'',working:'P(RB)+P(BR) = '+round2(prb)+'+'+round2(pbr)+' = '+p};})}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti+'<br><span class="badge be">Extended</span>';b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcUpdated='2026-06-28';window._abcTopicCode='Y11-PRO-01';
+window.markComplete=async function(){const{data:{session}}=await _sb.auth.getSession();if(!session)return;const{data:topic}=await _sb.from('topics').select('id').eq('topic_code',window._abcTopicCode).maybeSingle();if(!topic)return;window._abcTopicId=topic.id;await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>
