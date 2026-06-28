@@ -1771,25 +1771,17 @@
         // Count how many students have completed this topic
         const completions = allProgress.filter(p => p.topic_id === t.id && p.status === 'completed').length;
         const started     = allProgress.filter(p => p.topic_id === t.id && p.status === 'started').length;
-        const newBadge = isNew ? `<span style="font-size:0.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#C0272D;color:#fff;padding:1px 6px;border-radius:8px;margin-left:5px;vertical-align:middle">New</span>` : '';
-        const cardAttrs = file
-          ? `href="${file}" target="_blank"`
-          : `href="#" onclick="alert('Walkthrough coming soon — add the file to the repo first.');return false;"`;
-        return `
-          <a ${cardAttrs} style="
-            display:block;background:white;border:1.5px solid ${isNew ? '#C0272D' : '#eee'};border-radius:6px;
-            padding:14px 16px;text-decoration:none;color:#333;transition:all 0.18s;
-          " onmouseover="this.style.borderColor='#C0272D';this.style.transform='translateY(-1px)'"
-             onmouseout="this.style.borderColor='${isNew ? '#C0272D' : '#eee'}';this.style.transform='none'">
-            <div style="font-size:0.88rem;font-weight:700;color:#333;margin-bottom:4px">${t.topic_name}${newBadge}</div>
-            <div style="font-size:0.75rem;color:#888;margin-bottom:8px">${strand}</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <span style="font-size:0.72rem;font-weight:700;background:#e8f5e9;color:#2e7d32;padding:2px 7px;border-radius:99px">
-                ✓ ${completions} completed
-              </span>
-              ${started > 0 ? `<span style="font-size:0.72rem;font-weight:700;background:#fffde7;color:#f57f17;padding:2px 7px;border-radius:99px">▶ ${started} started</span>` : ''}
-            </div>
-          </a>`;
+        const borderCol  = isNew ? '#C0272D' : '#eee';
+        const newBadge   = isNew ? '<span style="font-size:0.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#C0272D;color:#fff;padding:1px 6px;border-radius:8px;margin-left:5px;vertical-align:middle">New</span>' : '';
+        const hrefAttr   = file ? 'href="' + file + '" target="_blank"' : 'href="#" onclick="alert(\'This walkthrough hasn\'t been deployed yet.\');return false;"';
+        const startedBadge = started > 0 ? '<span style="font-size:0.72rem;font-weight:700;background:#fffde7;color:#f57f17;padding:2px 7px;border-radius:99px">&#9654; ' + started + ' started</span>' : '';
+        return '<a ' + hrefAttr + ' style="display:block;background:white;border:1.5px solid ' + borderCol + ';border-radius:6px;padding:14px 16px;text-decoration:none;color:#333;transition:all 0.18s;" onmouseover="this.style.borderColor=\'#C0272D\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'' + borderCol + '\';this.style.transform=\'none\'">'
+          + '<div style="font-size:0.88rem;font-weight:700;color:#333;margin-bottom:4px">' + t.topic_name + newBadge + '</div>'
+          + '<div style="font-size:0.75rem;color:#888;margin-bottom:8px">' + strand + '</div>'
+          + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+          + '<span style="font-size:0.72rem;font-weight:700;background:#e8f5e9;color:#2e7d32;padding:2px 7px;border-radius:99px">&#10003; ' + completions + ' completed</span>'
+          + startedBadge
+          + '</div></a>';
       }).join('')
     ).join('');
   };
