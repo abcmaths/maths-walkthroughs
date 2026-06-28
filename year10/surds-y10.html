@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surds · Year 10 · Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-top:3px;}
+.bf{background:#e8f4ff;color:#1a5a8a;}
+.be{background:#fce8d8;color:#7A1418;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}
+.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.lt{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:8px;}
+.lf{background:#e8f4ff;color:#1a5a8a;}
+.le{background:#fce8d8;color:#7A1418;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">← All Topics</a>
+  <div class="ht">Surds — Year 10</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">← Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next →</button>
+    </div>
+  </div>
+</div>
+<script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function round2(x){return Math.round(x*100)/100;}
+
+var ST={};
+function tryIt(genOrObj){
+  var genFn=typeof genOrObj==='function'?genOrObj:function(){return genOrObj;};
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn();ST[id]={o:o,genFn:genFn};
+  return buildTry(id,o);
+}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">✔ Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
+    +'</div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=entry.genFn();entry.o=o;
+    var wrap=el.closest?el.closest('.try'):document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+    var tol=o.tol!=null?o.tol:0.5;
+    if(Math.abs(v-o.ans)<=tol){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! &nbsp;'+o.working;}
+    else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}
+  }
+});
+
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'"'+(b?' font-weight="bold"':'')+'>'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w){c=c||'#C0272D';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"/>';}
+
+// Q1: What is a surd? Number line showing irrational positions
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  // Number line
+  o.push(L(40,140,440,140,'#aaa',2));
+  var pts=[[1,'1'],[2,'2'],[3,'3'],[4,'4']];
+  pts.forEach(function(pt){var x=40+pt[0]*90;o.push(L(x,133,x,147,'#aaa',2));o.push(T(x,162,pt[1],'#555',12));});
+  // Surd marks
+  if(p>=1){
+    o.push(T(40+Math.sqrt(2)*90,110,'√2','#C0272D',13,'middle',true));
+    o.push(L(40+Math.sqrt(2)*90,115,40+Math.sqrt(2)*90,137,'#C0272D',2));
+    o.push(T(40+Math.sqrt(2)*90,182,'1.414…','#C0272D',11));
+  }
+  if(p>=2){
+    o.push(T(40+Math.sqrt(3)*90,85,'√3','#1a5a8a',13,'middle',true));
+    o.push(L(40+Math.sqrt(3)*90,90,40+Math.sqrt(3)*90,137,'#1a5a8a',2));
+    o.push(T(40+Math.sqrt(3)*90,182,'1.732…','#1a5a8a',11));
+  }
+  if(p>=3){
+    o.push(T(40+Math.sqrt(5)*90,60,'√5','#C8922A',13,'middle',true));
+    o.push(L(40+Math.sqrt(5)*90,65,40+Math.sqrt(5)*90,137,'#C8922A',2));
+    o.push(T(40+Math.sqrt(5)*90,182,'2.236…','#C8922A',11));
+  }
+  o.push(T(240,220,'Surds are irrational — their decimals never terminate or repeat','#555',11));
+  s.innerHTML=o.join('');
+}
+
+// Q2: Simplify √72 — factor tree style
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'Simplify √72','#C0272D',16,'middle',true));
+  // Factor breakdown boxes
+  o.push(R(180,44,120,36,'#fff5f0','#C0272D'));o.push(T(240,68,'72 = 36 × 2','#241A17',14));
+  if(p>=1){
+    o.push(L(240,80,240,100,'#aaa',1));
+    o.push(R(140,100,180,36,'#e8f4ff','#1a5a8a'));o.push(T(230,124,'36 is a perfect square','#1a5a8a',13));
+  }
+  if(p>=2){
+    o.push(L(240,136,240,156,'#aaa',1));
+    o.push(R(120,156,240,36,'#fff5f0','#C0272D'));o.push(T(240,180,'√72 = √36 × √2','#241A17',14));
+  }
+  if(p>=3){
+    o.push(L(240,192,240,212,'#aaa',1));
+    o.push(R(140,212,200,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,236,'= 6√2','#1a7a3a',18,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+// Q3: Simplify √75
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'Simplify √75','#C0272D',16,'middle',true));
+  o.push(R(180,44,120,36,'#fff5f0','#C0272D'));o.push(T(240,68,'75 = 25 × 3','#241A17',14));
+  if(p>=1){o.push(L(240,80,240,100,'#aaa',1));o.push(R(140,100,200,36,'#e8f4ff','#1a5a8a'));o.push(T(240,124,'25 is a perfect square (5²)','#1a5a8a',13));}
+  if(p>=2){o.push(L(240,136,240,156,'#aaa',1));o.push(R(120,156,240,36,'#fff5f0','#C0272D'));o.push(T(240,180,'√75 = √25 × √3 = 5√3','#241A17',14));}
+  if(p>=3){o.push(R(150,204,180,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,228,'= 5√3','#1a7a3a',18,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+// Q4: Multiply surds — √3 × √12
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'Simplify √3 × √12','#C0272D',16,'middle',true));
+  o.push(R(140,44,200,36,'#fff5f0','#C0272D'));o.push(T(240,68,'√a × √b = √(a×b)','#241A17',14));
+  if(p>=1){o.push(L(240,80,240,100,'#aaa',1));o.push(R(160,100,160,36,'#fff5f0','#C0272D'));o.push(T(240,124,'√3 × √12 = √36','#241A17',14));}
+  if(p>=2){o.push(L(240,136,240,156,'#aaa',1));o.push(R(170,156,140,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,180,'√36 = 6','#1a7a3a',18,'middle',true));}
+  if(p>=3){o.push(T(240,220,'Note: always simplify the product first before rooting','#555',11));}
+  s.innerHTML=o.join('');
+}
+
+// Q5: Expand (1 + √3)²
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'Expand (1 + √3)²','#C0272D',16,'middle',true));
+  o.push(R(100,44,280,36,'#fff5f0','#C0272D'));o.push(T(240,68,'(a+b)² = a² + 2ab + b²','#241A17',13));
+  if(p>=1){o.push(L(240,80,240,100,'#aaa',1));o.push(R(80,100,320,36,'#fff5f0','#C0272D'));o.push(T(240,124,'= 1² + 2×1×√3 + (√3)²','#241A17',13));}
+  if(p>=2){o.push(L(240,136,240,156,'#aaa',1));o.push(R(100,156,280,36,'#e8f4ff','#1a5a8a'));o.push(T(240,180,'= 1 + 2√3 + 3','#1a5a8a',14));}
+  if(p>=3){o.push(L(240,192,240,212,'#aaa',1));o.push(R(160,212,160,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,236,'= 4 + 2√3','#1a7a3a',16,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+// Q6: Rationalise denominator — 1/√5
+function dQ6(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'Rationalise the denominator: 1/√5','#C0272D',16,'middle',true));
+  o.push(T(240,65,'Multiply top and bottom by √5','#555',13));
+  if(p>=1){
+    o.push(R(100,78,280,42,'#fff5f0','#C0272D'));
+    o.push(T(240,106,'(1 × √5) / (√5 × √5)','#241A17',14));
+  }
+  if(p>=2){
+    o.push(L(240,120,240,140,'#aaa',1));
+    o.push(R(140,140,200,42,'#e8f4ff','#1a5a8a'));
+    o.push(T(240,168,'√5 / (√5)²  =  √5 / 5','#1a5a8a',14));
+  }
+  if(p>=3){
+    o.push(L(240,182,240,202,'#aaa',1));
+    o.push(R(170,202,140,40,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,228,'= √5 / 5','#1a7a3a',17,'middle',true));
+  }
+  o.push(T(240,250,'The denominator is now rational (no surd)','#555',11));
+  s.innerHTML=o.join('');
+}
+
+// Q7: Rationalise 6/√3
+function dQ7(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,28,'Rationalise the denominator: 6/√3','#C0272D',16,'middle',true));
+  o.push(T(240,60,'Multiply top and bottom by √3','#555',13));
+  if(p>=1){o.push(R(100,72,280,42,'#fff5f0','#C0272D'));o.push(T(240,100,'(6 × √3) / (√3 × √3)','#241A17',14));}
+  if(p>=2){o.push(L(240,114,240,134,'#aaa',1));o.push(R(120,134,240,42,'#e8f4ff','#1a5a8a'));o.push(T(240,162,'6√3 / 3  =  2√3','#1a5a8a',16));}
+  if(p>=3){o.push(L(240,176,240,196,'#aaa',1));o.push(R(170,196,140,40,'#e8f8ee','#1a7a3a',2));o.push(T(240,222,'= 2√3','#1a7a3a',18,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+// Q8: Rationalise (3+√2)/(√2) — mixed
+function dQ8(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,26,'Rationalise: (3 + √2) / √2','#C0272D',15,'middle',true));
+  o.push(T(240,55,'Multiply top and bottom by √2','#555',12));
+  if(p>=1){o.push(R(80,66,320,40,'#fff5f0','#C0272D'));o.push(T(240,92,'(3+√2)×√2 / (√2×√2)','#241A17',13));}
+  if(p>=2){o.push(L(240,106,240,126,'#aaa',1));o.push(R(80,126,320,40,'#e8f4ff','#1a5a8a'));o.push(T(240,152,'(3√2 + √2×√2) / 2  =  (3√2 + 2) / 2','#1a5a8a',12));}
+  if(p>=3){o.push(L(240,166,240,186,'#aaa',1));o.push(R(100,186,280,40,'#e8f8ee','#1a7a3a',2));o.push(T(240,212,'= (3√2 + 2) / 2  or  3√2/2 + 1','#1a7a3a',13,'middle',true));}
+  o.push(T(240,248,'Split into two fractions if needed','#555',11));
+  s.innerHTML=o.join('');
+}
+
+// Q9: Recurring decimal → fraction (E1.14 bonus link)
+function dQ9(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,26,'Surd or not a surd?','#C0272D',15,'middle',true));
+  var rows=[['√4','= 2','Not a surd — rational','#1a7a3a'],['√9','= 3','Not a surd — rational','#1a7a3a'],['√7','= 2.6457…','Surd — irrational','#C0272D'],['√(1/4)','= 1/2','Not a surd — rational','#1a7a3a'],['√8','= 2√2','Surd — irrational','#C0272D']];
+  rows.forEach(function(r,i){
+    if(i<p){
+      o.push(R(30,44+i*38,420,34,i%2===0?'#fdf7f4':'#fff','#E4D6CE',1));
+      o.push(T(80,66+i*38,r[0],'#241A17',14,'middle',true));
+      o.push(T(170,66+i*38,r[1],'#241A17',13));
+      o.push(T(370,66+i*38,r[2],r[3],12,'middle',true));
+    }
+  });
+  if(p===0){o.push(T(240,140,'Is the square root rational or irrational?','#888',13));}
+  s.innerHTML=o.join('');
+}
+
+var QS=[
+  {ey:'Q1 · Surds · Extended',ti:'What is a Surd?',su:'Understand why surds are irrational and where they sit on the number line.',lv:'E',steps:[
+    {lb:'The number line',dr:dQ1,ht:'<span class="lt le">Extended</span><p>A <b>surd</b> is a square root (or other root) that cannot be written as a fraction. Its decimal never terminates or repeats.</p><p>√4 = 2 (rational, not a surd) &nbsp;|&nbsp; √2 = 1.414… (surd).</p>'},
+    {lb:'Step 1 — √2',dr:dQ1,ht:'<p>√2 ≈ 1.414… It sits between 1 and 2 on the number line, but it cannot be written exactly as a fraction.</p>'},
+    {lb:'Step 2 — √3',dr:dQ1,ht:'<p>√3 ≈ 1.732… Another irrational number — the decimal goes on forever without a pattern.</p>'},
+    {lb:'Step 3 — √5',dr:dQ1,ht:'<p>√5 ≈ 2.236… Notice that perfect squares (1, 4, 9, 16…) give whole-number square roots. Everything in between is a surd.</p>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var opts=[[4,'rational'],[7,'surd'],[16,'rational'],[11,'surd'],[25,'rational'],[50,'surd']];var o=pick(opts);var isSurd=o[1]==='surd';return{question:'Is √'+o[0]+' a surd? Enter <b>1 for Yes (surd)</b>, <b>0 for No (not a surd)</b>.',hints:['Is '+o[0]+' a perfect square?'],ans:isSurd?1:0,tol:0,unit:'',working:'√'+o[0]+' is '+(isSurd?'irrational — it is a surd':'= '+Math.sqrt(o[0])+' — rational, not a surd')};})}
+  ]},
+  {ey:'Q2 · Surds · Extended',ti:'Simplifying a Surd — √72',su:'Write √72 in the form a√b where b is as small as possible.',lv:'E',steps:[
+    {lb:'The method',dr:dQ2,ht:'<span class="lt le">Extended</span><p>Find the <b>largest perfect square</b> that divides into 72. Then use √(ab) = √a × √b.</p><p>Perfect squares: 4, 9, 16, 25, 36, 49, 64…</p>'},
+    {lb:'Step 1 — Factor',dr:dQ2,ht:'<p>72 = <b>36</b> × 2. We use 36 because it is the largest perfect square factor.</p>'},
+    {lb:'Step 2 — Split the root',dr:dQ2,ht:'<div class="fm">√72 = √36 × √2</div>'},
+    {lb:'Step 3 — Simplify',dr:dQ2,ht:'<div class="fm">= 6 × √2 = 6√2</div>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var data=[[8,2,2],[12,2,3],[18,3,2],[20,2,5],[27,3,3],[45,3,5],[50,5,2],[98,7,2]];var d=pick(data);return{question:'Simplify √'+d[0]+'. Enter the value of <em>a</em> where the answer is a√'+d[2]+'.',hints:['Find the largest perfect square that divides '+d[0],''+d[0]+' = '+d[1]*d[1]+' × '+d[2]],ans:d[1],tol:0,unit:'',working:'√'+d[0]+' = √'+(d[1]*d[1])+'×√'+d[2]+' = '+d[1]+'√'+d[2]};})}
+  ]},
+  {ey:'Q3 · Surds · Extended',ti:'Simplifying a Surd — √75',su:'Write √75 in the form a√b.',lv:'E',steps:[
+    {lb:'The method',dr:dQ3,ht:'<span class="lt le">Extended</span><p>Look for the largest perfect square factor. Try dividing by 4, 9, 25, 36 in turn — stop at the largest one that divides exactly.</p>'},
+    {lb:'Step 1 — Factor',dr:dQ3,ht:'<p>75 = <b>25</b> × 3. (Check: does 25 divide 75? Yes: 75 ÷ 25 = 3 ✓)</p>'},
+    {lb:'Step 2 — Result',dr:dQ3,ht:'<div class="fm">√75 = √25 × √3 = 5√3</div>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var data=[[48,4,3],[75,5,3],[108,6,3],[200,10,2],[147,7,3],[125,5,5],[180,6,5]];var d=pick(data);return{question:'Simplify √'+d[0]+'. Enter the value of <em>a</em> in the form a√'+d[2]+'.',hints:[''+d[0]+' = '+d[1]*d[1]+' × '+d[2]],ans:d[1],tol:0,unit:'',working:'√'+d[0]+' = √'+(d[1]*d[1])+'×√'+d[2]+' = '+d[1]+'√'+d[2]};})}
+  ]},
+  {ey:'Q4 · Surds · Extended',ti:'Multiplying Surds',su:'Simplify √3 × √12.',lv:'E',steps:[
+    {lb:'The rule',dr:dQ4,ht:'<span class="lt le">Extended</span><p>Key rule: <b>√a × √b = √(ab)</b>. Multiply the numbers under the root signs, then simplify.</p>'},
+    {lb:'Step 1 — Multiply',dr:dQ4,ht:'<div class="fm">√3 × √12 = √(3×12) = √36</div>'},
+    {lb:'Step 2 — Simplify',dr:dQ4,ht:'<div class="fm">√36 = 6</div><p>The surds multiplied to give a rational number — this is useful in rationalising!</p>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var pairs=[[2,8,4],[3,3,3],[5,5,5],[2,18,6],[3,12,6],[5,20,10],[2,32,8]];var d=pick(pairs);return{question:'Evaluate √'+d[0]+' × √'+d[1]+'.',hints:['√'+d[0]+'×√'+d[1]+' = √'+(d[0]*d[1])],ans:d[2],tol:0,unit:'',working:'√'+(d[0]*d[1])+' = '+d[2]};})}
+  ]},
+  {ey:'Q5 · Surds · Extended',ti:'Expanding Brackets with Surds',su:'Expand and simplify (1 + √3)².',lv:'E',steps:[
+    {lb:'The method',dr:dQ5,ht:'<span class="lt le">Extended</span><p>Treat √3 like a letter. Expand using (a+b)² = a² + 2ab + b², then use the key fact: <b>(√n)² = n</b>.</p>'},
+    {lb:'Step 1 — Expand',dr:dQ5,ht:'<div class="fm">(1+√3)² = 1² + 2×1×√3 + (√3)²</div>'},
+    {lb:'Step 2 — Simplify (√3)²',dr:dQ5,ht:'<div class="fm">= 1 + 2√3 + 3</div><p>(√3)² = 3 — squaring a surd removes the root.</p>'},
+    {lb:'Step 3 — Collect terms',dr:dQ5,ht:'<div class="fm">= 4 + 2√3</div>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var n=pick([2,3,5]);var rational=1+n;return{question:'Expand (1 + √'+n+')². Enter the rational part (the whole number in the answer).',hints:['Use (a+b)² = a²+2ab+b²','(√'+n+')² = '+n],ans:rational,tol:0,unit:'',working:'1 + 2√'+n+' + '+n+' = '+(1+n)+' + 2√'+n+'. Rational part = '+(1+n)};})}
+  ]},
+  {ey:'Q6 · Surds · Extended',ti:'Rationalising the Denominator — 1/√5',su:'Write 1/√5 with a rational denominator.',lv:'E',steps:[
+    {lb:'Why rationalise?',dr:dQ6,ht:'<span class="lt le">Extended</span><p>Having a surd in the denominator is not considered simplified. To <b>rationalise</b>, multiply top and bottom by the surd in the denominator.</p>'},
+    {lb:'Step 1 — Multiply by √5/√5',dr:dQ6,ht:'<div class="fm">1/√5 × (√5/√5) = √5/(√5)²</div>'},
+    {lb:'Step 2 — Simplify',dr:dQ6,ht:'<div class="fm">= √5/5</div><p>The denominator is now 5 — a rational number. ✓</p>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var n=pick([2,3,5,7]);return{question:'Rationalise 1/√'+n+'. Enter the denominator of the simplified answer.',hints:['Multiply top and bottom by √'+n,'(√'+n+')² = '+n],ans:n,tol:0,unit:'',working:'1/√'+n+' = √'+n+'/'+n+'. Denominator = '+n};})}
+  ]},
+  {ey:'Q7 · Surds · Extended',ti:'Rationalising — 6/√3',su:'Simplify 6/√3.',lv:'E',steps:[
+    {lb:'The method',dr:dQ7,ht:'<span class="lt le">Extended</span><p>Multiply numerator and denominator by √3. Then simplify the fraction if possible.</p>'},
+    {lb:'Step 1 — Multiply',dr:dQ7,ht:'<div class="fm">6/√3 × (√3/√3) = 6√3/3</div>'},
+    {lb:'Step 2 — Simplify',dr:dQ7,ht:'<div class="fm">6√3/3 = 2√3</div><p>Divide 6 by 3. The answer is a simplified surd with rational coefficient.</p>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var data=[[4,2,2],[6,3,2],[10,5,2],[9,3,3],[15,5,3],[12,2,3],[20,4,5]];var d=pick(data);return{question:'Simplify '+d[0]+'/√'+d[2]+'. Enter the coefficient (the number in front of √'+d[2]+').',hints:['Multiply top and bottom by √'+d[2],'Then simplify '+d[0]+'/'+d[2]],ans:d[1],tol:0,unit:'',working:d[0]+'/√'+d[2]+' = '+d[0]+'√'+d[2]+'/'+d[2]+' = '+d[1]+'√'+d[2]};})}
+  ]},
+  {ey:'Q8 · Surds · Extended',ti:'Rationalising — Mixed Expression',su:'Rationalise (3 + √2)/√2.',lv:'E',steps:[
+    {lb:'The method',dr:dQ8,ht:'<span class="lt le">Extended</span><p>Multiply <b>every term</b> in the numerator by the denominator surd. Then simplify (√2)² = 2.</p>'},
+    {lb:'Step 1 — Multiply',dr:dQ8,ht:'<div class="fm">(3+√2)/√2 × (√2/√2) = (3√2 + √2·√2)/2</div>'},
+    {lb:'Step 2 — Simplify √2·√2',dr:dQ8,ht:'<div class="fm">= (3√2 + 2)/2</div><p>√2 × √2 = 2 — this is the key simplification.</p>'},
+    {lb:'Result',dr:dQ8,ht:'<div class="fm">= 3√2/2 + 1</div><p>Can be written as a single fraction or split — both are correct.</p>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var a=pick([2,4,6,8]),n=pick([2,3]);var coeff=a/n;if(!Number.isInteger(coeff))coeff=a;var ans=coeff;return{question:'Rationalise '+a+'/√'+n+'. Enter the coefficient of √'+n+' in the simplified answer.',hints:['Multiply top and bottom by √'+n,'(√'+n+')² = '+n,'Then simplify '+a+'/'+n],ans:a/n,tol:0,unit:'',working:a+'/√'+n+' = '+a+'√'+n+'/'+n+' = '+(a/n)+'√'+n};})}
+  ]},
+  {ey:'Q9 · Surds · Extended',ti:'Identifying Surds',su:'Which of these are surds? Check your understanding.',lv:'E',steps:[
+    {lb:'The examples',dr:dQ9,ht:'<span class="lt le">Extended</span><p>A number is a surd if its square root is irrational. If the number under the root is a <b>perfect square</b>, the result is rational — not a surd.</p>'},
+    {lb:'√4 and √9',dr:dQ9,ht:'<p>√4 = 2 and √9 = 3 — both whole numbers, so <b>not surds</b>.</p>'},
+    {lb:'√7 and √8',dr:dQ9,ht:'<p>√7 = 2.645… and √8 = 2√2 — both irrational, so <b>surds</b>.</p>'},
+    {lb:'√(1/4) and √50',dr:dQ9,ht:'<p>√(1/4) = 1/2 — rational, not a surd. &nbsp;√50 = 5√2 — irrational, so a surd.</p>'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var data=[[4,0],[9,0],[16,0],[25,0],[2,1],[3,1],[5,1],[6,1],[7,1],[8,1],[10,1],[12,1],[50,1],[98,1]];var d=pick(data);return{question:'Is √'+d[0]+' a surd? Enter <b>1 for Yes</b>, <b>0 for No</b>.',hints:['Is '+d[0]+' a perfect square?'],ans:d[1],tol:0,unit:'',working:'√'+d[0]+(d[1]?' cannot be simplified to a rational number — it is a surd':' = '+Math.sqrt(d[0])+' — rational, not a surd')};})}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){
+  var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);
+  QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti+'<br><span class="badge be">Extended</span>';b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});
+}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){
+  bSB();var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;
+  var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+  p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;
+  st.dr(si);bDT();
+  document.getElementById('pb').disabled=si===0;
+  document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';
+}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+
+<!-- ABC Supabase Progress Tracking -->
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase = _sb;
+window._abcUpdated = '2026-06-28';
+window._abcTopicCode = 'Y10-NUM-02';
+window.markComplete = async function() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) return;
+  const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', window._abcTopicCode).maybeSingle();
+  if (!topic) return;
+  window._abcTopicId = topic.id;
+  await _sb.from('walkthrough_progress').upsert({
+    student_id: session.user.id, topic_id: topic.id,
+    status: 'completed', completed_at: new Date().toISOString(),
+    last_visited_at: new Date().toISOString(),
+  }, { onConflict: 'student_id,topic_id' });
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>
