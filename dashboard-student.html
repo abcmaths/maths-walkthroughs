@@ -498,14 +498,15 @@
       const strandLabel = isSci
         ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${accent};margin-right:4px;vertical-align:middle"></span>${t.strand || ''}`
         : (t.strand || '');
+      const comingSoon = file === '#';
       return `<div class="${cardClass} ${status}" style="${isSci && status === 'not-started' ? `border-color:${accent}22` : ''}">
         <div class="t-name">${t.topic_name}</div>
         <div class="t-strand">${strandLabel}</div>
-        <div class="t-status">${lbl}</div>
+        <div class="t-status">${comingSoon ? '<span style="color:#bbb;font-size:0.72rem">🔒 Coming soon</span>' : lbl}</div>
         ${testBadge}
         <div class="t-btns" style="--accent:${accent}">
-          <button class="t-btn-walk" onclick="openTopic('${t.id}','${file}')">Walkthrough</button>
-          <button class="t-btn-test" onclick="openTest('${t.id}')">Take a Test</button>
+          <button class="t-btn-walk" ${comingSoon ? 'disabled style="background:#ddd;cursor:not-allowed"' : ''} onclick="openTopic('${t.id}','${file}')">Walkthrough</button>
+          <button class="t-btn-test" ${comingSoon ? 'disabled style="color:#bbb;border-color:#ddd;cursor:not-allowed"' : ''} onclick="openTest('${t.id}')">Take a Test</button>
         </div>
       </div>`;
     }).join('');
