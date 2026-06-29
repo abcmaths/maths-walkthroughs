@@ -102,179 +102,207 @@ function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D'
 function L(x1,y1,x2,y2,c,w){c=c||'#C0272D';w=w||2;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"/>';}
 
 // Session values
+
+// ── Binomial coefficient helper ─────────────────────────────────────────
+// Draws the bracket notation  ( n )  centred at (cx, cy)
+//                              ( r )
+function binom(cx, cy, n, r, col, sz) {
+  col = col || '#C0272D'; sz = sz || 15;
+  var sm = Math.round(sz * 0.72);
+  return '<rect x="'+(cx-22)+'" y="'+(cy-sz-2)+'" width="44" height="'+(sz*2+6)+'" fill="none" stroke="'+col+'" stroke-width="1.5" rx="3"/>'
+    + T(cx, cy - 1, n, col, sz, 'middle', true)
+    + T(cx, cy + sm + 5, r, col, sm, 'middle');
+}
+
 var V={};
 (function(){
-  V.n1=rnd(3,5); // Pascal's triangle row
-  // row for (1+x)^n: coefficients are nC0, nC1,...nCn
+  V.n1=rnd(3,5);
   V.row1=[];for(var i=0;i<=V.n1;i++)V.row1.push(nCr(V.n1,i));
-
   V.n2=rnd(3,5);V.a2=rnd(1,3);V.b2=rnd(1,3);
-  // (a+bx)^n2 — pick specific term r=2
-  V.r2=2;
-  V.coeff2=nCr(V.n2,V.r2)*Math.pow(V.a2,V.n2-V.r2)*Math.pow(V.b2,V.r2);
-
+  V.coeff2=nCr(V.n2,2)*Math.pow(V.a2,V.n2-2)*Math.pow(V.b2,2);
   V.n3=rnd(4,6);
-  // find term independent of x in (x + 1/x)^n3
-  // term r: nCr * x^(n3-r) * x^(-r) = nCr * x^(n3-2r) → ind when n3=2r
-  V.r3=V.n3/2; // only integer if n3 even
-  V.n3even=(V.n3%2===0);
-  if(!V.n3even){V.n3=V.n3+1;V.r3=V.n3/2;}
+  if(V.n3%2!==0)V.n3++;
+  V.r3=V.n3/2;
   V.indterm3=nCr(V.n3,V.r3);
-
-  V.n4=rnd(3,5);V.a4=rnd(1,3);
-  // approximation: (1+x)^n ≈ 1 + nx for small x
-  // use x=0.01, a4=1
-  V.xsmall=0.01;
-  V.approx4=1+V.n4*V.xsmall;
-  V.exact4=Math.round(Math.pow(1+V.xsmall,V.n4)*10000)/10000;
+  V.n4=rnd(3,5);
+  V.approx4=Math.round((1+V.n4*0.01)*1000)/1000;
+  V.exact4=Math.round(Math.pow(1.01,V.n4)*10000)/10000;
 })();
 
 function dQ1(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
   o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
   o.push(T(240,30,"Pascal's Triangle — row "+V.n1,'#C0272D',13,'middle',true));
-  // draw Pascal's triangle rows 0..n1
   var rows=[];for(var r=0;r<=V.n1;r++){var row=[];for(var k=0;k<=r;k++)row.push(nCr(r,k));rows.push(row);}
-  var startY=50,rowH=32,cellW=36;
+  var startY=56,rowH=34,cellW=38;
   rows.forEach(function(row,ri){
     var totalW=row.length*cellW;var startX=(480-totalW)/2;
     row.forEach(function(val,ci){
       var cx=startX+ci*cellW+cellW/2;var cy=startY+ri*rowH;
-      var isHighlight=(ri===V.n1)&&p>=2;
+      var hi=(ri===V.n1)&&p>=2;
       if(p>=ri){
-        o.push('<circle cx="'+cx+'" cy="'+cy+'" r="13" fill="'+(isHighlight?'#C0272D':'#fff')+'" stroke="'+(isHighlight?'#C0272D':'#E4D6CE')+'" stroke-width="1.5"/>');
-        o.push(T(cx,cy+5,''+val,isHighlight?'#fff':'#241A17',11,'middle',true));
+        o.push('<circle cx="'+cx+'" cy="'+cy+'" r="14" fill="'+(hi?'#C0272D':'#fff')+'" stroke="'+(hi?'#C0272D':'#E4D6CE')+'" stroke-width="1.5"/>');
+        o.push(T(cx,cy+5,''+val,hi?'#fff':'#241A17',11,'middle',true));
       }
     });
   });
   if(p>=2){
-    o.push(R(14,232,452,20,'#fff8e8','#C8922A',1));
-    o.push(T(240,246,'Row '+V.n1+' coefficients: '+V.row1.join(', '),'#C8922A',10,'middle'));
+    o.push(R(14,238,452,24,'#fff8e8','#C8922A',1));
+    o.push(T(240,254,'Row '+V.n1+':  '+V.row1.join('  ')+'   — coefficients of (a+b)^'+V.n1,'#C8922A',10,'middle'));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ2(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
   o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Expand ('+V.a2+' + '+V.b2+'x)^'+V.n2,'#C0272D',14,'middle',true));
-  // general term: nCr * a^(n-r) * (bx)^r = nCr * a^(n-r) * b^r * x^r
+  o.push(T(240,30,'Expanding ('+V.a2+' + '+V.b2+'x)^'+V.n2,'#C0272D',14,'middle',true));
   var terms=[];
-  for(var r=0;r<=V.n2;r++){
-    var c=nCr(V.n2,r)*Math.pow(V.a2,V.n2-r)*Math.pow(V.b2,r);
-    terms.push({r:r,c:c});
-  }
+  for(var r=0;r<=V.n2;r++) terms.push({r:r,c:nCr(V.n2,r)*Math.pow(V.a2,V.n2-r)*Math.pow(V.b2,r)});
   if(p>=1){
-    o.push(R(30,52,420,36,'#f8f8f8','#ccc',1));
-    o.push(T(240,66,'General term (r+1)th: \u207f\u1d9c\u1d63 \u00d7 a\u207f\u207b\u1d63 \u00d7 (bx)\u1d63','#888',11,'middle'));
-    o.push(T(240,82,'= \u207f\u1d9c\u1d63 \u00d7 '+V.a2+'\u207f\u207b\u1d63 \u00d7 '+V.b2+'\u1d63 \u00d7 x\u1d63','#241A17',11,'middle',true));
+    o.push(R(30,52,420,54,'#f8f8f8','#ccc',1));
+    o.push(T(55,66,'(r+1)th term:','#888',10,'start'));
+    o.push(binom(160,72,'n','r','#C0272D',14));
+    o.push(T(190,74,' \u00d7 a^(n\u2212r) \u00d7 (bx)^r','#241A17',12,'start'));
+    o.push(T(55,96,'The bracket','#888',9,'start'));
+    o.push(binom(148,96,'n','r','#888',11));
+    o.push(T(173,98,'means n! \u00f7 [r! \u00d7 (n\u2212r)!]  — also written nCr','#888',9,'start'));
   }
   if(p>=2){
-    terms.slice(0,4).forEach(function(t,i){
-      var xp=t.r===0?'':t.r===1?'x':'x\u00b2\u00b3\u2074\u2075\u2076'.charAt(t.r-1)||'x^'+t.r;
-      o.push(R(20+i*110,100,102,48,'#fff5f0','#C0272D',1));
-      o.push(T(71+i*110,118,'r='+t.r,'#888',9,'middle'));
-      o.push(T(71+i*110,140,t.c+xp,'#C0272D',13,'middle',true));
+    terms.slice(0,Math.min(4,V.n2+1)).forEach(function(t,i){
+      var xp=t.r===0?'':t.r===1?'x':'x^'+t.r;
+      o.push(R(18+i*115,114,107,56,'#fff5f0','#C0272D',1));
+      o.push(T(71+i*115,126,'r='+t.r,'#888',9,'middle'));
+      o.push(binom(71+i*115,142,''+V.n2,''+t.r,'#C0272D',12));
+      o.push(T(71+i*115,162,t.c+''+xp,'#C0272D',12,'middle',true));
     });
   }
   if(p>=3){
-    o.push(R(14,162,452,54,'#e8f8ee','#1a7a3a',1.5));
+    o.push(R(14,178,452,52,'#e8f8ee','#1a7a3a',1.5));
     var exp=terms.map(function(t){var xp=t.r===0?'':t.r===1?'x':'x^'+t.r;return t.c+xp;}).join(' + ');
-    o.push(T(240,184,'Expansion:','#1a7a3a',11,'middle'));
-    o.push(T(240,206,exp,'#1a7a3a',12,'middle',true));
+    o.push(T(240,196,'Expansion:','#1a7a3a',10,'middle'));
+    o.push(T(240,216,exp,'#1a7a3a',12,'middle',true));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ3(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
   o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Find a specific term in a binomial expansion','#C0272D',13,'middle',true));
-  // (2+3x)^5 — find term in x^2
-  var nn=5,aa=2,bb=3,rr=2;
-  var ans=nCr(nn,rr)*Math.pow(aa,nn-rr)*Math.pow(bb,rr);
+  o.push(T(240,30,'Find the term in x\u00b2 in (2+3x)^5','#C0272D',13,'middle',true));
+  var ans=nCr(5,2)*Math.pow(2,3)*Math.pow(3,2);
   if(p>=1){
-    o.push(R(30,52,420,40,'#f8f8f8','#ccc',1));
-    o.push(T(240,66,'Find the term in x\u00b2 in (2 + 3x)^5','#241A17',12,'middle',true));
-    o.push(T(240,82,'The term in x\u02b3 corresponds to r = 2 in the general term','#888',10,'middle'));
+    o.push(R(30,52,420,36,'#f8f8f8','#ccc',1));
+    o.push(T(240,66,'x\u00b2 term \u2192 r = 2  (power of bx in general term = r)','#888',11,'middle'));
+    o.push(T(240,80,'T(3) = 5C2 \u00d7 2^(5\u22122) \u00d7 (3x)^2','#241A17',12,'middle',true));
   }
   if(p>=2){
-    o.push(R(30,100,420,48,'#e8f4ff','#1a5a8a',1.5));
-    o.push(T(240,116,'\u2075\u1d9c\u2082 \u00d7 2\u00b3 \u00d7 (3x)\u00b2','#1a5a8a',13,'middle',true));
-    o.push(T(240,134,'= '+nCr(5,2)+' \u00d7 '+Math.pow(2,3)+' \u00d7 9x\u00b2','#888',12,'middle'));
+    o.push(R(30,96,420,60,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(55,110,'T(3) =','#888',11,'start'));
+    o.push(binom(135,116,'5','2','#1a5a8a',16));
+    o.push(T(163,118,' \u00d7 2\u00b3 \u00d7 (3x)\u00b2','#1a5a8a',13,'start'));
+    o.push(T(240,146,'= 10 \u00d7 8 \u00d7 9x\u00b2','#888',12,'middle'));
   }
   if(p>=3){
-    o.push(R(130,158,220,50,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,174,'= '+ans+'x\u00b2','#1a7a3a',20,'middle',true));
+    o.push(R(140,164,200,50,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,180,'= 720x\u00b2','#1a7a3a',20,'middle',true));
+    o.push(T(240,204,'Coefficient of x\u00b2 is 720','#888',10,'middle'));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ4(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
   o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Term independent of x in (x + 1/x)^'+V.n3,'#C0272D',13,'middle',true));
+  o.push(T(240,30,'Constant term in (x + 1/x)^'+V.n3,'#C0272D',13,'middle',true));
   if(p>=1){
-    o.push(R(30,52,420,40,'#f8f8f8','#ccc',1));
-    o.push(T(240,66,'General term: \u207f\u1d9c\u1d63 \u00d7 x^(n\u2212r) \u00d7 (1/x)^r = \u207f\u1d9c\u1d63 \u00d7 x^(n\u22122r)','#888',11,'middle'));
-    o.push(T(240,82,'Set power of x to 0: n \u2212 2r = 0 \u2192 r = n/2','#241A17',12,'middle',true));
+    o.push(R(30,52,420,44,'#f8f8f8','#ccc',1));
+    o.push(T(55,66,'General term:','#888',10,'start'));
+    o.push(binom(155,72,'n','r','#C0272D',14));
+    o.push(T(183,73,'\u00d7 x^(n\u2212r) \u00d7 x^(\u2212r) =','#241A17',12,'start'));
+    o.push(binom(325,72,'n','r','#C0272D',14));
+    o.push(T(350,73,'\u00d7 x^(n\u22122r)','#241A17',12,'start'));
   }
   if(p>=2){
-    o.push(R(30,100,420,40,'#e8f4ff','#1a5a8a',1.5));
-    o.push(T(240,116,'n = '+V.n3+' \u2192 r = '+V.r3,'#1a5a8a',13,'middle',true));
-    o.push(T(240,132,'(n must be even for an integer r to exist)','#888',10,'middle'));
+    o.push(R(30,104,420,40,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(240,118,'Set power = 0:  n \u2212 2r = 0  \u21d2  r = n/2 = '+V.r3,'#1a5a8a',13,'middle',true));
+    o.push(T(240,136,'n must be even (otherwise no constant term exists)','#888',10,'middle'));
   }
   if(p>=3){
-    o.push(R(130,148,220,50,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,164,'Term = \u207f\u1d9c\u1d63 = '+V.n3+'C'+V.r3+' = '+V.indterm3,'#1a7a3a',16,'middle',true));
-    o.push(T(240,188,'(coefficient of x\u2070 — no x in this term)','#888',10,'middle'));
+    o.push(R(30,150,420,44,'#fff','#C0272D',1.5));
+    o.push(T(80,168,'Constant term =','#241A17',12,'start'));
+    o.push(binom(235,170,''+V.n3,''+V.r3,'#C0272D',16));
+    o.push(T(262,172,'= '+V.indterm3,'#C0272D',18,'start',true));
+  }
+  if(p>=4){
+    o.push(R(14,204,452,58,'#e8f8ee','#1a7a3a',1));
+    o.push(T(240,218,'When r = '+V.r3+': x^('+V.n3+'\u22122\u00d7'+V.r3+') = x^0 = 1','#1a7a3a',11,'middle'));
+    o.push(T(240,234,'The x terms cancel completely \u2014 leaving just the number','#1a7a3a',11,'middle'));
+    o.push(T(240,250,'Constant term = '+V.indterm3,'#1a7a3a',14,'middle',true));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ5(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
   o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Approximation using binomial expansion','#C0272D',13,'middle',true));
+  o.push(T(240,30,'Approximation: (1+x)^n \u2248 1+nx for small x','#C0272D',13,'middle',true));
   if(p>=1){
-    o.push(R(30,52,420,36,'#f8f8f8','#ccc',1));
-    o.push(T(240,66,'For small x: (1+x)\u207f \u2248 1 + nx + n(n\u22121)x\u00b2/2! + \u2026','#888',11,'middle'));
-    o.push(T(240,82,'First two terms: (1+x)\u207f \u2248 1 + nx  (linear approximation)','#241A17',12,'middle',true));
+    o.push(R(30,52,420,50,'#f8f8f8','#ccc',1));
+    o.push(T(240,67,'Full expansion:  (1+x)^n =','#888',10,'middle'));
+    o.push(binom(196,82,'n','0','#888',12));o.push(T(218,84,'+','#888',12,'start'));
+    o.push(binom(238,82,'n','1','#888',12));o.push(T(260,84,'x +','#888',12,'start'));
+    o.push(binom(290,82,'n','2','#888',12));o.push(T(312,84,'x\u00b2 + \u2026','#888',12,'start'));
+    o.push(T(240,98,'For tiny x, x\u00b2 \u2248 0  so  (1+x)^n \u2248 1 + nx','#241A17',11,'middle',true));
   }
   if(p>=2){
-    o.push(T(240,108,'Estimate (1.01)^'+V.n4+' using x = 0.01:','#241A17',12,'middle'));
-    o.push(R(30,118,420,40,'#e8f4ff','#1a5a8a',1.5));
-    o.push(T(240,134,'(1+0.01)^'+V.n4+' \u2248 1 + '+V.n4+'\u00d70.01 = '+V.approx4,'#1a5a8a',14,'middle',true));
+    o.push(R(30,110,420,40,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(240,124,'(1.01)^'+V.n4+' = (1+0.01)^'+V.n4+' \u2248 1 + '+V.n4+'\u00d70.01 = '+V.approx4,'#1a5a8a',13,'middle',true));
+    o.push(T(240,142,'Exact: '+V.exact4+'  Difference < 0.001','#888',10,'middle'));
   }
   if(p>=3){
-    o.push(R(30,166,420,40,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,182,'Exact value: '+V.exact4,'#1a7a3a',13,'middle'));
-    o.push(T(240,198,'Approximation: '+V.approx4+' — very close!','#1a7a3a',12,'middle',true));
+    o.push(R(14,158,452,52,'#fff8e8','#C8922A',1));
+    o.push(T(240,174,'Condition: |x| must be much smaller than 1','#C8922A',11,'middle',true));
+    o.push(T(240,190,'The smaller x is, the better the approximation','#C8922A',10,'middle'));
+    o.push(T(240,206,'Valid for x = 0.01, 0.02, 0.001 etc.','#C8922A',10,'middle'));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ6(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
   o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'nCr symmetry and the binomial theorem formula','#C0272D',13,'middle',true));
+  o.push(T(240,30,'Notation summary and key results','#C0272D',13,'middle',true));
   if(p>=1){
-    o.push(R(30,52,420,40,'#f8f8f8','#ccc',1));
-    o.push(T(240,66,'(a + b)^n = \u03a3 \u207f\u1d9c\u1d63 a^(n\u2212r) b^r  for r = 0 to n','#241A17',13,'middle',true));
-    o.push(T(240,82,'The sum of all coefficients = 2^n (set a=b=1)','#888',10,'middle'));
+    o.push(R(30,52,420,74,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,66,'All three mean the same thing:','#888',10,'middle',true));
+    // Show all three notations side by side
+    o.push(binom(90,88,'n','r','#C0272D',18));
+    o.push(T(118,92,'=  nCr  =  C(n,r)  =  ','#241A17',13,'start',true));
+    o.push(T(280,92,'n!','#241A17',12,'middle'));
+    o.push(T(330,83,'n!','#241A17',12,'middle'));
+    // draw a fraction for n!/r!(n-r)!
+    o.push(T(310,84,'n!','#241A17',13,'middle'));
+    o.push('<line x1="290" y1="96" x2="430" y2="96" stroke="#241A17" stroke-width="1.5"/>');
+    o.push(T(360,112,'r! \u00d7 (n\u2212r)!','#241A17',13,'middle'));
   }
   if(p>=2){
-    o.push(R(30,100,420,40,'#e8f4ff','#1a5a8a',1.5));
-    o.push(T(240,116,'\u207f\u1d9c\u1d63 = \u207f\u1d9c\u207f\u207b\u1d63  (symmetry)','#1a5a8a',13,'middle',true));
-    o.push(T(240,132,'5C2 = 5C3 = 10  (choosing 2 same as leaving out 2)','#888',11,'middle'));
+    o.push(R(30,130,420,46,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(55,144,'Symmetry:  ','#1a5a8a',11,'start',true));
+    o.push(binom(148,152,'n','r','#1a5a8a',15));
+    o.push(T(175,155,' = ','#1a5a8a',14,'start'));
+    o.push(binom(215,152,'n','n\u2212r','#1a5a8a',15));
+    o.push(T(250,155,'   e.g. 5C2 = 5C3 = 10','#888',11,'start'));
+    o.push(T(240,168,'Choosing r from n = choosing which (n\u2212r) to leave out','#888',9,'middle'));
   }
   if(p>=3){
-    o.push(R(30,148,420,40,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,164,'Sum of row n in Pascal\'s triangle = 2^n','#1a7a3a',12,'middle',true));
-    o.push(T(240,180,'Row 4: 1+4+6+4+1 = 16 = 2^4 \u2713','#888',10,'middle'));
-    o.push(R(14,204,452,48,'#fff8e8','#C8922A',1));
-    o.push(T(240,224,'Alternating sum: \u03a3(\u22121)^r \u207f\u1d9c\u1d63 = 0  (set a=1, b=\u22121)','#C8922A',11,'middle',true));
-    o.push(T(240,240,'Row 4: 1\u22124+6\u22124+1 = 0 \u2713','#C8922A',10,'middle'));
+    o.push(R(30,184,420,40,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,198,'Sum of all nCr for a given n  =  2^n','#1a7a3a',12,'middle',true));
+    o.push(T(240,212,'e.g. Row 4: 1+4+6+4+1 = 16 = 2^4','#888',10,'middle'));
+  }
+  if(p>=4){
+    o.push(R(14,232,452,30,'#fff8e8','#C8922A',1));
+    o.push(T(240,252,'WAEC uses nCr notation. Your calculator: nCr or C(n,r) button','#C8922A',10,'middle'));
   }
   s.innerHTML=o.join('');
 }

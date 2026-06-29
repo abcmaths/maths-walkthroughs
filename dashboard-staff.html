@@ -597,6 +597,7 @@
       window.location.href = 'dashboard-student.html';
       return;
     }
+    window.currentUserRole = profile.role;
 
     document.getElementById('header-name').textContent = profile.full_name;
 
@@ -1322,18 +1323,11 @@
     'Y12-MIS-01': 'year12/misconceptions-y12.html',
     // Further Maths (year_group = 14)
     'Y12FM-SET-01': 'furthermaths/sets-furthermaths-y12.html',
-    'Y12FM-SUR-01': 'furthermaths/surds-furthermaths-y12.html',
-    'Y12FM-LOG-01': 'furthermaths/logic-furthermaths-y12.html',
-    // 'Y12FM-FUN-01': 'furthermaths/functions-furthermaths-y12.html',  // FILE NOT YET PUSHED
-    // 'Y12FM-ALG-01': 'furthermaths/partial-fractions-furthermaths-y12.html',  // FILE NOT YET PUSHED
-    // 'Y12FM-ALG-02': 'furthermaths/indices-log-furthermaths-y12.html',  // FILE NOT YET PUSHED
     'Y12FM-ALG-03': 'furthermaths/binomial-furthermaths-y12.html',
-    'Y12FM-ALG-04': 'furthermaths/sequences-series-furthermaths-y12.html',
-    // 'Y12FM-STA-01': 'furthermaths/permcomb-furthermaths-y12.html',  // FILE NOT YET PUSHED
-    'Y12FM-TRI-01': 'furthermaths/trigonometry-furthermaths-y12.html',
-    'Y12FM-STA-02': 'furthermaths/statistics-furthermaths-y12.html',
-    'Y12FM-STA-03': 'furthermaths/probability-furthermaths-y12.html',
-    // Vectors, Statics, Dynamics — coming soon
+'Y12FM-ALG-04': 'furthermaths/sequences-series-furthermaths-y12.html',
+'Y12FM-TRI-01': 'furthermaths/trigonometry-furthermaths-y12.html',
+'Y12FM-STA-02': 'furthermaths/statistics-furthermaths-y12.html',
+'Y12FM-STA-03': 'furthermaths/probability-furthermaths-y12.html',
     // Add Maths 0606 (year_group = 13)
     'AM-FUN-01':  'addmaths/functions-addmaths.html',
     'AM-ALG-01':  'addmaths/algebra-addmaths.html',
@@ -1456,6 +1450,11 @@
         <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}')">
           ${rm ? 'Add/Edit Review' : 'Review'}
         </button>
+        ${window.currentUserRole === 'admin' && reviewerCount >= 2
+            ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 12px;color:var(--red);border-color:var(--red)" onclick="copyReviewsForClaude(${t.id},'${t.topic_name}')">&#x1F4CB; Copy for Claude</button>`
+            : reviewerCount >= 2
+              ? `<span style="font-size:0.75rem;color:#1a7a3a;font-weight:600">&#x2713; Reviews complete</span>`
+              : ''}
       </div>`;
     }).join('');
   };
@@ -1650,6 +1649,33 @@
         </td>
       </tr>`;
     }).join('');
+  };
+
+  // ── Copy reviews for Claude (admin only) ──────────────────────────────
+  window.copyReviewsForClaude = async function(topicId, topicName) {
+    const topicReviews = allReviews.filter(r => r.topic_id === topicId);
+    if (!topicReviews.length) { alert('No reviews found for this topic.'); return; }
+
+    const questions = await getQuestions(topicReviews[0]?.topic_code || '');
+    const reviewerIds = [...new Set(topicReviews.map(r => r.reviewer_id))];
+
+    let block = '=== WALKTHROUGH REVIEW: ' + topicName + ' ===\n';
+    block += 'Reviewers: ' + reviewerIds.length + '\n\n';
+
+    topicReviews.forEach(r => {
+      const q = questions.find(q => q.number === r.question_number);
+      block += '--- Q' + r.question_number + (q ? ': ' + q.text.slice(0,60) : '') + ' ---\n';
+      block += 'Rating: ' + (r.rating || 'none') + '\n';
+      if (r.comment) block += 'Comment: ' + r.comment + '\n';
+      block += '\n';
+    });
+
+    try {
+      await navigator.clipboard.writeText(block);
+      alert('Copied to clipboard! Paste into Claude.');
+    } catch(e) {
+      prompt('Copy this text:', block);
+    }
   };
 
   window.exportUsers = function() {
