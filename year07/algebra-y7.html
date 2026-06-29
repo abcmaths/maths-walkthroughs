@@ -226,10 +226,14 @@ function dQ3(p){
   o.push(T(240,28,'3x + 2y + 5x + y','#C0272D',18,'middle',true));
   o.push(T(240,52,'Sort tiles by type:','#888',12));
   if(p>=1){
-    [68,118,168].forEach(function(x){o.push(R(x-22,64,44,36,'#fce8d8','#C0272D',2));o.push(T(x,87,'x','#C0272D',18));});
-    [228,278].forEach(function(x){o.push(R(x-22,64,44,36,'#e8f4ff','#1a5a8a',2));o.push(T(x,87,'y','#1a5a8a',18));});
-    [328,378,428].forEach(function(x){o.push(R(x-22,64,44,36,'#fce8d8','#C0272D',2));o.push(T(x,87,'x','#C0272D',18));});
-    o.push(R(153,112,44,36,'#e8f4ff','#1a5a8a',2));o.push(T(175,135,'y','#1a5a8a',18));
+    // All x-tiles together (left), all y-tiles together (right)
+    o.push(T(130,58,'x-terms','#C0272D',11,'middle'));
+    o.push(T(358,58,'y-terms','#1a5a8a',11,'middle'));
+    o.push(L(240,56,240,155,'#ddd',1,'4,3'));
+    [58,108,158,208].forEach(function(x){o.push(R(x-22,64,44,36,'#fce8d8','#C0272D',2));o.push(T(x,87,'x','#C0272D',18));});
+    [288,368].forEach(function(x){o.push(R(x-22,64,44,36,'#e8f4ff','#1a5a8a',2));o.push(T(x,87,'y','#1a5a8a',18));});
+    o.push(T(130,120,'3x + 5x','#C0272D',13,'middle'));
+    o.push(T(358,120,'2y + y','#1a5a8a',13,'middle'));
   }
   if(p>=2){o.push(T(240,170,'x terms: 3x + 5x','#C0272D',14));o.push(T(240,196,'y terms: 2y + y','#1a5a8a',14));}
   if(p>=3){o.push(R(130,212,220,34,'#e8f8ee','#1a7a3a',2));o.push(T(240,234,'= 8x + 3y','#1a7a3a',18,'middle',true));}
@@ -238,10 +242,10 @@ function dQ3(p){
 
 function dQ4(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Expand  3(x + 4)','#C0272D',18,'middle',true));
-  // Rectangle: width = (x+4) split into x and 4; height label = 3
-  var rx=80,ry=60,rw=280,rh=100,sp=rx+180;  // split at x portion
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,28,'Expand  3(x + 4)','#C0272D',16,'middle',true));
+  // Rectangle: moved down so it clears the title banner
+  var rx=80,ry=52,rw=280,rh=100,sp=rx+180;  // split at x portion
   o.push(R(rx,ry,rw,rh,'#fff8f4','#C0272D',2));
   // height label "3" on left
   o.push(T(rx-18,ry+rh/2,'3','#C0272D',18,'middle',true));
@@ -282,39 +286,67 @@ function dQ5(p){
 
 function dQ6(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,30,'2x + 3 = 11','#C0272D',20,'middle',true));
-  o.push(R(60,50,360,38,'#e8f4ff','#1a5a8a',2));o.push(T(240,74,'11','#1a5a8a',16,'middle',true));
+  // Helper: draw a simple scales diagram with left and right content
+  function scales(yBase, leftItems, rightVal, leftCol) {
+    // fulcrum
+    o.push('<polygon points="240,'+(yBase+38)+' 225,'+(yBase+54)+' 255,'+(yBase+54)+'" fill="#888"/>');
+    o.push(L(180,yBase,300,yBase,'#888',3));
+    // left pan
+    o.push(L(180,yBase,180,yBase+8,'#888',2));
+    o.push(R(136,yBase+8,88,32,leftItems.bg||'#fce8d8',leftItems.col||'#C0272D',2));
+    o.push(T(180,yBase+30,leftItems.label,leftItems.col||'#C0272D',15,'middle',true));
+    // right pan
+    o.push(L(300,yBase,300,yBase+8,'#888',2));
+    o.push(R(264,yBase+8,72,32,'#e8f4ff','#1a5a8a',2));
+    o.push(T(300,yBase+30,rightVal,'#1a5a8a',15,'middle',true));
+  }
+  if(p===0){
+    o.push(T(240,22,'2x + 3 = 11','#C0272D',20,'middle',true));
+    scales(60,{label:'2x + 3',col:'#C0272D',bg:'#fce8d8'},'11');
+    o.push(T(240,140,'An equation is balanced — both sides are equal.','#888',12,'middle'));
+  }
   if(p>=1){
-    o.push(R(60,104,270,38,'#fce8d8','#C0272D',2));o.push(T(195,128,'2x','#C0272D',16));
-    o.push(R(334,104,86,38,'#fff3cd','#C8922A',2));o.push(T(377,128,'3','#C8922A',16));
-    o.push(T(240,158,'Step 1: subtract 3  \u2192  2x = 8','#241A17',14));
+    o.push(T(240,22,'Step 1: subtract 3 from both sides','#241A17',14,'middle'));
+    scales(55,{label:'2x',col:'#C0272D',bg:'#fce8d8'},'8');
+    o.push(T(180,106,'\u2212 3','#C8922A',13,'middle'));o.push(T(300,106,'\u2212 3','#C8922A',13,'middle'));
+    o.push(T(240,136,'2x + 3 \u2212 3 = 11 \u2212 3','#241A17',13,'middle'));
+    o.push(T(240,155,'2x = 8','#C0272D',16,'middle',true));
   }
   if(p>=2){
-    o.push(R(60,170,360,38,'#fce8d8','#C0272D',1.5));
-    o.push(L(240,170,240,208,'#C0272D',1.5,'4,3'));
-    o.push(T(150,194,'x','#C0272D',16));o.push(T(330,194,'x','#C0272D',16));
-    o.push(T(240,220,'Step 2: divide by 2  \u2192  x = 4','#241A17',14));
+    o.push(T(240,180,'Step 2: divide both sides by 2','#241A17',14,'middle'));
+    scales(195,{label:'x',col:'#C0272D',bg:'#fce8d8'},'4');
+    o.push(T(180,246,'\u00f7 2','#C8922A',13,'middle'));o.push(T(300,246,'\u00f7 2','#C8922A',13,'middle'));
   }
-  if(p>=3){o.push(R(140,232,200,22,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,248,'x = 4  \u2713  Check: 2(4)+3 = 11','#1a7a3a',13,'middle',true));}
+  if(p>=3){o.push(R(120,230,240,24,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,247,'x = 4  \u2713  Check: 2(4)+3 = 11','#1a7a3a',13,'middle',true));}
   s.innerHTML=o.join('');
 }
 
 function dQ7(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  [80,180,280,380].forEach(function(cx){
-    o.push(R(cx-38,50,76,52,'#fff8f0','#C8922A',2));
-    o.push(T(cx,70,'TICKET','#C8922A',10,'middle',true));
-    o.push(L(cx-38,76,cx+38,76,'#C8922A',1,'4,3'));
-    o.push(T(cx,92,'adult/child','#C8922A',9));
+  // 3 adult tickets (red) + 4 child tickets (blue) shown separately
+  o.push(T(94,22,'3 adult tickets','#C0272D',12,'middle'));
+  o.push(T(340,22,'4 child tickets','#1a5a8a',12,'middle'));
+  o.push(L(220,14,220,110,'#ddd',1,'4,3'));
+  [40,94,148].forEach(function(cx){
+    o.push(R(cx-26,32,52,52,'#fff5f0','#C0272D',2));
+    o.push(T(cx,52,'TICKET','#C0272D',9,'middle',true));
+    o.push(L(cx-26,58,cx+26,58,'#C0272D',1,'3,2'));
+    o.push(T(cx,72,'\u00a3a','#C0272D',14,'middle',true));
   });
-  o.push(T(240,26,'Adult: \u00a3a each.  Child: \u00a3c each.','#241A17',14));
-  o.push(T(240,130,'3 adult and 4 child tickets','#888',13));
+  [250,298,346,394].forEach(function(cx){
+    o.push(R(cx-22,32,44,52,'#e8f4ff','#1a5a8a',2));
+    o.push(T(cx,52,'TICKET','#1a5a8a',9,'middle',true));
+    o.push(L(cx-22,58,cx+22,58,'#1a5a8a',1,'3,2'));
+    o.push(T(cx,72,'\u00a3c','#1a5a8a',14,'middle',true));
+  });
   if(p>=1){
-    o.push(R(60,144,160,38,'#fce8d8','#C0272D',2));o.push(T(140,168,'3a','#C0272D',15));
-    o.push(R(260,144,160,38,'#e8f4ff','#1a5a8a',2));o.push(T(340,168,'4c','#1a5a8a',15));
+    o.push(R(30,102,160,36,'#fce8d8','#C0272D',2));o.push(T(110,125,'3 \u00d7 a = 3a','#C0272D',14,'middle',true));
+    o.push(R(240,102,190,36,'#e8f4ff','#1a5a8a',2));o.push(T(335,125,'4 \u00d7 c = 4c','#1a5a8a',14,'middle',true));
+    o.push(T(110,152,'(a + a + a = 3 \u00d7 a = 3a)','#888',11,'middle'));
+    o.push(T(335,152,'(c + c + c + c = 4 \u00d7 c = 4c)','#888',11,'middle'));
   }
-  if(p>=2){o.push(R(120,196,240,38,'#e8f8ee','#1a7a3a',2));o.push(T(240,220,'Total = 3a + 4c','#1a7a3a',17,'middle',true));}
-  if(p>=3)o.push(T(240,250,'a=8, c=5: 3(8)+4(5)=24+20=\u00a344','#888',12));
+  if(p>=2){o.push(R(120,168,240,34,'#e8f8ee','#1a7a3a',2));o.push(T(240,190,'Total = 3a + 4c','#1a7a3a',17,'middle',true));}
+  if(p>=3)o.push(T(240,224,'a=\u00a38, c=\u00a35: 3(8)+4(5)=24+20=\u00a344','#888',13,'middle'));
   s.innerHTML=o.join('');
 }
 
@@ -323,27 +355,47 @@ function dQ8(p){
   o.push(T(240,30,'5x \u2212 2y \u2212 2x + 4y','#C0272D',18,'middle',true));
   o.push(T(240,55,'Identify each term and its sign:','#888',13));
   var terms=[{l:'5x',c:'#C0272D',f:'#fce8d8',x:55},{l:'\u22122y',c:'#1a5a8a',f:'#e8f4ff',x:163},{l:'\u22122x',c:'#C0272D',f:'#fce8d8',x:271},{l:'+4y',c:'#1a5a8a',f:'#e8f4ff',x:379}];
-  if(p>=1)terms.forEach(function(t){o.push(R(t.x-44,64,88,40,t.f,t.c,2));o.push(T(t.x,90,t.l,t.c,16));});
-  if(p>=2){o.push(T(240,130,'x terms: 5x \u2212 2x = 3x','#C0272D',15));o.push(T(240,156,'y terms: \u22122y + 4y = 2y','#1a5a8a',15));}
-  if(p>=3){o.push(R(140,174,200,38,'#e8f8ee','#1a7a3a',2));o.push(T(240,198,'= 3x + 2y','#1a7a3a',18,'middle',true));}
-  if(p>=4)o.push(T(240,232,'Tip: \u22122y + 4y = +2y  (more positive, so positive)','#C8922A',12));
+  if(p===0)terms.forEach(function(t){o.push(R(t.x-44,64,88,40,t.f,t.c,2));o.push(T(t.x,90,t.l,t.c,16));});
+  if(p>=1 && p<2)terms.forEach(function(t){o.push(R(t.x-44,64,88,40,t.f,t.c,2));o.push(T(t.x,90,t.l,t.c,16));});
+  if(p>=2){
+    // Rearrange: show x-tiles together left, y-tiles together right
+    o.push(T(130,58,'x-terms','#C0272D',11,'middle'));
+    o.push(T(360,58,'y-terms','#1a5a8a',11,'middle'));
+    o.push(L(245,54,245,155,'#ddd',1,'4,3'));
+    [{l:'5x',c:'#C0272D',f:'#fce8d8',x:80},{l:'\u22122x',c:'#C0272D',f:'#fce8d8',x:180}].forEach(function(t){o.push(R(t.x-44,64,88,40,t.f,t.c,2));o.push(T(t.x,90,t.l,t.c,16));});
+    [{l:'\u22122y',c:'#1a5a8a',f:'#e8f4ff',x:300},{l:'+4y',c:'#1a5a8a',f:'#e8f4ff',x:410}].forEach(function(t){o.push(R(t.x-44,64,88,40,t.f,t.c,2));o.push(T(t.x,90,t.l,t.c,16));});
+    o.push(T(130,125,'5x \u2212 2x = 3x','#C0272D',14,'middle'));
+    o.push(T(360,125,'\u22122y + 4y = 2y','#1a5a8a',14,'middle'));
+  }
+  if(p>=3){o.push(R(140,150,200,38,'#e8f8ee','#1a7a3a',2));o.push(T(240,174,'= 3x + 2y','#1a7a3a',18,'middle',true));}
+  if(p>=4)o.push(T(240,210,'Tip: \u22122y + 4y = +2y  (more positive, so positive)','#C8922A',12,'middle'));
   s.innerHTML=o.join('');
 }
 
 function dQ9(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var cx=[70,180,295,410],counts=[1,3,5,7];
+  var s=g();s.setAttribute('viewBox','0 0 480 270');
+  var o=[];
+  var cx=[58,156,264,382],counts=[1,3,5,7];
+  // Dot patterns in upper half (y 30-120), labels below dots, text in lower half
+  o.push(T(240,20,'Sequence: 1, 3, 5, 7, ...','#C0272D',16,'middle',true));
   cx.forEach(function(x,i){
-    o.push(T(x,215,'Term '+(i+1),'#888',12));
-    o.push(T(x,232,'n='+(i+1),'#C8922A',11));
     var n=counts[i];
-    for(var d=0;d<n;d++){var col2=Math.floor(d/3),row=d%3;o.push(C(x-8+col2*18,155-row*18,7,'#fce8d8','#C0272D',2));}
+    for(var d=0;d<n;d++){var col2=Math.floor(d/3),row=d%3;o.push(C(x-8+col2*18,90-row*18,7,'#fce8d8','#C0272D',2));}
+    o.push(T(x,112,'= '+n,'#C0272D',13,'middle',true));
+    o.push(T(x,128,'Term '+(i+1),'#888',11,'middle'));
+    if(i>0)o.push(T((cx[i-1]+x)/2,50,'+2','#C8922A',11,'middle'));
   });
-  o.push(T(240,28,'Sequence: 1, 3, 5, 7, ...','#C0272D',16,'middle',true));
-  if(p>=1){o.push(T(240,55,'Count dots: 1, 3, 5, 7  \u2014  difference = +2','#888',13));}
-  if(p>=2){o.push(T(240,82,'Common difference d=2, so nth term starts with 2n','#241A17',13));}
-  if(p>=3){o.push(R(90,100,300,36,'#fff5f0','#C0272D',2));o.push(T(240,123,'nth term = 2n \u2212 1','#C0272D',16,'middle',true));}
-  if(p>=4){o.push(T(240,162,'Check: n=1\u21921, n=2\u21923, n=3\u21925 \u2713','#888',12));o.push(T(240,185,'Term 10 = 2(10)\u22121 = 19','#1a7a3a',14,'middle',true));}
+  o.push(L(30,140,450,140,'#eee',1));
+  if(p>=1){
+    o.push(T(240,158,'Difference = +2 each time \u2192 nth term starts with <tspan font-weight="700">2n</tspan>','#241A17',13,'middle'));
+  }
+  if(p>=2){
+    o.push(R(80,170,160,28,'#fff3e0','#C8922A',1.5));o.push(T(160,189,'2n gives: 2, 4, 6, 8...','#C8922A',12,'middle'));
+    o.push(R(250,170,150,28,'#fff5f0','#C0272D',1.5));o.push(T(325,189,'We want: 1, 3, 5, 7...','#C0272D',12,'middle'));
+    o.push(T(240,214,'Each term is 1 less \u2192 subtract 1','#241A17',13,'middle'));
+  }
+  if(p>=3){o.push(R(110,222,260,32,'#fff5f0','#C0272D',2));o.push(T(240,243,'nth term = 2n \u2212 1','#C0272D',17,'middle',true));}
+  if(p>=4){o.push(T(240,258,'Check: n=1\u21921 \u2713  n=2\u21923 \u2713  Term 10 = 19','#1a7a3a',12,'middle'));}
   s.innerHTML=o.join('');
 }
 
@@ -368,17 +420,18 @@ var QS=[
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var c=rInt(2,9),things=rPick([['boxes','pencils'],['jars','sweets'],['packets','cards'],['bags','coins']]);return{question:'Each '+things[0]+' holds <b>'+c+'</b> '+things[1]+'. There are <b>n</b> '+things[0]+'. What is the coefficient (the number in front of n) in the expression for the total?',hints:['Total = '+c+' \u00d7 n','Write as a single term'],ans:c,tol:0,unit:'(coefficient)',working:c+' \u00d7 n = '+c+'n. Coefficient = '+c};})},
   ]},
   {ey:'Q2 \u00b7 Year 7 \u00b7 Algebra',ti:'Substitution',su:'Evaluate 3x + 4 when x = 5.',steps:[
-    {lb:'What is substitution?',dr:dQ2,ht:'<p><b>Substitution</b> means replacing the letter with its value. Then calculate using BIDMAS.</p>'},
+    {lb:'BIDMAS reminder',dr:dQ2,ht:'<p><b>BIDMAS</b> tells us the order to calculate: <b>B</b>rackets, <b>I</b>ndices, <b>D</b>ivision, <b>M</b>ultiplication, <b>A</b>ddition, <b>S</b>ubtraction. Multiplication always comes before addition.</p>'},
+    {lb:'What is substitution?',dr:dQ2,ht:'<p><b>Substitution</b> means replacing the letter with its value, then calculating using BIDMAS.</p>'},
     {lb:'Replace x with 5',dr:dQ2,ht:'<div class="fm">3x + 4 = 3 \u00d7 5 + 4</div>'},
-    {lb:'Calculate',dr:dQ2,ht:'<div class="fm">= 15 + 4 = 19</div>'},
+    {lb:'Calculate',dr:dQ2,ht:'<div class="fm">= 15 + 4 = 19</div><p>Multiplication first (3 \u00d7 5 = 15), then addition (15 + 4 = 19).</p>'},
     {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var a=rInt(2,6),b=rInt(1,9),x=rInt(1,8),ans=a*x+b;return{question:'Evaluate <b>'+a+'x + '+b+'</b> when <b>x = '+x+'</b>.',hints:['Replace x with '+x,'Calculate '+a+' \u00d7 '+x+' first (='+a*x+')','Then add '+b],ans:ans,tol:0,unit:'',working:a+' \u00d7 '+x+' + '+b+' = '+a*x+' + '+b+' = '+ans};})},
   ]},
   {ey:'Q3 \u00b7 Year 7 \u00b7 Algebra',ti:'Simplifying Expressions',su:'Simplify 3x + 2y + 5x + y.',steps:[
-    {lb:'Like terms',dr:dQ3,ht:'<p><b>Like terms</b> share the same letter. Only like terms can be added or subtracted.</p>'},
+    {lb:'Like terms',dr:dQ3,ht:'<p><b>Like terms</b> (the same) share the same letter. For example, 3x and 5x are like terms; 2y and y are like terms. Only like terms can be added or subtracted together.</p>'},
     {lb:'Group by type',dr:dQ3,ht:'<p>x-terms: 3x and 5x<br>y-terms: 2y and y (= 1y)</p>'},
     {lb:'Collect',dr:dQ3,ht:'<div class="fm">3x + 5x = 8x</div><div class="fm">2y + y = 3y</div>'},
     {lb:'Result',dr:dQ3,ht:'<div class="fm">3x + 2y + 5x + y = 8x + 3y</div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var a=rInt(2,7),b=rInt(2,6),c=rInt(1,5),d=rInt(1,5),rx=a+c,ry=b+d;return{question:'Simplify <b>'+a+'x + '+b+'y + '+c+'x + '+d+'y</b>. Enter the coefficient of x (we will check y coefficient in Show working).',hints:['Collect x terms: '+a+'x + '+c+'x = '+rx+'x','Collect y terms: '+b+'y + '+d+'y = '+ry+'y','Full answer: '+rx+'x + '+ry+'y'],ans:rx,tol:0,unit:'(x coefficient)',working:'Full answer: '+rx+'x + '+ry+'y  (x coeff = '+rx+', y coeff = '+ry+')'};})},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var a=rInt(2,7),b=rInt(2,6),c=rInt(1,5),d=rInt(1,5),rx=a+c,ry=b+d;return{question:'Simplify <b>'+a+'x + '+b+'y + '+c+'x + '+d+'y</b>. Enter the coefficient of x only (we will check the y coefficient in Show working).',hints:['Collect x terms: '+a+'x + '+c+'x = '+rx+'x','Collect y terms: '+b+'y + '+d+'y = '+ry+'y','Full answer: '+rx+'x + '+ry+'y'],ans:rx,tol:0,unit:'(x coefficient)',working:'Full answer: '+rx+'x + '+ry+'y  (x coeff = '+rx+', y coeff = '+ry+')'};})},
   ]},
   {ey:'Q4 \u00b7 Year 7 \u00b7 Algebra',ti:'Expanding Single Brackets',su:'Expand 3(x + 4).',steps:[
     {lb:'Rectangle method',dr:dQ4,ht:'<p>Multiply everything <b>inside</b> the bracket by the number <b>outside</b>. The rectangle shows the two areas.</p>'},
@@ -407,17 +460,17 @@ var QS=[
     {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var na=rInt(2,6),nc=rInt(2,6),a=rInt(4,12),c=rInt(2,8),ans=na*a+nc*c;return{question:''+na+' adult tickets at \u00a3'+a+' each and '+nc+' child tickets at \u00a3'+c+' each. What is the total cost?',hints:['Adults: '+na+' \u00d7 '+a+' = \u00a3'+na*a,'Children: '+nc+' \u00d7 '+c+' = \u00a3'+nc*c,'Add the two amounts'],ans:ans,tol:0,unit:'\u00a3',working:na+' \u00d7 '+a+' + '+nc+' \u00d7 '+c+' = '+na*a+' + '+nc*c+' = \u00a3'+ans};})},
   ]},
   {ey:'Q8 \u00b7 Year 7 \u00b7 Algebra',ti:'Simplifying with Negatives',su:'Simplify 5x \u2212 2y \u2212 2x + 4y.',steps:[
-    {lb:'Terms and signs',dr:dQ8,ht:'<p>A <b>term</b> carries its sign. \u22122y means negative 2y. Take the sign with the term when grouping.</p>'},
+    {lb:'Terms and signs',dr:dQ8,ht:'<p>A <b>term</b> is a single number, letter, or combination of the two (like 5x or \u22122y). Each term carries its own sign. \u22122y means negative 2y \u2014 take the sign with the term when grouping.</p>'},
     {lb:'Group like terms',dr:dQ8,ht:'<div class="fm">x terms: 5x and \u22122x</div><div class="fm">y terms: \u22122y and +4y</div>'},
     {lb:'Collect',dr:dQ8,ht:'<div class="fm">5x \u2212 2x = 3x</div><div class="fm">\u22122y + 4y = 2y</div>'},
     {lb:'Result',dr:dQ8,ht:'<div class="fm">5x \u2212 2y \u2212 2x + 4y = 3x + 2y</div>'},
     {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var a=rInt(3,8),b=rInt(1,a-1),c=rInt(1,6),d=rInt(c+1,9),rx=a-b,ry=d-c;return{question:'Simplify <b>'+a+'x \u2212 '+c+'y \u2212 '+b+'x + '+d+'y</b>. What is the coefficient of y?',hints:['x terms: '+a+'x \u2212 '+b+'x = '+rx+'x','y terms: \u2212'+c+'y + '+d+'y'],ans:ry,tol:0,unit:'(y coefficient)',working:''+a+'x\u2212'+b+'x='+rx+'x,  \u2212'+c+'y+'+d+'y='+ry+'y. Answer: '+rx+'x + '+ry+'y'};})},
   ]},
   {ey:'Q9 \u00b7 Year 7 \u00b7 Algebra',ti:'nth Term of a Sequence',su:'Find the nth term of 1, 3, 5, 7, ...',steps:[
-    {lb:'Dot pattern',dr:dQ9,ht:'<p>Each term forms a pattern. Count: 1, 3, 5, 7. The common difference tells us how fast the sequence grows.</p>'},
-    {lb:'Common difference',dr:dQ9,ht:'<p>Difference = <b>+2</b> each time. So the nth term contains <b>2n</b>.</p>'},
-    {lb:'Find adjustment',dr:dQ9,ht:'<div class="fm">2n gives: 2, 4, 6, 8, ...</div><div class="fm">Our sequence: 1, 3, 5, 7, ...</div><p>Subtract 1 each time: nth term = 2n \u2212 1</p>'},
-    {lb:'nth term formula',dr:dQ9,ht:'<div class="fm">nth term = 2n \u2212 1</div><div class="fm">Term 10 = 2(10) \u2212 1 = 19</div>'},
+    {lb:'Spot the pattern',dr:dQ9,ht:'<p>Write out the terms and look at how much they increase each time. Here: 1 \u2192 3 \u2192 5 \u2192 7. Each step goes up by <b>2</b>. We call this the <b>common difference</b>.</p>'},
+    {lb:'Use the common difference',dr:dQ9,ht:'<p>Because the difference is 2, the nth term <b>starts with 2n</b>. But 2n gives 2, 4, 6, 8 \u2014 which is <b>1 too many</b> each time. So we adjust by subtracting 1.</p>'},
+    {lb:'Find the adjustment',dr:dQ9,ht:'<div class="fm">2n \u2192 2, 4, 6, 8, ...</div><div class="fm">Our sequence \u2192 1, 3, 5, 7, ...</div><p>Each value is <b>1 less</b> than 2n, so: nth term = 2n \u2212 1</p>'},
+    {lb:'nth term formula',dr:dQ9,ht:'<div class="fm">nth term = 2n \u2212 1</div><p>Check: n=1 \u2192 2(1)\u22121 = 1 \u2713 &nbsp; n=2 \u2192 2(2)\u22121 = 3 \u2713</p><div class="fm">Term 10 = 2(10) \u2212 1 = 19</div>'},
     {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var d=rPick([2,3,4,5]),a=rInt(1,8),n=rInt(6,12),adj=a-d,ans=d*n+adj;return{question:'A sequence starts <b>'+a+', '+(a+d)+', '+(a+2*d)+', '+(a+3*d)+', ...</b> What is <b>term '+n+'</b>?',hints:['Common difference = '+d+' (nth term has '+d+'n)','Adjustment = '+(adj>=0?'+':'')+adj+' (check with n=1)','Term '+n+' = '+d+'('+n+') '+(adj>=0?'+':'')+adj],ans:ans,tol:0,unit:'',working:'nth term = '+d+'n '+(adj>=0?'+':'')+adj+'. Term '+n+' = '+d+'('+n+') '+(adj>=0?'+':'')+adj+' = '+ans};})},
   ]},
   {ey:'Q10 \u00b7 Year 7 \u00b7 Algebra',ti:'Forming and Solving Equations',su:'Amara and Kofi\u2019s ages sum to 31. Kofi is 7 years older. Find their ages.',steps:[

@@ -605,7 +605,7 @@
     ] = await Promise.all([
       supabase.from('profiles').select('*').eq('role', 'student').order('full_name'),
       supabase.from('profiles').select('*').in('role', ['teacher', 'admin']),
-      supabase.from('topics').select('*').order('year_group').order('sort_order'),
+      supabase.from('topics').select('*, revised_at').order('year_group').order('sort_order'),
       supabase.from('walkthrough_progress').select('*')
     ]);
 
@@ -1356,23 +1356,41 @@
       const reviewerCount = rm ? rm.reviewers.size : 0;
       const qCount = rm ? rm.questions.size : 0;
       const dominant = rm ? getDominantRating(rm.ratings) : null;
+      const revisedAt = t.revised_at ? new Date(t.revised_at) : null;
+
+      // Has any review been submitted before the last revision?
+      const topicReviews = allReviews.filter(r => r.topic_id === t.id);
+      const hasStaleReviews = revisedAt && topicReviews.some(r => new Date(r.reviewed_at) < revisedAt);
+      const allReviewsStale = revisedAt && topicReviews.length > 0 && topicReviews.every(r => new Date(r.reviewed_at) < revisedAt);
+
       const statusBadge = dominant
         ? (dominant === 'good' ? '<span class="badge badge-green">✓ Good</span>' :
            dominant === 'needs_improvement' ? '<span class="badge badge-yellow">⚠ Needs work</span>' :
            '<span class="badge badge-red">✗ Not good</span>')
         : '<span class="badge badge-grey">Not reviewed</span>';
+
+      const revisedBadge = revisedAt
+        ? `<span style="font-size:0.75rem;font-weight:600;color:#1a5a8a;background:#e8f4ff;border:1px solid #b3d4f0;border-radius:99px;padding:2px 9px">⟳ Revised ${revisedAt.toLocaleDateString('en-GB')}</span>`
+        : '';
+      const staleBadge = hasStaleReviews
+        ? `<span style="font-size:0.75rem;font-weight:600;color:#b36000;background:#fff3cd;border:1px solid #ffd77a;border-radius:99px;padding:2px 9px" title="Some reviews were submitted before the last revision">⚠ Needs re-review</span>`
+        : '';
+
       return `<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap">
         <div style="flex:1;min-width:200px">
           <div style="font-weight:600;font-size:0.88rem;color:#333">${t.topic_name}</div>
           <div style="font-size:0.75rem;color:#888">${yearLabel}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           ${statusBadge}
+          ${revisedBadge}
+          ${staleBadge}
           ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} · ${qCount} Qs</span>` : ''}
         </div>
         <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}')">
           ${rm ? 'Add/Edit Review' : 'Review'}
         </button>
+        ${currentProfile?.role === 'admin' ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;background:#e8f4ff;border-color:#1a5a8a;color:#1a5a8a" onclick="markRevised(${t.id})">⟳ Mark as Revised</button>` : ''}
         ${(currentProfile?.role === 'admin' && reviewerCount >= 2) ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;background:#fff8e1;border-color:#f0c040" onclick="copyForClaude(${t.id},'${t.topic_name}','${t.topic_code}')">📋 Copy for Claude</button>` : ''}
       </div>`;
     }).join('');
@@ -1384,6 +1402,20 @@
     ratings.forEach(r => { if (counts[r] !== undefined) counts[r]++; });
     return Object.entries(counts).sort((a,b) => b[1]-a[1])[0][0];
   }
+
+  window.markRevised = async function(topicId) {
+    const topic = allTopics.find(t => t.id === topicId);
+    if (!topic) return;
+    const confirmed = confirm(`Mark "${topic.topic_name}" as revised?\n\nThis will flag all existing reviews as pre-revision, prompting reviewers to re-check.`);
+    if (!confirmed) return;
+    const now = new Date().toISOString();
+    const { error } = await supabase.from('topics').update({ revised_at: now }).eq('id', topicId);
+    if (error) { alert('Error: ' + error.message); return; }
+    // Update local allTopics so UI refreshes without a full reload
+    const idx = allTopics.findIndex(t => t.id === topicId);
+    if (idx !== -1) allTopics[idx].revised_at = now;
+    window.renderReviewTab();
+  };
 
   window.copyForClaude = function(topicId, topicName, topicCode) {
     const reviews = allReviews.filter(r => r.topic_id === topicId);
