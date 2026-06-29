@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vectors in 2D &middot; Add Maths (0606) &middot; Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}
+.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Vectors in 2D &mdash; Additional Mathematics (0606)</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function round4(x){return Math.round(x*10000)/10000;}
+function round2(x){return Math.round(x*100)/100;}
+
+var ST={};
+function tryIt(genOrObj){
+  var genFn=typeof genOrObj==='function'?genOrObj:function(){return genOrObj;};
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn(); ST[id]={o:o,fn:genFn};
+  return buildTry(id,o);
+}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t" style="display:flex;justify-content:space-between;align-items:center;">'
+    +'\u2714 Your Turn'
+    +'<button class="nq-btn" data-tryid="'+id+'" style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;">\u21bb New</button>'
+    +'</div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +'<ul class="hl">'+(h||'')+'</ul>'
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'</div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('nq-btn')){
+    var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;
+    var o=en.fn();en.o=o;ST[id]={o:o,fn:en.fn};
+    var wrap=document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;
+    var o=en.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
+    var tol=o.tol!=null?o.tol:0.5;
+    if(Math.abs(v-o.ans)<=tol){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;}
+    else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
+  }
+});
+
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
+// Arrow: draws a line with an arrowhead at (x2,y2)
+function ARR(x1,y1,x2,y2,c,w){
+  c=c||'#C0272D';w=w||2;
+  var dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+  if(len<1)return '';
+  var ux=dx/len,uy=dy/len;
+  var ax=x2-10*ux,ay=y2-10*uy;
+  var px=-uy,py=ux;
+  var pts=(ax+5*px)+','+(ay+5*py)+' '+x2+','+y2+' '+(ax-5*px)+','+(ay-5*py);
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+ax+'" y2="'+ay+'" stroke="'+c+'" stroke-width="'+w+'"/>'
+        +'<polygon points="'+pts+'" fill="'+c+'"/>';
+}
+
+// ─── SESSION VALUES ────────────────────────────────────
+var V={};
+(function(){
+  // Q1 Vector notation
+  V.q1a=rnd(2,6); V.q1b=rnd(1,5);
+  V.q1c=rnd(-4,-1); V.q1d=rnd(2,6);
+  V.q1mag=round2(Math.sqrt(V.q1a*V.q1a+V.q1b*V.q1b));
+
+  // Q2 Addition and subtraction
+  V.q2a=rnd(1,5); V.q2b=rnd(1,5);
+  V.q2c=rnd(-4,-1); V.q2d=rnd(1,5);
+  V.q2sumX=V.q2a+V.q2c; V.q2sumY=V.q2b+V.q2d;
+  V.q2difX=V.q2a-V.q2c; V.q2difY=V.q2b-V.q2d;
+
+  // Q3 Scalar multiplication and magnitude
+  V.q3a=rnd(2,4); V.q3b=rnd(1,4);
+  V.q3k=rnd(2,5);
+  V.q3magOrig=round2(Math.sqrt(V.q3a*V.q3a+V.q3b*V.q3b));
+  V.q3magScaled=round2(V.q3k*V.q3magOrig);
+
+  // Q4 Unit vectors
+  V.q4a=rnd(3,5); V.q4b=pick([3,4]);
+  V.q4mag=Math.sqrt(V.q4a*V.q4a+V.q4b*V.q4b); // keep exact for clean unit vector
+  V.q4magR=round2(V.q4mag);
+  V.q4ux=round4(V.q4a/V.q4mag); V.q4uy=round4(V.q4b/V.q4mag);
+
+  // Q5 Position vectors and midpoint
+  V.q5ax=rnd(1,4); V.q5ay=rnd(1,4);
+  V.q5bx=rnd(5,9); V.q5by=rnd(5,9);
+  V.q5mx=round2((V.q5ax+V.q5bx)/2); V.q5my=round2((V.q5ay+V.q5by)/2);
+  V.q5abx=V.q5bx-V.q5ax; V.q5aby=V.q5by-V.q5ay;
+  V.q5abMag=round2(Math.sqrt(V.q5abx*V.q5abx+V.q5aby*V.q5aby));
+
+  // Q6 Resultant velocity / velocity addition
+  V.q6vx=rnd(3,7); V.q6vy=rnd(3,7);
+  V.q6wx=rnd(-4,-1); V.q6wy=rnd(1,4);
+  V.q6rx=V.q6vx+V.q6wx; V.q6ry=V.q6vy+V.q6wy;
+  V.q6speed=round2(Math.sqrt(V.q6rx*V.q6rx+V.q6ry*V.q6ry));
+
+  // Q7 Particle position from velocity
+  V.q7px=rnd(0,3); V.q7py=rnd(0,3);
+  V.q7vx=rnd(2,5); V.q7vy=rnd(1,4);
+  V.q7t=rnd(2,5);
+  V.q7qx=V.q7px+V.q7t*V.q7vx; V.q7qy=V.q7py+V.q7t*V.q7vy;
+  V.q7dist=round2(Math.sqrt(Math.pow(V.q7qx-V.q7px,2)+Math.pow(V.q7qy-V.q7py,2)));
+
+  // Q8 Collision / equal position vectors
+  V.q8ax=rnd(1,4); V.q8ay=rnd(1,3);
+  V.q8bx=rnd(5,9); V.q8by=rnd(5,9);
+  // particle A: rA = (q8ax, q8ay) + t*(vAx, vAy); particle B: rB = (q8bx, q8by) + t*(vBx, vBy)
+  V.q8t=rnd(2,4);
+  // Work backwards: choose a collision point, derive velocities
+  V.q8cx=rnd(7,12); V.q8cy=rnd(4,8);
+  V.q8vAx=round2((V.q8cx-V.q8ax)/V.q8t); V.q8vAy=round2((V.q8cy-V.q8ay)/V.q8t);
+  V.q8vBx=round2((V.q8cx-V.q8bx)/V.q8t); V.q8vBy=round2((V.q8cy-V.q8by)/V.q8t);
+})();
+
+// ─── tryIt generators ──────────────────────────────────
+function yt1(){return tryIt(function(){
+  var a=rnd(2,8),b=rnd(1,7);
+  var ans=round2(Math.sqrt(a*a+b*b));
+  return {
+    question:'Vector <b>p</b> = ('+a+'<b>i</b> + '+b+'<b>j</b>). Find |<b>p</b>| to 2 d.p.',
+    hints:['Use |p| = √(a² + b²)'],
+    ans:ans, tol:0.01,
+    working:'|<b>p</b>| = √('+a+'² + '+b+'²) = √'+(a*a+b*b)+' = '+ans
+  };
+});}
+
+function yt2(){return tryIt(function(){
+  var a=rnd(1,5),b=rnd(1,5),c=rnd(-4,-1),d=rnd(1,5);
+  var sx=a+c,sy=b+d;
+  var mag=round2(Math.sqrt(sx*sx+sy*sy));
+  return {
+    question:'<b>a</b> = ('+a+', '+b+') and <b>b</b> = ('+c+', '+d+'). Find |<b>a</b> + <b>b</b>| to 2 d.p.',
+    hints:['Add components first, then find the magnitude'],
+    ans:mag, tol:0.01,
+    working:'<b>a</b>+<b>b</b> = ('+sx+', '+sy+')  →  |<b>a</b>+<b>b</b>| = √('+sx+'²+'+sy+'²) = '+mag
+  };
+});}
+
+function yt3(){return tryIt(function(){
+  var a=rnd(2,6),b=rnd(1,5),k=rnd(2,5);
+  var mag=round2(k*Math.sqrt(a*a+b*b));
+  return {
+    question:'<b>v</b> = ('+a+'<b>i</b> + '+b+'<b>j</b>). Find |'+k+'<b>v</b>| to 2 d.p.',
+    hints:['|kv| = k|v| — scale the magnitude, or find the scaled vector first'],
+    ans:mag, tol:0.01,
+    working:k+'<b>v</b> = ('+(k*a)+'<b>i</b> + '+(k*b)+'<b>j</b>)  →  magnitude = √('+(k*a)+'²+'+(k*b)+'²) = '+mag
+  };
+});}
+
+function yt4(){return tryIt(function(){
+  var a=rnd(3,8),b=rnd(1,6);
+  var mag=Math.sqrt(a*a+b*b);
+  var ux=round4(a/mag); var mag2=round2(mag);
+  return {
+    question:'Find the x-component of the unit vector in the direction of ('+a+', '+b+'). Give your answer to 4 d.p.',
+    hints:['Divide the vector by its magnitude'],
+    ans:ux, tol:0.0005,
+    working:'|<b>v</b>| = √('+a+'²+'+b+'²) = '+mag2+'  →  x-component of û = '+a+'/'+mag2+' = '+ux
+  };
+});}
+
+function yt5(){return tryIt(function(){
+  var ax=rnd(1,4),ay=rnd(1,4),bx=rnd(5,9),by=rnd(5,9);
+  var abmag=round2(Math.sqrt(Math.pow(bx-ax,2)+Math.pow(by-ay,2)));
+  return {
+    question:'A = ('+ax+', '+ay+') and B = ('+bx+', '+by+'). Find |AB\u20D7| to 2 d.p.',
+    hints:['AB\u20D7 = OB\u20D7 \u2212 OA\u20D7, then find magnitude'],
+    ans:abmag, tol:0.01,
+    working:'AB\u20D7 = ('+(bx-ax)+', '+(by-ay)+')  →  |AB\u20D7| = √('+(bx-ax)+'²+'+(by-ay)+'²) = '+abmag
+  };
+});}
+
+function yt6(){return tryIt(function(){
+  var vx=rnd(3,8),vy=rnd(1,5),wx=rnd(-5,-1),wy=rnd(1,5);
+  var rx=vx+wx,ry=vy+wy;
+  var speed=round2(Math.sqrt(rx*rx+ry*ry));
+  return {
+    question:'Velocity <b>v</b> = ('+vx+'<b>i</b> + '+vy+'<b>j</b>) ms⁻¹ and wind <b>w</b> = ('+wx+'<b>i</b> + '+wy+'<b>j</b>) ms⁻¹. Find the resultant speed to 2 d.p.',
+    hints:['Add velocity vectors component by component, then find magnitude'],
+    ans:speed, tol:0.01,
+    working:'Resultant = ('+rx+'<b>i</b> + '+ry+'<b>j</b>)  →  speed = √('+rx+'²+'+ry+'²) = '+speed+' ms⁻¹'
+  };
+});}
+
+function yt7(){return tryIt(function(){
+  var px=rnd(0,4),py=rnd(0,4),vx=rnd(2,6),vy=rnd(1,5),t=rnd(2,6);
+  var qx=px+t*vx,qy=py+t*vy;
+  var dist=round2(Math.sqrt(Math.pow(qx-px,2)+Math.pow(qy-py,2)));
+  return {
+    question:'A particle starts at ('+px+', '+py+') with velocity ('+vx+', '+vy+') m/s. Find its distance from the start after '+t+' s.',
+    hints:['Position = initial position + t × velocity','Distance = |displacement|'],
+    ans:dist, tol:0.01,
+    working:'New position = ('+(qx)+', '+(qy)+')  →  displacement = ('+(qx-px)+', '+(qy-py)+')  →  distance = '+dist+' m'
+  };
+});}
+
+function yt8(){return tryIt(function(){
+  var t=rnd(2,4);
+  var ax=rnd(0,3),ay=rnd(0,3),cx=rnd(6,12),cy=rnd(4,9);
+  var bx=rnd(5,10),by=rnd(5,10);
+  var vax=round2((cx-ax)/t),vay=round2((cy-ay)/t);
+  return {
+    question:'Particle A starts at ('+ax+', '+ay+') with velocity ('+vax+', '+vay+'). Find its x-coordinate after '+t+' s.',
+    hints:['x = initial x + t × velocity x-component'],
+    ans:cx, tol:0.01,
+    working:'x = '+ax+' + '+t+'×'+vax+' = '+cx
+  };
+});}
+
+// ─── DRAW FUNCTIONS ────────────────────────────────────
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Vector notation: column vector, unit vector form, bold letter','#C0272D',12,'middle',true));
+  // Axes
+  var ox=60,oy=200,sc=30;
+  o.push(ARR(ox,oy,ox+180,oy,'#888',1.5));o.push(T(ox+185,oy,'x','#888',12,'start'));
+  o.push(ARR(ox,oy,ox,oy-140,'#888',1.5));o.push(T(ox-4,oy-145,'y','#888',12,'end'));
+  o.push(T(ox-5,oy+4,'O','#888',11,'end'));
+  // Grid dots at integer coords
+  for(var i=1;i<=4;i++){
+    o.push(C(ox+i*sc,oy,2,'#ddd','#ddd'));
+    o.push(T(ox+i*sc,oy+14,''+i,'#aaa',9,'middle'));
+  }
+  for(var j=1;j<=4;j++){
+    o.push(C(ox,oy-j*sc,2,'#ddd','#ddd'));
+    o.push(T(ox-8,oy-j*sc+4,''+j,'#aaa',9,'end'));
+  }
+  // Vector a = (V.q1a, V.q1b)
+  var ax=ox,ay=oy,bx=ox+V.q1a*sc,by=oy-V.q1b*sc;
+  if(p>=1){
+    o.push(ARR(ax,ay,bx,by,'#C0272D',2.5));
+    o.push(T((ax+bx)/2-10,(ay+by)/2,'a','#C0272D',14,'end',true));
+  }
+  if(p>=2){
+    o.push(L(ax,oy,bx,oy,'#1a5a8a',1,'5,3'));
+    o.push(L(bx,oy,bx,by,'#1a5a8a',1,'5,3'));
+    o.push(T((ax+bx)/2,oy+16,''+V.q1a,'#1a5a8a',11,'middle',true));
+    o.push(T(bx+10,(oy+by)/2,''+V.q1b,'#1a5a8a',11,'middle',true));
+  }
+  // notation panel
+  if(p>=1){
+    o.push(R(270,55,200,135,'#fff5f0','#C0272D',1));
+    o.push(T(370,75,'Equivalent notations:','#C0272D',11,'middle',true));
+    o.push(T(370,100,'Column: \u239b'+V.q1a+'\u239e','#241A17',13,'middle'));
+    o.push(T(370,118,'         \u239d'+V.q1b+'\u23a0','#241A17',13,'middle'));
+    o.push(T(370,138,'i-j form: '+V.q1a+'i + '+V.q1b+'j','#241A17',13,'middle'));
+    o.push(T(370,158,'Bold: a','#241A17',13,'middle'));
+    if(p>=2){
+      o.push(T(370,178,'|a| = \u221a('+V.q1a+'\u00b2+'+V.q1b+'\u00b2) = '+V.q1mag,'#C0272D',12,'middle',true));
+    }
+    // second vector (V.q1c, V.q1d)
+    if(p>=3){
+      var cx2=ox+V.q1a*sc+V.q1c*sc, cy2=by-V.q1d*sc;
+      // b vector from tip of a
+      o.push(ARR(bx,by,cx2,cy2,'#1a7a3a',2.5));
+      o.push(T((bx+cx2)/2+10,(by+cy2)/2,'b','#1a7a3a',14,'start',true));
+      // resultant a+b from origin
+      o.push(ARR(ax,ay,cx2,cy2,'#C8922A',2));
+      o.push(T(cx2+8,cy2-4,'a+b','#C8922A',11,'start',true));
+    }
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Adding & subtracting vectors: a=('+V.q2a+','+V.q2b+')  b=('+V.q2c+','+V.q2d+')','#C0272D',12,'middle',true));
+  var ox=50,oy=210,sc=22;
+  o.push(ARR(ox,oy,ox+210,oy,'#888',1.5));o.push(T(ox+214,oy,'x','#888',12,'start'));
+  o.push(ARR(ox,oy,ox,oy-170,'#888',1.5));o.push(T(ox,oy-174,'y','#888',12,'middle'));
+  // a
+  var ax1=ox+V.q2a*sc,ay1=oy-V.q2b*sc;
+  if(p>=1){
+    o.push(ARR(ox,oy,ax1,ay1,'#C0272D',2.5));
+    o.push(T((ox+ax1)/2-8,(oy+ay1)/2,'a','#C0272D',13,'end',true));
+    o.push(T(ax1+4,ay1-4,'('+V.q2a+','+V.q2b+')','#C0272D',10,'start'));
+  }
+  // b from origin
+  var bx1=ox+V.q2c*sc,by1=oy-V.q2d*sc;
+  if(p>=1){
+    o.push(ARR(ox,oy,bx1,by1,'#1a7a3a',2.5));
+    o.push(T((ox+bx1)/2+8,(oy+by1)/2,'b','#1a7a3a',13,'start',true));
+  }
+  // sum: b from tip of a
+  var sx=ox+V.q2sumX*sc,sy=oy-V.q2sumY*sc;
+  if(p>=2){
+    o.push(ARR(ax1,ay1,sx,sy,'#1a7a3a',1.5));
+    o.push(ARR(ox,oy,sx,sy,'#C8922A',2));
+    o.push(T(sx+5,sy-4,'a+b=('+V.q2sumX+','+V.q2sumY+')','#C8922A',10,'start',true));
+  }
+  // subtraction panel
+  if(p>=3){
+    o.push(R(260,55,210,130,'#e8f8ee','#1a7a3a',1));
+    o.push(T(365,74,'Subtraction: a \u2212 b','#1a7a3a',12,'middle',true));
+    o.push(T(365,96,'= ('+V.q2a+','+V.q2b+') \u2212 ('+V.q2c+','+V.q2d+')','#241A17',12,'middle'));
+    o.push(T(365,118,'= ('+V.q2difX+','+V.q2difY+')','#241A17',14,'middle',true));
+    o.push(T(365,140,'Negate b, then add.','#888',11,'middle'));
+    o.push(T(365,158,'\u2212b = ('+(-V.q2c)+','+(-V.q2d)+')','#888',11,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Scalar multiplication: v=('+V.q3a+','+V.q3b+'), k='+V.q3k,'#C0272D',12,'middle',true));
+  var ox=60,oy=210,sc=20;
+  o.push(ARR(ox,oy,ox+240,oy,'#888',1.5));o.push(T(ox+244,oy,'x','#888',12,'start'));
+  o.push(ARR(ox,oy,ox,oy-180,'#888',1.5));o.push(T(ox,oy-184,'y','#888',12,'middle'));
+  // original v
+  var vx=ox+V.q3a*sc,vy=oy-V.q3b*sc;
+  if(p>=1){
+    o.push(ARR(ox,oy,vx,vy,'#1a5a8a',2.5));
+    o.push(T((ox+vx)/2-8,(oy+vy)/2,'v','#1a5a8a',13,'end',true));
+    o.push(T(vx+4,vy-4,'|v|='+V.q3magOrig,'#1a5a8a',10,'start'));
+  }
+  // scaled kv
+  var kvx=ox+V.q3k*V.q3a*sc,kvy=oy-V.q3k*V.q3b*sc;
+  if(p>=2){
+    o.push(ARR(ox,oy,kvx,kvy,'#C0272D',2.5));
+    o.push(T((ox+kvx)/2+10,(oy+kvy)/2,''+V.q3k+'v','#C0272D',13,'start',true));
+    o.push(T(kvx+4,kvy-4,'|'+V.q3k+'v|='+V.q3magScaled,'#C0272D',10,'start'));
+  }
+  if(p>=3){
+    o.push(R(270,55,195,130,'#fff5f0','#C0272D',1));
+    o.push(T(367,74,'Key rules','#C0272D',12,'middle',true));
+    o.push(T(367,96,'k\u00b7v = (k\u00b7'+V.q3a+', k\u00b7'+V.q3b+')','#241A17',12,'middle'));
+    o.push(T(367,116,'= ('+(V.q3k*V.q3a)+', '+(V.q3k*V.q3b)+')','#241A17',13,'middle',true));
+    o.push(T(367,138,'|kv| = k|v| = '+V.q3k+'\u00d7'+V.q3magOrig+'='+V.q3magScaled,'#C0272D',12,'middle',true));
+    o.push(T(367,158,'Direction unchanged (k > 0)','#888',11,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Unit vectors: a=('+V.q4a+','+V.q4b+'), |a|='+V.q4magR,'#C0272D',12,'middle',true));
+  var ox=80,oy=200,sc=30;
+  o.push(ARR(ox,oy,ox+200,oy,'#888',1.5));o.push(T(ox+204,oy,'x','#888',12,'start'));
+  o.push(ARR(ox,oy,ox,oy-160,'#888',1.5));o.push(T(ox,oy-164,'y','#888',12,'middle'));
+  // original vector
+  var ax=ox+V.q4a*sc,ay=oy-V.q4b*sc;
+  if(p>=1){
+    o.push(ARR(ox,oy,ax,ay,'#1a5a8a',2.5));
+    o.push(T((ox+ax)/2-8,(oy+ay)/2,'a','#1a5a8a',14,'end',true));
+    o.push(T(ax+4,ay-4,'('+V.q4a+','+V.q4b+')','#1a5a8a',10,'start'));
+    // show magnitude
+    o.push(L(ox,oy,ax,ay,'#1a5a8a',1,'4,3'));
+    o.push(T((ox+ax)/2+5,(oy+ay)/2+14,'|a|='+V.q4magR,'#1a5a8a',10,'start'));
+  }
+  // unit vector (scaled visually to length 1 in display)
+  var dispLen=50; // pixels for length 1 vector visually
+  var uDispX=ox+V.q4ux*dispLen*V.q4magR, uDispY=oy-V.q4uy*dispLen*V.q4magR;
+  // Actually just show at same angle but shorter
+  var angle=Math.atan2(V.q4b,V.q4a);
+  var uEx=ox+60*Math.cos(angle),uEy=oy-60*Math.sin(angle);
+  if(p>=2){
+    o.push(ARR(ox,oy,uEx,uEy,'#C0272D',2.5));
+    o.push(T((ox+uEx)/2+10,(oy+uEy)/2+8,'\u00e2 (unit)','#C0272D',11,'start',true));
+  }
+  if(p>=3){
+    o.push(R(270,55,195,160,'#fff5f0','#C0272D',1));
+    o.push(T(367,74,'Finding the unit vector','#C0272D',12,'middle',true));
+    o.push(T(367,96,'\u00e2 = a / |a|','#241A17',13,'middle'));
+    o.push(T(367,116,'|a| = \u221a('+V.q4a+'\u00b2+'+V.q4b+'\u00b2) = '+V.q4magR,'#241A17',11,'middle'));
+    o.push(T(367,136,'\u00e2 = ('+V.q4a+', '+V.q4b+') \u00f7 '+V.q4magR,'#241A17',11,'middle'));
+    o.push(T(367,156,'= ('+V.q4ux+', '+V.q4uy+')','#C0272D',13,'middle',true));
+    o.push(T(367,176,'|\u00e2| = 1 always','#888',11,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Position vectors: A=('+V.q5ax+','+V.q5ay+')  B=('+V.q5bx+','+V.q5by+')','#C0272D',12,'middle',true));
+  var ox=40,oy=230,sc=22;
+  o.push(ARR(ox,oy,ox+250,oy,'#888',1.5));o.push(T(ox+254,oy,'x','#888',12,'start'));
+  o.push(ARR(ox,oy,ox,oy-200,'#888',1.5));o.push(T(ox,oy-204,'y','#888',12,'middle'));
+  o.push(T(ox-5,oy+4,'O','#888',11,'end'));
+  var Ax=ox+V.q5ax*sc,Ay=oy-V.q5ay*sc;
+  var Bx=ox+V.q5bx*sc,By=oy-V.q5by*sc;
+  var Mx=ox+V.q5mx*sc,My=oy-V.q5my*sc;
+  if(p>=1){
+    o.push(ARR(ox,oy,Ax,Ay,'#1a5a8a',2));
+    o.push(C(Ax,Ay,5,'#1a5a8a','#1a5a8a'));
+    o.push(T(Ax+5,Ay-8,'A('+V.q5ax+','+V.q5ay+')','#1a5a8a',10,'start',true));
+    o.push(ARR(ox,oy,Bx,By,'#1a7a3a',2));
+    o.push(C(Bx,By,5,'#1a7a3a','#1a7a3a'));
+    o.push(T(Bx+5,By-8,'B('+V.q5bx+','+V.q5by+')','#1a7a3a',10,'start',true));
+  }
+  if(p>=2){
+    o.push(ARR(Ax,Ay,Bx,By,'#C0272D',2.5));
+    o.push(T((Ax+Bx)/2+5,(Ay+By)/2-8,'AB\u20D7=('+V.q5abx+','+V.q5aby+')','#C0272D',10,'start',true));
+    o.push(T((Ax+Bx)/2-5,(Ay+By)/2+10,'|AB|='+V.q5abMag,'#C0272D',10,'end'));
+  }
+  if(p>=3){
+    o.push(C(Mx,My,5,'#C8922A','#C8922A'));
+    o.push(T(Mx-6,My-10,'M('+V.q5mx+','+V.q5my+')','#C8922A',10,'end',true));
+    o.push(L(Ax,Ay,Mx,My,'#C8922A',1,'4,3'));
+    o.push(L(Mx,My,Bx,By,'#C8922A',1,'4,3'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ6(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Resultant velocity: v=('+V.q6vx+','+V.q6vy+')  w=('+V.q6wx+','+V.q6wy+')','#C0272D',12,'middle',true));
+  var ox=120,oy=200,sc=20;
+  o.push(ARR(ox,oy,ox+200,oy,'#888',1.5));o.push(T(ox+204,oy,'x','#888',12,'start'));
+  o.push(ARR(ox,oy,ox+V.q6wx*sc*2,oy,'#888',0.8));// show negative x direction
+  o.push(ARR(ox,oy,ox,oy-150,'#888',1.5));o.push(T(ox,oy-154,'y','#888',12,'middle'));
+  o.push(T(ox-5,oy+4,'O','#888',11,'end'));
+  var vx=ox+V.q6vx*sc,vy=oy-V.q6vy*sc;
+  var rx=ox+V.q6rx*sc,ry=oy-V.q6ry*sc;
+  var wx=ox+V.q6wx*sc,wy=oy-V.q6wy*sc;
+  if(p>=1){
+    o.push(ARR(ox,oy,vx,vy,'#1a5a8a',2.5));
+    o.push(T((ox+vx)/2+6,(oy+vy)/2-4,'v','#1a5a8a',14,'start',true));
+  }
+  if(p>=2){
+    o.push(ARR(vx,vy,vx+V.q6wx*sc,vy-V.q6wy*sc,'#1a7a3a',2.5));
+    o.push(T(vx+V.q6wx*sc/2+6,vy-V.q6wy*sc/2,'w','#1a7a3a',14,'start',true));
+  }
+  if(p>=3){
+    o.push(ARR(ox,oy,rx,ry,'#C0272D',3));
+    o.push(T((ox+rx)/2-10,(oy+ry)/2-10,'R=('+V.q6rx+','+V.q6ry+')','#C0272D',10,'end',true));
+    o.push(T((ox+rx)/2-10,(oy+ry)/2+5,'speed='+V.q6speed,'#C0272D',10,'end',true));
+  }
+  if(p>=4){
+    o.push(R(300,100,165,100,'#fff5f0','#C0272D',1));
+    o.push(T(382,118,'R = v + w','#C0272D',12,'middle',true));
+    o.push(T(382,138,'= ('+V.q6vx+'+'+V.q6wx+', '+V.q6vy+'+'+V.q6wy+')','#241A17',11,'middle'));
+    o.push(T(382,156,'= ('+V.q6rx+', '+V.q6ry+')','#241A17',13,'middle',true));
+    o.push(T(382,176,'Speed = '+V.q6speed+' units/s','#C0272D',12,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ7(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Position from velocity: start=('+V.q7px+','+V.q7py+'), v=('+V.q7vx+','+V.q7vy+'), t='+V.q7t+'s','#C0272D',12,'middle',true));
+  var ox=40,oy=220,sc=18;
+  o.push(ARR(ox,oy,ox+260,oy,'#888',1.5));o.push(T(ox+264,oy,'x','#888',12,'start'));
+  o.push(ARR(ox,oy,ox,oy-190,'#888',1.5));o.push(T(ox,oy-194,'y','#888',12,'middle'));
+  var Px=ox+V.q7px*sc,Py=oy-V.q7py*sc;
+  var Qx=ox+V.q7qx*sc,Qy=oy-V.q7qy*sc;
+  if(p>=1){
+    o.push(C(Px,Py,6,'#1a5a8a','#1a5a8a'));
+    o.push(T(Px+6,Py-8,'Start ('+V.q7px+','+V.q7py+')','#1a5a8a',10,'start',true));
+  }
+  if(p>=2){
+    o.push(ARR(Px,Py,Qx,Qy,'#C0272D',2.5));
+    o.push(T((Px+Qx)/2-8,(Py+Qy)/2-10,'displacement','#C8922A',10,'end'));
+    o.push(T((Px+Qx)/2-8,(Py+Qy)/2+4,'t='+V.q7t+'s','#C8922A',10,'end'));
+  }
+  if(p>=3){
+    o.push(C(Qx,Qy,6,'#C0272D','#C0272D'));
+    o.push(T(Qx+6,Qy-8,'End ('+V.q7qx+','+V.q7qy+')','#C0272D',10,'start',true));
+    o.push(T(Qx+6,Qy+10,'dist='+V.q7dist,'#C0272D',10,'start'));
+  }
+  if(p>=4){
+    o.push(R(270,55,195,150,'#fff5f0','#C0272D',1));
+    o.push(T(367,74,'r = r\u2080 + tv','#C0272D',13,'middle',true));
+    o.push(T(367,96,'r\u2080 = ('+V.q7px+', '+V.q7py+')','#241A17',12,'middle'));
+    o.push(T(367,116,'v = ('+V.q7vx+', '+V.q7vy+')','#241A17',12,'middle'));
+    o.push(T(367,136,'t = '+V.q7t,'#241A17',12,'middle'));
+    o.push(T(367,156,'r = ('+V.q7qx+', '+V.q7qy+')','#C0272D',13,'middle',true));
+    o.push(T(367,178,'|r\u2212r\u2080| = '+V.q7dist+' m','#C8922A',12,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ8(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Particle collision: set position vectors equal, solve for t','#C0272D',12,'middle',true));
+  var ox=40,oy=220,sc=16;
+  o.push(ARR(ox,oy,ox+240,oy,'#888',1.5));o.push(T(ox+244,oy,'x','#888',12,'start'));
+  o.push(ARR(ox,oy,ox,oy-190,'#888',1.5));o.push(T(ox,oy-194,'y','#888',12,'middle'));
+  var Ax=ox+V.q8ax*sc,Ay=oy-V.q8ay*sc;
+  var Bx=ox+V.q8bx*sc,By=oy-V.q8by*sc;
+  var Cx=ox+V.q8cx*sc,Cy=oy-V.q8cy*sc;
+  if(p>=1){
+    o.push(C(Ax,Ay,6,'#1a5a8a','#1a5a8a'));
+    o.push(T(Ax+5,Ay+12,'A\u2080('+V.q8ax+','+V.q8ay+')','#1a5a8a',9,'start',true));
+    o.push(C(Bx,By,6,'#1a7a3a','#1a7a3a'));
+    o.push(T(Bx+5,By+12,'B\u2080('+V.q8bx+','+V.q8by+')','#1a7a3a',9,'start',true));
+  }
+  if(p>=2){
+    o.push(ARR(Ax,Ay,Cx,Cy,'#1a5a8a',1.5));
+    o.push(ARR(Bx,By,Cx,Cy,'#1a7a3a',1.5));
+  }
+  if(p>=3){
+    o.push(C(Cx,Cy,8,'#C0272D','#C0272D'));
+    o.push(T(Cx+8,Cy-8,'Collision at t='+V.q8t+'s','#C0272D',10,'start',true));
+    o.push(T(Cx+8,Cy+5,'('+V.q8cx+','+V.q8cy+')','#C0272D',9,'start'));
+  }
+  if(p>=4){
+    o.push(R(280,50,185,165,'#fff5f0','#C0272D',1));
+    o.push(T(372,68,'Strategy','#C0272D',12,'middle',true));
+    o.push(T(372,86,'r\u2090 = r\u2080 + tv','#241A17',11,'middle'));
+    o.push(T(372,104,'Set r_A(t) = r_B(t)','#241A17',11,'middle'));
+    o.push(T(372,122,'Solve for t (both x & y)','#241A17',11,'middle'));
+    o.push(T(372,140,'Verify t is same for both','#888',10,'middle'));
+    o.push(T(372,158,'Here t = '+V.q8t+' s','#C0272D',12,'middle',true));
+    o.push(T(372,178,'v_A=('+V.q8vAx+','+V.q8vAy+')','#1a5a8a',10,'middle'));
+    o.push(T(372,196,'v_B=('+V.q8vBx+','+V.q8vBy+')','#1a7a3a',10,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+// ─── QUESTION SET ─────────────────────────────────────
+var QS=[
+  {ey:'Q1 \u00b7 Add Maths 0606 \u00b7 Vectors in 2D',
+   ti:'Vector Notation and Magnitude',
+   su:'a = ('+V.q1a+', '+V.q1b+'). Understand notation and find |a|.',
+   steps:[
+    {lb:'Three ways to write a vector',dr:dQ1,ht:'<p>A <b>vector</b> has both magnitude and direction. In 2D it can be written as a column vector, in <b>i</b>–<b>j</b> form, or using a bold letter.</p><div class="fm">('+V.q1a+', '+V.q1b+') = '+V.q1a+'<b>i</b> + '+V.q1b+'<b>j</b> = <b>a</b></div><p>In handwriting, underline the letter: <u>a</u>.</p>'},
+    {lb:'Components and the diagram',dr:dQ1,ht:'<p>The <b>x-component</b> ('+V.q1a+') tells us how far right the vector goes; the <b>y-component</b> ('+V.q1b+') tells us how far up. The dashed lines show these on the diagram.</p>'},
+    {lb:'Finding the magnitude',dr:dQ1,ht:'<p>By Pythagoras the length (magnitude) is:</p><div class="fm">|<b>a</b>| = &radic;('+V.q1a+'&sup2; + '+V.q1b+'&sup2;) = &radic;'+(V.q1a*V.q1a+V.q1b*V.q1b)+' = '+V.q1mag+'</div>'},
+    {lb:'Your turn',dr:dQ1,ht:yt1()}
+   ]},
+
+  {ey:'Q2 \u00b7 Add Maths 0606 \u00b7 Vectors in 2D',
+   ti:'Adding and Subtracting Vectors',
+   su:'a = ('+V.q2a+', '+V.q2b+')  and  b = ('+V.q2c+', '+V.q2d+'). Find a+b and a\u2212b.',
+   steps:[
+    {lb:'Component-wise rule',dr:dQ2,ht:'<p>Add (or subtract) vectors <b>component by component</b>. The diagram shows the triangle law: place vectors head to tail to find the resultant.</p><div class="fm">a + b = ('+V.q2a+'+'+V.q2c+', '+V.q2b+'+'+V.q2d+') = ('+V.q2sumX+', '+V.q2sumY+')</div>'},
+    {lb:'The triangle law visually',dr:dQ2,ht:'<p>On the diagram, <b>b</b> is placed at the tip of <b>a</b>. The resultant (gold arrow) goes from the start of <b>a</b> to the tip of <b>b</b>.</p>'},
+    {lb:'Subtraction',dr:dQ2,ht:'<p>Subtract component by component. Equivalently, add the negative of <b>b</b>.</p><div class="fm">a \u2212 b = ('+V.q2a+'\u2212('+V.q2c+'), '+V.q2b+'\u2212'+V.q2d+') = ('+V.q2difX+', '+V.q2difY+')</div>'},
+    {lb:'Your turn',dr:dQ2,ht:yt2()}
+   ]},
+
+  {ey:'Q3 \u00b7 Add Maths 0606 \u00b7 Vectors in 2D',
+   ti:'Scalar Multiplication',
+   su:'v = ('+V.q3a+', '+V.q3b+'). Find '+V.q3k+'v and its magnitude.',
+   steps:[
+    {lb:'Scaling a vector',dr:dQ3,ht:'<p>Multiplying a vector by a scalar (ordinary number) <b>scales its magnitude</b> but keeps the same direction (if the scalar is positive).</p><div class="fm">'+V.q3k+'v = '+V.q3k+'\u00d7('+V.q3a+', '+V.q3b+') = ('+(V.q3k*V.q3a)+', '+(V.q3k*V.q3b)+')</div>'},
+    {lb:'Magnitude of '+V.q3k+'v',dr:dQ3,ht:'<div class="fm">|'+V.q3k+'v| = '+V.q3k+' \u00d7 |v| = '+V.q3k+' \u00d7 '+V.q3magOrig+' = '+V.q3magScaled+'</div><p>Shortcut: |kv| = k|v| — you can scale the magnitude directly without computing the new vector first.</p>'},
+    {lb:'Key rules',dr:dQ3,ht:'<ul class="hl"><li>k &gt; 0: same direction, scaled magnitude</li><li>k &lt; 0: opposite direction, scaled magnitude</li><li>k = 0: the zero vector</li><li>|kv| = |k| &times; |v| always</li></ul>'},
+    {lb:'Your turn',dr:dQ3,ht:yt3()}
+   ]},
+
+  {ey:'Q4 \u00b7 Add Maths 0606 \u00b7 Vectors in 2D',
+   ti:'Unit Vectors',
+   su:'a = ('+V.q4a+', '+V.q4b+'). Find the unit vector in the direction of a.',
+   steps:[
+    {lb:'What is a unit vector?',dr:dQ4,ht:'<p>A <b>unit vector</b> has magnitude 1. It points in the same direction as the original vector. We write it as <b>\u00e2</b> (a-hat).</p><div class="fm">\u00e2 = <b>a</b> / |<b>a</b>|</div>'},
+    {lb:'Calculate',dr:dQ4,ht:'<div class="fm">|<b>a</b>| = &radic;('+V.q4a+'&sup2; + '+V.q4b+'&sup2;) = '+V.q4magR+'</div><div class="fm">\u00e2 = ('+V.q4a+' / '+V.q4magR+',  '+V.q4b+' / '+V.q4magR+')</div><div class="fm">= ('+V.q4ux+', '+V.q4uy+')</div>'},
+    {lb:'Check: verify |\u00e2| = 1',dr:dQ4,ht:'<div class="fm">|\u00e2| = &radic;('+V.q4ux+'&sup2; + '+V.q4uy+'&sup2;) = 1 \u2713</div><p>The unit vectors <b>i</b> = (1, 0) and <b>j</b> = (0, 1) are the standard examples.</p>'},
+    {lb:'Your turn',dr:dQ4,ht:yt4()}
+   ]},
+
+  {ey:'Q5 \u00b7 Add Maths 0606 \u00b7 Vectors in 2D',
+   ti:'Position Vectors and AB\u20D7',
+   su:'A = ('+V.q5ax+', '+V.q5ay+')  and  B = ('+V.q5bx+', '+V.q5by+'). Find AB\u20D7, |AB|, and midpoint M.',
+   steps:[
+    {lb:'Position vectors',dr:dQ5,ht:'<p>The <b>position vector</b> of a point P is the vector from the origin O to P, written <b>OP</b> or simply <b>p</b>.</p><div class="fm">OA\u20D7 = ('+V.q5ax+', '+V.q5ay+')&ensp;&ensp;OB\u20D7 = ('+V.q5bx+', '+V.q5by+')</div>'},
+    {lb:'Finding AB\u20D7',dr:dQ5,ht:'<p>Use the key result: <b>AB = OB \u2212 OA</b>.</p><div class="fm">AB\u20D7 = ('+V.q5bx+'\u2212'+V.q5ax+', '+V.q5by+'\u2212'+V.q5ay+') = ('+V.q5abx+', '+V.q5aby+')</div><div class="fm">|AB| = &radic;('+V.q5abx+'&sup2; + '+V.q5aby+'&sup2;) = '+V.q5abMag+'</div>'},
+    {lb:'Midpoint of AB',dr:dQ5,ht:'<p>The position vector of the midpoint M is:</p><div class="fm">OM\u20D7 = \u00bd(OA\u20D7 + OB\u20D7) = \u00bd('+V.q5ax+'+'+V.q5bx+', '+V.q5ay+'+'+V.q5by+') = ('+V.q5mx+', '+V.q5my+')</div>'},
+    {lb:'Your turn',dr:dQ5,ht:yt5()}
+   ]},
+
+  {ey:'Q6 \u00b7 Add Maths 0606 \u00b7 Vectors in 2D',
+   ti:'Resultant Velocity',
+   su:'An object has velocity v = ('+V.q6vx+', '+V.q6vy+') and is pushed by wind w = ('+V.q6wx+', '+V.q6vy+'). Find the resultant speed.',
+   steps:[
+    {lb:'Adding velocity vectors',dr:dQ6,ht:'<p>When two velocities act simultaneously, the <b>resultant velocity</b> is their vector sum.</p><div class="fm">R = v + w = ('+V.q6vx+'+'+V.q6wx+', '+V.q6vy+'+'+V.q6wy+')</div>'},
+    {lb:'Tip-to-tail on the diagram',dr:dQ6,ht:'<p>Place <b>w</b> at the tip of <b>v</b>. The resultant goes from the start of <b>v</b> to the tip of <b>w</b>.</p><div class="fm">R = ('+V.q6rx+', '+V.q6ry+')</div>'},
+    {lb:'Resultant speed',dr:dQ6,ht:'<p><b>Speed</b> is the magnitude of the velocity vector.</p><div class="fm">Speed = |R| = &radic;('+V.q6rx+'&sup2; + '+V.q6ry+'&sup2;) = '+V.q6speed+' units/s</div>'},
+    {lb:'Full summary',dr:dQ6,ht:yt6()}
+   ]},
+
+  {ey:'Q7 \u00b7 Add Maths 0606 \u00b7 Vectors in 2D',
+   ti:'Position from Velocity',
+   su:'Particle starts at ('+V.q7px+', '+V.q7py+') with velocity ('+V.q7vx+', '+V.q7vy+') m/s. Find its position and distance after '+V.q7t+' s.',
+   steps:[
+    {lb:'The position equation',dr:dQ7,ht:'<p>If a particle starts at <b>r</b>\u2080 with constant velocity <b>v</b>, its position at time <i>t</i> is:</p><div class="fm">r(t) = r\u2080 + t<b>v</b></div>'},
+    {lb:'Find position at t = '+V.q7t,dr:dQ7,ht:'<div class="fm">r('+V.q7t+') = ('+V.q7px+', '+V.q7py+') + '+V.q7t+'\u00d7('+V.q7vx+', '+V.q7vy+')</div><div class="fm">= ('+V.q7px+'+'+V.q7t*V.q7vx+', '+V.q7py+'+'+V.q7t*V.q7vy+')</div><div class="fm">= ('+V.q7qx+', '+V.q7qy+')</div>'},
+    {lb:'Distance from start',dr:dQ7,ht:'<div class="fm">displacement = ('+V.q7qx+'\u2212'+V.q7px+', '+V.q7qy+'\u2212'+V.q7py+') = ('+(V.q7qx-V.q7px)+', '+(V.q7qy-V.q7py)+')</div><div class="fm">distance = &radic;('+(V.q7qx-V.q7px)+'&sup2; + '+(V.q7qy-V.q7py)+'&sup2;) = '+V.q7dist+' m</div>'},
+    {lb:'Your turn',dr:dQ7,ht:yt7()}
+   ]},
+
+  {ey:'Q8 \u00b7 Add Maths 0606 \u00b7 Vectors in 2D',
+   ti:'Particles Colliding',
+   su:'Particle A starts at ('+V.q8ax+','+V.q8ay+') with velocity ('+V.q8vAx+','+V.q8vAy+'). Particle B starts at ('+V.q8bx+','+V.q8by+') with velocity ('+V.q8vBx+','+V.q8vBy+'). Find when they collide.',
+   steps:[
+    {lb:'Setting up position equations',dr:dQ8,ht:'<p>Write the position vector of each particle as a function of time t.</p><div class="fm">r_A(t) = ('+V.q8ax+', '+V.q8ay+') + t('+V.q8vAx+', '+V.q8vAy+')</div><div class="fm">r_B(t) = ('+V.q8bx+', '+V.q8by+') + t('+V.q8vBx+', '+V.q8vBy+')</div>'},
+    {lb:'Setting r_A = r_B',dr:dQ8,ht:'<p>For a collision, both x and y components must match simultaneously.</p><div class="fm">x: '+V.q8ax+' + '+V.q8vAx+'t = '+V.q8bx+' + '+V.q8vBx+'t</div><div class="fm">y: '+V.q8ay+' + '+V.q8vAy+'t = '+V.q8by+' + '+V.q8vBy+'t</div>'},
+    {lb:'Solve for t',dr:dQ8,ht:'<p>Solving the x-equation:</p><div class="fm">('+V.q8vAx+'\u2212'+V.q8vBx+')t = '+V.q8bx+'\u2212'+V.q8ax+'</div><div class="fm">t = '+V.q8t+' s</div><p>Verify this also satisfies the y-equation. If t is the same for both, the particles collide.</p>'},
+    {lb:'Your turn',dr:dQ8,ht:yt8()}
+   ]}
+];
+
+var qi=0,si=0;
+function bSB(){
+  var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');
+  sb.innerHTML='';sb.appendChild(lbl);
+  QS.forEach(function(q,i){
+    var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;
+    b.onclick=function(){qi=i;si=0;render();};
+    sb.appendChild(b);
+  });
+}
+function bDT(){
+  var w=document.getElementById('dt');w.innerHTML='';
+  QS[qi].steps.forEach(function(_,i){
+    var d=document.createElement('div');
+    d.className='dot'+(i===si?' on':i<si?' dn':'');
+    w.appendChild(d);
+  });
+}
+function render(){
+  bSB();
+  var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').textContent=q.ey;
+  document.getElementById('ti').textContent=q.ti;
+  document.getElementById('su').textContent=q.su;
+  var p=document.getElementById('pn');
+  p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+  p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);
+  st.dr(si);bDT();
+  document.getElementById('pb').disabled=(si===0);
+  document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \u2192';
+}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){
+  var q=QS[qi];
+  si=si===q.steps.length-1?0:si+1;
+  render();
+});
+render();
+</script>
+
+<!-- ABC Supabase Progress Tracking -->
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase = _sb;
+window._abcTopicCode = 'AM-VEC-01';
+window.markComplete = async function() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) return;
+  const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', window._abcTopicCode).maybeSingle();
+  if (!topic) return;
+  window._abcTopicId = topic.id;
+  await _sb.from('walkthrough_progress').upsert({
+    student_id: session.user.id, topic_id: topic.id,
+    status: 'completed', completed_at: new Date().toISOString(),
+    last_visited_at: new Date().toISOString(),
+  }, { onConflict: 'student_id,topic_id' });
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>
