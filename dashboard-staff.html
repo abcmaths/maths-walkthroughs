@@ -77,7 +77,7 @@
 <header>
   <div class="header-left">
     <div class="logo">ABC</div>
-    <a href="index.html" class="subtitle" style="color:#fff;text-decoration:none;">Maths Portal — Staff</a>
+    <div class="subtitle">Maths Portal — Staff</div>
   </div>
   <div class="header-right">
     <span class="user-name" id="header-name"></span>
@@ -570,6 +570,7 @@
   window._supabase = supabase;
 
   let allStudents = [], allProgress = [], allTopics = [];
+  let currentProfile = null;
 
   // ── Use getSession directly — more reliable than onAuthStateChange for page loads ──
   async function init() {
@@ -592,6 +593,7 @@
       return;
     }
 
+    currentProfile = profile;
     document.getElementById('header-name').textContent = profile.full_name;
 
     // ── Fetch all data in parallel ──
@@ -1242,26 +1244,20 @@
     'Y8-GEO-01': 'year08/angles-y8.html', 'Y8-GEO-02': 'year08/shapes-construction-y8.html',
     'Y8-GEO-03': 'year08/perimeter-area-volume-y8.html', 'Y8-GEO-04': 'year08/transformations-y8.html',
     'Y8-STA-01': 'year08/data-handling-y8.html', 'Y8-STA-02': 'year08/probability-y8.html',
-    'Y8-MEA-01': 'year08/units-measurement-y8.html', 'Y8-MIS-01': 'year08/misconceptions-y8.html',
+    'Y8-MEA-01': 'year08/units-measurement-y8.html',
     'Y9-NUM-01': 'year09/number-y9.html', 'Y9-ALG-01': 'year09/algebra-y9.html',
     'Y9-ALG-02': 'year09/sequences-y9.html', 'Y9-ALG-03': 'year09/graphs-y9.html',
     'Y9-GEO-01': 'year09/geometry-y9.html', 'Y9-GEO-02': 'year09/mensuration-y9.html',
     'Y9-GEO-03': 'year09/pythagoras-trig-y9.html', 'Y9-GEO-04': 'year09/transformations-y9.html',
     'Y9-STA-01': 'year09/statistics-y9.html', 'Y9-STA-02': 'year09/probability-y9.html', 'Y9-MIS-01': 'year09/misconceptions-y9.html',
-    'Y9-NUM-02': 'year09/rates-speed-density.html',
     'Y10-NUM-01': 'year10/number-y10.html', 'Y10-ALG-01': 'year10/algebra-y10.html',
     'Y10-ALG-02': 'year10/graphs-y10.html', 'Y10-GEO-01': 'year10/geometry-y10.html',
     'Y10-GEO-02': 'year10/mensuration-y10.html', 'Y10-GEO-03': 'year10/constructions-y10.html',
     'Y10-GEO-04': 'year10/trig-y10.html', 'Y10-CAL-01': 'year10/calculus-diff-y10.html',
     'Y10-STA-01': 'year10/stats-y10.html', 'Y10-MIS-01': 'year10/misconceptions-y10.html',
-    'Y10-NUM-02': 'year10/surds-y10.html', 'Y10-NUM-03': 'year09/rates-speed-density.html', 'Y10-NUM-04': 'year10/recurring-decimals-y10.html', 'Y10-ALG-03': 'year10/proportion-y10.html',
-    'Y10-GEO-05': 'year10/similarity-y10.html', 'Y10-GEO-06': 'year10/elevation-depression-y10.html',
     'Y11-ALG-01': 'year11/algebra-y11.html', 'Y11-GEO-01': 'year11/geometry-y11.html',
     'Y11-GEO-02': 'year11/mensuration-y11.html', 'Y11-GEO-03': 'year11/transformations-y11.html',
     'Y11-NUM-01': 'year11/percentages-y11.html', 'Y11-VEC-01': 'year11/vectors-y11.html', 'Y11-MIS-01': 'year11/misconceptions-y11.html',
-    'Y11-ALG-02': 'year11/sets-y12.html',
-    'Y11-GEO-04': 'year11/trig-graphs-y11.html', 'Y11-GEO-05': 'year11/transformations-adv-y11.html', 'Y11-SET-01': 'year11/sets-y11.html', 'Y11-NUM-02': 'year11/exponential-y11.html', 'Y11-ALG-03': 'year11/sequences-adv-y11.html',
-    'Y11-ALG-04': 'year11/inequalities-y11.html', 'Y11-STA-01': 'year11/histograms-y11.html', 'Y11-PRO-01': 'year11/probability-adv-y11.html',
     'Y12-ALG-01': 'year12/algebra-y12.html', 'Y12-GEO-01': 'year12/geometry-y12.html',
     'Y12-CAL-01': 'year12/calculus-y12.html', 'Y12-NUM-01': 'year12/number-bases-y12.html',
     'Y12-NUM-02': 'year12/modulo-y12.html', 'Y12-ALG-02': 'year12/binary-operations-y12.html',
@@ -1377,6 +1373,7 @@
         <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}')">
           ${rm ? 'Add/Edit Review' : 'Review'}
         </button>
+        ${(currentProfile?.role === 'admin' && reviewerCount >= 2) ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;background:#fff8e1;border-color:#f0c040" onclick="copyForClaude(${t.id},'${t.topic_name}','${t.topic_code}')">📋 Copy for Claude</button>` : ''}
       </div>`;
     }).join('');
   };
@@ -1387,6 +1384,50 @@
     ratings.forEach(r => { if (counts[r] !== undefined) counts[r]++; });
     return Object.entries(counts).sort((a,b) => b[1]-a[1])[0][0];
   }
+
+  window.copyForClaude = function(topicId, topicName, topicCode) {
+    const reviews = allReviews.filter(r => r.topic_id === topicId);
+    if (reviews.length === 0) { alert('No reviews found for this topic.'); return; }
+
+    // Group by question number
+    const byQ = {};
+    reviews.forEach(r => {
+      if (!byQ[r.question_number]) byQ[r.question_number] = [];
+      byQ[r.question_number].push(r);
+    });
+
+    const ratingLabel = { good: '✓ Good', needs_improvement: '⚠ Needs improvement', not_good: '✗ Not good' };
+    const lines = [
+      `=== WALKTHROUGH REVIEW EXPORT ===`,
+      `Topic: ${topicName} (${topicCode})`,
+      `Exported: ${new Date().toLocaleString('en-GB')}`,
+      `Reviewers: ${[...new Set(reviews.map(r => r.profiles?.full_name || r.reviewer_id))].join(', ')}`,
+      ``
+    ];
+
+    Object.keys(byQ).sort((a,b) => Number(a)-Number(b)).forEach(qNum => {
+      lines.push(`--- Q${qNum} ---`);
+      byQ[qNum].forEach(r => {
+        lines.push(`Reviewer: ${r.profiles?.full_name || 'Unknown'}`);
+        lines.push(`Rating: ${ratingLabel[r.rating] || r.rating}`);
+        lines.push(`Comment: ${r.comment}`);
+        lines.push(``);
+      });
+    });
+
+    const text = lines.join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      // Brief visual feedback — flash the button
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copied!';
+      btn.style.borderColor = '#2e7d32';
+      btn.style.background = '#e8f5e9';
+      setTimeout(() => { btn.textContent = orig; btn.style.borderColor = '#f0c040'; btn.style.background = '#fff8e1'; }, 2000);
+    }).catch(() => {
+      alert('Could not copy to clipboard. Please try again.');
+    });
+  };
 
   window.openReviewModal = async function(topicId, topicCode, topicName) {
     currentReviewTopicId = topicId;
@@ -1767,22 +1808,25 @@
 
     grid.innerHTML = Object.entries(strands).map(([strand, topics]) =>
       topics.map(t => {
-        const file = WALKTHROUGH_FILES[t.topic_code] || '';
-        const isNew = ['Y9-NUM-02','Y10-NUM-02','Y10-NUM-03','Y10-ALG-03','Y10-GEO-05','Y11-GEO-04','Y11-ALG-03','Y11-ALG-04','Y11-STA-01','Y10-NUM-04','Y11-GEO-05','Y11-PRO-01','Y10-GEO-06','Y11-SET-01','Y11-NUM-02'].includes(t.topic_code);
+        const file = WALKTHROUGH_FILES[t.topic_code] || '#';
         // Count how many students have completed this topic
         const completions = allProgress.filter(p => p.topic_id === t.id && p.status === 'completed').length;
         const started     = allProgress.filter(p => p.topic_id === t.id && p.status === 'started').length;
-        const borderCol  = isNew ? '#C0272D' : '#eee';
-        const newBadge   = isNew ? '<span style="font-size:0.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#C0272D;color:#fff;padding:1px 6px;border-radius:8px;margin-left:5px;vertical-align:middle">New</span>' : '';
-        const hrefAttr   = file ? 'href="' + file + '" target="_blank"' : 'href="#" onclick="alert(\'This walkthrough hasn\'t been deployed yet.\');return false;"';
-        const startedBadge = started > 0 ? '<span style="font-size:0.72rem;font-weight:700;background:#fffde7;color:#f57f17;padding:2px 7px;border-radius:99px">&#9654; ' + started + ' started</span>' : '';
-        return '<a ' + hrefAttr + ' style="display:block;background:white;border:1.5px solid ' + borderCol + ';border-radius:6px;padding:14px 16px;text-decoration:none;color:#333;transition:all 0.18s;" onmouseover="this.style.borderColor=\'#C0272D\';this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.borderColor=\'' + borderCol + '\';this.style.transform=\'none\'">'
-          + '<div style="font-size:0.88rem;font-weight:700;color:#333;margin-bottom:4px">' + t.topic_name + newBadge + '</div>'
-          + '<div style="font-size:0.75rem;color:#888;margin-bottom:8px">' + strand + '</div>'
-          + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
-          + '<span style="font-size:0.72rem;font-weight:700;background:#e8f5e9;color:#2e7d32;padding:2px 7px;border-radius:99px">&#10003; ' + completions + ' completed</span>'
-          + startedBadge
-          + '</div></a>';
+        return `
+          <a href="${file}" target="_blank" style="
+            display:block;background:white;border:1.5px solid #eee;border-radius:6px;
+            padding:14px 16px;text-decoration:none;color:#333;transition:all 0.18s;
+          " onmouseover="this.style.borderColor='#C0272D';this.style.transform='translateY(-1px)'"
+             onmouseout="this.style.borderColor='#eee';this.style.transform='none'">
+            <div style="font-size:0.88rem;font-weight:700;color:#333;margin-bottom:4px">${t.topic_name}</div>
+            <div style="font-size:0.75rem;color:#888;margin-bottom:8px">${strand}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <span style="font-size:0.72rem;font-weight:700;background:#e8f5e9;color:#2e7d32;padding:2px 7px;border-radius:99px">
+                ✓ ${completions} completed
+              </span>
+              ${started > 0 ? `<span style="font-size:0.72rem;font-weight:700;background:#fffde7;color:#f57f17;padding:2px 7px;border-radius:99px">▶ ${started} started</span>` : ''}
+            </div>
+          </a>`;
       }).join('')
     ).join('');
   };
