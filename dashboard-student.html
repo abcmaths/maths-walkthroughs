@@ -252,40 +252,6 @@
     'Y12-ALG-02': 'year12/binary-operations-y12.html',
     'Y12-ALG-03': 'year12/matrices-y12.html',
     'Y12-ALG-04': 'year12/sets-y12.html',
-    // Science walkthroughs — files to be added as built
-    'Y7-BIO-S01': 'sci07/cells-y7.html',
-    'Y7-BIO-S02': 'sci07/classifying-life-y7.html',
-    'Y7-BIO-S03': 'sci07/ecosystems-y7.html',
-    'Y7-CHE-S01': 'sci07/classifying-matter-y7.html',
-    'Y7-CHE-S02': 'sci07/properties-matter-y7.html',
-    'Y7-CHE-S03': 'sci07/chemical-changes-y7.html',
-    'Y7-PHY-S01': 'sci07/forces-space-y7.html',
-    'Y7-PHY-S02': 'sci07/energy-sound-y7.html',
-    'Y7-PHY-S03': 'sci07/electricity-y7.html',
-    'Y7-SIC-S01': 'sci07/science-in-context-y7.html',
-    'Y7-EOY-S01': 'sci07/eoy-y7.html',
-    'Y8-BIO-S01': 'sci08/respiration-y8.html',
-    'Y8-BIO-S02': 'sci08/health-y8.html',
-    'Y8-CHE-S01': 'sci08/gases-y8.html',
-    'Y8-CHE-S02': 'sci08/liquids-y8.html',
-    'Y8-CHE-S03': 'sci08/atomic-structure-y8.html',
-    'Y8-CHE-S04': 'sci08/applications-science-y8.html',
-    'Y8-PHY-S01': 'sci08/light-colour-y8.html',
-    'Y8-PHY-S02': 'sci08/speed-motion-forces-y8.html',
-    'Y8-ES-S01':  'sci08/earth-solar-system-y8.html',
-    'Y8-SIC-S01': 'sci08/science-in-context-y8.html',
-    'Y8-EOY-S01': 'sci08/eoy-y8.html',
-    'Y9-BIO-S01': 'sci09/plant-biology-y9.html',
-    'Y9-BIO-S02': 'sci09/human-biology-y9.html',
-    'Y9-BIO-S03': 'sci09/species-environments-y9.html',
-    'Y9-CHE-S01': 'sci09/chemical-bonding-y9.html',
-    'Y9-CHE-S02': 'sci09/chemical-structures-y9.html',
-    'Y9-CHE-S03': 'sci09/chemical-reactions-y9.html',
-    'Y9-PHY-S01': 'sci09/sound-energy-y9.html',
-    'Y9-PHY-S02': 'sci09/electricity-y9.html',
-    'Y9-ES-S01':  'sci09/earth-beyond-y9.html',
-    'Y9-SIC-S01': 'sci09/science-in-context-y9.html',
-    'Y9-EOY-S01': 'sci09/eoy-checkpoint-y9.html',
     // Add Maths
     'AM-ALG-01': 'addmaths/algebra-addmaths.html',
     'AM-ALG-02': 'addmaths/equations-inequalities-addmaths.html',
@@ -305,6 +271,11 @@
     'AM-TRI-02': 'addmaths/trig-identities-addmaths.html',
     'AM-TRI-03': 'addmaths/circular-measure-addmaths.html',
     'AM-STA-01': 'addmaths/permutation-combination-addmaths.html',
+  };
+
+  // Science walkthrough files — add entries here only when the file is built and deployed
+  const SCIENCE_WALKTHROUGH_FILES = {
+    // 'Y7-BIO-S01': 'sci07/cells-y7.html',  ← uncomment as each file is completed
   };
 
   const SCIENCE_STRAND_COLOURS = {
@@ -487,14 +458,15 @@
     grid.innerHTML = filtered.map(t => {
       const status = progressMap[t.id] || 'not-started';
       const lbl    = status === 'completed' ? '✓ Completed' : status === 'started' ? '▶ In Progress' : '○ Not started';
-      const file   = WALKTHROUGH_FILES[t.topic_code] || '#';
       const testResult = testResultsMap[t.id];
       const testBadge  = testResult
         ? `<div class="t-test">Last test: <strong>${testResult.grade}</strong> (${testResult.percentage}%)</div>`
         : '';
       const isSci    = (t.subject || 'maths') === 'science';
+      const file     = isSci
+        ? (SCIENCE_WALKTHROUGH_FILES[t.topic_code] || '#')
+        : (WALKTHROUGH_FILES[t.topic_code] || '#');
       const accent   = isSci ? (SCIENCE_STRAND_COLOURS[t.strand] || '#1565C0') : '#C0272D';
-      const cardClass = isSci ? 'topic-card science-card' : 'topic-card maths-card';
       const strandLabel = isSci
         ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${accent};margin-right:4px;vertical-align:middle"></span>${t.strand || ''}`
         : (t.strand || '');

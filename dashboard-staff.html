@@ -1280,26 +1280,12 @@
     'AM-TRI-02': 'addmaths/trig-identities-addmaths.html', 'AM-TRI-03': 'addmaths/circular-measure-addmaths.html',
     'AM-ALG-03': 'addmaths/simultaneous-advanced-addmaths.html', 'AM-ALG-04': 'addmaths/quadratics-advanced-addmaths.html',
     'AM-ALG-05': 'addmaths/polynomials-addmaths.html', 'AM-ALG-06': 'addmaths/binomial-addmaths.html',
-    'AM-ALG-07': 'addmaths/progressions-addmaths.html', 'AM-ALG-08': 'addmaths/indices-surds-addmaths.html',
-    // Science
-    'Y7-BIO-S01': 'sci07/cells-y7.html', 'Y7-BIO-S02': 'sci07/classifying-life-y7.html',
-    'Y7-BIO-S03': 'sci07/ecosystems-y7.html', 'Y7-CHE-S01': 'sci07/classifying-matter-y7.html',
-    'Y7-CHE-S02': 'sci07/properties-matter-y7.html', 'Y7-CHE-S03': 'sci07/chemical-changes-y7.html',
-    'Y7-PHY-S01': 'sci07/forces-space-y7.html', 'Y7-PHY-S02': 'sci07/energy-sound-y7.html',
-    'Y7-PHY-S03': 'sci07/electricity-y7.html', 'Y7-SIC-S01': 'sci07/science-in-context-y7.html',
-    'Y7-EOY-S01': 'sci07/eoy-y7.html',
-    'Y8-BIO-S01': 'sci08/respiration-y8.html', 'Y8-BIO-S02': 'sci08/health-y8.html',
-    'Y8-CHE-S01': 'sci08/gases-y8.html', 'Y8-CHE-S02': 'sci08/liquids-y8.html',
-    'Y8-CHE-S03': 'sci08/atomic-structure-y8.html', 'Y8-CHE-S04': 'sci08/applications-science-y8.html',
-    'Y8-PHY-S01': 'sci08/light-colour-y8.html', 'Y8-PHY-S02': 'sci08/speed-motion-forces-y8.html',
-    'Y8-ES-S01':  'sci08/earth-solar-system-y8.html', 'Y8-SIC-S01': 'sci08/science-in-context-y8.html',
-    'Y8-EOY-S01': 'sci08/eoy-y8.html',
-    'Y9-BIO-S01': 'sci09/plant-biology-y9.html', 'Y9-BIO-S02': 'sci09/human-biology-y9.html',
-    'Y9-BIO-S03': 'sci09/species-environments-y9.html', 'Y9-CHE-S01': 'sci09/chemical-bonding-y9.html',
-    'Y9-CHE-S02': 'sci09/chemical-structures-y9.html', 'Y9-CHE-S03': 'sci09/chemical-reactions-y9.html',
-    'Y9-PHY-S01': 'sci09/sound-energy-y9.html', 'Y9-PHY-S02': 'sci09/electricity-y9.html',
-    'Y9-ES-S01':  'sci09/earth-beyond-y9.html', 'Y9-SIC-S01': 'sci09/science-in-context-y9.html',
-    'Y9-EOY-S01': 'sci09/eoy-checkpoint-y9.html'
+    'AM-ALG-07': 'addmaths/progressions-addmaths.html', 'AM-ALG-08': 'addmaths/indices-surds-addmaths.html'
+  };
+
+  // Science walkthrough files — add entries here only when the file is built and deployed
+  const SCIENCE_WALKTHROUGH_FILES = {
+    // 'Y7-BIO-S01': 'sci07/cells-y7.html',  ← uncomment as each file is completed
   };
 
   const SCIENCE_STRAND_COLOURS = {
@@ -1323,7 +1309,7 @@
 
   // Extract question titles from a walkthrough file
   async function getQuestions(topicCode) {
-    const file = WALKTHROUGH_FILES[topicCode];
+    const file = SCIENCE_WALKTHROUGH_FILES[topicCode] || WALKTHROUGH_FILES[topicCode];
     if (!file) return [];
     try {
       const resp = await fetch(file);
@@ -1449,7 +1435,7 @@
 
     document.getElementById('review-modal-body').innerHTML = `
       <p style="font-size:0.85rem;color:#666;margin-bottom:8px">Rate each question and leave a comment. All fields are required.</p>
-      <p style="margin-bottom:16px"><a href="#" onclick="window.open('${WALKTHROUGH_FILES[topicCode] || '#'}','walkthrough_review','width=1200,height=800,scrollbars=yes,resizable=yes');return false;" style="font-size:0.85rem;color:#C0272D;font-weight:600;text-decoration:none">↗ Open walkthrough in new window</a> <span style="font-size:0.78rem;color:#aaa">(review each question as you go)</span></p>
+      <p style="margin-bottom:16px"><a href="#" onclick="window.open('${SCIENCE_WALKTHROUGH_FILES[topicCode] || WALKTHROUGH_FILES[topicCode] || '#'}','walkthrough_review','width=1200,height=800,scrollbars=yes,resizable=yes');return false;" style="font-size:0.85rem;color:#C0272D;font-weight:600;text-decoration:none">↗ Open walkthrough in new window</a> <span style="font-size:0.78rem;color:#aaa">(review each question as you go)</span></p>
       ${questions.map(q => {
         const existing = myReviewMap[q.num];
         return `<div style="border:1.5px solid #eee;border-radius:6px;padding:14px;margin-bottom:12px">
@@ -1815,7 +1801,7 @@
       const strandColour = isSci ? (SCIENCE_STRAND_COLOURS[strand] || '#888') : '#C0272D';
       const strandHeader = `<div style="grid-column:1/-1;font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:${strandColour};padding:4px 0 2px;border-bottom:2px solid ${strandColour}22;margin-bottom:2px">${strand}</div>`;
       const cards = topics.map(t => {
-        const file = WALKTHROUGH_FILES[t.topic_code] || '#';
+        const file = isSci ? (SCIENCE_WALKTHROUGH_FILES[t.topic_code] || '#') : (WALKTHROUGH_FILES[t.topic_code] || '#');
         const completions = allProgress.filter(p => p.topic_id === t.id && p.status === 'completed').length;
         const started     = allProgress.filter(p => p.topic_id === t.id && p.status === 'started').length;
         const hoverColour = isSci ? strandColour : '#C0272D';
