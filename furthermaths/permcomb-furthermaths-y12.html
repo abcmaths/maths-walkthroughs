@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Permutations &amp; Combinations &middot; Further Mathematics &middot; Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}
+.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.nq-btn{font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.try-q{font-size:15px;line-height:1.55;margin-bottom:8px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
+.try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Permutations &amp; Combinations &mdash; Further Mathematics</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function fact(n){var r=1;for(var i=2;i<=n;i++)r*=i;return r;}
+function nPr(n,r){return fact(n)/fact(n-r);}
+function nCr(n,r){return fact(n)/(fact(r)*fact(n-r));}
+function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,fn:genFn};return buildTry(id,o);}
+function buildTry(id,o){var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');var ph='Answer'+(o.unit?' ('+o.unit+')':'');return '<div class="try" data-tryid="'+id+'"><div class="try-t">\u2714 Your Turn <button class="nq-btn" data-tryid="'+id+'">\u21bb New</button></div><div class="try-q">'+o.question+'</div><ul class="hl">'+(h||'')+'</ul><div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div><div class="try-fb" data-tryid="'+id+'"></div><details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
+document.addEventListener('click',function(e){var el=e.target;if(el.classList.contains('nq-btn')){var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;var o=en.fn();en.o=o;ST[id]={o:o,fn:en.fn};var wrap=document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);wrap.parentNode.replaceChild(tmp.firstChild,wrap);return;}if(el.classList.contains('try-ck')){var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;var o=en.o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}var tol=o.tol!=null?o.tol:0;if(Math.abs(v-o.ans)<=tol){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;}else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}}});
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Georgia,serif" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
+function L(x1,y1,x2,y2,c,w){c=c||'#C0272D';w=w||2;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"/>';}
+
+var V={};
+(function(){
+  V.q1n=rnd(4,6);
+  V.q1fact=fact(V.q1n);
+
+  V.q2n=rnd(5,7);V.q2r=rnd(2,Math.min(3,V.q2n-1));
+  V.q2perm=nPr(V.q2n,V.q2r);
+
+  V.q3n=rnd(5,8);V.q3r=rnd(2,Math.min(4,V.q3n-1));
+  V.q3comb=nCr(V.q3n,V.q3r);
+
+  V.q4n=rnd(6,9);V.q4r=rnd(3,4);
+  V.q4perm=nPr(V.q4n,V.q4r);
+  V.q4comb=nCr(V.q4n,V.q4r);
+
+  V.q5total=rnd(8,12);V.q5choose=rnd(3,5);
+  V.q5comb=nCr(V.q5total,V.q5choose);
+})();
+
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Factorial: '+V.q1n+'! = '+V.q1fact,'#C0272D',14,'middle',true));
+  if(p>=1){
+    o.push(R(40,52,400,36,'#f8f8f8','#ccc',1));
+    o.push(T(240,66,'n! = n \u00d7 (n\u22121) \u00d7 (n\u22122) \u00d7 \u2026 \u00d7 2 \u00d7 1','#241A17',12,'middle',true));
+    o.push(T(240,82,'(read "n factorial")','#888',10,'middle'));
+  }
+  if(p>=2){
+    var chain=''+V.q1n+'! = ';
+    for(var i=V.q1n;i>=1;i--)chain+=i+(i>1?' \u00d7 ':'');
+    o.push(T(240,108,chain,'#C0272D',12,'middle'));
+    o.push(T(240,124,'= '+V.q1fact,'#C0272D',16,'middle',true));
+  }
+  if(p>=3){
+    // slot diagram for 3! arrangements of A,B,C
+    o.push(T(240,154,'Arrangements of A, B, C (3 items):','#888',11,'middle'));
+    var arr=['ABC','ACB','BAC','BCA','CAB','CBA'];
+    arr.forEach(function(a,i){
+      o.push(R(30+i*74,162,66,40,'#fff5f0','#C0272D',1));
+      o.push(T(63+i*74,187,a,'#C0272D',13,'middle',true));
+    });
+    o.push(T(240,220,'3! = 6 arrangements','#1a7a3a',13,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'\u207f\u1d56\u1d63 = Arrangements of '+V.q2r+' from '+V.q2n+' = '+V.q2perm,'#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(R(40,52,400,40,'#f8f8f8','#ccc',1));
+    o.push(T(240,66,'Permutation: ORDER MATTERS (arranging, ranking, seating)','#888',11,'middle'));
+    o.push(T(240,82,'\u207f\u1d56\u1d63 = n! / (n\u2212r)!','#241A17',13,'middle',true));
+  }
+  // slot diagram
+  if(p>=2){
+    for(var i=0;i<V.q2r;i++){
+      o.push(R(60+i*90,100,80,46,'#e8f4ff','#1a5a8a',1.5));
+      o.push(T(100+i*90,120,'Slot '+(i+1),'#888',9,'middle'));
+      o.push(T(100+i*90,138,''+(V.q2n-i)+' choices','#1a5a8a',12,'middle',true));
+    }
+    var mul='';for(var j=0;j<V.q2r;j++)mul+=(V.q2n-j)+(j<V.q2r-1?' \u00d7 ':'');
+    o.push(T(240,166,mul+' = '+V.q2perm,'#C0272D',13,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(60,180,360,48,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,198,'\u207f\u1d56\u1d63 = '+V.q2n+'! / '+(V.q2n-V.q2r)+'! = '+V.q2perm,'#1a7a3a',14,'middle',true));
+    o.push(T(240,216,'(dividing cancels the unwanted factorial terms)','#888',10,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'\u207f\u1d9c\u1d63 = Selections of '+V.q3r+' from '+V.q3n+' = '+V.q3comb,'#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(R(40,52,400,40,'#f8f8f8','#ccc',1));
+    o.push(T(240,66,'Combination: ORDER DOES NOT MATTER (choosing, selecting)','#888',11,'middle'));
+    o.push(T(240,82,'\u207f\u1d9c\u1d63 = n! / [r!(n\u2212r)!]','#241A17',13,'middle',true));
+  }
+  if(p>=2){
+    o.push(R(40,100,400,60,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(240,116,'Start with \u207f\u1d56\u1d63 = '+nPr(V.q3n,V.q3r),' #1a5a8a',12,'middle'));
+    o.push(T(240,134,'Divide by r! = '+V.q3r+'! = '+fact(V.q3r)+' (remove duplicate orderings)','#1a5a8a',11,'middle'));
+    o.push(T(240,150,'\u207f\u1d9c\u1d63 = '+nPr(V.q3n,V.q3r)+' / '+fact(V.q3r)+' = '+V.q3comb,'#1a5a8a',13,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(60,172,360,50,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,192,V.q3n+'C'+V.q3r+' = '+V.q3n+'! / ('+V.q3r+'! \u00d7 '+(V.q3n-V.q3r)+'!)','#1a7a3a',12,'middle'));
+    o.push(T(240,210,'= '+V.q3comb,'#1a7a3a',16,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Permutation vs Combination — '+V.q4n+' people, choose '+V.q4r,'#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(R(30,52,205,140,'#fff5f0','#C0272D',1.5));
+    o.push(T(132,70,'PERMUTATION','#C0272D',11,'middle',true));
+    o.push(T(132,86,'Order MATTERS','#C0272D',10,'middle'));
+    o.push(T(132,104,'\u207f\u1d56\u1d63 = '+V.q4n+'P'+V.q4r,'#241A17',12,'middle'));
+    o.push(T(132,122,'= '+V.q4n+'! / '+(V.q4n-V.q4r)+'!','#888',11,'middle'));
+    o.push(T(132,142,'= '+V.q4perm,'#C0272D',18,'middle',true));
+    o.push(T(132,160,'e.g. President, VP, Sec','#888',9,'middle'));
+  }
+  if(p>=2){
+    o.push(R(245,52,205,140,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(348,70,'COMBINATION','#1a5a8a',11,'middle',true));
+    o.push(T(348,86,'Order does NOT matter','#1a5a8a',10,'middle'));
+    o.push(T(348,104,'\u207f\u1d9c\u1d63 = '+V.q4n+'C'+V.q4r,'#241A17',12,'middle'));
+    o.push(T(348,122,'= '+V.q4n+'! / ('+V.q4r+'! \u00d7 '+(V.q4n-V.q4r)+'!)','#888',11,'middle'));
+    o.push(T(348,142,'= '+V.q4comb,'#1a5a8a',18,'middle',true));
+    o.push(T(348,160,'e.g. Select a committee','#888',9,'middle'));
+  }
+  if(p>=3){
+    o.push(R(14,202,452,50,'#fff8e8','#C8922A',1.5));
+    o.push(T(240,220,'Key question: does swapping two choices give a different outcome?','#C8922A',11,'middle',true));
+    o.push(T(240,238,'YES \u2192 Permutation  \u2502  NO \u2192 Combination','#C8922A',11,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Committee of '+V.q5choose+' from '+V.q5total+' people','#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(R(40,52,400,36,'#f8f8f8','#ccc',1));
+    o.push(T(240,66,'Choosing a committee — order does not matter \u2192 Combination','#888',11,'middle'));
+    o.push(T(240,82,'Use \u207f\u1d9c\u1d63 = '+V.q5total+'C'+V.q5choose,'#241A17',13,'middle',true));
+  }
+  if(p>=2){
+    o.push(R(40,96,400,64,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(240,112,V.q5total+'! / ('+V.q5choose+'! \u00d7 '+(V.q5total-V.q5choose)+'!)','#1a5a8a',13,'middle'));
+    o.push(T(240,132,fact(V.q5total)+' / ('+fact(V.q5choose)+' \u00d7 '+fact(V.q5total-V.q5choose)+')','#888',11,'middle'));
+    // show a simplified form
+    o.push(T(240,150,'= '+V.q5comb,'#1a5a8a',16,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(80,172,320,50,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,188,'There are '+V.q5comb+' possible committees','#1a7a3a',15,'middle',true));
+    o.push(T(240,210,'Notice: '+V.q5total+'C'+V.q5choose+' = '+V.q5total+'C'+(V.q5total-V.q5choose)+'  (symmetry property)','#888',10,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ6(p){
+  // restricted permutation — must/must not include
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Restrictions — fixed positions and excluded items','#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(R(30,52,420,50,'#f8f8f8','#ccc',1));
+    o.push(T(240,68,'Example: arrange 6 people in a row, two specific people (A and B)','#888',10,'middle'));
+    o.push(T(240,84,'must be at the ends (first or last position).','#888',10,'middle'));
+  }
+  if(p>=2){
+    o.push(R(30,110,420,70,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(240,128,'Step 1: Place A and B in the end positions.','#1a5a8a',11,'middle',true));
+    o.push(T(240,144,'2 ways (A first or B first) = 2! = 2','#241A17',12,'middle'));
+    o.push(T(240,162,'Step 2: Arrange remaining 4 people in middle 4 spots = 4! = 24','#241A17',11,'middle'));
+  }
+  if(p>=3){
+    o.push(R(80,190,320,44,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,206,'Total = 2 \u00d7 24 = 48 arrangements','#1a7a3a',15,'middle',true));
+    o.push(T(240,226,'Multiply independent choices together','#888',10,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ7(p){
+  // choosing with conditions
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Combinations with conditions','#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(R(30,52,420,50,'#f8f8f8','#ccc',1));
+    o.push(T(240,68,'Choose 4 from 10 people (6 men, 4 women).','#888',11,'middle'));
+    o.push(T(240,84,'At least one woman must be included.','#888',11,'middle'));
+  }
+  if(p>=2){
+    o.push(R(30,110,420,50,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(240,126,'Strategy: Total \u2212 (none of the restricted type)','#1a5a8a',12,'middle',true));
+    o.push(T(240,144,'= All ways to choose 4 \u2212 ways with NO women','#241A17',11,'middle'));
+  }
+  if(p>=3){
+    o.push(R(30,168,420,60,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,184,'10C4 \u2212 6C4 = '+nCr(10,4)+' \u2212 '+nCr(6,4),'#1a7a3a',13,'middle',true));
+    o.push(T(240,200,'= '+(nCr(10,4)-nCr(6,4))+' committees with at least one woman','#1a7a3a',14,'middle',true));
+  }
+  if(p>=4){
+    o.push(R(14,238,452,16,'#fff8e8','#C8922A',1));
+    o.push(T(240,250,'"At least one" \u2192 complement method is almost always fastest','#C8922A',9,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+var QS=[
+  {ey:'Q1 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Factorials',
+   su:V.q1n+'! = '+V.q1fact+'. Understand factorial notation.',
+   steps:[
+    {lb:'What is n!?',dr:dQ1,ht:'<p><b>n!</b> (n factorial) is the product of all positive integers from 1 to n.</p><div class="fm">n! = n \u00d7 (n\u22121) \u00d7 (n\u22122) \u00d7 \u2026 \u00d7 1</div><p>Special case: 0! = 1 (by definition).</p>'},
+    {lb:'Calculate '+V.q1n+'!',dr:dQ1,ht:'<div class="fm">'+V.q1n+'! = '+Array.from({length:V.q1n},function(_,i){return V.q1n-i;}).join(' \u00d7 ')+' = '+V.q1fact+'</div>'},
+    {lb:'Why factorials?',dr:dQ1,ht:'<p>n! counts the number of ways to arrange n distinct objects in a row. 3 objects (A,B,C) can be arranged in 3! = 6 ways.</p>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
+      var n=rnd(3,7);
+      return {question:'Calculate '+n+'!',
+        hints:['Multiply '+n+' \u00d7 '+(n-1)+' \u00d7 \u2026 \u00d7 1'],
+        ans:fact(n),tol:0,unit:'',working:n+'! = '+fact(n)};
+    })}
+   ]},
+
+  {ey:'Q2 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Permutations \u207f\u1d56\u1d63',
+   su:'Arrange '+V.q2r+' from '+V.q2n+' objects where order matters.',
+   steps:[
+    {lb:'What is a permutation?',dr:dQ2,ht:'<p>A <b>permutation</b> is an arrangement where <b>order matters</b>. Choosing 1st, 2nd, 3rd place is a permutation — ABC and BAC are different.</p><div class="fm">\u207f\u1d56\u1d63 = n! / (n\u2212r)!</div>'},
+    {lb:'Slot method',dr:dQ2,ht:'<p>Think of r empty slots. Fill slot 1 (n choices), slot 2 (n\u22121 choices), etc:</p><div class="fm">\u207f\u1d56\u1d63 = n \u00d7 (n\u22121) \u00d7 \u2026 \u00d7 (n\u2212r+1)</div>'},
+    {lb:'Calculate '+V.q2n+'P'+V.q2r,dr:dQ2,ht:'<div class="fm">'+Array.from({length:V.q2r},function(_,i){return V.q2n-i;}).join(' \u00d7 ')+' = '+V.q2perm+'</div>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
+      var n=rnd(5,8),r=rnd(2,3);
+      return {question:'Find \u207f\u1d56\u1d63 where n='+n+' and r='+r+' (\u207f\u1d56\u1d63 = n\u00d7(n\u22121)\u00d7\u2026).',
+        hints:['Start at n='+n+', multiply '+r+' terms'],
+        ans:nPr(n,r),tol:0,unit:'',working:n+'P'+r+' = '+nPr(n,r)};
+    })}
+   ]},
+
+  {ey:'Q3 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Combinations \u207f\u1d9c\u1d63',
+   su:'Select '+V.q3r+' from '+V.q3n+' objects where order does NOT matter.',
+   steps:[
+    {lb:'What is a combination?',dr:dQ3,ht:'<p>A <b>combination</b> is a selection where <b>order does not matter</b>. Choosing a team of 3 from 8 is a combination — {A,B,C} and {B,A,C} are the same team.</p><div class="fm">\u207f\u1d9c\u1d63 = n! / [r!(n\u2212r)!]</div>'},
+    {lb:'Relationship to permutations',dr:dQ3,ht:'<p>Divide the permutation by r! to remove duplicate orderings:</p><div class="fm">\u207f\u1d9c\u1d63 = \u207f\u1d56\u1d63 / r!</div>'},
+    {lb:'Calculate '+V.q3n+'C'+V.q3r,dr:dQ3,ht:'<div class="fm">'+V.q3n+'C'+V.q3r+' = '+nPr(V.q3n,V.q3r)+' / '+fact(V.q3r)+' = '+V.q3comb+'</div>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
+      var n=rnd(5,9),r=rnd(2,4);
+      return {question:'Find \u207f\u1d9c\u1d63 where n='+n+' and r='+r+'.',
+        hints:['\u207f\u1d9c\u1d63 = \u207f\u1d56\u1d63 / r!','= '+nPr(n,r)+' / '+fact(r)],
+        ans:nCr(n,r),tol:0,unit:'',working:n+'C'+r+' = '+nCr(n,r)};
+    })}
+   ]},
+
+  {ey:'Q4 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Permutation vs Combination',
+   su:'When to use each — the key question to always ask.',
+   steps:[
+    {lb:'The key question',dr:dQ4,ht:'<p>Ask: <b>"Does swapping two items give a different outcome?"</b></p><ul class="hl"><li>YES \u2192 Permutation (order matters)</li><li>NO \u2192 Combination (order irrelevant)</li></ul>'},
+    {lb:'Permutation examples',dr:dQ4,ht:'<p>President + VP + Secretary from 8 people — order matters (President \u2260 VP). Use \u207f\u1d56\u1d63.</p><p>PIN codes, race positions, seating arrangements.</p>'},
+    {lb:'Combination examples',dr:dQ4,ht:'<p>Choose a committee of 3 from 8 — {A,B,C} same as {C,B,A}. Use \u207f\u1d9c\u1d63.</p><p>Choosing pizza toppings, selecting a hand of cards, lottery numbers.</p>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
+      var n=rnd(6,10),r=rnd(2,4);
+      var scenarios=[
+        {q:'How many ways to award 1st, 2nd and 3rd prizes to '+n+' contestants?',ans:nPr(n,r>3?3:r),r:r>3?3:r,type:'P'},
+        {q:'How many ways to choose a team of '+r+' from '+n+' players?',ans:nCr(n,r),r:r,type:'C'}
+      ];
+      var sc=pick(scenarios);
+      return {question:sc.q,
+        hints:[sc.type==='P'?'Order matters \u2192 use permutation':'Order does not matter \u2192 use combination'],
+        ans:sc.ans,tol:0,unit:'ways',working:(sc.type==='P'?n+'P'+sc.r:n+'C'+sc.r)+' = '+sc.ans};
+    })}
+   ]},
+
+  {ey:'Q5 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Committee Selection',
+   su:'Choose '+V.q5choose+' people from a group of '+V.q5total+'.',
+   steps:[
+    {lb:'Set up',dr:dQ5,ht:'<p>Forming a committee: order does not matter, so use a combination.</p><div class="fm">'+V.q5total+'C'+V.q5choose+' = '+V.q5total+'! / ('+V.q5choose+'! \u00d7 '+(V.q5total-V.q5choose)+'!)</div>'},
+    {lb:'Calculate',dr:dQ5,ht:'<div class="fm">= '+V.q5comb+' possible committees</div>'},
+    {lb:'Symmetry property',dr:dQ5,ht:'<div class="fm">\u207f\u1d9c\u1d63 = \u207f\u1d9c\u207f\u207b\u1d63</div><p>Choosing who IS in the team is the same count as choosing who is NOT. '+V.q5total+'C'+V.q5choose+' = '+V.q5total+'C'+(V.q5total-V.q5choose)+' = '+V.q5comb+'</p>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){
+      var total=rnd(7,12),choose=rnd(2,4);
+      return {question:'How many ways can a committee of '+choose+' be chosen from '+total+' people?',
+        hints:[total+'C'+choose+' = ?','Use combination formula'],
+        ans:nCr(total,choose),tol:0,unit:'ways',working:total+'C'+choose+' = '+nCr(total,choose)};
+    })}
+   ]},
+
+  {ey:'Q6 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Permutations with Restrictions',
+   su:'Arranging 6 people where two must be at the ends.',
+   steps:[
+    {lb:'Strategy for restrictions',dr:dQ6,ht:'<p>Handle restrictions first, then count the remaining freely. Multiply independent choices together.</p>'},
+    {lb:'Fix the restricted positions',dr:dQ6,ht:'<p>Place A and B at the two ends: 2! = 2 ways (AB or BA at the ends).</p>'},
+    {lb:'Fill remaining positions',dr:dQ6,ht:'<p>Arrange remaining 4 people in the middle 4 spots: 4! = 24 ways.</p><div class="fm">Total = 2 \u00d7 24 = 48</div>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){
+      var n=rnd(5,7);
+      // how many ways to arrange n people in a line with 2 specific people adjacent (treat as block)
+      var ans=fact(n-1)*fact(2);
+      return {question:'In how many ways can '+n+' people sit in a row if two specific people must sit next to each other?',
+        hints:['Treat the pair as a single block: '+(n-1)+' units to arrange','Then multiply by 2! for the pair\'s internal order'],
+        ans:ans,tol:0,unit:'ways',working:(n-1)+'! \u00d7 2! = '+fact(n-1)+' \u00d7 2 = '+ans};
+    })}
+   ]},
+
+  {ey:'Q7 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Combinations with Conditions',
+   su:'"At least one" problems — use the complement method.',
+   steps:[
+    {lb:'Complement method',dr:dQ7,ht:'<p>For "at least one of type X" problems, it is often easier to count:</p><div class="fm">At least one = Total \u2212 None</div><p>This avoids adding many separate cases.</p>'},
+    {lb:'Set up the subtraction',dr:dQ7,ht:'<div class="fm">10C4 \u2212 6C4</div><p>10C4 = all ways to choose 4 from 10.<br>6C4 = ways to choose 4 with NO women (all from 6 men).</p>'},
+    {lb:'Calculate',dr:dQ7,ht:'<div class="fm">'+ nCr(10,4)+' \u2212 '+nCr(6,4)+' = '+(nCr(10,4)-nCr(6,4))+'</div>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){
+      var men=rnd(4,6),women=rnd(3,5),choose=rnd(3,4);
+      var total=men+women;
+      var ans=nCr(total,choose)-nCr(men,choose);
+      return {question:'Choose '+choose+' from '+men+' men and '+women+' women. How many selections include at least one woman?',
+        hints:['Use complement: Total \u2212 (all men)',total+'C'+choose+' \u2212 '+men+'C'+choose],
+        ans:ans,tol:0,unit:'ways',working:total+'C'+choose+'\u2212'+men+'C'+choose+'='+nCr(total,choose)+'\u2212'+nCr(men,choose)+'='+ans};
+    })}
+   ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \u2192';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcTopicCode='Y12FM-STA-01';
+window.markComplete=async function(){const{data:{session}}=await _sb.auth.getSession();if(!session)return;const{data:topic}=await _sb.from('topics').select('id').eq('topic_code',window._abcTopicCode).maybeSingle();if(!topic)return;await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>
