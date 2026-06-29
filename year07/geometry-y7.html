@@ -184,25 +184,106 @@ function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" 
 function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" rx="2"/>';}
 function arc(cx,cy,r,a1,a2,c,w){var r1=a1*Math.PI/180,r2=a2*Math.PI/180;var x1=cx+r*Math.cos(r1),y1=cy-r*Math.sin(r1),x2=cx+r*Math.cos(r2),y2=cy-r*Math.sin(r2);var laf=((a2-a1+360)%360)>180?1:0;return '<path d="M '+x1.toFixed(1)+','+y1.toFixed(1)+' A '+r+','+r+' 0 '+laf+',0 '+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="'+(c||'#C8922A')+'" stroke-width="'+(w||1.5)+'" />';}
 
-/* Q1 Angles on a line */
+/* Q1 Angles on a straight line */
 function dQ1(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(L(60,160,420,160,'#241A17',2.5));
-  var rx=60+130*Math.cos(-40*Math.PI/180);var ry=160-130*Math.sin(-40*Math.PI/180);
-  o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Triangle: 45° and 65° — find the third angle x.','#C0272D',13,'middle',true));
+  var lx1=50,lx2=430,ly=160;
+  // The straight line
+  o.push(L(lx1,ly,lx2,ly,'#241A17',2.5));
+  // Point P where angles sit
+  var px=200,py=ly;
+  // Ray going up-right at ~50° from horizontal
+  var rayLen=120,rayAng=50*Math.PI/180;
+  var rx2=px+rayLen*Math.cos(rayAng),ry2=py-rayLen*Math.sin(rayAng);
+  o.push(L(px,py,rx2,ry2,'#241A17',2));
+  // Label the point
+  o.push(T(px,py+18,'P','#241A17',11,'middle',false));
+  // Step 0: just show the line and ray, label the known angle 130°
+  o.push(arc(px,py,44,0,50,'#C8922A',2));
+  o.push(T(px+62,py-30,'130\u00b0','#C8922A',13,'middle',true));
+  // Step 1: show x on the other side
   if(p>=1){
-    o.push(arc(ax,ay,36,0,48,'#C8922A',1.5));o.push(T(ax+50,ay-22,'45\u00b0','#C8922A',12,'middle',true));
-    o.push(arc(bx,by,36,108,180,'#1a5a8a',1.5));o.push(T(bx-52,by-22,'65\u00b0','#1a5a8a',12,'middle',true));
+    o.push(arc(px,py,44,50,180,'#C0272D',2));
+    o.push(T(px-50,py-30,'x','#C0272D',16,'middle',true));
   }
-  if(p>=2){o.push(arc(cx,cy,36,226,322,'#C0272D',1.5));o.push(T(cx,cy+52,'x','#C0272D',15,'middle',true));}
-  if(p>=3){o.push(T(240,248,'x = 180 \u2212 45 \u2212 65 = 70\u00b0','#C0272D',14,'middle',true));o.push(T(240,16,'Angle sum of triangle = 180\u00b0','#241A17',12,'middle',false));}
+  // Step 2: show the 180° annotation
+  if(p>=2){
+    o.push(arc(px,py,62,0,180,'#888',1.5,'4,3'));
+    o.push(T(px,py-72,'180\u00b0 (straight line)','#888',11,'middle',false));
+  }
+  // Step 3: show answer
+  if(p>=3){
+    o.push(R(120,210,240,36,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,233,'x = 180 \u2212 130 = 50\u00b0','#C0272D',14,'middle',true));
+  }
   s.innerHTML=o.join('');
 }
 
-/* Q4 Symmetry */
-function dQ2(p){ dQ1(p); }
-function dQ3(p){ dQ1(p); }
+/* Q2 Vertically opposite angles */
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var cx=240,cy=130;
+  // Two crossing lines
+  var ang=35*Math.PI/180;
+  var len=160;
+  // Line 1: horizontal-ish
+  o.push(L(cx-len,cy,cx+len,cy,'#241A17',2.5));
+  // Line 2: diagonal
+  o.push(L(cx-len*Math.cos(ang),cy+len*Math.sin(ang),cx+len*Math.cos(ang),cy-len*Math.sin(ang),'#241A17',2.5));
+  // 4 angle regions: label them
+  // Top angle (between line2 going up-right and line1 going right) = 35°... wait, let's label properly
+  // Angle above line1, right of line2 = 35° (acute, top-right)
+  // Opposite = also 35° (bottom-left)
+  // Adjacent = 145° (top-left and bottom-right)
+  if(p>=0){
+    o.push(arc(cx,cy,38,0,35,'#C8922A',2));
+    o.push(T(cx+52,cy-14,'65\u00b0','#C8922A',12,'middle',true));
+  }
+  if(p>=1){
+    // Vertically opposite: bottom-left
+    o.push(arc(cx,cy,38,180,215,'#C8922A',2));
+    o.push(T(cx-52,cy+14,'65\u00b0','#C8922A',12,'middle',true));
+    o.push(T(cx,cy-100,'Vertically opposite \u2192 equal!','#C8922A',12,'middle',true));
+  }
+  if(p>=2){
+    // Other pair: 115°
+    o.push(arc(cx,cy,38,35,180,'#1a5a8a',2));
+    o.push(T(cx-60,cy-30,'115\u00b0','#1a5a8a',12,'middle',true));
+    o.push(arc(cx,cy,38,215,360,'#1a5a8a',2));
+    o.push(T(cx+60,cy+30,'115\u00b0','#1a5a8a',12,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(80,210,320,36,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,233,'65\u00b0 & 65\u00b0 opposite.  115\u00b0 & 115\u00b0 adjacent.','#C0272D',13,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* Q3 Angles in a triangle */
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  // Triangle vertices
+  var ax=100,ay=210, bx=370,by=210, cx2=220,cy2=70;
+  o.push('<polygon points="'+ax+','+ay+' '+bx+','+by+' '+cx2+','+cy2+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2.5"/>');
+  // Step 0: label all three angles
+  o.push(arc(ax,ay,36,0,Math.atan2(ay-cy2,cx2-ax)*180/Math.PI,'#C8922A',2));
+  o.push(T(ax+50,ay-22,'45\u00b0','#C8922A',12,'middle',true));
+  o.push(arc(bx,by,36,180-Math.atan2(ay-cy2,bx-cx2)*180/Math.PI,180,'#1a5a8a',2));
+  o.push(T(bx-55,by-22,'65\u00b0','#1a5a8a',12,'middle',true));
+  if(p>=1){
+    // Label x at top vertex
+    o.push(T(cx2,cy2-18,'x','#C0272D',17,'middle',true));
+  }
+  if(p>=2){
+    o.push(R(110,4,260,38,'#fff8f0','#C0272D',1.5));
+    o.push(T(240,27,'45 + 65 + x = 180\u00b0','#C0272D',13,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(110,210,260,38,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,234,'x = 180 \u2212 45 \u2212 65 = 70\u00b0','#C0272D',14,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
 
 function dQ4(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
@@ -240,72 +321,134 @@ function dQ4(p){
 /* Q5 Perimeter compound */
 function dQ5(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var ox=80,oy=220,sc=20;
+  var ox=80,oy=230,sc=16;
   // L-shape: 10x8 with 4x3 cut from top right
   var W=10*sc,H=8*sc,cw=4*sc,ch=3*sc;
   var pts=ox+','+oy+' '+(ox+W)+','+oy+' '+(ox+W)+','+(oy-H+ch)+' '+(ox+W-cw)+','+(oy-H+ch)+' '+(ox+W-cw)+','+(oy-H)+' '+ox+','+(oy-H);
   o.push('<polygon points="'+pts+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
-  o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'L-shape: outer 10×8 cm. Find the perimeter.','#C0272D',13,'middle',true));
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'L-shape: outer 10\u00d78 cm — find the perimeter.','#C0272D',12,'middle',true));
   if(p>=1){
     o.push(T(ox+W/2,oy+14,'10 cm','#C0272D',11,'middle',true));
-    o.push(T(ox-14,oy-H/2,'8 cm','#C0272D',11,'middle',true));
-    o.push(T(ox+W-cw/2,oy-H-8,'4 cm','#888',10,'middle',false));
-    o.push(T(ox+W+10,oy-H+ch/2,'3 cm','#888',10,'start',false));
+    o.push(T(ox-18,oy-H/2,'8 cm','#C0272D',11,'middle',true));
+    o.push(T(ox+W-cw/2,oy-H-10,'4 cm','#888',10,'middle',false));
+    o.push(T(ox+W+12,oy-H+ch/2,'3 cm','#888',10,'start',false));
   }
   if(p>=2){
-    o.push(T(ox+W-cw,oy-H+ch/2-4,'5 cm','#1a5a8a',10,'end',false));
-    o.push(T(ox+(W-cw)/2,oy-H-8,'6 cm','#1a5a8a',10,'middle',false));
-    o.push(T(240,30,'Missing sides: 8\u22123=5 cm and 10\u22124=6 cm','#1a5a8a',12,'middle',false));
+    // Missing sides — positioned well below the title banner
+    o.push(T(ox+W-cw,oy-H+ch/2,'5 cm','#1a5a8a',11,'end',true));
+    o.push(T(ox+(W-cw)/2,oy-H-10,'6 cm','#1a5a8a',11,'middle',true));
+    o.push(R(14,50,452,34,'#eef4ff','#1a5a8a',1.5));
+    o.push(T(240,71,'Missing sides: 8\u22123=5 cm  and  10\u22124=6 cm','#1a5a8a',12,'middle',false));
   }
-  if(p>=3){o.push(T(240,54,'P = 10+8+4+3+6+5 = 36 cm','#C0272D',14,'middle',true));}
+  if(p>=3){
+    o.push(R(14,88,452,34,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,109,'P = 10+8+4+3+6+5 = 36 cm','#C0272D',13,'middle',true));
+  }
   s.innerHTML=o.join('');
 }
 
 /* Q6 Area */
 function dQ6(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  // Rectangle
-  o.push(R(40,60,180,100,'#fff5f0','#C0272D',2));
-  o.push(T(130,50,'9 cm','#C0272D',12,'middle',true));
-  o.push(T(22,112,'5 cm','#C0272D',12,'middle',true));
-  if(p>=1){o.push(T(130,115,'A = 9 \u00d7 5 = 45 cm\u00b2','#C0272D',13,'middle',true));}
-  // Triangle
-  var tx=300,ty=190,tb=160,th=110;
-  o.push('<polygon points="'+tx+','+ty+' '+(tx+tb)+','+ty+' '+(tx+80)+','+(ty-th)+'" fill="#e8f4e8" stroke="#1a7a3a" stroke-width="2"/>');
-  o.push(T(tx+tb/2,ty+14,'12 cm','#1a7a3a',12,'middle',true));
-  o.push(L(tx+80,ty,tx+80,ty-th,'#aaa',1,'4,3'));
-  o.push(T(tx+80+10,ty-th/2,'8 cm','#1a7a3a',12,'start',true));
-  if(p>=2){o.push(T(tx+tb/2-10,ty-th/2,'\u00bd\u00d712\u00d78','#1a7a3a',13,'middle',false));o.push(T(tx+tb/2-10,ty-th/2+16,'= 48 cm\u00b2','#1a7a3a',13,'middle',true));}
-  if(p>=3){o.push(T(240,238,'Rectangle: l\u00d7w    Triangle: \u00bd\u00d7base\u00d7height','#888',11,'middle',false));}
+  // Rectangle — top left
+  o.push(R(30,50,160,90,'#fff5f0','#C0272D',2));
+  o.push(T(110,42,'9 cm','#C0272D',12,'middle',true));
+  o.push(T(14,96,'5 cm','#C0272D',12,'middle',true));
+  if(p>=1){
+    o.push(R(30,145,160,34,'#fce8d8','#C0272D',1.5));
+    o.push(T(110,167,'A = 9 \u00d7 5 = 45 cm\u00b2','#C0272D',13,'middle',true));
+  }
+  // Triangle — right side: bounding rectangle always shown to illustrate half-rectangle concept
+  var tx=260,ty=50,tb=160,th=110;
+  o.push(R(tx,ty,tb,th,'#f0f8f0','#aaa',1,'4,3'));
+  o.push('<polygon points="'+tx+','+(ty+th)+' '+(tx+tb)+','+(ty+th)+' '+(tx+80)+','+ty+'" fill="#e8f4e8" stroke="#1a7a3a" stroke-width="2"/>');
+  o.push(T(tx+tb/2,ty+th+14,'12 cm','#1a7a3a',12,'middle',true));
+  // Height line
+  o.push(L(tx+80,ty+th,tx+80,ty,'#aaa',1,'4,3'));
+  o.push(T(tx+80+14,ty+th/2,'8 cm','#1a7a3a',12,'start',true));
+  if(p>=2){
+    // Working displayed BELOW the triangle, not on top
+    o.push(R(258,188,165,34,'#e8f4e8','#1a7a3a',1.5));
+    o.push(T(340,209,'\u00bd\u00d712\u00d78 = 48 cm\u00b2','#1a7a3a',13,'middle',true));
+  }
+  if(p>=3){o.push(T(240,244,'Rectangle: l\u00d7w    Triangle: \u00bd\u00d7base\u00d7height','#888',11,'middle',false));}
   s.innerHTML=o.join('');
 }
 
-/* Q7 Volume cuboid */
+/* Q7 Volume cuboid — progressive cube layers */
 function dQ7(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var ox=100,oy=220,l=180,h=100,d=55;
-  o.push('<polygon points="'+ox+','+(oy-h)+' '+(ox+d)+','+(oy-h-d)+' '+(ox+l+d)+','+(oy-h-d)+' '+(ox+l)+','+(oy-h)+'" fill="#e8e8f8" stroke="#aaa" stroke-width="1"/>');
-  o.push('<polygon points="'+(ox+l)+','+oy+' '+(ox+l+d)+','+(oy-d)+' '+(ox+l+d)+','+(oy-h-d)+' '+(ox+l)+','+(oy-h)+'" fill="#d8d8f0" stroke="#aaa" stroke-width="1"/>');
-  o.push('<rect x="'+ox+'" y="'+(oy-h)+'" width="'+l+'" height="'+h+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
-  o.push(L(ox,oy,ox+l,oy,'#C0272D',2));
-  o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Cuboid 8×4×5. Find the volume.','#C0272D',13,'middle',true));
-  if(p>=1){
-    o.push(T(ox+l/2,oy+14,'8 cm','#C0272D',12,'middle',true));
-    o.push(T(ox-14,oy-h/2,'5 cm','#C0272D',12,'middle',true));
-    o.push(T(ox+l+d/2+8,oy-d/2,'4 cm','#888',11,'start',false));
+  // Draw a grid of unit cubes to show the concept progressively
+  // Cuboid is 4×2×3 unit cubes (scaled for clarity)
+  var cs=28; // cube size in px
+  var numL=4,numW=2,numH=3; // length (cols), width (depth), height (layers)
+  var ox=120,oy=230; // base origin
+  var dx=cs*0.55,dy=cs*0.35; // isometric offsets for depth
+
+  // Draw layers from bottom to top, each layer = numL × numW cubes
+  // Number of layers shown = p (capped at numH)
+  var layersToShow = Math.min(p+1, numH);
+  // Colour layers alternately for visual clarity
+  var layerFills=['#fff5f0','#fce8d8','#f8ddd0'];
+  var layerStrokes=['#C0272D','#C0272D','#C0272D'];
+
+  for(var layer=0; layer<layersToShow; layer++){
+    var baseY = oy - layer*cs;
+    for(var row=0; row<numW; row++){
+      for(var col=0; col<numL; col++){
+        var cx2 = ox + col*cs + row*dx;
+        var cy2 = baseY - row*dy;
+        var fill = layerFills[layer] || '#fff5f0';
+        var strokeC = layerStrokes[layer] || '#C0272D';
+        // Top face
+        var tp = [cx2+','+cy2, (cx2+cs)+','+cy2, (cx2+cs+dx)+','+(cy2-dy), (cx2+dx)+','+(cy2-dy)];
+        o.push('<polygon points="'+tp.join(' ')+'" fill="'+fill+'" stroke="'+strokeC+'" stroke-width="1"/>');
+        // Front face (only front row)
+        if(row===0){
+          o.push('<rect x="'+cx2+'" y="'+cy2+'" width="'+cs+'" height="'+cs+'" fill="'+fill+'" stroke="'+strokeC+'" stroke-width="1"/>');
+        }
+        // Right face (only last col)
+        if(col===numL-1){
+          var rf=[
+            (cx2+cs)+','+(cy2),
+            (cx2+cs+dx)+','+(cy2-dy),
+            (cx2+cs+dx)+','+(cy2-dy+cs),
+            (cx2+cs)+','+(cy2+cs)
+          ];
+          o.push('<polygon points="'+rf.join(' ')+'" fill="#e8e0f8" stroke="'+strokeC+'" stroke-width="1"/>');
+        }
+      }
+    }
+    // Layer label on the right side
+    var labelY = oy - layer*cs - cs/2;
+    var labelX = ox + numL*cs + numW*dx + 14;
+    if(p>=1){o.push(T(labelX,labelY,'Layer '+(layer+1),'#888',10,'start',false));}
   }
-  if(p>=2){o.push(T(340,130,'V = l \u00d7 w \u00d7 h','#241A17',13,'start',true));o.push(T(340,152,'= 8 \u00d7 4 \u00d7 5','#241A17',13,'start',false));}
-  if(p>=3){o.push(T(340,178,'= 160 cm\u00b3','#C0272D',16,'start',true));}
+
+  // Dimension labels
+  if(p>=1){
+    o.push(T(ox+numL*cs/2,oy+16,'8 cm (4 cubes)','#C0272D',11,'middle',true));
+    o.push(T(ox-14,oy-numH*cs/2,'5 cm','#C0272D',11,'middle',true));
+    o.push(T(ox+numL*cs+numW*dx+16,oy-numW*dy/2,'4 cm','#888',10,'start',false));
+  }
+  // Formula
+  if(p>=2){
+    o.push(R(14,8,452,34,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,29,'One layer = 8\u00d74 = 32 cm\u00b3.  Stack 5 layers \u2192 V = 8\u00d74\u00d75','#C0272D',12,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(14,46,452,34,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,67,'V = 8 \u00d7 4 \u00d7 5 = 160 cm\u00b3','#C0272D',14,'middle',true));
+  }
   s.innerHTML=o.join('');
 }
 
 /* Q8 Net of cuboid */
 function dQ8(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  // Net of a simple 3x2x2 cuboid
-  var sc=30,ox=120,oy=130;
+  // Net of a 3x2x2 cuboid — moved down to avoid title overlap
+  var sc=28,ox=30,oy=160;
   var W=3*sc,H=2*sc,D=2*sc;
   // Top face
   o.push(R(ox,oy-D-H,W,H,'#fce8d8','#C0272D',1.5));o.push(T(ox+W/2,oy-D-H/2,'top','#888',10));
@@ -317,10 +460,29 @@ function dQ8(p){
   o.push(R(ox-D,oy-H,D,H,'#e8f4ff','#1a5a8a',1.5));o.push(T(ox-D/2,oy-H/2,'left','#888',10));
   // Right face
   o.push(R(ox+W,oy-H,D,H,'#e8f4ff','#1a5a8a',1.5));o.push(T(ox+W+D/2,oy-H/2,'right','#888',10));
-  // Back face always shown
+  // Back face
   o.push(R(ox,oy+H,W,H,'#e8ffe8','#1a7a3a',1.5));o.push(T(ox+W/2,oy+H+H/2,'back','#888',10));
-  o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,25,'Net of a cuboid — all 6 faces shown flat','#C0272D',12,'middle',true));
-  if(p>=3){o.push(T(350,160,'3 pairs of','#241A17',12,'start',false));o.push(T(350,178,'identical faces','#241A17',12,'start',false));o.push(T(350,196,'(top/bottom,','#888',11,'start',false));o.push(T(350,212,'front/back,','#888',11,'start',false));o.push(T(350,228,'left/right)','#888',11,'start',false));}
+  // Title banner — moved to bottom row well clear of the net
+  o.push(R(8,8,464,30,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,28,'Net of a cuboid — fold along edges to make the 3D shape','#C0272D',12,'middle',true));
+
+  // 3D cuboid drawn on the right side — appears from step 1
+  if(p>=1){
+    var bx=320,by=230,bl=3*sc,bh=2*sc,bd=2*sc;
+    // Top face
+    o.push('<polygon points="'+bx+','+(by-bh)+' '+(bx+bd*0.6)+','+(by-bh-bd*0.5)+' '+(bx+bl+bd*0.6)+','+(by-bh-bd*0.5)+' '+(bx+bl)+','+(by-bh)+'" fill="#fce8d8" stroke="#C0272D" stroke-width="1.5"/>');
+    // Right face
+    o.push('<polygon points="'+(bx+bl)+','+by+' '+(bx+bl+bd*0.6)+','+(by-bd*0.5)+' '+(bx+bl+bd*0.6)+','+(by-bh-bd*0.5)+' '+(bx+bl)+','+(by-bh)+'" fill="#d8d8f0" stroke="#aaa" stroke-width="1.5"/>');
+    // Front face
+    o.push('<rect x="'+bx+'" y="'+(by-bh)+'" width="'+bl+'" height="'+bh+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+    o.push(T(bx+bl/2,by+14,'3D cuboid','#888',10,'middle',false));
+    // Arrow between net and cuboid
+    o.push(T(293,165,'\u27a4 fold','#C8922A',12,'middle',false));
+  }
+  if(p>=3){
+    o.push(R(8,42,464,30,'#f0f8ff','#1a5a8a',1.5));
+    o.push(T(240,62,'3 pairs of identical faces: top/bottom \u2022 front/back \u2022 left/right','#1a5a8a',11,'middle',false));
+  }
   s.innerHTML=o.join('');
 }
 
@@ -487,7 +649,7 @@ var QS=[
 })}
   ]},
   {ey:'Q6 \u00b7 Year 7 \u00b7 Geometry',ti:'Area of Rectangles and Triangles',su:'Find the area of a rectangle (9\u00d75 cm) and a triangle (base 12 cm, height 8 cm).',steps:[
-    {lb:'Why triangle = half rectangle?',dr:dQ6,ht:'<p>Any triangle fits inside a rectangle with the same base and height — the triangle always covers exactly <b>half</b> that rectangle.</p><div class="fm">Triangle area = ½ × base × height</div><p style="font-size:13px;margin-top:6px;color:#6b5750;">The height must be <b>perpendicular</b> (90°) to the base.</p>'},
+    {lb:'Why triangle = \u00bd rectangle?',dr:dQ6,ht:'<p>Draw a triangle inside a rectangle with the <b>same base and height</b>. The triangle fills exactly <b>half</b> that rectangle \u2014 you can see this because the two small triangles outside it fill the other half.</p><div class="fm">Triangle area = \u00bd \u00d7 base \u00d7 height</div><p style="font-size:13px;margin-top:6px;color:#6b5750;">The height must be <b>perpendicular (90\u00b0)</b> to the base.</p>'},
     {lb:'Rectangle',dr:dQ6,ht:'<div class="fm">A = 9 \u00d7 5 = 45 cm\u00b2</div>'},
     {lb:'Triangle',dr:dQ6,ht:'<div class="fm">A = \u00bd \u00d7 12 \u00d7 8 = 48 cm\u00b2</div>'},
     {lb:'Your turn',dr:dQ6,ht:tryIt(function(){
@@ -505,9 +667,9 @@ var QS=[
 })}
   ]},
   {ey:'Q7 \u00b7 Year 7 \u00b7 Geometry',ti:'Volume of a Cuboid',su:'Find the volume of a cuboid measuring 8 cm \u00d7 4 cm \u00d7 5 cm.',steps:[
-    {lb:'Why l × w × h?',dr:dQ7,ht:'<p>Imagine filling the cuboid with tiny 1 cm³ cubes. One flat layer covers the base: <b>l × w</b> cubes. Then stack <b>h</b> layers.</p><div class="fm">Volume = (l × w) × h = l × w × h</div>'},
-    {lb:'Label the dimensions',dr:dQ7,ht:'<div class="fm">l = 8 cm,  w = 4 cm,  h = 5 cm</div>'},
-    {lb:'Calculate',dr:dQ7,ht:'<div class="fm">V = 8 \u00d7 4 \u00d7 5 = 160 cm\u00b3</div>'},
+    {lb:'Filling with cubes',dr:dQ7,ht:'<p>Imagine filling the cuboid with tiny 1 cm\u00b3 cubes. One flat <b>layer</b> covers the base: <b>length \u00d7 width</b> cubes. Then stack the layers to fill the height.</p><div class="fm">Volume = (l \u00d7 w) \u00d7 h = l \u00d7 w \u00d7 h</div>'},
+    {lb:'Layer 1 of 5',dr:dQ7,ht:'<p>The first layer has <b>8 \u00d7 4 = 32</b> unit cubes sitting on the base.</p>'},
+    {lb:'Stack all 5 layers',dr:dQ7,ht:'<p>Five identical layers means <b>5 \u00d7 32 = 160</b> cubes in total.</p><div class="fm">V = 8 \u00d7 4 \u00d7 5 = 160 cm\u00b3</div>'},
     {lb:'Your turn',dr:dQ7,ht:tryIt(function(){
   var l = pick([2,3,4,5,6,7,8,9,10]);
   var w = pick([2,3,4,5,6,7,8]);
@@ -524,9 +686,9 @@ var QS=[
 })}
   ]},
   {ey:'Q8 \u00b7 Year 7 \u00b7 Geometry',ti:'Nets of 3D Shapes',su:'Identify the net of a cuboid. How many faces does a cuboid have?',steps:[
-    {lb:'What is a net?',dr:dQ8,ht:'<p>A <b>net</b> is a 2D shape that can be folded up to make a 3D solid. Every face of the 3D shape appears once in the net.</p>'},
-    {lb:'A cuboid has 6 faces',dr:dQ8,ht:'<p>A cuboid has 6 rectangular faces in 3 pairs: top/bottom, front/back, left/right.</p>'},
-    {lb:'The net',dr:dQ8,ht:'<p>One common net has a column of 4 rectangles (top, front, bottom, back) with the left and right faces attached to the sides of one rectangle.</p>'},
+    {lb:'What is a net?',dr:dQ8,ht:'<p>A <b>net</b> is a 2D shape that can be folded up to make a 3D solid. Think of it as the shape <b>unfolded flat</b> \u2014 every face of the 3D shape appears once in the net.</p>'},
+    {lb:'Net \u2192 3D shape',dr:dQ8,ht:'<p>When you fold the net along the edges, the faces wrap around to form the cuboid. See the 3D shape on the right.</p>'},
+    {lb:'A cuboid has 6 faces',dr:dQ8,ht:'<p>A cuboid has <b>6 rectangular faces</b> in 3 pairs: top/bottom, front/back, left/right.</p>'},
     {lb:'Your turn',dr:dQ8,ht:tryIt(function(){
   var shapes = [
     {name:'triangular prism', faces:5, working:'A triangular prism has 2 triangular faces and 3 rectangular faces = 5 faces total.', hint1:'Count: 2 triangular ends and 3 rectangular sides', hint2:'2 + 3 = ?'},
