@@ -60,6 +60,10 @@
     .year-selector label { font-size: 0.82rem; font-weight: 600; color: #555; white-space: nowrap; }
     .year-selector select { padding: 7px 10px; border: 1.5px solid #ddd; border-radius: 5px; font-size: 0.88rem; color: #333; background: white; cursor: pointer; }
     .year-selector select:focus { outline: none; border-color: #C0272D; }
+    .coming-soon-card { opacity: 0.6; background: #fafafa !important; border-style: dashed !important; }
+    .coming-soon-card .t-name { color: #888; }
+    .t-btn-soon { background: #ddd !important; color: #999 !important; cursor: not-allowed !important; border-color: #ddd !important; }
+    .t-new-badge { display: inline-block; font-size: 9px; font-weight: 700; background: #C0272D; color: #fff; padding: 1px 6px; border-radius: 8px; margin-left: 6px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; }
     .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
     .topic-card { border: 1.5px solid #eee; border-radius: 6px; padding: 12px 14px; cursor: pointer; transition: all 0.18s; }
     .topic-card:hover { border-color: #C0272D; box-shadow: 0 2px 8px rgba(192,39,45,0.12); transform: translateY(-1px); }
@@ -153,6 +157,7 @@
             <option value="11">Year 11</option>
             <option value="12">Year 12</option>
             <option value="13">Add Maths</option>
+            <option value="14">Further Maths</option>
           </select>
         </div>
       </div>
@@ -313,7 +318,8 @@
 
       document.getElementById('header-name').textContent = profile.full_name;
       document.getElementById('welcome-name').textContent = 'Hello, ' + profile.full_name.split(' ')[0] + '!';
-      document.getElementById('welcome-sub').textContent = 'Year ' + myYearGroup + (profile.form_class ? ' · ' + profile.form_class : '') + ' · Maths';
+      const yearLabel = myYearGroup === 13 ? 'Add Maths' : myYearGroup === 14 ? 'Further Maths' : 'Year ' + myYearGroup;
+      document.getElementById('welcome-sub').textContent = yearLabel + (profile.form_class ? ' · ' + profile.form_class : '') + ' · Maths';
 
       // Load all topics
       const { data: topics } = await supabase
@@ -403,6 +409,9 @@
       label    = 'Showing your Year ' + myYearGroup + ' topics';
     } else if (value === '13') {
       filtered = allTopics.filter(t => t.year_group === 13);
+    } else if (value === '14') {
+      filtered = allTopics.filter(t => t.year_group === 14);
+      label    = 'Further Mathematics topics';
       label    = 'Showing Add Maths topics';
     } else {
       const yr = parseInt(value);
@@ -418,22 +427,32 @@
       return;
     }
 
+    // Track which topic codes are new (added in last 30 days) - based on sort_order vs existing
+    const now = Date.now();
     grid.innerHTML = filtered.map(t => {
-      const status = progressMap[t.id] || 'not-started';
-      const lbl    = status === 'completed' ? '✓ Completed' : status === 'started' ? '▶ In Progress' : '○ Not started';
-      const file   = WALKTHROUGH_FILES[t.topic_code] || '#';
-      const testResult = testResultsMap[t.id];
+      const file      = WALKTHROUGH_FILES[t.topic_code];
+      const hasFile   = file && file !== '#';
+      const status    = hasFile ? (progressMap[t.id] || 'not-started') : 'coming-soon';
+      const lbl       = !hasFile ? '⏳ Coming soon'
+                      : status === 'completed' ? '✓ Completed'
+                      : status === 'started'   ? '▶ In Progress'
+                      : '○ Not started';
+      const testResult = hasFile ? testResultsMap[t.id] : null;
       const testBadge  = testResult
         ? `<div class="t-test">Last test: <strong>${testResult.grade}</strong> (${testResult.percentage}%)</div>`
         : '';
-      return `<div class="topic-card ${status}">
-        <div class="t-name">${t.topic_name}</div>
+      const newBadge = t.is_new ? '<span class="t-new-badge">New</span>' : '';
+      return `<div class="topic-card ${status}${!hasFile ? ' coming-soon-card' : ''}">
+        <div class="t-name">${t.topic_name}${newBadge}</div>
         <div class="t-strand">${t.strand || ''}</div>
         <div class="t-status">${lbl}</div>
         ${testBadge}
         <div class="t-btns">
-          <button class="t-btn-walk" onclick="openTopic('${t.id}','${file}')">Walkthrough</button>
-          <button class="t-btn-test" onclick="openTest('${t.id}')">Take a Test</button>
+          ${hasFile
+            ? `<button class="t-btn-walk" onclick="openTopic('${t.id}','${file}')">Walkthrough</button>
+               <button class="t-btn-test" onclick="openTest('${t.id}')">Take a Test</button>`
+            : `<button class="t-btn-walk t-btn-soon" disabled>Coming Soon</button>`
+          }
         </div>
       </div>`;
     }).join('');
