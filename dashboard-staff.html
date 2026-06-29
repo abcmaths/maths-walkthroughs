@@ -70,9 +70,6 @@
     .message.success { background: #e8f5e9; color: #2e7d32; display: block; }
     .loading { text-align: center; color: #aaa; padding: 40px; font-size: 0.95rem; }
     footer { text-align: center; padding: 16px; font-size: 0.78rem; color: #aaa; }
-    .rt-lbl { display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px }
-    .rt-inp { width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;font-family:inherit;background:#fff }
-    .rt-inp:focus { outline:none;border-color:#C0272D }
   </style>
 </head>
 <body>
@@ -98,7 +95,6 @@
   <div class="nav-tab" onclick="showTab('users')">Users</div>
   <div class="nav-tab" onclick="showTab('reviews')">Review Walkthroughs</div>
   <div class="nav-tab" onclick="showTab('import')">Import Users</div>
-  <div class="nav-tab admin-only" id="tab-btn-register" onclick="showTab('register')" style="display:none;color:#C0272D;border-bottom:3px solid transparent">➕ Register Topic</div>
 </div>
 
 <main>
@@ -499,121 +495,6 @@
     </div>
     </div>
 
-    <!-- REGISTER TOPIC (admin only) -->
-    <div class="tab-panel" id="tab-register">
-      <div class="section">
-        <div class="section-title" style="margin-bottom:4px">Register New Topic</div>
-        <p style="font-size:0.85rem;color:#888;margin-bottom:24px">Adds the topic to the Supabase <code>topics</code> table, maps the walkthrough file in both dashboards, and adds the topic code to the test engine. Admin only.</p>
-
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px">
-
-          <div>
-            <label class="rt-lbl">Topic Name</label>
-            <input type="text" id="rt-name" placeholder="e.g. Vectors in Two Dimensions" class="rt-inp">
-          </div>
-
-          <div>
-            <label class="rt-lbl">Topic Code</label>
-            <input type="text" id="rt-code" placeholder="e.g. AM-VEC-01" class="rt-inp" style="text-transform:uppercase">
-            <div style="font-size:0.75rem;color:#aaa;margin-top:4px">Format: XX-STR-nn  e.g. AM-VEC-01, Y12-TRI-01</div>
-          </div>
-
-          <div>
-            <label class="rt-lbl">Year Group</label>
-            <select id="rt-year" class="rt-inp">
-              <option value="">— select —</option>
-              <option value="7">Year 7</option>
-              <option value="8">Year 8</option>
-              <option value="9">Year 9</option>
-              <option value="10">Year 10</option>
-              <option value="11">Year 11</option>
-              <option value="12">Year 12</option>
-              <option value="addmaths">Add Maths (0606)</option>
-              <option value="further">Further Maths (Y12)</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="rt-lbl">Strand</label>
-            <select id="rt-strand" class="rt-inp">
-              <option value="NUM">Number (NUM)</option>
-              <option value="ALG">Algebra (ALG)</option>
-              <option value="GEO">Geometry (GEO)</option>
-              <option value="TRI">Trigonometry (TRI)</option>
-              <option value="STA">Statistics (STA)</option>
-              <option value="CAL">Calculus (CAL)</option>
-              <option value="VEC">Vectors (VEC)</option>
-              <option value="FUN">Functions (FUN)</option>
-              <option value="LOG">Logarithms (LOG)</option>
-              <option value="MEC">Mechanics (MEC)</option>
-              <option value="MIS">Miscellaneous (MIS)</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="rt-lbl">Walkthrough File Path</label>
-            <input type="text" id="rt-path" placeholder="e.g. addmaths/vectors-addmaths.html" class="rt-inp">
-            <div style="font-size:0.75rem;color:#aaa;margin-top:4px">Relative to site root, e.g. year12/trig-y12.html</div>
-          </div>
-
-          <div>
-            <label class="rt-lbl">Description (optional)</label>
-            <input type="text" id="rt-desc" placeholder="Brief topic description" class="rt-inp">
-          </div>
-
-          <div>
-            <label class="rt-lbl">Sort Order</label>
-            <input type="number" id="rt-sort" value="99" min="1" max="999" class="rt-inp">
-          </div>
-
-          <div>
-            <label class="rt-lbl">Level</label>
-            <select id="rt-level" class="rt-inp">
-              <option value="both">Both (Foundation + Extended)</option>
-              <option value="foundation">Foundation only</option>
-              <option value="extended">Extended only</option>
-              <option value="addmaths">Add Maths</option>
-              <option value="further">Further Maths</option>
-            </select>
-          </div>
-
-        </div>
-
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-          <button onclick="registerTopic()" style="background:#C0272D;color:#fff;border:none;padding:11px 28px;border-radius:5px;font-weight:700;font-size:0.95rem;cursor:pointer">Register Topic</button>
-          <button onclick="document.getElementById('rt-preview').style.display='block';previewSQL()" style="background:#fff;color:#C0272D;border:1.5px solid #C0272D;padding:11px 20px;border-radius:5px;font-weight:600;font-size:0.9rem;cursor:pointer">Preview SQL</button>
-          <span style="font-size:0.82rem;color:#aaa">This will INSERT into Supabase only. Dashboard file mappings shown below for manual copy.</span>
-        </div>
-
-        <div id="rt-msg" style="margin-top:16px;padding:12px 16px;border-radius:5px;display:none;font-size:0.9rem"></div>
-
-        <!-- SQL Preview -->
-        <div id="rt-preview" style="display:none;margin-top:20px">
-          <div class="section-title" style="font-size:0.9rem;margin-bottom:8px">SQL Preview (Supabase INSERT)</div>
-          <pre id="rt-sql" style="background:#1e1e2e;color:#cdd6f4;padding:16px;border-radius:6px;font-size:0.82rem;overflow-x:auto;white-space:pre-wrap"></pre>
-        </div>
-
-        <!-- Dashboard mapping snippet -->
-        <div id="rt-mapping" style="display:none;margin-top:20px">
-          <div class="section-title" style="font-size:0.9rem;margin-bottom:8px">WALKTHROUGH_FILES mapping to add to both dashboards</div>
-          <pre id="rt-map-code" style="background:#1e1e2e;color:#a6e3a1;padding:16px;border-radius:6px;font-size:0.85rem;overflow-x:auto;white-space:pre-wrap"></pre>
-          <button onclick="copyMapping()" style="margin-top:8px;background:#fff;border:1.5px solid #888;padding:7px 16px;border-radius:4px;font-size:0.82rem;cursor:pointer">📋 Copy mapping line</button>
-        </div>
-
-        <!-- test.html topic code reminder -->
-        <div id="rt-testcode" style="display:none;margin-top:16px;padding:14px 18px;background:#fff8e8;border:1.5px solid #C8922A;border-radius:6px;font-size:0.85rem;color:#7a5200">
-          <strong>Also add to test.html topic list:</strong><br>
-          <code id="rt-testcode-val" style="font-size:0.9rem"></code>
-        </div>
-
-        <hr style="border:none;border-top:1px solid #eee;margin:32px 0">
-
-        <!-- Existing topics quick reference -->
-        <div class="section-title" style="margin-bottom:12px">Existing Registered Topics</div>
-        <div id="rt-existing" style="font-size:0.83rem;color:#555;line-height:1.9;font-family:monospace"></div>
-      </div>
-    </div>
-
   </div>
 </main>
 
@@ -712,11 +593,6 @@
     }
 
     document.getElementById('header-name').textContent = profile.full_name;
-
-    // Show Register Topic tab for admins only
-    if (profile.role === 'admin') {
-      document.getElementById('tab-btn-register').style.display = '';
-    }
 
     // ── Fetch all data in parallel ──
     const [
@@ -959,7 +835,7 @@
 
   // ── Tab switching ──
   window.showTab = function(name) {
-    const names = ['overview','progress','tests','topics','feedback','bugs','users','reviews','import','register'];
+    const names = ['overview','progress','tests','topics','feedback','bugs','users','reviews','import'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
@@ -969,7 +845,6 @@
     if (name === 'users')    window.renderUsersTab();
     if (name === 'tests')    window.renderTestsTab();
     if (name === 'reviews')  window.renderReviewTab();
-    if (name === 'register') window.renderRegisterTab();
   };
 
   // ── CSV template ──
@@ -1107,7 +982,7 @@
 
     tbody.innerHTML = filtered.map(r => {
       const gradeBadge = r.grade === 'A*' ? 'badge-green' : r.grade === 'A' ? 'badge-green' : r.grade === 'B' ? 'badge-yellow' : 'badge-red';
-      const yearLabel  = r.topics?.year_group === 13 ? 'Add Maths' : 'Year ' + (r.topics?.year_group || '—');
+      const yearLabel  = r.topics?.year_group === 13 ? 'Add Maths' : r.topics?.year_group === 14 ? 'Further Maths' : 'Year ' + (r.topics?.year_group || '—');
       const mins = Math.floor((r.time_taken_secs || 0) / 60);
       const secs = (r.time_taken_secs || 0) % 60;
       const date = new Date(r.completed_at).toLocaleDateString('en-GB');
@@ -1128,7 +1003,7 @@
   window.exportTests = function() {
     const rows = [['Student', 'Year', 'Topic', 'Level', 'Score', 'Max', 'Percentage', 'Grade', 'Time (secs)', 'Date']];
     allTestResults.forEach(r => {
-      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : 'Year ' + (r.topics?.year_group || '');
+      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : r.topics?.year_group === 14 ? 'Further Maths' : 'Year ' + (r.topics?.year_group || '');
       rows.push([
         r.profiles?.full_name || '',
         yearLabel,
@@ -1191,7 +1066,7 @@
       : sorted.map(t => {
           const total  = t.ups + t.downs;
           const downPct = Math.round((t.downs / total) * 100);
-          const yearLabel = t.topic?.year_group === 13 ? 'Add Maths' : `Year ${t.topic?.year_group}`;
+          const yearLabel = t.topic?.year_group === 13 ? 'Add Maths' : t.topic?.year_group === 14 ? 'Further Maths' : `Year ${t.topic?.year_group}`;
           return `
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
               <div style="width:180px;font-size:0.85rem;font-weight:600;color:#333">${t.topic?.topic_name || '—'}</div>
@@ -1212,7 +1087,7 @@
     }
 
     tbody.innerHTML = filtered.map(f => {
-      const yearLabel = f.topics?.year_group === 13 ? 'Add Maths' : `Year ${f.topics?.year_group}`;
+      const yearLabel = f.topics?.year_group === 13 ? 'Add Maths' : f.topics?.year_group === 14 ? 'Further Maths' : `Year ${f.topics?.year_group}`;
       const statusBadge = f.status === 'approved' ? 'badge-green' : f.status === 'rejected' ? 'badge-red' : 'badge-grey';
       return `<tr>
         <td><strong>${f.topics?.topic_name || '—'}</strong></td>
@@ -1274,7 +1149,7 @@
     document.getElementById('bug-topic-list').innerHTML = sorted.length === 0
       ? '<div style="color:#aaa;font-style:italic;font-size:0.88rem">No bug reports yet.</div>'
       : sorted.map(t => {
-          const yearLabel = t.topic?.year_group === 13 ? 'Add Maths' : `Year ${t.topic?.year_group}`;
+          const yearLabel = t.topic?.year_group === 13 ? 'Add Maths' : t.topic?.year_group === 14 ? 'Further Maths' : `Year ${t.topic?.year_group}`;
           return `
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
               <div style="width:180px;font-size:0.85rem;font-weight:600;color:#333">${t.topic?.topic_name || '—'}</div>
@@ -1292,7 +1167,7 @@
     }
 
     tbody.innerHTML = filtered.map(r => {
-      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : `Year ${r.topics?.year_group || '—'}`;
+      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : r.topics?.year_group === 14 ? 'Further Maths' : `Year ${r.topics?.year_group || '—'}`;
       const statusBadge = r.status === 'fixed' ? 'badge-green' : r.status === 'wontfix' ? 'badge-grey' : 'badge-red';
       const date = new Date(r.reported_at).toLocaleDateString('en-GB');
       return `<tr>
@@ -1320,7 +1195,7 @@
   window.exportBugs = function() {
     const rows = [['Topic', 'Year', 'Question', 'Description', 'JS Error', 'Student', 'Date', 'Status']];
     allBugReports.forEach(r => {
-      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : `Year ${r.topics?.year_group || '—'}`;
+      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : r.topics?.year_group === 14 ? 'Further Maths' : `Year ${r.topics?.year_group || '—'}`;
       const qLabel = r.question_number ? 'Q' + r.question_number + (r.question_title ? ' - ' + r.question_title : '') : '—';
       rows.push([
         r.topics?.topic_name || '—',
@@ -1356,44 +1231,111 @@
   let currentReviewQuestions = [];
 
   const WALKTHROUGH_FILES = {
-    'Y7-ALG-01': 'year07/algebra-y7.html', 'Y7-GEO-01': 'year07/geometry-y7.html',
-    'Y7-NUM-01': 'year07/number-y7.html', 'Y7-STA-01': 'year07/stats-y7.html',
-    'Y7-SEQ-01': 'year07/sequences-y7.html', 'Y7-MIS-01': 'year07/misconceptions-y7.html',
-    'Y8-NUM-01': 'year08/place-value-rounding-y8.html', 'Y8-NUM-02': 'year08/addition-subtraction-y8.html',
-    'Y8-NUM-03': 'year08/multiplication-y8.html', 'Y8-NUM-04': 'year08/division-y8.html',
-    'Y8-NUM-05': 'year08/integers-powers-roots-y8.html', 'Y8-NUM-06': 'year08/fractions-percentages-ratio-y8.html',
-    'Y8-NUM-07': 'year08/mixed-operations-y8.html', 'Y8-ALG-01': 'year08/algebra-y8.html',
-    'Y8-ALG-02': 'year08/manipulation-y8.html', 'Y8-ALG-03': 'year08/equations-sequences-graphs-y8.html',
-    'Y8-GEO-01': 'year08/angles-y8.html', 'Y8-GEO-02': 'year08/shapes-construction-y8.html',
-    'Y8-GEO-03': 'year08/perimeter-area-volume-y8.html', 'Y8-GEO-04': 'year08/transformations-y8.html',
-    'Y8-STA-01': 'year08/data-handling-y8.html', 'Y8-STA-02': 'year08/probability-y8.html',
+    // Year 7
+    'Y7-ALG-01': 'year07/algebra-y7.html',
+    'Y7-GEO-01': 'year07/geometry-y7.html',
+    'Y7-NUM-01': 'year07/number-y7.html',
+    'Y7-STA-01': 'year07/stats-y7.html',
+    'Y7-SEQ-01': 'year07/sequences-y7.html',
+    'Y7-MIS-01': 'year07/misconceptions-y7.html',
+    // Year 8
+    'Y8-NUM-01': 'year08/place-value-rounding-y8.html',
+    'Y8-NUM-02': 'year08/addition-subtraction-y8.html',
+    'Y8-NUM-03': 'year08/multiplication-y8.html',
+    'Y8-NUM-04': 'year08/division-y8.html',
+    'Y8-NUM-05': 'year08/integers-powers-roots-y8.html',
+    'Y8-NUM-06': 'year08/fractions-percentages-ratio-y8.html',
+    'Y8-NUM-07': 'year08/mixed-operations-y8.html',
+    'Y8-ALG-01': 'year08/algebra-y8.html',
+    'Y8-ALG-02': 'year08/manipulation-y8.html',
+    'Y8-ALG-03': 'year08/equations-sequences-graphs-y8.html',
+    'Y8-GEO-01': 'year08/angles-y8.html',
+    'Y8-GEO-02': 'year08/shapes-construction-y8.html',
+    'Y8-GEO-03': 'year08/perimeter-area-volume-y8.html',
+    'Y8-GEO-04': 'year08/transformations-y8.html',
+    'Y8-STA-01': 'year08/data-handling-y8.html',
+    'Y8-STA-02': 'year08/probability-y8.html',
     'Y8-MEA-01': 'year08/units-measurement-y8.html',
-    'Y9-NUM-01': 'year09/number-y9.html', 'Y9-ALG-01': 'year09/algebra-y9.html',
-    'Y9-ALG-02': 'year09/sequences-y9.html', 'Y9-ALG-03': 'year09/graphs-y9.html',
-    'Y9-GEO-01': 'year09/geometry-y9.html', 'Y9-GEO-02': 'year09/mensuration-y9.html',
-    'Y9-GEO-03': 'year09/pythagoras-trig-y9.html', 'Y9-GEO-04': 'year09/transformations-y9.html',
-    'Y9-STA-01': 'year09/statistics-y9.html', 'Y9-STA-02': 'year09/probability-y9.html', 'Y9-MIS-01': 'year09/misconceptions-y9.html',
-    'Y10-NUM-01': 'year10/number-y10.html', 'Y10-ALG-01': 'year10/algebra-y10.html',
-    'Y10-ALG-02': 'year10/graphs-y10.html', 'Y10-GEO-01': 'year10/geometry-y10.html',
-    'Y10-GEO-02': 'year10/mensuration-y10.html', 'Y10-GEO-03': 'year10/constructions-y10.html',
-    'Y10-GEO-04': 'year10/trig-y10.html', 'Y10-CAL-01': 'year10/calculus-diff-y10.html',
-    'Y10-STA-01': 'year10/stats-y10.html', 'Y10-MIS-01': 'year10/misconceptions-y10.html',
-    'Y11-ALG-01': 'year11/algebra-y11.html', 'Y11-GEO-01': 'year11/geometry-y11.html',
-    'Y11-GEO-02': 'year11/mensuration-y11.html', 'Y11-GEO-03': 'year11/transformations-y11.html',
-    'Y11-NUM-01': 'year11/percentages-y11.html', 'Y11-VEC-01': 'year11/vectors-y11.html', 'Y11-MIS-01': 'year11/misconceptions-y11.html',
-    'Y12-ALG-01': 'year12/algebra-y12.html', 'Y12-GEO-01': 'year12/geometry-y12.html',
-    'Y12-CAL-01': 'year12/calculus-y12.html', 'Y12-NUM-01': 'year12/number-bases-y12.html',
-    'Y12-NUM-02': 'year12/modulo-y12.html', 'Y12-ALG-02': 'year12/binary-operations-y12.html',
-    'Y12-ALG-03': 'year12/matrices-y12.html', 'Y12-ALG-04': 'year12/algebra-y12.html', 'Y12-MIS-01': 'year12/misconceptions-y12.html',
-    'AM-ALG-01': 'addmaths/algebra-addmaths.html', 'AM-ALG-02': 'addmaths/equations-inequalities-addmaths.html',
-    'AM-CAL-01': 'addmaths/differentiation-addmaths.html', 'AM-CAL-02': 'addmaths/integration-addmaths.html',
-    'AM-TRI-01': 'addmaths/trigonometry-addmaths.html', 'AM-STA-01': 'addmaths/permutation-combination-addmaths.html',
-    'AM-FUN-01': 'addmaths/functions-addmaths.html', 'AM-LOG-01': 'addmaths/logarithms-addmaths.html',
-    'AM-GEO-01': 'addmaths/coordinate-geometry-addmaths.html', 'AM-GEO-02': 'addmaths/straight-lines-addmaths.html',
-    'AM-TRI-02': 'addmaths/trig-identities-addmaths.html', 'AM-TRI-03': 'addmaths/circular-measure-addmaths.html',
-    'AM-ALG-03': 'addmaths/simultaneous-advanced-addmaths.html', 'AM-ALG-04': 'addmaths/quadratics-advanced-addmaths.html',
-    'AM-ALG-05': 'addmaths/polynomials-addmaths.html', 'AM-ALG-06': 'addmaths/binomial-addmaths.html',
-    'AM-ALG-07': 'addmaths/progressions-addmaths.html', 'AM-ALG-08': 'addmaths/indices-surds-addmaths.html'
+    'Y8-MIS-01': 'year08/misconceptions-y8.html',
+    // Year 9
+    'Y9-NUM-01': 'year09/number-y9.html',
+    'Y9-NUM-02': 'year09/rates-speed-density-y9.html',
+    'Y9-ALG-01': 'year09/algebra-y9.html',
+    'Y9-ALG-02': 'year09/sequences-y9.html',
+    'Y9-ALG-03': 'year09/graphs-y9.html',
+    'Y9-GEO-01': 'year09/geometry-y9.html',
+    'Y9-GEO-02': 'year09/mensuration-y9.html',
+    'Y9-GEO-03': 'year09/pythagoras-trig-y9.html',
+    'Y9-GEO-04': 'year09/transformations-y9.html',
+    'Y9-STA-01': 'year09/statistics-y9.html',
+    'Y9-STA-02': 'year09/probability-y9.html',
+    'Y9-MIS-01': 'year09/misconceptions-y9.html',
+    // Year 10
+    'Y10-NUM-01': 'year10/number-y10.html',
+    'Y10-NUM-02': 'year10/number-y10.html',         // Surds (in number file)
+    'Y10-NUM-03': 'year10/number-y10.html',         // Rates, Speed & Density
+    'Y10-NUM-04': 'year10/number-y10.html',         // Recurring Decimals
+    'Y10-ALG-01': 'year10/algebra-y10.html',
+    'Y10-ALG-02': 'year10/graphs-y10.html',
+    'Y10-ALG-03': 'year10/algebra-y10.html',        // Proportion (in algebra file)
+    'Y10-GEO-01': 'year10/geometry-y10.html',
+    'Y10-GEO-02': 'year10/mensuration-y10.html',
+    'Y10-GEO-03': 'year10/constructions-y10.html',
+    'Y10-GEO-04': 'year10/trig-y10.html',
+    'Y10-GEO-05': 'year10/geometry-y10.html',       // Similarity (in geometry file)
+    'Y10-GEO-06': 'year10/eoy-aoc-y10.html',        // Angles of Elevation & Depression
+    'Y10-CAL-01': 'year10/calculus-diff-y10.html',
+    'Y10-STA-01': 'year10/stats-y10.html',
+    'Y10-MIS-01': 'year10/misconceptions-y10.html',
+    // Year 11
+    'Y11-ALG-01': 'year11/algebra-y11.html',
+    'Y11-ALG-02': 'year12/sets-y12.html',           // Sets (shared with Y12)
+    'Y11-ALG-03': 'year11/algebra-y11.html',        // Advanced Sequences
+    'Y11-ALG-04': 'year11/algebra-y11.html',        // Graphical Inequalities
+    'Y11-GEO-01': 'year11/geometry-y11.html',
+    'Y11-GEO-02': 'year11/mensuration-y11.html',
+    'Y11-GEO-03': 'year11/transformations-y11.html',
+    'Y11-GEO-04': 'year11/geometry-y11.html',       // Trig Graphs & Exact Values
+    'Y11-GEO-05': 'year11/transformations-y11.html', // Advanced Transformations
+    'Y11-NUM-01': 'year11/percentages-y11.html',
+    'Y11-NUM-02': 'year11/percentages-y11.html',    // Exponential Growth & Decay
+    'Y11-VEC-01': 'year11/vectors-y11.html',
+    'Y11-MIS-01': 'year11/misconceptions-y11.html',
+    'Y11-STA-01': 'year11/eoy-aoc-y11.html',        // Histograms
+    'Y11-PRO-01': 'year11/eoy-aoc-y11.html',        // Conditional Probability
+    'Y11-SET-01': 'year12/sets-y12.html',           // Sets & Venn Diagrams (shared)
+    // Year 12 (WAEC/NECO core)
+    'Y12-ALG-01': 'year12/algebra-y12.html',
+    'Y12-ALG-02': 'year12/binary-operations-y12.html',
+    'Y12-ALG-03': 'year12/matrices-y12.html',
+    'Y12-SET-01': 'year12/sets-y12.html',
+    'Y12-GEO-01': 'year12/geometry-y12.html',
+    'Y12-CAL-01': 'year12/calculus-y12.html',
+    'Y12-NUM-01': 'year12/number-bases-y12.html',
+    'Y12-NUM-02': 'year12/modulo-y12.html',
+    'Y12-MIS-01': 'year12/misconceptions-y12.html',
+    // Further Maths (year_group = 14)
+    'Y12FM-SET-01': 'year12/sets-furthermaths-y12.html',
+    // Add Maths 0606 (year_group = 13)
+    'AM-FUN-01':  'addmaths/functions-addmaths.html',
+    'AM-ALG-01':  'addmaths/algebra-addmaths.html',
+    'AM-ALG-02':  'addmaths/equations-inequalities-addmaths.html',
+    'AM-ALG-03':  'addmaths/quadratics-advanced-addmaths.html',
+    'AM-ALG-04':  'addmaths/polynomials-addmaths.html',
+    'AM-ALG-05':  'addmaths/partial-fractions-addmaths.html',
+    'AM-ALG-06':  'addmaths/simultaneous-advanced-addmaths.html',
+    'AM-ALG-07':  'addmaths/surds-addmaths.html',
+    'AM-ALG-08':  'addmaths/series-addmaths.html',
+    'AM-LOG-01':  'addmaths/log-exp-addmaths.html',
+    'AM-GEO-01':  'addmaths/straight-lines-addmaths.html',
+    'AM-GEO-02':  'addmaths/circle-equation-addmaths.html',
+    'AM-VEC-01':  'addmaths/vectors-addmaths.html',
+    'AM-CAL-01':  'addmaths/differentiation-addmaths.html',
+    'AM-CAL-02':  'addmaths/integration-addmaths.html',
+    'AM-TRI-01':  'addmaths/trigonometry-addmaths.html',
+    'AM-TRI-02':  'addmaths/trig-identities-addmaths.html',
+    'AM-TRI-03':  'addmaths/circular-measure-addmaths.html',
+    'AM-STA-01':  'addmaths/permutation-combination-addmaths.html',
   };
 
   async function loadReviews() {
@@ -1475,7 +1417,7 @@
 
     listEl.innerHTML = filtered.map(t => {
       const rm = reviewMap[t.id];
-      const yearLabel = t.year_group === 13 ? 'Add Maths' : 'Year ' + t.year_group;
+      const yearLabel = t.year_group === 13 ? 'Add Maths' : t.year_group === 14 ? 'Further Maths' : 'Year ' + t.year_group;
       const reviewerCount = rm ? rm.reviewers.size : 0;
       const qCount = rm ? rm.questions.size : 0;
       const dominant = rm ? getDominantRating(rm.ratings) : null;
@@ -1907,109 +1849,6 @@
           </a>`;
       }).join('')
     ).join('');
-  };
-
-  // ── Register Topic Tab ──
-  window.renderRegisterTab = async function() {
-    const { data: topics } = await supabase.from('topics').select('topic_code,title,year_group').order('year_group').order('sort_order');
-    const el = document.getElementById('rt-existing');
-    if (topics && topics.length) {
-      el.innerHTML = topics.map(t =>
-        `<span style="display:inline-block;margin-right:24px;margin-bottom:2px"><b style="color:#C0272D">${t.topic_code}</b> — ${t.title} <span style="color:#aaa">(Yr ${t.year_group})</span></span>`
-      ).join('');
-    } else {
-      el.textContent = 'Could not load topics.';
-    }
-  };
-
-  function rtValues() {
-    return {
-      name:   document.getElementById('rt-name').value.trim(),
-      code:   document.getElementById('rt-code').value.trim().toUpperCase(),
-      year:   document.getElementById('rt-year').value,
-      strand: document.getElementById('rt-strand').value,
-      path:   document.getElementById('rt-path').value.trim(),
-      desc:   document.getElementById('rt-desc').value.trim(),
-      sort:   parseInt(document.getElementById('rt-sort').value) || 99,
-      level:  document.getElementById('rt-level').value,
-    };
-  }
-
-  window.previewSQL = function() {
-    const v = rtValues();
-    if (!v.name || !v.code || !v.year || !v.path) {
-      document.getElementById('rt-sql').textContent = '⚠ Fill in Name, Code, Year Group and File Path first.';
-      return;
-    }
-    const sql = `INSERT INTO topics (topic_code, title, year_group, strand, description, sort_order, level, created_at)\nVALUES (\n  '${v.code}',\n  '${v.name.replace(/'/g,"''")}',\n  '${v.year}',\n  '${v.strand}',\n  '${(v.desc || v.name).replace(/'/g,"''")}',\n  ${v.sort},\n  '${v.level}',\n  NOW()\n);`;
-    document.getElementById('rt-sql').textContent = sql;
-    document.getElementById('rt-preview').style.display = 'block';
-
-    // Mapping line
-    const mapLine = `'${v.code}': '${v.path}',`;
-    document.getElementById('rt-map-code').textContent = mapLine;
-    document.getElementById('rt-mapping').style.display = 'block';
-
-    // Test code reminder
-    document.getElementById('rt-testcode-val').textContent = `'${v.code}'`;
-    document.getElementById('rt-testcode').style.display = 'block';
-  };
-
-  window.copyMapping = function() {
-    const txt = document.getElementById('rt-map-code').textContent;
-    navigator.clipboard.writeText(txt).then(() => {
-      const btn = event.target;
-      btn.textContent = '✓ Copied!';
-      setTimeout(() => btn.textContent = '📋 Copy mapping line', 2000);
-    });
-  };
-
-  window.registerTopic = async function() {
-    const v = rtValues();
-    const msg = document.getElementById('rt-msg');
-    msg.style.display = 'none';
-
-    if (!v.name || !v.code || !v.year || !v.path) {
-      msg.style.cssText = 'display:block;background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;padding:12px 16px;border-radius:5px;font-size:0.9rem;margin-top:16px';
-      msg.textContent = '⚠ Please fill in: Topic Name, Topic Code, Year Group and File Path.';
-      return;
-    }
-
-    // Check for duplicate code
-    const { data: existing } = await supabase.from('topics').select('id').eq('topic_code', v.code).maybeSingle();
-    if (existing) {
-      msg.style.cssText = 'display:block;background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;padding:12px 16px;border-radius:5px;font-size:0.9rem;margin-top:16px';
-      msg.textContent = `⚠ Topic code ${v.code} already exists in the database.`;
-      return;
-    }
-
-    const { error } = await supabase.from('topics').insert({
-      topic_code:  v.code,
-      title:       v.name,
-      year_group:  v.year,
-      strand:      v.strand,
-      description: v.desc || v.name,
-      sort_order:  v.sort,
-      level:       v.level,
-    });
-
-    if (error) {
-      msg.style.cssText = 'display:block;background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;padding:12px 16px;border-radius:5px;font-size:0.9rem;margin-top:16px';
-      msg.innerHTML = `❌ Supabase error: ${error.message}`;
-      return;
-    }
-
-    msg.style.cssText = 'display:block;background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;padding:12px 16px;border-radius:5px;font-size:0.9rem;margin-top:16px';
-    msg.innerHTML = `✅ <strong>${v.code}</strong> — "${v.name}" added to Supabase.<br><br>`
-      + `<strong>Next steps:</strong><br>`
-      + `1. Add <code>'${v.code}': '${v.path}'</code> to WALKTHROUGH_FILES in <b>dashboard-student.html</b> and <b>dashboard-staff.html</b><br>`
-      + `2. Add <code>'${v.code}'</code> to the topic list in <b>test.html</b>`;
-
-    // Show preview panel too
-    window.previewSQL();
-
-    // Refresh existing list
-    window.renderRegisterTab();
   };
 </script>
 
