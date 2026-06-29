@@ -3,11 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ABC Maths — My Dashboard</title>
+  <title>ABC Portal — My Dashboard</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
     header { background: #C0272D; color: white; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    /* Subject toggle */
+    .subject-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 6px; padding: 3px; gap: 2px; }
+    .subject-toggle button { background: none; border: none; color: rgba(255,255,255,0.75); font-size: 0.82rem; font-weight: 600; padding: 4px 14px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+    .subject-toggle button.active { background: white; color: #C0272D; }
+    .subject-toggle button:hover:not(.active) { color: white; background: rgba(255,255,255,0.2); }
     .header-left { display: flex; align-items: center; gap: 14px; }
     .logo { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; }
     .subtitle { font-size: 0.85rem; opacity: 0.85; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 14px; }
@@ -50,7 +55,8 @@
     .strands { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 28px; }
     .strand-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
     .strand-row:last-child { margin-bottom: 0; }
-    .strand-name { width: 130px; font-size: 0.85rem; color: #444; font-weight: 600; flex-shrink: 0; }
+    .strand-name { width: 130px; font-size: 0.85rem; color: #444; font-weight: 600; flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
+    .strand-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .bar-bg { flex: 1; background: #eee; border-radius: 99px; height: 10px; overflow: hidden; }
     .bar-fill { height: 100%; background: #C0272D; border-radius: 99px; transition: width 0.6s ease; }
     .strand-pct { width: 40px; text-align: right; font-size: 0.82rem; color: #888; flex-shrink: 0; }
@@ -60,23 +66,20 @@
     .year-selector label { font-size: 0.82rem; font-weight: 600; color: #555; white-space: nowrap; }
     .year-selector select { padding: 7px 10px; border: 1.5px solid #ddd; border-radius: 5px; font-size: 0.88rem; color: #333; background: white; cursor: pointer; }
     .year-selector select:focus { outline: none; border-color: #C0272D; }
-    .coming-soon-card { opacity: 0.6; background: #fafafa !important; border-style: dashed !important; }
-    .coming-soon-card .t-name { color: #888; }
-    .t-btn-soon { background: #ddd !important; color: #999 !important; cursor: not-allowed !important; border-color: #ddd !important; }
-    .t-new-badge { display: inline-block; font-size: 9px; font-weight: 700; background: #C0272D; color: #fff; padding: 1px 6px; border-radius: 8px; margin-left: 6px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; }
     .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
     .topic-card { border: 1.5px solid #eee; border-radius: 6px; padding: 12px 14px; cursor: pointer; transition: all 0.18s; }
-    .topic-card:hover { border-color: #C0272D; box-shadow: 0 2px 8px rgba(192,39,45,0.12); transform: translateY(-1px); }
+    .topic-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); transform: translateY(-1px); }
+    .topic-card.maths-card:hover { border-color: #C0272D; box-shadow: 0 2px 8px rgba(192,39,45,0.12); }
     .topic-card.completed { border-color: #a5d6a7; background: #f1f8f1; }
     .topic-card.started   { border-color: #ffe082; background: #fffde7; }
     .topic-card .t-name   { font-size: 0.88rem; font-weight: 600; color: #333; margin-bottom: 4px; }
     .topic-card .t-strand { font-size: 0.75rem; color: #888; }
     .topic-card .t-test { font-size: 0.72rem; color: #1a56b0; margin-top: 4px; }
     .t-btns { display: flex; gap: 6px; margin-top: 8px; }
-    .t-btn-walk { flex: 1; padding: 5px 8px; background: #C0272D; color: white; border: none; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
-    .t-btn-walk:hover { background: #a01f24; }
-    .t-btn-test { flex: 1; padding: 5px 8px; background: white; color: #C0272D; border: 1.5px solid #C0272D; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
-    .t-btn-test:hover { background: #fde8e8; }
+    .t-btn-walk { flex: 1; padding: 5px 8px; background: var(--accent, #C0272D); color: white; border: none; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+    .t-btn-walk:hover { filter: brightness(0.88); }
+    .t-btn-test { flex: 1; padding: 5px 8px; background: white; color: var(--accent, #C0272D); border: 1.5px solid var(--accent, #C0272D); border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+    .t-btn-test:hover { background: #f5f5f5; }
     .topic-card.completed .t-status { color: #2e7d32; }
     .topic-card.started   .t-status { color: #f57f17; }
     .topic-card.not-started .t-status { color: #bbb; }
@@ -91,9 +94,13 @@
 <header>
   <div class="header-left">
     <div class="logo">ABC</div>
-    <div class="subtitle">Maths Portal</div>
+    <div class="subtitle" id="header-subtitle">Maths Portal</div>
   </div>
   <div class="header-right">
+    <div class="subject-toggle">
+      <button id="toggle-maths" class="active" onclick="switchSubject('maths')">📐 Maths</button>
+      <button id="toggle-science" onclick="switchSubject('science')">🔬 Science</button>
+    </div>
     <span class="user-name" id="header-name"></span>
     <button class="btn-chpwd" onclick="openChangePwd()">Change Password</button>
     <button class="btn-signout" onclick="signOut()">Sign out</button>
@@ -157,7 +164,6 @@
             <option value="11">Year 11</option>
             <option value="12">Year 12</option>
             <option value="13">Add Maths</option>
-            <option value="14">Further Maths</option>
           </select>
         </div>
       </div>
@@ -168,7 +174,7 @@
   </div>
 </main>
 
-<footer>© Adorable British College — ABC Maths Portal</footer>
+<footer>© Adorable British College — ABC Learning Portal</footer>
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -207,7 +213,6 @@
     'Y8-MIS-01': 'year08/misconceptions-y8.html',
     // Year 9
     'Y9-NUM-01': 'year09/number-y9.html',
-    'Y9-NUM-02': 'year09/rates-speed-density-y9.html',
     'Y9-ALG-01': 'year09/algebra-y9.html',
     'Y9-ALG-02': 'year09/sequences-y9.html',
     'Y9-ALG-03': 'year09/graphs-y9.html',
@@ -220,82 +225,95 @@
     'Y9-MIS-01': 'year09/misconceptions-y9.html',
     // Year 10
     'Y10-NUM-01': 'year10/number-y10.html',
-    'Y10-NUM-02': 'year10/surds-y10.html',
-    'Y10-NUM-03': 'year10/rates-speed-density-y10.html',
-    'Y10-NUM-04': 'year10/recurring-decimals-y10.html',
     'Y10-ALG-01': 'year10/algebra-y10.html',
     'Y10-ALG-02': 'year10/graphs-y10.html',
-    'Y10-ALG-03': 'year10/proportion-y10.html',
     'Y10-GEO-01': 'year10/geometry-y10.html',
     'Y10-GEO-02': 'year10/mensuration-y10.html',
     'Y10-GEO-03': 'year10/constructions-y10.html',
     'Y10-GEO-04': 'year10/trig-y10.html',
-    'Y10-GEO-05': 'year10/similarity-y10.html',
-    'Y10-GEO-06': 'year10/elevation-depression-y10.html',
     'Y10-CAL-01': 'year10/calculus-diff-y10.html',
     'Y10-STA-01': 'year10/stats-y10.html',
     'Y10-MIS-01': 'year10/misconceptions-y10.html',
     // Year 11
     'Y11-ALG-01': 'year11/algebra-y11.html',
-    'Y11-ALG-02': 'year11/sets-y11.html',
-    'Y11-ALG-03': 'year11/sequences-adv-y11.html',
-    'Y11-ALG-04': 'year11/inequalities-y11.html',
     'Y11-GEO-01': 'year11/geometry-y11.html',
     'Y11-GEO-02': 'year11/mensuration-y11.html',
     'Y11-GEO-03': 'year11/transformations-y11.html',
-    'Y11-GEO-04': 'year11/trig-graphs-y11.html',
-    'Y11-GEO-05': 'year11/transformations-adv-y11.html',
     'Y11-NUM-01': 'year11/percentages-y11.html',
-    'Y11-NUM-02': 'year11/exponential-y11.html',
+    'Y11-ALG-02': 'year11/sets-y12.html',
     'Y11-VEC-01': 'year11/vectors-y11.html',
     'Y11-MIS-01': 'year11/misconceptions-y11.html',
-    'Y11-STA-01': 'year11/histograms-y11.html',
-    'Y11-PRO-01': 'year11/probability-adv-y11.html',
-    'Y11-SET-01': 'year11/sets-y11.html',
-    // Year 12 (WAEC/NECO core)
+    // Year 12
     'Y12-ALG-01': 'year12/algebra-y12.html',
-    'Y12-ALG-02': 'year12/binary-operations-y12.html',
-    'Y12-ALG-03': 'year12/matrices-y12.html',
-    'Y12-SET-01': 'year12/sets-y12.html',
     'Y12-GEO-01': 'year12/geometry-y12.html',
     'Y12-CAL-01': 'year12/calculus-y12.html',
     'Y12-NUM-01': 'year12/number-bases-y12.html',
     'Y12-NUM-02': 'year12/modulo-y12.html',
-    'Y12-MIS-01': 'year12/misconceptions-y12.html',
-    // Further Maths (year_group = 14)
-    'Y12FM-SET-01': 'furthermaths/sets-furthermaths-y12.html',
-    'Y12FM-SUR-01': 'furthermaths/surds-furthermaths-y12.html',
-    'Y12FM-LOG-01': 'furthermaths/logic-furthermaths-y12.html',
-    // 'Y12FM-FUN-01': 'furthermaths/functions-furthermaths-y12.html',  // FILE NOT YET PUSHED
-    // 'Y12FM-ALG-01': 'furthermaths/partial-fractions-furthermaths-y12.html',  // FILE NOT YET PUSHED
-    // 'Y12FM-ALG-02': 'furthermaths/indices-log-furthermaths-y12.html',  // FILE NOT YET PUSHED
-    'Y12FM-ALG-03': 'furthermaths/binomial-furthermaths-y12.html',
-    'Y12FM-ALG-04': 'furthermaths/sequences-series-furthermaths-y12.html',
-    // 'Y12FM-STA-01': 'furthermaths/permcomb-furthermaths-y12.html',  // FILE NOT YET PUSHED
-    'Y12FM-TRI-01': 'furthermaths/trigonometry-furthermaths-y12.html',
-    'Y12FM-STA-02': 'furthermaths/statistics-furthermaths-y12.html',
-    'Y12FM-STA-03': 'furthermaths/probability-furthermaths-y12.html',
-    // Vectors, Statics, Dynamics — coming soon
-    // Add Maths 0606 (year_group = 13)
-    'AM-FUN-01':  'addmaths/functions-addmaths.html',
-    'AM-ALG-01':  'addmaths/algebra-addmaths.html',
-    'AM-ALG-02':  'addmaths/equations-inequalities-addmaths.html',
-    'AM-ALG-03':  'addmaths/quadratics-advanced-addmaths.html',
-    'AM-ALG-04':  'addmaths/polynomials-addmaths.html',
-    'AM-ALG-05':  'addmaths/partial-fractions-addmaths.html',
-    'AM-ALG-06':  'addmaths/simultaneous-advanced-addmaths.html',
-    'AM-ALG-07':  'addmaths/surds-addmaths.html',
-    'AM-ALG-08':  'addmaths/series-addmaths.html',
-    'AM-LOG-01':  'addmaths/log-exp-addmaths.html',
-    'AM-GEO-01':  'addmaths/straight-lines-addmaths.html',
-    'AM-GEO-02':  'addmaths/circle-equation-addmaths.html',
-    'AM-VEC-01':  'addmaths/vectors-addmaths.html',
-    'AM-CAL-01':  'addmaths/differentiation-addmaths.html',
-    'AM-CAL-02':  'addmaths/integration-addmaths.html',
-    'AM-TRI-01':  'addmaths/trigonometry-addmaths.html',
-    'AM-TRI-02':  'addmaths/trig-identities-addmaths.html',
-    'AM-TRI-03':  'addmaths/circular-measure-addmaths.html',
-    'AM-STA-01':  'addmaths/permutation-combination-addmaths.html',
+    'Y12-ALG-02': 'year12/binary-operations-y12.html',
+    'Y12-ALG-03': 'year12/matrices-y12.html',
+    'Y12-ALG-04': 'year12/sets-y12.html',
+    // Science walkthroughs — files to be added as built
+    'Y7-BIO-S01': 'sci07/cells-y7.html',
+    'Y7-BIO-S02': 'sci07/classifying-life-y7.html',
+    'Y7-BIO-S03': 'sci07/ecosystems-y7.html',
+    'Y7-CHE-S01': 'sci07/classifying-matter-y7.html',
+    'Y7-CHE-S02': 'sci07/properties-matter-y7.html',
+    'Y7-CHE-S03': 'sci07/chemical-changes-y7.html',
+    'Y7-PHY-S01': 'sci07/forces-space-y7.html',
+    'Y7-PHY-S02': 'sci07/energy-sound-y7.html',
+    'Y7-PHY-S03': 'sci07/electricity-y7.html',
+    'Y7-SIC-S01': 'sci07/science-in-context-y7.html',
+    'Y7-EOY-S01': 'sci07/eoy-y7.html',
+    'Y8-BIO-S01': 'sci08/respiration-y8.html',
+    'Y8-BIO-S02': 'sci08/health-y8.html',
+    'Y8-CHE-S01': 'sci08/gases-y8.html',
+    'Y8-CHE-S02': 'sci08/liquids-y8.html',
+    'Y8-CHE-S03': 'sci08/atomic-structure-y8.html',
+    'Y8-CHE-S04': 'sci08/applications-science-y8.html',
+    'Y8-PHY-S01': 'sci08/light-colour-y8.html',
+    'Y8-PHY-S02': 'sci08/speed-motion-forces-y8.html',
+    'Y8-ES-S01':  'sci08/earth-solar-system-y8.html',
+    'Y8-SIC-S01': 'sci08/science-in-context-y8.html',
+    'Y8-EOY-S01': 'sci08/eoy-y8.html',
+    'Y9-BIO-S01': 'sci09/plant-biology-y9.html',
+    'Y9-BIO-S02': 'sci09/human-biology-y9.html',
+    'Y9-BIO-S03': 'sci09/species-environments-y9.html',
+    'Y9-CHE-S01': 'sci09/chemical-bonding-y9.html',
+    'Y9-CHE-S02': 'sci09/chemical-structures-y9.html',
+    'Y9-CHE-S03': 'sci09/chemical-reactions-y9.html',
+    'Y9-PHY-S01': 'sci09/sound-energy-y9.html',
+    'Y9-PHY-S02': 'sci09/electricity-y9.html',
+    'Y9-ES-S01':  'sci09/earth-beyond-y9.html',
+    'Y9-SIC-S01': 'sci09/science-in-context-y9.html',
+    'Y9-EOY-S01': 'sci09/eoy-checkpoint-y9.html',
+  };
+
+  const SCIENCE_STRAND_COLOURS = {
+    'Biology':           '#2E7D32',
+    'Chemistry':         '#6A1B9A',
+    'Physics':           '#1565C0',
+    'Earth & Space':     '#00695C',
+    'Science in Context':'#E65100',
+    'SIC':               '#E65100',
+    'Review':            '#E65100',
+  };
+    'AM-ALG-02': 'addmaths/equations-inequalities-addmaths.html',
+    'AM-ALG-03': 'addmaths/quadratics-advanced-addmaths.html',
+    'AM-ALG-04': 'addmaths/polynomials-addmaths.html',
+    'AM-ALG-05': 'addmaths/partial-fractions-addmaths.html',
+    'AM-ALG-06': 'addmaths/simultaneous-advanced-addmaths.html',
+    'AM-ALG-07': 'addmaths/surds-addmaths.html',
+    'AM-ALG-08': 'addmaths/series-addmaths.html',
+    'AM-FUN-01': 'addmaths/functions-addmaths.html',
+    'AM-LOG-01': 'addmaths/log-exp-addmaths.html',
+    'AM-GEO-01': 'addmaths/straight-lines-addmaths.html',
+    'AM-GEO-02': 'addmaths/circle-equation-addmaths.html',
+    'AM-CAL-01': 'addmaths/differentiation-addmaths.html',
+    'AM-CAL-02': 'addmaths/integration-addmaths.html',
+    'AM-TRI-01': 'addmaths/trigonometry-addmaths.html',
+    'AM-TRI-02': 'addmaths/trig-identities-addmaths.html',
+    'AM-TRI-03': 'addmaths/circular-measure-addmaths.html',
+    'AM-STA-01': 'addmaths/permutation-combination-addmaths.html',
   };
 
   let allTopics   = [];
@@ -303,6 +321,7 @@
   let testResultsMap = {};
   let myYearGroup = 7;
   let userId      = null;
+  let currentSubject = 'maths';
 
   function showError(msg) {
     document.getElementById('loading').style.display = 'none';
@@ -330,8 +349,7 @@
 
       document.getElementById('header-name').textContent = profile.full_name;
       document.getElementById('welcome-name').textContent = 'Hello, ' + profile.full_name.split(' ')[0] + '!';
-      const yearLabel = myYearGroup === 13 ? 'Add Maths' : myYearGroup === 14 ? 'Further Maths' : 'Year ' + myYearGroup;
-      document.getElementById('welcome-sub').textContent = yearLabel + (profile.form_class ? ' · ' + profile.form_class : '') + ' · Maths';
+      document.getElementById('welcome-sub').textContent = 'Year ' + myYearGroup + (profile.form_class ? ' · ' + profile.form_class : '');
 
       // Load all topics
       const { data: topics } = await supabase
@@ -356,17 +374,8 @@
         .from('eoy_aoc_results').select('*').eq('student_id', userId)
         .order('academic_year', { ascending: false }).limit(1).maybeSingle();
 
-      // Summary cards (own year)
-      const myTopics  = allTopics.filter(t => t.year_group === myYearGroup);
-      const total     = myTopics.length;
-      const completed = myTopics.filter(t => progressMap[t.id] === 'completed').length;
-      const started   = myTopics.filter(t => progressMap[t.id] === 'started').length;
-      const pct       = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-      document.getElementById('stat-total').textContent     = total;
-      document.getElementById('stat-completed').textContent = completed;
-      document.getElementById('stat-started').textContent   = started;
-      document.getElementById('stat-pct').textContent       = pct + '%';
+      // Summary cards
+      renderSummaryCards();
 
       // AOC banner
       if (aoc) {
@@ -379,25 +388,8 @@
           <div class="aoc-item"><div class="val" style="font-size:0.9rem;color:#555">${aoc.academic_year}</div><div class="lbl">Academic Year</div></div>`;
       }
 
-      // Strand bars (own year)
-      const strands = {};
-      myTopics.forEach(t => {
-        const s = t.strand || 'Other';
-        if (!strands[s]) strands[s] = { total: 0, completed: 0 };
-        strands[s].total++;
-        if (progressMap[t.id] === 'completed') strands[s].completed++;
-      });
-
-      document.getElementById('strand-bars').innerHTML = Object.entries(strands).length > 0
-        ? Object.entries(strands).map(([name, data]) => {
-            const p = data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0;
-            return `<div class="strand-row">
-              <div class="strand-name">${name}</div>
-              <div class="bar-bg"><div class="bar-fill" style="width:${p}%"></div></div>
-              <div class="strand-pct">${p}%</div>
-            </div>`;
-          }).join('')
-        : '<div class="no-topics">No topics added for your year group yet.</div>';
+      // Strand bars (own year, current subject)
+      renderStrandBars();
 
       // Set default selector and render
       document.getElementById('year-select').value = 'own';
@@ -412,22 +404,74 @@
     }
   }
 
+  function renderStrandBars() {
+    const strandTopics = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
+    const strands = {};
+    strandTopics.forEach(t => {
+      const s = t.strand || 'Other';
+      if (!strands[s]) strands[s] = { total: 0, completed: 0 };
+      strands[s].total++;
+      if (progressMap[t.id] === 'completed') strands[s].completed++;
+    });
+
+    document.getElementById('strand-bars').innerHTML = Object.entries(strands).length > 0
+      ? Object.entries(strands).map(([name, data]) => {
+          const p = data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0;
+          const colour = currentSubject === 'science'
+            ? (SCIENCE_STRAND_COLOURS[name] || '#888')
+            : '#C0272D';
+          const dot = currentSubject === 'science'
+            ? `<span class="strand-dot" style="background:${colour}"></span>`
+            : '';
+          return `<div class="strand-row">
+            <div class="strand-name">${dot}${name}</div>
+            <div class="bar-bg"><div class="bar-fill" style="width:${p}%;background:${colour}"></div></div>
+            <div class="strand-pct">${p}%</div>
+          </div>`;
+        }).join('')
+      : '<div class="no-topics">No topics added for your year group yet.</div>';
+  }
+
+  function renderSummaryCards() {
+    const myTopics  = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
+    const total     = myTopics.length;
+    const completed = myTopics.filter(t => progressMap[t.id] === 'completed').length;
+    const started   = myTopics.filter(t => progressMap[t.id] === 'started').length;
+    const pct       = total > 0 ? Math.round((completed / total) * 100) : 0;
+    document.getElementById('stat-total').textContent     = total;
+    document.getElementById('stat-completed').textContent = completed;
+    document.getElementById('stat-started').textContent   = started;
+    document.getElementById('stat-pct').textContent       = pct + '%';
+  }
+
+  window.switchSubject = function(subject) {
+    currentSubject = subject;
+    document.getElementById('toggle-maths').classList.toggle('active', subject === 'maths');
+    document.getElementById('toggle-science').classList.toggle('active', subject === 'science');
+    document.getElementById('header-subtitle').textContent = subject === 'science' ? 'Science Portal' : 'Maths Portal';
+    // Hide Add Maths option when in science mode (science only has Y7–9)
+    document.querySelector('#year-select option[value="13"]').style.display = subject === 'science' ? 'none' : '';
+    if (subject === 'science' && document.getElementById('year-select').value === '13') {
+      document.getElementById('year-select').value = 'own';
+    }
+    renderSummaryCards();
+    renderStrandBars();
+    window.renderTopics();
+  };
+
   window.renderTopics = function() {
     const value = document.getElementById('year-select').value;
     let filtered, label;
 
     if (value === 'own') {
-      filtered = allTopics.filter(t => t.year_group === myYearGroup);
+      filtered = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
       label    = 'Showing your Year ' + myYearGroup + ' topics';
     } else if (value === '13') {
-      filtered = allTopics.filter(t => t.year_group === 13);
-    } else if (value === '14') {
-      filtered = allTopics.filter(t => t.year_group === 14);
-      label    = 'Further Mathematics topics';
+      filtered = allTopics.filter(t => t.year_group === 13 && (t.subject || 'maths') === 'maths');
       label    = 'Showing Add Maths topics';
     } else {
       const yr = parseInt(value);
-      filtered = allTopics.filter(t => t.year_group === yr);
+      filtered = allTopics.filter(t => t.year_group === yr && (t.subject || 'maths') === currentSubject);
       label    = 'Showing Year ' + yr + ' topics' + (yr !== myYearGroup ? ' — browsing another year' : '');
     }
 
@@ -439,32 +483,28 @@
       return;
     }
 
-    // Track which topic codes are new (added in last 30 days) - based on sort_order vs existing
-    const now = Date.now();
     grid.innerHTML = filtered.map(t => {
-      const file      = WALKTHROUGH_FILES[t.topic_code];
-      const hasFile   = file && file !== '#';
-      const status    = hasFile ? (progressMap[t.id] || 'not-started') : 'coming-soon';
-      const lbl       = !hasFile ? '⏳ Coming soon'
-                      : status === 'completed' ? '✓ Completed'
-                      : status === 'started'   ? '▶ In Progress'
-                      : '○ Not started';
-      const testResult = hasFile ? testResultsMap[t.id] : null;
+      const status = progressMap[t.id] || 'not-started';
+      const lbl    = status === 'completed' ? '✓ Completed' : status === 'started' ? '▶ In Progress' : '○ Not started';
+      const file   = WALKTHROUGH_FILES[t.topic_code] || '#';
+      const testResult = testResultsMap[t.id];
       const testBadge  = testResult
         ? `<div class="t-test">Last test: <strong>${testResult.grade}</strong> (${testResult.percentage}%)</div>`
         : '';
-      const newBadge = t.is_new ? '<span class="t-new-badge">New</span>' : '';
-      return `<div class="topic-card ${status}${!hasFile ? ' coming-soon-card' : ''}">
-        <div class="t-name">${t.topic_name}${newBadge}</div>
-        <div class="t-strand">${t.strand || ''}</div>
+      const isSci    = (t.subject || 'maths') === 'science';
+      const accent   = isSci ? (SCIENCE_STRAND_COLOURS[t.strand] || '#1565C0') : '#C0272D';
+      const cardClass = isSci ? 'topic-card science-card' : 'topic-card maths-card';
+      const strandLabel = isSci
+        ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${accent};margin-right:4px;vertical-align:middle"></span>${t.strand || ''}`
+        : (t.strand || '');
+      return `<div class="${cardClass} ${status}" style="${isSci && status === 'not-started' ? `border-color:${accent}22` : ''}">
+        <div class="t-name">${t.topic_name}</div>
+        <div class="t-strand">${strandLabel}</div>
         <div class="t-status">${lbl}</div>
         ${testBadge}
-        <div class="t-btns">
-          ${hasFile
-            ? `<button class="t-btn-walk" onclick="openTopic('${t.id}','${file}')">Walkthrough</button>
-               <button class="t-btn-test" onclick="openTest('${t.id}')">Take a Test</button>`
-            : `<button class="t-btn-walk t-btn-soon" disabled>Coming Soon</button>`
-          }
+        <div class="t-btns" style="--accent:${accent}">
+          <button class="t-btn-walk" onclick="openTopic('${t.id}','${file}')">Walkthrough</button>
+          <button class="t-btn-test" onclick="openTest('${t.id}')">Take a Test</button>
         </div>
       </div>`;
     }).join('');
