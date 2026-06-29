@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logical Reasoning &middot; Further Mathematics &middot; Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}
+.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.nq-btn{font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.try-q{font-size:15px;line-height:1.55;margin-bottom:8px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
+.try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+/* truth table styling */
+.tt{border-collapse:collapse;margin:8px 0;font-size:14px;font-family:'Cambria Math',Georgia,serif;}
+.tt th{background:var(--red);color:#fff;padding:6px 14px;text-align:center;font-weight:700;}
+.tt td{border:1px solid var(--line);padding:5px 14px;text-align:center;}
+.tt tr:nth-child(even) td{background:#fdf7f4;}
+.tt .T{color:#1a7a3a;font-weight:700;}
+.tt .F{color:#a01820;font-weight:700;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Logical Reasoning &mdash; Further Mathematics</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function tryIt(genFn){
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn(); ST[id]={o:o,fn:genFn};
+  return buildTry(id,o);
+}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn'
+    +' <button class="nq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +'<ul class="hl">'+(h||'')+'</ul>'
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'
+    +'<div class="wk-b">'+o.working+'</div></details>'
+    +'</div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('nq-btn')){
+    var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;
+    var o=en.fn();en.o=o;ST[id]={o:o,fn:en.fn};
+    var wrap=document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;
+    var o=en.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
+    var tol=o.tol!=null?o.tol:0;
+    if(Math.abs(v-o.ans)<=tol){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;}
+    else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
+  }
+});
+
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial,sans-serif" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
+function L(x1,y1,x2,y2,c,w){c=c||'#C0272D';w=w||2;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"/>';}
+
+// ── truth table helper ──────────────────────────────────────
+function ttCell(v){return '<td class="'+(v?'T':'F')+'">'+(v?'T':'F')+'</td>';}
+
+// ── Draw functions ──────────────────────────────────────────
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Propositions — True (T) or False (F)','#C0272D',13,'middle',true));
+  var props=[
+    {t:'p: "It is raining"',note:'could be T or F'},
+    {t:'q: "2 + 2 = 4"',note:'always T'},
+    {t:'r: "All cats can fly"',note:'always F'}
+  ];
+  props.forEach(function(pr,i){
+    if(p>=i){
+      o.push(R(40,52+i*60,390,48,'#fff',i===1?'#1a7a3a':i===2?'#C0272D':'#888',1.5));
+      o.push(T(52,72+i*60,pr.t,'#241A17',13,'start',true));
+      o.push(T(52,88+i*60,'  \u2192 '+pr.note,'#888',11,'start'));
+    }
+  });
+  if(p>=3){
+    o.push(R(14,234,452,20,'#fff8e8','#C8922A',1));
+    o.push(T(240,248,'A proposition must be either True or False — not both, not neither','#C8922A',10,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ2(p){
+  // NOT, AND, OR truth tables
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,30,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,28,'Logical connectives: NOT (\u00ac), AND (\u2227), OR (\u2228)','#C0272D',12,'middle',true));
+  // NOT table
+  if(p>=1){
+    o.push(T(80,55,'NOT (\u00acp)','#C0272D',11,'middle',true));
+    o.push(R(30,62,100,20,'#C0272D','#C0272D',0));
+    ['p','¬p'].forEach(function(h,i){o.push(T(35+i*50,76,h,'#fff',11,'middle',true));});
+    [[true,false],[false,true]].forEach(function(row,i){
+      o.push(T(35,94+i*18,row[0]?'T':'F',row[0]?'#1a7a3a':'#C0272D',12,'middle',true));
+      o.push(T(85,94+i*18,row[1]?'T':'F',row[1]?'#1a7a3a':'#C0272D',12,'middle',true));
+    });
+  }
+  // AND table
+  if(p>=2){
+    o.push(T(240,55,'AND (p\u2227q)','#1a5a8a',11,'middle',true));
+    ['p','q','p\u2227q'].forEach(function(h,i){o.push(T(165+i*55,76,h,'#fff',11,'middle',true));});
+    o.push(R(140,62,170,20,'#1a5a8a','#1a5a8a',0));
+    [[1,1,1],[1,0,0],[0,1,0],[0,0,0]].forEach(function(row,i){
+      row.forEach(function(v,j){o.push(T(165+j*55,94+i*18,v?'T':'F',v?'#1a7a3a':'#C0272D',11,'middle',true));});
+    });
+  }
+  // OR table
+  if(p>=3){
+    o.push(T(400,55,'OR (p\u2228q)','#1a7a3a',11,'middle',true));
+    ['p','q','p\u2228q'].forEach(function(h,i){o.push(T(330+i*50,76,h,'#fff',11,'middle',true));});
+    o.push(R(305,62,165,20,'#1a7a3a','#1a7a3a',0));
+    [[1,1,1],[1,0,1],[0,1,1],[0,0,0]].forEach(function(row,i){
+      row.forEach(function(v,j){o.push(T(330+j*50,94+i*18,v?'T':'F',v?'#1a7a3a':'#C0272D',11,'middle',true));});
+    });
+  }
+  if(p>=4){
+    o.push(R(14,174,452,78,'#fafafa','#ccc',1));
+    o.push(T(240,192,'Key rules:','#241A17',11,'middle',true));
+    o.push(T(240,210,'\u00acp flips T\u2194F   |   p\u2227q: BOTH must be T   |   p\u2228q: AT LEAST ONE must be T','#555',11,'middle'));
+    o.push(T(240,232,'AND is strict (all or nothing)   \u2014   OR is inclusive','#888',10,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ3(p){
+  // Implication p→q
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,30,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,28,'Implication: p \u2192 q  ("if p then q")','#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(R(40,46,400,48,'#fff8e8','#C8922A',1.5));
+    o.push(T(240,64,'"If it rains, the ground gets wet"','#241A17',13,'middle',true));
+    o.push(T(240,84,'p = "it rains"   q = "ground gets wet"','#888',11,'middle'));
+  }
+  if(p>=2){
+    // Truth table for p→q
+    ['p','q','p\u2192q'].forEach(function(h,i){o.push(T(130+i*90,114,h,'#fff',12,'middle',true));});
+    o.push(R(80,100,310,20,'#C0272D','#C0272D',0));
+    [[1,1,1,'If it rains and ground wet: TRUE'],[1,0,0,'Rains but ground dry: FALSE!'],[0,1,1,'No rain, ground wet: TRUE (maybe sprinkler)'],[0,0,1,'No rain, ground dry: TRUE']].forEach(function(row,i){
+      [0,1,2].forEach(function(j){o.push(T(130+j*90,132+i*22,row[j]?'T':'F',row[j]?'#1a7a3a':'#C0272D',12,'middle',true));});
+      if(p>=3)o.push(T(330,132+i*22,row[3],'#888',9,'start'));
+    });
+  }
+  if(p>=3){
+    o.push(R(14,222,452,30,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(240,242,'p\u2192q is only FALSE when p is TRUE and q is FALSE','#1a5a8a',12,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ4(p){
+  // Biconditional and contrapositive
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,30,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,28,'Biconditional p\u2194q and Contrapositive','#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(R(20,46,435,58,'#f8f8f8','#ccc',1));
+    o.push(T(240,64,'p\u2194q means "p if and only if q" (p iff q)','#241A17',13,'middle',true));
+    o.push(T(240,82,'TRUE when p and q have the SAME truth value','#888',11,'middle'));
+  }
+  if(p>=2){
+    ['p','q','p\u2194q'].forEach(function(h,i){o.push(T(130+i*90,118,h,'#fff',12,'middle',true));});
+    o.push(R(80,104,310,20,'#C0272D','#C0272D',0));
+    [[1,1,1],[1,0,0],[0,1,0],[0,0,1]].forEach(function(row,i){
+      [0,1,2].forEach(function(j){o.push(T(130+j*90,136+i*22,row[j]?'T':'F',row[j]?'#1a7a3a':'#C0272D',12,'middle',true));});
+    });
+  }
+  if(p>=3){
+    o.push(R(20,228,200,24,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(120,244,'Contrapositive of p\u2192q','#1a5a8a',11,'middle',true));
+    o.push(R(240,228,215,24,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(348,244,'\u00acq \u2192 \u00acp  (always equivalent)','#1a7a3a',11,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ5(p){
+  // Build a truth table for compound statement
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,30,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,28,'Truth table for \u00acp \u2228 q','#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(R(20,46,440,28,'#f8f8f8','#ccc',1));
+    o.push(T(240,64,'Work column by column: find \u00acp first, then \u00acp \u2228 q','#888',11,'middle'));
+  }
+  if(p>=2){
+    var cols=['p','q','\u00acp','\u00acp\u2228q'];
+    var cw=[80,80,80,100];var cx=[50,130,210,310];
+    cols.forEach(function(h,i){o.push(T(cx[i],94,h,'#fff',12,'middle',true));});
+    o.push(R(20,80,430,20,'#C0272D','#C0272D',0));
+    [[1,1,0,1],[1,0,0,0],[0,1,1,1],[0,0,1,1]].forEach(function(row,i){
+      var yy=112+i*22;
+      if(i%2===0)o.push(R(20,yy-12,430,22,'#fdf7f4','none',0));
+      row.forEach(function(v,j){
+        var show=(p>=2&&j<2)||(p>=3&&j===2)||(p>=4&&j===3);
+        if(show)o.push(T(cx[j],yy,v?'T':'F',v?'#1a7a3a':'#C0272D',12,'middle',true));
+      });
+    });
+  }
+  if(p>=4){
+    o.push(R(14,204,452,48,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,222,'\u00acp \u2228 q is FALSE only when p is TRUE and q is FALSE','#1a7a3a',12,'middle',true));
+    o.push(T(240,238,'Notice: \u00acp \u2228 q \u2261 p \u2192 q  (logically equivalent!)','#888',11,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ6(p){
+  // Valid arguments / syllogism
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,30,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,28,'Valid Arguments and Deduction','#C0272D',13,'middle',true));
+  var arg=[
+    'Premise 1:  All mammals are warm-blooded.',
+    'Premise 2:  A whale is a mammal.',
+    'Conclusion: \u2234 A whale is warm-blooded.'
+  ];
+  arg.forEach(function(ln,i){
+    if(p>=i){
+      var col=i===2?'#1a7a3a':'#241A17';
+      o.push(R(30,48+i*52,420,42,i===2?'#e8f8ee':'#fff',i===2?'#1a7a3a':'#ccc',i===2?2:1));
+      o.push(T(50,72+i*52,ln,col,12,'start',i===2));
+    }
+  });
+  if(p>=3){
+    o.push(R(14,208,452,44,'#fff8e8','#C8922A',1.5));
+    o.push(T(240,224,'Modus Ponens: if p\u2192q is true, and p is true, then q must be true','#C8922A',11,'middle',true));
+    o.push(T(240,240,'Modus Tollens: if p\u2192q is true, and q is false, then p must be false','#C8922A',10,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ7(p){
+  // Tautology and contradiction
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,30,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,28,'Tautology and Contradiction','#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(R(20,46,200,90,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(120,64,'Tautology','#1a5a8a',12,'middle',true));
+    o.push(T(120,82,'Always TRUE','#1a5a8a',11,'middle'));
+    o.push(T(120,100,'Example: p \u2228 \u00acp','#241A17',12,'middle',true));
+    o.push(T(120,118,'"it rains OR it doesn\'t"','#888',10,'middle'));
+    o.push(R(260,46,200,90,'#fde8e8','#C0272D',1.5));
+    o.push(T(360,64,'Contradiction','#C0272D',12,'middle',true));
+    o.push(T(360,82,'Always FALSE','#C0272D',11,'middle'));
+    o.push(T(360,100,'Example: p \u2227 \u00acp','#241A17',12,'middle',true));
+    o.push(T(360,118,'"it rains AND it doesn\'t"','#888',10,'middle'));
+  }
+  if(p>=2){
+    // truth table for p∨¬p
+    ['p','\u00acp','p\u2228\u00acp'].forEach(function(h,i){o.push(T(90+i*100,162,h,'#fff',11,'middle',true));});
+    o.push(R(40,148,320,20,'#1a5a8a','#1a5a8a',0));
+    [[1,0,1],[0,1,1]].forEach(function(row,i){
+      row.forEach(function(v,j){o.push(T(90+j*100,180+i*20,v?'T':'F',v?'#1a7a3a':'#C0272D',11,'middle',true));});
+    });
+  }
+  if(p>=3){
+    o.push(R(14,224,452,28,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,242,'All columns T \u2192 tautology   |   All columns F \u2192 contradiction','#1a7a3a',11,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+var QS=[
+  {ey:'Q1 \u00b7 Logic \u00b7 Further Maths',ti:'Propositions — True or False Statements',
+   su:'Understand what a proposition is and how to classify statements.',
+   steps:[
+    {lb:'What is a proposition?',dr:dQ1,ht:'<p>A <b>proposition</b> is a statement that is either <b>True (T)</b> or <b>False (F)</b> — never both, never neither.</p><p>We use letters p, q, r to represent propositions.</p>'},
+    {lb:'Examples',dr:dQ1,ht:'<p>✓ "2 + 2 = 4" — a proposition (True)</p><p>✓ "Lagos is in the UK" — a proposition (False)</p><p>✗ "What time is it?" — NOT a proposition (a question)</p><p>✗ "Do your homework" — NOT a proposition (a command)</p>'},
+    {lb:'Truth values',dr:dQ1,ht:'<p>We write <b>T</b> for True and <b>F</b> for False. A variable like p can hold either value. We explore all combinations in a <b>truth table</b>.</p>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
+      // How many rows in a truth table with n variables
+      var n=rnd(2,4);
+      return {question:'How many rows does a truth table with '+n+' propositions need? (Not counting the header row.)',
+        hints:['Each variable can be T or F','Number of combinations = 2^n'],
+        ans:Math.pow(2,n),tol:0,unit:'rows',working:'2^'+n+' = '+Math.pow(2,n)+' rows'};
+    })}
+   ]},
+
+  {ey:'Q2 \u00b7 Logic \u00b7 Further Maths',ti:'Connectives — NOT, AND, OR',
+   su:'Learn the three basic logical connectives and their truth tables.',
+   steps:[
+    {lb:'NOT (\u00ac)',dr:dQ2,ht:'<p><b>\u00acp</b> (read "not p") reverses the truth value. If p is True, \u00acp is False, and vice versa.</p><div class="fm">\u00acT = F &ensp;&ensp; \u00acF = T</div>'},
+    {lb:'AND (\u2227)',dr:dQ2,ht:'<p><b>p \u2227 q</b> (read "p and q") is True <b>only when both</b> p and q are True. If either is False, the result is False.</p><div class="fm">T \u2227 T = T &ensp; T \u2227 F = F &ensp; F \u2227 F = F</div>'},
+    {lb:'OR (\u2228)',dr:dQ2,ht:'<p><b>p \u2228 q</b> (read "p or q") is True when <b>at least one</b> of p, q is True. Only False when both are False.</p><div class="fm">T \u2228 F = T &ensp; F \u2228 F = F</div>'},
+    {lb:'All three together',dr:dQ2,ht:'<p>Memory aid: AND is like multiplication (0×anything=0), OR is like addition (0+0=0 only).</p>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
+      var ops=[
+        {q:'T \u2227 F',a:0,w:'AND: both must be T. T\u2227F = F = 0'},
+        {q:'F \u2228 T',a:1,w:'OR: at least one T. F\u2228T = T = 1'},
+        {q:'\u00acF',a:1,w:'NOT flips: \u00acF = T = 1'},
+        {q:'T \u2227 T',a:1,w:'AND: both T. T\u2227T = T = 1'},
+        {q:'F \u2228 F',a:0,w:'OR: both F. F\u2228F = F = 0'},
+        {q:'\u00acT',a:0,w:'NOT flips: \u00acT = F = 0'}
+      ];
+      var o=pick(ops);
+      return {question:'Evaluate: '+o.q+'. Enter 1 for True, 0 for False.',
+        hints:['T=1, F=0'],ans:o.a,tol:0,unit:'',working:o.w};
+    })}
+   ]},
+
+  {ey:'Q3 \u00b7 Logic \u00b7 Further Maths',ti:'Implication: p \u2192 q',
+   su:'"If p then q" — understanding when an implication is true or false.',
+   steps:[
+    {lb:'What does p \u2192 q mean?',dr:dQ3,ht:'<p><b>p \u2192 q</b> means "if p is true, then q must be true". The only way an implication is <b>FALSE</b> is when p is True but q is False — the promise is broken.</p>'},
+    {lb:'Truth table',dr:dQ3,ht:'<table class="tt"><tr><th>p</th><th>q</th><th>p\u2192q</th></tr><tr><td class="T">T</td><td class="T">T</td><td class="T">T</td></tr><tr><td class="T">T</td><td class="F">F</td><td class="F">F</td></tr><tr><td class="F">F</td><td class="T">T</td><td class="T">T</td></tr><tr><td class="F">F</td><td class="F">F</td><td class="T">T</td></tr></table><p>When p is False, the implication is <b>vacuously true</b> — a promise about a condition that never holds can never be broken.</p>'},
+    {lb:'Real example',dr:dQ3,ht:'<p>"If I score above 80%, I get a prize" (p\u2192q).</p><ul class="hl"><li>Score 85%, get prize: TRUE (promise kept)</li><li>Score 85%, no prize: FALSE (promise broken!)</li><li>Score 70%, get prize: TRUE (no promise was made about this case)</li><li>Score 70%, no prize: TRUE (promise not triggered)</li></ul>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
+      var cases=[
+        {p:1,q:0,ans:0,w:'p\u2192q is FALSE only when p=T and q=F'},
+        {p:0,q:0,ans:1,w:'p is F so implication is vacuously TRUE'},
+        {p:1,q:1,ans:1,w:'Both T so implication is TRUE'},
+        {p:0,q:1,ans:1,w:'p is F so implication is TRUE'}
+      ];
+      var c=pick(cases);
+      return {question:'For p\u2192q: if p = '+(c.p?'T':'F')+' and q = '+(c.q?'T':'F')+', is p\u2192q true? Enter 1 for True, 0 for False.',
+        hints:['p\u2192q is only FALSE when p=T and q=F'],
+        ans:c.ans,tol:0,unit:'',working:c.w};
+    })}
+   ]},
+
+  {ey:'Q4 \u00b7 Logic \u00b7 Further Maths',ti:'Biconditional and Contrapositive',
+   su:'p \u2194 q ("p if and only if q") and the contrapositive of p \u2192 q.',
+   steps:[
+    {lb:'Biconditional p \u2194 q',dr:dQ4,ht:'<p><b>p \u2194 q</b> is True when p and q have the <b>same truth value</b> (both T or both F). It means "p if and only if q" (written "p iff q").</p><div class="fm">p \u2194 q \u2261 (p\u2192q) \u2227 (q\u2192p)</div>'},
+    {lb:'Truth table',dr:dQ4,ht:'<table class="tt"><tr><th>p</th><th>q</th><th>p\u2194q</th></tr><tr><td class="T">T</td><td class="T">T</td><td class="T">T</td></tr><tr><td class="T">T</td><td class="F">F</td><td class="F">F</td></tr><tr><td class="F">F</td><td class="T">T</td><td class="F">F</td></tr><tr><td class="F">F</td><td class="F">F</td><td class="T">T</td></tr></table>'},
+    {lb:'Contrapositive',dr:dQ4,ht:'<p>The <b>contrapositive</b> of p\u2192q is <b>\u00acq\u2192\u00acp</b>. These are logically equivalent — always have the same truth value.</p><div class="fm">p\u2192q \u2261 \u00acq\u2192\u00acp</div><p>Example: "If it rains, the ground is wet" \u2261 "If the ground is not wet, it did not rain".</p>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
+      var cases=[{p:1,q:1,ans:1},{p:1,q:0,ans:0},{p:0,q:1,ans:0},{p:0,q:0,ans:1}];
+      var c=pick(cases);
+      return {question:'Evaluate p\u2194q when p='+(c.p?'T':'F')+' and q='+(c.q?'T':'F')+'. Enter 1=True, 0=False.',
+        hints:['p\u2194q is T when both same, F when different'],
+        ans:c.ans,tol:0,unit:'',working:'p and q are '+(c.p===c.q?'the same \u2192 T':'different \u2192 F')};
+    })}
+   ]},
+
+  {ey:'Q5 \u00b7 Logic \u00b7 Further Maths',ti:'Building a Truth Table',
+   su:'Construct the truth table for \u00acp \u2228 q step by step.',
+   steps:[
+    {lb:'Strategy',dr:dQ5,ht:'<p>For compound statements, work <b>one column at a time</b>:</p><ol style="padding-left:20px;font-size:15px;line-height:2"><li>List all variable combinations</li><li>Compute \u00acp</li><li>Compute \u00acp \u2228 q using those values</li></ol>'},
+    {lb:'Variable columns',dr:dQ5,ht:'<p>With 2 variables, we need 4 rows. Fill p and q with all combinations: TT, TF, FT, FF.</p>'},
+    {lb:'Compute \u00acp',dr:dQ5,ht:'<p>Flip every value in the p column:</p><table class="tt"><tr><th>p</th><th>\u00acp</th></tr><tr><td class="T">T</td><td class="F">F</td></tr><tr><td class="T">T</td><td class="F">F</td></tr><tr><td class="F">F</td><td class="T">T</td></tr><tr><td class="F">F</td><td class="T">T</td></tr></table>'},
+    {lb:'Final column \u00acp \u2228 q',dr:dQ5,ht:'<table class="tt"><tr><th>p</th><th>q</th><th>\u00acp</th><th>\u00acp\u2228q</th></tr><tr><td class="T">T</td><td class="T">T</td><td class="F">F</td><td class="T">T</td></tr><tr><td class="T">T</td><td class="F">F</td><td class="F">F</td><td class="F">F</td></tr><tr><td class="F">F</td><td class="T">T</td><td class="T">T</td><td class="T">T</td></tr><tr><td class="F">F</td><td class="F">F</td><td class="T">T</td><td class="T">T</td></tr></table><p>Note: \u00acp\u2228q is equivalent to p\u2192q!</p>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){
+      // how many F values in the truth table for ¬p∧q
+      return {question:'In the truth table for \u00acp \u2227 q (with 2 variables, 4 rows), how many rows give a TRUE result?',
+        hints:['\u00acp is T only when p is F','Then q must also be T for AND to be T'],
+        ans:1,tol:0,unit:'rows',working:'\u00acp\u2227q: only row p=F,q=T gives T\u2227T=T. Answer: 1 row.'};
+    })}
+   ]},
+
+  {ey:'Q6 \u00b7 Logic \u00b7 Further Maths',ti:'Valid Arguments and Deduction',
+   su:'Modus Ponens, Modus Tollens, and recognising valid reasoning.',
+   steps:[
+    {lb:'What makes an argument valid?',dr:dQ6,ht:'<p>An argument is <b>valid</b> if, whenever all the premises are true, the conclusion must also be true. Validity is about the <b>structure</b>, not whether the premises are actually true.</p>'},
+    {lb:'Modus Ponens',dr:dQ6,ht:'<p><b>Modus Ponens</b> (affirming the antecedent):</p><div class="fm">Premise: p \u2192 q &ensp; Premise: p &ensp; \u2234 Conclusion: q</div><p>If "it rains \u2192 ground wet" is true, and "it rains" is true, then "ground is wet" must be true.</p>'},
+    {lb:'Modus Tollens',dr:dQ6,ht:'<p><b>Modus Tollens</b> (denying the consequent):</p><div class="fm">Premise: p \u2192 q &ensp; Premise: \u00acq &ensp; \u2234 Conclusion: \u00acp</div><p>If "it rains \u2192 ground wet", and "ground is NOT wet", then "it did NOT rain".</p>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){
+      // Count premises in a standard syllogism
+      return {question:'A standard syllogism has how many premises before the conclusion?',
+        hints:['Think: Premise 1, Premise 2, \u2234 Conclusion'],
+        ans:2,tol:0,unit:'',working:'A standard syllogism has exactly 2 premises and 1 conclusion.'};
+    })}
+   ]},
+
+  {ey:'Q7 \u00b7 Logic \u00b7 Further Maths',ti:'Tautology and Contradiction',
+   su:'Identify statements that are always true or always false.',
+   steps:[
+    {lb:'Tautology',dr:dQ7,ht:'<p>A <b>tautology</b> is a compound proposition that is True for <b>every possible combination</b> of truth values. The last column of its truth table contains only T.</p><div class="fm">Example: p \u2228 \u00acp &ensp; ("it rains or it doesn\'t")</div>'},
+    {lb:'Contradiction',dr:dQ7,ht:'<p>A <b>contradiction</b> is a compound proposition that is False for <b>every possible combination</b>. The last column contains only F.</p><div class="fm">Example: p \u2227 \u00acp &ensp; ("it rains and it doesn\'t")</div>'},
+    {lb:'Truth table check',dr:dQ7,ht:'<p>For p \u2228 \u00acp: when p=T, \u00acp=F, T\u2228F=<b>T</b>. When p=F, \u00acp=T, F\u2228T=<b>T</b>. Always true \u2714</p>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){
+      var qs=[
+        {q:'Is p \u2228 \u00acp a tautology? Enter 1 for Yes, 0 for No.',ans:1,w:'p\u2228\u00acp is always T — classic tautology'},
+        {q:'Is p \u2227 \u00acp a contradiction? Enter 1 for Yes, 0 for No.',ans:1,w:'p\u2227\u00acp is always F — classic contradiction'},
+        {q:'Is p \u2192 p a tautology? Enter 1 for Yes, 0 for No.',ans:1,w:'p\u2192p: T\u2192T=T and F\u2192F=T — always T, so tautology'},
+        {q:'Is p \u2227 q a tautology? Enter 1 for Yes, 0 for No.',ans:0,w:'p\u2227q is F when either is F — not always true, not a tautology'}
+      ];
+      var o=pick(qs);
+      return {question:o.q,hints:['Check if every row in the truth table gives the same result'],ans:o.ans,tol:0,unit:'',working:o.w};
+    })}
+   ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \u2192';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+
+<!-- ABC Supabase Progress Tracking -->
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase = _sb;
+window._abcTopicCode = 'Y12FM-LOG-01';
+window.markComplete = async function() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) return;
+  const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', window._abcTopicCode).maybeSingle();
+  if (!topic) return;
+  await _sb.from('walkthrough_progress').upsert({
+    student_id: session.user.id, topic_id: topic.id,
+    status: 'completed', completed_at: new Date().toISOString(),
+    last_visited_at: new Date().toISOString(),
+  }, { onConflict: 'student_id,topic_id' });
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surds &middot; Further Mathematics &middot; Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}
+.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.nq-btn{font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.try-q{font-size:15px;line-height:1.55;margin-bottom:8px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
+.try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Surds &mdash; Further Mathematics</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function tryIt(genFn){
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn(); ST[id]={o:o,fn:genFn};
+  return buildTry(id,o);
+}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn'
+    +' <button class="nq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +'<ul class="hl">'+(h||'')+'</ul>'
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'
+    +'<div class="wk-b">'+o.working+'</div></details>'
+    +'</div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('nq-btn')){
+    var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;
+    var o=en.fn();en.o=o;ST[id]={o:o,fn:en.fn};
+    var wrap=document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;
+    var o=en.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
+    var tol=o.tol!=null?o.tol:0.01;
+    if(Math.abs(v-o.ans)<=tol){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;}
+    else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
+  }
+});
+
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Georgia,serif" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#C0272D';w=w||2;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+
+// ── Session values ──────────────────────────────────────────
+var V={};
+(function(){
+  // Q1 simplify √n
+  var perfect=[4,9,16,25,36,49];
+  V.q1big=pick([8,12,18,20,27,32,45,48,50,72,75,98]);
+  // find largest perfect square factor
+  var bests=1,bestk=V.q1big;
+  perfect.forEach(function(p){if(V.q1big%p===0&&p>bests){bests=p;bestk=V.q1big/p;}});
+  V.q1a=Math.sqrt(bests); V.q1b=bestk; // √q1big = q1a√q1b
+
+  // Q2 addition/subtraction of surds
+  V.q2k=pick([2,3,5,6,7]);
+  V.q2a=rnd(2,6); V.q2b=rnd(2,6);
+  V.q2sum=V.q2a+V.q2b; V.q2dif=Math.abs(V.q2a-V.q2b);
+
+  // Q3 multiply surds
+  V.q3a=rnd(2,5); V.q3b=rnd(2,5);
+  V.q3k1=rnd(2,4); V.q3k2=rnd(2,4);
+  V.q3prod=V.q3a*V.q3b; V.q3kprod=V.q3k1*V.q3k2;
+  // simplify √(q3prod) if possible
+  var ps2=[4,9,16,25];var bs2=1,bk2=V.q3prod;
+  ps2.forEach(function(p){if(V.q3prod%p===0&&p>bs2){bs2=p;bk2=V.q3prod/p;}});
+  V.q3outer=V.q3kprod*Math.sqrt(bs2); V.q3inner=bk2;
+
+  // Q4 rationalise 1/√n
+  V.q4n=pick([2,3,5,6,7,10]);
+
+  // Q5 rationalise a/(b+√n)
+  V.q5a=rnd(2,6); V.q5b=rnd(1,4); V.q5n=pick([2,3,5,6,7]);
+  V.q5conj=V.q5b*V.q5b-V.q5n; // denominator after rationalising
+
+  // Q6 expand (a+√b)(c+√d)
+  V.q6a=rnd(1,4); V.q6b=pick([2,3,5,6,7]); V.q6c=rnd(1,4); V.q6d=V.q6b;
+  V.q6int=V.q6a*V.q6c+V.q6b; // ac + b (since √b·√b=b)
+  V.q6surd=(V.q6a+V.q6c); // surd coeff
+
+  // Q7 solve surd equation √(ax+b)=c
+  V.q7a=rnd(1,4); V.q7c=rnd(2,6);
+  V.q7b=rnd(0,5);
+  V.q7x=(V.q7c*V.q7c-V.q7b)/V.q7a;
+})();
+
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Simplify \u221a'+V.q1big,'#C0272D',14,'middle',true));
+  // factor tree visual
+  if(p>=1){
+    o.push(R(160,56,160,36,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,80,'\u221a'+V.q1big+' = \u221a('+V.q1a*V.q1a+' \u00d7 '+V.q1b+')','#241A17',13,'middle'));
+    o.push(L(210,96,165,126,'#888',1.5));o.push(L(270,96,315,126,'#888',1.5));
+    o.push(R(130,128,80,36,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(170,152,'\u221a'+V.q1a*V.q1a,'#1a5a8a',13,'middle',true));
+    o.push(R(270,128,80,36,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(310,152,'\u221a'+V.q1b,'#1a7a3a',13,'middle',true));
+  }
+  if(p>=2){
+    o.push(T(170,182,'= '+V.q1a,'#1a5a8a',14,'middle',true));
+    o.push(T(310,182,'stays','#1a7a3a',11,'middle'));
+  }
+  if(p>=3){
+    o.push(R(140,200,200,40,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,226,'\u221a'+V.q1big+' = '+V.q1a+'\u221a'+V.q1b,'#1a7a3a',16,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,V.q2a+'\u221a'+V.q2k+' + '+V.q2b+'\u221a'+V.q2k+' and '+V.q2a+'\u221a'+V.q2k+' \u2212 '+V.q2b+'\u221a'+V.q2k,'#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(R(40,56,180,80,'#fff5f0','#C0272D',1.5));
+    o.push(T(130,80,'Addition','#C0272D',12,'middle',true));
+    o.push(T(130,102,V.q2a+'\u221a'+V.q2k+' + '+V.q2b+'\u221a'+V.q2k,'#241A17',13,'middle'));
+    o.push(T(130,122,'= ('+V.q2a+'+'+V.q2b+')\u221a'+V.q2k,'#888',12,'middle'));
+    o.push(R(260,56,180,80,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(350,80,'Subtraction','#1a5a8a',12,'middle',true));
+    o.push(T(350,102,V.q2a+'\u221a'+V.q2k+' \u2212 '+V.q2b+'\u221a'+V.q2k,'#241A17',13,'middle'));
+    o.push(T(350,122,'= ('+V.q2a+'\u2212'+V.q2b+')\u221a'+V.q2k,'#888',12,'middle'));
+  }
+  if(p>=2){
+    o.push(R(40,152,180,50,'#e8f8ee','#1a7a3a',2));
+    o.push(T(130,170,'= '+V.q2sum+'\u221a'+V.q2k,'#1a7a3a',18,'middle',true));
+    o.push(R(260,152,180,50,'#e8f8ee','#1a7a3a',2));
+    o.push(T(350,170,'= '+V.q2dif+'\u221a'+V.q2k,'#1a7a3a',18,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(14,214,452,36,'#fff8e8','#C8922A',1.5));
+    o.push(T(240,236,'Only like surds can be added or subtracted — same number under \u221a','#C8922A',11,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,V.q3k1+'\u221a'+V.q3a+' \u00d7 '+V.q3k2+'\u221a'+V.q3b,'#C0272D',14,'middle',true));
+  if(p>=1){
+    o.push(R(60,56,360,40,'#f8f8f8','#ccc',1));
+    o.push(T(240,82,'Multiply numbers together, multiply surds together','#888',11,'middle'));
+  }
+  if(p>=2){
+    o.push(R(60,106,360,44,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,134,'('+V.q3k1+'\u00d7'+V.q3k2+') \u00d7 (\u221a'+V.q3a+' \u00d7 \u221a'+V.q3b+') = '+V.q3kprod+'\u221a'+V.q3prod,'#241A17',13,'middle'));
+  }
+  if(p>=3){
+    var simp=V.q3inner===1?''+V.q3outer:''+V.q3outer+(V.q3outer%1===0?'':'')+'\u221a'+V.q3inner;
+    if(V.q3inner===1){
+      o.push(R(140,162,200,50,'#e8f8ee','#1a7a3a',2));
+      o.push(T(240,193,'= '+V.q3outer,'#1a7a3a',20,'middle',true));
+    } else {
+      o.push(T(240,168,V.q3kprod+'\u221a'+V.q3prod+' = '+simp+' (simplified)','#1a7a3a',13,'middle',true));
+      o.push(R(120,178,240,50,'#e8f8ee','#1a7a3a',2));
+      o.push(T(240,208,simp,'#1a7a3a',20,'middle',true));
+    }
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Rationalise: 1 / \u221a'+V.q4n,'#C0272D',14,'middle',true));
+  if(p>=1){
+    o.push(R(80,56,320,50,'#f8f8f8','#ccc',1));
+    o.push(T(240,76,'Multiply top and bottom by \u221a'+V.q4n,'#888',12,'middle'));
+    o.push(T(240,96,'(this removes the surd from the denominator)','#888',10,'middle'));
+  }
+  if(p>=2){
+    o.push(R(80,116,320,60,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,140,'1       \u221a'+V.q4n,'#241A17',13,'middle'));
+    o.push(T(240,158,'\u2015\u2015 \u00d7 \u2015\u2015\u2015','#241A17',13,'middle'));
+    o.push(T(240,172,'\u221a'+V.q4n+'     \u221a'+V.q4n,'#241A17',13,'middle'));
+  }
+  if(p>=3){
+    o.push(R(140,188,200,50,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,210,'\u221a'+V.q4n+' / '+V.q4n,'#1a7a3a',18,'middle',true));
+    o.push(T(240,238,'denominator is now rational \u2713','#888',11,'middle'));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,V.q5a+' / ('+V.q5b+' + \u221a'+V.q5n+') — rationalise','#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(R(40,56,400,40,'#f8f8f8','#ccc',1));
+    o.push(T(240,82,'Conjugate of ('+V.q5b+' + \u221a'+V.q5n+') is ('+V.q5b+' \u2212 \u221a'+V.q5n+')','#888',12,'middle'));
+  }
+  if(p>=2){
+    o.push(R(40,106,400,50,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,126,V.q5a+'('+V.q5b+' \u2212 \u221a'+V.q5n+')','#241A17',13,'middle'));
+    o.push(L(40,134,440,134,'#ccc',1));
+    o.push(T(240,150,'('+V.q5b+' + \u221a'+V.q5n+')('+V.q5b+' \u2212 \u221a'+V.q5n+')','#241A17',13,'middle'));
+  }
+  if(p>=3){
+    var denom=V.q5b*V.q5b-V.q5n;
+    o.push(R(40,166,400,60,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,186,'Denominator: '+V.q5b+'\u00b2 \u2212 '+V.q5n+' = '+denom,'#1a7a3a',12,'middle'));
+    o.push(T(240,208,V.q5a+'('+V.q5b+' \u2212 \u221a'+V.q5n+') / '+denom,'#1a7a3a',14,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ6(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Expand ('+V.q6a+' + \u221a'+V.q6b+')('+V.q6c+' + \u221a'+V.q6d+')','#C0272D',13,'middle',true));
+  var ox=80,oy=65,W=320,H=130,mid=W/2,h1=H/2;
+  o.push(R(ox,oy,W,H,'#fff','#C0272D',1.5));
+  if(p>=1){
+    o.push(L(ox+mid,oy,ox+mid,oy+H,'#C0272D',1,'4,3'));
+    o.push(L(ox,oy+h1,ox+W,oy+h1,'#C0272D',1,'4,3'));
+    o.push(T(ox-22,oy+h1/2,V.q6a,'#C0272D',15,'end',true));
+    o.push(T(ox-22,oy+h1+h1/2,'\u221a'+V.q6b,'#C0272D',15,'end',true));
+    o.push(T(ox+mid/2,oy-12,V.q6c,'#C0272D',15,'middle',true));
+    o.push(T(ox+mid+mid/2,oy-12,'\u221a'+V.q6d,'#C0272D',15,'middle',true));
+  }
+  if(p>=2){
+    o.push(T(ox+mid/2,oy+h1/2+5,''+V.q6a*V.q6c,'#1a5a8a',18,'middle',true));
+    o.push(T(ox+mid+mid/2,oy+h1/2+5,V.q6a+'\u221a'+V.q6d,'#1a7a3a',16,'middle',true));
+  }
+  if(p>=3){
+    o.push(T(ox+mid/2,oy+h1+h1/2+5,V.q6c+'\u221a'+V.q6b,'#1a7a3a',16,'middle',true));
+    o.push(T(ox+mid+mid/2,oy+h1+h1/2+5,'\u221a'+(V.q6b*V.q6d)+'='+V.q6b,'#C8922A',16,'middle',true));
+  }
+  if(p>=4){
+    o.push(R(80,206,320,44,'#e8f8ee','#1a7a3a',2));
+    o.push(T(240,234,'= '+V.q6int+' + '+V.q6surd+'\u221a'+V.q6b,'#1a7a3a',16,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+function dQ7(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,30,'Solve: \u221a('+V.q7a+'x + '+V.q7b+') = '+V.q7c,'#C0272D',14,'middle',true));
+  var steps=[
+    {t:'\u221a('+V.q7a+'x + '+V.q7b+') = '+V.q7c,note:'Start'},
+    {t:V.q7a+'x + '+V.q7b+' = '+V.q7c*V.q7c,note:'Square both sides'},
+    {t:V.q7a+'x = '+(V.q7c*V.q7c-V.q7b),note:'Subtract '+V.q7b},
+    {t:'x = '+V.q7x,note:'Divide by '+V.q7a}
+  ];
+  steps.forEach(function(st,i){
+    if(p>=i){
+      var col=i===3?'#1a7a3a':'#241A17';
+      o.push(R(80,55+i*50,320,38,i===3?'#e8f8ee':'#fff',i===3?'#1a7a3a':'#C0272D',i===3?2:1));
+      o.push(T(240,74+i*50,st.t,col,14,'middle',i===3));
+      if(i>0)o.push(T(420,74+i*50,'← '+st.note,'#888',10,'end'));
+    }
+  });
+  if(p>=4){
+    o.push(R(80,257,320,30,'#fffde8','#C8922A',1));
+    // check already shown via step 3
+  }
+  s.innerHTML=o.join('');
+}
+
+var QS=[
+  {ey:'Q1 \u00b7 Surds \u00b7 Further Maths',ti:'Simplifying Surds',
+   su:'Simplify \u221a'+V.q1big+' by finding the largest perfect square factor.',
+   steps:[
+    {lb:'What is a surd?',dr:dQ1,ht:'<p>A <b>surd</b> is an irrational root that cannot be simplified to a whole number or fraction. \u221a2, \u221a3, \u221a5 are surds. \u221a4 = 2 is NOT a surd.</p><p>To simplify, find the largest perfect square that divides the number.</p>'},
+    {lb:'Factor tree',dr:dQ1,ht:'<div class="fm">\u221a'+V.q1big+' = \u221a('+V.q1a*V.q1a+' \u00d7 '+V.q1b+')</div><p>Split into a perfect square (\u221a'+V.q1a*V.q1a+' = '+V.q1a+') and the remaining factor.</p>'},
+    {lb:'Take out the root',dr:dQ1,ht:'<div class="fm">\u221a('+V.q1a*V.q1a+' \u00d7 '+V.q1b+') = \u221a'+V.q1a*V.q1a+' \u00d7 \u221a'+V.q1b+' = '+V.q1a+'\u221a'+V.q1b+'</div>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
+      var nums=[8,12,18,20,27,32,45,48,50,72,75,98,108,128];
+      var n=pick(nums);
+      var ps=[4,9,16,25,36,49,64];var bs=1,bk=n;
+      ps.forEach(function(p){if(n%p===0&&p>bs){bs=p;bk=n/p;}});
+      var a=Math.sqrt(bs);
+      return {question:'Simplify \u221a'+n+'. Enter the coefficient (the number outside \u221a).',
+        hints:['Find the largest perfect square factor of '+n,''+n+' = '+bs+' \u00d7 '+bk],
+        ans:a,tol:0.01,unit:'',working:'\u221a'+n+' = \u221a('+bs+'\u00d7'+bk+') = '+a+'\u221a'+bk};
+    })}
+   ]},
+
+  {ey:'Q2 \u00b7 Surds \u00b7 Further Maths',ti:'Adding and Subtracting Surds',
+   su:V.q2a+'\u221a'+V.q2k+' + '+V.q2b+'\u221a'+V.q2k+' and '+V.q2a+'\u221a'+V.q2k+' \u2212 '+V.q2b+'\u221a'+V.q2k,
+   steps:[
+    {lb:'Like surds',dr:dQ2,ht:'<p>Surds can only be added or subtracted if they have the <b>same number under the root</b> — just like collecting like terms in algebra.</p><div class="fm">a\u221an + b\u221an = (a+b)\u221an</div>'},
+    {lb:'Calculate',dr:dQ2,ht:'<div class="fm">'+V.q2a+'\u221a'+V.q2k+' + '+V.q2b+'\u221a'+V.q2k+' = '+V.q2sum+'\u221a'+V.q2k+'</div><div class="fm">'+V.q2a+'\u221a'+V.q2k+' \u2212 '+V.q2b+'\u221a'+V.q2k+' = '+V.q2dif+'\u221a'+V.q2k+'</div>'},
+    {lb:'Unlike surds',dr:dQ2,ht:'<p>\u221a2 + \u221a3 <b>cannot</b> be simplified further — they are unlike surds. However, sometimes simplifying first reveals like surds: \u221a8 + \u221a2 = 2\u221a2 + \u221a2 = 3\u221a2.</p>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
+      var k=pick([2,3,5,6,7]);var a=rnd(2,8);var b=rnd(2,8);
+      return {question:'Simplify '+a+'\u221a'+k+' + '+b+'\u221a'+k+'. Enter the coefficient of \u221a'+k+'.',
+        hints:['Collect like terms','('+a+'+'+b+')\u221a'+k],
+        ans:a+b,tol:0,unit:'',working:a+'\u221a'+k+' + '+b+'\u221a'+k+' = '+(a+b)+'\u221a'+k};
+    })}
+   ]},
+
+  {ey:'Q3 \u00b7 Surds \u00b7 Further Maths',ti:'Multiplying Surds',
+   su:V.q3k1+'\u221a'+V.q3a+' \u00d7 '+V.q3k2+'\u221a'+V.q3b,
+   steps:[
+    {lb:'Rule for multiplying',dr:dQ3,ht:'<p>Multiply the numbers outside together, and the numbers inside together:</p><div class="fm">a\u221am \u00d7 b\u221an = ab\u221a(mn)</div><p>Then simplify the surd if possible.</p>'},
+    {lb:'Apply the rule',dr:dQ3,ht:'<div class="fm">'+V.q3k1+'\u221a'+V.q3a+' \u00d7 '+V.q3k2+'\u221a'+V.q3b+' = '+V.q3kprod+'\u221a'+V.q3prod+'</div>'},
+    {lb:'Simplify',dr:dQ3,ht:'<div class="fm">'+V.q3kprod+'\u221a'+V.q3prod+(V.q3inner===1?' = '+V.q3outer:' = '+V.q3outer+'\u221a'+V.q3inner)+'</div><p>Special case: \u221an \u00d7 \u221an = n (the surds cancel to give a whole number).</p>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
+      var a=pick([2,3,5,6]);var b=a;var k=rnd(2,5);
+      return {question:'Find \u221a'+a+' \u00d7 \u221a'+b+'. (When a surd multiplies itself.)',
+        hints:['\u221an \u00d7 \u221an = n'],
+        ans:a,tol:0,unit:'',working:'\u221a'+a+' \u00d7 \u221a'+b+' = \u221a'+(a*b)+' = '+a};
+    })}
+   ]},
+
+  {ey:'Q4 \u00b7 Surds \u00b7 Further Maths',ti:'Rationalising the Denominator (Simple)',
+   su:'Write 1/\u221a'+V.q4n+' with a rational denominator.',
+   steps:[
+    {lb:'Why rationalise?',dr:dQ4,ht:'<p>It is standard form to have <b>no surds in the denominator</b>. To remove a surd from the bottom, multiply top and bottom by that surd.</p><div class="fm">1/\u221an \u00d7 \u221an/\u221an = \u221an/n</div>'},
+    {lb:'Multiply by \u221a'+V.q4n+'/\u221a'+V.q4n,dr:dQ4,ht:'<div class="fm">1/\u221a'+V.q4n+' = (1 \u00d7 \u221a'+V.q4n+') / (\u221a'+V.q4n+' \u00d7 \u221a'+V.q4n+')</div>'},
+    {lb:'Result',dr:dQ4,ht:'<div class="fm">= \u221a'+V.q4n+' / '+V.q4n+'</div><p>The denominator is now a whole number \u2713</p>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
+      var n=pick([2,3,5,7,6]);
+      return {question:'Rationalise 1/\u221a'+n+'. Enter the denominator of your answer.',
+        hints:['Multiply top and bottom by \u221a'+n,'Bottom becomes \u221a'+n+' \u00d7 \u221a'+n+' = ?'],
+        ans:n,tol:0,unit:'',working:'1/\u221a'+n+' = \u221a'+n+'/'+n+'. Denominator = '+n};
+    })}
+   ]},
+
+  {ey:'Q5 \u00b7 Surds \u00b7 Further Maths',ti:'Rationalising with a Conjugate',
+   su:'Rationalise '+V.q5a+' / ('+V.q5b+' + \u221a'+V.q5n+')',
+   steps:[
+    {lb:'The conjugate',dr:dQ5,ht:'<p>When the denominator is <b>a + \u221ab</b>, multiply by its <b>conjugate a \u2212 \u221ab</b>. This uses the difference of two squares: (a+\u221ab)(a\u2212\u221ab) = a\u00b2 \u2212 b.</p>'},
+    {lb:'Multiply by conjugate',dr:dQ5,ht:'<div class="fm">'+V.q5a+'/('+V.q5b+'+\u221a'+V.q5n+') \u00d7 ('+V.q5b+'\u2212\u221a'+V.q5n+')/('+V.q5b+'\u2212\u221a'+V.q5n+')</div>'},
+    {lb:'Simplify denominator',dr:dQ5,ht:'<div class="fm">Denominator: '+V.q5b+'\u00b2 \u2212 '+V.q5n+' = '+V.q5conj+'</div><div class="fm">Answer: '+V.q5a+'('+V.q5b+' \u2212 \u221a'+V.q5n+') / '+V.q5conj+'</div>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){
+      var b=rnd(2,5);var n=pick([2,3,5,6]);
+      var denom=b*b-n;
+      return {question:'Rationalise 1/('+b+' + \u221a'+n+'). Enter the rational denominator of your answer.',
+        hints:['Multiply by the conjugate ('+b+' \u2212 \u221a'+n+')','Denominator = '+b+'\u00b2 \u2212 '+n],
+        ans:Math.abs(denom),tol:0,unit:'',working:'Denominator = '+b+'\u00b2\u2212'+n+' = '+denom};
+    })}
+   ]},
+
+  {ey:'Q6 \u00b7 Surds \u00b7 Further Maths',ti:'Expanding Brackets with Surds',
+   su:'Expand ('+V.q6a+' + \u221a'+V.q6b+')('+V.q6c+' + \u221a'+V.q6d+')',
+   steps:[
+    {lb:'Use the grid method',dr:dQ6,ht:'<p>Expand just like double brackets in algebra. Use FOIL or the grid. Remember: \u221ab \u00d7 \u221ab = b.</p>'},
+    {lb:'Four products',dr:dQ6,ht:'<div class="fm">'+V.q6a+'\u00d7'+V.q6c+' = '+V.q6a*V.q6c+'</div><div class="fm">'+V.q6a+'\u00d7\u221a'+V.q6d+' = '+V.q6a+'\u221a'+V.q6d+'</div>'},
+    {lb:'Surd products',dr:dQ6,ht:'<div class="fm">'+V.q6c+'\u00d7\u221a'+V.q6b+' = '+V.q6c+'\u221a'+V.q6b+'</div><div class="fm">\u221a'+V.q6b+'\u00d7\u221a'+V.q6d+' = \u221a'+V.q6b*V.q6d+' = '+V.q6b+'</div>'},
+    {lb:'Collect terms',dr:dQ6,ht:'<div class="fm">= ('+V.q6a*V.q6c+'+'+V.q6b+') + ('+V.q6a+'+'+V.q6c+')\u221a'+V.q6b+'</div><div class="fm">= '+V.q6int+' + '+V.q6surd+'\u221a'+V.q6b+'</div>'}
+   ]},
+
+  {ey:'Q7 \u00b7 Surds \u00b7 Further Maths',ti:'Solving Equations with Surds',
+   su:'Solve \u221a('+V.q7a+'x + '+V.q7b+') = '+V.q7c,
+   steps:[
+    {lb:'Strategy',dr:dQ7,ht:'<p>To remove a square root, <b>square both sides</b>. Be careful — you must check your answer in the original equation, as squaring can introduce false solutions.</p>'},
+    {lb:'Square both sides',dr:dQ7,ht:'<div class="fm">\u221a('+V.q7a+'x + '+V.q7b+') = '+V.q7c+'</div><div class="fm">'+V.q7a+'x + '+V.q7b+' = '+V.q7c*V.q7c+'</div>'},
+    {lb:'Solve for x',dr:dQ7,ht:'<div class="fm">'+V.q7a+'x = '+(V.q7c*V.q7c-V.q7b)+'</div><div class="fm">x = '+V.q7x+'</div>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){
+      var a=rnd(1,3);var c=rnd(2,6);var b=rnd(0,4);
+      var x=(c*c-b)/a;
+      return {question:'Solve \u221a('+a+'x + '+b+') = '+c+'. Find x.',
+        hints:['Square both sides first','Then solve the linear equation'],
+        ans:x,tol:0.01,unit:'',working:a+'x+'+b+'='+c*c+' \u2192 x='+(c*c-b)+'/'+a+'='+x};
+    })}
+   ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \u2192';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+
+<!-- ABC Supabase Progress Tracking -->
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase = _sb;
+window._abcTopicCode = 'Y12FM-SUR-01';
+window.markComplete = async function() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) return;
+  const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', window._abcTopicCode).maybeSingle();
+  if (!topic) return;
+  await _sb.from('walkthrough_progress').upsert({
+    student_id: session.user.id, topic_id: topic.id,
+    status: 'completed', completed_at: new Date().toISOString(),
+    last_visited_at: new Date().toISOString(),
+  }, { onConflict: 'student_id,topic_id' });
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>
