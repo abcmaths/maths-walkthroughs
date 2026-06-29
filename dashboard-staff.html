@@ -1369,12 +1369,14 @@
            '<span class="badge badge-red">✗ Not good</span>')
         : '<span class="badge badge-grey">Not reviewed</span>';
 
-      const revisedBadge = revisedAt
-        ? `<span style="font-size:0.75rem;font-weight:600;color:#1a5a8a;background:#e8f4ff;border:1px solid #b3d4f0;border-radius:99px;padding:2px 9px">⟳ Revised ${revisedAt.toLocaleDateString('en-GB')}</span>`
-        : '';
       const staleBadge = hasStaleReviews
         ? `<span style="font-size:0.75rem;font-weight:600;color:#b36000;background:#fff3cd;border:1px solid #ffd77a;border-radius:99px;padding:2px 9px" title="Some reviews were submitted before the last revision">⚠ Needs re-review</span>`
         : '';
+
+      // Show "Mark as Revised" only if not yet marked, or if all reviews are now post-revision (i.e. cycle is complete and a new fix has been deployed)
+      const showMarkRevised = currentProfile?.role === 'admin' && !revisedAt;
+      // Show "Copy for Claude" only when 2+ reviewers and no stale reviews pending
+      const showCopyForClaude = currentProfile?.role === 'admin' && reviewerCount >= 2 && !hasStaleReviews;
 
       return `<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap">
         <div style="flex:1;min-width:200px">
@@ -1383,15 +1385,14 @@
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           ${statusBadge}
-          ${revisedBadge}
           ${staleBadge}
           ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} · ${qCount} Qs</span>` : ''}
         </div>
         <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}')">
           ${rm ? 'Add/Edit Review' : 'Review'}
         </button>
-        ${currentProfile?.role === 'admin' ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;background:#e8f4ff;border-color:#1a5a8a;color:#1a5a8a" onclick="markRevised(${t.id})">⟳ Mark as Revised</button>` : ''}
-        ${(currentProfile?.role === 'admin' && reviewerCount >= 2) ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;background:#fff8e1;border-color:#f0c040" onclick="copyForClaude(${t.id},'${t.topic_name}','${t.topic_code}')">📋 Copy for Claude</button>` : ''}
+        ${showMarkRevised ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;background:#e8f4ff;border-color:#1a5a8a;color:#1a5a8a" onclick="markRevised(${t.id})">⟳ Mark as Revised</button>` : ''}
+        ${showCopyForClaude ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;background:#fff8e1;border-color:#f0c040" onclick="copyForClaude(${t.id},'${t.topic_name}','${t.topic_code}')">📋 Copy for Claude</button>` : ''}
       </div>`;
     }).join('');
   };
