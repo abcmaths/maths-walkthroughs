@@ -45,6 +45,15 @@
     .summary-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); text-align: center; }
     .summary-card .big { font-size: 2rem; font-weight: 700; color: #C0272D; line-height: 1; }
     .summary-card .label { font-size: 0.8rem; color: #777; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .subject-progress-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .subject-panel { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 18px 20px; border-top: 3px solid var(--accent); }
+    .subject-panel.maths-panel { --accent: #C0272D; }
+    .subject-panel.science-panel { --accent: #1565C0; }
+    .subject-panel-title { font-size: 0.85rem; font-weight: 700; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .subject-panel-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .subject-panel-stat { text-align: center; }
+    .subject-panel-stat .big { font-size: 1.4rem; font-weight: 700; color: #333; line-height: 1; }
+    .subject-panel-stat .label { font-size: 0.66rem; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
     .aoc-banner { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 28px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
     .aoc-banner h2 { font-size: 1rem; color: #333; font-weight: 700; flex: 1; min-width: 160px; }
     .aoc-item { text-align: center; }
@@ -134,7 +143,28 @@
       <p id="welcome-sub"></p>
     </div>
 
-    <div class="summary-row">
+    <div class="subject-progress-row" id="subject-progress-row">
+      <div class="subject-panel maths-panel">
+        <div class="subject-panel-title">📐 Maths Progress</div>
+        <div class="subject-panel-stats">
+          <div class="subject-panel-stat"><div class="big" id="maths-stat-total">—</div><div class="label">Topics</div></div>
+          <div class="subject-panel-stat"><div class="big" id="maths-stat-completed">—</div><div class="label">Completed</div></div>
+          <div class="subject-panel-stat"><div class="big" id="maths-stat-started">—</div><div class="label">In Progress</div></div>
+          <div class="subject-panel-stat"><div class="big" id="maths-stat-pct">—</div><div class="label">Progress</div></div>
+        </div>
+      </div>
+      <div class="subject-panel science-panel">
+        <div class="subject-panel-title">🔬 Science Progress</div>
+        <div class="subject-panel-stats">
+          <div class="subject-panel-stat"><div class="big" id="science-stat-total">—</div><div class="label">Topics</div></div>
+          <div class="subject-panel-stat"><div class="big" id="science-stat-completed">—</div><div class="label">Completed</div></div>
+          <div class="subject-panel-stat"><div class="big" id="science-stat-started">—</div><div class="label">In Progress</div></div>
+          <div class="subject-panel-stat"><div class="big" id="science-stat-pct">—</div><div class="label">Progress</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-row" id="summary-row">
       <div class="summary-card"><div class="big" id="stat-total">—</div><div class="label">My Topics</div></div>
       <div class="summary-card"><div class="big" id="stat-completed">—</div><div class="label">Completed</div></div>
       <div class="summary-card"><div class="big" id="stat-started">—</div><div class="label">In Progress</div></div>
@@ -444,6 +474,26 @@
     document.getElementById('stat-completed').textContent = completed;
     document.getElementById('stat-started').textContent   = started;
     document.getElementById('stat-pct').textContent       = pct + '%';
+
+    // Always-visible per-subject split, regardless of active toggle
+    ['maths', 'science'].forEach(subj => {
+      const subjTopics    = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === subj);
+      const subjTotal     = subjTopics.length;
+      const subjCompleted = subjTopics.filter(t => progressMap[t.id] === 'completed').length;
+      const subjStarted   = subjTopics.filter(t => progressMap[t.id] === 'started').length;
+      const subjPct       = subjTotal > 0 ? Math.round((subjCompleted / subjTotal) * 100) : 0;
+      document.getElementById(subj + '-stat-total').textContent     = subjTotal;
+      document.getElementById(subj + '-stat-completed').textContent = subjCompleted;
+      document.getElementById(subj + '-stat-started').textContent   = subjStarted;
+      document.getElementById(subj + '-stat-pct').textContent       = subjPct + '%';
+    });
+
+    // If this year group has no topics at all for a subject (e.g. science not yet
+    // available for Year 10+), hide that panel rather than showing a dead 0/0/0/0%
+    const mathsHasTopics   = allTopics.some(t => t.year_group === myYearGroup && (t.subject || 'maths') === 'maths');
+    const scienceHasTopics = allTopics.some(t => t.year_group === myYearGroup && (t.subject || 'maths') === 'science');
+    document.querySelector('.subject-panel.maths-panel').style.display   = mathsHasTopics   ? '' : 'none';
+    document.querySelector('.subject-panel.science-panel').style.display = scienceHasTopics ? '' : 'none';
   }
 
   window.switchSubject = function(subject) {
