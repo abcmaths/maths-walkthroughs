@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Light & Colour — Year 8 Physics</title>
+<style>
+:root{--acc:#1565C0;--dark:#0D47A1;--cream:#E3F2FD;--ink:#0d1a2e;--line:#90CAF9;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--acc);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--acc);color:var(--acc);}
+.qb.on{background:var(--acc);color:#fff;border-color:var(--acc);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--acc);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#555;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,var(--cream));padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:16px;background:var(--cream);border-left:4px solid var(--acc);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--acc);background:#fff;color:var(--acc);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--acc);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--acc);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:var(--ink);margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.nq{margin-top:12px;font-size:13px;font-weight:600;padding:6px 14px;border-radius:3px;border:1px solid #aaa;background:#f5f5f5;color:#444;cursor:pointer;}
+.nq:hover{background:#e0e0e0;}
+.wk-ans{margin-top:8px;font-size:14px;line-height:1.6;}
+.wk summary{cursor:pointer;color:var(--acc);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.mc-opt{padding:9px 14px;border:1.5px solid var(--line);border-radius:4px;cursor:pointer;font-size:14px;background:#fff;text-align:left;transition:.15s;font-family:inherit;}
+.mc-opt:hover{border-color:var(--acc);background:var(--cream);}
+.mc-opt.correct{border-color:#2e7d32;background:#e8f8ee;color:#1a7a3a;font-weight:600;}
+.mc-opt.wrong{border-color:#C0272D;background:#fde8e8;color:#a01820;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../dashboard-student.html" class="back">&larr; My Dashboard</a>
+  <div class="ht">Light & Colour — Year 8 Physics</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Topics</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 300"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+
+var ST={};
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rPick(a){return a[Math.floor(Math.random()*a.length)];}
+function tryIt(fn){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]=fn;return genTry(id,fn());
+}
+function genTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  return '<div class="try" data-tryid="'+id+'">'+
+    '<div class="try-t">&#10004; Your Turn</div><p>'+o.question+'</p>'+
+    '<div class="ar"><input type="number" step="any" placeholder="Your answer" id="'+id+'_i"/>'+
+    '<button class="ck" onclick="ck(''+id+'')">&#10003; Check</button></div>'+
+    '<div class="fb" id="'+id+'_f"></div>'+
+    '<details class="wk"><summary>Show working</summary><div class="wk-b">'+
+    (h?'<ul class="hl">'+h+'</ul>':'')+
+    '<div class="wk-ans">'+o.working+'</div></div></details>'+
+    '<button class="nq" data-tryid="'+id+'">New question</button></div>';
+}
+function ck(id){
+  var fn=ST[id];var o=typeof fn==='function'?fn():fn;
+  var v=parseFloat(document.getElementById(id+'_i').value);
+  var f=document.getElementById(id+'_f');
+  if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}
+  var tol=o.tol!==undefined?o.tol:0.5;
+  if(Math.abs(v-o.ans)<=tol){
+    f.className='fb ok';f.textContent='\u2713 Correct! Answer: '+o.ans+(o.unit?' '+o.unit:'');
+  }else{f.className='fb er';f.textContent='Not quite \u2014 check your working and try again.';}
+}
+function tryItMC(fn){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]=fn;return genTryMC(id,fn());
+}
+function genTryMC(id,o){
+  var opts=o.options.map(function(opt,i){
+    return '<button class="mc-opt" onclick="ckMC(''+id+'','+i+','+o.correct+')">'+opt+'</button>';
+  }).join('');
+  return '<div class="try" data-tryid="'+id+'">'+
+    '<div class="try-t">&#10004; Your Turn</div><p>'+o.question+'</p>'+
+    '<div class="mc-opts" id="'+id+'_opts">'+opts+'</div>'+
+    '<div class="fb" id="'+id+'_f"></div>'+
+    '<details class="wk"><summary>Show answer</summary><div class="wk-b"><div class="wk-ans">'+o.working+'</div></div></details>'+
+    '<button class="nq" data-tryid="'+id+'_mc">New question</button></div>';
+}
+function ckMC(id,chosen,correct){
+  var opts=document.getElementById(id+'_opts').querySelectorAll('.mc-opt');
+  opts.forEach(function(b,i){
+    if(i===correct)b.classList.add('correct');
+    else if(i===chosen)b.classList.add('wrong');
+    b.disabled=true;
+  });
+  var f=document.getElementById(id+'_f');
+  if(chosen===correct){f.className='fb ok';f.textContent='\u2713 Correct!';}
+  else{f.className='fb er';f.textContent='Not quite \u2014 the correct answer is highlighted in green.';}
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.nq');if(!b)return;
+  var rawId=b.getAttribute('data-tryid');
+  var id=rawId.replace('_mc','');
+  var fn=ST[id];if(typeof fn!=='function')return;
+  var wrap=b.closest('.try');if(!wrap)return;
+  var isMC=(rawId.indexOf('_mc')>=0);
+  var fresh=isMC?genTryMC(id,fn()):genTry(id,fn());
+  var tmp=document.createElement('div');tmp.innerHTML=fresh;
+  wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#333';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';}
+function R(x,y,w,h,fill,stroke,sw,rx){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#333')+'" stroke-width="'+(sw||2)+'" rx="'+(rx||0)+'"/>';}
+function circ(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#333')+'" stroke-width="'+(sw||2)+'"/>';}
+function ellipse(cx,cy,rx,ry,fill,stroke,sw){return '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#333')+'" stroke-width="'+(sw||2)+'"/>';}
+function arr(x1,y1,x2,y2,c,w){
+  c=c||'#555';w=w||1.5;
+  var ang=Math.atan2(y2-y1,x2-x1);
+  var hs=8;
+  var p1x=x2-hs*Math.cos(ang-0.4),p1y=y2-hs*Math.sin(ang-0.4);
+  var p2x=x2-hs*Math.cos(ang+0.4),p2y=y2-hs*Math.sin(ang+0.4);
+  return L(x1,y1,x2,y2,c,w)+'<polygon points="'+x2+','+y2+' '+p1x.toFixed(1)+','+p1y.toFixed(1)+' '+p2x.toFixed(1)+','+p2y.toFixed(1)+'" fill="'+c+'"/>';
+}
+
+
+var QS=[
+{ey:'Y8 Physics \u2022 Q1',ti:'The Electromagnetic Spectrum',su:'Beyond visible light',steps:[
+{sl:'EM spectrum overview',p:'<b>Electromagnetic waves</b> are transverse waves that travel through a vacuum at the speed of light (3\u00d710\u2078 m/s).<br><br>From longest to shortest wavelength:<br>Radio \u2192 Microwave \u2192 Infrared \u2192 Visible \u2192 UV \u2192 X-rays \u2192 Gamma rays',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+var waves=[{n:'Radio',c:'#9c27b0',w:58},{n:'Micro',c:'#1565C0',w:50},{n:'IR',c:'#C0272D',w:46},{n:'Vis',c:'#2E7D32',w:44},{n:'UV',c:'#6A1B9A',w:44},{n:'X-ray',c:'#C8922A',w:46},{n:'Gamma',c:'#C0272D',w:48}];var x=10;
+waves.forEach(function(w){o.push(R(x,80,w.w-4,80,w.c+'44',w.c,1.5,3));o.push(T(x+w.w/2-2,125,w.n,w.c,7,'middle',true));x+=w.w;});
+o.push(arr(10,200,480,200,'#555',1.5));o.push(T(245,220,'Decreasing wavelength, increasing frequency \u2192','#555',8,'middle',false));
+s.innerHTML=o.join('');}},
+{sl:'Uses and hazards',p:'Each part of the EM spectrum has uses and hazards:<br><br>\u2022 <b>Radio</b>: broadcasting<br>\u2022 <b>Microwave</b>: cooking, mobile phones<br>\u2022 <b>Infrared</b>: remote controls, thermal imaging<br>\u2022 <b>Visible</b>: sight, photography<br>\u2022 <b>UV</b>: sterilisation, causes skin cancer<br>\u2022 <b>X-rays</b>: medical imaging, cancer risk<br>\u2022 <b>Gamma</b>: cancer treatment, highly ionising',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+var rows=[['Radio/Microwave','Communication, cooking'],['Infrared','Remote controls, heating'],['Visible','Sight, cameras'],['UV','Sunbeds, sterilisation'],['X-ray/Gamma','Medical imaging, radiotherapy']];var cols=['#9c27b0','#C0272D','#2E7D32','#6A1B9A','#C8922A'];
+rows.forEach(function(r,i){o.push(R(20,28+i*50,440,38,cols[i]+'18',cols[i],1.5,4));o.push(T(130,52+i*50,r[0],cols[i],9,'start',true));o.push(T(320,52+i*50,r[1],'#555',8,'middle',false));});
+s.innerHTML=o.join('');}},
+{sl:'Wave equation',p:'All EM waves obey:<br><br><span class="fm">Speed = frequency \u00d7 wavelength (v = f\u03bb)</span>Since speed is constant (3\u00d710\u2078 m/s in vacuum), higher frequency means shorter wavelength.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(arr(30,150,450,150,'#555',1.5));
+var wp='30,150';for(var i=0;i<=420;i++)wp+=' '+(30+i)+','+(150-60*Math.sin(i*2*Math.PI/140));
+o.push('<polyline points="'+wp+'" fill="none" stroke="#1565C0" stroke-width="2.5"/>');
+o.push(L(100,90,240,90,'#C0272D',1,'4,2'));o.push(arr(170,90,100,90,'#C0272D',1.5));o.push(arr(170,90,240,90,'#C0272D',1.5));
+o.push(T(170,80,'\u03bb (wavelength)','#C0272D',10,'middle',true));
+o.push(T(240,250,'v = f \u00d7 \u03bb','#1565C0',16,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+mc3(
+'Which part of the EM spectrum has the shortest wavelength?',
+['Gamma rays','X-rays','Ultraviolet','Radio waves'],
+'<b>Gamma rays</b> have the shortest wavelength (and highest frequency and energy) of all EM waves.',
+'What speed do all electromagnetic waves travel at in a vacuum?',
+['3 \u00d7 10\u2078 m/s','340 m/s','1,500 m/s','3 \u00d7 10\u2076 m/s'],
+'All EM waves travel at the speed of light in a vacuum: <b>3 \u00d7 10\u2078 m/s</b>.',
+'Which EM radiation is used in medical imaging of bones?',
+['X-rays','Gamma rays','Ultraviolet','Infrared'],
+'<b>X-rays</b> pass through soft tissue but are absorbed by dense bone, creating a shadow image.'
+),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'v = f \u00d7 \u03bb','#1565C0',18,'middle',true));
+var rows=[['Speed (v)','3 \u00d7 10\u2078 m/s in vacuum','#1565C0'],['Frequency (f)','Hertz (Hz)','#C0272D'],['Wavelength (\u03bb)','metres (m)','#2E7D32']];
+rows.forEach(function(r,i){o.push(R(30,80+i*52,420,38,r[2]+'18',r[2],1.5,4));o.push(T(130,104+i*52,r[0],r[2],10,'start',true));o.push(T(320,104+i*52,r[1],'#555',9,'middle',false));});
+s.innerHTML=o.join('');}}
+]},
+{ey:'Y8 Physics \u2022 Q2',ti:'Colour and Filters',su:'How we see colour',steps:[
+{sl:'White light and the spectrum',p:'<b>White light</b> is a mixture of all colours. A <b>prism</b> splits white light into the colours: Red, Orange, Yellow, Green, Blue, Indigo, Violet (ROYGBIV) — called <b>dispersion</b>.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(30,130,60,40,'#e0e0e0','#555',2,2));o.push(T(60,155,'White\nlight','#555',9,'middle',false));
+o.push(arr(92,150,130,150,'#e0e0e0',2));
+o.push('<polygon points="130,100 200,150 130,200" fill="#fff5f0" stroke="#6A1B9A" stroke-width="2"/>');
+var cols=['#C0272D','#ff5722','#ffc107','#4caf50','#1565C0','#5c35cc','#9c27b0'];
+cols.forEach(function(c,i){var y=100+i*18;o.push(arr(200,150,350,y,c,2));});
+o.push(T(365,100,'Red','#C0272D',9,'start',false));o.push(T(365,218,'Violet','#9c27b0',9,'start',false));
+s.innerHTML=o.join('');}},
+{sl:'Colour filters',p:'A <b>colour filter</b> absorbs certain colours and transmits others.<br><br>A red filter only transmits red light. If white light passes through a red filter then a blue filter, no light gets through.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(60,22,'White light','#555',9,'middle',false));
+o.push(R(30,40,60,200,'none','#555',1,2));for(var i=0;i<7;i++){var c2=['#C0272D','#ff5722','#ffc107','#4caf50','#1565C0','#5c35cc','#9c27b0'][i];o.push(L(30,55+i*26,90,55+i*26,c2,3));}
+o.push(arr(92,140,130,140,'#555',1.5));
+o.push(R(130,40,30,200,'#ffcdd2','#C0272D',2,0));o.push(T(145,22,'Red filter','#C0272D',8,'middle',false));
+o.push(L(162,140,220,140,'#C0272D',3));
+o.push(T(185,22,'Red light\nonly','#C0272D',8,'middle',false));
+o.push(R(220,80,180,120,'#e3f2fd','#1565C0',2,4));o.push(T(310,145,'Now through\nblue filter','#1565C0',9,'middle',false));
+o.push(R(310,40,30,200,'#bbdefb','#1565C0',2,0));
+o.push(T(380,140,'No light\n(black)','#555',9,'start',false));
+s.innerHTML=o.join('');}},
+{sl:'Mixing colours',p:'<b>Mixing light</b> (additive): Red+Green=Yellow, Red+Blue=Magenta, Green+Blue=Cyan, Red+Green+Blue=White.<br><br><b>Mixing pigments</b> (subtractive): CMY (Cyan, Magenta, Yellow) are primary pigments; mixing all three gives black.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(120,22,'Light (additive)','#555',10,'middle',true));
+o.push(circ(105,140,45,'#C0272D66','#C0272D',1));o.push(circ(135,140,45,'#2E7D3266','#2E7D32',1));o.push(circ(120,115,45,'#1565C066','#1565C0',1));
+o.push(T(120,143,'Y','#fff',9,'middle',true));o.push(T(100,120,'M','#fff',9,'middle',true));o.push(T(142,120,'C','#fff',9,'middle',true));o.push(T(120,107,'W','#fff',9,'middle',true));
+o.push(T(360,22,'Pigments (subtractive)','#555',10,'middle',true));
+o.push(circ(345,140,45,'#00bcd466','#00bcd4',1));o.push(circ(375,140,45,'#e91e6366','#e91e63',1));o.push(circ(360,115,45,'#ffeb3b66','#f9a825',1));
+o.push(T(360,143,'R','#555',9,'middle',true));o.push(T(340,120,'B','#555',9,'middle',true));o.push(T(380,120,'G','#555',9,'middle',true));o.push(T(360,107,'K','#333',9,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+mc3(
+'A red filter is placed in a beam of white light. Which colours of light pass through?',
+['Red light only','All colours except red','No light passes through','Red and green light'],
+'A red filter <b>only transmits red light</b> and absorbs all other colours.',
+'What colours of light combine to make white light?',
+['Red, green and blue','Red, yellow and blue','Cyan, magenta and yellow','Red, orange and violet'],
+'In additive colour mixing (light), Red + Green + Blue = <b>White</b>.',
+'What is dispersion?',
+['Splitting white light into its component colours','Mixing coloured paints together','The absorption of light by a filter','Reflection of light off a surface'],
+'<b>Dispersion</b> is the splitting of white light into its spectrum of colours by a prism (different wavelengths refract by different amounts).'
+),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Colour summary','#1565C0',12,'middle',true));
+var rows=[['White light','Contains all colours (ROYGBIV)'],['Prism','Disperses white light into spectrum'],['Colour filter','Transmits its colour, absorbs others'],['Additive (light)','R+G+B = White'],['Subtractive (pigment)','CMY = Black']];var cols=['#555','#6A1B9A','#C0272D','#1565C0','#C8922A'];
+rows.forEach(function(r,i){o.push(R(20,58+i*44,440,32,cols[i]+'18',cols[i],1.5,3));o.push(T(120,79+i*44,r[0],cols[i],9,'start',false));o.push(T(320,79+i*44,r[1],'#555',8,'middle',false));});
+s.innerHTML=o.join('');}}
+]},
+{ey:'Y8 Physics \u2022 Q3',ti:'Lenses and the Eye',su:'Refraction and vision',steps:[
+{sl:'Convex and concave lenses',p:'\u2022 <b>Convex (converging) lens</b>: bulges outward, brings parallel rays to a focal point. Used in magnifying glasses, cameras, eyes.<br>\u2022 <b>Concave (diverging) lens</b>: curves inward, spreads parallel rays apart. Used to correct short-sightedness.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(120,22,'Convex (converging)','#1565C0',10,'middle',true));
+o.push('<ellipse cx="120" cy="130" rx="20" ry="70" fill="#e3f2fd" stroke="#1565C0" stroke-width="2"/>');
+for(var i=0;i<3;i++)o.push(arr(40,80+i*50,135,128,'#C8922A',1.5));
+o.push(arr(135,128,230,130,'#C8922A',1.5));
+o.push(circ(230,130,3,'#C0272D','#C0272D',1));o.push(T(230,150,'Focal point','#C0272D',8,'middle',false));
+o.push(T(360,22,'Concave (diverging)','#C0272D',10,'middle',true));
+o.push('<path d="M345,60 C355,95 355,165 345,200 M375,60 C365,95 365,165 375,200" fill="none" stroke="#C0272D" stroke-width="2"/>');
+for(var j=0;j<3;j++){o.push(arr(290,80+j*50,360,130,'#C8922A',1.5));o.push(arr(360,130,430,80+j*50-20,'#C8922A',1.2));}
+s.innerHTML=o.join('');}},
+{sl:'The eye',p:'The human eye refracts light to form an image on the retina:<br><br>\u2022 <b>Cornea</b>: main refraction (fixed)<br>\u2022 <b>Lens</b>: fine focus (changes shape — accommodation)<br>\u2022 <b>Retina</b>: light-sensitive layer, image forms here<br>\u2022 <b>Optic nerve</b>: carries signal to brain',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(ellipse(240,150,140,100,'#fde8e8','#C0272D',2));
+o.push('<path d="M105,80 C90,110 90,190 105,220" fill="none" stroke="#1565C0" stroke-width="4"/>');o.push(T(95,240,'Cornea','#1565C0',8,'middle',false));
+o.push(ellipse(150,150,18,45,'#e3f2fd','#1565C0',2));o.push(T(150,210,'Lens','#1565C0',8,'middle',false));
+o.push('<path d="M370,60 C385,100 385,200 370,240" fill="none" stroke="#2E7D32" stroke-width="6"/>');o.push(T(355,255,'Retina','#2E7D32',8,'middle',false));
+o.push(R(375,140,40,20,'#888','#555',1.5,2));o.push(T(420,170,'Optic\nnerve','#555',8,'middle',false));
+s.innerHTML=o.join('');}},
+{sl:'Short and long sight',p:'<b>Short-sightedness (myopia)</b>: image focuses in front of retina (eyeball too long). Corrected with <b>concave</b> lenses.<br><br><b>Long-sightedness (hyperopia)</b>: image focuses behind retina (eyeball too short). Corrected with <b>convex</b> lenses.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(120,22,'Short-sighted','#C0272D',10,'middle',true));
+o.push(ellipse(120,130,100,70,'#fde8e8','#C0272D',1.5));
+o.push(arr(40,100,200,130,'#C8922A',1.2));o.push(arr(40,160,200,130,'#C8922A',1.2));
+o.push(circ(200,130,3,'#C0272D','#C0272D',1));o.push(L(220,90,220,170,'#2E7D32',2));
+o.push(T(120,225,'Corrected with concave lens','#C0272D',9,'middle',false));
+o.push(T(360,22,'Long-sighted','#1565C0',10,'middle',true));
+o.push(ellipse(360,130,90,70,'#e3f2fd','#1565C0',1.5));
+o.push(arr(290,100,470,130,'#C8922A',1.2));o.push(arr(290,160,470,130,'#C8922A',1.2));
+o.push(circ(450,130,3,'#1565C0','#1565C0',1));o.push(L(430,90,430,170,'#2E7D32',2));
+o.push(T(360,225,'Corrected with convex lens','#1565C0',9,'middle',false));
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+mc3(
+'What type of lens corrects short-sightedness?',
+['Concave lens','Convex lens','Both work equally','No lens needed'],
+'Short-sightedness occurs because the image focuses in front of the retina. A <b>concave (diverging) lens</b> spreads the light rays slightly before they enter the eye, moving the focal point back onto the retina.',
+'Which part of the eye does most of the light refraction?',
+['Cornea','Lens','Retina','Optic nerve'],
+'The <b>cornea</b> (the clear front surface) does about 2/3 of the eye\'s total refraction. The lens does the remaining fine-tuning (accommodation) to focus on objects at different distances.',
+'What happens to the lens shape when focusing on a near object?',
+['It becomes more curved (fatter) to increase refraction','It becomes flatter','It moves closer to the retina','It changes colour'],
+'For near objects, the ciliary muscles contract, allowing the lens to become more <b>curved/rounder</b>, increasing its refractive power to focus the closer object onto the retina.'
+),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Lenses and vision summary','#1565C0',12,'middle',true));
+var rows=[['Convex lens','Converges light, magnifies','#1565C0'],['Concave lens','Diverges light, corrects myopia','#C0272D'],['Short-sighted','Image in front of retina \u2192 concave lens','#C0272D'],['Long-sighted','Image behind retina \u2192 convex lens','#1565C0']];
+rows.forEach(function(r,i){o.push(R(20,65+i*52,440,38,r[2]+'18',r[2],1.5,4));o.push(T(130,89+i*52,r[0],r[2],10,'start',true));o.push(T(330,89+i*52,r[1],'#555',8,'middle',false));});
+s.innerHTML=o.join('');}}
+]},
+{ey:'Y8 Physics \u2022 Q4',ti:'Sound and the Ear',su:'How we hear',steps:[
+{sl:'Structure of the ear',p:'Sound waves travel through the ear:<br><br><b>Outer ear</b> (pinna, ear canal) \u2192 <b>Eardrum</b> (vibrates) \u2192 <b>Middle ear</b> (ossicles: hammer, anvil, stirrup — amplify vibration) \u2192 <b>Inner ear</b> (cochlea converts vibration to electrical signal) \u2192 auditory nerve \u2192 brain',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push('<path d="M50,150 C30,120 30,180 50,150" fill="#fde8e8" stroke="#C0272D" stroke-width="2"/>');o.push(T(50,200,'Pinna','#C0272D',8,'middle',false));
+o.push(R(70,135,80,30,'#e0e0e0','#555',1.5,2));o.push(T(110,180,'Ear canal','#555',8,'middle',false));
+o.push(L(150,120,155,180,'#1565C0',3));o.push(T(155,200,'Eardrum','#1565C0',8,'middle',false));
+o.push(circ(190,135,8,'#C8922A','#a07018',1.5));o.push(circ(210,140,8,'#C8922A','#a07018',1.5));o.push(circ(228,150,8,'#C8922A','#a07018',1.5));
+o.push(T(210,180,'Ossicles','#C8922A',8,'middle',false));
+o.push('<path d="M260,150 C260,120 300,100 320,130 C340,160 320,190 290,180 C275,175 260,165 260,150 Z" fill="#e8f5e9" stroke="#2E7D32" stroke-width="2"/>');o.push(T(290,210,'Cochlea','#2E7D32',8,'middle',false));
+o.push(L(330,150,400,150,'#6A1B9A',2));o.push(T(390,170,'Auditory\nnerve','#6A1B9A',8,'start',false));
+s.innerHTML=o.join('');}},
+{sl:'How sound is detected',p:'1. Sound waves (vibrations in air) enter the ear canal<br>2. The <b>eardrum vibrates</b><br>3. <b>Ossicles</b> (3 tiny bones) amplify the vibration<br>4. The <b>cochlea</b> (fluid-filled, spiral) converts vibrations into electrical nerve impulses via tiny hair cells<br>5. The <b>auditory nerve</b> carries signals to the brain for interpretation',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+var steps=['Sound waves enter ear canal','Eardrum vibrates','Ossicles amplify vibration','Cochlea converts to nerve signal','Auditory nerve \u2192 brain'];var cols=['#1565C0','#C0272D','#C8922A','#2E7D32','#6A1B9A'];
+steps.forEach(function(st,i){o.push(R(60,28+i*48,360,36,cols[i]+'22',cols[i],1.5,4));o.push(T(240,51+i*48,(i+1)+'. '+st,cols[i],10,'middle',true));if(i<4)o.push(arr(240,64+i*48,240,76+i*48,'#555',1.5));});
+s.innerHTML=o.join('');}},
+{sl:'Hearing range and loudness',p:'Humans typically hear frequencies from <b>20 Hz to 20,000 Hz</b>. This range decreases with age (especially high frequencies).<br><br><b>Loudness</b> is measured in decibels (dB):<br>\u2022 Whisper: ~30 dB<br>\u2022 Normal conversation: ~60 dB<br>\u2022 Loud music/traffic: ~90 dB<br>\u2022 Above 120 dB: pain and permanent damage risk',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(arr(40,250,440,250,'#555',1.5));o.push(arr(40,250,40,20,'#555',1.5));
+o.push(T(240,275,'Sound level (dB)','#555',10,'middle',false));
+var levels=[[60,30,'Whisper','#2E7D32'],[140,60,'Conversation','#C8922A'],[230,90,'Loud music','#ff9800'],[320,120,'Pain threshold','#C0272D'],[400,140,'Hearing damage','#7b1fa2']];
+levels.forEach(function(l){var h=l[1]*1.5;o.push(R(l[0]-15,250-h,30,h,l[3]+'66',l[3],1.5,2));o.push(T(l[0],265,l[2],l[3],8,'middle',false));o.push(T(l[0],245-h,l[1]+'dB',l[3],8,'middle',true));});
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+mc3(
+'What is the function of the ossicles in the ear?',
+['Amplify the vibration from the eardrum','Convert sound to nerve impulses','Detect sound direction','Protect the eardrum from damage'],
+'The <b>ossicles</b> (hammer, anvil, stirrup) form a lever system that <b>amplifies</b> the vibration from the eardrum before passing it to the cochlea via the oval window.',
+'What is the typical hearing range for humans?',
+['20 Hz to 20,000 Hz','0 Hz to 1,000 Hz','100 Hz to 100,000 Hz','1 Hz to 1,000,000 Hz'],
+'Humans typically hear frequencies from <b>20 Hz to 20,000 Hz</b>. This range narrows with age, particularly losing sensitivity to high frequencies.',
+'How does the cochlea convert sound vibrations into a signal the brain understands?',
+['Tiny hair cells convert vibrations into electrical nerve impulses','It amplifies the vibrations only','It reflects the sound waves','It filters out background noise'],
+'The cochlea contains thousands of tiny <b>hair cells</b> that bend in response to vibrations in the fluid, triggering electrical signals that travel along the auditory nerve to the brain.'
+),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Ear and hearing summary','#1565C0',12,'middle',true));
+var rows=[['Pinna','Collects sound waves','#C0272D'],['Eardrum','Vibrates from sound waves','#1565C0'],['Ossicles','3 bones amplify vibration','#C8922A'],['Cochlea','Converts to nerve signal','#2E7D32'],['Range','20 Hz - 20,000 Hz','#6A1B9A']];
+rows.forEach(function(r,i){o.push(R(20,55+i*44,440,32,r[2]+'18',r[2],1.5,3));o.push(T(110,76+i*44,r[0],r[2],10,'start',true));o.push(T(310,76+i*44,r[1],'#555',9,'middle',false));});
+s.innerHTML=o.join('');}}
+]}
+];
+
+var qi=0,si=0;
+function buildSidebar(){
+  var sb=document.getElementById('sb');
+  sb.innerHTML='<div class="sb-lbl">Topics</div>';
+  QS.forEach(function(q,i){
+    var b=document.createElement('button');
+    b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;
+    b.onclick=function(){qi=i;si=0;render();};
+    sb.appendChild(b);
+  });
+}
+function render(){
+  var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').textContent=q.ey;
+  document.getElementById('ti').textContent=q.ti;
+  document.getElementById('su').textContent=q.su;
+  document.getElementById('pn').className='pnl fi';
+  document.getElementById('pn').innerHTML='<div class="sl">'+st.sl+'</div><div>'+st.p+'</div>';
+  st.draw();
+  var dt=document.getElementById('dt');
+  dt.innerHTML=q.steps.map(function(_,i){return '<div class="dot'+(i===si?' on':i<si?' dn':'')+'"></div>';}).join('');
+  document.getElementById('pb').disabled=(qi===0&&si===0);
+  var last=(qi===QS.length-1&&si===q.steps.length-1);
+  document.getElementById('nb').textContent=last?'Finished \u2713':'Next \u2192';
+  document.getElementById('nb').disabled=false;
+  document.querySelectorAll('.qb').forEach(function(b,i){b.classList.toggle('on',i===qi);});
+}
+document.getElementById('nb').onclick=function(){
+  var q=QS[qi];
+  if(si<q.steps.length-1){si++;}
+  else if(qi<QS.length-1){qi++;si=0;}
+  render();
+};
+document.getElementById('pb').onclick=function(){
+  if(si>0){si--;}
+  else if(qi>0){qi--;si=QS[qi].steps.length-1;}
+  render();
+};
+buildSidebar();render();
+
+</script>
+</body>
+</html>

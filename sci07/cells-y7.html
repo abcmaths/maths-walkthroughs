@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cells — Year 7 Science</title>
+<style>
+:root{--bio:#2E7D32;--dark:#1B5E20;--cream:#F1F8F1;--ink:#1a2e1a;--line:#C8E6C9;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--bio);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--bio);color:var(--bio);}
+.qb.on{background:var(--bio);color:#fff;border-color:var(--bio);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--bio);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--bio);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#4a6a4a;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#f1f8f1);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:16px;background:var(--cream);border-left:4px solid var(--bio);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--bio);background:#fff;color:var(--bio);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--bio);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--bio);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#1a2e1a;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.nq{margin-top:12px;font-size:13px;font-weight:600;padding:6px 14px;border-radius:3px;border:1px solid #aaa;background:#f5f5f5;color:#444;cursor:pointer;}
+.nq:hover{background:#e0e0e0;}
+.wk-ans{margin-top:8px;font-size:14px;line-height:1.6;color:#1a2e1a;}
+.wk summary{cursor:pointer;color:var(--bio);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#1a2e1a;}
+/* Multiple choice tryIt */
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.mc-opt{padding:9px 14px;border:1.5px solid var(--line);border-radius:4px;cursor:pointer;font-size:14px;background:#fff;text-align:left;transition:.15s;font-family:inherit;}
+.mc-opt:hover{border-color:var(--bio);background:#f1f8f1;}
+.mc-opt.correct{border-color:#2e7d32;background:#e8f8ee;color:#1a7a3a;font-weight:600;}
+.mc-opt.wrong{border-color:#C0272D;background:#fde8e8;color:#a01820;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../dashboard-student.html" class="back">&larr; My Dashboard</a>
+  <div class="ht">Cells — Year 7 Biology</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Topics</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 300"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rPick(a){return a[Math.floor(Math.random()*a.length)];}
+
+/* Numeric tryIt */
+function tryIt(fn){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]=fn;
+  return genTry(id,fn());
+}
+function genTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  return '<div class="try" data-tryid="'+id+'">'+
+    '<div class="try-t">&#10004; Your Turn</div>'+
+    '<p>'+o.question+'</p>'+
+    '<div class="ar">'+
+      '<input type="number" step="any" placeholder="Your answer" id="'+id+'_i"/>'+
+      '<button class="ck" onclick="ck(\''+id+'\')">&#10003; Check</button>'+
+    '</div>'+
+    '<div class="fb" id="'+id+'_f"></div>'+
+    '<details class="wk">'+
+      '<summary>Show working</summary>'+
+      '<div class="wk-b">'+
+        (h?'<ul class="hl">'+h+'</ul>':'')+
+        '<div class="wk-ans">'+o.working+'</div>'+
+      '</div>'+
+    '</details>'+
+    '<button class="nq" data-tryid="'+id+'">New question</button>'+
+  '</div>';
+}
+function ck(id){
+  var fn=ST[id];var o=typeof fn==='function'?fn():fn;
+  var v=parseFloat(document.getElementById(id+'_i').value);
+  var f=document.getElementById(id+'_f');
+  if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}
+  var tol=o.tol!==undefined?o.tol:0.5;
+  if(Math.abs(v-o.ans)<=tol){
+    f.className='fb ok';f.textContent='\u2713 Correct! Answer: '+o.ans+(o.unit?' '+o.unit:'');
+  }else{
+    f.className='fb er';f.textContent='Not quite \u2014 check your working and try again.';
+  }
+}
+
+/* Multiple-choice tryIt */
+function tryItMC(fn){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]=fn;
+  return genTryMC(id,fn());
+}
+function genTryMC(id,o){
+  var opts=o.options.map(function(opt,i){
+    return '<button class="mc-opt" onclick="ckMC(\''+id+'\','+i+','+o.correct+')">'+opt+'</button>';
+  }).join('');
+  return '<div class="try" data-tryid="'+id+'">'+
+    '<div class="try-t">&#10004; Your Turn</div>'+
+    '<p>'+o.question+'</p>'+
+    '<div class="mc-opts" id="'+id+'_opts">'+opts+'</div>'+
+    '<div class="fb" id="'+id+'_f"></div>'+
+    '<details class="wk"><summary>Show answer</summary>'+
+      '<div class="wk-b"><div class="wk-ans">'+o.working+'</div></div>'+
+    '</details>'+
+    '<button class="nq" data-tryid="'+id+'_mc">New question</button>'+
+  '</div>';
+}
+function ckMC(id,chosen,correct){
+  var opts=document.getElementById(id+'_opts').querySelectorAll('.mc-opt');
+  opts.forEach(function(b,i){
+    if(i===correct)b.classList.add('correct');
+    else if(i===chosen)b.classList.add('wrong');
+    b.disabled=true;
+  });
+  var f=document.getElementById(id+'_f');
+  if(chosen===correct){f.className='fb ok';f.textContent='\u2713 Correct!';}
+  else{f.className='fb er';f.textContent='Not quite \u2014 the correct answer is highlighted in green.';}
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.nq');if(!b)return;
+  var rawId=b.getAttribute('data-tryid');
+  var id=rawId.replace('_mc','');
+  var fn=ST[id];if(typeof fn!=='function')return;
+  var wrap=b.closest('.try');if(!wrap)return;
+  var isMC=(rawId.indexOf('_mc')>=0);
+  var fresh=isMC?genTryMC(id,fn()):genTry(id,fn());
+  var tmp=document.createElement('div');tmp.innerHTML=fresh;
+  wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+});
+
+/* SVG helpers */
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#1a2e1a';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';}
+function R(x,y,w,h,fill,stroke,sw,rx){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#2E7D32')+'" stroke-width="'+(sw||2)+'" rx="'+(rx||0)+'"/>';}
+function circ(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#2E7D32')+'" stroke-width="'+(sw||2)+'"/>';}
+function ellipse(cx,cy,rx,ry,fill,stroke,sw){return '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#2E7D32')+'" stroke-width="'+(sw||2)+'"/>';}
+function leader(x1,y1,x2,y2,label,c){
+  c=c||'#555';
+  return L(x1,y1,x2,y2,c,1)+T(x2+(x2>x1?5:-5),y2+4,label,c,11,x2>x1?'start':'end',false);
+}
+
+/* ── Q1: What is a cell? ── */
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // Simple animal cell outline
+  o.push(ellipse(240,155,160,110,'#fff5e6','#2E7D32',2.5));
+  // nucleus
+  if(p>=1){
+    o.push(circ(240,155,38,'#d4e8ff','#1565C0',2));
+    o.push(T(240,159,'Nucleus','#1565C0',11,'middle',true));
+  }
+  // cytoplasm label
+  if(p>=2){
+    o.push(T(310,120,'Cytoplasm','#2E7D32',11,'start',true));
+    o.push(L(305,120,280,130,'#2E7D32',1));
+  }
+  // cell membrane label
+  if(p>=3){
+    o.push(T(240,282,'Cell membrane','#C0272D',11,'middle',true));
+    o.push(L(240,278,240,265,'#C0272D',1));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* ── Q2: Animal vs Plant cell ── */
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // Animal cell (left)
+  o.push(T(120,28,'Animal Cell','#2E7D32',12,'middle',true));
+  o.push(ellipse(120,160,90,80,'#fff9f0','#2E7D32',2));
+  o.push(circ(120,160,24,'#d4e8ff','#1565C0',1.5));
+  // Plant cell (right)
+  o.push(T(360,28,'Plant Cell','#2E7D32',12,'middle',true));
+  o.push(R(280,80,160,160,'#f1faf1','#2E7D32',2.5,4));
+  o.push(circ(360,160,24,'#d4e8ff','#1565C0',1.5));
+  if(p>=1){
+    // cell wall highlight
+    o.push(R(278,78,164,164,'none','#1B5E20',3,4));
+    o.push(T(360,272,'Cell wall','#1B5E20',11,'middle',true));
+  }
+  if(p>=2){
+    // chloroplasts in plant cell
+    var cps=[[320,120],[380,120],[320,200],[380,200],[350,160]];
+    cps.forEach(function(pt){
+      o.push(ellipse(pt[0],pt[1],12,7,'#a5d6a7','#2E7D32',1.5));
+    });
+    o.push(T(360,295,'Chloroplasts (green)','#2E7D32',10,'middle',false));
+  }
+  if(p>=3){
+    // vacuole in plant cell
+    o.push(ellipse(360,162,30,28,'#e3f2fd','#1565C0',1.5));
+    o.push(T(360,164,'Vacuole','#1565C0',10,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* ── Q3: Specialised cells ── */
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // Red blood cell — biconcave disc
+  o.push(T(110,28,'Red Blood Cell','#C0272D',11,'middle',true));
+  o.push(ellipse(110,100,60,30,'#ffcdd2','#C0272D',2));
+  o.push(ellipse(110,100,30,12,'#ef9a9a','#C0272D',1));
+  if(p>=1){
+    o.push(T(110,152,'No nucleus','#555',10,'middle',false));
+    o.push(T(110,165,'Carries oxygen','#555',10,'middle',false));
+  }
+  // Nerve cell
+  o.push(T(340,28,'Nerve Cell','#6A1B9A',11,'middle',true));
+  o.push(circ(340,90,18,'#e1bee7','#6A1B9A',2));
+  // axon
+  o.push(L(340,108,340,200,'#6A1B9A',2.5));
+  // dendrites
+  o.push(L(340,90,310,72,'#6A1B9A',1.5));
+  o.push(L(340,90,370,72,'#6A1B9A',1.5));
+  o.push(L(340,90,320,60,'#6A1B9A',1.5));
+  // terminal branches
+  o.push(L(340,200,320,218,'#6A1B9A',1.5));
+  o.push(L(340,200,360,218,'#6A1B9A',1.5));
+  if(p>=2){
+    o.push(T(340,240,'Transmits electrical','#555',10,'middle',false));
+    o.push(T(340,252,'signals','#555',10,'middle',false));
+  }
+  // Root hair cell
+  o.push(T(110,195,'Root Hair Cell','#2E7D32',11,'middle',true));
+  o.push(R(80,218,60,50,'#c8e6c9','#2E7D32',2,3));
+  // root hair extension
+  o.push(R(48,225,32,20,'#c8e6c9','#2E7D32',1.5,2));
+  if(p>=3){
+    o.push(T(110,282,'Large surface area','#555',10,'middle',false));
+    o.push(T(110,293,'absorbs water','#555',10,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* ── Q4: The microscope ── */
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // Simple microscope outline
+  var mx=240;
+  // base
+  o.push(R(180,255,120,20,'#ddd','#555',2,4));
+  // pillar
+  o.push(R(228,130,24,125,'#eee','#555',1.5,2));
+  // arm
+  o.push(R(200,120,80,18,'#ddd','#555',1.5,3));
+  // body tube
+  o.push(R(225,50,30,80,'#ccc','#555',1.5,2));
+  // eyepiece
+  o.push(R(222,32,36,24,'#bbb','#444',2,3));
+  o.push(T(240,47,'Eyepiece','#444',10,'middle',false));
+  // objective lens
+  o.push(ellipse(240,136,14,8,'#aad4ff','#1565C0',2));
+  if(p>=1){
+    o.push(T(290,136,'Objective lens','#1565C0',10,'start',true));
+    o.push(L(254,136,288,136,'#1565C0',1));
+  }
+  // stage
+  o.push(R(195,152,90,12,'#ddd','#555',1.5,2));
+  if(p>=2){
+    o.push(T(140,158,'Stage','#555',10,'end',false));
+    o.push(L(195,158,160,158,'#555',1));
+  }
+  // coarse focus knob
+  o.push(circ(210,175,10,'#ccc','#555',1.5));
+  if(p>=3){
+    o.push(T(170,178,'Coarse focus','#C0272D',10,'end',true));
+    o.push(L(200,177,173,177,'#C0272D',1));
+    o.push(T(240,295,'Magnification = eyepiece \u00d7 objective','#2E7D32',11,'middle',true));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* ── Q5: Unicellular organisms ── */
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  // Amoeba (left)
+  o.push(T(120,22,'Amoeba','#C8922A',12,'middle',true));
+  // irregular blob shape via path
+  o.push('<path d="M120,80 C160,60 185,90 175,120 C185,150 160,175 130,168 C95,175 65,155 68,125 C55,95 80,65 120,80 Z" fill="#fff9e6" stroke="#C8922A" stroke-width="2"/>');
+  o.push(circ(118,122,14,'#ffeaa7','#C8922A',1.5));
+  // pseudopods
+  if(p>=1){
+    o.push('<path d="M175,120 C195,105 210,100 205,118 C210,135 195,138 175,130" fill="#fff9e6" stroke="#C8922A" stroke-width="2"/>');
+    o.push(T(215,115,'Pseudopod','#C8922A',10,'start',false));
+    o.push(T(215,128,'(for movement)','#C8922A',10,'start',false));
+  }
+  // Euglena (middle)
+  o.push(T(260,22,'Euglena','#2E7D32',12,'middle',true));
+  o.push('<path d="M260,55 C280,55 295,80 295,130 C295,175 280,200 260,205 C240,200 225,175 225,130 C225,80 240,55 260,55 Z" fill="#e8f5e9" stroke="#2E7D32" stroke-width="2"/>');
+  o.push(circ(260,115,12,'#a5d6a7','#2E7D32',1.5));
+  if(p>=2){
+    // flagellum
+    o.push('<path d="M260,55 C265,35 280,20 275,8" fill="none" stroke="#2E7D32" stroke-width="1.5"/>');
+    o.push(T(285,12,'Flagellum','#2E7D32',10,'start',false));
+    o.push(T(260,230,'Has chloroplasts','#2E7D32',10,'middle',false));
+    o.push(T(260,242,'— makes own food','#2E7D32',10,'middle',false));
+  }
+  // Bacterium (right)
+  o.push(T(390,22,'Bacterium','#C0272D',12,'middle',true));
+  o.push(ellipse(390,130,40,25,'#fde8e8','#C0272D',2));
+  if(p>=3){
+    // flagella
+    o.push('<path d="M430,125 C450,110 460,95 458,80" fill="none" stroke="#C0272D" stroke-width="1.5"/>');
+    o.push('<path d="M430,135 C452,140 462,155 460,168" fill="none" stroke="#C0272D" stroke-width="1.5"/>');
+    o.push(T(390,175,'No nucleus','#C0272D',10,'middle',true));
+    o.push(T(390,187,'(prokaryote)','#C0272D',10,'middle',false));
+  }
+  s.innerHTML=o.join('');
+}
+
+/* ── QS array ── */
+var QS=[
+  {
+    ey:'Y7 Biology \u2022 Q1',
+    ti:'What is a cell?',
+    su:'The basic unit of all living things',
+    steps:[
+      {
+        sl:'The cell',
+        p:'All living organisms are made of <b>cells</b>. The cell is the smallest unit that can carry out the basic processes of life — growing, reproducing, and responding to the environment.<br><br>This is an <b>animal cell</b>. Its boundary is called the <b>cell membrane</b>, which controls what enters and leaves.',
+        draw:function(){dQ1(0);}
+      },
+      {
+        sl:'The nucleus',
+        p:'The <b>nucleus</b> is the control centre of the cell. It contains <b>DNA</b> — the genetic instructions that tell the cell what to do and how to grow. Almost every cell in your body has a nucleus.',
+        draw:function(){dQ1(1);}
+      },
+      {
+        sl:'The cytoplasm',
+        p:'The <b>cytoplasm</b> is the jelly-like fluid that fills the cell. Chemical reactions that keep the cell alive — such as releasing energy from food — take place here. It also contains tiny structures called <b>organelles</b>.',
+        draw:function(){dQ1(2);}
+      },
+      {
+        sl:'The cell membrane',
+        p:'The <b>cell membrane</b> surrounds the cytoplasm. It is partially permeable — it lets some substances pass through (like oxygen and glucose) while blocking others.<br><br>'+
+        tryItMC(function(){
+          var opts=[
+            ['The nucleus','The cytoplasm','The cell membrane','The ribosome'],
+            ['The cytoplasm','The nucleus','The ribosome','The cell membrane'],
+            ['The cell membrane','The nucleus','The cytoplasm','The mitochondria']
+          ];
+          var q=rPick([
+            {q:'Which part of the cell contains DNA?',opts:opts[0],c:0,w:'The <b>nucleus</b> contains DNA — the genetic instructions for the cell.'},
+            {q:'Which part of the cell is described as "jelly-like" and where reactions take place?',opts:opts[1],c:0,w:'The <b>cytoplasm</b> is the jelly-like fluid where chemical reactions occur.'},
+            {q:'Which part controls what enters and leaves the cell?',opts:opts[2],c:0,w:'The <b>cell membrane</b> is partially permeable and controls entry/exit of substances.'}
+          ]);
+          return {question:q.q,options:q.opts,correct:q.c,working:q.w};
+        }),
+        draw:function(){dQ1(3);}
+      }
+    ]
+  },
+  {
+    ey:'Y7 Biology \u2022 Q2',
+    ti:'Animal vs Plant Cells',
+    su:'Similarities and key differences',
+    steps:[
+      {
+        sl:'Shared features',
+        p:'Both animal and plant cells have:<br><br>\u2022 A <b>cell membrane</b><br>\u2022 A <b>nucleus</b><br>\u2022 <b>Cytoplasm</b><br><br>These three structures are found in almost all living cells.',
+        draw:function(){dQ2(0);}
+      },
+      {
+        sl:'The cell wall',
+        p:'Plant cells have a <b>cell wall</b> made of <b>cellulose</b> — a tough fibre that gives the cell a rigid rectangular shape and extra support. Animal cells do <b>not</b> have a cell wall, which is why they are more irregular in shape.',
+        draw:function(){dQ2(1);}
+      },
+      {
+        sl:'Chloroplasts',
+        p:'Plant cells (in green parts of the plant) contain <b>chloroplasts</b>. These contain a green pigment called <b>chlorophyll</b> which absorbs sunlight to make food through <b>photosynthesis</b>.<br><br>Animal cells have <b>no</b> chloroplasts — animals must eat food rather than make it.',
+        draw:function(){dQ2(2);}
+      },
+      {
+        sl:'The permanent vacuole',
+        p:'Plant cells often have a large <b>permanent vacuole</b> filled with cell sap. This keeps the cell firm (turgid) and helps support the plant.<br><br>Animal cells may have small temporary vacuoles but <b>not</b> a large permanent one.<br><br>'+
+        tryItMC(function(){
+          var qs=[
+            {q:'Which structure is found in plant cells but NOT animal cells?',opts:['Chloroplast','Nucleus','Cell membrane','Cytoplasm'],c:0,w:'<b>Chloroplasts</b> are only in plant cells. Both cell types share a nucleus, cell membrane and cytoplasm.'},
+            {q:'What is the cell wall made of?',opts:['Cellulose','Chlorophyll','Glucose','Starch'],c:0,w:'The cell wall is made of <b>cellulose</b>, a strong fibre that gives the cell its rigid shape.'},
+            {q:'What is the function of chloroplasts?',opts:['Photosynthesis','Respiration','Protein synthesis','Cell division'],c:0,w:'Chloroplasts carry out <b>photosynthesis</b> — using sunlight to make glucose from carbon dioxide and water.'}
+          ];
+          return rPick(qs);
+        }),
+        draw:function(){dQ2(3);}
+      }
+    ]
+  },
+  {
+    ey:'Y7 Biology \u2022 Q3',
+    ti:'Specialised Cells',
+    su:'How cells are adapted for specific jobs',
+    steps:[
+      {
+        sl:'Specialisation',
+        p:'Multicellular organisms (like humans and plants) have many <b>different types of cells</b>, each adapted for a specific function. This is called <b>specialisation</b>.<br><br>A cell\'s structure is linked to its function — form follows function.',
+        draw:function(){dQ3(0);}
+      },
+      {
+        sl:'Red blood cells',
+        p:'<b>Red blood cells</b> are adapted to carry oxygen around the body:<br><br>\u2022 <b>Biconcave disc shape</b> — large surface area for absorbing oxygen<br>\u2022 <b>No nucleus</b> — more space to carry haemoglobin<br>\u2022 Contain <b>haemoglobin</b> — binds to oxygen',
+        draw:function(){dQ3(1);}
+      },
+      {
+        sl:'Nerve cells',
+        p:'<b>Nerve cells (neurones)</b> transmit electrical signals rapidly around the body:<br><br>\u2022 Very <b>long axon</b> — carries signals over long distances<br>\u2022 <b>Dendrites</b> — branch-like extensions to receive signals from other neurones<br>\u2022 <b>Myelin sheath</b> (not shown) — insulates the axon to speed up signals',
+        draw:function(){dQ3(2);}
+      },
+      {
+        sl:'Root hair cells',
+        p:'<b>Root hair cells</b> absorb water and minerals from the soil:<br><br>\u2022 Long <b>root hair extension</b> — greatly increases surface area for absorption<br>\u2022 No chloroplasts — underground, so no light for photosynthesis<br><br>'+
+        tryItMC(function(){
+          var qs=[
+            {q:'Why do red blood cells have no nucleus?',opts:['To carry more haemoglobin','To move faster','To absorb oxygen directly','To survive longer'],c:0,w:'Removing the nucleus leaves more space for <b>haemoglobin</b>, the protein that carries oxygen.'},
+            {q:'What feature of root hair cells increases water absorption?',opts:['Long hair-like extension','Presence of chloroplasts','Biconcave shape','Large nucleus'],c:0,w:'The long <b>root hair extension</b> dramatically increases the surface area in contact with soil water.'},
+            {q:'Which specialised cell transmits electrical signals?',opts:['Nerve cell','Red blood cell','Root hair cell','Guard cell'],c:0,w:'<b>Nerve cells (neurones)</b> are specialised to transmit electrical signals rapidly through the body.'}
+          ];
+          return rPick(qs);
+        }),
+        draw:function(){dQ3(3);}
+      }
+    ]
+  },
+  {
+    ey:'Y7 Biology \u2022 Q4',
+    ti:'Using a Microscope',
+    su:'Magnification and cell observation',
+    steps:[
+      {
+        sl:'The light microscope',
+        p:'A <b>light microscope</b> uses lenses to magnify objects too small to see with the naked eye. It allowed scientists to discover cells for the first time.<br><br>Key parts: <b>eyepiece lens</b>, <b>objective lens</b>, <b>stage</b> (where the slide goes), and focus knobs.',
+        draw:function(){dQ4(0);}
+      },
+      {
+        sl:'Objective lens',
+        p:'The <b>objective lens</b> is the lens closest to the specimen. Most microscopes have several objective lenses of different magnification (e.g. \u00d74, \u00d710, \u00d740).<br><br>You start with the <b>lowest magnification</b> to find the specimen, then switch to higher magnification for detail.',
+        draw:function(){dQ4(1);}
+      },
+      {
+        sl:'The stage',
+        p:'The <b>stage</b> is the flat platform where the glass slide is placed. The specimen on the slide must be thin enough for light to pass through it.<br><br>Specimens are often <b>stained</b> with dyes (e.g. iodine for plant cells) to make structures visible.',
+        draw:function(){dQ4(2);}
+      },
+      {
+        sl:'Calculating magnification',
+        p:'Total magnification is calculated as:<br><span class="fm">Magnification = eyepiece lens \u00d7 objective lens</span>For example: eyepiece \u00d710, objective \u00d740 gives total magnification of <b>400\u00d7</b>.<br><br>'+
+        tryIt(function(){
+          var eye=rPick([10,10,10]);
+          var obj=rPick([4,10,40]);
+          return {
+            question:'An eyepiece lens is \u00d7'+eye+' and the objective lens is \u00d7'+obj+'. What is the total magnification?',
+            ans:eye*obj,
+            tol:0,
+            unit:'\u00d7',
+            hints:['Total magnification = eyepiece \u00d7 objective','Multiply the two values together'],
+            working:'Magnification = '+eye+' \u00d7 '+obj+' = <b>'+(eye*obj)+'</b>\u00d7'
+          };
+        }),
+        draw:function(){dQ4(3);}
+      }
+    ]
+  },
+  {
+    ey:'Y7 Biology \u2022 Q5',
+    ti:'Unicellular Organisms',
+    su:'Single-celled living things',
+    steps:[
+      {
+        sl:'What is a unicellular organism?',
+        p:'A <b>unicellular organism</b> is made of just <b>one cell</b>. That single cell must carry out all the functions of life: feeding, respiring, excreting, growing, and reproducing.<br><br>Examples include <b>amoeba</b>, <b>euglena</b>, and <b>bacteria</b>.',
+        draw:function(){dQ5(0);}
+      },
+      {
+        sl:'Amoeba',
+        p:'An <b>amoeba</b> is a unicellular organism found in pond water. It moves and feeds using <b>pseudopods</b> (\u2018false feet\u2019) — extensions of its cytoplasm that flow outward to engulf food particles.<br><br>This process of engulfing food is called <b>phagocytosis</b>.',
+        draw:function(){dQ5(1);}
+      },
+      {
+        sl:'Euglena',
+        p:'<b>Euglena</b> is unusual — it has a <b>flagellum</b> for movement (like an animal) but also <b>chloroplasts</b> to photosynthesise (like a plant).<br><br>In sunlight it makes its own food. In the dark it can absorb nutrients from its surroundings. Scientists classify it as a <b>protist</b>.',
+        draw:function(){dQ5(2);}
+      },
+      {
+        sl:'Bacteria',
+        p:'<b>Bacteria</b> are the smallest unicellular organisms. Crucially, they are <b>prokaryotes</b> — they have <b>no nucleus</b>. Their DNA floats freely in the cytoplasm.<br><br>All other cells (plant, animal, fungal) are <b>eukaryotes</b> with a true nucleus.<br><br>'+
+        tryItMC(function(){
+          var qs=[
+            {q:'What is the key difference between a prokaryote and a eukaryote?',opts:['Prokaryotes have no nucleus','Prokaryotes have no cell membrane','Eukaryotes have no nucleus','Eukaryotes are always unicellular'],c:0,w:'<b>Prokaryotes</b> (like bacteria) have no membrane-bound nucleus — their DNA floats in the cytoplasm. Eukaryotes have a true nucleus.'},
+            {q:'How does an amoeba move?',opts:['Using pseudopods','Using a flagellum','Using cilia','By diffusion'],c:0,w:'An amoeba extends <b>pseudopods</b> (false feet) — projections of its cytoplasm — to move and engulf food.'},
+            {q:'What makes euglena unusual compared to other unicellular organisms?',opts:['It can both photosynthesise and move','It has two nuclei','It has a cell wall and chloroplasts','It is the largest cell'],c:0,w:'Euglena is unusual because it has <b>chloroplasts</b> for photosynthesis AND a <b>flagellum</b> for movement — features normally associated with different kingdoms.'}
+          ];
+          return rPick(qs);
+        }),
+        draw:function(){dQ5(3);}
+      }
+    ]
+  }
+];
+
+/* ── Engine ── */
+var qi=0,si=0;
+
+function buildSidebar(){
+  var sb=document.getElementById('sb');
+  sb.innerHTML='<div class="sb-lbl">Topics</div>';
+  QS.forEach(function(q,i){
+    var b=document.createElement('button');
+    b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;
+    b.onclick=function(){qi=i;si=0;render();};
+    sb.appendChild(b);
+  });
+}
+
+function render(){
+  var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').textContent=q.ey;
+  document.getElementById('ti').textContent=q.ti;
+  document.getElementById('su').textContent=q.su;
+  document.getElementById('pn').className='pnl fi';
+  document.getElementById('pn').innerHTML='<div class="sl">'+st.sl+'</div><div>'+st.p+'</div>';
+  st.draw();
+  // dots
+  var dt=document.getElementById('dt');
+  dt.innerHTML=q.steps.map(function(_,i){return '<div class="dot'+(i===si?' on':i<si?' dn':'')+'"></div>';}).join('');
+  // buttons
+  document.getElementById('pb').disabled=(qi===0&&si===0);
+  var last=(qi===QS.length-1&&si===q.steps.length-1);
+  document.getElementById('nb').textContent=last?'Finished \u2713':'Next \u2192';
+  document.getElementById('nb').disabled=false;
+  // sidebar
+  document.querySelectorAll('.qb').forEach(function(b,i){b.classList.toggle('on',i===qi);});
+}
+
+document.getElementById('nb').onclick=function(){
+  var q=QS[qi];
+  if(si<q.steps.length-1){si++;}
+  else if(qi<QS.length-1){qi++;si=0;}
+  render();
+};
+document.getElementById('pb').onclick=function(){
+  if(si>0){si--;}
+  else if(qi>0){qi--;si=QS[qi].steps.length-1;}
+  render();
+};
+
+buildSidebar();
+render();
+</script>
+</body>
+</html>

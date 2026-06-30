@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Electricity — Year 7 Physics</title>
+<style>
+:root{--acc:#1565C0;--dark:#0D47A1;--cream:#E3F2FD;--ink:#0d1a2e;--line:#90CAF9;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--acc);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--acc);color:var(--acc);}
+.qb.on{background:var(--acc);color:#fff;border-color:var(--acc);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--acc);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#555;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,var(--cream));padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:16px;background:var(--cream);border-left:4px solid var(--acc);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--acc);background:#fff;color:var(--acc);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--acc);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--acc);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:var(--ink);margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.nq{margin-top:12px;font-size:13px;font-weight:600;padding:6px 14px;border-radius:3px;border:1px solid #aaa;background:#f5f5f5;color:#444;cursor:pointer;}
+.nq:hover{background:#e0e0e0;}
+.wk-ans{margin-top:8px;font-size:14px;line-height:1.6;}
+.wk summary{cursor:pointer;color:var(--acc);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.mc-opt{padding:9px 14px;border:1.5px solid var(--line);border-radius:4px;cursor:pointer;font-size:14px;background:#fff;text-align:left;transition:.15s;font-family:inherit;}
+.mc-opt:hover{border-color:var(--acc);background:var(--cream);}
+.mc-opt.correct{border-color:#2e7d32;background:#e8f8ee;color:#1a7a3a;font-weight:600;}
+.mc-opt.wrong{border-color:#C0272D;background:#fde8e8;color:#a01820;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../dashboard-student.html" class="back">&larr; My Dashboard</a>
+  <div class="ht">Electricity — Year 7 Physics</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Topics</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 300"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+
+var ST={};
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rPick(a){return a[Math.floor(Math.random()*a.length)];}
+function tryIt(fn){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]=fn;return genTry(id,fn());
+}
+function genTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  return '<div class="try" data-tryid="'+id+'">'+
+    '<div class="try-t">&#10004; Your Turn</div><p>'+o.question+'</p>'+
+    '<div class="ar"><input type="number" step="any" placeholder="Your answer" id="'+id+'_i"/>'+
+    '<button class="ck" onclick="ck(''+id+'')">&#10003; Check</button></div>'+
+    '<div class="fb" id="'+id+'_f"></div>'+
+    '<details class="wk"><summary>Show working</summary><div class="wk-b">'+
+    (h?'<ul class="hl">'+h+'</ul>':'')+
+    '<div class="wk-ans">'+o.working+'</div></div></details>'+
+    '<button class="nq" data-tryid="'+id+'">New question</button></div>';
+}
+function ck(id){
+  var fn=ST[id];var o=typeof fn==='function'?fn():fn;
+  var v=parseFloat(document.getElementById(id+'_i').value);
+  var f=document.getElementById(id+'_f');
+  if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}
+  var tol=o.tol!==undefined?o.tol:0.5;
+  if(Math.abs(v-o.ans)<=tol){
+    f.className='fb ok';f.textContent='\u2713 Correct! Answer: '+o.ans+(o.unit?' '+o.unit:'');
+  }else{f.className='fb er';f.textContent='Not quite \u2014 check your working and try again.';}
+}
+function tryItMC(fn){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]=fn;return genTryMC(id,fn());
+}
+function genTryMC(id,o){
+  var opts=o.options.map(function(opt,i){
+    return '<button class="mc-opt" onclick="ckMC(''+id+'','+i+','+o.correct+')">'+opt+'</button>';
+  }).join('');
+  return '<div class="try" data-tryid="'+id+'">'+
+    '<div class="try-t">&#10004; Your Turn</div><p>'+o.question+'</p>'+
+    '<div class="mc-opts" id="'+id+'_opts">'+opts+'</div>'+
+    '<div class="fb" id="'+id+'_f"></div>'+
+    '<details class="wk"><summary>Show answer</summary><div class="wk-b"><div class="wk-ans">'+o.working+'</div></div></details>'+
+    '<button class="nq" data-tryid="'+id+'_mc">New question</button></div>';
+}
+function ckMC(id,chosen,correct){
+  var opts=document.getElementById(id+'_opts').querySelectorAll('.mc-opt');
+  opts.forEach(function(b,i){
+    if(i===correct)b.classList.add('correct');
+    else if(i===chosen)b.classList.add('wrong');
+    b.disabled=true;
+  });
+  var f=document.getElementById(id+'_f');
+  if(chosen===correct){f.className='fb ok';f.textContent='\u2713 Correct!';}
+  else{f.className='fb er';f.textContent='Not quite \u2014 the correct answer is highlighted in green.';}
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.nq');if(!b)return;
+  var rawId=b.getAttribute('data-tryid');
+  var id=rawId.replace('_mc','');
+  var fn=ST[id];if(typeof fn!=='function')return;
+  var wrap=b.closest('.try');if(!wrap)return;
+  var isMC=(rawId.indexOf('_mc')>=0);
+  var fresh=isMC?genTryMC(id,fn()):genTry(id,fn());
+  var tmp=document.createElement('div');tmp.innerHTML=fresh;
+  wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#333';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';}
+function R(x,y,w,h,fill,stroke,sw,rx){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#333')+'" stroke-width="'+(sw||2)+'" rx="'+(rx||0)+'"/>';}
+function circ(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#333')+'" stroke-width="'+(sw||2)+'"/>';}
+function ellipse(cx,cy,rx,ry,fill,stroke,sw){return '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#333')+'" stroke-width="'+(sw||2)+'"/>';}
+function arr(x1,y1,x2,y2,c,w){
+  c=c||'#555';w=w||1.5;
+  var ang=Math.atan2(y2-y1,x2-x1);
+  var hs=8;
+  var p1x=x2-hs*Math.cos(ang-0.4),p1y=y2-hs*Math.sin(ang-0.4);
+  var p2x=x2-hs*Math.cos(ang+0.4),p2y=y2-hs*Math.sin(ang+0.4);
+  return L(x1,y1,x2,y2,c,w)+'<polygon points="'+x2+','+y2+' '+p1x.toFixed(1)+','+p1y.toFixed(1)+' '+p2x.toFixed(1)+','+p2y.toFixed(1)+'" fill="'+c+'"/>';
+}
+
+
+var QS=[
+{ey:'Y7 Physics \u2022 Q1',ti:'Static Electricity',su:'Charges and attraction',steps:[
+{sl:'Electric charge',p:'There are two types of electric charge: <b>positive (+)</b> and <b>negative (-)</b>.<br><br>\u2022 Like charges <b>repel</b><br>\u2022 Unlike charges <b>attract</b><br><br>Most objects are neutral — they have equal numbers of positive and negative charges.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(circ(130,130,35,'#fde8e8','#C0272D',2));o.push(T(130,135,'+','#C0272D',24,'middle',true));
+o.push(circ(230,130,35,'#fde8e8','#C0272D',2));o.push(T(230,135,'+','#C0272D',24,'middle',true));
+o.push(arr(163,130,197,130,'#C0272D',2));o.push(arr(197,130,163,130,'#C0272D',2));
+o.push(T(180,200,'Like charges REPEL','#C0272D',10,'middle',true));
+o.push(circ(310,130,35,'#fde8e8','#C0272D',2));o.push(T(310,135,'+','#C0272D',24,'middle',true));
+o.push(circ(410,130,35,'#e3f2fd','#1565C0',2));o.push(T(410,135,'-','#1565C0',28,'middle',true));
+o.push(arr(347,130,373,130,'#2E7D32',2));
+o.push(T(360,200,'Unlike charges ATTRACT','#2E7D32',10,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:'Charging by friction',p:'When two materials are rubbed together, electrons transfer from one to the other. The material that <b>gains electrons</b> becomes negatively charged; the one that <b>loses electrons</b> becomes positively charged.<br><br>Example: rubbing a balloon on hair — balloon becomes negative, hair becomes positive.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Charging by friction','#1565C0',12,'middle',true));
+o.push(ellipse(130,160,60,80,'#e1bee7','#6A1B9A',2));o.push(T(130,200,'Balloon','#6A1B9A',10,'middle',true));o.push(T(130,115,'- - -','#1565C0',14,'middle',true));
+for(var i=0;i<5;i++){var lx=200+i*8;o.push(L(lx,130,lx,200,'#8d6e63',3));}
+o.push(T(210,220,'Hair','#8d6e63',10,'middle',true));o.push(T(210,110,'+ + +','#C0272D',14,'middle',true));
+o.push(arr(158,145,196,135,'#1565C0',1.5));o.push(T(175,125,'e\u207b transfer','#1565C0',9,'middle',false));
+s.innerHTML=o.join('');}},
+{sl:'Conductors and insulators',p:'<b>Conductors</b> allow charge to flow through them easily (e.g. metals, graphite).<br><br><b>Insulators</b> do not allow charge to flow (e.g. plastic, rubber, glass).<br><br>Static charge builds up on insulators but quickly flows away through conductors to earth.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(40,80,160,140,'#e3f2fd','#1565C0',2,6));o.push(T(120,140,'CONDUCTOR','#1565C0',11,'middle',true));o.push(T(120,158,'Metals, graphite','#555',9,'middle',false));o.push(T(120,172,'Charge flows freely','#2E7D32',9,'middle',false));
+o.push(R(280,80,160,140,'#fde8e8','#C0272D',2,6));o.push(T(360,140,'INSULATOR','#C0272D',11,'middle',true));o.push(T(360,158,'Plastic, rubber','#555',9,'middle',false));o.push(T(360,172,'Charge stays put','#C0272D',9,'middle',false));
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+
+tryItMC(function(){var qs=[
+{question:'What happens when two negative charges are brought close together?',options:['They repel each other','They attract each other','Nothing happens','They become neutral'],correct:0,working:'Like charges always <b>repel</b> each other. Two negative charges push away from each other, just as two positive charges do. Only unlike charges (+ and -) attract.'},
+{question:'When a balloon is rubbed on hair, which object gains electrons?',options:['The balloon','The hair','Both equally','Neither'],correct:0,working:'The balloon <b>gains electrons</b> (becomes negatively charged); the hair <b>loses electrons</b> (becomes positively charged). Electrons transfer from hair to balloon during friction.'},
+{question:'Why does static charge build up on plastic but not on metal?',options:['Plastic is an insulator; charge cannot flow away','Metal is heavier','Plastic has more electrons','Metal is magnetic'],correct:0,working:'Plastic is an <b>insulator</b> — charge cannot flow through it, so it builds up on the surface. Metal is a conductor, so any charge quickly flows away to earth.'}
+];return rPick(qs);})
+,draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,40,'Static electricity summary','#1565C0',12,'middle',true));
+var rows=[['Like charges','Repel','#C0272D'],['Unlike charges','Attract','#2E7D32'],['Gain electrons','Becomes negative','#1565C0'],['Lose electrons','Becomes positive','#C0272D']];
+rows.forEach(function(r,i){o.push(R(30,75+i*52,420,38,r[2]+'18',r[2],1.5,4));o.push(T(150,99+i*52,r[0],r[2],11,'start',false));o.push(T(360,99+i*52,r[1],'#555',10,'middle',false));});
+s.innerHTML=o.join('');}}
+]},
+{ey:'Y7 Physics \u2022 Q2',ti:'Current and Circuits',su:'Flow of charge',steps:[
+{sl:'Electric current',p:'<b>Electric current</b> is the flow of charge (electrons) around a circuit. It is measured in <b>amperes (A)</b> using an <b>ammeter</b> (connected in series).<br><br>Current flows from the <b>negative terminal</b> of a battery, through the circuit, to the <b>positive terminal</b> (conventional current flows the other way).',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(80,80,320,160,'none','#1565C0',2,8));
+o.push(R(78,138,34,44,'#fff9c4','#C8922A',2,2));o.push(T(95,163,'+\u2212','#C8922A',12,'middle',true));
+o.push(circ(290,160,18,'none','#1565C0',2));o.push(L(279,149,301,171,'#1565C0',2));o.push(L(301,149,279,171,'#1565C0',2));
+o.push(arr(155,80,210,80,'#C0272D',2.5));o.push(T(182,69,'I','#C0272D',13,'middle',true));
+o.push(T(240,270,'Ammeter in series measures current (A)','#555',9,'middle',false));
+s.innerHTML=o.join('');}},
+{sl:'Voltage',p:'<b>Voltage</b> (potential difference) is the energy transferred per unit charge. It is measured in <b>volts (V)</b> using a <b>voltmeter</b> (connected in parallel).<br><br>The battery voltage drives the current around the circuit.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(80,80,320,160,'none','#1565C0',2,8));
+o.push(R(78,138,34,44,'#fff9c4','#C8922A',2,2));o.push(T(95,163,'+\u2212','#C8922A',12,'middle',true));
+o.push(circ(290,160,18,'none','#1565C0',2));o.push(L(279,149,301,171,'#1565C0',2));o.push(L(301,149,279,171,'#1565C0',2));
+o.push(R(140,45,120,36,'#e8f5e9','#2E7D32',1.5,4));o.push(L(160,81,160,81,'#2E7D32',1));o.push(L(160,80,160,81,'#2E7D32',1));
+o.push(L(155,80,155,50,'#2E7D32',1.5));o.push(L(250,80,250,50,'#2E7D32',1.5));
+o.push(T(202,65,'V','#2E7D32',12,'middle',true));
+o.push(T(240,270,'Voltmeter in parallel measures voltage (V)','#555',9,'middle',false));
+s.innerHTML=o.join('');}},
+{sl:'Ohm\'s Law',p:'<b>Ohm\'s Law</b> relates voltage, current and resistance:<br><br><span class="fm">Voltage (V) = Current (A) \u00d7 Resistance (\u03a9)</span>Rearranging: I = V/R and R = V/I.<br><br>A higher resistance means less current for the same voltage.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push('<polygon points="240,40 120,230 360,230" fill="#e3f2fd" stroke="#1565C0" stroke-width="2"/>');
+o.push(T(240,110,'V','#1565C0',28,'middle',true));
+o.push(L(180,230,180,40,'#555',1,'4,2'));
+o.push(T(152,205,'I','#C0272D',26,'middle',true));o.push(T(270,205,'R','#2E7D32',26,'middle',true));
+o.push(T(100,270,'I = V \u00f7 R','#C0272D',11,'middle',false));o.push(T(240,270,'V = I \u00d7 R','#1565C0',11,'middle',false));o.push(T(380,270,'R = V \u00f7 I','#2E7D32',11,'middle',false));
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+
+tryIt(function(){var v=rInt(2,12);var r=rInt(2,8);return{question:'A circuit has voltage '+v+' V and resistance '+r+' \u03a9. Calculate the current.',ans:Math.round(v/r*100)/100,tol:0.05,unit:'A',hints:['I = V \u00f7 R','I = '+v+' \u00f7 '+r],working:'I = '+v+' \u00f7 '+r+' = <b>'+(Math.round(v/r*100)/100)+'</b> A'};})
+,draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,40,'V = I \u00d7 R','#1565C0',18,'middle',true));
+var rows=[['Voltage (V)','Volts (V)','Voltmeter (parallel)','#1565C0'],['Current (I)','Amperes (A)','Ammeter (series)','#C0272D'],['Resistance (R)','Ohms (\u03a9)','Calculated','#2E7D32']];
+rows.forEach(function(r,i){o.push(R(20,85+i*60,440,48,r[3]+'18',r[3],1.5,4));o.push(T(90,114+i*60,r[0],r[3],11,'start',true));o.push(T(230,114+i*60,r[1],'#555',9,'middle',false));o.push(T(370,114+i*60,r[2],'#888',9,'middle',false));});
+s.innerHTML=o.join('');}}
+]},
+{ey:'Y7 Physics \u2022 Q3',ti:'Magnets and Magnetism',su:'Magnetic fields and forces',steps:[
+{sl:'Magnetic poles',p:'Every magnet has a <b>north pole</b> and a <b>south pole</b>.<br><br>\u2022 Unlike poles <b>attract</b> (N and S)<br>\u2022 Like poles <b>repel</b> (N-N or S-S)<br><br>The Earth has a magnetic field — a compass needle is a small magnet that aligns with it.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(30,110,140,60,'#fde8e8','#C0272D',2,4));o.push(R(30,110,70,60,'#fde8e8','#C0272D',2,0));o.push(T(65,145,'N','#C0272D',18,'middle',true));o.push(T(135,145,'S','#1565C0',18,'middle',true));
+o.push(R(310,110,140,60,'#e3f2fd','#1565C0',2,4));o.push(T(345,145,'N','#C0272D',18,'middle',true));o.push(T(415,145,'S','#1565C0',18,'middle',true));
+o.push(arr(173,140,308,140,'#C0272D',2));o.push(T(240,128,'ATTRACT','#2E7D32',11,'middle',true));
+o.push(T(240,240,'N pole of one attracts S pole of other','#555',10,'middle',false));
+s.innerHTML=o.join('');}},
+{sl:'Magnetic field lines',p:'A <b>magnetic field</b> is a region where magnetic materials experience a force. Field lines show the direction a north pole would move.<br><br>\u2022 Field lines go from <b>N to S</b> outside the magnet<br>\u2022 Closer field lines = stronger field',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(170,130,140,40,'#e0e0e0','#555',2,2));o.push(T(205,155,'N','#C0272D',16,'middle',true));o.push(T(275,155,'S','#1565C0',16,'middle',true));
+var arcs=['M170,150 C120,100 100,50 240,50 C380,50 360,100 310,150','M170,150 C130,130 115,90 240,90 C365,90 350,130 310,150','M170,150 C150,145 145,140 240,140 C335,140 330,145 310,150'];
+arcs.forEach(function(d,i){var w=2-i*0.5;o.push('<path d="'+d+'" fill="none" stroke="#6A1B9A" stroke-width="'+w+'" marker-end="url(#arr)"/>');});
+o.push(T(240,280,'Field lines from N to S outside magnet','#6A1B9A',10,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:'Electromagnets',p:'An <b>electromagnet</b> is a coil of wire (solenoid) that creates a magnetic field when current flows through it. The magnetic field disappears when the current is switched off.<br><br>Strength can be increased by: more turns, higher current, iron core inside the coil.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(170,120,140,60,'#fff9c4','#C8922A',2,4));o.push(T(240,153,'Iron core','#C8922A',10,'middle',false));
+for(var i=0;i<7;i++){o.push(ellipse(170+i*20,150,8,30,'none','#1565C0',1.5));}
+o.push(L(100,150,170,150,'#C8922A',2.5));o.push(L(310,150,370,150,'#C8922A',2.5));
+o.push(arr(110,150,85,150,'#C0272D',2));o.push(T(75,143,'N','#C0272D',16,'middle',true));
+o.push(arr(360,150,390,150,'#1565C0',2));o.push(T(400,143,'S','#1565C0',16,'middle',true));
+o.push(T(240,250,'More turns / more current / iron core = stronger','#555',9,'middle',false));
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+
+tryItMC(function(){var qs=[
+{question:'What happens when two north poles of magnets are brought close together?',options:['They repel','They attract','Nothing happens','They become demagnetised'],correct:0,working:'Like poles <b>repel</b> each other. Two north poles push away from each other. Only unlike poles (N and S) attract.'},
+{question:'How can you increase the strength of an electromagnet?',options:['Increase the number of coil turns','Use a plastic core','Decrease the current','Use a shorter wire'],correct:0,working:'You can increase electromagnet strength by: <b>more coil turns</b>, higher current, or adding a <b>soft iron core</b> inside the coil.'},
+{question:'What is the direction of magnetic field lines outside a magnet?',options:['From N pole to S pole','From S pole to N pole','Circular around the magnet','Random directions'],correct:0,working:'Outside a magnet, field lines run from the <b>north pole to the south pole</b>. Inside the magnet, they run from S to N (completing the loop).'}
+];return rPick(qs);})
+,draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,40,'Electromagnets vs permanent magnets','#1565C0',11,'middle',true));
+var rows=[['Permanent magnet','Always magnetic, cannot be switched off'],['Electromagnet','Switchable, strength controllable'],['Iron core','Increases field strength significantly'],['More coil turns','Increases field strength']];var cols=['#C0272D','#1565C0','#C8922A','#2E7D32'];
+rows.forEach(function(r,i){o.push(R(30,70+i*52,420,38,cols[i]+'18',cols[i],1.5,4));o.push(T(150,94+i*52,r[0],cols[i],10,'start',true));o.push(T(330,94+i*52,r[1],'#555',9,'middle',false));});
+s.innerHTML=o.join('');}}
+]},
+{ey:'Y7 Physics \u2022 Q4',ti:'Voltage, Current and Resistance',su:'Ohm\'s Law in practice',steps:[
+{sl:'Measuring in circuits',p:'Key measuring instruments:<br><br>\u2022 <b>Ammeter</b>: measures current (A) — connected in <b>series</b><br>\u2022 <b>Voltmeter</b>: measures voltage (V) — connected in <b>parallel</b><br>\u2022 <b>Ohmmeter</b>: measures resistance (\u03a9)',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(60,70,160,80,'#e3f2fd','#1565C0',2,4));o.push(T(140,115,'Ammeter','#1565C0',11,'middle',true));o.push(T(140,132,'Series \u2022 Amps (A)','#555',9,'middle',false));
+o.push(R(260,70,160,80,'#e8f5e9','#2E7D32',2,4));o.push(T(340,115,'Voltmeter','#2E7D32',11,'middle',true));o.push(T(340,132,'Parallel \u2022 Volts (V)','#555',9,'middle',false));
+o.push(T(240,260,'Always: ammeter in series, voltmeter in parallel','#6A1B9A',10,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:'Resistance',p:'<b>Resistance</b> opposes the flow of current in a circuit. It converts electrical energy into thermal energy (heat).<br><br>Resistance depends on: length of wire (longer = more), thickness (thinner = more), material, and temperature.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+var factors=[['Longer wire','\u2191 Resistance','#C0272D'],['Thinner wire','\u2191 Resistance','#6A1B9A'],['Higher temp','\u2191 Resistance','#C8922A'],['Better conductor','\u2193 Resistance','#2E7D32']];
+factors.forEach(function(f,i){o.push(R(30,50+i*55,420,40,f[2]+'18',f[2],1.5,4));o.push(T(170,75+i*55,f[0],f[2],11,'start',false));o.push(T(380,75+i*55,f[1],f[2],13,'end',true));});
+s.innerHTML=o.join('');}},
+{sl:'Series and parallel calculations',p:'In a <b>series</b> circuit:<br>\u2022 Current is the same throughout<br>\u2022 Voltages add up: V_total = V\u2081 + V\u2082<br><br>In a <b>parallel</b> circuit:<br>\u2022 Voltage is the same across each branch<br>\u2022 Currents add up: I_total = I\u2081 + I\u2082',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(120,22,'Series','#1565C0',12,'middle',true));
+o.push(R(20,50,200,80,'none','#1565C0',1.5,4));
+o.push(R(30,75,40,30,'#fde8e8','#C0272D',1.5,2));o.push(T(50,93,'2\u03a9','#C0272D',9,'middle',false));
+o.push(R(90,75,40,30,'#fde8e8','#C0272D',1.5,2));o.push(T(110,93,'3\u03a9','#C0272D',9,'middle',false));
+o.push(T(120,155,'R_total = 2+3 = 5\u03a9','#1565C0',9,'middle',false));
+o.push(T(360,22,'Parallel','#C0272D',12,'middle',true));
+o.push(R(260,50,200,80,'none','#C0272D',1.5,4));
+o.push(L(360,50,360,130,'#C0272D',1,'4,2'));
+o.push(R(275,65,70,25,'#fde8e8','#C0272D',1.5,2));o.push(T(310,80,'2\u03a9','#C0272D',9,'middle',false));
+o.push(R(275,100,70,25,'#fde8e8','#C0272D',1.5,2));o.push(T(310,114,'3\u03a9','#C0272D',9,'middle',false));
+o.push(T(360,155,'Each branch: same voltage','#C0272D',9,'middle',false));
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+
+tryIt(function(){var r1=rInt(2,6);var r2=rInt(2,6);return{question:'Two resistors of '+r1+' \u03a9 and '+r2+' \u03a9 are connected in series. What is the total resistance?',ans:r1+r2,tol:0,unit:'\u03a9',hints:['Series: total resistance = R\u2081 + R\u2082','Add the two values'],working:'R_total = '+r1+' + '+r2+' = <b>'+(r1+r2)+'</b> \u03a9'};})
+,draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Circuit rules reminder','#1565C0',12,'middle',true));
+var rows=[['Series total R','R\u2081 + R\u2082 + ...'],['Series: current','Same everywhere'],['Series: voltage','Splits between components'],['Parallel: voltage','Same in each branch']];var cols=['#C0272D','#1565C0','#C8922A','#2E7D32'];
+rows.forEach(function(r,i){o.push(R(30,65+i*52,420,38,cols[i]+'18',cols[i],1.5,4));o.push(T(160,89+i*52,r[0],cols[i],10,'start',false));o.push(T(350,89+i*52,r[1],'#555',10,'middle',false));});
+s.innerHTML=o.join('');}}
+]},
+{ey:'Y7 Physics \u2022 Q5',ti:'Using Electricity Safely',su:'Hazards, safety and the home',steps:[
+{sl:'Electrical hazards',p:'Electricity can be dangerous. Key hazards include:<br><br>\u2022 <b>Overloaded sockets</b> — too many appliances on one socket<br>\u2022 <b>Damaged insulation</b> — exposed wires<br>\u2022 <b>Water near electricity</b> — water conducts current<br>\u2022 <b>Long extension leads</b> — can overheat',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+var hazards=[['Damaged wire','#C0272D'],['Water + electricity','#1565C0'],['Overloaded socket','#C8922A'],['Long extension lead','#6A1B9A']];
+hazards.forEach(function(h,i){var x=30+i%2*230,y=60+Math.floor(i/2)*100;o.push(R(x,y,200,70,h[1]+'22',h[1],2,6));o.push(T(x+100,y+38,'\u26a0 '+h[0],h[1],10,'middle',true));});
+s.innerHTML=o.join('');}},
+{sl:'Fuses and circuit breakers',p:'A <b>fuse</b> is a thin wire that melts and breaks the circuit if too much current flows. It protects the appliance and wiring from overheating.<br><br>A <b>circuit breaker</b> does the same job but can be reset by flicking a switch — much more convenient.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(80,80,140,60,'#fff9c4','#C8922A',2,4));o.push(T(150,115,'Fuse','#C8922A',11,'middle',true));
+o.push(L(100,110,200,110,'#C8922A',2));
+o.push(R(80,200,140,60,'#e3f2fd','#1565C0',2,4));o.push(T(150,235,'Circuit breaker','#1565C0',11,'middle',true));
+o.push(T(300,80,'Too much current:','#C0272D',11,'start',false));
+o.push(arr(225,110,280,110,'#C0272D',2));o.push(T(300,115,'Fuse wire melts','#C0272D',10,'start',false));o.push(T(300,130,'Circuit breaks','#C0272D',10,'start',false));o.push(T(300,145,'Appliance protected','#2E7D32',10,'start',false));
+s.innerHTML=o.join('');}},
+{sl:'The three-pin plug',p:'In the UK/Nigeria, a three-pin plug contains:<br><br>\u2022 <b>Live wire (brown)</b>: carries current at high voltage<br>\u2022 <b>Neutral wire (blue)</b>: completes the circuit at low voltage<br>\u2022 <b>Earth wire (green/yellow)</b>: safety wire; carries current if there is a fault',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(140,50,200,200,'#e0e0e0','#555',2,8));
+o.push(R(220,20,40,50,'#555','#333',2,3));o.push(T(240,48,'Earth','#2E7D32',9,'middle',true));
+o.push(R(148,140,50,40,'#795548','#4e342e',2,2));o.push(T(173,163,'Live\n(brown)','#C0272D',8,'middle',true));
+o.push(R(282,140,50,40,'#e3f2fd','#1565C0',2,2));o.push(T(307,163,'Neutral\n(blue)','#1565C0',8,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+
+tryItMC(function(){var qs=[
+{question:'What is the purpose of a fuse?',options:['To break the circuit if too much current flows','To increase the voltage','To store electrical energy','To reduce the current'],correct:0,working:'A fuse is a thin wire that <b>melts</b> and breaks the circuit if the current exceeds a safe level. This protects the wiring and appliances from overheating or catching fire.'},
+{question:'Why is it dangerous to use electrical appliances near water?',options:['Water conducts electricity','Water increases resistance','Water reduces voltage','Water is magnetic'],correct:0,working:'Water (especially tap water containing dissolved salts) is a <b>conductor of electricity</b>. If electricity reaches water, it could flow through the water — and through a person.'},
+{question:'What colour is the live wire in a UK three-pin plug?',options:['Brown','Blue','Green/yellow','Red'],correct:0,working:'In modern UK wiring, the <b>live wire is brown</b>, the neutral wire is blue, and the earth wire is green and yellow. (Older wiring used red for live and black for neutral.)'}
+];return rPick(qs);})
+,draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Electrical safety summary','#1565C0',12,'middle',true));
+var rows=[['Live wire','Brown \u2022 High voltage \u2022 Dangerous','#C0272D'],['Neutral wire','Blue \u2022 Completes circuit','#1565C0'],['Earth wire','Green/yellow \u2022 Safety','#2E7D32'],['Fuse/breaker','Breaks circuit if overloaded','#C8922A']];
+rows.forEach(function(r,i){o.push(R(20,65+i*52,440,40,r[2]+'22',r[2],1.5,4));o.push(T(100,90+i*52,r[0],r[2],10,'start',true));o.push(T(310,90+i*52,r[1],'#555',9,'middle',false));});
+s.innerHTML=o.join('');}}
+]}
+];
+
+var qi=0,si=0;
+function buildSidebar(){
+  var sb=document.getElementById('sb');
+  sb.innerHTML='<div class="sb-lbl">Topics</div>';
+  QS.forEach(function(q,i){
+    var b=document.createElement('button');
+    b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;
+    b.onclick=function(){qi=i;si=0;render();};
+    sb.appendChild(b);
+  });
+}
+function render(){
+  var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').textContent=q.ey;
+  document.getElementById('ti').textContent=q.ti;
+  document.getElementById('su').textContent=q.su;
+  document.getElementById('pn').className='pnl fi';
+  document.getElementById('pn').innerHTML='<div class="sl">'+st.sl+'</div><div>'+st.p+'</div>';
+  st.draw();
+  var dt=document.getElementById('dt');
+  dt.innerHTML=q.steps.map(function(_,i){return '<div class="dot'+(i===si?' on':i<si?' dn':'')+'"></div>';}).join('');
+  document.getElementById('pb').disabled=(qi===0&&si===0);
+  var last=(qi===QS.length-1&&si===q.steps.length-1);
+  document.getElementById('nb').textContent=last?'Finished \u2713':'Next \u2192';
+  document.getElementById('nb').disabled=false;
+  document.querySelectorAll('.qb').forEach(function(b,i){b.classList.toggle('on',i===qi);});
+}
+document.getElementById('nb').onclick=function(){
+  var q=QS[qi];
+  if(si<q.steps.length-1){si++;}
+  else if(qi<QS.length-1){qi++;si=0;}
+  render();
+};
+document.getElementById('pb').onclick=function(){
+  if(si>0){si--;}
+  else if(qi>0){qi--;si=QS[qi].steps.length-1;}
+  render();
+};
+buildSidebar();render();
+
+</script>
+</body>
+</html>
