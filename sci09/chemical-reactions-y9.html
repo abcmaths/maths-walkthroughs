@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chemical Reactions — Year 9 Chemistry</title>
+<style>
+:root{--acc:#6A1B9A;--dark:#4A148C;--cream:#F3E5F5;--ink:#2a1a2e;--line:#CE93D8;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--acc);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--acc);color:var(--acc);}
+.qb.on{background:var(--acc);color:#fff;border-color:var(--acc);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--acc);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#555;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,var(--cream));padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:16px;background:var(--cream);border-left:4px solid var(--acc);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--acc);background:#fff;color:var(--acc);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--acc);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--acc);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:var(--ink);margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.nq{margin-top:12px;font-size:13px;font-weight:600;padding:6px 14px;border-radius:3px;border:1px solid #aaa;background:#f5f5f5;color:#444;cursor:pointer;}
+.nq:hover{background:#e0e0e0;}
+.wk-ans{margin-top:8px;font-size:14px;line-height:1.6;}
+.wk summary{cursor:pointer;color:var(--acc);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.mc-opt{padding:9px 14px;border:1.5px solid var(--line);border-radius:4px;cursor:pointer;font-size:14px;background:#fff;text-align:left;transition:.15s;font-family:inherit;}
+.mc-opt:hover{border-color:var(--acc);background:var(--cream);}
+.mc-opt.correct{border-color:#2e7d32;background:#e8f8ee;color:#1a7a3a;font-weight:600;}
+.mc-opt.wrong{border-color:#C0272D;background:#fde8e8;color:#a01820;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../dashboard-student.html" class="back">&larr; My Dashboard</a>
+  <div class="ht">Chemical Reactions — Year 9 Chemistry</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Topics</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 300"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+
+var ST={};
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rPick(a){return a[Math.floor(Math.random()*a.length)];}
+function tryIt(fn){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]=fn;return genTry(id,fn());
+}
+function genTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  return '<div class="try" data-tryid="'+id+'">'+
+    '<div class="try-t">&#10004; Your Turn</div><p>'+o.question+'</p>'+
+    '<div class="ar"><input type="number" step="any" placeholder="Your answer" id="'+id+'_i"/>'+
+    '<button class="ck" onclick="ck(''+id+'')">&#10003; Check</button></div>'+
+    '<div class="fb" id="'+id+'_f"></div>'+
+    '<details class="wk"><summary>Show working</summary><div class="wk-b">'+
+    (h?'<ul class="hl">'+h+'</ul>':'')+
+    '<div class="wk-ans">'+o.working+'</div></div></details>'+
+    '<button class="nq" data-tryid="'+id+'">New question</button></div>';
+}
+function ck(id){
+  var fn=ST[id];var o=typeof fn==='function'?fn():fn;
+  var v=parseFloat(document.getElementById(id+'_i').value);
+  var f=document.getElementById(id+'_f');
+  if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}
+  var tol=o.tol!==undefined?o.tol:0.5;
+  if(Math.abs(v-o.ans)<=tol){
+    f.className='fb ok';f.textContent='\u2713 Correct! Answer: '+o.ans+(o.unit?' '+o.unit:'');
+  }else{f.className='fb er';f.textContent='Not quite \u2014 check your working and try again.';}
+}
+function tryItMC(fn){
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]=fn;return genTryMC(id,fn());
+}
+function genTryMC(id,o){
+  var opts=o.options.map(function(opt,i){
+    return '<button class="mc-opt" onclick="ckMC(''+id+'','+i+','+o.correct+')">'+opt+'</button>';
+  }).join('');
+  return '<div class="try" data-tryid="'+id+'">'+
+    '<div class="try-t">&#10004; Your Turn</div><p>'+o.question+'</p>'+
+    '<div class="mc-opts" id="'+id+'_opts">'+opts+'</div>'+
+    '<div class="fb" id="'+id+'_f"></div>'+
+    '<details class="wk"><summary>Show answer</summary><div class="wk-b"><div class="wk-ans">'+o.working+'</div></div></details>'+
+    '<button class="nq" data-tryid="'+id+'_mc">New question</button></div>';
+}
+function ckMC(id,chosen,correct){
+  var opts=document.getElementById(id+'_opts').querySelectorAll('.mc-opt');
+  opts.forEach(function(b,i){
+    if(i===correct)b.classList.add('correct');
+    else if(i===chosen)b.classList.add('wrong');
+    b.disabled=true;
+  });
+  var f=document.getElementById(id+'_f');
+  if(chosen===correct){f.className='fb ok';f.textContent='\u2713 Correct!';}
+  else{f.className='fb er';f.textContent='Not quite \u2014 the correct answer is highlighted in green.';}
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.nq');if(!b)return;
+  var rawId=b.getAttribute('data-tryid');
+  var id=rawId.replace('_mc','');
+  var fn=ST[id];if(typeof fn!=='function')return;
+  var wrap=b.closest('.try');if(!wrap)return;
+  var isMC=(rawId.indexOf('_mc')>=0);
+  var fresh=isMC?genTryMC(id,fn()):genTry(id,fn());
+  var tmp=document.createElement('div');tmp.innerHTML=fresh;
+  wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#333';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';}
+function R(x,y,w,h,fill,stroke,sw,rx){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#333')+'" stroke-width="'+(sw||2)+'" rx="'+(rx||0)+'"/>';}
+function circ(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#333')+'" stroke-width="'+(sw||2)+'"/>';}
+function ellipse(cx,cy,rx,ry,fill,stroke,sw){return '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="'+(fill||'none')+'" stroke="'+(stroke||'#333')+'" stroke-width="'+(sw||2)+'"/>';}
+function arr(x1,y1,x2,y2,c,w){
+  c=c||'#555';w=w||1.5;
+  var ang=Math.atan2(y2-y1,x2-x1);
+  var hs=8;
+  var p1x=x2-hs*Math.cos(ang-0.4),p1y=y2-hs*Math.sin(ang-0.4);
+  var p2x=x2-hs*Math.cos(ang+0.4),p2y=y2-hs*Math.sin(ang+0.4);
+  return L(x1,y1,x2,y2,c,w)+'<polygon points="'+x2+','+y2+' '+p1x.toFixed(1)+','+p1y.toFixed(1)+' '+p2x.toFixed(1)+','+p2y.toFixed(1)+'" fill="'+c+'"/>';
+}
+
+
+var QS=[
+{ey:'Y9 Chemistry \u2022 Q1',ti:'Balanced Chemical Equations',su:'Symbol equations and conservation of mass',steps:[
+{sl:'Writing symbol equations',p:'A <b>balanced symbol equation</b> shows the exact ratio of atoms/molecules reacting, with equal numbers of each atom on both sides.<br><br><span class="fm">2Mg + O\u2082 \u2192 2MgO</span>This shows 2 magnesium atoms react with 1 oxygen molecule to form 2 units of magnesium oxide.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(120,30,'2Mg + O\u2082 \u2192 2MgO','#1565C0',16,'middle',true));
+o.push(circ(60,100,15,'#e0e0e0','#555',1.5));o.push(circ(100,100,15,'#e0e0e0','#555',1.5));
+o.push(circ(170,100,15,'#ffcdd2','#C0272D',1.5));o.push(circ(200,100,15,'#ffcdd2','#C0272D',1.5));
+o.push(arr(240,100,290,100,'#555',2));
+o.push(circ(330,90,12,'#e0e0e0','#555',1.5));o.push(circ(355,90,10,'#ffcdd2','#C0272D',1.5));
+o.push(circ(330,130,12,'#e0e0e0','#555',1.5));o.push(circ(355,130,10,'#ffcdd2','#C0272D',1.5));
+o.push(T(240,200,'Same number of each atom type on both sides','#555',10,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:'Balancing equations',p:'To balance an equation:<br><br>1. Count atoms of each element on both sides<br>2. Add <b>coefficients</b> (numbers in front of formulae) to balance \u2014 never change the formula subscripts<br>3. Check all elements balance<br><br>e.g. Fe + O\u2082 \u2192 Fe\u2082O\u2083 is unbalanced. Balanced: <b>4Fe + 3O\u2082 \u2192 2Fe\u2082O\u2083</b>',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Balancing: Fe + O\u2082 \u2192 Fe\u2082O\u2083','#C0272D',13,'middle',true));
+var steps=['Unbalanced: Fe + O\u2082 \u2192 Fe\u2082O\u2083','Balance Fe: 2Fe + O\u2082 \u2192 Fe\u2082O\u2083','Balance O: need 3 O\u2082 worth of O','Balanced: 4Fe + 3O\u2082 \u2192 2Fe\u2082O\u2083'];var cols=['#C0272D','#C8922A','#1565C0','#2E7D32'];
+steps.forEach(function(st,i){o.push(R(40,60+i*48,400,36,cols[i]+'18',cols[i],1.5,3));o.push(T(240,83+i*48,st,cols[i],10,'middle',false));});
+s.innerHTML=o.join('');}},
+{sl:'Conservation of mass',p:'The <b>law of conservation of mass</b> means mass is never created or destroyed in a chemical reaction.<br><br><span class="fm">Total mass of reactants = total mass of products</span>If a reaction appears to lose or gain mass, it usually means a gas has entered/left the reaction unaccounted for.',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+var cols=['#ffcdd2','#bbdefb','#c8e6c9'];
+[0,1,2].forEach(function(i){o.push(circ(80+i*30,150,12,cols[i],'#555',1.5));});
+o.push(T(120,200,'Before: 3 atoms, mass = X','#555',10,'middle',false));
+o.push(arr(200,150,250,150,'#555',2));
+[0,1,2].forEach(function(i){o.push(circ(285+rInt(-10,30),140+rInt(-10,20),12,cols[i],'#555',1.5));});
+o.push(T(335,200,'After: same 3 atoms, mass = X','#555',10,'middle',false));
+o.push(T(240,265,'Atoms rearranged, not created or destroyed','#6A1B9A',10,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+mc3(
+'Balance: __Na + __Cl\u2082 \u2192 __NaCl',
+['2Na + Cl\u2082 \u2192 2NaCl','Na + Cl\u2082 \u2192 NaCl','2Na + 2Cl\u2082 \u2192 2NaCl','Na + 2Cl\u2082 \u2192 2NaCl'],
+'<b>2Na + Cl\u2082 \u2192 2NaCl</b>. Cl\u2082 provides 2 chlorine atoms, so you need 2 sodium atoms to react with them, producing 2 NaCl units.',
+'When 10g of magnesium burns completely in oxygen, the magnesium oxide produced weighs MORE than 10g. Why does this NOT violate conservation of mass?',
+['Oxygen from the air has been added to the reaction and is now part of the product','Mass has been created in the reaction','The scales are inaccurate','Magnesium gains mass when heated'],
+'Conservation of mass applies to the <b>total</b> mass of all reactants and products. The oxygen that combined with magnesium <b>came from the air</b> \u2014 it was a reactant, so the total mass (Mg + O\u2082) does equal the mass of MgO produced.',
+'In the unbalanced equation H\u2082 + O\u2082 \u2192 H\u2082O, how many H\u2082 molecules are needed to balance with one O\u2082 molecule?',
+['2H\u2082 (giving 2H\u2082O)','1H\u2082','3H\u2082','4H\u2082'],
+'<b>2H\u2082 + O\u2082 \u2192 2H\u2082O</b>. One O\u2082 molecule provides 2 oxygen atoms, requiring 2 water molecules to be formed, which need 4 hydrogen atoms = 2 H\u2082 molecules.'
+),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Balancing equations checklist','#6A1B9A',12,'middle',true));
+var steps=['1. Count atoms of each element both sides','2. Add coefficients (large numbers) to balance','3. Never change subscripts in formulae','4. Re-count after each change','5. Check ALL elements balance'];var cols=['#1565C0','#C0272D','#C8922A','#2E7D32','#6A1B9A'];
+steps.forEach(function(st,i){o.push(R(30,55+i*44,420,32,cols[i]+'18',cols[i],1.5,3));o.push(T(50,76+i*44,st,cols[i],9,'start',false));});
+s.innerHTML=o.join('');}}
+]},
+{ey:'Y9 Chemistry \u2022 Q2',ti:'Calculating Masses in Reactions',su:'Moles and stoichiometry basics',steps:[
+{sl:'Relative formula mass',p:'<b>Relative formula mass (M_r)</b> is the sum of relative atomic masses in a formula.<br><br>e.g. H\u2082O: M_r = (2\u00d71) + 16 = 18<br>e.g. CO\u2082: M_r = 12 + (2\u00d716) = 44<br>e.g. CaCO\u2083: M_r = 40 + 12 + (3\u00d716) = 100',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Calculating M_r for CaCO\u2083','#6A1B9A',13,'middle',true));
+var atoms=[['Ca','1 \u00d7 40 = 40','#1565C0'],['C','1 \u00d7 12 = 12','#2E7D32'],['O','3 \u00d7 16 = 48','#C0272D']];
+atoms.forEach(function(a,i){o.push(R(60,60+i*50,360,38,a[2]+'18',a[2],1.5,4));o.push(T(150,84+i*50,a[0],a[2],14,'middle',true));o.push(T(310,84+i*50,a[1],a[2],11,'middle',false));});
+o.push(L(60,225,420,225,'#555',1.5));
+o.push(T(240,255,'Total M_r = 40+12+48 = 100','#6A1B9A',14,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:'Conservation of mass calculations',p:'Using conservation of mass and a balanced equation, you can calculate the mass of a product or reactant.<br><br><span class="fm">2Mg + O\u2082 \u2192 2MgO</span>If 48g of Mg reacts completely, all the mass ends up in the MgO product (plus the oxygen mass that combined).',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'2Mg + O\u2082 \u2192 2MgO','#1565C0',16,'middle',true));
+o.push(R(60,70,140,60,'#e3f2fd','#1565C0',2,4));o.push(T(130,105,'48g Mg','#1565C0',13,'middle',true));
+o.push(T(215,105,'+','#555',20,'middle',true));
+o.push(R(240,70,140,60,'#fde8e8','#C0272D',2,4));o.push(T(310,105,'32g O\u2082','#C0272D',13,'middle',true));
+o.push(arr(390,105,420,105,'#555',2));
+o.push(R(150,160,180,60,'#e8f5e9','#2E7D32',2,4));o.push(T(240,195,'80g MgO','#2E7D32',14,'middle',true));
+o.push(T(240,240,'48 + 32 = 80 (mass conserved)','#555',10,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:'Percentage yield',p:'In practice, reactions rarely give 100% of the theoretical (predicted) product, due to: incomplete reactions, side reactions, or loss during purification.<br><br><span class="fm">% Yield = (actual yield \u00f7 theoretical yield) \u00d7 100</span>',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,40,'% Yield = (actual \u00f7 theoretical) \u00d7 100','#6A1B9A',13,'middle',true));
+o.push(R(80,80,140,80,'#e3f2fd','#1565C0',2,4));o.push(T(150,115,'Theoretical\nyield','#1565C0',12,'middle',true));o.push(T(150,140,'(predicted max)','#555',9,'middle',false));
+o.push(R(260,80,140,80,'#fde8e8','#C0272D',2,4));o.push(T(330,115,'Actual\nyield','#C0272D',12,'middle',true));o.push(T(330,140,'(measured)','#555',9,'middle',false));
+o.push(T(240,200,'Reasons for less than 100%: side reactions,','#555',10,'middle',false));
+o.push(T(240,215,'incomplete reactions, loss during purification','#555',10,'middle',false));
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+tryIt(function(){var elements=[{f:'H\u2082O',m:18},{f:'CO\u2082',m:44},{f:'NaCl',m:58.5},{f:'CaCO\u2083',m:100}];var e=rPick(elements);return{question:'What is the relative formula mass (M_r) of '+e.f+'?',ans:e.m,tol:0.5,unit:'',hints:['Add up the relative atomic masses of each atom in the formula','H=1, C=12, O=16, Na=23, Cl=35.5, Ca=40'],working:'M_r of '+e.f+' = <b>'+e.m+'</b> (sum of relative atomic masses)'};})
+,draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Relative atomic masses (common elements)','#6A1B9A',11,'middle',true));
+var els=[['H',1],['C',12],['N',14],['O',16],['Na',23],['Mg',24],['S',32],['Cl',35.5],['Ca',40]];
+els.forEach(function(e,i){var x=40+(i%3)*150,y=60+Math.floor(i/3)*60;o.push(R(x,y,130,46,'#f3e5f5','#6A1B9A',1.5,4));o.push(T(x+65,y+28,e[0]+' = '+e[1],'#6A1B9A',13,'middle',true));});
+s.innerHTML=o.join('');}}
+]},
+{ey:'Y9 Chemistry \u2022 Q3',ti:'Reversible Reactions and Equilibrium',su:'Dynamic equilibrium',steps:[
+{sl:'Reversible reactions',p:'A <b>reversible reaction</b> can proceed in both directions, shown with the symbol \u21cc.<br><br><span class="fm">A + B \u21cc C + D</span>e.g. ammonium chloride \u21cc ammonia + hydrogen chloride (heating decomposes it; cooling reforms it)',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(80,100,140,80,'#e3f2fd','#1565C0',2,4));o.push(T(150,135,'Reactants\n(A + B)','#1565C0',12,'middle',true));
+o.push(arr(225,120,255,120,'#2E7D32',2));o.push(T(240,108,'forward','#2E7D32',9,'middle',false));
+o.push(arr(255,150,225,150,'#C0272D',2));o.push(T(240,165,'reverse','#C0272D',9,'middle',false));
+o.push(R(260,100,140,80,'#e8f5e9','#2E7D32',2,4));o.push(T(330,135,'Products\n(C + D)','#2E7D32',12,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:'Dynamic equilibrium',p:'In a <b>closed system</b>, a reversible reaction reaches <b>dynamic equilibrium</b>:<br><br>\u2022 Forward and reverse reactions still happen, but at the <b>same rate</b><br>\u2022 The concentrations of reactants and products stay <b>constant</b> (not necessarily equal)<br>\u2022 The reaction has NOT stopped \u2014 it\'s a dynamic balance',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(80,80,140,140,'#e3f2fd','#1565C0',2,6));o.push(T(150,150,'Reactants','#1565C0',11,'middle',true));
+o.push(R(260,80,140,140,'#e8f5e9','#2E7D32',2,6));o.push(T(330,150,'Products','#2E7D32',11,'middle',true));
+o.push(arr(225,110,255,110,'#2E7D32',2));o.push(arr(255,190,225,190,'#C0272D',2));
+o.push(T(240,100,'rate forward','#2E7D32',8,'middle',false));o.push(T(240,205,'= rate reverse','#C0272D',8,'middle',false));
+o.push(T(240,260,'Equilibrium: forward rate = reverse rate','#6A1B9A',11,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:"Le Chatelier's principle",p:'If conditions change at equilibrium, the system shifts to <b>counteract</b> the change:<br><br>\u2022 \u2191 Concentration of reactant \u2192 shifts toward products<br>\u2022 \u2191 Temperature \u2192 shifts to favour the endothermic direction<br>\u2022 \u2191 Pressure (gases) \u2192 shifts toward the side with fewer gas molecules',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+var rules=[['\u2191 Reactant concentration','Shifts toward products','#1565C0'],['\u2191 Temperature','Favours endothermic direction','#C0272D'],['\u2191 Pressure (gases)','Shifts to side with fewer molecules','#2E7D32']];
+rules.forEach(function(r,i){o.push(R(30,40+i*70,420,55,r[2]+'22',r[2],2,4));o.push(T(110,68+i*70,r[0],r[2],11,'start',true));o.push(T(330,68+i*70,r[1],'#555',9,'middle',false));});
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+mc3(
+'What characterises dynamic equilibrium in a reversible reaction?',
+['The forward and reverse reaction rates are equal','The reaction has completely stopped','Only the forward reaction occurs','Only the reverse reaction occurs'],
+'At <b>dynamic equilibrium</b>, both forward and reverse reactions continue to occur, but at the <b>same rate</b>, so the overall concentrations of reactants and products remain constant.',
+'In the Haber process (N\u2082+3H\u2082\u21cc2NH\u2083), what happens to the equilibrium if pressure is increased?',
+['It shifts toward NH\u2083 (fewer gas molecules on that side)','It shifts toward N\u2082 and H\u2082','No change occurs','The reaction stops'],
+'There are <b>4 moles of gas</b> on the reactant side (1 N\u2082 + 3 H\u2082) but only <b>2 moles</b> on the product side (2 NH\u2083). Increasing pressure shifts equilibrium toward the side with <b>fewer gas molecules</b> \u2014 i.e. toward NH\u2083.',
+'Why does dynamic equilibrium only occur in a CLOSED system?',
+['Reactants and products must be unable to escape so the rates can balance','Closed systems are easier to study','Open systems react faster','Equilibrium needs a vacuum'],
+'In an <b>open system</b>, products (especially gases) can escape, preventing the reverse reaction from being able to occur at a matching rate \u2014 equilibrium can only be established when nothing escapes.'
+),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Equilibrium summary','#6A1B9A',12,'middle',true));
+var rows=[['Reversible reaction','Symbol: \u21cc, can go both directions','#1565C0'],['Dynamic equilibrium','Forward rate = reverse rate','#2E7D32'],['Closed system needed','Nothing can escape','#C8922A'],['Le Chatelier\'s principle','System shifts to counteract change','#C0272D']];
+rows.forEach(function(r,i){o.push(R(20,65+i*52,440,38,r[2]+'18',r[2],1.5,4));o.push(T(130,89+i*52,r[0],r[2],10,'start',true));o.push(T(330,89+i*52,r[1],'#555',8,'middle',false));});
+s.innerHTML=o.join('');}}
+]},
+{ey:'Y9 Chemistry \u2022 Q4',ti:'Electrolysis',su:'Splitting compounds with electricity',steps:[
+{sl:'What is electrolysis?',p:'<b>Electrolysis</b> uses electrical energy to break down (decompose) an <b>ionic compound</b> when molten or dissolved.<br><br>Key terms: <b>electrolyte</b> (the molten/dissolved ionic compound), <b>electrode</b> (conductor where reactions happen), <b>cathode</b> (negative), <b>anode</b> (positive).',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(R(100,80,280,150,'#e3f2fd','#1565C0',2,4));o.push(T(240,225,'Electrolyte','#1565C0',11,'middle',true));
+o.push(R(150,40,20,180,'#555','#333',1.5,2));o.push(T(160,30,'Cathode (\u2212)','#1565C0',10,'middle',true));
+o.push(R(310,40,20,180,'#555','#333',1.5,2));o.push(T(320,30,'Anode (+)','#C0272D',10,'middle',true));
+for(var i=0;i<6;i++){o.push(circ(180+rInt(0,140),100+rInt(0,110),5,i%2===0?'#1565C0':'#C0272D','#fff',1));}
+s.innerHTML=o.join('');}},
+{sl:'Electrolysis of molten compounds',p:'When a molten ionic compound is electrolysed:<br><br>\u2022 <b>Cathode (negative)</b>: positive ions (cations) move here and <b>gain electrons</b> (reduction) \u2014 forms the metal<br>\u2022 <b>Anode (positive)</b>: negative ions (anions) move here and <b>lose electrons</b> (oxidation) \u2014 forms the non-metal',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Electrolysis of molten PbBr\u2082','#6A1B9A',12,'middle',true));
+o.push(R(150,50,20,180,'#555','#333',1.5,2));o.push(T(160,40,'Cathode (\u2212)','#1565C0',10,'middle',true));
+o.push(R(310,50,20,180,'#555','#333',1.5,2));o.push(T(320,40,'Anode (+)','#C0272D',10,'middle',true));
+o.push(arr(220,130,170,130,'#1565C0',2));o.push(circ(230,130,10,'#e3f2fd','#1565C0',1.5));o.push(T(230,134,'Pb\u00b2\u207a','#1565C0',8,'middle',true));
+o.push(arr(260,130,308,130,'#C0272D',2));o.push(circ(250,130,10,'#fde8e8','#C0272D',1.5));o.push(T(250,134,'Br\u207b','#C0272D',8,'middle',true));
+o.push(T(160,260,'Pb forms\n(reduction)','#1565C0',9,'middle',true));
+o.push(T(320,260,'Br\u2082 forms\n(oxidation)','#C0272D',9,'middle',true));
+s.innerHTML=o.join('');}},
+{sl:'Uses of electrolysis',p:'Electrolysis is used industrially to:<br><br>\u2022 <b>Extract reactive metals</b>: aluminium from molten aluminium oxide (too reactive for reduction with carbon)<br>\u2022 <b>Purify copper</b>: impure copper electrolysed, pure copper deposits at cathode<br>\u2022 <b>Electroplating</b>: coat objects with a thin layer of metal (e.g. silver-plating cutlery)',
+draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+var uses=[['Aluminium extraction','From molten aluminium oxide (Al\u2082O\u2083)','#C8922A'],['Copper purification','Impure Cu \u2192 pure Cu at cathode','#C0272D'],['Electroplating','Coats objects with thin metal layer','#1565C0']];
+uses.forEach(function(u,i){o.push(R(30,40+i*70,420,55,u[2]+'22',u[2],2,4));o.push(T(110,68+i*70,u[0],u[2],11,'start',true));o.push(T(320,68+i*70,u[1],'#555',9,'middle',false));});
+s.innerHTML=o.join('');}},
+{sl:'Try it',p:''+mc3(
+'In electrolysis, what happens at the cathode (negative electrode)?',
+['Positive ions gain electrons (reduction)','Negative ions gain electrons','Positive ions lose electrons','No reaction occurs'],
+'At the <b>cathode</b> (negative), positively charged ions (cations) are attracted and <b>gain electrons</b> \u2014 this is <b>reduction</b>. The metal usually forms here.',
+'Why is aluminium extracted by electrolysis rather than reduction with carbon (like iron)?',
+['Aluminium is too reactive \u2014 carbon cannot remove oxygen from aluminium oxide','Aluminium is too cheap for electrolysis','Carbon reduction only works for non-metals','Electrolysis is always cheaper'],
+'Aluminium is <b>more reactive than carbon</b>, so carbon cannot displace it from its oxide via reduction. <b>Electrolysis</b> must be used instead, despite being energy-intensive.',
+'What is electroplating used for?',
+['Coating an object with a thin, even layer of metal','Extracting metals from ore','Purifying water','Splitting water into hydrogen and oxygen'],
+'<b>Electroplating</b> deposits a thin, even layer of metal (e.g. silver, chromium, gold) onto an object\'s surface using electrolysis \u2014 often for appearance, corrosion resistance, or improved properties.'
+),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+o.push(T(240,30,'Electrolysis summary','#6A1B9A',12,'middle',true));
+var rows=[['Cathode (\u2212)','Cations gain e\u207b (reduction) \u2014 metal forms','#1565C0'],['Anode (+)','Anions lose e\u207b (oxidation) \u2014 non-metal forms','#C0272D'],['Aluminium extraction','From Al\u2082O\u2083 (too reactive for carbon reduction)','#C8922A'],['Electroplating','Thin metal coating on objects','#2E7D32']];
+rows.forEach(function(r,i){o.push(R(20,65+i*52,440,38,r[2]+'18',r[2],1.5,4));o.push(T(120,89+i*52,r[0],r[2],10,'start',true));o.push(T(310,89+i*52,r[1],'#555',8,'middle',false));});
+s.innerHTML=o.join('');}}
+]}
+];
+
+var qi=0,si=0;
+function buildSidebar(){
+  var sb=document.getElementById('sb');
+  sb.innerHTML='<div class="sb-lbl">Topics</div>';
+  QS.forEach(function(q,i){
+    var b=document.createElement('button');
+    b.className='qb'+(i===qi?' on':'');
+    b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;
+    b.onclick=function(){qi=i;si=0;render();};
+    sb.appendChild(b);
+  });
+}
+function render(){
+  var q=QS[qi],st=q.steps[si];
+  document.getElementById('ey').textContent=q.ey;
+  document.getElementById('ti').textContent=q.ti;
+  document.getElementById('su').textContent=q.su;
+  document.getElementById('pn').className='pnl fi';
+  document.getElementById('pn').innerHTML='<div class="sl">'+st.sl+'</div><div>'+st.p+'</div>';
+  st.draw();
+  var dt=document.getElementById('dt');
+  dt.innerHTML=q.steps.map(function(_,i){return '<div class="dot'+(i===si?' on':i<si?' dn':'')+'"></div>';}).join('');
+  document.getElementById('pb').disabled=(qi===0&&si===0);
+  var last=(qi===QS.length-1&&si===q.steps.length-1);
+  document.getElementById('nb').textContent=last?'Finished \u2713':'Next \u2192';
+  document.getElementById('nb').disabled=false;
+  document.querySelectorAll('.qb').forEach(function(b,i){b.classList.toggle('on',i===qi);});
+}
+document.getElementById('nb').onclick=function(){
+  var q=QS[qi];
+  if(si<q.steps.length-1){si++;}
+  else if(qi<QS.length-1){qi++;si=0;}
+  render();
+};
+document.getElementById('pb').onclick=function(){
+  if(si>0){si--;}
+  else if(qi>0){qi--;si=QS[qi].steps.length-1;}
+  render();
+};
+buildSidebar();render();
+
+</script>
+</body>
+</html>

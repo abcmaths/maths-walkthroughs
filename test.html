@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ABC Maths — Topic Test</title>
+  <title>ABC Portal — Topic Test</title>
   <style>
+    :root{ --accent:#C0272D; --accent-dark:#a01f24; --accent-tint:#fde8e8; }
+    body.subject-science{ --accent:#6A1B9A; --accent-dark:#4A148C; --accent-tint:#f3e5f5; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
-    header { background: #C0272D; color: white; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    header { background: var(--accent); color: white; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; transition: background .2s; }
     .header-left { display: flex; align-items: center; gap: 14px; }
     .logo { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; }
     .subtitle { font-size: 0.85rem; opacity: 0.85; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 14px; }
@@ -18,6 +20,12 @@
 
     main { flex: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 28px 16px; }
 
+    /* Subject toggle */
+    .subject-toggle { display: flex; gap: 8px; margin-bottom: 20px; }
+    .subject-btn { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer; background: white; color: #666; transition: all 0.15s; text-align: center; }
+    .subject-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .subject-btn.on { border-color: var(--accent); background: var(--accent-tint); color: var(--accent); }
+
     /* Setup screen */
     .setup-card { background: white; border-radius: 10px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; }
     .setup-card h1 { font-size: 1.4rem; color: #222; font-weight: 700; margin-bottom: 8px; }
@@ -25,49 +33,55 @@
     .form-group { margin-bottom: 20px; }
     .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #555; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
     .form-group select { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 5px; font-size: 0.95rem; color: #333; background: white; }
-    .form-group select:focus { outline: none; border-color: #C0272D; }
+    .form-group select:focus { outline: none; border-color: var(--accent); }
     .level-btns { display: flex; gap: 12px; }
     .level-btn { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; background: white; color: #555; transition: all 0.18s; text-align: center; }
-    .level-btn:hover { border-color: #C0272D; color: #C0272D; }
-    .level-btn.selected { border-color: #C0272D; background: #fde8e8; color: #C0272D; }
-    .start-btn { width: 100%; padding: 14px; background: #C0272D; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
-    .start-btn:hover { background: #a01f24; }
+    .level-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .level-btn.selected { border-color: var(--accent); background: var(--accent-tint); color: var(--accent); }
+    .start-btn { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
+    .start-btn:hover { background: var(--accent-dark); }
     .start-btn:disabled { background: #ccc; cursor: not-allowed; }
 
     /* Test screen */
     .test-card { background: white; border-radius: 10px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; display: none; }
     .progress-bar-wrap { background: #eee; border-radius: 99px; height: 6px; margin-bottom: 24px; overflow: hidden; }
-    .progress-bar-fill { height: 100%; background: #C0272D; border-radius: 99px; transition: width 0.4s; }
+    .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.4s; }
     .q-counter { font-size: 0.82rem; color: #888; margin-bottom: 6px; }
     .q-text { font-size: 1.05rem; color: #222; font-weight: 600; margin-bottom: 20px; line-height: 1.5; }
     .hints { margin-bottom: 16px; }
     .hint-btn { background: none; border: 1.5px solid #ddd; border-radius: 5px; padding: 6px 14px; font-size: 0.82rem; color: #888; cursor: pointer; margin-bottom: 8px; display: block; }
-    .hint-btn:hover { border-color: #C0272D; color: #C0272D; }
+    .hint-btn:hover { border-color: var(--accent); color: var(--accent); }
     .hint-text { font-size: 0.85rem; color: #666; background: #f9f9f9; border-radius: 5px; padding: 8px 12px; margin-top: 4px; display: none; }
     .answer-row { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; }
     .answer-input { flex: 1; padding: 11px 14px; border: 2px solid #ddd; border-radius: 6px; font-size: 1.1rem; color: #333; }
-    .answer-input:focus { outline: none; border-color: #C0272D; }
+    .answer-input:focus { outline: none; border-color: var(--accent); }
     .answer-input.correct { border-color: #2e7d32; background: #e8f5e9; }
-    .answer-input.wrong   { border-color: #C0272D; background: #fde8e8; }
+    .answer-input.wrong   { border-color: var(--accent); background: var(--accent-tint); }
     .unit-label { font-size: 0.9rem; color: #888; white-space: nowrap; }
-    .check-btn { padding: 11px 24px; background: #C0272D; color: white; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .check-btn { padding: 11px 24px; background: var(--accent); color: white; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
     .check-btn:disabled { background: #ccc; cursor: not-allowed; }
+    .mc-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .mc-option { text-align: left; padding: 12px 16px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.95rem; color: #333; background: white; cursor: pointer; transition: all 0.15s; }
+    .mc-option:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-tint); }
+    .mc-option:disabled { cursor: default; }
+    .mc-option.correct { border-color: #2e7d32; background: #e8f5e9; color: #2e7d32; font-weight: 700; }
+    .mc-option.wrong { border-color: var(--accent); background: var(--accent-tint); color: var(--accent-dark); font-weight: 700; }
     .feedback-row { font-size: 0.9rem; padding: 10px 14px; border-radius: 5px; margin-bottom: 16px; display: none; }
     .feedback-row.correct { background: #e8f5e9; color: #2e7d32; }
-    .feedback-row.wrong   { background: #fde8e8; color: #a01f24; }
+    .feedback-row.wrong   { background: var(--accent-tint); color: var(--accent-dark); }
     .next-btn { width: 100%; padding: 12px; background: #333; color: white; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: none; }
     .next-btn:hover { background: #111; }
 
     /* Results screen */
     .results-card { background: white; border-radius: 10px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; display: none; text-align: center; }
     .results-card h2 { font-size: 1.3rem; color: #222; margin-bottom: 8px; }
-    .score-big { font-size: 3.5rem; font-weight: 700; color: #C0272D; line-height: 1; margin: 20px 0 8px; }
+    .score-big { font-size: 3.5rem; font-weight: 700; color: var(--accent); line-height: 1; margin: 20px 0 8px; }
     .grade-badge { display: inline-block; font-size: 1.1rem; font-weight: 700; padding: 6px 20px; border-radius: 99px; margin-bottom: 20px; }
     .grade-A-star { background: #ffd700; color: #333; }
     .grade-A { background: #e8f5e9; color: #2e7d32; }
     .grade-B { background: #e8f0fe; color: #1a56b0; }
     .grade-C { background: #fffde7; color: #f57f17; }
-    .grade-D { background: #fde8e8; color: #C0272D; }
+    .grade-D { background: var(--accent-tint); color: var(--accent); }
     .grade-E { background: #f5f5f5; color: #888; }
     .results-detail { text-align: left; margin: 20px 0; }
     .result-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; }
@@ -77,7 +91,7 @@
     .result-working { color: #888; font-size: 0.8rem; margin-top: 2px; }
     .results-btns { display: flex; gap: 12px; margin-top: 24px; }
     .results-btns button { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
-    .btn-retry { background: #C0272D; color: white; }
+    .btn-retry { background: var(--accent); color: white; }
     .btn-dash  { background: #333; color: white; }
 
     .loading { text-align: center; color: #aaa; padding: 40px; }
@@ -89,7 +103,7 @@
 <header>
   <div class="header-left">
     <div class="logo">ABC</div>
-    <div class="subtitle">Topic Test</div>
+    <div class="subtitle" id="header-subtitle">Topic Test</div>
   </div>
   <div class="header-right">
     <div class="timer" id="timer" style="display:none">30:00</div>
@@ -100,7 +114,15 @@
   <!-- Setup screen -->
   <div class="setup-card" id="setup-screen">
     <h1>Topic Test</h1>
-    <p>Choose a topic and level. You'll get 10 questions and 30 minutes.</p>
+    <p>Choose a subject, topic and level. You'll get 10 questions and 30 minutes.</p>
+
+    <div class="form-group">
+      <label>Subject</label>
+      <div class="subject-toggle">
+        <div class="subject-btn on" id="subj-maths" onclick="selectSubject('maths')">📐 Maths</div>
+        <div class="subject-btn" id="subj-science" onclick="selectSubject('science')">🔬 Science</div>
+      </div>
+    </div>
 
     <div class="form-group">
       <label>Year Group</label>
@@ -109,11 +131,11 @@
         <option value="7">Year 7</option>
         <option value="8">Year 8</option>
         <option value="9">Year 9</option>
-        <option value="10">Year 10</option>
-        <option value="11">Year 11</option>
-        <option value="12">Year 12</option>
-        <option value="13">Add Maths</option>
-        <option value="14">Further Maths</option>
+        <option value="10" id="opt-y10">Year 10</option>
+        <option value="11" id="opt-y11">Year 11</option>
+        <option value="12" id="opt-y12">Year 12</option>
+        <option value="13" id="opt-y13">Add Maths</option>
+        <option value="14" id="opt-y14">Further Maths</option>
       </select>
     </div>
 
@@ -148,11 +170,12 @@
     <div class="q-counter" id="q-counter">Question 1 of 10</div>
     <div class="q-text" id="q-text"></div>
     <div class="hints" id="hints-container"></div>
-    <div class="answer-row">
+    <div class="answer-row" id="numeric-answer-row">
       <input type="number" class="answer-input" id="answer-input" placeholder="Your answer" step="any">
       <span class="unit-label" id="unit-label"></span>
       <button class="check-btn" id="check-btn" onclick="checkAnswer()">Check</button>
     </div>
+    <div class="mc-options" id="mc-options" style="display:none"></div>
     <div class="feedback-row" id="feedback-row"></div>
     <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question →</button>
   </div>
@@ -187,7 +210,7 @@
   <div class="loading" id="loading" style="display:none">Loading questions…</div>
 </main>
 
-<footer>© Adorable British College — ABC Maths Portal</footer>
+<footer>© Adorable British College — ABC Portal</footer>
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -225,6 +248,7 @@
   let allTopics    = [];
   let session      = null;
   let selectedLevel = null;
+  let selectedSubject = 'maths';
   let questions    = [];
   let currentQ     = 0;
   let answers      = [];
@@ -237,6 +261,40 @@
   // ── Question generators — loaded dynamically from walkthrough files ──
   // Map topic_code -> array of generator functions
   const QUESTION_GENERATORS = {};
+
+  // ── Science walkthrough file map ──
+  const SCIENCE_WALKTHROUGH_FILES = {
+    'Y7-BIO-S01': 'sci07/cells-y7.html',
+    'Y7-BIO-S02': 'sci07/classifying-life-y7.html',
+    'Y7-CHE-S01': 'sci07/classifying-matter-y7.html',
+    'Y7-CHE-S02': 'sci07/properties-matter-y7.html',
+    'Y7-CHE-S03': 'sci07/chemical-changes-y7.html',
+    'Y7-PHY-S01': 'sci07/forces-space-y7.html',
+    'Y7-PHY-S02': 'sci07/energy-sound-y7.html',
+    'Y7-PHY-S03': 'sci07/electricity-y7.html',
+    'Y7-SIC-S01': 'sci07/science-in-context-y7.html',
+    'Y7-EOY-S01': 'sci07/eoy-y7.html',
+    'Y8-BIO-S01': 'sci08/respiration-y8.html',
+    'Y8-BIO-S02': 'sci08/health-y8.html',
+    'Y8-CHE-S01': 'sci08/gases-y8.html',
+    'Y8-CHE-S02': 'sci08/liquids-y8.html',
+    'Y8-CHE-S03': 'sci08/atomic-structure-y8.html',
+    'Y8-CHE-S04': 'sci08/applications-science-y8.html',
+    'Y8-PHY-S01': 'sci08/light-colour-y8.html',
+    'Y8-PHY-S02': 'sci08/speed-motion-forces-y8.html',
+    'Y8-ES-S01': 'sci08/earth-solar-system-y8.html',
+    'Y8-SIC-S01': 'sci08/science-in-context-y8.html',
+    'Y8-EOY-S01': 'sci08/eoy-y8.html',
+    'Y9-BIO-S01': 'sci09/plant-biology-y9.html',
+    'Y9-BIO-S02': 'sci09/human-biology-y9.html',
+    'Y9-BIO-S03': 'sci09/species-environments-y9.html',
+    'Y9-CHE-S01': 'sci09/chemical-bonding-y9.html',
+    'Y9-CHE-S02': 'sci09/chemical-structures-y9.html',
+    'Y9-CHE-S03': 'sci09/chemical-reactions-y9.html',
+    'Y9-PHY-S01': 'sci09/sound-energy-y9.html',
+    'Y9-PHY-S02': 'sci09/electricity-y9.html',
+    // Y9 still pending: Y9-ES-S01 (earth-beyond), Y9-SIC-S01, Y9-EOY-S01
+  };
 
   // ── Walkthrough file map ──
   const WALKTHROUGH_FILES = {
@@ -359,52 +417,63 @@
     'AM-STA-01':  'addmaths/permutation-combination-addmaths.html',
   };
 
-  // ── Extract tryIt generators from a walkthrough HTML file ──
-  async function extractGenerators(topicCode) {
-    const file = WALKTHROUGH_FILES[topicCode];
+  // ── Extract tryIt/tryItMC generators from a walkthrough HTML file ──
+  async function extractGenerators(topicCode, subject) {
+    const file = subject === 'science'
+      ? SCIENCE_WALKTHROUGH_FILES[topicCode]
+      : WALKTHROUGH_FILES[topicCode];
     if (!file) return [];
 
     try {
       const resp = await fetch(file);
       const html = await resp.text();
 
-      // Extract all tryIt(function(){...}) blocks
       const generators = [];
+
+      // Extract all tryIt(function(){...}) blocks — numeric questions
       const regex = /tryIt\(function\(\)\s*\{([\s\S]*?)\}\s*\)/g;
       let match;
       while ((match = regex.exec(html)) !== null) {
         try {
-          // Create the generator function
           const fnBody = match[1];
-          const genFn = new Function('pick', 'rnd', fnBody);
-          generators.push(() => genFn(window.pick, window.rnd));
+          const genFn = new Function('pick', 'rnd', 'rPick', 'rInt', fnBody);
+          generators.push({ type: 'numeric', gen: () => genFn(window.pick, window.rnd, window.pick, window.rnd) });
         } catch(e) {
           // Skip malformed generators
         }
       }
 
-      // Also extract yt wrapper functions
+      // Extract all tryItMC(function(){...}) blocks — multiple-choice questions
+      const mcRegex = /tryItMC\(function\(\)\s*\{([\s\S]*?)\}\s*\)/g;
+      while ((match = mcRegex.exec(html)) !== null) {
+        try {
+          const fnBody = match[1];
+          const genFn = new Function('pick', 'rnd', 'rPick', 'rInt', fnBody);
+          generators.push({ type: 'mc', gen: () => genFn(window.pick, window.rnd, window.pick, window.rnd) });
+        } catch(e) {
+          // Skip malformed generators
+        }
+      }
+
+      // Also extract yt wrapper functions (Year 8 maths legacy pattern, numeric only)
       const ytRegex = /function (yt\d+)\(\)\{([\s\S]*?)\n\}/g;
       while ((match = ytRegex.exec(html)) !== null) {
         try {
+          const tryItCapture = (genOrObj) => {
+            if (typeof genOrObj === 'function') return genOrObj();
+            return genOrObj;
+          };
           const fnBody = match[2];
-          const genFn = new Function('pick', 'rnd', 'tryIt', fnBody + '\nreturn result;');
-          // For yt functions we need a different approach — extract the return value
-          generators.push(() => {
-            // Execute the yt function body to get the tryIt call result
-            const tryItCapture = (genOrObj) => {
-              if (typeof genOrObj === 'function') return genOrObj();
-              return genOrObj;
-            };
+          generators.push({ type: 'numeric', gen: () => {
             try {
-              const fn = new Function('pick', 'rnd', 'tryIt', match[2]);
+              const fn = new Function('pick', 'rnd', 'tryIt', fnBody);
               return fn(window.pick, window.rnd, tryItCapture);
             } catch(e) { return null; }
-          });
+          }});
         } catch(e) {}
       }
 
-      return generators.filter(g => g !== null);
+      return generators.filter(g => g.gen !== null);
     } catch(e) {
       console.error('Failed to load generators:', e);
       return [];
@@ -419,14 +488,39 @@
   const { data: { session: s } } = await supabase.auth.getSession();
   session = s;
 
-  // ── Load topics by year group ──
+  // ── Subject selection ──
+  window.selectSubject = function(subject) {
+    selectedSubject = subject;
+    document.getElementById('subj-maths').classList.toggle('on', subject === 'maths');
+    document.getElementById('subj-science').classList.toggle('on', subject === 'science');
+    document.body.classList.toggle('subject-science', subject === 'science');
+    document.getElementById('header-subtitle').textContent = subject === 'science' ? 'Topic Test — Science' : 'Topic Test — Maths';
+
+    // Add Maths / Further Maths years only make sense for maths
+    const mathsOnlyOpts = ['opt-y13', 'opt-y14'];
+    mathsOnlyOpts.forEach(id => {
+      document.getElementById(id).style.display = subject === 'science' ? 'none' : '';
+    });
+    // Science topics currently only go up to Year 9
+    const scienceUnavailableOpts = ['opt-y10', 'opt-y11', 'opt-y12'];
+    scienceUnavailableOpts.forEach(id => {
+      document.getElementById(id).style.display = subject === 'science' ? 'none' : '';
+    });
+
+    // Reset year/topic selection when switching subject
+    document.getElementById('year-select').value = '';
+    document.getElementById('topic-select').innerHTML = '<option value="">— Select year group first —</option>';
+    checkReady();
+  };
+
+  // ── Load topics by year group + subject ──
   window.loadTopics = async function() {
     const yr = parseInt(document.getElementById('year-select').value);
     if (!yr) return;
 
     const { data: topics } = await supabase
       .from('topics').select('*').eq('year_group', yr).order('sort_order');
-    allTopics = topics || [];
+    allTopics = (topics || []).filter(t => (t.subject || 'maths') === selectedSubject);
 
     const sel = document.getElementById('topic-select');
     sel.innerHTML = allTopics.map(t =>
@@ -441,12 +535,14 @@
     checkReady();
   };
 
-  // Auto-load if topic pre-selected
+  // Auto-load if topic pre-selected — also auto-detect its subject
   if (preselectedTopicId) {
-    // Find which year group this topic belongs to
     const { data: topic } = await supabase
-      .from('topics').select('year_group').eq('id', preselectedTopicId).maybeSingle();
+      .from('topics').select('year_group, subject').eq('id', preselectedTopicId).maybeSingle();
     if (topic) {
+      if ((topic.subject || 'maths') === 'science') {
+        window.selectSubject('science');
+      }
       document.getElementById('year-select').value = topic.year_group === 14 ? '14' : topic.year_group === 13 ? '13' : String(topic.year_group);
       await window.loadTopics();
     }
@@ -467,6 +563,23 @@
 
   document.getElementById('topic-select').addEventListener('change', checkReady);
 
+  // ── Normalize a generated question to a consistent shape ──
+  function normalizeQuestion(raw, type) {
+    if (!raw) return null;
+    if (type === 'mc') {
+      // Handle both {question,options,correct,working} and shorthand {q,opts,c,w}
+      const question = raw.question !== undefined ? raw.question : raw.q;
+      const options   = raw.options  !== undefined ? raw.options  : raw.opts;
+      const correct   = raw.correct  !== undefined ? raw.correct  : raw.c;
+      const working    = raw.working  !== undefined ? raw.working  : raw.w;
+      if (!question || !options) return null;
+      return { type: 'mc', question, options, correct, working, hints: [] };
+    }
+    // numeric
+    if (raw.question === undefined || raw.ans === undefined) return null;
+    return Object.assign({ type: 'numeric' }, raw);
+  }
+
   // ── Start test ──
   window.startTest = async function() {
     const topicSel = document.getElementById('topic-select');
@@ -479,7 +592,7 @@
     document.getElementById('loading').style.display = 'block';
 
     // Load generators from walkthrough file
-    const generators = await extractGenerators(topicCode);
+    const generators = await extractGenerators(topicCode, selectedSubject);
 
     if (generators.length === 0) {
       document.getElementById('loading').style.display = 'none';
@@ -493,12 +606,11 @@
     questions = [];
     const shuffled = [...generators].sort(() => Math.random() - 0.5);
     for (let i = 0; i < 10; i++) {
-      const gen = shuffled[i % shuffled.length];
+      const g = shuffled[i % shuffled.length];
       try {
-        const q = gen();
-        if (q && q.question && q.ans !== undefined) {
-          questions.push(q);
-        }
+        const raw = g.gen();
+        const q = normalizeQuestion(raw, g.type);
+        if (q) questions.push(q);
       } catch(e) {}
     }
 
@@ -552,13 +664,27 @@
     document.getElementById('progress-fill').style.width = pct + '%';
     document.getElementById('q-counter').textContent = 'Question ' + (currentQ + 1) + ' of ' + questions.length;
     document.getElementById('q-text').innerHTML = q.question;
-    document.getElementById('unit-label').textContent = q.unit || '';
-    document.getElementById('answer-input').value = '';
-    document.getElementById('answer-input').className = 'answer-input';
-    document.getElementById('answer-input').disabled = false;
-    document.getElementById('check-btn').disabled = false;
     document.getElementById('feedback-row').style.display = 'none';
     document.getElementById('next-btn').style.display = 'none';
+
+    const numericRow = document.getElementById('numeric-answer-row');
+    const mcContainer = document.getElementById('mc-options');
+
+    if (q.type === 'mc') {
+      numericRow.style.display = 'none';
+      mcContainer.style.display = 'flex';
+      mcContainer.innerHTML = q.options.map((opt, i) =>
+        `<button class="mc-option" onclick="checkMCAnswer(${i})">${opt}</button>`
+      ).join('');
+    } else {
+      numericRow.style.display = 'flex';
+      mcContainer.style.display = 'none';
+      document.getElementById('unit-label').textContent = q.unit || '';
+      document.getElementById('answer-input').value = '';
+      document.getElementById('answer-input').className = 'answer-input';
+      document.getElementById('answer-input').disabled = false;
+      document.getElementById('check-btn').disabled = false;
+    }
 
     // Hints
     const hintsEl = document.getElementById('hints-container');
@@ -567,7 +693,7 @@
        <div class="hint-text">${h}</div>`
     ).join('');
 
-    document.getElementById('answer-input').focus();
+    if (q.type !== 'mc') document.getElementById('answer-input').focus();
   }
 
   window.showHint = function(btn, text) {
@@ -604,6 +730,37 @@
     fb.appendChild(reportDiv);
 
     answers.push({ q, correct, given: val });
+
+    const nextBtn = document.getElementById('next-btn');
+    nextBtn.style.display = 'block';
+    nextBtn.textContent = currentQ < questions.length - 1 ? 'Next Question →' : 'See Results';
+  };
+
+  // ── Check MC answer ──
+  window.checkMCAnswer = function(chosenIndex) {
+    const q = questions[currentQ];
+    const correct = chosenIndex === q.correct;
+
+    const buttons = document.querySelectorAll('#mc-options .mc-option');
+    buttons.forEach((btn, i) => {
+      btn.disabled = true;
+      if (i === q.correct) btn.classList.add('correct');
+      else if (i === chosenIndex) btn.classList.add('wrong');
+    });
+
+    const fb = document.getElementById('feedback-row');
+    fb.style.display = 'block';
+    fb.className = 'feedback-row ' + (correct ? 'correct' : 'wrong');
+    fb.innerHTML = correct
+      ? '✓ Correct! ' + (q.working ? '<span style="opacity:0.8">— ' + q.working + '</span>' : '')
+      : '✗ Not quite. Answer: <strong>' + q.options[q.correct] + '</strong>' + (q.working ? ' — ' + q.working : '');
+
+    const reportDiv = document.createElement('div');
+    reportDiv.style.cssText = 'margin-top:8px;';
+    reportDiv.innerHTML = '<button onclick="reportQuestion()" style="background:none;border:none;color:#aaa;font-size:0.78rem;cursor:pointer;text-decoration:underline;padding:0">⚑ Report a problem with this question</button>';
+    fb.appendChild(reportDiv);
+
+    answers.push({ q, correct, given: q.options[chosenIndex] });
 
     const nextBtn = document.getElementById('next-btn');
     nextBtn.style.display = 'block';
@@ -669,7 +826,7 @@
         <div class="result-icon">${a.correct ? '✓' : '✗'}</div>
         <div class="result-q">
           <div>${a.q.question}</div>
-          ${!a.correct ? `<div class="result-working">Answer: ${a.q.ans}${a.q.unit ? ' ' + a.q.unit : ''} — ${a.q.working || ''}</div>` : ''}
+          ${!a.correct ? `<div class="result-working">Answer: ${a.q.type === 'mc' ? a.q.options[a.q.correct] : (a.q.ans + (a.q.unit ? ' ' + a.q.unit : ''))} — ${a.q.working || ''}</div>` : ''}
         </div>
       </div>`).join('');
 
@@ -678,9 +835,10 @@
 
   window.reportQuestion = function() {
     const q = questions[currentQ];
+    const expectedAnswer = q.type === 'mc' ? q.options[q.correct] : (q.ans + (q.unit ? ' ' + q.unit : ''));
     document.getElementById('report-q-preview').innerHTML = 
       '<strong>Q' + (currentQ + 1) + ':</strong> ' + q.question + 
-      '<br><span style="color:#C0272D">Expected answer: ' + q.ans + (q.unit ? ' ' + q.unit : '') + '</span>';
+      '<br><span style="color:var(--accent)">Expected answer: ' + expectedAnswer + '</span>';
     document.getElementById('report-desc').value = '';
     document.getElementById('report-done').style.display = 'none';
     document.getElementById('report-overlay').style.display = 'flex';
@@ -696,6 +854,10 @@
     try {
       const topicOpt = document.getElementById('topic-select').options[document.getElementById('topic-select').selectedIndex];
       const topicId  = parseInt(topicOpt.value);
+      const expectedAnswer = q.type === 'mc' ? q.options[q.correct] : (q.ans + (q.unit ? ' ' + q.unit : ''));
+      const studentAnswer  = q.type === 'mc'
+        ? (answers[answers.length - 1] ? answers[answers.length - 1].given : '')
+        : document.getElementById('answer-input').value;
 
       await supabase.from('bug_reports').insert({
         student_id:      session ? session.user.id : null,
@@ -703,8 +865,8 @@
         question_number: currentQ + 1,
         question_title:  'Test question: ' + q.question.replace(/<[^>]+>/g, '').slice(0, 60),
         description:     (desc || 'Student reported issue during test') + 
-                         '\nExpected: ' + q.ans + (q.unit ? ' ' + q.unit : '') +
-                         '\nStudent answered: ' + document.getElementById('answer-input').value,
+                         '\nExpected: ' + expectedAnswer +
+                         '\nStudent answered: ' + studentAnswer,
         js_error:        null,
         status:          'open',
         reported_at:     new Date().toISOString()
