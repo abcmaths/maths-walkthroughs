@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Adorable Portal — Staff Dashboard</title>
+  <title>ABC Portal — Staff Dashboard</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
@@ -69,6 +69,10 @@
     .message.error   { background: #fde8e8; color: #a01f24; display: block; }
     .message.success { background: #e8f5e9; color: #2e7d32; display: block; }
     .loading { text-align: center; color: #aaa; padding: 40px; font-size: 0.95rem; }
+    .subject-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 6px; padding: 3px; gap: 2px; }
+    .subject-toggle button { background: none; border: none; color: rgba(255,255,255,0.75); font-size: 0.82rem; font-weight: 600; padding: 4px 14px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+    .subject-toggle button.active { background: white; color: #C0272D; }
+    .subject-toggle button:hover:not(.active) { color: white; background: rgba(255,255,255,0.2); }
     footer { text-align: center; padding: 16px; font-size: 0.78rem; color: #aaa; }
   </style>
 </head>
@@ -77,9 +81,13 @@
 <header>
   <div class="header-left">
     <div class="logo">ABC</div>
-    <div class="subtitle">Adorable Portal — Staff</div>
+    <div class="subtitle" id="header-subtitle">Maths Portal — Staff</div>
   </div>
   <div class="header-right">
+    <div class="subject-toggle">
+      <button id="toggle-maths" class="active">📐 Maths</button>
+      <button id="toggle-science">🔬 Science</button>
+    </div>
     <span class="user-name" id="header-name"></span>
     <button class="btn-signout" onclick="signOut()">Sign out</button>
   </div>
@@ -194,6 +202,10 @@
     <!-- BROWSE TOPICS -->
     <div class="tab-panel" id="tab-topics">
       <div class="filter-bar">
+        <select id="topics-filter-subject" onchange="renderTopicsTab()">
+          <option value="maths">Maths</option>
+          <option value="science">Science</option>
+        </select>
         <select id="topics-filter-year" onchange="renderTopicsTab()">
           <option value="7">Year 7</option>
           <option value="8">Year 8</option>
@@ -375,15 +387,20 @@
       <!-- Walkthrough list -->
       <div class="section">
         <div class="filter-bar" style="margin-bottom:16px">
+          <select id="review-filter-subject" onchange="renderReviewTab()">
+            <option value="">All Subjects</option>
+            <option value="maths">📐 Maths</option>
+            <option value="science">🔬 Science</option>
+          </select>
           <select id="review-filter-year" onchange="renderReviewTab()">
             <option value="">All Year Groups</option>
             <option value="7">Year 7</option>
             <option value="8">Year 8</option>
             <option value="9">Year 9</option>
-            <option value="10">Year 10</option>
-            <option value="11">Year 11</option>
-            <option value="12">Year 12</option>
-            <option value="13">Add Maths</option>
+            <option value="10" id="review-opt-y10">Year 10</option>
+            <option value="11" id="review-opt-y11">Year 11</option>
+            <option value="12" id="review-opt-y12">Year 12</option>
+            <option value="13" id="review-opt-y13">Add Maths</option>
           </select>
           <select id="review-filter-status" onchange="renderReviewTab()">
             <option value="">All statuses</option>
@@ -1271,6 +1288,52 @@
     'AM-ALG-07': 'addmaths/progressions-addmaths.html', 'AM-ALG-08': 'addmaths/indices-surds-addmaths.html'
   };
 
+  // Science walkthrough files — add entries here only when the file is built and deployed
+  const SCIENCE_WALKTHROUGH_FILES = {
+    'Y7-BIO-S01': 'sci07/cells-y7.html',
+    'Y7-BIO-S02': 'sci07/classifying-life-y7.html',
+    'Y7-CHE-S01': 'sci07/classifying-matter-y7.html',
+    'Y7-CHE-S02': 'sci07/properties-matter-y7.html',
+    'Y7-CHE-S03': 'sci07/chemical-changes-y7.html',
+    'Y7-PHY-S01': 'sci07/forces-space-y7.html',
+    'Y7-PHY-S02': 'sci07/energy-sound-y7.html',
+    'Y7-PHY-S03': 'sci07/electricity-y7.html',
+    'Y7-SIC-S01': 'sci07/science-in-context-y7.html',
+    'Y7-EOY-S01': 'sci07/eoy-y7.html',
+    'Y8-BIO-S01': 'sci08/respiration-y8.html',
+    'Y8-BIO-S02': 'sci08/health-y8.html',
+    'Y8-CHE-S01': 'sci08/gases-y8.html',
+    'Y8-CHE-S02': 'sci08/liquids-y8.html',
+    'Y8-CHE-S03': 'sci08/atomic-structure-y8.html',
+    'Y8-CHE-S04': 'sci08/applications-science-y8.html',
+    'Y8-PHY-S01': 'sci08/light-colour-y8.html',
+    'Y8-PHY-S02': 'sci08/speed-motion-forces-y8.html',
+    'Y8-ES-S01': 'sci08/earth-solar-system-y8.html',
+    'Y8-SIC-S01': 'sci08/science-in-context-y8.html',
+    'Y8-EOY-S01': 'sci08/eoy-y8.html',
+    'Y9-BIO-S01': 'sci09/plant-biology-y9.html',
+    'Y9-BIO-S02': 'sci09/human-biology-y9.html',
+    'Y9-BIO-S03': 'sci09/species-environments-y9.html',
+    'Y9-CHE-S01': 'sci09/chemical-bonding-y9.html',
+    'Y9-CHE-S02': 'sci09/chemical-structures-y9.html',
+    'Y9-CHE-S03': 'sci09/chemical-reactions-y9.html',
+    'Y9-PHY-S01': 'sci09/sound-energy-y9.html',
+    'Y9-PHY-S02': 'sci09/electricity-y9.html',
+    // Y9 still pending: Y9-ES-S01 (earth-beyond), Y9-SIC-S01, Y9-EOY-S01
+  };
+
+  const SCIENCE_STRAND_COLOURS = {
+    'Biology':           '#2E7D32',
+    'Chemistry':         '#6A1B9A',
+    'Physics':           '#1565C0',
+    'Earth & Space':     '#00695C',
+    'Science in Context':'#E65100',
+    'SIC':               '#E65100',
+    'Review':            '#E65100',
+  };
+
+  let staffSubject = 'maths';
+
   async function loadReviews() {
     const { data } = await supabase
       .from('walkthrough_reviews')
@@ -1280,7 +1343,7 @@
 
   // Extract question titles from a walkthrough file
   async function getQuestions(topicCode) {
-    const file = WALKTHROUGH_FILES[topicCode];
+    const file = SCIENCE_WALKTHROUGH_FILES[topicCode] || WALKTHROUGH_FILES[topicCode];
     if (!file) return [];
     try {
       const resp = await fetch(file);
@@ -1295,8 +1358,19 @@
   }
 
   window.renderReviewTab = function() {
-    const yearFilter   = document.getElementById('review-filter-year').value;
+    const subjectFilter = document.getElementById('review-filter-subject').value;
     const statusFilter = document.getElementById('review-filter-status').value;
+
+    // Science topics only go up to Year 9 — hide irrelevant year options when
+    // Science is selected, and reset the year filter if it's now invalid.
+    const mathsOnlyYearOpts = ['review-opt-y10', 'review-opt-y11', 'review-opt-y12', 'review-opt-y13'];
+    mathsOnlyYearOpts.forEach(id => {
+      document.getElementById(id).style.display = subjectFilter === 'science' ? 'none' : '';
+    });
+    if (subjectFilter === 'science' && ['10', '11', '12', '13'].includes(document.getElementById('review-filter-year').value)) {
+      document.getElementById('review-filter-year').value = '';
+    }
+    const yearFilter = document.getElementById('review-filter-year').value;
 
     // Build review map: topicId -> { reviewerIds, ratings }
     const reviewMap = {};
@@ -1329,6 +1403,8 @@
 
     // Filter topics
     let filtered = allTopics.filter(t => {
+      const matchSubject = !subjectFilter || (t.subject || 'maths') === subjectFilter;
+      if (!matchSubject) return false;
       const matchYear = !yearFilter || String(t.year_group) === yearFilter;
       if (!matchYear) return false;
       if (!statusFilter) return true;
@@ -1351,6 +1427,10 @@
     listEl.innerHTML = filtered.map(t => {
       const rm = reviewMap[t.id];
       const yearLabel = t.year_group === 13 ? 'Add Maths' : 'Year ' + t.year_group;
+      const isSci = (t.subject || 'maths') === 'science';
+      const subjectLabel = isSci
+        ? `<span style="color:${SCIENCE_STRAND_COLOURS[t.strand] || '#1565C0'}">🔬 ${t.strand || 'Science'}</span>`
+        : `<span style="color:#888">📐 Maths</span>`;
       const reviewerCount = rm ? rm.reviewers.size : 0;
       const qCount = rm ? rm.questions.size : 0;
       const dominant = rm ? getDominantRating(rm.ratings) : null;
@@ -1362,7 +1442,7 @@
       return `<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap">
         <div style="flex:1;min-width:200px">
           <div style="font-weight:600;font-size:0.88rem;color:#333">${t.topic_name}</div>
-          <div style="font-size:0.75rem;color:#888">${yearLabel}</div>
+          <div style="font-size:0.75rem;color:#888">${yearLabel} · ${subjectLabel}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           ${statusBadge}
@@ -1406,7 +1486,7 @@
 
     document.getElementById('review-modal-body').innerHTML = `
       <p style="font-size:0.85rem;color:#666;margin-bottom:8px">Rate each question and leave a comment. All fields are required.</p>
-      <p style="margin-bottom:16px"><a href="#" onclick="window.open('${WALKTHROUGH_FILES[topicCode] || '#'}','walkthrough_review','width=1200,height=800,scrollbars=yes,resizable=yes');return false;" style="font-size:0.85rem;color:#C0272D;font-weight:600;text-decoration:none">↗ Open walkthrough in new window</a> <span style="font-size:0.78rem;color:#aaa">(review each question as you go)</span></p>
+      <p style="margin-bottom:16px"><a href="#" onclick="window.open('${SCIENCE_WALKTHROUGH_FILES[topicCode] || WALKTHROUGH_FILES[topicCode] || '#'}','walkthrough_review','width=1200,height=800,scrollbars=yes,resizable=yes');return false;" style="font-size:0.85rem;color:#C0272D;font-weight:600;text-decoration:none">↗ Open walkthrough in new window</a> <span style="font-size:0.78rem;color:#aaa">(review each question as you go)</span></p>
       ${questions.map(q => {
         const existing = myReviewMap[q.num];
         return `<div style="border:1.5px solid #eee;border-radius:6px;padding:14px;margin-bottom:12px">
@@ -1742,9 +1822,17 @@
 
   // ── Render topics tab ──
   window.renderTopicsTab = function() {
-    const yr = parseInt(document.getElementById('topics-filter-year').value) || 13;
-    const filtered = allTopics.filter(t => t.year_group === yr);
+    const yr      = parseInt(document.getElementById('topics-filter-year').value) || 13;
+    const subject = document.getElementById('topics-filter-subject').value;
+    const filtered = allTopics.filter(t => t.year_group === yr && (t.subject || 'maths') === subject);
     const grid = document.getElementById('topics-grid');
+
+    // Sync year selector — hide Add Maths when science selected
+    document.querySelector('#topics-filter-year option[value="13"]').style.display = subject === 'science' ? 'none' : '';
+    if (subject === 'science' && yr === 13) {
+      document.getElementById('topics-filter-year').value = '7';
+      window.renderTopicsTab(); return;
+    }
 
     if (filtered.length === 0) {
       grid.innerHTML = '<div style="color:#aaa;padding:32px;font-style:italic">No topics found for this year group.</div>';
@@ -1759,30 +1847,49 @@
       strands[s].push(t);
     });
 
-    grid.innerHTML = Object.entries(strands).map(([strand, topics]) =>
-      topics.map(t => {
-        const file = WALKTHROUGH_FILES[t.topic_code] || '#';
-        // Count how many students have completed this topic
+    const isSci = subject === 'science';
+    grid.innerHTML = Object.entries(strands).map(([strand, topics]) => {
+      const strandColour = isSci ? (SCIENCE_STRAND_COLOURS[strand] || '#888') : '#C0272D';
+      const strandHeader = `<div style="grid-column:1/-1;font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:${strandColour};padding:4px 0 2px;border-bottom:2px solid ${strandColour}22;margin-bottom:2px">${strand}</div>`;
+      const cards = topics.map(t => {
+        const file = isSci ? (SCIENCE_WALKTHROUGH_FILES[t.topic_code] || '#') : (WALKTHROUGH_FILES[t.topic_code] || '#');
         const completions = allProgress.filter(p => p.topic_id === t.id && p.status === 'completed').length;
         const started     = allProgress.filter(p => p.topic_id === t.id && p.status === 'started').length;
+        const hoverColour = isSci ? strandColour : '#C0272D';
+        const dot = isSci ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${strandColour};margin-right:5px;vertical-align:middle"></span>` : '';
         return `
           <a href="${file}" target="_blank" style="
-            display:block;background:white;border:1.5px solid #eee;border-radius:6px;
+            display:block;background:white;border:1.5px solid ${isSci ? strandColour + '33' : '#eee'};border-radius:6px;
             padding:14px 16px;text-decoration:none;color:#333;transition:all 0.18s;
-          " onmouseover="this.style.borderColor='#C0272D';this.style.transform='translateY(-1px)'"
-             onmouseout="this.style.borderColor='#eee';this.style.transform='none'">
+          " onmouseover="this.style.borderColor='${hoverColour}';this.style.transform='translateY(-1px)'"
+             onmouseout="this.style.borderColor='${isSci ? strandColour + '33' : '#eee'}';this.style.transform='none'">
             <div style="font-size:0.88rem;font-weight:700;color:#333;margin-bottom:4px">${t.topic_name}</div>
-            <div style="font-size:0.75rem;color:#888;margin-bottom:8px">${strand}</div>
+            <div style="font-size:0.75rem;color:#888;margin-bottom:8px">${dot}${strand}</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <span style="font-size:0.72rem;font-weight:700;background:#e8f5e9;color:#2e7d32;padding:2px 7px;border-radius:99px">
                 ✓ ${completions} completed
               </span>
               ${started > 0 ? `<span style="font-size:0.72rem;font-weight:700;background:#fffde7;color:#f57f17;padding:2px 7px;border-radius:99px">▶ ${started} started</span>` : ''}
+              ${file === '#' ? `<span style="font-size:0.72rem;font-weight:700;background:#f5f5f5;color:#aaa;padding:2px 7px;border-radius:99px">🔒 Coming soon</span>` : ''}
             </div>
           </a>`;
-      }).join('')
-    ).join('');
+      }).join('');
+      return strandHeader + cards;
+    }).join('');
   };
+  window.switchSubject = function(subject) {
+    staffSubject = subject;
+    document.getElementById('toggle-maths').classList.toggle('active', subject === 'maths');
+    document.getElementById('toggle-science').classList.toggle('active', subject === 'science');
+    document.getElementById('header-subtitle').textContent = subject === 'science' ? 'Science Portal — Staff' : 'Maths Portal — Staff';
+    // Sync Browse Topics subject filter
+    const subjectSelect = document.getElementById('topics-filter-subject');
+    if (subjectSelect) subjectSelect.value = subject;
+    window.renderTopicsTab();
+  };
+
+  document.getElementById('toggle-maths').addEventListener('click', () => window.switchSubject('maths'));
+  document.getElementById('toggle-science').addEventListener('click', () => window.switchSubject('science'));
 </script>
 
 </body>
