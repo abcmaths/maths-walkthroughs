@@ -3,16 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ABC Portal — My Dashboard</title>
+  <title>Adorable Portal — My Dashboard</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
     header { background: #C0272D; color: white; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
-    /* Subject toggle */
-    .subject-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 6px; padding: 3px; gap: 2px; }
-    .subject-toggle button { background: none; border: none; color: rgba(255,255,255,0.75); font-size: 0.82rem; font-weight: 600; padding: 4px 14px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
-    .subject-toggle button.active { background: white; color: #C0272D; }
-    .subject-toggle button:hover:not(.active) { color: white; background: rgba(255,255,255,0.2); }
     .header-left { display: flex; align-items: center; gap: 14px; }
     .logo { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; }
     .subtitle { font-size: 0.85rem; opacity: 0.85; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 14px; }
@@ -45,19 +40,6 @@
     .summary-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); text-align: center; }
     .summary-card .big { font-size: 2rem; font-weight: 700; color: #C0272D; line-height: 1; }
     .summary-card .label { font-size: 0.8rem; color: #777; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .subject-progress-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 28px; }
-    .subject-panel { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 18px 20px; border-top: 3px solid var(--accent); }
-    .subject-panel.maths-panel { --accent: #C0272D; }
-    .subject-panel.science-panel { --accent: #1565C0; }
-    .subject-panel.unavailable { --accent: #ccc; opacity: 0.6; position: relative; }
-    .subject-panel.unavailable .subject-panel-stat .big { color: #aaa; }
-    .subject-panel-soon-badge { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #999; background: #f0f0f0; padding: 2px 8px; border-radius: 10px; margin-left: auto; }
-    .subject-panel-title { font-size: 0.85rem; font-weight: 700; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-    .subject-panel.unavailable .subject-panel-title { color: #999; }
-    .subject-panel-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .subject-panel-stat { text-align: center; }
-    .subject-panel-stat .big { font-size: 1.4rem; font-weight: 700; color: #333; line-height: 1; }
-    .subject-panel-stat .label { font-size: 0.66rem; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
     .aoc-banner { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 28px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
     .aoc-banner h2 { font-size: 1rem; color: #333; font-weight: 700; flex: 1; min-width: 160px; }
     .aoc-item { text-align: center; }
@@ -68,8 +50,7 @@
     .strands { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 28px; }
     .strand-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
     .strand-row:last-child { margin-bottom: 0; }
-    .strand-name { width: 130px; font-size: 0.85rem; color: #444; font-weight: 600; flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
-    .strand-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .strand-name { width: 130px; font-size: 0.85rem; color: #444; font-weight: 600; flex-shrink: 0; }
     .bar-bg { flex: 1; background: #eee; border-radius: 99px; height: 10px; overflow: hidden; }
     .bar-fill { height: 100%; background: #C0272D; border-radius: 99px; transition: width 0.6s ease; }
     .strand-pct { width: 40px; text-align: right; font-size: 0.82rem; color: #888; flex-shrink: 0; }
@@ -81,19 +62,17 @@
     .year-selector select:focus { outline: none; border-color: #C0272D; }
     .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
     .topic-card { border: 1.5px solid #eee; border-radius: 6px; padding: 12px 14px; cursor: pointer; transition: all 0.18s; }
-    .topic-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); transform: translateY(-1px); }
-    .topic-card.maths-card:hover { border-color: #C0272D; box-shadow: 0 2px 8px rgba(192,39,45,0.12); }
-    .topic-card.science-card:hover { border-color: #1565C0; box-shadow: 0 2px 8px rgba(21,101,192,0.12); }
+    .topic-card:hover { border-color: #C0272D; box-shadow: 0 2px 8px rgba(192,39,45,0.12); transform: translateY(-1px); }
     .topic-card.completed { border-color: #a5d6a7; background: #f1f8f1; }
     .topic-card.started   { border-color: #ffe082; background: #fffde7; }
     .topic-card .t-name   { font-size: 0.88rem; font-weight: 600; color: #333; margin-bottom: 4px; }
     .topic-card .t-strand { font-size: 0.75rem; color: #888; }
     .topic-card .t-test { font-size: 0.72rem; color: #1a56b0; margin-top: 4px; }
     .t-btns { display: flex; gap: 6px; margin-top: 8px; }
-    .t-btn-walk { flex: 1; padding: 5px 8px; background: var(--accent, #C0272D); color: white; border: none; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
-    .t-btn-walk:hover { filter: brightness(0.88); }
-    .t-btn-test { flex: 1; padding: 5px 8px; background: white; color: var(--accent, #C0272D); border: 1.5px solid var(--accent, #C0272D); border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
-    .t-btn-test:hover { background: #f5f5f5; }
+    .t-btn-walk { flex: 1; padding: 5px 8px; background: #C0272D; color: white; border: none; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+    .t-btn-walk:hover { background: #a01f24; }
+    .t-btn-test { flex: 1; padding: 5px 8px; background: white; color: #C0272D; border: 1.5px solid #C0272D; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+    .t-btn-test:hover { background: #fde8e8; }
     .topic-card.completed .t-status { color: #2e7d32; }
     .topic-card.started   .t-status { color: #f57f17; }
     .topic-card.not-started .t-status { color: #bbb; }
@@ -108,13 +87,9 @@
 <header>
   <div class="header-left">
     <div class="logo">ABC</div>
-    <div class="subtitle" id="header-subtitle">Maths Portal</div>
+    <div class="subtitle">Adorable Portal</div>
   </div>
   <div class="header-right">
-    <div class="subject-toggle">
-      <button id="toggle-maths" class="active">📐 Maths</button>
-      <button id="toggle-science">🔬 Science</button>
-    </div>
     <span class="user-name" id="header-name"></span>
     <button class="btn-chpwd" onclick="openChangePwd()">Change Password</button>
     <button class="btn-signout" onclick="signOut()">Sign out</button>
@@ -147,28 +122,7 @@
       <p id="welcome-sub"></p>
     </div>
 
-    <div class="subject-progress-row" id="subject-progress-row">
-      <div class="subject-panel maths-panel" id="maths-panel">
-        <div class="subject-panel-title">📐 Maths Progress<span class="subject-panel-soon-badge" id="maths-soon-badge" style="display:none">Coming Soon</span></div>
-        <div class="subject-panel-stats">
-          <div class="subject-panel-stat"><div class="big" id="maths-stat-total">—</div><div class="label">Topics</div></div>
-          <div class="subject-panel-stat"><div class="big" id="maths-stat-completed">—</div><div class="label">Completed</div></div>
-          <div class="subject-panel-stat"><div class="big" id="maths-stat-started">—</div><div class="label">In Progress</div></div>
-          <div class="subject-panel-stat"><div class="big" id="maths-stat-pct">—</div><div class="label">Progress</div></div>
-        </div>
-      </div>
-      <div class="subject-panel science-panel" id="science-panel">
-        <div class="subject-panel-title">🔬 Science Progress<span class="subject-panel-soon-badge" id="science-soon-badge" style="display:none">Coming Soon</span></div>
-        <div class="subject-panel-stats">
-          <div class="subject-panel-stat"><div class="big" id="science-stat-total">—</div><div class="label">Topics</div></div>
-          <div class="subject-panel-stat"><div class="big" id="science-stat-completed">—</div><div class="label">Completed</div></div>
-          <div class="subject-panel-stat"><div class="big" id="science-stat-started">—</div><div class="label">In Progress</div></div>
-          <div class="subject-panel-stat"><div class="big" id="science-stat-pct">—</div><div class="label">Progress</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="summary-row" id="summary-row">
+    <div class="summary-row">
       <div class="summary-card"><div class="big" id="stat-total">—</div><div class="label">My Topics</div></div>
       <div class="summary-card"><div class="big" id="stat-completed">—</div><div class="label">Completed</div></div>
       <div class="summary-card"><div class="big" id="stat-started">—</div><div class="label">In Progress</div></div>
@@ -209,7 +163,7 @@
   </div>
 </main>
 
-<footer>© Adorable British College — ABC Learning Portal</footer>
+<footer>© Adorable British College — Adorable Portal</footer>
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -308,56 +262,11 @@
     'AM-STA-01': 'addmaths/permutation-combination-addmaths.html',
   };
 
-  // Science walkthrough files — add entries here only when the file is built and deployed
-  const SCIENCE_WALKTHROUGH_FILES = {
-    'Y7-BIO-S01': 'sci07/cells-y7.html',
-    'Y7-BIO-S02': 'sci07/classifying-life-y7.html',
-    'Y7-CHE-S01': 'sci07/classifying-matter-y7.html',
-    'Y7-CHE-S02': 'sci07/properties-matter-y7.html',
-    'Y7-CHE-S03': 'sci07/chemical-changes-y7.html',
-    'Y7-PHY-S01': 'sci07/forces-space-y7.html',
-    'Y7-PHY-S02': 'sci07/energy-sound-y7.html',
-    'Y7-PHY-S03': 'sci07/electricity-y7.html',
-    'Y7-SIC-S01': 'sci07/science-in-context-y7.html',
-    'Y7-EOY-S01': 'sci07/eoy-y7.html',
-    'Y8-BIO-S01': 'sci08/respiration-y8.html',
-    'Y8-BIO-S02': 'sci08/health-y8.html',
-    'Y8-CHE-S01': 'sci08/gases-y8.html',
-    'Y8-CHE-S02': 'sci08/liquids-y8.html',
-    'Y8-CHE-S03': 'sci08/atomic-structure-y8.html',
-    'Y8-CHE-S04': 'sci08/applications-science-y8.html',
-    'Y8-PHY-S01': 'sci08/light-colour-y8.html',
-    'Y8-PHY-S02': 'sci08/speed-motion-forces-y8.html',
-    'Y8-ES-S01': 'sci08/earth-solar-system-y8.html',
-    'Y8-SIC-S01': 'sci08/science-in-context-y8.html',
-    'Y8-EOY-S01': 'sci08/eoy-y8.html',
-    'Y9-BIO-S01': 'sci09/plant-biology-y9.html',
-    'Y9-BIO-S02': 'sci09/human-biology-y9.html',
-    'Y9-BIO-S03': 'sci09/species-environments-y9.html',
-    'Y9-CHE-S01': 'sci09/chemical-bonding-y9.html',
-    'Y9-CHE-S02': 'sci09/chemical-structures-y9.html',
-    'Y9-CHE-S03': 'sci09/chemical-reactions-y9.html',
-    'Y9-PHY-S01': 'sci09/sound-energy-y9.html',
-    'Y9-PHY-S02': 'sci09/electricity-y9.html',
-    // Y9 still pending: Y9-ES-S01 (earth-beyond), Y9-SIC-S01, Y9-EOY-S01
-  };
-
-  const SCIENCE_STRAND_COLOURS = {
-    'Biology':           '#2E7D32',
-    'Chemistry':         '#6A1B9A',
-    'Physics':           '#1565C0',
-    'Earth & Space':     '#00695C',
-    'Science in Context':'#E65100',
-    'SIC':               '#E65100',
-    'Review':            '#E65100',
-  };
-
   let allTopics   = [];
   let progressMap = {};
   let testResultsMap = {};
   let myYearGroup = 7;
   let userId      = null;
-  let currentSubject = 'maths';
 
   function showError(msg) {
     document.getElementById('loading').style.display = 'none';
@@ -385,7 +294,7 @@
 
       document.getElementById('header-name').textContent = profile.full_name;
       document.getElementById('welcome-name').textContent = 'Hello, ' + profile.full_name.split(' ')[0] + '!';
-      document.getElementById('welcome-sub').textContent = 'Year ' + myYearGroup + (profile.form_class ? ' · ' + profile.form_class : '');
+      document.getElementById('welcome-sub').textContent = 'Year ' + myYearGroup + (profile.form_class ? ' · ' + profile.form_class : '') + ' · Maths';
 
       // Load all topics
       const { data: topics } = await supabase
@@ -410,8 +319,17 @@
         .from('eoy_aoc_results').select('*').eq('student_id', userId)
         .order('academic_year', { ascending: false }).limit(1).maybeSingle();
 
-      // Summary cards
-      renderSummaryCards();
+      // Summary cards (own year)
+      const myTopics  = allTopics.filter(t => t.year_group === myYearGroup);
+      const total     = myTopics.length;
+      const completed = myTopics.filter(t => progressMap[t.id] === 'completed').length;
+      const started   = myTopics.filter(t => progressMap[t.id] === 'started').length;
+      const pct       = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      document.getElementById('stat-total').textContent     = total;
+      document.getElementById('stat-completed').textContent = completed;
+      document.getElementById('stat-started').textContent   = started;
+      document.getElementById('stat-pct').textContent       = pct + '%';
 
       // AOC banner
       if (aoc) {
@@ -424,8 +342,25 @@
           <div class="aoc-item"><div class="val" style="font-size:0.9rem;color:#555">${aoc.academic_year}</div><div class="lbl">Academic Year</div></div>`;
       }
 
-      // Strand bars (own year, current subject)
-      renderStrandBars();
+      // Strand bars (own year)
+      const strands = {};
+      myTopics.forEach(t => {
+        const s = t.strand || 'Other';
+        if (!strands[s]) strands[s] = { total: 0, completed: 0 };
+        strands[s].total++;
+        if (progressMap[t.id] === 'completed') strands[s].completed++;
+      });
+
+      document.getElementById('strand-bars').innerHTML = Object.entries(strands).length > 0
+        ? Object.entries(strands).map(([name, data]) => {
+            const p = data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0;
+            return `<div class="strand-row">
+              <div class="strand-name">${name}</div>
+              <div class="bar-bg"><div class="bar-fill" style="width:${p}%"></div></div>
+              <div class="strand-pct">${p}%</div>
+            </div>`;
+          }).join('')
+        : '<div class="no-topics">No topics added for your year group yet.</div>';
 
       // Set default selector and render
       document.getElementById('year-select').value = 'own';
@@ -440,98 +375,19 @@
     }
   }
 
-  function renderStrandBars() {
-    const strandTopics = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
-    const strands = {};
-    strandTopics.forEach(t => {
-      const s = t.strand || 'Other';
-      if (!strands[s]) strands[s] = { total: 0, completed: 0 };
-      strands[s].total++;
-      if (progressMap[t.id] === 'completed') strands[s].completed++;
-    });
-
-    document.getElementById('strand-bars').innerHTML = Object.entries(strands).length > 0
-      ? Object.entries(strands).map(([name, data]) => {
-          const p = data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0;
-          const colour = currentSubject === 'science'
-            ? (SCIENCE_STRAND_COLOURS[name] || '#888')
-            : '#C0272D';
-          const dot = currentSubject === 'science'
-            ? `<span class="strand-dot" style="background:${colour}"></span>`
-            : '';
-          return `<div class="strand-row">
-            <div class="strand-name">${dot}${name}</div>
-            <div class="bar-bg"><div class="bar-fill" style="width:${p}%;background:${colour}"></div></div>
-            <div class="strand-pct">${p}%</div>
-          </div>`;
-        }).join('')
-      : '<div class="no-topics">No topics added for your year group yet.</div>';
-  }
-
-  function renderSummaryCards() {
-    const myTopics  = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
-    const total     = myTopics.length;
-    const completed = myTopics.filter(t => progressMap[t.id] === 'completed').length;
-    const started   = myTopics.filter(t => progressMap[t.id] === 'started').length;
-    const pct       = total > 0 ? Math.round((completed / total) * 100) : 0;
-    document.getElementById('stat-total').textContent     = total;
-    document.getElementById('stat-completed').textContent = completed;
-    document.getElementById('stat-started').textContent   = started;
-    document.getElementById('stat-pct').textContent       = pct + '%';
-
-    // Always-visible per-subject split, regardless of active toggle
-    ['maths', 'science'].forEach(subj => {
-      const subjTopics    = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === subj);
-      const subjTotal     = subjTopics.length;
-      const subjCompleted = subjTopics.filter(t => progressMap[t.id] === 'completed').length;
-      const subjStarted   = subjTopics.filter(t => progressMap[t.id] === 'started').length;
-      const subjPct       = subjTotal > 0 ? Math.round((subjCompleted / subjTotal) * 100) : 0;
-      const placeholder   = subjTotal === 0;
-      document.getElementById(subj + '-stat-total').textContent     = placeholder ? '—' : subjTotal;
-      document.getElementById(subj + '-stat-completed').textContent = placeholder ? '—' : subjCompleted;
-      document.getElementById(subj + '-stat-started').textContent   = placeholder ? '—' : subjStarted;
-      document.getElementById(subj + '-stat-pct').textContent       = placeholder ? '—' : subjPct + '%';
-    });
-
-    // If this year group has no topics at all for a subject (e.g. science not yet
-    // available for Year 10+), show that panel greyed-out with a "Coming Soon" badge
-    // rather than hiding it entirely.
-    const mathsHasTopics   = allTopics.some(t => t.year_group === myYearGroup && (t.subject || 'maths') === 'maths');
-    const scienceHasTopics = allTopics.some(t => t.year_group === myYearGroup && (t.subject || 'maths') === 'science');
-    document.getElementById('maths-panel').classList.toggle('unavailable', !mathsHasTopics);
-    document.getElementById('science-panel').classList.toggle('unavailable', !scienceHasTopics);
-    document.getElementById('maths-soon-badge').style.display   = mathsHasTopics   ? 'none' : '';
-    document.getElementById('science-soon-badge').style.display = scienceHasTopics ? 'none' : '';
-  }
-
-  window.switchSubject = function(subject) {
-    currentSubject = subject;
-    document.getElementById('toggle-maths').classList.toggle('active', subject === 'maths');
-    document.getElementById('toggle-science').classList.toggle('active', subject === 'science');
-    document.getElementById('header-subtitle').textContent = subject === 'science' ? 'Science Portal' : 'Maths Portal';
-    // Hide Add Maths option when in science mode (science only has Y7–9)
-    document.querySelector('#year-select option[value="13"]').style.display = subject === 'science' ? 'none' : '';
-    if (subject === 'science' && document.getElementById('year-select').value === '13') {
-      document.getElementById('year-select').value = 'own';
-    }
-    renderSummaryCards();
-    renderStrandBars();
-    window.renderTopics();
-  };
-
   window.renderTopics = function() {
     const value = document.getElementById('year-select').value;
     let filtered, label;
 
     if (value === 'own') {
-      filtered = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
+      filtered = allTopics.filter(t => t.year_group === myYearGroup);
       label    = 'Showing your Year ' + myYearGroup + ' topics';
     } else if (value === '13') {
-      filtered = allTopics.filter(t => t.year_group === 13 && (t.subject || 'maths') === 'maths');
+      filtered = allTopics.filter(t => t.year_group === 13);
       label    = 'Showing Add Maths topics';
     } else {
       const yr = parseInt(value);
-      filtered = allTopics.filter(t => t.year_group === yr && (t.subject || 'maths') === currentSubject);
+      filtered = allTopics.filter(t => t.year_group === yr);
       label    = 'Showing Year ' + yr + ' topics' + (yr !== myYearGroup ? ' — browsing another year' : '');
     }
 
@@ -546,28 +402,19 @@
     grid.innerHTML = filtered.map(t => {
       const status = progressMap[t.id] || 'not-started';
       const lbl    = status === 'completed' ? '✓ Completed' : status === 'started' ? '▶ In Progress' : '○ Not started';
+      const file   = WALKTHROUGH_FILES[t.topic_code] || '#';
       const testResult = testResultsMap[t.id];
       const testBadge  = testResult
         ? `<div class="t-test">Last test: <strong>${testResult.grade}</strong> (${testResult.percentage}%)</div>`
         : '';
-      const isSci    = (t.subject || 'maths') === 'science';
-      const file     = isSci
-        ? (SCIENCE_WALKTHROUGH_FILES[t.topic_code] || '#')
-        : (WALKTHROUGH_FILES[t.topic_code] || '#');
-      const accent   = isSci ? (SCIENCE_STRAND_COLOURS[t.strand] || '#1565C0') : '#C0272D';
-      const strandLabel = isSci
-        ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${accent};margin-right:4px;vertical-align:middle"></span>${t.strand || ''}`
-        : (t.strand || '');
-      const comingSoon = file === '#';
-      const cardClass  = isSci ? 'topic-card science-card' : 'topic-card maths-card';
-      return `<div class="${cardClass} ${status}" style="${isSci && status === 'not-started' ? `border-color:${accent}22` : ''}">
+      return `<div class="topic-card ${status}">
         <div class="t-name">${t.topic_name}</div>
-        <div class="t-strand">${strandLabel}</div>
-        <div class="t-status">${comingSoon ? '<span style="color:#bbb;font-size:0.72rem">🔒 Coming soon</span>' : lbl}</div>
+        <div class="t-strand">${t.strand || ''}</div>
+        <div class="t-status">${lbl}</div>
         ${testBadge}
-        <div class="t-btns" style="--accent:${accent}">
-          <button class="t-btn-walk" ${comingSoon ? 'disabled style="background:#ddd;cursor:not-allowed"' : ''} onclick="openTopic('${t.id}','${file}')">Walkthrough</button>
-          <button class="t-btn-test" ${comingSoon ? 'disabled style="color:#bbb;border-color:#ddd;cursor:not-allowed"' : ''} onclick="openTest('${t.id}')">Take a Test</button>
+        <div class="t-btns">
+          <button class="t-btn-walk" onclick="openTopic('${t.id}','${file}')">Walkthrough</button>
+          <button class="t-btn-test" onclick="openTest('${t.id}')">Take a Test</button>
         </div>
       </div>`;
     }).join('');
@@ -643,9 +490,6 @@
     await supabase.auth.signOut();
     window.location.href = 'login.html';
   };
-
-  document.getElementById('toggle-maths').addEventListener('click', () => window.switchSubject('maths'));
-  document.getElementById('toggle-science').addEventListener('click', () => window.switchSubject('science'));
 
   init();
 </script>
