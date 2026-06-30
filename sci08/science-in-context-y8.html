@@ -111,7 +111,7 @@ function genTry(id,o){
   return '<div class="try" data-tryid="'+id+'">'+
     '<div class="try-t">&#10004; Your Turn</div><p>'+o.question+'</p>'+
     '<div class="ar"><input type="number" step="any" placeholder="Your answer" id="'+id+'_i"/>'+
-    '<button class="ck" onclick="ck(''+id+'')">&#10003; Check</button></div>'+
+    '<button class="ck" onclick="ck(\''+id+'\')">&#10003; Check</button></div>'+
     '<div class="fb" id="'+id+'_f"></div>'+
     '<details class="wk"><summary>Show working</summary><div class="wk-b">'+
     (h?'<ul class="hl">'+h+'</ul>':'')+
@@ -134,7 +134,7 @@ function tryItMC(fn){
 }
 function genTryMC(id,o){
   var opts=o.options.map(function(opt,i){
-    return '<button class="mc-opt" onclick="ckMC(''+id+'','+i+','+o.correct+')">'+opt+'</button>';
+    return '<button class="mc-opt" onclick="ckMC(\''+id+'\','+i+','+o.correct+')">'+opt+'</button>';
   }).join('');
   return '<div class="try" data-tryid="'+id+'">'+
     '<div class="try-t">&#10004; Your Turn</div><p>'+o.question+'</p>'+
@@ -198,17 +198,7 @@ draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 var steps=['Experiment conducted','Results written up','Peer review by experts','Published in journal','Other labs replicate','Scientific consensus'];var cols=['#E65100','#C8922A','#1565C0','#6A1B9A','#2E7D32','#C0272D'];
 steps.forEach(function(st,i){o.push(R(60,28+i*42,360,30,cols[i]+'22',cols[i],1.5,3));o.push(T(240,48+i*42,st,cols[i],9,'middle',false));if(i<5)o.push(arr(240,58+i*42,240,70+i*42,'#555',1.5));});
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'What is peer review?',
-['Other scientists check a study before publication','Scientists reviewing their own work','Students reviewing textbooks','Government approval of research'],
-'<b>Peer review</b> is when independent experts (peers — scientists in the same field) critically evaluate a study\'s methods, data, and conclusions before it is published. This helps ensure quality and detect errors.',
-'What does scientific consensus mean?',
-['The agreement of the vast majority of scientists based on overwhelming evidence','All scientists agree on everything','A vote among scientists','The opinion of the most famous scientist'],
-'<b>Scientific consensus</b> occurs when the overwhelming weight of evidence, evaluated by the scientific community, points to the same conclusion. Examples: evolution, human-caused climate change, vaccine safety, germ theory.',
-'Why is replication of experiments important in science?',
-['It verifies results and confirms they are not due to chance or error','It wastes resources','It proves the first scientist wrong','It is required by law'],
-'<b>Replication</b> — repeating experiments in different labs — is crucial because it confirms that results are real and reproducible, not due to experimental error, equipment faults, or fraudulent data.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'What is peer review?',options:['Other scientists check a study before publication','Scientists reviewing their own work','Students reviewing textbooks','Government approval of research'],correct:0,working:'<b>Peer review</b> is when independent experts (peers — scientists in the same field) critically evaluate a study\'s methods, data, and conclusions before it is published. This helps ensure quality and detect errors.'},{question:'What does scientific consensus mean?',options:['The agreement of the vast majority of scientists based on overwhelming evidence','All scientists agree on everything','A vote among scientists','The opinion of the most famous scientist'],correct:0,working:'<b>Scientific consensus</b> occurs when the overwhelming weight of evidence, evaluated by the scientific community, points to the same conclusion. Examples: evolution, human-caused climate change, vaccine safety, germ theory.'},{question:'Why is replication of experiments important in science?',options:['It verifies results and confirms they are not due to chance or error','It wastes resources','It proves the first scientist wrong','It is required by law'],correct:0,working:'<b>Replication</b> — repeating experiments in different labs — is crucial because it confirms that results are real and reproducible, not due to experimental error, equipment faults, or fraudulent data.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(T(240,30,'Science in society','#E65100',12,'middle',true));
 var rows=[['Peer review','Independent experts check research quality'],['Replication','Other labs verify results'],['Scientific consensus','Vast majority of evidence agrees'],['Media reporting','Can oversimplify or distort findings'],['Evidence-based policy','Decisions guided by scientific data']];var cols=['#1565C0','#2E7D32','#C0272D','#C8922A','#6A1B9A'];
 rows.forEach(function(r,i){o.push(R(20,58+i*44,440,32,cols[i]+'18',cols[i],1.5,3));o.push(T(140,79+i*44,r[0],cols[i],9,'start',true));o.push(T(330,79+i*44,r[1],'#555',8,'middle',false));});
@@ -243,17 +233,7 @@ pts2.forEach(function(p,i){o.push(circ(p[0],p[1],i===4?8:5,i===4?'#C0272D':'#156
 o.push(T(255,110,'Anomalous\nresult','#C0272D',8,'middle',true));
 o.push(T(240,40,'Exclude anomalous results from mean calculation','#555',9,'middle',false));
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'Ice cream sales and drowning rates are correlated. Does this mean ice cream causes drowning?',
-['No — both are caused by a third variable (hot weather)','Yes — the data clearly shows causation','No — the correlation is wrong','Yes, but only sometimes'],
-'This is a classic example of <b>correlation without causation</b>. Both ice cream sales and swimming (leading to drowning risk) increase in hot weather. Hot weather is the <b>third variable</b> (confounding variable) causing both.',
-'When should you use a scatter graph rather than a line graph?',
-['When investigating correlation between two continuous variables','When the data has clear categories','When showing proportions of a whole','When one variable is categoric'],
-'A <b>scatter graph</b> is used to investigate the relationship (correlation) between two continuous variables — you plot individual data points and look for a trend. A line graph is used when showing change over time or another continuous progression.',
-'What should you do with an anomalous result?',
-['Identify it, investigate the cause, and exclude it from mean calculations','Include it in all calculations','Repeat only that measurement','Ignore it without recording'],
-'Anomalous results should be <b>identified</b> (circled on a graph), the <b>cause investigated</b> (measurement error? equipment fault?), and <b>excluded from the mean</b> if confirmed as an error. The experiment should be repeated if necessary.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'Ice cream sales and drowning rates are correlated. Does this mean ice cream causes drowning?',options:['No — both are caused by a third variable (hot weather)','Yes — the data clearly shows causation','No — the correlation is wrong','Yes, but only sometimes'],correct:0,working:'This is a classic example of <b>correlation without causation</b>. Both ice cream sales and swimming (leading to drowning risk) increase in hot weather. Hot weather is the <b>third variable</b> (confounding variable) causing both.'},{question:'When should you use a scatter graph rather than a line graph?',options:['When investigating correlation between two continuous variables','When the data has clear categories','When showing proportions of a whole','When one variable is categoric'],correct:0,working:'A <b>scatter graph</b> is used to investigate the relationship (correlation) between two continuous variables — you plot individual data points and look for a trend. A line graph is used when showing change over time or another continuous progression.'},{question:'What should you do with an anomalous result?',options:['Identify it, investigate the cause, and exclude it from mean calculations','Include it in all calculations','Repeat only that measurement','Ignore it without recording'],correct:0,working:'Anomalous results should be <b>identified</b> (circled on a graph), the <b>cause investigated</b> (measurement error? equipment fault?), and <b>excluded from the mean</b> if confirmed as an error. The experiment should be repeated if necessary.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(T(240,30,'Data analysis checklist','#E65100',12,'middle',true));
 var items=['1. Plot data on appropriate graph type','2. Draw line/curve of best fit','3. Identify any anomalous results','4. Calculate mean (excluding anomalies)','5. Comment on correlation (if scatter graph)','6. Do NOT confuse correlation with causation'];var cols=['#1565C0','#2E7D32','#C0272D','#C8922A','#6A1B9A','#E65100'];
 items.forEach(function(it,i){o.push(R(20,52+i*38,440,28,cols[i]+'18',cols[i],1.5,3));o.push(T(40,71+i*38,it,cols[i],8,'start',false));});
@@ -281,17 +261,7 @@ o.push(T(240,30,'Evaluating science in the media','#E65100',12,'middle',true));
 var questions=['Is the source peer-reviewed?','What was the sample size?','Has it been replicated?','Who funded the research?','Does one study prove anything?','Is the headline accurate?'];var cols=['#2E7D32','#1565C0','#C0272D','#C8922A','#6A1B9A','#E65100'];
 questions.forEach(function(q,i){o.push(R(30,55+i*37,420,28,cols[i]+'18',cols[i],1.5,3));o.push(T(50,74+i*37,'\u2753 '+q,cols[i],8,'start',false));});
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'A newspaper headline reads "Scientists discover coffee CURES cancer!" What is the most appropriate response?',
-['Find the original peer-reviewed study and check the actual findings','Immediately drink lots of coffee','Avoid coffee completely','Believe the headline — newspapers never lie'],
-'Headlines massively oversimplify scientific findings. You should <b>find and read the original peer-reviewed study</b>. Check: sample size, whether it was done on humans or animals, the actual size of the effect, and whether it has been replicated.',
-'What does "informed consent" mean in research?',
-['Participants are told about the study and agree to take part voluntarily','Scientists are informed about the consent laws','The government consents to the research','Participants consent without knowing what the study is about'],
-'<b>Informed consent</b> means participants: (1) are told clearly what the study involves and any risks, (2) understand the information, and (3) <b>voluntarily agree</b> to participate. They must be able to withdraw at any time.',
-'What are the 3Rs in animal testing ethics?',
-['Replace, Reduce, Refine','Research, Review, Report','Repeat, Record, Report','Remove, Replace, Redesign'],
-'The <b>3Rs</b> framework for ethical animal research: <b>Replace</b> animal tests with alternatives where possible; <b>Reduce</b> the number of animals used; <b>Refine</b> procedures to minimise suffering and improve animal welfare.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'A newspaper headline reads "Scientists discover coffee CURES cancer!" What is the most appropriate response?',options:['Find the original peer-reviewed study and check the actual findings','Immediately drink lots of coffee','Avoid coffee completely','Believe the headline — newspapers never lie'],correct:0,working:'Headlines massively oversimplify scientific findings. You should <b>find and read the original peer-reviewed study</b>. Check: sample size, whether it was done on humans or animals, the actual size of the effect, and whether it has been replicated.'},{question:'What does "informed consent" mean in research?',options:['Participants are told about the study and agree to take part voluntarily','Scientists are informed about the consent laws','The government consents to the research','Participants consent without knowing what the study is about'],correct:0,working:'<b>Informed consent</b> means participants: (1) are told clearly what the study involves and any risks, (2) understand the information, and (3) <b>voluntarily agree</b> to participate. They must be able to withdraw at any time.'},{question:'What are the 3Rs in animal testing ethics?',options:['Replace, Reduce, Refine','Research, Review, Report','Repeat, Record, Report','Remove, Replace, Redesign'],correct:0,working:'The <b>3Rs</b> framework for ethical animal research: <b>Replace</b> animal tests with alternatives where possible; <b>Reduce</b> the number of animals used; <b>Refine</b> procedures to minimise suffering and improve animal welfare.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(T(240,30,'Scientific ethics summary','#E65100',12,'middle',true));
 var rows=[['Informed consent','Participants agree voluntarily'],['3Rs','Replace, Reduce, Refine (animal research)'],['Data integrity','No falsification or selective reporting'],['Media scepticism','Check source, sample size, replication'],['Risk-benefit','Weigh all benefits and risks of new tech']];var cols=['#1565C0','#2E7D32','#C0272D','#C8922A','#6A1B9A'];
 rows.forEach(function(r,i){o.push(R(20,62+i*44,440,32,cols[i]+'18',cols[i],1.5,3));o.push(T(140,83+i*44,r[0],cols[i],9,'start',true));o.push(T(330,83+i*44,r[1],'#555',8,'middle',false));});
@@ -319,17 +289,7 @@ o.push(L(280,200,440,200,'#555',2));
 o.push(T(360,140,'Compression','#C0272D',8,'middle',true));
 o.push(arr(360,152,380,170,'#C0272D',1.5));o.push(arr(360,152,340,170,'#C0272D',1.5));
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'Why are triangles used in bridge and structure design?',
-['Triangles are rigid and cannot change shape under load','Triangles are the strongest shape under all forces','Triangles use the least material','Triangles are aesthetic'],
-'<b>Triangles are rigid</b> — unlike rectangles or other shapes, a triangle cannot deform (change shape) when forces are applied to its corners without changing the lengths of its sides. This makes triangular frameworks ideal for strong, stable structures.',
-'A structural engineer needs to build a lightweight aircraft component. Which material is most appropriate?',
-['Aluminium alloy','Concrete','Steel','Ceramic'],
-'<b>Aluminium alloys</b> are ideal for aircraft because they are <b>lightweight yet strong</b>, and resistant to corrosion. Steel is strong but too heavy; concrete is brittle and very heavy; ceramics are too brittle for dynamic aircraft loads.',
-'What is the purpose of the "test and evaluate" stage in the engineering design cycle?',
-['To identify faults and areas for improvement so the design can be refined','To confirm the design is perfect and needs no changes','To show the design to customers','To calculate the cost of production'],
-'Testing reveals how well the design meets requirements and where it fails. <b>Evaluation</b> identifies areas for improvement. This leads back to redesign — the process is <b>iterative</b>, not linear.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'Why are triangles used in bridge and structure design?',options:['Triangles are rigid and cannot change shape under load','Triangles are the strongest shape under all forces','Triangles use the least material','Triangles are aesthetic'],correct:0,working:'<b>Triangles are rigid</b> — unlike rectangles or other shapes, a triangle cannot deform (change shape) when forces are applied to its corners without changing the lengths of its sides. This makes triangular frameworks ideal for strong, stable structures.'},{question:'A structural engineer needs to build a lightweight aircraft component. Which material is most appropriate?',options:['Aluminium alloy','Concrete','Steel','Ceramic'],correct:0,working:'<b>Aluminium alloys</b> are ideal for aircraft because they are <b>lightweight yet strong</b>, and resistant to corrosion. Steel is strong but too heavy; concrete is brittle and very heavy; ceramics are too brittle for dynamic aircraft loads.'},{question:'What is the purpose of the "test and evaluate" stage in the engineering design cycle?',options:['To identify faults and areas for improvement so the design can be refined','To confirm the design is perfect and needs no changes','To show the design to customers','To calculate the cost of production'],correct:0,working:'Testing reveals how well the design meets requirements and where it fails. <b>Evaluation</b> identifies areas for improvement. This leads back to redesign — the process is <b>iterative</b>, not linear.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(T(240,30,'Material properties for engineering','#E65100',12,'middle',true));
 var rows=[['Strength','Resists breaking under force'],['Stiffness/rigidity','Resists deformation'],['Ductility','Can be drawn into wire'],['Hardness','Resists scratching'],['Toughness','Resists impact/shattering'],['Corrosion resistance','Resists chemical degradation']];var cols=['#C0272D','#1565C0','#2E7D32','#C8922A','#6A1B9A','#E65100'];
 rows.forEach(function(r,i){o.push(R(20,52+i*38,440,28,cols[i]+'18',cols[i],1.5,3));o.push(T(120,71+i*38,r[0],cols[i],9,'start',true));o.push(T(310,71+i*38,r[1],'#555',8,'middle',false));});
@@ -354,17 +314,7 @@ o.push(R(0,0,480,300,'#080818','none',0,0));
 var challenges=['Vacuum (no air, extreme temps)','Radiation (no atmospheric shield)','Microgravity (muscle/bone loss)','Enormous distances','Signal delay in communication'];var cols=['#C0272D','#C8922A','#6A1B9A','#1565C0','#2E7D32'];
 challenges.forEach(function(c,i){o.push(R(30,30+i*50,420,36,cols[i]+'22',cols[i],1.5,3));o.push(T(50,53+i*50,'\u26a0 '+c,cols[i],9,'start',false));});
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'Which technology originally developed for space exploration is now used by billions of people daily?',
-['GPS (Global Positioning System)','The internet','Mobile phones','Nuclear power'],
-'<b>GPS</b> was developed by NASA and the US military for space and navigation purposes. It uses a network of satellites to provide accurate positioning anywhere on Earth — now used in cars, phones, and countless applications.',
-'Why is radiation a particular danger for astronauts on long missions to Mars?',
-['There is no thick atmosphere or magnetic field to shield them from cosmic and solar radiation','Space is very cold','Their suits might fail','Mars has more gravity than Earth'],
-'On Earth, we are protected by the atmosphere and magnetic field. In deep space, astronauts are exposed to <b>high-energy cosmic rays and solar particle events</b>, which can damage DNA and increase cancer risk significantly over long missions.',
-'How long does a radio signal take to travel from Earth to Mars?',
-['Up to 20 minutes (one way)','A few seconds','Several hours','Instantly'],
-'Radio signals travel at the speed of light (3\u00d710\u2078 m/s). At maximum Earth-Mars distance (~225 million km), this takes about <b>20 minutes one way</b> — making real-time control of missions impossible.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'Which technology originally developed for space exploration is now used by billions of people daily?',options:['GPS (Global Positioning System)','The internet','Mobile phones','Nuclear power'],correct:0,working:'<b>GPS</b> was developed by NASA and the US military for space and navigation purposes. It uses a network of satellites to provide accurate positioning anywhere on Earth — now used in cars, phones, and countless applications.'},{question:'Why is radiation a particular danger for astronauts on long missions to Mars?',options:['There is no thick atmosphere or magnetic field to shield them from cosmic and solar radiation','Space is very cold','Their suits might fail','Mars has more gravity than Earth'],correct:0,working:'On Earth, we are protected by the atmosphere and magnetic field. In deep space, astronauts are exposed to <b>high-energy cosmic rays and solar particle events</b>, which can damage DNA and increase cancer risk significantly over long missions.'},{question:'How long does a radio signal take to travel from Earth to Mars?',options:['Up to 20 minutes (one way)','A few seconds','Several hours','Instantly'],correct:0,working:'Radio signals travel at the speed of light (3\u00d710\u2078 m/s). At maximum Earth-Mars distance (~225 million km), this takes about <b>20 minutes one way</b> — making real-time control of missions impossible.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(R(0,0,480,300,'#080818','none',0,0));
 o.push(T(240,30,'Space exploration summary','#fff9c4',12,'middle',true));
 var rows=[['Hubble/Webb','Space telescopes: observe early universe','#9c27b0'],['Mars rovers','Curiosity, Perseverance: surface geology','#C8922A'],['ISS','International Space Station: orbits Earth','#1565C0'],['Challenges','Radiation, distance, microgravity','#C0272D'],['Spin-offs','GPS, memory foam, water purification','#2E7D32']];

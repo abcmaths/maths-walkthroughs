@@ -111,7 +111,7 @@ function genTry(id,o){
   return '<div class="try" data-tryid="'+id+'">'+
     '<div class="try-t">&#10004; Your Turn</div><p>'+o.question+'</p>'+
     '<div class="ar"><input type="number" step="any" placeholder="Your answer" id="'+id+'_i"/>'+
-    '<button class="ck" onclick="ck(''+id+'')">&#10003; Check</button></div>'+
+    '<button class="ck" onclick="ck(\''+id+'\')">&#10003; Check</button></div>'+
     '<div class="fb" id="'+id+'_f"></div>'+
     '<details class="wk"><summary>Show working</summary><div class="wk-b">'+
     (h?'<ul class="hl">'+h+'</ul>':'')+
@@ -134,7 +134,7 @@ function tryItMC(fn){
 }
 function genTryMC(id,o){
   var opts=o.options.map(function(opt,i){
-    return '<button class="mc-opt" onclick="ckMC(''+id+'','+i+','+o.correct+')">'+opt+'</button>';
+    return '<button class="mc-opt" onclick="ckMC(\''+id+'\','+i+','+o.correct+')">'+opt+'</button>';
   }).join('');
   return '<div class="try" data-tryid="'+id+'">'+
     '<div class="try-t">&#10004; Your Turn</div><p>'+o.question+'</p>'+
@@ -206,17 +206,7 @@ draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 var steps=['1. Heat solution to concentrate','2. Cool slowly','3. Crystals form','4. Filter and dry'];var cols=['#C0272D','#1565C0','#6A1B9A','#2E7D32'];
 steps.forEach(function(st,i){o.push(R(60,40+i*58,360,44,cols[i]+'22',cols[i],1.5,4));o.push(T(240,67+i*58,st,cols[i],10,'middle',true));if(i<3)o.push(arr(240,84+i*58,240,98+i*58,'#555',1.5));});
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'A solution contains 15 g of salt dissolved in 0.5 dm\u00b3. What is the concentration?',
-['30 g/dm\u00b3','7.5 g/dm\u00b3','15 g/dm\u00b3','0.5 g/dm\u00b3'],
-'Concentration = mass \u00f7 volume = 15 \u00f7 0.5 = <b>30 g/dm\u00b3</b>.',
-'How does temperature affect the solubility of a solid solute?',
-['Solubility increases with temperature','Solubility decreases with temperature','Temperature has no effect','Solubility first increases then decreases'],
-'For most solid solutes, <b>solubility increases with temperature</b>. More solute dissolves in hot water than cold water because the increased energy helps break apart the solute\'s crystal lattice.',
-'What is a saturated solution?',
-['A solution that cannot dissolve any more solute at that temperature','A very concentrated solution','A solution at 100\u00b0C','A solution with excess solvent'],
-'A <b>saturated solution</b> contains the maximum possible amount of dissolved solute at a given temperature. Any additional solute added will remain undissolved at the bottom of the container.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'A solution contains 15 g of salt dissolved in 0.5 dm\u00b3. What is the concentration?',options:['30 g/dm\u00b3','7.5 g/dm\u00b3','15 g/dm\u00b3','0.5 g/dm\u00b3'],correct:0,working:'Concentration = mass \u00f7 volume = 15 \u00f7 0.5 = <b>30 g/dm\u00b3</b>.'},{question:'How does temperature affect the solubility of a solid solute?',options:['Solubility increases with temperature','Solubility decreases with temperature','Temperature has no effect','Solubility first increases then decreases'],correct:0,working:'For most solid solutes, <b>solubility increases with temperature</b>. More solute dissolves in hot water than cold water because the increased energy helps break apart the solute\'s crystal lattice.'},{question:'What is a saturated solution?',options:['A solution that cannot dissolve any more solute at that temperature','A very concentrated solution','A solution at 100\u00b0C','A solution with excess solvent'],correct:0,working:'A <b>saturated solution</b> contains the maximum possible amount of dissolved solute at a given temperature. Any additional solute added will remain undissolved at the bottom of the container.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(T(240,40,'Concentration = mass \u00f7 volume','#6A1B9A',14,'middle',true));
 var rows=[['Dilute','Few solute particles per dm\u00b3','#1565C0'],['Concentrated','Many solute particles per dm\u00b3','#6A1B9A'],['Saturated','Cannot dissolve any more solute','#C0272D'],['Unsaturated','Could dissolve more solute','#2E7D32']];
 rows.forEach(function(r,i){o.push(R(20,90+i*48,440,36,r[2]+'18',r[2],1.5,3));o.push(T(120,113+i*48,r[0],r[2],10,'start',true));o.push(T(310,113+i*48,r[1],'#555',9,'middle',false));});
@@ -244,17 +234,7 @@ o.push(T(360,22,'High temp (fast)','#C0272D',10,'middle',true));
 for(var j=0;j<8;j++){o.push(circ(280+rInt(0,160),50+rInt(0,160),8,'#ffcdd2','#C0272D',1.5));var a=rInt(0,360)*Math.PI/180;var r=20;o.push(arr(280+rInt(0,160),50+rInt(0,160),280+rInt(0,160)+r*Math.cos(a),50+rInt(0,160)+r*Math.sin(a),'#C0272D',1));}
 o.push(T(240,260,'More collisions with sufficient energy = faster rate','#555',10,'middle',false));
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'Marble chips react with hydrochloric acid. How can you increase the rate WITHOUT changing temperature?',
-['Use powdered marble (larger surface area)','Use less acid','Cool the acid','Remove the marble chips'],
-'Powdered marble has a much <b>larger surface area</b> than chips, exposing more particles to the acid at once. More collisions per second \u2192 faster rate. This is why fine powders react faster than lumps.',
-'What is a catalyst?',
-['A substance that increases reaction rate without being used up','A substance that slows reactions down','A product of the reaction','A reactant that speeds up the reaction'],
-'A <b>catalyst</b> increases the rate of a reaction by providing an alternative reaction pathway with a lower activation energy. Crucially, it is <b>not used up</b> — the same catalyst can be used over and over.',
-'Why does increasing temperature increase reaction rate?',
-['Particles move faster, so more collisions have enough energy to react','Particles become larger','The activation energy decreases','Concentration increases'],
-'Higher temperature gives particles more <b>kinetic energy</b>. They move faster, collide more often, AND a greater fraction of collisions have energy exceeding the <b>activation energy</b> — so both frequency and success of collisions increase.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'Marble chips react with hydrochloric acid. How can you increase the rate WITHOUT changing temperature?',options:['Use powdered marble (larger surface area)','Use less acid','Cool the acid','Remove the marble chips'],correct:0,working:'Powdered marble has a much <b>larger surface area</b> than chips, exposing more particles to the acid at once. More collisions per second \u2192 faster rate. This is why fine powders react faster than lumps.'},{question:'What is a catalyst?',options:['A substance that increases reaction rate without being used up','A substance that slows reactions down','A product of the reaction','A reactant that speeds up the reaction'],correct:0,working:'A <b>catalyst</b> increases the rate of a reaction by providing an alternative reaction pathway with a lower activation energy. Crucially, it is <b>not used up</b> — the same catalyst can be used over and over.'},{question:'Why does increasing temperature increase reaction rate?',options:['Particles move faster, so more collisions have enough energy to react','Particles become larger','The activation energy decreases','Concentration increases'],correct:0,working:'Higher temperature gives particles more <b>kinetic energy</b>. They move faster, collide more often, AND a greater fraction of collisions have energy exceeding the <b>activation energy</b> — so both frequency and success of collisions increase.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(T(240,30,'Factors affecting rate','#6A1B9A',12,'middle',true));
 var rows=[['Concentration \u2191','More particles \u2192 more frequent collisions'],['Temperature \u2191','Faster particles \u2192 more energetic collisions'],['Surface area \u2191','More exposure \u2192 more collision sites'],['Catalyst','Lowers activation energy, not used up']];var cols=['#6A1B9A','#C0272D','#2E7D32','#C8922A'];
 rows.forEach(function(r,i){o.push(R(20,62+i*52,440,38,cols[i]+'18',cols[i],1.5,4));o.push(T(150,86+i*52,r[0],cols[i],10,'start',true));o.push(T(330,86+i*52,r[1],'#555',8,'middle',false));});
@@ -290,17 +270,7 @@ o.push('<path d="M80,170 C100,170 130,170 150,170 C170,170 180,60 200,50 C220,60
 o.push(L(200,50,200,170,'#C0272D',1,'4,2'));o.push(arr(200,115,200,58,'#C0272D',1.5));o.push(arr(200,115,200,172,'#C0272D',1.5));o.push(T(215,115,'Activation\nenergy','#C0272D',8,'start',false));
 o.push(T(115,168,'Reactants','#6A1B9A',8,'middle',false));o.push(T(355,128,'Products','#6A1B9A',8,'middle',false));
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'Hand warmers use iron oxidising in air. What type of energy change is this?',
-['Exothermic — energy is released, temperature rises','Endothermic — energy is absorbed','Neither — no temperature change','Exothermic but temperature falls'],
-'Iron oxidation (rusting) is <b>exothermic</b> — it releases energy as heat. This warms the hand warmer packet and your hands. Any reaction that releases heat to its surroundings is exothermic.',
-'What does a catalyst do to the activation energy?',
-['Lowers it','Raises it','Has no effect on it','Eliminates it completely'],
-'A <b>catalyst lowers the activation energy</b> by providing an alternative reaction pathway. This means more collisions have sufficient energy to react, increasing the rate without changing the temperature.',
-'Photosynthesis is endothermic. What does this mean?',
-['Energy is absorbed from the surroundings (light)','Energy is released to the surroundings','No energy is involved','Temperature of the plant increases'],
-'Photosynthesis is <b>endothermic</b> — it absorbs energy from its surroundings (specifically, light energy from the Sun). The temperature of the surroundings decreases slightly as energy is taken in.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'Hand warmers use iron oxidising in air. What type of energy change is this?',options:['Exothermic — energy is released, temperature rises','Endothermic — energy is absorbed','Neither — no temperature change','Exothermic but temperature falls'],correct:0,working:'Iron oxidation (rusting) is <b>exothermic</b> — it releases energy as heat. This warms the hand warmer packet and your hands. Any reaction that releases heat to its surroundings is exothermic.'},{question:'What does a catalyst do to the activation energy?',options:['Lowers it','Raises it','Has no effect on it','Eliminates it completely'],correct:0,working:'A <b>catalyst lowers the activation energy</b> by providing an alternative reaction pathway. This means more collisions have sufficient energy to react, increasing the rate without changing the temperature.'},{question:'Photosynthesis is endothermic. What does this mean?',options:['Energy is absorbed from the surroundings (light)','Energy is released to the surroundings','No energy is involved','Temperature of the plant increases'],correct:0,working:'Photosynthesis is <b>endothermic</b> — it absorbs energy from its surroundings (specifically, light energy from the Sun). The temperature of the surroundings decreases slightly as energy is taken in.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(T(240,30,'Energy changes in reactions','#6A1B9A',12,'middle',true));
 o.push(R(30,65,190,100,'#fde8e8','#C0272D',2,6));o.push(T(125,95,'EXOTHERMIC','#C0272D',11,'middle',true));o.push(T(125,113,'Energy released \u2192 heat up','#555',9,'middle',false));o.push(T(125,128,'e.g. combustion, neutralisation','#555',8,'middle',false));
 o.push(R(260,65,190,100,'#e3f2fd','#1565C0',2,6));o.push(T(355,95,'ENDOTHERMIC','#1565C0',11,'middle',true));o.push(T(355,113,'Energy absorbed \u2192 cool down','#555',9,'middle',false));o.push(T(355,128,'e.g. photosynthesis, dissolving NH\u2084NO\u2083','#555',8,'middle',false));
@@ -309,7 +279,7 @@ s.innerHTML=o.join('');}}
 {ey:'Y8 Chemistry \u2022 Q4',ti:'The Periodic Table Groups',su:'Group 1 and Group 7 elements',steps:[
 {sl:'Group 1: Alkali metals',p:'<b>Group 1</b> elements (Li, Na, K, Rb, Cs, Fr) are very reactive metals:<br><br>\u2022 React vigorously with water \u2192 metal hydroxide + hydrogen<br>\u2022 Store under oil (to prevent reaction with air)<br>\u2022 Reactivity <b>increases</b> down the group<br>\u2022 Low density, soft, silvery',
 draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
-var metals=[{n:'Li',c:'#e8f5e9',r:'reacts slowly'},{n:'Na',c:'#c8e6c9',r:'fizzes, moves'},{n:'K',c:'#a5d6a7',r:'ignites, purple flame'},{n:'Rb',c:'#66bb6a',r:'vigorous','},{n:'Cs',c:'#2E7D32',r:'explosive'}];
+var metals=[{n:'Li',c:'#e8f5e9',r:'reacts slowly'},{n:'Na',c:'#c8e6c9',r:'fizzes, moves'},{n:'K',c:'#a5d6a7',r:'ignites, purple flame'},{n:'Rb',c:'#66bb6a',r:'vigorous'},{n:'Cs',c:'#2E7D32',r:'explosive'}];
 metals.forEach(function(m,i){o.push(R(30+i*88,60,76,80,m.c,'#2E7D32',2,4));o.push(T(68+i*88,100,m.n,'#1B5E20',18,'middle',true));o.push(T(68+i*88,155,m.r,'#555',7,'middle',false));});
 o.push(arr(68,220,458,220,'#2E7D32',1.5));o.push(T(263,240,'Increasing reactivity down the group','#2E7D32',9,'middle',false));
 s.innerHTML=o.join('');}},
@@ -325,17 +295,7 @@ var noble=[['He','Helium','Balloons, MRI'],['Ne','Neon','Signs, lighting'],['Ar'
 noble.forEach(function(n,i){o.push(R(20+i*92,50,84,180,cols[i],'#555',1.5,4));o.push(T(62+i*92,88,n[0],'#333',16,'middle',true));o.push(T(62+i*92,110,n[1],'#555',8,'middle',false));o.push(T(62+i*92,140,n[2],'#888',7,'middle',false));});
 o.push(T(240,270,'Full outer shell \u2192 very unreactive \u2192 no compounds formed','#555',9,'middle',false));
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'Which Group 1 metal is most reactive?',
-['Caesium (Cs)','Lithium (Li)','Sodium (Na)','Potassium (K)'],
-'Reactivity in Group 1 <b>increases down the group</b>. Caesium (Cs) is the most reactive commonly studied Group 1 metal — it reacts explosively with water. Francium (Fr) is even more reactive but is radioactive.',
-'Chlorine water is added to potassium iodide solution. What do you observe?',
-['Solution turns brown (iodine is displaced)','No visible change','Solution turns green','Chlorine gas is produced'],
-'Chlorine is more reactive than iodine, so it <b>displaces iodine</b> from potassium iodide: Cl\u2082 + 2KI \u2192 2KCl + I\u2082. The brown colour is free iodine being released into the solution.',
-'Why are noble gases unreactive?',
-['Their outer electron shells are full','They are gases at room temperature','They are very light','They have no protons'],
-'Noble gases have a <b>full outer electron shell</b> (2 for He, 8 for others). Since they already have the maximum number of electrons in their outer shell, they have no tendency to gain, lose, or share electrons.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'Which Group 1 metal is most reactive?',options:['Caesium (Cs)','Lithium (Li)','Sodium (Na)','Potassium (K)'],correct:0,working:'Reactivity in Group 1 <b>increases down the group</b>. Caesium (Cs) is the most reactive commonly studied Group 1 metal — it reacts explosively with water. Francium (Fr) is even more reactive but is radioactive.'},{question:'Chlorine water is added to potassium iodide solution. What do you observe?',options:['Solution turns brown (iodine is displaced)','No visible change','Solution turns green','Chlorine gas is produced'],correct:0,working:'Chlorine is more reactive than iodine, so it <b>displaces iodine</b> from potassium iodide: Cl\u2082 + 2KI \u2192 2KCl + I\u2082. The brown colour is free iodine being released into the solution.'},{question:'Why are noble gases unreactive?',options:['Their outer electron shells are full','They are gases at room temperature','They are very light','They have no protons'],correct:0,working:'Noble gases have a <b>full outer electron shell</b> (2 for He, 8 for others). Since they already have the maximum number of electrons in their outer shell, they have no tendency to gain, lose, or share electrons.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(T(240,30,'Groups of the Periodic Table','#6A1B9A',12,'middle',true));
 var rows=[['Group 1 (alkali metals)','Li Na K Cs \u2022 reactive, soft metals','#2E7D32'],['Group 7 (halogens)','F Cl Br I \u2022 reactive non-metals','#C0272D'],['Group 0 (noble gases)','He Ne Ar \u2022 very unreactive','#1565C0'],['Reactivity in G1','\u2191 down the group','#2E7D32'],['Reactivity in G7','\u2193 down the group','#C0272D']];
 rows.forEach(function(r,i){o.push(R(20,58+i*44,440,32,r[2]+'18',r[2],1.5,3));o.push(T(145,79+i*44,r[0],r[2],9,'start',false));o.push(T(330,79+i*44,r[1],'#555',8,'middle',false));});
@@ -359,17 +319,7 @@ o.push(T(25,260,'G1: reactive metals','#2E7D32',8,'start',false));
 o.push(T(420,260,'G7: reactive non-metals','#C0272D',8,'end',false));
 o.push(T(240,280,'Group 0 not shown - far right','#1565C0',8,'middle',false));
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'How does reactivity change going DOWN Group 1?',
-['Increases','Decreases','Stays the same','First increases then decreases'],
-'Reactivity in Group 1 <b>increases going down</b> (Li < Na < K < Rb < Cs). As you go down, the outer electron is in a higher shell, further from the nucleus, more easily lost in reactions.',
-'An exothermic reaction has a temperature change of +15\u00b0C. What does this mean?',
-['Surroundings heat up by 15\u00b0C (energy is released)','Reaction absorbs 15\u00b0C of energy','The products are 15\u00b0C hotter than reactants','Reaction requires 15\u00b0C to start'],
-'In an exothermic reaction, energy is <b>released to the surroundings</b>. A +15\u00b0C temperature rise in the surroundings confirms this — the reaction is warming its surroundings as it releases energy.',
-'What type of bonding holds sodium chloride (NaCl) together?',
-['Ionic bonding (transfer of electrons)','Covalent bonding (sharing of electrons)','Metallic bonding','Hydrogen bonding'],
-'NaCl is held together by <b>ionic bonding</b>. Sodium loses one electron (becomes Na\u207a) and chlorine gains it (becomes Cl\u207b). The opposite charges attract, forming an ionic compound.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'How does reactivity change going DOWN Group 1?',options:['Increases','Decreases','Stays the same','First increases then decreases'],correct:0,working:'Reactivity in Group 1 <b>increases going down</b> (Li < Na < K < Rb < Cs). As you go down, the outer electron is in a higher shell, further from the nucleus, more easily lost in reactions.'},{question:'An exothermic reaction has a temperature change of +15\u00b0C. What does this mean?',options:['Surroundings heat up by 15\u00b0C (energy is released)','Reaction absorbs 15\u00b0C of energy','The products are 15\u00b0C hotter than reactants','Reaction requires 15\u00b0C to start'],correct:0,working:'In an exothermic reaction, energy is <b>released to the surroundings</b>. A +15\u00b0C temperature rise in the surroundings confirms this — the reaction is warming its surroundings as it releases energy.'},{question:'What type of bonding holds sodium chloride (NaCl) together?',options:['Ionic bonding (transfer of electrons)','Covalent bonding (sharing of electrons)','Metallic bonding','Hydrogen bonding'],correct:0,working:'NaCl is held together by <b>ionic bonding</b>. Sodium loses one electron (becomes Na\u207a) and chlorine gains it (becomes Cl\u207b). The opposite charges attract, forming an ionic compound.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(T(240,30,'Y8 Chemistry checklist','#6A1B9A',12,'middle',true));
 var items=['\u2713 Atmospheric composition: N\u2082 78%, O\u2082 21%','\u2713 Electron shells: shell 1 \u2192 2, shell 2 \u2192 8, shell 3 \u2192 8','\u2713 Ionic: transfer; Covalent: sharing electrons','\u2713 Exo: heat released; Endo: heat absorbed','\u2713 G1 reactivity \u2191 down; G7 reactivity \u2193 down'];
 items.forEach(function(it,i){o.push(R(20,58+i*44,440,32,'#f3e5f5','#6A1B9A',1.5,3));o.push(T(40,79+i*44,it,'#6A1B9A',8,'start',false));});

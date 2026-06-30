@@ -111,7 +111,7 @@ function genTry(id,o){
   return '<div class="try" data-tryid="'+id+'">'+
     '<div class="try-t">&#10004; Your Turn</div><p>'+o.question+'</p>'+
     '<div class="ar"><input type="number" step="any" placeholder="Your answer" id="'+id+'_i"/>'+
-    '<button class="ck" onclick="ck(''+id+'')">&#10003; Check</button></div>'+
+    '<button class="ck" onclick="ck(\''+id+'\')">&#10003; Check</button></div>'+
     '<div class="fb" id="'+id+'_f"></div>'+
     '<details class="wk"><summary>Show working</summary><div class="wk-b">'+
     (h?'<ul class="hl">'+h+'</ul>':'')+
@@ -134,7 +134,7 @@ function tryItMC(fn){
 }
 function genTryMC(id,o){
   var opts=o.options.map(function(opt,i){
-    return '<button class="mc-opt" onclick="ckMC(''+id+'','+i+','+o.correct+')">'+opt+'</button>';
+    return '<button class="mc-opt" onclick="ckMC(\''+id+'\','+i+','+o.correct+')">'+opt+'</button>';
   }).join('');
   return '<div class="try" data-tryid="'+id+'">'+
     '<div class="try-t">&#10004; Your Turn</div><p>'+o.question+'</p>'+
@@ -209,17 +209,7 @@ o.push(arr(200,150,250,150,'#555',2));
 o.push(T(335,200,'After: same 3 atoms, mass = X','#555',10,'middle',false));
 o.push(T(240,265,'Atoms rearranged, not created or destroyed','#6A1B9A',10,'middle',true));
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'Balance: __Na + __Cl\u2082 \u2192 __NaCl',
-['2Na + Cl\u2082 \u2192 2NaCl','Na + Cl\u2082 \u2192 NaCl','2Na + 2Cl\u2082 \u2192 2NaCl','Na + 2Cl\u2082 \u2192 2NaCl'],
-'<b>2Na + Cl\u2082 \u2192 2NaCl</b>. Cl\u2082 provides 2 chlorine atoms, so you need 2 sodium atoms to react with them, producing 2 NaCl units.',
-'When 10g of magnesium burns completely in oxygen, the magnesium oxide produced weighs MORE than 10g. Why does this NOT violate conservation of mass?',
-['Oxygen from the air has been added to the reaction and is now part of the product','Mass has been created in the reaction','The scales are inaccurate','Magnesium gains mass when heated'],
-'Conservation of mass applies to the <b>total</b> mass of all reactants and products. The oxygen that combined with magnesium <b>came from the air</b> \u2014 it was a reactant, so the total mass (Mg + O\u2082) does equal the mass of MgO produced.',
-'In the unbalanced equation H\u2082 + O\u2082 \u2192 H\u2082O, how many H\u2082 molecules are needed to balance with one O\u2082 molecule?',
-['2H\u2082 (giving 2H\u2082O)','1H\u2082','3H\u2082','4H\u2082'],
-'<b>2H\u2082 + O\u2082 \u2192 2H\u2082O</b>. One O\u2082 molecule provides 2 oxygen atoms, requiring 2 water molecules to be formed, which need 4 hydrogen atoms = 2 H\u2082 molecules.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'Balance: __Na + __Cl\u2082 \u2192 __NaCl',options:['2Na + Cl\u2082 \u2192 2NaCl','Na + Cl\u2082 \u2192 NaCl','2Na + 2Cl\u2082 \u2192 2NaCl','Na + 2Cl\u2082 \u2192 2NaCl'],correct:0,working:'<b>2Na + Cl\u2082 \u2192 2NaCl</b>. Cl\u2082 provides 2 chlorine atoms, so you need 2 sodium atoms to react with them, producing 2 NaCl units.'},{question:'When 10g of magnesium burns completely in oxygen, the magnesium oxide produced weighs MORE than 10g. Why does this NOT violate conservation of mass?',options:['Oxygen from the air has been added to the reaction and is now part of the product','Mass has been created in the reaction','The scales are inaccurate','Magnesium gains mass when heated'],correct:0,working:'Conservation of mass applies to the <b>total</b> mass of all reactants and products. The oxygen that combined with magnesium <b>came from the air</b> \u2014 it was a reactant, so the total mass (Mg + O\u2082) does equal the mass of MgO produced.'},{question:'In the unbalanced equation H\u2082 + O\u2082 \u2192 H\u2082O, how many H\u2082 molecules are needed to balance with one O\u2082 molecule?',options:['2H\u2082 (giving 2H\u2082O)','1H\u2082','3H\u2082','4H\u2082'],correct:0,working:'<b>2H\u2082 + O\u2082 \u2192 2H\u2082O</b>. One O\u2082 molecule provides 2 oxygen atoms, requiring 2 water molecules to be formed, which need 4 hydrogen atoms = 2 H\u2082 molecules.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(T(240,30,'Balancing equations checklist','#6A1B9A',12,'middle',true));
 var steps=['1. Count atoms of each element both sides','2. Add coefficients (large numbers) to balance','3. Never change subscripts in formulae','4. Re-count after each change','5. Check ALL elements balance'];var cols=['#1565C0','#C0272D','#C8922A','#2E7D32','#6A1B9A'];
 steps.forEach(function(st,i){o.push(R(30,55+i*44,420,32,cols[i]+'18',cols[i],1.5,3));o.push(T(50,76+i*44,st,cols[i],9,'start',false));});
@@ -280,17 +270,7 @@ draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 var rules=[['\u2191 Reactant concentration','Shifts toward products','#1565C0'],['\u2191 Temperature','Favours endothermic direction','#C0272D'],['\u2191 Pressure (gases)','Shifts to side with fewer molecules','#2E7D32']];
 rules.forEach(function(r,i){o.push(R(30,40+i*70,420,55,r[2]+'22',r[2],2,4));o.push(T(110,68+i*70,r[0],r[2],11,'start',true));o.push(T(330,68+i*70,r[1],'#555',9,'middle',false));});
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'What characterises dynamic equilibrium in a reversible reaction?',
-['The forward and reverse reaction rates are equal','The reaction has completely stopped','Only the forward reaction occurs','Only the reverse reaction occurs'],
-'At <b>dynamic equilibrium</b>, both forward and reverse reactions continue to occur, but at the <b>same rate</b>, so the overall concentrations of reactants and products remain constant.',
-'In the Haber process (N\u2082+3H\u2082\u21cc2NH\u2083), what happens to the equilibrium if pressure is increased?',
-['It shifts toward NH\u2083 (fewer gas molecules on that side)','It shifts toward N\u2082 and H\u2082','No change occurs','The reaction stops'],
-'There are <b>4 moles of gas</b> on the reactant side (1 N\u2082 + 3 H\u2082) but only <b>2 moles</b> on the product side (2 NH\u2083). Increasing pressure shifts equilibrium toward the side with <b>fewer gas molecules</b> \u2014 i.e. toward NH\u2083.',
-'Why does dynamic equilibrium only occur in a CLOSED system?',
-['Reactants and products must be unable to escape so the rates can balance','Closed systems are easier to study','Open systems react faster','Equilibrium needs a vacuum'],
-'In an <b>open system</b>, products (especially gases) can escape, preventing the reverse reaction from being able to occur at a matching rate \u2014 equilibrium can only be established when nothing escapes.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'What characterises dynamic equilibrium in a reversible reaction?',options:['The forward and reverse reaction rates are equal','The reaction has completely stopped','Only the forward reaction occurs','Only the reverse reaction occurs'],correct:0,working:'At <b>dynamic equilibrium</b>, both forward and reverse reactions continue to occur, but at the <b>same rate</b>, so the overall concentrations of reactants and products remain constant.'},{question:'In the Haber process (N\u2082+3H\u2082\u21cc2NH\u2083), what happens to the equilibrium if pressure is increased?',options:['It shifts toward NH\u2083 (fewer gas molecules on that side)','It shifts toward N\u2082 and H\u2082','No change occurs','The reaction stops'],correct:0,working:'There are <b>4 moles of gas</b> on the reactant side (1 N\u2082 + 3 H\u2082) but only <b>2 moles</b> on the product side (2 NH\u2083). Increasing pressure shifts equilibrium toward the side with <b>fewer gas molecules</b> \u2014 i.e. toward NH\u2083.'},{question:'Why does dynamic equilibrium only occur in a CLOSED system?',options:['Reactants and products must be unable to escape so the rates can balance','Closed systems are easier to study','Open systems react faster','Equilibrium needs a vacuum'],correct:0,working:'In an <b>open system</b>, products (especially gases) can escape, preventing the reverse reaction from being able to occur at a matching rate \u2014 equilibrium can only be established when nothing escapes.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(T(240,30,'Equilibrium summary','#6A1B9A',12,'middle',true));
 var rows=[['Reversible reaction','Symbol: \u21cc, can go both directions','#1565C0'],['Dynamic equilibrium','Forward rate = reverse rate','#2E7D32'],['Closed system needed','Nothing can escape','#C8922A'],['Le Chatelier\'s principle','System shifts to counteract change','#C0272D']];
 rows.forEach(function(r,i){o.push(R(20,65+i*52,440,38,r[2]+'18',r[2],1.5,4));o.push(T(130,89+i*52,r[0],r[2],10,'start',true));o.push(T(330,89+i*52,r[1],'#555',8,'middle',false));});
@@ -319,17 +299,7 @@ draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 var uses=[['Aluminium extraction','From molten aluminium oxide (Al\u2082O\u2083)','#C8922A'],['Copper purification','Impure Cu \u2192 pure Cu at cathode','#C0272D'],['Electroplating','Coats objects with thin metal layer','#1565C0']];
 uses.forEach(function(u,i){o.push(R(30,40+i*70,420,55,u[2]+'22',u[2],2,4));o.push(T(110,68+i*70,u[0],u[2],11,'start',true));o.push(T(320,68+i*70,u[1],'#555',9,'middle',false));});
 s.innerHTML=o.join('');}},
-{sl:'Try it',p:''+mc3(
-'In electrolysis, what happens at the cathode (negative electrode)?',
-['Positive ions gain electrons (reduction)','Negative ions gain electrons','Positive ions lose electrons','No reaction occurs'],
-'At the <b>cathode</b> (negative), positively charged ions (cations) are attracted and <b>gain electrons</b> \u2014 this is <b>reduction</b>. The metal usually forms here.',
-'Why is aluminium extracted by electrolysis rather than reduction with carbon (like iron)?',
-['Aluminium is too reactive \u2014 carbon cannot remove oxygen from aluminium oxide','Aluminium is too cheap for electrolysis','Carbon reduction only works for non-metals','Electrolysis is always cheaper'],
-'Aluminium is <b>more reactive than carbon</b>, so carbon cannot displace it from its oxide via reduction. <b>Electrolysis</b> must be used instead, despite being energy-intensive.',
-'What is electroplating used for?',
-['Coating an object with a thin, even layer of metal','Extracting metals from ore','Purifying water','Splitting water into hydrogen and oxygen'],
-'<b>Electroplating</b> deposits a thin, even layer of metal (e.g. silver, chromium, gold) onto an object\'s surface using electrolysis \u2014 often for appearance, corrosion resistance, or improved properties.'
-),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+{sl:'Try it',p:''+tryItMC(function(){var qs=[{question:'In electrolysis, what happens at the cathode (negative electrode)?',options:['Positive ions gain electrons (reduction)','Negative ions gain electrons','Positive ions lose electrons','No reaction occurs'],correct:0,working:'At the <b>cathode</b> (negative), positively charged ions (cations) are attracted and <b>gain electrons</b> \u2014 this is <b>reduction</b>. The metal usually forms here.'},{question:'Why is aluminium extracted by electrolysis rather than reduction with carbon (like iron)?',options:['Aluminium is too reactive \u2014 carbon cannot remove oxygen from aluminium oxide','Aluminium is too cheap for electrolysis','Carbon reduction only works for non-metals','Electrolysis is always cheaper'],correct:0,working:'Aluminium is <b>more reactive than carbon</b>, so carbon cannot displace it from its oxide via reduction. <b>Electrolysis</b> must be used instead, despite being energy-intensive.'},{question:'What is electroplating used for?',options:['Coating an object with a thin, even layer of metal','Extracting metals from ore','Purifying water','Splitting water into hydrogen and oxygen'],correct:0,working:'<b>Electroplating</b> deposits a thin, even layer of metal (e.g. silver, chromium, gold) onto an object\'s surface using electrolysis \u2014 often for appearance, corrosion resistance, or improved properties.'}];return rPick(qs);}),draw:function(){var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
 o.push(T(240,30,'Electrolysis summary','#6A1B9A',12,'middle',true));
 var rows=[['Cathode (\u2212)','Cations gain e\u207b (reduction) \u2014 metal forms','#1565C0'],['Anode (+)','Anions lose e\u207b (oxidation) \u2014 non-metal forms','#C0272D'],['Aluminium extraction','From Al\u2082O\u2083 (too reactive for carbon reduction)','#C8922A'],['Electroplating','Thin metal coating on objects','#2E7D32']];
 rows.forEach(function(r,i){o.push(R(20,65+i*52,440,38,r[2]+'18',r[2],1.5,4));o.push(T(120,89+i*52,r[0],r[2],10,'start',true));o.push(T(310,89+i*52,r[1],'#555',8,'middle',false));});
