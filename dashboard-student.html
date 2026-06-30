@@ -49,7 +49,11 @@
     .subject-panel { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 18px 20px; border-top: 3px solid var(--accent); }
     .subject-panel.maths-panel { --accent: #C0272D; }
     .subject-panel.science-panel { --accent: #1565C0; }
+    .subject-panel.unavailable { --accent: #ccc; opacity: 0.6; position: relative; }
+    .subject-panel.unavailable .subject-panel-stat .big { color: #aaa; }
+    .subject-panel-soon-badge { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #999; background: #f0f0f0; padding: 2px 8px; border-radius: 10px; margin-left: auto; }
     .subject-panel-title { font-size: 0.85rem; font-weight: 700; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .subject-panel.unavailable .subject-panel-title { color: #999; }
     .subject-panel-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
     .subject-panel-stat { text-align: center; }
     .subject-panel-stat .big { font-size: 1.4rem; font-weight: 700; color: #333; line-height: 1; }
@@ -144,8 +148,8 @@
     </div>
 
     <div class="subject-progress-row" id="subject-progress-row">
-      <div class="subject-panel maths-panel">
-        <div class="subject-panel-title">📐 Maths Progress</div>
+      <div class="subject-panel maths-panel" id="maths-panel">
+        <div class="subject-panel-title">📐 Maths Progress<span class="subject-panel-soon-badge" id="maths-soon-badge" style="display:none">Coming Soon</span></div>
         <div class="subject-panel-stats">
           <div class="subject-panel-stat"><div class="big" id="maths-stat-total">—</div><div class="label">Topics</div></div>
           <div class="subject-panel-stat"><div class="big" id="maths-stat-completed">—</div><div class="label">Completed</div></div>
@@ -153,8 +157,8 @@
           <div class="subject-panel-stat"><div class="big" id="maths-stat-pct">—</div><div class="label">Progress</div></div>
         </div>
       </div>
-      <div class="subject-panel science-panel">
-        <div class="subject-panel-title">🔬 Science Progress</div>
+      <div class="subject-panel science-panel" id="science-panel">
+        <div class="subject-panel-title">🔬 Science Progress<span class="subject-panel-soon-badge" id="science-soon-badge" style="display:none">Coming Soon</span></div>
         <div class="subject-panel-stats">
           <div class="subject-panel-stat"><div class="big" id="science-stat-total">—</div><div class="label">Topics</div></div>
           <div class="subject-panel-stat"><div class="big" id="science-stat-completed">—</div><div class="label">Completed</div></div>
@@ -482,18 +486,22 @@
       const subjCompleted = subjTopics.filter(t => progressMap[t.id] === 'completed').length;
       const subjStarted   = subjTopics.filter(t => progressMap[t.id] === 'started').length;
       const subjPct       = subjTotal > 0 ? Math.round((subjCompleted / subjTotal) * 100) : 0;
-      document.getElementById(subj + '-stat-total').textContent     = subjTotal;
-      document.getElementById(subj + '-stat-completed').textContent = subjCompleted;
-      document.getElementById(subj + '-stat-started').textContent   = subjStarted;
-      document.getElementById(subj + '-stat-pct').textContent       = subjPct + '%';
+      const placeholder   = subjTotal === 0;
+      document.getElementById(subj + '-stat-total').textContent     = placeholder ? '—' : subjTotal;
+      document.getElementById(subj + '-stat-completed').textContent = placeholder ? '—' : subjCompleted;
+      document.getElementById(subj + '-stat-started').textContent   = placeholder ? '—' : subjStarted;
+      document.getElementById(subj + '-stat-pct').textContent       = placeholder ? '—' : subjPct + '%';
     });
 
     // If this year group has no topics at all for a subject (e.g. science not yet
-    // available for Year 10+), hide that panel rather than showing a dead 0/0/0/0%
+    // available for Year 10+), show that panel greyed-out with a "Coming Soon" badge
+    // rather than hiding it entirely.
     const mathsHasTopics   = allTopics.some(t => t.year_group === myYearGroup && (t.subject || 'maths') === 'maths');
     const scienceHasTopics = allTopics.some(t => t.year_group === myYearGroup && (t.subject || 'maths') === 'science');
-    document.querySelector('.subject-panel.maths-panel').style.display   = mathsHasTopics   ? '' : 'none';
-    document.querySelector('.subject-panel.science-panel').style.display = scienceHasTopics ? '' : 'none';
+    document.getElementById('maths-panel').classList.toggle('unavailable', !mathsHasTopics);
+    document.getElementById('science-panel').classList.toggle('unavailable', !scienceHasTopics);
+    document.getElementById('maths-soon-badge').style.display   = mathsHasTopics   ? 'none' : '';
+    document.getElementById('science-soon-badge').style.display = scienceHasTopics ? 'none' : '';
   }
 
   window.switchSubject = function(subject) {
