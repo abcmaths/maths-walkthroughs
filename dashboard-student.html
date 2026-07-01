@@ -3,11 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Adorable Portal — My Dashboard</title>
+  <title>ABC Portal — My Dashboard</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
     header { background: #C0272D; color: white; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    /* Subject toggle */
+    .subject-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 6px; padding: 3px; gap: 2px; }
+    .subject-toggle button { background: none; border: none; color: rgba(255,255,255,0.75); font-size: 0.82rem; font-weight: 600; padding: 4px 14px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+    .subject-toggle button.active { background: white; color: #C0272D; }
+    .subject-toggle button:hover:not(.active) { color: white; background: rgba(255,255,255,0.2); }
     .header-left { display: flex; align-items: center; gap: 14px; }
     .logo { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; }
     .subtitle { font-size: 0.85rem; opacity: 0.85; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 14px; }
@@ -40,6 +45,26 @@
     .summary-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); text-align: center; }
     .summary-card .big { font-size: 2rem; font-weight: 700; color: #C0272D; line-height: 1; }
     .summary-card .label { font-size: 0.8rem; color: #777; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .subject-progress-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .subject-panel { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 18px 20px; border-top: 3px solid var(--accent); }
+    .subject-panel.maths-panel    { --accent: #C0272D; }
+    .subject-panel.science-panel  { --accent: #1565C0; }
+    .subject-panel.physics-panel  { --accent: #1565C0; }
+    .subject-panel.chemistry-panel{ --accent: #6A1B9A; }
+    .subject-panel.biology-panel  { --accent: #2E7D32; }
+    .science-subtabs { display:none; gap:6px; margin-top:8px; }
+    .science-subtabs.visible { display:flex; }
+    .science-subtab { padding:5px 14px; border-radius:16px; border:1.5px solid #ddd; background:white; font-size:0.78rem; font-weight:600; cursor:pointer; color:#666; transition:all 0.15s; }
+    .science-subtab.active { border-color:var(--subtab-accent,#1565C0); background:var(--subtab-accent,#1565C0); color:white; }
+    .subject-panel.unavailable { --accent: #ccc; opacity: 0.6; position: relative; }
+    .subject-panel.unavailable .subject-panel-stat .big { color: #aaa; }
+    .subject-panel-soon-badge { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #999; background: #f0f0f0; padding: 2px 8px; border-radius: 10px; margin-left: auto; }
+    .subject-panel-title { font-size: 0.85rem; font-weight: 700; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .subject-panel.unavailable .subject-panel-title { color: #999; }
+    .subject-panel-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .subject-panel-stat { text-align: center; }
+    .subject-panel-stat .big { font-size: 1.4rem; font-weight: 700; color: #333; line-height: 1; }
+    .subject-panel-stat .label { font-size: 0.66rem; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
     .aoc-banner { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 28px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
     .aoc-banner h2 { font-size: 1rem; color: #333; font-weight: 700; flex: 1; min-width: 160px; }
     .aoc-item { text-align: center; }
@@ -50,7 +75,8 @@
     .strands { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 28px; }
     .strand-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
     .strand-row:last-child { margin-bottom: 0; }
-    .strand-name { width: 130px; font-size: 0.85rem; color: #444; font-weight: 600; flex-shrink: 0; }
+    .strand-name { width: 130px; font-size: 0.85rem; color: #444; font-weight: 600; flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
+    .strand-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .bar-bg { flex: 1; background: #eee; border-radius: 99px; height: 10px; overflow: hidden; }
     .bar-fill { height: 100%; background: #C0272D; border-radius: 99px; transition: width 0.6s ease; }
     .strand-pct { width: 40px; text-align: right; font-size: 0.82rem; color: #888; flex-shrink: 0; }
@@ -62,17 +88,19 @@
     .year-selector select:focus { outline: none; border-color: #C0272D; }
     .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
     .topic-card { border: 1.5px solid #eee; border-radius: 6px; padding: 12px 14px; cursor: pointer; transition: all 0.18s; }
-    .topic-card:hover { border-color: #C0272D; box-shadow: 0 2px 8px rgba(192,39,45,0.12); transform: translateY(-1px); }
+    .topic-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); transform: translateY(-1px); }
+    .topic-card.maths-card:hover { border-color: #C0272D; box-shadow: 0 2px 8px rgba(192,39,45,0.12); }
+    .topic-card.science-card:hover { border-color: #1565C0; box-shadow: 0 2px 8px rgba(21,101,192,0.12); }
     .topic-card.completed { border-color: #a5d6a7; background: #f1f8f1; }
     .topic-card.started   { border-color: #ffe082; background: #fffde7; }
     .topic-card .t-name   { font-size: 0.88rem; font-weight: 600; color: #333; margin-bottom: 4px; }
     .topic-card .t-strand { font-size: 0.75rem; color: #888; }
     .topic-card .t-test { font-size: 0.72rem; color: #1a56b0; margin-top: 4px; }
     .t-btns { display: flex; gap: 6px; margin-top: 8px; }
-    .t-btn-walk { flex: 1; padding: 5px 8px; background: #C0272D; color: white; border: none; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
-    .t-btn-walk:hover { background: #a01f24; }
-    .t-btn-test { flex: 1; padding: 5px 8px; background: white; color: #C0272D; border: 1.5px solid #C0272D; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
-    .t-btn-test:hover { background: #fde8e8; }
+    .t-btn-walk { flex: 1; padding: 5px 8px; background: var(--accent, #C0272D); color: white; border: none; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+    .t-btn-walk:hover { filter: brightness(0.88); }
+    .t-btn-test { flex: 1; padding: 5px 8px; background: white; color: var(--accent, #C0272D); border: 1.5px solid var(--accent, #C0272D); border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+    .t-btn-test:hover { background: #f5f5f5; }
     .topic-card.completed .t-status { color: #2e7d32; }
     .topic-card.started   .t-status { color: #f57f17; }
     .topic-card.not-started .t-status { color: #bbb; }
@@ -80,10 +108,6 @@
     .loading { text-align: center; color: #aaa; padding: 40px; font-size: 0.95rem; }
     .error-box { background: #fde8e8; color: #a01f24; border-radius: 8px; padding: 20px; margin: 20px 0; font-size: 0.9rem; }
     footer { text-align: center; padding: 16px; font-size: 0.78rem; color: #aaa; }
-    .subject-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 6px; padding: 3px; gap: 2px; }
-    .subject-toggle button { background: none; border: none; color: rgba(255,255,255,0.75); font-size: 0.82rem; font-weight: 600; padding: 4px 14px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
-    .subject-toggle button.active { background: white; color: #C0272D; }
-    .subject-toggle button:hover:not(.active) { color: white; background: rgba(255,255,255,0.2); }
   </style>
 </head>
 <body>
@@ -91,12 +115,18 @@
 <header>
   <div class="header-left">
     <div class="logo">ABC</div>
-    <div class="subtitle" id="header-subtitle">Adorable Portal</div>
+    <div class="subtitle" id="header-subtitle">Maths Portal</div>
   </div>
   <div class="header-right">
     <div class="subject-toggle">
       <button id="toggle-maths" class="active">📐 Maths</button>
       <button id="toggle-science">🔬 Science</button>
+    </div>
+    <div class="science-subtabs" id="science-subtabs">
+      <button class="science-subtab" id="subtab-science" style="--subtab-accent:#1565C0" onclick="window.switchSubject('science')">🔬 Combined Sci</button>
+      <button class="science-subtab" id="subtab-physics" style="--subtab-accent:#1565C0" onclick="window.switchSubject('physics')">⚡ Physics</button>
+      <button class="science-subtab" id="subtab-chemistry" style="--subtab-accent:#6A1B9A" onclick="window.switchSubject('chemistry')">⚗️ Chemistry</button>
+      <button class="science-subtab" id="subtab-biology" style="--subtab-accent:#2E7D32" onclick="window.switchSubject('biology')">🌿 Biology</button>
     </div>
     <span class="user-name" id="header-name"></span>
     <button class="btn-chpwd" onclick="openChangePwd()">Change Password</button>
@@ -130,7 +160,55 @@
       <p id="welcome-sub"></p>
     </div>
 
-    <div class="summary-row">
+    <div class="subject-progress-row" id="subject-progress-row">
+      <div class="subject-panel maths-panel" id="maths-panel">
+        <div class="subject-panel-title">📐 Maths Progress<span class="subject-panel-soon-badge" id="maths-soon-badge" style="display:none">Coming Soon</span></div>
+        <div class="subject-panel-stats">
+          <div class="subject-panel-stat"><div class="big" id="maths-stat-total">—</div><div class="label">Topics</div></div>
+          <div class="subject-panel-stat"><div class="big" id="maths-stat-completed">—</div><div class="label">Completed</div></div>
+          <div class="subject-panel-stat"><div class="big" id="maths-stat-started">—</div><div class="label">In Progress</div></div>
+          <div class="subject-panel-stat"><div class="big" id="maths-stat-pct">—</div><div class="label">Progress</div></div>
+        </div>
+      </div>
+      <div class="subject-panel science-panel" id="science-panel">
+        <div class="subject-panel-title">🔬 Science Progress<span class="subject-panel-soon-badge" id="science-soon-badge" style="display:none">Coming Soon</span></div>
+        <div class="subject-panel-stats">
+          <div class="subject-panel-stat"><div class="big" id="science-stat-total">—</div><div class="label">Topics</div></div>
+          <div class="subject-panel-stat"><div class="big" id="science-stat-completed">—</div><div class="label">Completed</div></div>
+          <div class="subject-panel-stat"><div class="big" id="science-stat-started">—</div><div class="label">In Progress</div></div>
+          <div class="subject-panel-stat"><div class="big" id="science-stat-pct">—</div><div class="label">Progress</div></div>
+        </div>
+      </div>
+      <div class="subject-panel physics-panel" id="physics-panel">
+        <div class="subject-panel-title">⚡ Physics Progress<span class="subject-panel-soon-badge" id="physics-soon-badge" style="display:none">Coming Soon</span></div>
+        <div class="subject-panel-stats">
+          <div class="subject-panel-stat"><div class="big" id="physics-stat-total">—</div><div class="label">Topics</div></div>
+          <div class="subject-panel-stat"><div class="big" id="physics-stat-completed">—</div><div class="label">Completed</div></div>
+          <div class="subject-panel-stat"><div class="big" id="physics-stat-started">—</div><div class="label">In Progress</div></div>
+          <div class="subject-panel-stat"><div class="big" id="physics-stat-pct">—</div><div class="label">Progress</div></div>
+        </div>
+      </div>
+      <div class="subject-panel chemistry-panel" id="chemistry-panel">
+        <div class="subject-panel-title">⚗️ Chemistry Progress<span class="subject-panel-soon-badge" id="chemistry-soon-badge" style="display:none">Coming Soon</span></div>
+        <div class="subject-panel-stats">
+          <div class="subject-panel-stat"><div class="big" id="chemistry-stat-total">—</div><div class="label">Topics</div></div>
+          <div class="subject-panel-stat"><div class="big" id="chemistry-stat-completed">—</div><div class="label">Completed</div></div>
+          <div class="subject-panel-stat"><div class="big" id="chemistry-stat-started">—</div><div class="label">In Progress</div></div>
+          <div class="subject-panel-stat"><div class="big" id="chemistry-stat-pct">—</div><div class="label">Progress</div></div>
+        </div>
+      </div>
+      <div class="subject-panel biology-panel" id="biology-panel">
+        <div class="subject-panel-title">🌿 Biology Progress<span class="subject-panel-soon-badge" id="biology-soon-badge" style="display:none">Coming Soon</span></div>
+        <div class="subject-panel-stats">
+          <div class="subject-panel-stat"><div class="big" id="biology-stat-total">—</div><div class="label">Topics</div></div>
+          <div class="subject-panel-stat"><div class="big" id="biology-stat-completed">—</div><div class="label">Completed</div></div>
+          <div class="subject-panel-stat"><div class="big" id="biology-stat-started">—</div><div class="label">In Progress</div></div>
+          <div class="subject-panel-stat"><div class="big" id="biology-stat-pct">—</div><div class="label">Progress</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-row" id="summary-row">
       <div class="summary-card"><div class="big" id="stat-total">—</div><div class="label">My Topics</div></div>
       <div class="summary-card"><div class="big" id="stat-completed">—</div><div class="label">Completed</div></div>
       <div class="summary-card"><div class="big" id="stat-started">—</div><div class="label">In Progress</div></div>
@@ -171,7 +249,7 @@
   </div>
 </main>
 
-<footer>© Adorable British College — Adorable Portal</footer>
+<footer>© Adorable British College — ABC Learning Portal</footer>
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -274,7 +352,6 @@
   const SCIENCE_WALKTHROUGH_FILES = {
     'Y7-BIO-S01': 'sci07/cells-y7.html',
     'Y7-BIO-S02': 'sci07/classifying-life-y7.html',
-    'Y7-BIO-S03': 'sci07/environment-ecosystems-y7.html',
     'Y7-CHE-S01': 'sci07/classifying-matter-y7.html',
     'Y7-CHE-S02': 'sci07/properties-matter-y7.html',
     'Y7-CHE-S03': 'sci07/chemical-changes-y7.html',
@@ -305,6 +382,32 @@
     // Y9 still pending: Y9-ES-S01 (earth-beyond), Y9-SIC-S01, Y9-EOY-S01
   };
 
+  // Physics walkthrough files — add entries here as files are built and deployed
+  const PHYSICS_WALKTHROUGH_FILES = {
+    // Y10-Y12 Physics walkthroughs not yet built — all show as Coming Soon
+  };
+
+  // Chemistry walkthrough files — add entries here as files are built and deployed
+  const CHEMISTRY_WALKTHROUGH_FILES = {
+    // Y10-Y12 Chemistry walkthroughs not yet built — all show as Coming Soon
+  };
+
+  // Biology walkthrough files — add entries here as files are built and deployed
+  const BIOLOGY_WALKTHROUGH_FILES = {
+    // Y10-Y12 Biology walkthroughs not yet built — all show as Coming Soon
+  };
+
+  // Resolve walkthrough file for any subject/topic_code combination
+  function getWalkthroughFile(subject, topicCode) {
+    let file;
+    if (subject === 'science')   file = SCIENCE_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'physics')   file = PHYSICS_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'chemistry') file = CHEMISTRY_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'biology')   file = BIOLOGY_WALKTHROUGH_FILES[topicCode];
+    else file = WALKTHROUGH_FILES[topicCode];
+    return file || '#';
+  }
+
   const SCIENCE_STRAND_COLOURS = {
     'Biology':           '#2E7D32',
     'Chemistry':         '#6A1B9A',
@@ -315,14 +418,12 @@
     'Review':            '#E65100',
   };
 
-  let currentSubject = 'maths';
-  let currentProfile = null;
-
   let allTopics   = [];
   let progressMap = {};
   let testResultsMap = {};
   let myYearGroup = 7;
   let userId      = null;
+  let currentSubject = 'maths';
 
   function showError(msg) {
     document.getElementById('loading').style.display = 'none';
@@ -347,11 +448,10 @@
       }
 
       myYearGroup = profile.year_group || 7;
-      currentProfile = profile;
 
       document.getElementById('header-name').textContent = profile.full_name;
       document.getElementById('welcome-name').textContent = 'Hello, ' + profile.full_name.split(' ')[0] + '!';
-      document.getElementById('welcome-sub').textContent = 'Year ' + myYearGroup + (profile.form_class ? ' · ' + profile.form_class : '') + ' · Maths';
+      document.getElementById('welcome-sub').textContent = 'Year ' + myYearGroup + (profile.form_class ? ' · ' + profile.form_class : '');
 
       // Load all topics
       const { data: topics } = await supabase
@@ -375,9 +475,23 @@
       const { data: aoc } = await supabase
         .from('eoy_aoc_results').select('*').eq('student_id', userId)
         .order('academic_year', { ascending: false }).limit(1).maybeSingle();
-      lastAOC = aoc;
 
-      window.renderSummary();
+      // Summary cards
+      renderSummaryCards();
+
+      // AOC banner
+      if (aoc) {
+        const aocEl = document.getElementById('aoc-content');
+        aocEl.className = '';
+        aocEl.innerHTML = `
+          <div class="aoc-item"><div class="val">${aoc.total_marks}/${aoc.max_marks}</div><div class="lbl">Marks</div></div>
+          <div class="aoc-item"><div class="val">${aoc.percentage}%</div><div class="lbl">Percentage</div></div>
+          <div class="aoc-item"><div class="val">${aoc.grade || '—'}</div><div class="lbl">Grade</div></div>
+          <div class="aoc-item"><div class="val" style="font-size:0.9rem;color:#555">${aoc.academic_year}</div><div class="lbl">Academic Year</div></div>`;
+      }
+
+      // Strand bars (own year, current subject)
+      renderStrandBars();
 
       // Set default selector and render
       document.getElementById('year-select').value = 'own';
@@ -392,55 +506,102 @@
     }
   }
 
-  let lastAOC = null;
-
-  window.renderSummary = function() {
-    // Summary cards (own year, current subject)
-    const myTopics  = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
-    const total     = myTopics.length;
-    const completed = myTopics.filter(t => progressMap[t.id] === 'completed').length;
-    const started   = myTopics.filter(t => progressMap[t.id] === 'started').length;
-    const pct       = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-    document.getElementById('stat-total').textContent     = total;
-    document.getElementById('stat-completed').textContent = completed;
-    document.getElementById('stat-started').textContent   = started;
-    document.getElementById('stat-pct').textContent       = pct + '%';
-
-    // AOC banner (maths only — science has no AOC yet)
-    const aocEl = document.getElementById('aoc-content');
-    if (currentSubject === 'maths' && lastAOC) {
-      aocEl.className = '';
-      aocEl.innerHTML = `
-        <div class="aoc-item"><div class="val">${lastAOC.total_marks}/${lastAOC.max_marks}</div><div class="lbl">Marks</div></div>
-        <div class="aoc-item"><div class="val">${lastAOC.percentage}%</div><div class="lbl">Percentage</div></div>
-        <div class="aoc-item"><div class="val">${lastAOC.grade || '—'}</div><div class="lbl">Grade</div></div>
-        <div class="aoc-item"><div class="val" style="font-size:0.9rem;color:#555">${lastAOC.academic_year}</div><div class="lbl">Academic Year</div></div>`;
-    } else {
-      aocEl.className = 'aoc-none';
-      aocEl.textContent = 'No result recorded yet.';
-    }
-
-    // Strand bars (own year, current subject)
+  function renderStrandBars() {
+    const strandTopics = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
     const strands = {};
-    myTopics.forEach(t => {
+    strandTopics.forEach(t => {
       const s = t.strand || 'Other';
       if (!strands[s]) strands[s] = { total: 0, completed: 0 };
       strands[s].total++;
       if (progressMap[t.id] === 'completed') strands[s].completed++;
     });
 
+    const PHYS_COLOURS = { 'Mechanics':'#1565C0','Thermal':'#C0272D','Waves':'#6A1B9A','Electricity':'#E65100','Nuclear':'#2E7D32','Space':'#00695C','Practical':'#888','Fields':'#6A1B9A','Energy':'#C0272D','Applied':'#555','Measurement':'#555' };
+    const CHEM_COLOURS = { 'Physical Chemistry':'#1565C0','Atomic Structure':'#6A1B9A','Bonding':'#E65100','Stoichiometry':'#C0272D','Electrochemistry':'#00695C','Energetics':'#C0272D','Kinetics':'#E65100','Redox':'#6A1B9A','Acids & Bases':'#C0272D','Periodic Table':'#1565C0','Metals':'#00695C','Environment':'#2E7D32','Organic':'#E65100','Analysis':'#555','Inorganic':'#888','Practical':'#888' };
+    const BIO_COLOURS  = { 'Classification':'#2E7D32','Cell Biology':'#1565C0','Biochemistry':'#6A1B9A','Plant Biology':'#2E7D32','Human Biology':'#C0272D','Health & Disease':'#E65100','Reproduction':'#E65100','Genetics':'#6A1B9A','Ecology':'#00695C','Biotechnology':'#1565C0','Evolution':'#00695C','Practical':'#888' };
+    const strandColourMap = { science: SCIENCE_STRAND_COLOURS, physics: PHYS_COLOURS, chemistry: CHEM_COLOURS, biology: BIO_COLOURS };
+    const colourLookup = strandColourMap[currentSubject] || null;
+
     document.getElementById('strand-bars').innerHTML = Object.entries(strands).length > 0
       ? Object.entries(strands).map(([name, data]) => {
-          const p = data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0;
-          const barColour = currentSubject === 'science' ? (SCIENCE_STRAND_COLOURS[name] || '#888') : '#C0272D';
+          const p      = data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0;
+          const colour = colourLookup ? (colourLookup[name] || '#888') : '#C0272D';
+          const dot    = colourLookup
+            ? `<span class="strand-dot" style="background:${colour}"></span>`
+            : '';
           return `<div class="strand-row">
-            <div class="strand-name">${name}</div>
-            <div class="bar-bg"><div class="bar-fill" style="width:${p}%;background:${barColour}"></div></div>
+            <div class="strand-name">${dot}${name}</div>
+            <div class="bar-bg"><div class="bar-fill" style="width:${p}%;background:${colour}"></div></div>
             <div class="strand-pct">${p}%</div>
           </div>`;
         }).join('')
       : '<div class="no-topics">No topics added for your year group yet.</div>';
+  }
+
+  function renderSummaryCards() {
+    const myTopics  = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
+    const total     = myTopics.length;
+    const completed = myTopics.filter(t => progressMap[t.id] === 'completed').length;
+    const started   = myTopics.filter(t => progressMap[t.id] === 'started').length;
+    const pct       = total > 0 ? Math.round((completed / total) * 100) : 0;
+    document.getElementById('stat-total').textContent     = total;
+    document.getElementById('stat-completed').textContent = completed;
+    document.getElementById('stat-started').textContent   = started;
+    document.getElementById('stat-pct').textContent       = pct + '%';
+
+    // Always-visible per-subject split across all 5 subjects
+    ['maths', 'science', 'physics', 'chemistry', 'biology'].forEach(subj => {
+      const subjTopics    = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === subj);
+      const subjTotal     = subjTopics.length;
+      const subjCompleted = subjTopics.filter(t => progressMap[t.id] === 'completed').length;
+      const subjStarted   = subjTopics.filter(t => progressMap[t.id] === 'started').length;
+      const subjPct       = subjTotal > 0 ? Math.round((subjCompleted / subjTotal) * 100) : 0;
+      const placeholder   = subjTotal === 0;
+      document.getElementById(subj + '-stat-total').textContent     = placeholder ? '—' : subjTotal;
+      document.getElementById(subj + '-stat-completed').textContent = placeholder ? '—' : subjCompleted;
+      document.getElementById(subj + '-stat-started').textContent   = placeholder ? '—' : subjStarted;
+      document.getElementById(subj + '-stat-pct').textContent       = placeholder ? '—' : subjPct + '%';
+      document.getElementById(subj + '-panel').classList.toggle('unavailable', placeholder);
+      document.getElementById(subj + '-soon-badge').style.display = placeholder ? '' : 'none';
+    });
+  }
+
+  const SCIENCE_SUBJECTS = ['science', 'physics', 'chemistry', 'biology'];
+
+  window.switchSubject = function(subject) {
+    currentSubject = subject;
+    const isMaths   = subject === 'maths';
+    const isSciGrp  = SCIENCE_SUBJECTS.includes(subject);
+
+    // Main toggle active state
+    document.getElementById('toggle-maths').classList.toggle('active', isMaths);
+    document.getElementById('toggle-science').classList.toggle('active', isSciGrp);
+
+    // Show/hide science sub-tabs
+    document.getElementById('science-subtabs').classList.toggle('visible', isSciGrp);
+
+    // Sub-tab active state (only applies if in science group)
+    ['science', 'physics', 'chemistry', 'biology'].forEach(s => {
+      const el = document.getElementById('subtab-' + s);
+      if (el) el.classList.toggle('active', s === subject);
+    });
+
+    // Header subtitle
+    const subtitles = { maths: 'Maths Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal' };
+    document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Portal';
+
+    // Year selector: hide Add Maths (Y13) when not in Maths
+    const addMathsOpt = document.querySelector('#year-select option[value="13"]');
+    if (addMathsOpt) {
+      addMathsOpt.style.display = isMaths ? '' : 'none';
+      if (!isMaths && document.getElementById('year-select').value === '13') {
+        document.getElementById('year-select').value = 'own';
+      }
+    }
+
+    renderSummaryCards();
+    renderStrandBars();
+    window.renderTopics();
   };
 
   window.renderTopics = function() {
@@ -449,14 +610,14 @@
 
     if (value === 'own') {
       filtered = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
-      label    = 'Showing your Year ' + myYearGroup + (currentSubject === 'science' ? ' Science' : '') + ' topics';
+      label    = 'Showing your Year ' + myYearGroup + ' topics';
     } else if (value === '13') {
-      filtered = allTopics.filter(t => t.year_group === 13 && (t.subject || 'maths') === currentSubject);
+      filtered = allTopics.filter(t => t.year_group === 13 && (t.subject || 'maths') === 'maths');
       label    = 'Showing Add Maths topics';
     } else {
       const yr = parseInt(value);
       filtered = allTopics.filter(t => t.year_group === yr && (t.subject || 'maths') === currentSubject);
-      label    = 'Showing Year ' + yr + (currentSubject === 'science' ? ' Science' : '') + ' topics' + (yr !== myYearGroup ? ' — browsing another year' : '');
+      label    = 'Showing Year ' + yr + ' topics' + (yr !== myYearGroup ? ' — browsing another year' : '');
     }
 
     document.getElementById('viewing-label').textContent = label;
@@ -467,56 +628,40 @@
       return;
     }
 
-    const isSci = currentSubject === 'science';
-    const fileMap = isSci ? SCIENCE_WALKTHROUGH_FILES : WALKTHROUGH_FILES;
-
     grid.innerHTML = filtered.map(t => {
       const status = progressMap[t.id] || 'not-started';
       const lbl    = status === 'completed' ? '✓ Completed' : status === 'started' ? '▶ In Progress' : '○ Not started';
-      const file   = fileMap[t.topic_code] || '#';
       const testResult = testResultsMap[t.id];
       const testBadge  = testResult
         ? `<div class="t-test">Last test: <strong>${testResult.grade}</strong> (${testResult.percentage}%)</div>`
         : '';
-      const strandColour = isSci ? (SCIENCE_STRAND_COLOURS[t.strand] || '#888') : null;
-      const strandStyle  = strandColour ? ` style="color:${strandColour}"` : '';
-      return `<div class="topic-card ${status}">
+      const subj  = t.subject || 'maths';
+      const file  = getWalkthroughFile(subj, t.topic_code) || '#';
+      const STRAND_COLOURS = {
+        science:   SCIENCE_STRAND_COLOURS,
+        physics:   { 'Mechanics':'#1565C0','Thermal':'#C0272D','Waves':'#6A1B9A','Electricity':'#E65100','Nuclear':'#2E7D32','Space':'#00695C','Practical':'#888','Fields':'#6A1B9A','Energy':'#C0272D','Applied':'#555','Measurement':'#555' },
+        chemistry: { 'Physical Chemistry':'#1565C0','Atomic Structure':'#6A1B9A','Bonding':'#E65100','Stoichiometry':'#C0272D','Electrochemistry':'#00695C','Energetics':'#C0272D','Kinetics':'#E65100','Redox':'#6A1B9A','Acids & Bases':'#C0272D','Periodic Table':'#1565C0','Metals':'#00695C','Environment':'#2E7D32','Organic':'#E65100','Analysis':'#555','Inorganic':'#888','Practical':'#888' },
+        biology:   { 'Classification':'#2E7D32','Cell Biology':'#1565C0','Biochemistry':'#6A1B9A','Plant Biology':'#2E7D32','Human Biology':'#C0272D','Health & Disease':'#E65100','Reproduction':'#E65100','Genetics':'#6A1B9A','Ecology':'#00695C','Biotechnology':'#1565C0','Evolution':'#00695C','Practical':'#888' },
+      };
+      const colourMap = STRAND_COLOURS[subj] || {};
+      const accent     = subj === 'maths' ? '#C0272D' : (colourMap[t.strand] || '#1565C0');
+      const strandLabel = subj !== 'maths'
+        ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${accent};margin-right:4px;vertical-align:middle"></span>${t.strand || ''}`
+        : (t.strand || '');
+      const comingSoon = file === '#';
+      const cardClass  = subj === 'maths' ? 'topic-card maths-card' : `topic-card science-card`;
+      return `<div class="${cardClass} ${status}" style="${subj !== 'maths' && status === 'not-started' ? `border-color:${accent}22` : ''}">
         <div class="t-name">${t.topic_name}</div>
-        <div class="t-strand"${strandStyle}>${t.strand || ''}</div>
-        <div class="t-status">${lbl}</div>
+        <div class="t-strand">${strandLabel}</div>
+        <div class="t-status">${comingSoon ? '<span style="color:#bbb;font-size:0.72rem">🔒 Coming soon</span>' : lbl}</div>
         ${testBadge}
-        <div class="t-btns">
-          <button class="t-btn-walk" onclick="openTopic('${t.id}','${file}')">Walkthrough</button>
-          <button class="t-btn-test" onclick="openTest('${t.id}')">Take a Test</button>
+        <div class="t-btns" style="--accent:${accent}">
+          <button class="t-btn-walk" ${comingSoon ? 'disabled style="background:#ddd;cursor:not-allowed"' : ''} onclick="openTopic('${t.id}','${file}')">Walkthrough</button>
+          <button class="t-btn-test" ${comingSoon ? 'disabled style="color:#bbb;border-color:#ddd;cursor:not-allowed"' : ''} onclick="openTest('${t.id}')">Take a Test</button>
         </div>
       </div>`;
     }).join('');
   };
-
-  window.switchSubject = function(subject) {
-    currentSubject = subject;
-    document.getElementById('toggle-maths').classList.toggle('active', subject === 'maths');
-    document.getElementById('toggle-science').classList.toggle('active', subject === 'science');
-    document.getElementById('header-subtitle').textContent = subject === 'science' ? 'Adorable Portal — Science' : 'Adorable Portal';
-    document.getElementById('welcome-sub').textContent = 'Year ' + myYearGroup + (currentProfile && currentProfile.form_class ? ' · ' + currentProfile.form_class : '') + ' · ' + (subject === 'science' ? 'Science' : 'Maths');
-
-    // Science content only goes up to Year 9 — hide irrelevant year options and
-    // reset the year selector if it's now pointing at an invalid year.
-    const mathsOnlyYearOpts = ['10', '11', '12', '13'];
-    const yearSelect = document.getElementById('year-select');
-    [...yearSelect.options].forEach(opt => {
-      if (mathsOnlyYearOpts.includes(opt.value)) opt.style.display = subject === 'science' ? 'none' : '';
-    });
-    if (subject === 'science' && mathsOnlyYearOpts.includes(yearSelect.value)) {
-      yearSelect.value = 'own';
-    }
-
-    window.renderSummary();
-    window.renderTopics();
-  };
-
-  document.getElementById('toggle-maths').addEventListener('click', () => window.switchSubject('maths'));
-  document.getElementById('toggle-science').addEventListener('click', () => window.switchSubject('science'));
 
   window.openTest = function(topicId) {
     // Pass topic ID to test page via URL parameter
@@ -588,6 +733,13 @@
     await supabase.auth.signOut();
     window.location.href = 'login.html';
   };
+
+  document.getElementById('toggle-maths').addEventListener('click', () => window.switchSubject('maths'));
+  document.getElementById('toggle-science').addEventListener('click', () => {
+    // If already in a science-group subject, do nothing (let sub-tabs control it)
+    // If coming from Maths, default to combined science
+    if (!SCIENCE_SUBJECTS.includes(currentSubject)) window.switchSubject('science');
+  });
 
   init();
 </script>
