@@ -121,10 +121,12 @@
       <div class="subject-toggle">
         <div class="subject-btn on" id="subj-maths" onclick="selectSubject('maths')">📐 Maths</div>
         <div class="subject-btn" id="subj-science" onclick="selectSubject('science')">🔬 Science</div>
+        <div class="subject-btn" id="subj-crs" onclick="selectSubject('crs')" style="display:none">✝️ CRS</div>
+        <div class="subject-btn" id="subj-government" onclick="selectSubject('government')" style="display:none">🏛️ Government</div>
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" id="year-group-row">
       <label>Year Group</label>
       <select id="year-select" onchange="loadTopics()">
         <option value="">— Select year group —</option>
@@ -585,48 +587,102 @@
   const urlParams = new URLSearchParams(window.location.search);
   const preselectedTopicId = urlParams.get('topic');
 
-  // ── Auth ──
+  // ── Auth + stream detection ──
   const { data: { session: s } } = await supabase.auth.getSession();
   session = s;
+
+  // Fetch user stream from profiles to show correct subject buttons
+  if (session) {
+    const { data: prof } = await supabase
+      .from('profiles').select('stream').eq('id', session.user.id).maybeSingle();
+    const stream = prof?.stream || 'science';
+    const isArts = stream === 'arts';
+    const isBoth = stream === 'both';
+
+    // Science button: hide for pure arts
+    document.getElementById('subj-science').style.display = isArts ? 'none' : '';
+    // CRS / Government buttons: show for arts or both
+    document.getElementById('subj-crs').style.display        = (isArts || isBoth) ? '' : 'none';
+    document.getElementById('subj-government').style.display = (isArts || isBoth) ? '' : 'none';
+
+    // For arts students, default to CRS instead of maths
+    if (isArts) {
+      document.getElementById('subj-maths').classList.remove('on');
+      selectedSubject = 'crs';
+      document.getElementById('subj-crs').classList.add('on');
+      window.selectSubject('crs');
+    }
+  }
 
   // ── Subject selection ──
   window.selectSubject = function(subject) {
     selectedSubject = subject;
-    document.getElementById('subj-maths').classList.toggle('on', subject === 'maths');
-    document.getElementById('subj-science').classList.toggle('on', subject === 'science');
+    const ARTS_SUBJECTS = ['crs', 'government'];
+    const isArtsSubject = ARTS_SUBJECTS.includes(subject);
+
+    // Toggle button active states
+    ['maths','science','crs','government'].forEach(s => {
+      const el = document.getElementById('subj-' + s);
+      if (el) el.classList.toggle('on', s === subject);
+    });
+
+    // Body class for accent colour
     document.body.classList.toggle('subject-science', subject === 'science');
-    document.getElementById('header-subtitle').textContent = subject === 'science' ? 'Topic Test — Science' : 'Topic Test — Maths';
 
-    // Add Maths / Further Maths years only make sense for maths
-    const mathsOnlyOpts = ['opt-y13', 'opt-y14'];
-    mathsOnlyOpts.forEach(id => {
-      document.getElementById(id).style.display = subject === 'science' ? 'none' : '';
+    // Header subtitle
+    const subtitles = { maths: 'Topic Test — Maths', science: 'Topic Test — Science', crs: 'Topic Test — CRS', government: 'Topic Test — Government' };
+    document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Topic Test';
+
+    // Year select visibility — hide entire row for arts subjects
+    const yearSelect = document.getElementById('year-select');
+    document.getElementById('year-group-row').style.display = isArtsSubject ? 'none' : '';
+
+    // Add Maths / Further Maths: maths only
+    ['opt-y13', 'opt-y14'].forEach(id => {
+      document.getElementById(id).style.display = (subject === 'maths') ? '' : 'none';
     });
-    // Science topics currently only go up to Year 9
-    const scienceUnavailableOpts = ['opt-y10', 'opt-y11', 'opt-y12'];
-    scienceUnavailableOpts.forEach(id => {
-      document.getElementById(id).style.display = subject === 'science' ? 'none' : '';
+    // Y10–12 unavailable for combined science
+    ['opt-y10', 'opt-y11', 'opt-y12'].forEach(id => {
+      document.getElementById(id).style.display = (subject === 'science') ? 'none' : '';
     });
 
-    // Reset year/topic selection when switching subject
-    document.getElementById('year-select').value = '';
+    // Reset selections
+    yearSelect.value = '';
     document.getElementById('topic-select').innerHTML = '<option value="">— Select year group first —</option>';
+
+    // For arts subjects, load all topics immediately (no year filter)
+    if (isArtsSubject) {
+      window.loadTopics();
+    }
+
     checkReady();
   };
 
   // ── Load topics by year group + subject ──
   window.loadTopics = async function() {
-    const yr = parseInt(document.getElementById('year-select').value);
-    if (!yr) return;
+    const ARTS_SUBJECTS = ['crs', 'government'];
+    const isArtsSubject = ARTS_SUBJECTS.includes(selectedSubject);
 
-    const { data: topics } = await supabase
-      .from('topics').select('*').eq('year_group', yr).order('sort_order');
-    allTopics = (topics || []).filter(t => (t.subject || 'maths') === selectedSubject);
+    let topics;
+    if (isArtsSubject) {
+      // Arts subjects: load all topics for this subject regardless of year
+      const { data } = await supabase
+        .from('topics').select('*').eq('subject', selectedSubject).order('sort_order');
+      topics = data;
+    } else {
+      const yr = parseInt(document.getElementById('year-select').value);
+      if (!yr) return;
+      const { data } = await supabase
+        .from('topics').select('*').eq('year_group', yr).order('sort_order');
+      topics = (data || []).filter(t => (t.subject || 'maths') === selectedSubject);
+    }
+
+    allTopics = topics || [];
 
     const sel = document.getElementById('topic-select');
-    sel.innerHTML = allTopics.map(t =>
-      `<option value="${t.id}" data-code="${t.topic_code}">${t.topic_name}</option>`
-    ).join('');
+    sel.innerHTML = allTopics.length
+      ? allTopics.map(t => `<option value="${t.id}" data-code="${t.topic_code}">${t.topic_name}</option>`).join('')
+      : '<option value="">— No topics available —</option>';
 
     // Pre-select topic from URL if present
     if (preselectedTopicId) {
@@ -641,10 +697,11 @@
     const { data: topic } = await supabase
       .from('topics').select('year_group, subject').eq('id', preselectedTopicId).maybeSingle();
     if (topic) {
-      if ((topic.subject || 'maths') === 'science') {
-        window.selectSubject('science');
+      const subj = topic.subject || 'maths';
+      window.selectSubject(subj);
+      if (!['crs','government'].includes(subj)) {
+        document.getElementById('year-select').value = topic.year_group === 14 ? '14' : topic.year_group === 13 ? '13' : String(topic.year_group);
       }
-      document.getElementById('year-select').value = topic.year_group === 14 ? '14' : topic.year_group === 13 ? '13' : String(topic.year_group);
       await window.loadTopics();
     }
   }

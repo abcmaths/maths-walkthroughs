@@ -416,6 +416,8 @@
             <option value="physics">⚡ Physics</option>
             <option value="chemistry">⚗️ Chemistry</option>
             <option value="biology">🌿 Biology</option>
+            <option value="crs">✝️ CRS</option>
+            <option value="government">🏛️ Government</option>
           </select>
           <select id="review-filter-year" onchange="renderReviewTab()">
             <option value="">All Year Groups</option>
@@ -1466,7 +1468,6 @@
   };
 
   const CRS_WALKTHROUGH_FILES = {
-    // Old Testament
     'CRS-OT-01': 'crs/sovereignty-of-god.html',
     'CRS-OT-02': 'crs/the-covenant.html',
     'CRS-OT-03': 'crs/leadership-ot.html',
@@ -1475,7 +1476,6 @@
   };
 
   const GOV_WALKTHROUGH_FILES = {
-    // Elements of Government
     'GOV-ELE-01': 'gov/meaning-and-scope-of-government.html',
     'GOV-ELE-02': 'gov/the-state-and-nation.html',
     'GOV-ELE-03': 'gov/constitution.html',
@@ -1536,29 +1536,36 @@
     // Show/hide year options based on which subject ranges apply:
     //   Science (combined): Y7-9 only
     //   Physics/Chemistry/Biology: Y10-12 only
+    //   CRS / Government: not year-grouped — hide year filter entirely
     //   Maths / All: all years except Y13 shows only for Maths
     const isSciCombined = subjectFilter === 'science';
     const isSciSubject  = ['physics', 'chemistry', 'biology'].includes(subjectFilter);
     const isMathsOnly   = subjectFilter === 'maths';
+    const isArtsSubject = ['crs', 'government'].includes(subjectFilter);
 
-    document.getElementById('review-opt-y7').style.display  = isSciSubject ? 'none' : '';
-    document.getElementById('review-opt-y8').style.display  = isSciSubject ? 'none' : '';
-    document.getElementById('review-opt-y9').style.display  = isSciSubject ? 'none' : '';
-    document.getElementById('review-opt-y10').style.display = isSciCombined ? 'none' : '';
-    document.getElementById('review-opt-y11').style.display = isSciCombined ? 'none' : '';
-    document.getElementById('review-opt-y12').style.display = isSciCombined ? 'none' : '';
+    const yearFilterEl = document.getElementById('review-filter-year');
+    yearFilterEl.style.display = isArtsSubject ? 'none' : '';
+
+    document.getElementById('review-opt-y7').style.display  = (isSciSubject || isArtsSubject) ? 'none' : '';
+    document.getElementById('review-opt-y8').style.display  = (isSciSubject || isArtsSubject) ? 'none' : '';
+    document.getElementById('review-opt-y9').style.display  = (isSciSubject || isArtsSubject) ? 'none' : '';
+    document.getElementById('review-opt-y10').style.display = (isSciCombined || isArtsSubject) ? 'none' : '';
+    document.getElementById('review-opt-y11').style.display = (isSciCombined || isArtsSubject) ? 'none' : '';
+    document.getElementById('review-opt-y12').style.display = (isSciCombined || isArtsSubject) ? 'none' : '';
     document.getElementById('review-opt-y13').style.display = (isMathsOnly || !subjectFilter) ? '' : 'none';
 
     // Reset year filter if current selection is now invalid
-    const curYear = document.getElementById('review-filter-year').value;
+    const curYear = yearFilterEl.value;
     const hiddenYears = {
-      science:   ['10','11','12','13'],
-      physics:   ['7','8','9','13'],
-      chemistry: ['7','8','9','13'],
-      biology:   ['7','8','9','13'],
+      science:    ['10','11','12','13'],
+      physics:    ['7','8','9','13'],
+      chemistry:  ['7','8','9','13'],
+      biology:    ['7','8','9','13'],
+      crs:        ['7','8','9','10','11','12','13'],
+      government: ['7','8','9','10','11','12','13'],
     };
     if (subjectFilter && hiddenYears[subjectFilter]?.includes(curYear)) {
-      document.getElementById('review-filter-year').value = '';
+      yearFilterEl.value = '';
     }
     const yearFilter = document.getElementById('review-filter-year').value;
 
