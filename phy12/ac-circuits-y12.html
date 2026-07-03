@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simple A.C. Circuits — Year 12 Physics</title>
+<style>
+:root{--red:#1565C0;--dark:#0d47a1;--cream:#E3F2FD;--ink:#0d1b2a;--line:#BBDEFB;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#555;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#E3F2FD);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:180px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:15px;line-height:1.6;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:16px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;margin-bottom:8px;line-height:1.5;}
+.hl{font-size:14px;color:#1a2a3a;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e3f2fd;color:#0d47a1;border:1px solid #90caf9;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#1a2a3a;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <div class="ht">AC Circuits — Y12 Physics</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr"><div class="eyebrow" id="ey"></div><h1 id="ti"></h1><div class="sub" id="su"></div></div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ACC='#1565C0',DARK='#0d47a1',CRM='#E3F2FD',LINE='#BBDEFB';
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+var ST={};
+function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn};return buildTry(id,o);}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="any" placeholder="Answer'+(o.unit?' ('+o.unit+')':'')+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=entry.genFn();entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.05*Math.abs(o.ans)||0.05)){fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
+  }
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#0d1b2a';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||CRM;stroke=stroke||ACC;sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';}
+function arw(x1,y1,x2,y2,c,w){var id='m'+Math.round(x1*7+y2*3);return '<defs><marker id="'+id+'" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="'+(c||ACC)+'"/></marker></defs><line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||ACC)+'" stroke-width="'+(w||2)+'" marker-end="url(#'+id+')"/>';}
+function circ(cx,cy,r,fill,stroke){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||CRM)+'" stroke="'+(stroke||ACC)+'" stroke-width="1.5"/>';}
+
+function dQ1(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'AC phasors and impedance',ACC,13,'middle',true));
+o.push(R(10,36,460,44,CRM,ACC,2));o.push(T(240,54,'Z = \u221a(R\u00b2 + (X_L - X_C)\u00b2) \u2014 Impedance',DARK,13,'middle',true));o.push(T(240,72,'X_L=\u03c9L; X_C=1/(\u03c9C); \u03c9=2\u03c0f','#555',9,'middle',false));
+if(p>=1){o.push(R(10,90,460,42,CRM,ACC,1.5));o.push(T(240,108,'Phase angle: tan\u03c6 = (X_L-X_C)/R','#333',11,'middle',false));o.push(T(240,126,'Power factor: cos\u03c6 = R/Z; P_avg = I_rms V_rms cos\u03c6','#555',9,'middle',false));}
+if(p>=2){o.push(R(10,140,460,42,CRM,ACC,1.5));o.push(T(240,158,'Resonance: X_L=X_C; Z=R (minimum); I=max','#333',11,'middle',false));o.push(T(240,176,'Resonant frequency: f\u2080=1/(2\u03c0\u221a(LC))','#555',9,'middle',false));}
+if(p>=3){o.push(R(10,190,460,42,CRM,ACC,1.5));o.push(T(240,208,'V_R in phase with I; V_L leads I by 90\u00b0; V_C lags I by 90\u00b0','#333',10,'middle',false));}
+if(p>=4){o.push(R(10,238,460,18,LINE,ACC,0.5));o.push(T(240,250,'V_supply = \u221a(V_R\u00b2 + (V_L-V_C)\u00b2); phasor addition','#555',8,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ2(p){dQ1(p);}
+function dQ3(p){dQ1(p);}
+function dQ4(p){dQ1(p);}
+function dQ5(p){dQ1(p);}
+function dQ6(p){dQ1(p);}
+function dQ7(p){dQ1(p);}
+function dQ8(p){dQ1(p);}
+function dQ9(p){dQ1(p);}
+function dQ10(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'AC circuits summary',ACC,13,'middle',true));
+[['V_rms','V\u2080/\u221a2; I_rms=I\u2080/\u221a2'],['X_L','2\u03c0fL; increases with f'],['X_C','1/(2\u03c0fC); decreases with f'],['Impedance Z','\u221a(R\u00b2+(X_L-X_C)\u00b2)'],['Phase angle','\u03c6=arctan((X_L-X_C)/R)'],['Power','P=I_rms V_rms cos\u03c6=I\u00b2R'],['Resonance','f\u2080=1/(2\u03c0\u221a(LC)); Z=R (minimum)']].forEach(function(r,i){if(i<p+1){o.push(R(10,36+i*30,460,24,CRM,LINE,1));o.push(T(120,52+i*30,r[0],ACC,10,'middle',true));o.push(T(320,52+i*30,r[1],'#555',9,'middle',false));}});
+s.innerHTML=o.join('');}
+var QS=[
+{ey:'Q1 \u2022 Y12 Physics \u2022 AC Circuits',ti:'RMS Values and AC Power',su:'Calculate V_rms, I_rms and average AC power.',steps:[
+  {lb:'RMS values',dr:dQ1,ht:'<div class="fm">V_{rms} = V\u2080/\u221a2 \u2248 0.707V\u2080 &nbsp;&nbsp; I_{rms} = I\u2080/\u221a2</div><p>Root mean square (rms): value of DC that produces the same heating effect. V_rms for UK mains 230 V at 50 Hz; peak V\u2080 = 230\u221a2 \u2248 325 V. Measured by moving-iron meters (rms) or digital meters (rms). Oscilloscope shows peak; convert to rms by dividing by \u221a2.</p>'},
+  {lb:'AC power',dr:dQ1,ht:'<div class="fm">P_{avg} = I_{rms} V_{rms} \cos\phi = I_{rms}^2 R</div><p>Power factor cos\u03c6 = R/Z. For pure resistor: \u03c6=0, cos\u03c6=1, P=I_rms V_rms. For pure inductor or capacitor: \u03c6=90\u00b0, cos\u03c6=0, P=0 (no average power, energy stored and returned). Apparent power = I_rms V_rms (VA). Real power = I_rms V_rms cos\u03c6 (W).</p>'},
+  {lb:'Resistor in AC',dr:dQ1,ht:'<p>Pure resistor: V and I in phase (\u03c6=0). Ohm\u2019s law applies at every instant: V=IR. P_avg = I_rms\u00b2 R = V_rms\u00b2/R. RMS values behave exactly like DC for power calculations. Current direction reverses every half cycle; heating effect same for both directions (I\u00b2R).</p>'},
+  {lb:'Measuring AC with oscilloscope',dr:dQ1,ht:'<p>Oscilloscope: voltage (y-axis) vs time (x-axis). Period T = (number of divisions per cycle) \u00d7 timebase. Amplitude = (peak height in divisions) \u00d7 (volts/div). Frequency f = 1/T. V_rms = V_peak/\u221a2. Two-channel: measure phase difference between V and I by comparing positions of peaks.</p>'},
+  {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var type=pick(['Vrms','V0_from_Vrms','P_avg']);if(type==='Vrms'){var V0=rnd(100,500),Vrms=parseFloat((V0/Math.sqrt(2)).toFixed(1));return{question:'Peak voltage V\u2080=<b>'+V0+'V</b>. V_rms?',hints:['V_rms=V\u2080/\u221a2'],ans:Vrms,tol:Vrms*0.01,unit:'V',working:'V_rms='+V0+'/\u221a2 = '+Vrms+' V'};}if(type==='V0_from_Vrms'){var Vrms=rnd(100,300),V0=parseFloat((Vrms*Math.sqrt(2)).toFixed(1));return{question:'V_rms=<b>'+Vrms+'V</b>. Peak voltage V\u2080?',hints:['V\u2080=V_rms\u00d7\u221a2'],ans:V0,tol:V0*0.01,unit:'V',working:'V\u2080='+Vrms+'\u00d7\u221a2 = '+V0+' V'};}var Irms=rnd(1,20),R=rnd(10,500),P=parseFloat((Irms*Irms*R).toFixed(1));return{question:'I_rms=<b>'+Irms+'A</b>, R=<b>'+R+'\u03a9</b>. Average power (pure resistor)?',hints:['P=I_rms\u00b2R'],ans:P,tol:P*0.02,unit:'W',working:'P='+Irms+'\u00b2\u00d7'+R+' = '+P+' W'};})},
+]},
+{ey:'Q2 \u2022 Y12 Physics \u2022 AC Circuits',ti:'Reactance of Inductors and Capacitors',su:'Calculate X_L and X_C. Compare behaviour at different frequencies.',steps:[
+  {lb:'Inductive reactance',dr:dQ2,ht:'<div class="fm">X_L = \u03c9L = 2\u03c0fL (\u03a9)</div><p>X_L: opposition of inductor to AC. Increases linearly with frequency. At f=0 (DC): X_L=0; inductor is just a wire. At high f: large X_L; inductor blocks high-frequency current. V_L leads I by 90\u00b0 (I lags V by 90\u00b0). Inductor used as: high-frequency filter, choke in power supplies.</p>'},
+  {lb:'Capacitive reactance',dr:dQ2,ht:'<div class="fm">X_C = 1/(\u03c9C) = 1/(2\u03c0fC) (\u03a9)</div><p>X_C: opposition of capacitor to AC. Decreases with frequency. At f=0 (DC): X_C=\u221e; capacitor blocks DC. At high f: small X_C; capacitor passes high frequency. V_C lags I by 90\u00b0 (I leads V by 90\u00b0). CIVIL mnemonic: Capacitor I before V (leads); Inductor I after V (lags).</p>'},
+  {lb:'Phasor diagrams',dr:dQ2,ht:'<p>Phasors: rotating vectors representing sinusoidal quantities. Length = amplitude; angle = phase. I is reference phasor (horizontal). V_R: along I (in phase). V_L: 90\u00b0 ahead of I (vertical, up). V_C: 90\u00b0 behind I (vertical, down). V_supply: vector sum = \u221a(V_R\u00b2 + (V_L-V_C)\u00b2). Phase angle \u03c6 = arctan((V_L-V_C)/V_R).</p>'},
+  {lb:'Comparing R, L, C',dr:dQ2,ht:'<p>Resistor: V in phase with I; dissipates energy (P=I\u00b2R). Inductor: I lags V by 90\u00b0; stores energy in B field; P_avg=0; acts as short at low f, open at high f. Capacitor: I leads V by 90\u00b0; stores energy in E field; P_avg=0; acts as open at low f, short at high f. Remember: at resonance (X_L=X_C), V_L and V_C cancel, Z=R minimum.</p>'},
+  {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var type=pick(['XL','XC','compare']);if(type==='XL'){var f=rnd(50,5000),L=rnd(10,500)/1000,XL=parseFloat((2*Math.PI*f*L).toFixed(2));return{question:'f=<b>'+f+'Hz</b>, L=<b>'+(L*1000).toFixed(0)+'mH</b>. Inductive reactance X_L?',hints:['X_L=2\u03c0fL'],ans:XL,tol:XL*0.02,unit:'\u03a9',working:'X_L=2\u03c0\u00d7'+f+'\u00d7'+L+' = '+XL+' \u03a9'};}if(type==='XC'){var f=rnd(50,5000),C=rnd(1,100)*1e-6,XC=parseFloat((1/(2*Math.PI*f*C)).toFixed(2));return{question:'f=<b>'+f+'Hz</b>, C=<b>'+(C*1e6).toFixed(0)+'\u03bcF</b>. Capacitive reactance X_C?',hints:['X_C=1/(2\u03c0fC)'],ans:XC,tol:XC*0.02,unit:'\u03a9',working:'X_C=1/(2\u03c0\u00d7'+f+'\u00d7'+C.toExponential(2)+') = '+XC+' \u03a9'};}var L=rnd(10,500)/1000,C=rnd(1,100)*1e-6,f=rnd(100,2000),XL=parseFloat((2*Math.PI*f*L).toFixed(2)),XC=parseFloat((1/(2*Math.PI*f*C)).toFixed(2));return{question:'f=<b>'+f+'Hz</b>, L=<b>'+(L*1000).toFixed(0)+'mH</b>, C=<b>'+(C*1e6).toFixed(0)+'\u03bcF</b>. X_L - X_C?',hints:['X_L=2\u03c0fL; X_C=1/(2\u03c0fC)'],ans:parseFloat((XL-XC).toFixed(2)),tol:1,unit:'\u03a9',working:'X_L='+XL+', X_C='+XC+', diff='+(XL-XC).toFixed(2)+' \u03a9'};})},
+]},
+{ey:'Q3 \u2022 Y12 Physics \u2022 AC Circuits',ti:'Impedance and Series RLC',su:'Calculate impedance Z. Find current and phase angle in series RLC.',steps:[
+  {lb:'Impedance',dr:dQ3,ht:'<div class="fm">Z = \u221a(R\u00b2 + (X_L - X_C)\u00b2) (\u03a9)</div><p>Z is the total opposition to AC in a circuit. For pure R: Z=R. For RL series: Z=\u221a(R\u00b2+X_L\u00b2). For RC series: Z=\u221a(R\u00b2+X_C\u00b2). For RLC series: Z=\u221a(R\u00b2+(X_L-X_C)\u00b2). Minimum Z = R (at resonance, when X_L=X_C). I_rms = V_rms/Z.</p>'},
+  {lb:'Phase angle',dr:dQ3,ht:'<div class="fm">tan\u03c6 = (X_L - X_C)/R</div><p>\u03c6 > 0 (X_L > X_C): circuit is inductive; I lags V. \u03c6 < 0 (X_C > X_L): circuit is capacitive; I leads V. \u03c6 = 0 (X_L = X_C): resonance; I in phase with V; Z=R. Power factor cos\u03c6 = R/Z. P_avg = V_rms I_rms cos\u03c6 = I_rms\u00b2 R.</p>'},
+  {lb:'Voltage phasors in RLC',dr:dQ3,ht:'<p>V_R = IR (in phase with I). V_L = IX_L (leads I by 90\u00b0). V_C = IX_C (lags I by 90\u00b0). V_supply = \u221a(V_R\u00b2 + (V_L-V_C)\u00b2). At resonance: V_L = V_C; they cancel; V_supply = V_R. V_L and V_C can each be MUCH larger than V_supply (Q-factor amplification). Useful in radio tuning circuits.</p>'},
+  {lb:'Q-factor (quality factor)',dr:dQ3,ht:'<div class="fm">Q = \u03c9\u2080L/R = 1/(\u03c9\u2080CR) = (1/R)\u221a(L/C)</div><p>Q-factor: ratio of energy stored to energy dissipated per cycle. High Q: sharp resonance peak; large voltage amplification at resonance; selective tuning. V_L at resonance = Q \u00d7 V_supply. Bandwidth: f_bandwidth = f\u2080/Q. Low R \u2192 high Q \u2192 sharper resonance.</p>'},
+  {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var type=pick(['impedance_Z','current_I','phase_phi']);var R=rnd(10,500),XL=rnd(10,500),XC=rnd(10,500);if(type==='impedance_Z'){var Z=parseFloat(Math.sqrt(R*R+(XL-XC)*(XL-XC)).toFixed(2));return{question:'R=<b>'+R+'\u03a9</b>, X_L=<b>'+XL+'\u03a9</b>, X_C=<b>'+XC+'\u03a9</b>. Impedance Z?',hints:['Z=\u221a(R\u00b2+(X_L-X_C)\u00b2)'],ans:Z,tol:Z*0.02,unit:'\u03a9',working:'Z=\u221a('+R+'\u00b2+('+XL+'-'+XC+')\u00b2) = '+Z+' \u03a9'};}if(type==='current_I'){var Vrms=rnd(10,240),Z=parseFloat(Math.sqrt(R*R+(XL-XC)*(XL-XC)).toFixed(2)),I=parseFloat((Vrms/Z).toFixed(3));return{question:'V_rms=<b>'+Vrms+'V</b>, R=<b>'+R+'</b>, X_L=<b>'+XL+'</b>, X_C=<b>'+XC+'\u03a9</b>. I_rms?',hints:['I_rms=V_rms/Z; Z=\u221a(R\u00b2+(X_L-X_C)\u00b2)'],ans:I,tol:I*0.03,unit:'A',working:'Z='+Z+'; I='+Vrms+'/'+Z+' = '+I+' A'};}var phi=parseFloat((Math.atan((XL-XC)/R)*180/Math.PI).toFixed(1));return{question:'R=<b>'+R+'\u03a9</b>, X_L=<b>'+XL+'\u03a9</b>, X_C=<b>'+XC+'\u03a9</b>. Phase angle \u03c6?',hints:['tan\u03c6=(X_L-X_C)/R'],ans:phi,tol:1,unit:'\u00b0',working:'\u03c6=arctan(('+(XL-XC)+')/'+R+') = '+phi+'\u00b0'};})},
+]},
+{ey:'Q4 \u2022 Y12 Physics \u2022 AC Circuits',ti:'Resonance in Series RLC',su:'Find resonant frequency. Describe behaviour at resonance.',steps:[
+  {lb:'Series resonance',dr:dQ4,ht:'<div class="fm">f\u2080 = 1/(2\u03c0\u221a(LC))</div><p>At resonance: X_L = X_C; \u03c9\u2080L = 1/(\u03c9\u2080C). Z = R (minimum). Current I = V/R (maximum). I and V in phase (cos\u03c6=1). V_L = V_C (equal and opposite; cancel). V_supply = V_R. Power factor = 1 (maximum power). This frequency: \u03c9\u2080 = 1/\u221a(LC); f\u2080 = 1/(2\u03c0\u221a(LC)).</p>'},
+  {lb:'Q-factor at resonance',dr:dQ4,ht:'<p>Q = \u03c9\u2080L/R = 1/(\u03c9\u2080CR). V_L = V_C = Q \u00d7 V_supply at resonance. Q also = f\u2080/\u0394f (bandwidth). High Q: sharp peak, selective filter. Low Q: broad peak. Radio tuning: vary C to change f\u2080 to match station frequency. When f\u2080 = station carrier frequency: maximum reception.</p>'},
+  {lb:'Parallel resonance',dr:dQ4,ht:'<p>Parallel LC circuit: at resonance, impedance is MAXIMUM (not minimum). Current from supply is MINIMUM. Voltage across circuit is MAXIMUM. Parallel resonant frequency: f\u2080 = 1/(2\u03c0\u221a(LC)) (same formula, approximately). Used in: tank circuits (RF oscillators), bandpass filters, antenna matching. Current inside LC loop can be much larger than supply current.</p>'},
+  {lb:'Applications of resonance',dr:dQ4,ht:'<p>Radio receiver: LC circuit tuned to station\u2019s carrier frequency. TV tuner: same principle at higher frequency. MRI: RF coil resonant at Larmor frequency. Quartz crystal oscillator: piezoelectric crystal has very sharp resonance; Q \u2248 10\u2075; used in clocks, computers. Microwave ovens: 2.45 GHz resonates with water molecules (not LC resonance, but molecular resonance).</p>'},
+  {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var type=pick(['f_resonant','Z_at_resonance','Q_factor']);if(type==='f_resonant'){var L=rnd(1,100)/1000,C=rnd(1,100)*1e-6,f0=parseFloat((1/(2*Math.PI*Math.sqrt(L*C))).toFixed(1));return{question:'L=<b>'+(L*1000).toFixed(0)+'mH</b>, C=<b>'+(C*1e6).toFixed(0)+'\u03bcF</b>. Resonant frequency f\u2080?',hints:['f\u2080=1/(2\u03c0\u221a(LC))'],ans:f0,tol:f0*0.02,unit:'Hz',working:'f\u2080=1/(2\u03c0\u221a('+L+'\u00d7'+C.toExponential(2)+')) = '+f0+' Hz'};}if(type==='Z_at_resonance'){var R=rnd(10,500);return{question:'Series RLC: R=<b>'+R+'\u03a9</b>. Impedance at resonance?',hints:['At resonance: X_L=X_C; Z=R'],ans:R,tol:0,unit:'\u03a9',working:'At resonance: Z=R = '+R+' \u03a9'};}var L=rnd(1,100)/1000,R=rnd(1,50),omega0=rnd(1000,10000),Q=parseFloat((omega0*L/R).toFixed(2));return{question:'\u03c9\u2080=<b>'+omega0+'rad/s</b>, L=<b>'+(L*1000).toFixed(0)+'mH</b>, R=<b>'+R+'\u03a9</b>. Q-factor?',hints:['Q=\u03c9\u2080L/R'],ans:Q,tol:Q*0.02,unit:'',working:'Q='+omega0+'\u00d7'+L+'/'+R+' = '+Q};})},
+]},
+{ey:'Q5 \u2022 Y12 Physics \u2022 AC Circuits',ti:'AC Filters',su:'Describe low-pass, high-pass and bandpass filters.',steps:[
+  {lb:'Low-pass filter (RC)',dr:dQ5,ht:'<p>RC low-pass: R in series, C to ground. At low f: X_C large; most V_in appears across C. At high f: X_C small; most V_in dropped across R; V_out (across C) small. Cut-off frequency f_c = 1/(2\u03c0RC); at f_c: V_out = V_in/\u221a2; power = half max. Applications: remove high-frequency noise; audio bass response; anti-aliasing filters.</p>'},
+  {lb:'High-pass filter (CR)',dr:dQ5,ht:'<p>CR high-pass: C in series, R to ground. Output taken across R. At low f: X_C large; blocks signal; V_out small. At high f: X_C small; signal passes; V_out \u2248 V_in. Cut-off: f_c = 1/(2\u03c0RC). Applications: remove DC and low-frequency hum; audio treble; coupling stages in amplifiers.</p>'},
+  {lb:'Bandpass filter (RLC)',dr:dQ5,ht:'<p>Series RLC: maximum current (and V_R) at resonance f\u2080. Bandwidth \u0394f = f\u2080/Q (distance between -3dB points). Wide band: low Q. Narrow band: high Q. Bandpass filter selects a range of frequencies. Applications: radio/TV tuning (selects one channel); audio equaliser (select frequency band); communication systems.</p>'},
+  {lb:'Frequency response',dr:dQ5,ht:'<p>Bode plot: |V_out/V_in| (in dB) vs log(frequency). Low-pass: flat up to f_c, then -20 dB/decade roll-off. High-pass: -20 dB/decade rise up to f_c, then flat. Bandpass: peak at f\u2080, -20 dB/decade fall on both sides. Active filters (with op-amp): steeper roll-off; can amplify. Butterworth: maximally flat passband. Chebyshev: steeper roll-off, ripple in passband.</p>'},
+  {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var type=pick(['cutoff_RC','cutoff_RL','resonant_f']);if(type==='cutoff_RC'){var R=rnd(1,100)*1e3,C=rnd(1,100)*1e-9,fc=parseFloat((1/(2*Math.PI*R*C)).toFixed(0));return{question:'RC filter: R=<b>'+R/1e3+'k\u03a9</b>, C=<b>'+C*1e9+'nF</b>. Cut-off frequency f_c?',hints:['f_c=1/(2\u03c0RC)'],ans:fc,tol:fc*0.03,unit:'Hz',working:'f_c=1/(2\u03c0\u00d7'+R+'\u00d7'+C.toExponential(2)+') = '+fc+' Hz'};}if(type==='cutoff_RL'){var R=rnd(10,1000),L=rnd(1,100)/1000,fc=parseFloat((R/(2*Math.PI*L)).toFixed(1));return{question:'RL filter: R=<b>'+R+'\u03a9</b>, L=<b>'+(L*1000).toFixed(0)+'mH</b>. Cut-off f_c?',hints:['f_c=R/(2\u03c0L)'],ans:fc,tol:fc*0.03,unit:'Hz',working:'f_c='+R+'/(2\u03c0\u00d7'+L+') = '+fc+' Hz'};}var L=rnd(1,100)/1000,C=rnd(1,100)*1e-6,f0=parseFloat((1/(2*Math.PI*Math.sqrt(L*C))).toFixed(1));return{question:'L=<b>'+(L*1000).toFixed(0)+'mH</b>, C=<b>'+(C*1e6).toFixed(0)+'\u03bcF</b>. Resonant frequency?',hints:['f\u2080=1/(2\u03c0\u221a(LC))'],ans:f0,tol:f0*0.03,unit:'Hz',working:'f\u2080=1/(2\u03c0\u221a('+L+'\u00d7'+C.toExponential(2)+')) = '+f0+' Hz'};})},
+]},
+{ey:'Q6 \u2022 Y12 Physics \u2022 AC Circuits',ti:'Power in AC Circuits',su:'Calculate real power, reactive power and power factor.',steps:[
+  {lb:'Real and reactive power',dr:dQ6,ht:'<p>Real (active) power P = I_rms\u00b2 R (W) = I_rms V_rms cos\u03c6. Reactive power Q = I_rms\u00b2 X (VAR, volt-ampere reactive). Apparent power S = I_rms V_rms (VA). Power factor PF = cos\u03c6 = P/S = R/Z. Power triangle: S\u00b2 = P\u00b2 + Q\u00b2. Purely resistive: Q=0, PF=1. Purely reactive: P=0, PF=0.</p>'},
+  {lb:'Power factor correction',dr:dQ6,ht:'<p>Inductive loads (motors): lag current; low PF; large I for same power; wasted I\u00b2R in lines. Correct by adding capacitor in parallel: C provides leading reactive current to cancel inductive lag; overall \u03c6 \u2192 0; PF \u2192 1. Industry pays penalty for low PF. Capacitor bank switched in as needed. PF=1 \u2192 minimum current for given power.</p>'},
+  {lb:'Energy and billing',dr:dQ6,ht:'<p>Energy meter measures kWh (real energy). Charges based on real power (kW) \u00d7 time (h). Maximum demand charge: extra fee for peak power drawn. Reactive energy (kVARh): some industrial tariffs include reactive charge. Smart meters: record time-of-use; variable tariffs. Unit: 1 kWh = 3.6 MJ. 1 unit = 1 kWh.</p>'},
+  {lb:'AC power in practice',dr:dQ6,ht:'<p>In practice: most AC loads are inductive (motors, fluorescent lights). PF typically 0.8\u20130.95. Utility companies require PF > 0.9 for large consumers. Large consumers install capacitor banks for power factor correction. Unity PF: maximum efficiency, minimum current, minimum I\u00b2R losses in supply cables.</p>'},
+  {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var type=pick(['P_real','PF','apparent_S']);if(type==='P_real'){var Irms=rnd(1,20),Vrms=rnd(100,240),phi=pick([0,30,45,60]),P=parseFloat((Irms*Vrms*Math.cos(phi*Math.PI/180)).toFixed(1));return{question:'I_rms=<b>'+Irms+'A</b>, V_rms=<b>'+Vrms+'V</b>, \u03c6=<b>'+phi+'\u00b0</b>. Real power P?',hints:['P=I_rms V_rms cos\u03c6'],ans:P,tol:P*0.02,unit:'W',working:'P='+Irms+'\u00d7'+Vrms+'\u00d7cos'+phi+'\u00b0 = '+P+' W'};}if(type==='PF'){var R=rnd(10,500),Z=rnd(R+10,1000),PF=parseFloat((R/Z).toFixed(3));return{question:'R=<b>'+R+'\u03a9</b>, Z=<b>'+Z+'\u03a9</b>. Power factor cos\u03c6?',hints:['cos\u03c6=R/Z'],ans:PF,tol:PF*0.02,unit:'',working:'cos\u03c6='+R+'/'+Z+' = '+PF};}var Irms=rnd(1,20),Vrms=rnd(100,240),S=parseFloat((Irms*Vrms).toFixed(1));return{question:'I_rms=<b>'+Irms+'A</b>, V_rms=<b>'+Vrms+'V</b>. Apparent power S?',hints:['S=I_rms\u00d7V_rms (VA)'],ans:S,tol:S*0.02,unit:'VA',working:'S='+Irms+'\u00d7'+Vrms+' = '+S+' VA'};})},
+]},
+{ey:'Q7 \u2022 Y12 Physics \u2022 AC Circuits',ti:'The Transformer in Detail',su:'Analyse transformer behaviour with resistance and efficiency.',steps:[
+  {lb:'Ideal transformer equations',dr:dQ7,ht:'<div class="fm">V_s/V_p = N_s/N_p = I_p/I_s</div><p>Ideal (100% efficient): V_p I_p = V_s I_s. Step-up: N_s > N_p, V_s > V_p, I_s < I_p. Step-down: N_s < N_p, V_s < V_p, I_s > I_p. The turns ratio determines all voltage and current ratios. Impedance transformation: Z seen by primary = (N_p/N_s)\u00b2 \u00d7 Z_secondary.</p>'},
+  {lb:'Real transformer losses',dr:dQ7,ht:'<p>Copper loss: I\u00b2R in primary and secondary windings; reduces with lower resistance wire. Iron loss: (1) Hysteresis: reversal of domain alignment each cycle; proportional to f and B\u00b2; reduced by soft-iron laminated core. (2) Eddy currents: induced by changing flux; I\u00b2R in core; reduced by laminating. Total efficiency: \u03b7 = P_out/P_in > 99% for large power transformers.</p>'},
+  {lb:'Impedance matching',dr:dQ7,ht:'<p>Impedance transformation: Z_primary = (N_p/N_s)\u00b2 \u00d7 Z_secondary. Use: match loudspeaker (8\u03a9) to amplifier output impedance for maximum power transfer. Audio transformer with N_p:N_s = n:1 makes 8\u03a9 look like 8n\u00b2 \u03a9. Maximum power when Z_source = Z_load (conjugate match).</p>'},
+  {lb:'Three-phase supply',dr:dQ7,ht:'<p>Three-phase: three AC supply voltages, 120\u00b0 apart. For balanced load: total power constant (no fluctuation). Three-phase generator: three coils 120\u00b0 apart; star (Y) or delta (\u0394) connection. V_line = \u221a3 \u00d7 V_phase (star). Industry: three-phase motors more efficient, more powerful, smoother. UK: 400 V (line) three-phase; 230 V (phase-to-neutral).</p>'},
+  {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var type=pick(['turns_ratio','efficiency','impedance_transform']);if(type==='turns_ratio'){var Np=rnd(100,2000),Ns=rnd(100,2000),Vp=rnd(100,400),Vs=parseFloat((Vp*Ns/Np).toFixed(1));return{question:'N_p=<b>'+Np+'</b>, N_s=<b>'+Ns+'</b>, V_p=<b>'+Vp+'V</b>. V_s?',hints:['V_s=V_p\u00d7N_s/N_p'],ans:Vs,tol:Vs*0.02,unit:'V',working:'V_s='+Vp+'\u00d7'+Ns+'/'+Np+' = '+Vs+' V'};}if(type==='efficiency'){var Pin=rnd(1000,10000),Pout=rnd(900,Pin-10),eta=parseFloat((Pout/Pin*100).toFixed(1));return{question:'P_in=<b>'+Pin+'W</b>, P_out=<b>'+Pout+'W</b>. Efficiency?',hints:['\u03b7=P_out/P_in\u00d7100%'],ans:eta,tol:eta*0.02,unit:'%',working:'\u03b7='+Pout+'/'+Pin+'\u00d7100 = '+eta+'%'};}var Np=rnd(1,20),Ns=rnd(1,20),ZL=rnd(8,500),Zp=parseFloat((ZL*Np*Np/(Ns*Ns)).toFixed(2));return{question:'N_p=<b>'+Np+'</b>, N_s=<b>'+Ns+'</b>, Z_L=<b>'+ZL+'\u03a9</b>. Impedance seen at primary?',hints:['Z_p=(N_p/N_s)\u00b2\u00d7Z_L'],ans:Zp,tol:Zp*0.03,unit:'\u03a9',working:'Z_p=('+Np+'/'+Ns+')\u00b2\u00d7'+ZL+' = '+Zp+' \u03a9'};})},
+]},
+{ey:'Q8 \u2022 Y12 Physics \u2022 AC Circuits',ti:'AC Circuit Analysis',su:'Solve multi-element AC circuits using phasors and impedance.',steps:[
+  {lb:'Series RL circuit',dr:dQ8,ht:'<div class="fm">Z=\u221a(R\u00b2+X_L\u00b2); \u03c6=arctan(X_L/R)</div><p>Current lags voltage by \u03c6. V_R=IR (in phase with I). V_L=IX_L (leads I 90\u00b0). V_supply=\u221a(V_R\u00b2+V_L\u00b2). Power=I\u00b2R (only R dissipates). Used in: fluorescent lamp ballast (inductor limits current without wasting power), motor windings.</p>'},
+  {lb:'Series RC circuit',dr:dQ8,ht:'<div class="fm">Z=\u221a(R\u00b2+X_C\u00b2); \u03c6=arctan(X_C/R)</div><p>Current leads voltage by \u03c6. V_R=IR (in phase). V_C=IX_C (lags I 90\u00b0). V_supply=\u221a(V_R\u00b2+V_C\u00b2). Power=I\u00b2R. Used in: timing circuits, coupling in amplifiers, power factor correction.</p>'},
+  {lb:'Parallel circuits',dr:dQ8,ht:'<p>Parallel circuits: same voltage across all components; currents add (as phasors). For R\u2225L: I_R in phase; I_L lags 90\u00b0; total I = \u221a(I_R\u00b2+I_L\u00b2). Admittance Y = 1/Z (siemens, S). Y_total = Y_R + Y_L + Y_C. Parallel resonance: I_L and I_C cancel; current from supply minimum (just I_R).</p>'},
+  {lb:'Mixed circuit analysis',dr:dQ8,ht:'<p>For complex circuits: (1) Find X_L and X_C at given f. (2) Reduce using series/parallel rules. (3) Find Z_total. (4) Find I from V/Z. (5) Find individual currents and voltages. (6) Check power: P=I\u00b2R for each resistor; sum = total real power. Kirchhoff\u2019s laws apply using complex phasors (or just magnitudes for simple cases).</p>'},
+  {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var type=pick(['Z_RL','Z_RC','I_from_V_Z']);if(type==='Z_RL'){var R=rnd(10,500),XL=rnd(10,500),Z=parseFloat(Math.sqrt(R*R+XL*XL).toFixed(2));return{question:'Series RL: R=<b>'+R+'\u03a9</b>, X_L=<b>'+XL+'\u03a9</b>. Z?',hints:['Z=\u221a(R\u00b2+X_L\u00b2)'],ans:Z,tol:Z*0.02,unit:'\u03a9',working:'Z=\u221a('+R+'\u00b2+'+XL+'\u00b2) = '+Z+' \u03a9'};}if(type==='Z_RC'){var R=rnd(10,500),XC=rnd(10,500),Z=parseFloat(Math.sqrt(R*R+XC*XC).toFixed(2));return{question:'Series RC: R=<b>'+R+'\u03a9</b>, X_C=<b>'+XC+'\u03a9</b>. Z?',hints:['Z=\u221a(R\u00b2+X_C\u00b2)'],ans:Z,tol:Z*0.02,unit:'\u03a9',working:'Z=\u221a('+R+'\u00b2+'+XC+'\u00b2) = '+Z+' \u03a9'};}var Vrms=rnd(50,240),R=rnd(10,500),XL=rnd(10,500),Z=parseFloat(Math.sqrt(R*R+XL*XL).toFixed(2)),I=parseFloat((Vrms/Z).toFixed(3));return{question:'V_rms=<b>'+Vrms+'V</b>, R=<b>'+R+'</b>, X_L=<b>'+XL+'\u03a9</b>. I_rms?',hints:['I=V_rms/Z; Z=\u221a(R\u00b2+X_L\u00b2)'],ans:I,tol:I*0.03,unit:'A',working:'Z='+Z+'; I='+Vrms+'/'+Z+' = '+I+' A'};})},
+]},
+{ey:'Q9 \u2022 Y12 Physics \u2022 AC Circuits',ti:'Oscillators and Signal Generation',su:'Describe LC oscillators. Explain how resonance generates signals.',steps:[
+  {lb:'LC oscillator principle',dr:dQ9,ht:'<p>LC tank circuit: capacitor charges, discharges through inductor, charging capacitor in opposite polarity, discharging again\u2026 Energy oscillates between E-field (C) and B-field (L). Natural frequency \u03c9 = 1/\u221a(LC). Without resistance: oscillation forever. With resistance: damped; energy input needed to sustain. Feedback amplifier maintains oscillation.</p>'},
+  {lb:'Colpitts and Hartley oscillators',dr:dQ9,ht:'<p>Colpitts: capacitive voltage divider feeds back portion of output to maintain oscillation. Hartley: inductive voltage divider. Both: transistor or op-amp amplifies feedback signal; LC network selects frequency. Frequency stable if L and C stable (temperature-compensated capacitors). Practical oscillators: crystal (quartz) gives Q \u2248 10\u2075; very stable frequency.</p>'},
+  {lb:'Quartz crystal oscillator',dr:dQ9,ht:'<p>Quartz crystal: piezoelectric; mechanical resonance (specific frequency); very sharp resonance; Q ~ 10\u2075; frequency very stable with temperature. Equivalent circuit: series LCR in parallel with C_holder. Crystal clock accuracy: \u00b130 s/year. TCXO (temperature-compensated): \u00b11 s/year. Atomic clock: 10\u207b\u00b9\u00b3 accuracy. Used in: watches, computers, GPS, telephones.</p>'},
+  {lb:'Signal generators',dr:dQ9,ht:'<p>Signal generator: produces sinusoidal, square, triangular waves at selectable frequency. RC oscillator: uses RC network for phase shift; low frequency. LC oscillator: used at RF frequencies. Crystal-controlled: very stable. Function generator: produces multiple waveforms. Arbitrary waveform generator: creates any waveform via DAC. Used in: labs, circuit testing, calibration.</p>'},
+  {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var type=pick(['LC_freq','LC_period','LC_L_from_f']);if(type==='LC_freq'){var L=rnd(1,100)/1000,C=rnd(1,100)*1e-9,f0=parseFloat((1/(2*Math.PI*Math.sqrt(L*C))).toFixed(0));return{question:'LC oscillator: L=<b>'+(L*1000).toFixed(0)+'mH</b>, C=<b>'+C*1e9+'nF</b>. Frequency?',hints:['f\u2080=1/(2\u03c0\u221a(LC))'],ans:f0,tol:f0*0.03,unit:'Hz',working:'f\u2080=1/(2\u03c0\u221a('+L+'\u00d7'+C.toExponential(2)+')) = '+f0+' Hz'};}if(type==='LC_period'){var L=rnd(1,100)/1000,C=rnd(1,100)*1e-9,f0=1/(2*Math.PI*Math.sqrt(L*C)),T=parseFloat((1/f0*1e6).toFixed(2));return{question:'L=<b>'+(L*1000).toFixed(0)+'mH</b>, C=<b>'+C*1e9+'nF</b>. Period T (\u03bcs)?',hints:['T=1/f\u2080=2\u03c0\u221a(LC)'],ans:T,tol:T*0.03,unit:'\u03bcs',working:'f\u2080='+f0.toFixed(0)+'Hz; T='+T+'\u03bcs'};}var f0=rnd(1,1000)*1e3,C=rnd(1,100)*1e-9,L=parseFloat((1/(4*Math.PI*Math.PI*f0*f0*C)*1000).toFixed(2));return{question:'f\u2080=<b>'+f0/1e3+'kHz</b>, C=<b>'+C*1e9+'nF</b>. Inductance L (mH)?',hints:['L=1/(4\u03c0\u00b2f\u2080\u00b2C)'],ans:L,tol:L*0.05,unit:'mH',working:'L=1/(4\u03c0\u00b2\u00d7'+f0+'\u00b2\u00d7'+C.toExponential(2)+')\u00d71000 = '+L+' mH'};})},
+]},
+{ey:'Q10 \u2022 Y12 Physics \u2022 AC Circuits',ti:'Mixed AC Circuit Questions',su:'Integrated questions across all Y12-ELE-03 topics.',steps:[
+  {lb:'Summary',dr:dQ10,ht:'<p>V_rms=V\u2080/\u221a2. X_L=2\u03c0fL. X_C=1/(2\u03c0fC). Z=\u221a(R\u00b2+(X_L-X_C)\u00b2). \u03c6=arctan((X_L-X_C)/R). f\u2080=1/(2\u03c0\u221a(LC)). P=I\u00b2R=I_rms V_rms cos\u03c6. Q=\u03c9\u2080L/R. Transformer: V_s/V_p=N_s/N_p. f_c(RC)=1/(2\u03c0RC).</p>'},
+  {lb:'WAEC emphasis',dr:dQ10,ht:'<p>WAEC tests: V_rms from peak; X_L and X_C formulas; impedance Z for series RLC; resonant frequency; transformer equations; power factor and AC power. Know phasor relationships (which leads, which lags) and be able to draw phasor diagram for RLC circuit.</p>'},
+  {lb:'Phasor diagram rules',dr:dQ10,ht:'<p>Draw I horizontal (reference). V_R along I (in phase). V_L vertically up (leads I 90\u00b0). V_C vertically down (lags I 90\u00b0). V_supply = vector sum. Angle \u03c6 between I and V_supply = phase angle. If X_L > X_C: V points up (inductive). If X_C > X_L: V points down (capacitive). At resonance: V_supply = V_R only (V_L and V_C cancel).</p>'},
+  {lb:'Key formulae',dr:dQ10,ht:'<div class="fm">X_L=2\u03c0fL \u2022 X_C=1/(2\u03c0fC) \u2022 Z=\u221a(R\u00b2+(X_L-X_C)\u00b2)</div><div class="fm">f\u2080=1/(2\u03c0\u221a(LC)) \u2022 P=I\u00b2R \u2022 cos\u03c6=R/Z</div>'},
+  {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var type=pick(['XL','impedance','resonant']);if(type==='XL'){var f=rnd(50,2000),L=rnd(10,500)/1000,XL=parseFloat((2*Math.PI*f*L).toFixed(2));return{question:'f=<b>'+f+'Hz</b>, L=<b>'+(L*1000).toFixed(0)+'mH</b>. X_L?',hints:['X_L=2\u03c0fL'],ans:XL,tol:XL*0.02,unit:'\u03a9',working:'X_L=2\u03c0\u00d7'+f+'\u00d7'+L+' = '+XL+' \u03a9'};}if(type==='impedance'){var R=rnd(10,500),XL=rnd(10,500),XC=rnd(10,500),Z=parseFloat(Math.sqrt(R*R+(XL-XC)*(XL-XC)).toFixed(2));return{question:'R=<b>'+R+'</b>, X_L=<b>'+XL+'</b>, X_C=<b>'+XC+'\u03a9</b>. Z?',hints:['Z=\u221a(R\u00b2+(X_L-X_C)\u00b2)'],ans:Z,tol:Z*0.02,unit:'\u03a9',working:'Z=\u221a('+R+'\u00b2+('+XL+'-'+XC+')\u00b2) = '+Z+' \u03a9'};}var L=rnd(1,100)/1000,C=rnd(1,100)*1e-6,f0=parseFloat((1/(2*Math.PI*Math.sqrt(L*C))).toFixed(1));return{question:'L=<b>'+(L*1000).toFixed(0)+'mH</b>, C=<b>'+(C*1e6).toFixed(0)+'\u03bcF</b>. f\u2080?',hints:['f\u2080=1/(2\u03c0\u221a(LC))'],ans:f0,tol:f0*0.03,unit:'Hz',working:'f\u2080=1/(2\u03c0\u221a('+L+'\u00d7'+C.toExponential(2)+')) = '+f0+' Hz'};})},
+]},
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcTopicCode='Y12-ELE-03';
+window.markComplete=async function(){
+  const{data:{session}}=await _sb.auth.getSession();if(!session)return;
+  const{data:topic}=await _sb.from('topics').select('id').eq('topic_code','Y12-ELE-03').maybeSingle();if(!topic)return;
+  window._abcTopicId=topic.id;
+  await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body></html>

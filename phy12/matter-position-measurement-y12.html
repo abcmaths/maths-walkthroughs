@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matter, Position and Measurement — Year 12 Physics</title>
+<style>
+:root{--red:#1565C0;--dark:#0d47a1;--cream:#E3F2FD;--ink:#0d1b2a;--line:#BBDEFB;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#555;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#E3F2FD);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:180px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:15px;line-height:1.6;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:16px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;margin-bottom:8px;line-height:1.5;}
+.hl{font-size:14px;color:#1a2a3a;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e3f2fd;color:#0d47a1;border:1px solid #90caf9;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#1a2a3a;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <div class="ht">Measurement — Y12 Physics</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr"><div class="eyebrow" id="ey"></div><h1 id="ti"></h1><div class="sub" id="su"></div></div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ACC='#1565C0',DARK='#0d47a1',CRM='#E3F2FD',LINE='#BBDEFB';
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+var ST={};
+function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn};return buildTry(id,o);}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="any" placeholder="Answer'+(o.unit?' ('+o.unit+')':'')+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=entry.genFn();entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.05*Math.abs(o.ans)||0.05)){fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
+  }
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#0d1b2a';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||CRM;stroke=stroke||ACC;sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';}
+function arw(x1,y1,x2,y2,c,w){var id='m'+Math.round(x1*7+y2*3);return '<defs><marker id="'+id+'" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="'+(c||ACC)+'"/></marker></defs><line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||ACC)+'" stroke-width="'+(w||2)+'" marker-end="url(#'+id+')"/>';}
+function circ(cx,cy,r,fill,stroke){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||CRM)+'" stroke="'+(stroke||ACC)+'" stroke-width="1.5"/>';}
+
+function dQ1(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'SI base units',ACC,13,'middle',true));
+var rows=[['Quantity','Unit','Symbol'],['Length','metre','m'],['Mass','kilogram','kg'],['Time','second','s'],['Current','ampere','A'],['Temperature','kelvin','K'],['Amount','mole','mol'],['Luminous int.','candela','cd']];
+rows.forEach(function(r,i){if(i<=p+1){o.push(R(10,30+i*26,460,22,i===0?LINE:CRM,i===0?ACC:LINE,0.5));r.forEach(function(v,j){o.push(T(20+j*150,45+i*26,v,i===0?ACC:'#333',9,'start',i===0));});}});
+s.innerHTML=o.join('');}
+function dQ2(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Scalars vs vectors',ACC,12,'middle',true));
+o.push(R(10,36,222,210,CRM,ACC,2));o.push(T(121,54,'SCALARS',ACC,11,'middle',true));
+o.push(R(248,36,222,210,CRM,ACC,2));o.push(T(359,54,'VECTORS',ACC,11,'middle',true));
+['Mass','Speed','Distance','Energy','Power','Temperature'].forEach(function(v,i){if(i<p+1)o.push(T(121,74+i*26,v,'#333',9,'middle',false));});
+['Displacement','Velocity','Acceleration','Force','Momentum','Electric field'].forEach(function(v,i){if(i<p+1)o.push(T(359,74+i*26,v,'#333',9,'middle',false));});
+s.innerHTML=o.join('');}
+function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Errors and uncertainty',ACC,12,'middle',true));
+if(p>=1){o.push(R(10,38,460,42,CRM,ACC,1.5));o.push(T(240,56,'Random error: scatter around true value; reduce by repeating + averaging',DARK,10,'middle',false));o.push(T(240,72,'Systematic error: constant offset one way; fix by calibration','#333',9,'middle',false));}
+if(p>=2){o.push(R(10,90,460,42,CRM,ACC,1.5));o.push(T(240,106,'Absolute uncertainty \u0394x: same units; usually half smallest scale div','#333',10,'middle',false));o.push(T(240,122,'Percentage uncertainty = (\u0394x/x) \u00d7 100%','#555',9,'middle',false));}
+if(p>=3){o.push(R(10,142,460,42,CRM,ACC,1.5));o.push(T(240,158,'Add / subtract: add absolute uncertainties','#333',10,'middle',false));o.push(T(240,174,'Multiply / divide: add % uncertainties; power n: multiply % by |n|','#555',9,'middle',false));}
+if(p>=4){o.push(R(10,194,460,42,LINE,ACC,1));o.push(T(240,210,'Accurate: close to true value (low systematic error)','#333',10,'middle',false));o.push(T(240,228,'Precise: reproducible, small spread (low random error)','#555',9,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ4(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Dimensional analysis',ACC,12,'middle',true));
+[['Force F=ma','[M][L][T\u207b\u00b2] = N'],['Energy E=\u00bdmv\u00b2','[M][L\u00b2][T\u207b\u00b2] = J'],['Pressure p=F/A','[M][L\u207b\u00b9][T\u207b\u00b2] = Pa'],['Power P=W/t','[M][L\u00b2][T\u207b\u00b3] = W'],['Momentum p=mv','[M][L][T\u207b\u00b9] = kg\u22c5m/s']].forEach(function(r,i){if(i<p+1){o.push(R(10,38+i*42,460,34,CRM,LINE,1));o.push(T(160,58+i*42,r[0],ACC,10,'middle',true));o.push(T(360,58+i*42,r[1],'#555',9,'middle',false));}});
+s.innerHTML=o.join('');}
+function dQ5(p){dQ1(p);}
+function dQ6(p){dQ3(p);}
+function dQ7(p){dQ4(p);}
+function dQ8(p){dQ2(p);}
+function dQ9(p){dQ3(p);}
+function dQ10(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Measurement summary',ACC,13,'middle',true));
+[['SI base units','m, kg, s, A, K, mol, cd'],['Scalar','magnitude only: speed, mass, energy'],['Vector','magnitude+direction: velocity, force, p'],['Random error','scatter; reduce by repeating'],['Systematic error','constant offset; calibrate'],['% uncertainty','(\u0394x/x)\u00d7100; add % for \u00d7\u00f7'],['Dimensions','[F]=[MLT\u207b\u00b2]; check all equations']].forEach(function(r,i){if(i<p+1){o.push(R(10,36+i*30,460,24,CRM,LINE,1));o.push(T(120,52+i*30,r[0],ACC,10,'middle',true));o.push(T(330,52+i*30,r[1],'#555',9,'middle',false));}});
+s.innerHTML=o.join('');}
+var QS=[
+{ey:'Q1 \u2022 Y12 Physics \u2022 Measurement',ti:'SI Units and Prefixes',su:'State the seven SI base units. Convert between SI prefixes.',steps:[
+  {lb:'Seven base units',dr:dQ1,ht:'<p>The seven SI base units are <b>metre</b> (m, length), <b>kilogram</b> (kg, mass), <b>second</b> (s, time), <b>ampere</b> (A, current), <b>kelvin</b> (K, temperature), <b>mole</b> (mol, amount), <b>candela</b> (cd, luminous intensity). All other units are derived from these.</p>'},
+  {lb:'Derived units in base form',dr:dQ1,ht:'<p>Derived units expressed in base units: N = kg m s\u207b\u00b2, J = kg m\u00b2 s\u207b\u00b2, W = kg m\u00b2 s\u207b\u00b3, Pa = kg m\u207b\u00b9 s\u207b\u00b2, V = kg m\u00b2 s\u207b\u00b3 A\u207b\u00b9, C = A s, T = kg s\u207b\u00b2 A\u207b\u00b9. WAEC requires this regularly.</p>'},
+  {lb:'SI prefixes',dr:dQ1,ht:'<p>p (pico, 10\u207b\u00b9\u00b2), n (nano, 10\u207b\u2079), \u03bc (micro, 10\u207b\u2076), m (milli, 10\u207b\u00b3), k (kilo, 10\u00b3), M (mega, 10\u2076), G (giga, 10\u2079), T (tera, 10\u00b9\u00b2). Multiply or divide by the power of ten to convert.</p>'},
+  {lb:'Significant figures',dr:dQ1,ht:'<p>Round answers to the least precise input. 3.456 \u00d7 2.1 = 7.3 (2 s.f.). Always state units. WAEC awards marks for correct unit and appropriate s.f.</p>'},
+  {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var c=pick([{val:rnd(1,999),from:'nm',to:'m',f:1e-9},{val:rnd(1,999),from:'\u03bcm',to:'m',f:1e-6},{val:rnd(1,999),from:'km',to:'m',f:1e3},{val:rnd(1,999),from:'MHz',to:'Hz',f:1e6}]);var ans=parseFloat((c.val*c.f).toExponential(3));return{question:'Convert <b>'+c.val+' '+c.from+'</b> to '+c.to+'.',hints:['Multiply by prefix factor'],ans:ans,tol:Math.abs(ans)*0.01,unit:c.to,working:c.val+' \u00d7 '+c.f+' = '+ans+' '+c.to};})},
+]},
+{ey:'Q2 \u2022 Y12 Physics \u2022 Measurement',ti:'Scalars and Vectors',su:'Distinguish scalars from vectors. Resolve vectors into components.',steps:[
+  {lb:'Scalar vs vector',dr:dQ2,ht:'<p><b>Scalar:</b> magnitude only — mass, speed, distance, energy, power, temperature, pressure, charge, time. <b>Vector:</b> magnitude AND direction — displacement, velocity, acceleration, force, weight, momentum, electric/magnetic fields.</p>'},
+  {lb:'Adding vectors by components',dr:dQ2,ht:'<p>Resolve into perpendicular components: F_x = F\u202fcos\u03b8, F_y = F\u202fsin\u03b8. Sum x-components and y-components separately. Resultant R = \u221a(R_x\u00b2 + R_y\u00b2), direction \u03b8 = arctan(R_y/R_x).</p>'},
+  {lb:'Relative velocity',dr:dQ2,ht:'<p>v_A relative to B = v_A \u2212 v_B (vector subtraction). River crossing: resultant = boat velocity + river current; time = width / v_perpendicular; drift = v_river \u00d7 time. Always draw a vector triangle for river crossing questions.</p>'},
+  {lb:'Vector subtraction',dr:dQ2,ht:'<p>Change in velocity \u0394v = v_f \u2212 v_i (a vector). Uniform circular motion: speed constant, direction changes \u2192 \u0394v \u2260 0 \u2192 centripetal acceleration. Reverse one vector then add tip-to-tail for subtraction.</p>'},
+  {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var F=rnd(5,60),th=pick([30,37,45,53,60]),rad=th*Math.PI/180;var type=pick(['x','y','mag']);if(type==='x'){var Fx=parseFloat((F*Math.cos(rad)).toFixed(2));return{question:'F = <b>'+F+' N</b> at <b>'+th+'\u00b0</b> above horizontal. Horizontal component?',hints:['F_x = F cos\u03b8'],ans:Fx,tol:Fx*0.02,unit:'N',working:'F_x = '+F+' cos'+th+'\u00b0 = '+Fx+' N'};}if(type==='y'){var Fy=parseFloat((F*Math.sin(rad)).toFixed(2));return{question:'F = <b>'+F+' N</b> at <b>'+th+'\u00b0</b>. Vertical component?',hints:['F_y = F sin\u03b8'],ans:Fy,tol:Fy*0.02,unit:'N',working:'F_y = '+F+' sin'+th+'\u00b0 = '+Fy+' N'};}var Rx=rnd(3,30),Ry=rnd(3,30),R=parseFloat(Math.sqrt(Rx*Rx+Ry*Ry).toFixed(2));return{question:'R_x = <b>'+Rx+' N</b>, R_y = <b>'+Ry+' N</b>. Resultant?',hints:['R = \u221a(R_x\u00b2 + R_y\u00b2)'],ans:R,tol:R*0.02,unit:'N',working:'R = \u221a('+Rx+'\u00b2+'+Ry+'\u00b2) = '+R+' N'};})},
+]},
+{ey:'Q3 \u2022 Y12 Physics \u2022 Measurement',ti:'Errors and Uncertainties',su:'Identify error types. Calculate and combine uncertainties.',steps:[
+  {lb:'Types of error',dr:dQ3,ht:'<p><b>Random:</b> unpredictable scatter; different each time; reduce by repeating and averaging; shows as spread in results. <b>Systematic:</b> consistent shift one direction; zero error, calibration, parallax, reaction time; cannot be reduced by repeating; must be identified and corrected.</p>'},
+  {lb:'Calculating uncertainty',dr:dQ3,ht:'<p>Absolute \u0394x: usually half the smallest graduation. % uncertainty = (\u0394x/x)\u00d7100. Combining: a\u00b1b \u2192 add absolute uncertainties. a\u00d7b or a/b \u2192 add % uncertainties. a^n \u2192 multiply % by |n|.</p>'},
+  {lb:'Worked example',dr:dQ3,ht:'<p>a = 3.0\u00b10.1 m, b = 2.0\u00b10.1 m. Sum: 5.0\u00b10.2 m. Product: %unc(a)=3.3%, %unc(b)=5.0%, total=8.3%; product=6.0\u00b10.5 m\u00b2. For a\u00b2: %unc=2\u00d73.3%=6.6%; a\u00b2=9.0\u00b10.6 m\u00b2.</p>'},
+  {lb:'Accuracy vs precision',dr:dQ3,ht:'<p>Accurate = close to true value (low systematic error). Precise = small spread (low random error). Can be precise but not accurate (systematic offset). Can be accurate but not precise (large scatter). Ideally both.</p>'},
+  {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var x=rnd(10,100),dx=rnd(1,5),type=pick(['pct','add','power']);if(type==='pct'){var pct=parseFloat((dx/x*100).toFixed(1));return{question:'x = <b>'+x+'</b>, \u0394x = <b>'+dx+'</b>. % uncertainty?',hints:['% = (\u0394x/x)\u00d7100'],ans:pct,tol:0.2,unit:'%',working:'% = '+dx+'/'+x+'\u00d7100 = '+pct+'%'};}if(type==='add'){var y=rnd(10,100),dy=rnd(1,5);return{question:'\u0394a = <b>'+dx+'</b>, \u0394b = <b>'+dy+'</b>. Uncertainty in a+b?',hints:['Add absolute uncertainties'],ans:dx+dy,tol:0,unit:'(same units)',working:'\u0394(a+b) = '+dx+'+'+dy+' = '+(dx+dy)};}var n=pick([2,3]),px=parseFloat((dx/x*100).toFixed(1)),pn=parseFloat((n*px).toFixed(1));return{question:'%unc(x)=<b>'+px+'%</b>. %unc(x^'+n+')?',hints:['Multiply % unc by |n|'],ans:pn,tol:0.2,unit:'%',working:'%unc = '+n+'\u00d7'+px+' = '+pn+'%'};})},
+]},
+{ey:'Q4 \u2022 Y12 Physics \u2022 Measurement',ti:'Dimensional Analysis',su:'Use dimensions to check equations and derive relationships.',steps:[
+  {lb:'Base dimensions',dr:dQ4,ht:'<p>Every quantity has dimensions [M], [L], [T], [I], [\u0398]. Key: velocity [LT\u207b\u00b9], acceleration [LT\u207b\u00b2], force [MLT\u207b\u00b2], energy [ML\u00b2T\u207b\u00b2], pressure [ML\u207b\u00b9T\u207b\u00b2]. Only same-dimension quantities can be added or equated.</p>'},
+  {lb:'Checking equations',dr:dQ4,ht:'<p>Check v\u00b2=u\u00b2+2as: LHS [L\u00b2T\u207b\u00b2]; RHS [L\u00b2T\u207b\u00b2]+[LT\u207b\u00b2][L]=[L\u00b2T\u207b\u00b2]. \u2713 Consistent. Cannot find dimensionless constants (2, \u03c0, \u00bd) this way.</p>'},
+  {lb:'Deriving relationships',dr:dQ4,ht:'<p>Pendulum: T depends on L, m, g. [T]=[L]^a[M]^b[LT\u207b\u00b2]^c. Equating: c=-\u00bd, a=\u00bd, b=0. So T\u221d\u221a(L/g). Dimensionless constant (2\u03c0) from experiment.</p>'},
+  {lb:'Electrical dimensions',dr:dQ4,ht:'<p>Voltage [V]=[ML\u00b2T\u207b\u00b3I\u207b\u00b9]. Resistance [R]=[ML\u00b2T\u207b\u00b3I\u207b\u00b2]. Charge [Q]=[IT]. Capacitance [C]=[M\u207b\u00b9L\u207b\u00b2T\u2074I\u00b2]. Electric field [E]=[MLT\u207b\u00b3I\u207b\u00b9]. These appear in WAEC and Cambridge papers.</p>'},
+  {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var qs=[{q:'Dimensions of pressure (p=F/A)?',a:1,w:'[F]/[A]=[MLT\u207b\u00b2]/[L\u00b2]=[ML\u207b\u00b9T\u207b\u00b2]. Choose: 1=[ML\u207b\u00b9T\u207b\u00b2], 2=[ML\u00b2T\u207b\u00b2]'},{q:'Dimensions of energy (E=\u00bdmv\u00b2)?',a:2,w:'[M][L\u00b2T\u207b\u00b2]=[ML\u00b2T\u207b\u00b2]. Choose: 1=[MLT\u207b\u00b2], 2=[ML\u00b2T\u207b\u00b2]'},{q:'Dimensions of acceleration?',a:1,w:'[a]=[LT\u207b\u00b9]/[T]=[LT\u207b\u00b2]. Choose: 1=[LT\u207b\u00b2], 2=[LT\u207b\u00b3]'}];var qq=pick(qs);return{question:qq.q,hints:['Use [M],[L],[T]'],ans:qq.a,tol:0,unit:'(1 or 2)',working:qq.w};})},
+]},
+{ey:'Q5 \u2022 Y12 Physics \u2022 Measurement',ti:'Graphs and Data Analysis',su:'Plot best-fit lines. Calculate gradient, intercept and uncertainty.',steps:[
+  {lb:'Best-fit lines',dr:dQ5,ht:'<p>Rules: label axes (quantity and unit); scale \u226550% of grid; plot accurately as \u00d7 or \u25cb; draw best-fit line (NOT connect-the-dots); circle anomalous points, exclude from fit; line may pass through none of the data points.</p>'},
+  {lb:'Gradient and intercept',dr:dQ5,ht:'<p>Gradient = \u0394y/\u0394x using a LARGE triangle on the best-fit line. Include units. Rearrange equation to y=mx+c: gradient=m, y-intercept=c. v=u+at \u2192 gradient=a, intercept=u.</p>'},
+  {lb:'Linearising curves',dr:dQ5,ht:'<p>y=kx\u00b2: plot y vs x\u00b2 (gradient=k). y=Ae^(bx): plot ln\u202fy vs x (gradient=b, intercept=ln\u202fA). T=2\u03c0\u221a(L/g): plot T\u00b2 vs L (gradient=4\u03c0\u00b2/g). Identify correct linearisation from the physics equation.</p>'},
+  {lb:'Uncertainty from graphs',dr:dQ5,ht:'<p>Add error bars. Draw steepest and shallowest plausible lines through the error bars. \u0394gradient = (max\u2212min)/2. Similarly for intercept. Quote: gradient = (mean \u00b1 \u0394) units.</p>'},
+  {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var m=rnd(2,15),x1=rnd(1,5),x2=rnd(8,15),y1=m*x1+rnd(-3,3),y2=m*x2+rnd(-3,3);var grad=parseFloat(((y2-y1)/(x2-x1)).toFixed(2));return{question:'Best-fit line: ('+x1+', '+y1.toFixed(1)+') and ('+x2+', '+y2.toFixed(1)+'). Gradient?',hints:['grad = \u0394y/\u0394x'],ans:grad,tol:Math.abs(grad)*0.05+0.1,unit:'y-unit/x-unit',working:'\u0394y/\u0394x = '+(y2-y1).toFixed(1)+'/'+(x2-x1)+' = '+grad};})},
+]},
+{ey:'Q6 \u2022 Y12 Physics \u2022 Measurement',ti:'States of Matter and Density',su:'Calculate density. Describe states of matter at molecular level.',steps:[
+  {lb:'Three states',dr:dQ6,ht:'<p><b>Solid:</b> fixed shape/volume; regular lattice; strong forces; particles vibrate only. <b>Liquid:</b> fixed volume, variable shape; close but mobile; moderate forces; flows. <b>Gas:</b> variable shape/volume; widely spaced; fast random motion; very weak forces; compressible.</p>'},
+  {lb:'Density',dr:dQ6,ht:'<div class="fm">\u03c1 = m/V (kg\u202fm\u207b\u00b3)</div><p>Water: 1000, ice: 917, air: 1.2, aluminium: 2700, steel: 7900, mercury: 13\u202f600 (all kg/m\u00b3). Volume of irregular solid: water displacement. Upthrust = \u03c1_fluid \u00d7 V_sub \u00d7 g.</p>'},
+  {lb:'Intermolecular forces',dr:dQ6,ht:'<p>PE vs separation graph: repulsive at r < r\u2080, attractive at r > r\u2080. Equilibrium r\u2080: minimum PE, zero force. Stiffness \u221d steepness of PE curve at r\u2080. Temperature \u2192 greater vibration amplitude \u2192 asymmetric well \u2192 expansion on heating.</p>'},
+  {lb:'Elastic properties',dr:dQ6,ht:'<div class="fm">E = (F/A)/(x/L) \u2014 Young modulus (Pa)</div><p>Stress \u03c3 = F/A (Pa). Strain \u03b5 = x/L (dimensionless). Hooke\u2019s law: F=kx in elastic region. Strain energy = \u00bdkx\u00b2 = area under F-x graph. Beyond elastic limit: permanent (plastic) deformation.</p>'},
+  {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var type=pick(['density','Hooke','stress']);if(type==='density'){var m=rnd(100,5000),V=rnd(100,5000)/1e6,rho=parseFloat((m/V).toFixed(0));return{question:'m=<b>'+m+' kg</b>, V=<b>'+V.toExponential(2)+' m\u00b3</b>. Density?',hints:['\u03c1=m/V'],ans:rho,tol:rho*0.02,unit:'kg/m\u00b3',working:'\u03c1='+m+'/'+V.toExponential(2)+' = '+rho+' kg/m\u00b3'};}if(type==='Hooke'){var k=rnd(20,500),x=rnd(1,20)/100,F=parseFloat((k*x).toFixed(2));return{question:'k=<b>'+k+' N/m</b>, x=<b>'+Math.round(x*100)+' cm</b>. Force?',hints:['F=kx; convert cm\u2192m'],ans:F,tol:F*0.02,unit:'N',working:'F='+k+'\u00d7'+x.toFixed(2)+' = '+F+' N'};}var F=rnd(100,5000),A=rnd(1,10)*1e-6,st=parseFloat((F/A/1e6).toFixed(2));return{question:'F=<b>'+F+' N</b>, A=<b>'+A.toExponential(1)+' m\u00b2</b>. Stress (MPa)?',hints:['stress=F/A; \u00f710\u2076 for MPa'],ans:st,tol:st*0.02,unit:'MPa',working:'stress='+F+'/'+A.toExponential(1)+'/1e6 = '+st+' MPa'};})},
+]},
+{ey:'Q7 \u2022 Y12 Physics \u2022 Measurement',ti:'Pressure in Fluids',su:'Calculate fluid pressure. Apply Archimedes\u2019 and Pascal\u2019s principles.',steps:[
+  {lb:'Fluid pressure',dr:dQ7,ht:'<div class="fm">p = \u03c1gh (Pa)</div><p>Pressure increases with depth h. Acts equally in all directions at a given depth. Gauge pressure = above atmospheric. Absolute = gauge + 101\u202f325 Pa.</p>'},
+  {lb:'Archimedes\u2019 principle',dr:dQ7,ht:'<div class="fm">F\u209a = \u03c1_f V_s g</div><p>Upthrust = weight of fluid displaced. Float when F\u209a = weight. Fraction submerged = \u03c1_obj/\u03c1_fluid. Apparent weight = true weight \u2212 upthrust.</p>'},
+  {lb:'Pascal\u2019s principle',dr:dQ7,ht:'<p>Pressure in enclosed fluid transmitted equally everywhere. Hydraulic system: F\u2081/A\u2081 = F\u2082/A\u2082. MA = A\u2082/A\u2081. Work conserved (ideal): F\u2081d\u2081 = F\u2082d\u2082. Applications: car brakes, hydraulic jack, presses.</p>'},
+  {lb:'Pressure measurement',dr:dQ7,ht:'<p>Mercury barometer: p_atm = \u03c1_Hg\u202fg\u202fh; standard 760 mmHg = 101\u202f325 Pa. U-tube manometer: height difference gives gauge pressure p = \u03c1gh. Sphygmomanometer: blood pressure in mmHg.</p>'},
+  {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var type=pick(['pressure','upthrust','hydraulic']);if(type==='pressure'){var rho=pick([1000,1025,800]),h=rnd(1,20),p=parseFloat((rho*9.81*h).toFixed(0));return{question:'\u03c1=<b>'+rho+' kg/m\u00b3</b>, h=<b>'+h+' m</b>. Fluid pressure?',hints:['p=\u03c1gh'],ans:p,tol:p*0.01,unit:'Pa',working:'p='+rho+'\u00d79.81\u00d7'+h+' = '+p+' Pa'};}if(type==='upthrust'){var rho2=1000,V=rnd(200,5000)/1e6,F=parseFloat((rho2*V*9.81).toFixed(2));return{question:'V_sub=<b>'+V.toExponential(2)+' m\u00b3</b> in water. Upthrust?',hints:['F=\u03c1Vg; \u03c1_water=1000'],ans:F,tol:F*0.02,unit:'N',working:'F=1000\u00d7'+V.toExponential(2)+'\u00d79.81 = '+F+' N'};}var F1=rnd(10,200),A1=rnd(1,10)/100,A2=rnd(20,200)/100,F2=parseFloat((F1*A2/A1).toFixed(1));return{question:'Hydraulic: F\u2081=<b>'+F1+'N</b>, A\u2081=<b>'+A1.toFixed(2)+'m\u00b2</b>, A\u2082=<b>'+A2.toFixed(2)+'m\u00b2</b>. F\u2082?',hints:['F\u2081/A\u2081=F\u2082/A\u2082'],ans:F2,tol:F2*0.02,unit:'N',working:'F\u2082='+F1+'\u00d7'+A2.toFixed(2)+'/'+A1.toFixed(2)+' = '+F2+' N'};})},
+]},
+{ey:'Q8 \u2022 Y12 Physics \u2022 Measurement',ti:'Measurement Instruments',su:'Use vernier calipers, micrometer, oscilloscope. Estimate uncertainties.',steps:[
+  {lb:'Length instruments',dr:dQ8,ht:'<p>Ruler: \u00b10.5 mm. Vernier calipers: main + vernier scale (\u00b10.1 mm). Micrometer screw gauge: sleeve + thimble (\u00b10.01 mm); pitch 0.5 mm; 50 thimble divisions. Always check zero error; positive zero error: subtract from reading.</p>'},
+  {lb:'Reading verniers',dr:dQ8,ht:'<p>Vernier: (1) Read main scale just left of zero line. (2) Find which vernier line aligns with a main scale line. (3) Reading = main + (vernier_div \u00d7 LC). 10-division vernier: LC = 0.1 mm. Example: main=23.0, vernier=4 \u2192 23.4 mm.</p>'},
+  {lb:'Oscilloscope',dr:dQ8,ht:'<p>Voltage vs time display. Period T = divisions between peaks \u00d7 timebase (s/div). Amplitude = peak height in div \u00d7 volts/div. Frequency f = 1/T. Phase difference between two traces. Can measure nanosecond events.</p>'},
+  {lb:'Calibration and zero error',dr:dQ8,ht:'<p>Zero error: non-zero reading when measuring nothing. Positive: subtract. Negative: add magnitude. Calibration: compare against traceable standard. Parallax: always view scale perpendicularly (use mirror on ruler).</p>'},
+  {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var main=rnd(20,80),vd=rnd(1,9),reading=parseFloat((main+vd*0.1).toFixed(1));var type=pick(['vernier','micro','pct']);if(type==='vernier')return{question:'Vernier: main=<b>'+main+'.0 mm</b>, vernier div=<b>'+vd+'</b> (LC=0.1mm)?',hints:['reading = main + vernier_div\u00d7LC'],ans:reading,tol:0.05,unit:'mm',working:main+'.0+'+vd+'\u00d70.1 = '+reading+' mm'};if(type==='micro'){var sl=rnd(5,15)*0.5,th=rnd(0,49),mic=parseFloat((sl+th*0.01).toFixed(2));return{question:'Micrometer: sleeve=<b>'+sl.toFixed(1)+'mm</b>, thimble=<b>'+th+'</b> (0.01mm/div)?',hints:['reading = sleeve + thimble\u00d70.01'],ans:mic,tol:0.005,unit:'mm',working:sl.toFixed(1)+'+'+th+'\u00d70.01 = '+mic+' mm'};}var x=rnd(20,200),dx=rnd(1,10),pct=parseFloat((dx/x*100).toFixed(1));return{question:'Measurement=<b>'+x+' mm</b>, \u0394=<b>'+dx+' mm</b>. % uncertainty?',hints:['% = (\u0394x/x)\u00d7100'],ans:pct,tol:0.2,unit:'%',working:'% = '+dx+'/'+x+'\u00d7100 = '+pct+'%'};})},
+]},
+{ey:'Q9 \u2022 Y12 Physics \u2022 Measurement',ti:'Orders of Magnitude and Estimation',su:'Use standard form. Estimate quantities to correct order of magnitude.',steps:[
+  {lb:'Standard form',dr:dQ9,ht:'<p>A\u00d710^n where 1\u2264A<10. Key constants: c=3\u00d710\u2078 m/s, e=1.6\u00d710\u207b\u00b9\u2079 C, h=6.63\u00d710\u207b\u00b3\u2074 J\u202fs, G=6.67\u00d710\u207b\u00b9\u00b9 N\u202fm\u00b2/kg\u00b2, m_e=9.11\u00d710\u207b\u00b3\u00b9 kg, m_p=1.67\u00d710\u207b\u00b2\u2077 kg, k_B=1.38\u00d710\u207b\u00b2\u00b3 J/K.</p>'},
+  {lb:'Orders of magnitude',dr:dQ9,ht:'<p>Atom ~10\u207b\u00b9\u2070 m. Nucleus ~10\u207b\u00b9\u2075 m. Human ~10\u2070 m. Earth radius ~10\u2077 m. Sun radius ~10\u2079 m. Observable universe ~10\u00b2\u2076 m. Proton ~10\u207b\u00b2\u2077 kg. Earth ~10\u00b2\u2075 kg. Electron ~10\u207b\u00b3\u00b9 kg.</p>'},
+  {lb:'Estimation strategies',dr:dQ9,ht:'<p>Break into known parts. Air in room: V~300 m\u00b3, \u03c1~1.2 kg/m\u00b3 \u2192 mass~360 kg~10\u00b3 kg. Getting the power of 10 right is the skill. Person ~70 kg, height ~1.7 m, heart rate ~1 Hz, walking ~1.5 m/s.</p>'},
+  {lb:'Key physical constants',dr:dQ9,ht:'<p>g=9.81 m/s\u00b2, c=3\u00d710\u2078 m/s, e=1.6\u00d710\u207b\u00b9\u2079 C, h=6.63\u00d710\u207b\u00b3\u2074 J\u202fs, \u03b5\u2080=8.85\u00d710\u207b\u00b9\u00b2 F/m, G=6.67\u00d710\u207b\u00b9\u00b9, R=8.31 J/mol/K, k_B=1.38\u00d710\u207b\u00b2\u00b3 J/K, N_A=6.02\u00d710\u00b2\u00b3 mol\u207b\u00b9.</p>'},
+  {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var type=pick(['std_form','order','ratio']);if(type==='std_form'){var exp=rnd(-12,8),A=rnd(11,99)/10;return{question:'Express '+parseFloat((A*Math.pow(10,exp)).toExponential(2))+' in standard form A\u00d710^n. What is n?',hints:['1\u2264A<10'],ans:exp,tol:0,unit:'',working:'n = '+exp};}if(type==='order'){var n=rnd(-12,10);return{question:'Order of magnitude of 10^<b>'+n+'</b>?',hints:['Nearest power of 10'],ans:n,tol:0,unit:'',working:'Order = '+n};}var n1=rnd(-12,-6),n2=rnd(4,10);return{question:'Ratio of 10^'+n2+' to 10^('+n1+')?',hints:['Subtract exponents'],ans:n2-n1,tol:0,unit:'orders',working:(n2-n1)+' orders of magnitude'};})},
+]},
+{ey:'Q10 \u2022 Y12 Physics \u2022 Measurement',ti:'Mixed Measurement Questions',su:'Integrated questions across all Y12-MEA-01 topics.',steps:[
+  {lb:'Summary',dr:dQ10,ht:'<p>SI base units: m, kg, s, A, K, mol, cd. Scalar: magnitude only. Vector: +direction. Random error: scatter, reduce by repeating. Systematic: constant, calibrate. %unc = (\u0394x/x)\u00d7100. Add % for \u00d7\u00f7. p=\u03c1gh. F_up=\u03c1Vg. [F]=[MLT\u207b\u00b2].</p>'},
+  {lb:'Problem-solving',dr:dQ10,ht:'<p>State equation \u2192 substitute with units \u2192 calculate \u2192 correct s.f. with unit \u2192 check dimensions. Always draw diagrams for vector problems. Identify scalar vs vector before starting.</p>'},
+  {lb:'WAEC emphasis',dr:dQ10,ht:'<p>WAEC regularly tests: reading verniers/micrometers; identifying error types; % uncertainty; dimensional analysis; unit conversions; linearising for graph work. Always state whether an error is random or systematic and how to reduce it.</p>'},
+  {lb:'Key formulae',dr:dQ10,ht:'<div class="fm">\u03c1=m/V \u2022 p=\u03c1gh \u2022 F_up=\u03c1Vg \u2022 E=\u03c3/\u03b5</div><div class="fm">%unc=(\u0394x/x)\u00d7100 \u2022 F_x=F\cos\u03b8 \u2022 F_y=F\sin\u03b8</div>'},
+  {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var type=pick(['density','pressure','vector','pct']);if(type==='density'){var m=rnd(500,5000),V=rnd(1,10)/10,rho=parseFloat((m/V).toFixed(1));return{question:'m=<b>'+m+' kg</b>, V=<b>'+V.toFixed(1)+' m\u00b3</b>. Density?',hints:['\u03c1=m/V'],ans:rho,tol:rho*0.02,unit:'kg/m\u00b3',working:rho+' kg/m\u00b3'};}if(type==='pressure'){var rho=pick([1000,800,1025]),h=rnd(2,30),p=parseFloat((rho*9.81*h).toFixed(0));return{question:'\u03c1=<b>'+rho+'</b>, h=<b>'+h+' m</b>. Fluid pressure?',hints:['p=\u03c1gh'],ans:p,tol:p*0.01,unit:'Pa',working:'p='+rho+'\u00d79.81\u00d7'+h+' = '+p+' Pa'};}if(type==='vector'){var F=rnd(10,100),th=pick([30,45,60]),Fx=parseFloat((F*Math.cos(th*Math.PI/180)).toFixed(2));return{question:'F=<b>'+F+' N</b> at <b>'+th+'\u00b0</b>. Horizontal component?',hints:['F_x=F cos\u03b8'],ans:Fx,tol:Fx*0.02,unit:'N',working:'F_x='+F+' cos'+th+'\u00b0 = '+Fx+' N'};}var x=rnd(20,200),dx=rnd(1,10),pct=parseFloat((dx/x*100).toFixed(1));return{question:'x=<b>'+x+'</b>, \u0394x=<b>'+dx+'</b>. % uncertainty?',hints:['(\u0394x/x)\u00d7100'],ans:pct,tol:0.2,unit:'%',working:'% = '+dx+'/'+x+'\u00d7100 = '+pct+'%'};})},
+]},
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcTopicCode='Y12-MEA-01';
+window.markComplete=async function(){
+  const{data:{session}}=await _sb.auth.getSession();if(!session)return;
+  const{data:topic}=await _sb.from('topics').select('id').eq('topic_code','Y12-MEA-01').maybeSingle();if(!topic)return;
+  window._abcTopicId=topic.id;
+  await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body></html>

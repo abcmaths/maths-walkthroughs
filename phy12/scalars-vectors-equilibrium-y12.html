@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scalars, Vectors and Equilibrium — Year 12 Physics</title>
+<style>
+:root{--red:#1565C0;--dark:#0d47a1;--cream:#E3F2FD;--ink:#0d1b2a;--line:#BBDEFB;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#555;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#E3F2FD);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:180px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:15px;line-height:1.6;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:16px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;margin-bottom:8px;line-height:1.5;}
+.hl{font-size:14px;color:#1a2a3a;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e3f2fd;color:#0d47a1;border:1px solid #90caf9;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#1a2a3a;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <div class="ht">Vectors & Equilibrium — Y12 Physics</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr"><div class="eyebrow" id="ey"></div><h1 id="ti"></h1><div class="sub" id="su"></div></div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ACC='#1565C0',DARK='#0d47a1',CRM='#E3F2FD',LINE='#BBDEFB';
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+var ST={};
+function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn};return buildTry(id,o);}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="any" placeholder="Answer'+(o.unit?' ('+o.unit+')':'')+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=entry.genFn();entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.05*Math.abs(o.ans)||0.05)){fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
+  }
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#0d1b2a';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||CRM;stroke=stroke||ACC;sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';}
+function arw(x1,y1,x2,y2,c,w){var id='m'+Math.round(x1*7+y2*3);return '<defs><marker id="'+id+'" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="'+(c||ACC)+'"/></marker></defs><line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||ACC)+'" stroke-width="'+(w||2)+'" marker-end="url(#'+id+')"/>';}
+function circ(cx,cy,r,fill,stroke){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||CRM)+'" stroke="'+(stroke||ACC)+'" stroke-width="1.5"/>';}
+
+function dQ1(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Vector addition by components',ACC,12,'middle',true));
+if(p>=1){o.push(R(10,36,460,42,CRM,ACC,2));o.push(T(240,54,'Resolve each vector: F_x = F cos\u03b8, F_y = F sin\u03b8',DARK,11,'middle',false));o.push(T(240,72,'Sum x-components; sum y-components separately','#555',9,'middle',false));}
+if(p>=2){o.push(R(10,88,460,42,CRM,ACC,1.5));o.push(T(240,106,'Resultant: R = \u221a(R_x\u00b2 + R_y\u00b2)','#333',11,'middle',false));o.push(T(240,122,'Direction: \u03b8 = arctan(R_y/R_x)','#555',9,'middle',false));}
+if(p>=3){o.push(R(10,138,460,42,CRM,ACC,1.5));o.push(T(240,156,'For equilibrium: R_x = 0 AND R_y = 0','#333',11,'middle',false));o.push(T(240,174,'Sum of all x-components = 0; sum of all y-components = 0','#555',9,'middle',false));}
+if(p>=4){o.push(R(10,188,460,42,LINE,ACC,1));o.push(T(240,206,'Three-force equilibrium: close triangle (tip-to-tail of all three vectors)','#333',10,'middle',false));o.push(T(240,224,'Lami\u2019s theorem: F\u2081/sin\u03b1\u2081 = F\u2082/sin\u03b1\u2082 = F\u2083/sin\u03b1\u2083 (angles opposite to forces)','#555',8,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ2(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Conditions for equilibrium',ACC,12,'middle',true));
+o.push(R(10,36,460,44,CRM,ACC,2));o.push(T(240,58,'1. \u03a3F = 0 (translational: \u03a3F_x=0, \u03a3F_y=0)',DARK,11,'middle',false));o.push(T(240,76,'2. \u03a3\u03c4 = 0 about any point (rotational)',DARK,11,'middle',false));
+if(p>=1){o.push(R(10,92,460,42,CRM,ACC,1.5));o.push(T(240,110,'Principle of moments: \u03a3CW moments = \u03a3ACW moments','#333',11,'middle',false));o.push(T(240,128,'\u03c4 = Fd where d is perpendicular distance from line of action to pivot','#555',9,'middle',false));}
+if(p>=2){o.push(R(10,142,460,42,CRM,ACC,1.5));o.push(T(240,160,'Take moments about a point where an unknown force acts \u2192 eliminates it','#333',11,'middle',false));}
+if(p>=3){o.push(R(10,194,460,42,CRM,ACC,1.5));o.push(T(240,210,'Couple: two equal, opposite, parallel forces; torque = Fd; no net force','#333',11,'middle',false));}
+if(p>=4){o.push(R(10,238,460,18,LINE,ACC,0.5));o.push(T(240,250,'Resultant is zero + zero moment = complete equilibrium','#555',8,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ3(p){dQ1(p);}
+function dQ4(p){dQ2(p);}
+function dQ5(p){dQ1(p);}
+function dQ6(p){dQ2(p);}
+function dQ7(p){dQ1(p);}
+function dQ8(p){dQ2(p);}
+function dQ9(p){dQ1(p);}
+function dQ10(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Vectors and equilibrium summary',ACC,13,'middle',true));
+[['Resolution','F_x=F cos\u03b8; F_y=F sin\u03b8'],['Resultant','R=\u221a(R_x\u00b2+R_y\u00b2); \u03b8=arctan(R_y/R_x)'],['Translational eq.','R_x=0; R_y=0'],['Rotational eq.','\u03a3\u03c4=0 about any point'],['Moment','\u03c4=Fd (perp. dist. to pivot)'],['Couple','two equal opp. forces; torque=Fd'],['Lami\u2019s theorem','F/sin\u03b1 same for all three forces']].forEach(function(r,i){if(i<p+1){o.push(R(10,36+i*30,460,24,CRM,LINE,1));o.push(T(120,52+i*30,r[0],ACC,10,'middle',true));o.push(T(320,52+i*30,r[1],'#555',9,'middle',false));}});
+s.innerHTML=o.join('');}
+var QS=[
+{ey:'Q1 \u2022 Y12 Physics \u2022 Vectors',ti:'Vector Resolution and Addition',su:'Resolve forces. Find resultant by component method.',steps:[
+  {lb:'Resolving vectors',dr:dQ1,ht:'<p>Any vector F at angle \u03b8 to horizontal: F_x = F cos\u03b8 (horizontal component), F_y = F sin\u03b8 (vertical component). For angle to vertical: swap sin and cos. Resolve all vectors; add x-components; add y-components; find resultant R = \u221a(R_x\u00b2 + R_y\u00b2).</p>'},
+  {lb:'Adding multiple vectors',dr:dQ1,ht:'<p>Three or more forces: resolve each into x and y. R_x = F\u2081_x + F\u2082_x + F\u2083_x + \u2026 R_y = F\u2081_y + F\u2082_y + F\u2083_y + \u2026 Resultant magnitude: R = \u221a(R_x\u00b2 + R_y\u00b2). Direction: \u03b8 = arctan(R_y/R_x). Careful with signs: right/up positive.</p>'},
+  {lb:'Triangle and parallelogram rule',dr:dQ1,ht:'<p>Graphical: draw vectors tip-to-tail (triangle rule); resultant = closing vector. Two vectors: parallelogram rule. Use sine rule or cosine rule for non-right angle triangles: a\u00b2 = b\u00b2 + c\u00b2 \u2212 2bc cos A. Magnitude only; use components for direction.</p>'},
+  {lb:'Relative motion and velocity triangles',dr:dQ1,ht:'<p>Velocity triangle: v_actual = v_boat + v_river (vector addition). Triangle law: v_x, v_y perpendicular; use Pythagoras. Aim angle: sin\u03b8 = v_river/v_boat for straight-across crossing. Resultant speed = \u221a(v_boat\u00b2 \u2212 v_river\u00b2) if aiming straight across.</p>'},
+  {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var type=pick(['x_comp','y_comp','resultant']);var F=rnd(5,100),th=pick([20,30,37,40,45,53,60]);var rad=th*Math.PI/180;if(type==='x_comp'){var Fx=parseFloat((F*Math.cos(rad)).toFixed(2));return{question:'F=<b>'+F+'N</b> at <b>'+th+'\u00b0</b> to horizontal. Horizontal component?',hints:['F_x=F cos\u03b8'],ans:Fx,tol:Fx*0.02,unit:'N',working:'F_x='+F+' cos'+th+'\u00b0 = '+Fx+' N'};}if(type==='y_comp'){var Fy=parseFloat((F*Math.sin(rad)).toFixed(2));return{question:'F=<b>'+F+'N</b> at <b>'+th+'\u00b0</b> to horizontal. Vertical component?',hints:['F_y=F sin\u03b8'],ans:Fy,tol:Fy*0.02,unit:'N',working:'F_y='+F+' sin'+th+'\u00b0 = '+Fy+' N'};}var Rx=rnd(3,40),Ry=rnd(3,40),R=parseFloat(Math.sqrt(Rx*Rx+Ry*Ry).toFixed(2));return{question:'R_x=<b>'+Rx+'N</b>, R_y=<b>'+Ry+'N</b>. Resultant?',hints:['R=\u221a(R_x\u00b2+R_y\u00b2)'],ans:R,tol:R*0.02,unit:'N',working:'R=\u221a('+Rx+'\u00b2+'+Ry+'\u00b2)='+R+' N'};})},
+]},
+{ey:'Q2 \u2022 Y12 Physics \u2022 Vectors',ti:'Equilibrium of Forces',su:'Apply conditions for translational and rotational equilibrium.',steps:[
+  {lb:'Two conditions',dr:dQ2,ht:'<p>For a body in complete equilibrium: (1) \u03a3F = 0 (no resultant force \u2192 no linear acceleration): \u03a3F_x = 0 and \u03a3F_y = 0. (2) \u03a3\u03c4 = 0 about any point (no net torque \u2192 no angular acceleration). Both conditions must hold simultaneously.</p>'},
+  {lb:'Taking moments',dr:dQ2,ht:'<p>Choose a pivot where an unknown force acts \u2192 its moment is zero, eliminating it from the moment equation. Moment = force \u00d7 perpendicular distance from pivot to line of action of force. Clockwise positive (by convention). Sum of CW moments = sum of ACW moments.</p>'},
+  {lb:'Worked example',dr:dQ2,ht:'<p>Uniform beam of weight W, length L, supported at both ends by forces R\u2081 and R\u2082. For equilibrium: R\u2081 + R\u2082 = W (\u03a3F_y=0). Taking moments about left end: R\u2082\u00d7L = W\u00d7L/2 \u2192 R\u2082 = W/2. Then R\u2081 = W/2. Uniform beam: weight acts at midpoint.</p>'},
+  {lb:'Couple and non-concurrent forces',dr:dQ2,ht:'<p>Couple: two equal, opposite, parallel forces at distance d apart; net force=0; torque=Fd. Examples: steering wheel, screwdriver. For non-concurrent forces: single resultant may not pass through original point; creates a couple. If three forces in equilibrium, they must be concurrent (lines of action meet at one point).</p>'},
+  {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var type=pick(['moment','beam_reaction','couple']);if(type==='moment'){var F=rnd(10,200),d=parseFloat((rnd(5,20)/10).toFixed(1)),tau=parseFloat((F*d).toFixed(2));return{question:'F=<b>'+F+'N</b>, perp. dist=<b>'+d+'m</b>. Moment?',hints:['\u03c4=Fd'],ans:tau,tol:tau*0.02,unit:'N m',working:'\u03c4='+F+'\u00d7'+d+' = '+tau+' N m'};}if(type==='beam_reaction'){var W=rnd(100,2000),L=rnd(2,8),x=parseFloat((rnd(30,70)/100).toFixed(2));var R2=parseFloat((W*x).toFixed(1)),R1=parseFloat((W*(1-x)).toFixed(1));return{question:'Beam length <b>'+L+'m</b>, weight <b>'+W+'N</b> at <b>'+(x*100).toFixed(0)+'%</b> from left. Left reaction R\u2081?',hints:['Moments about right: R\u2081\u00d7L=W\u00d7(L-x\u00d7L)'],ans:R1,tol:R1*0.03,unit:'N',working:'R\u2081=W\u00d7'+(1-x).toFixed(2)+'='+R1+' N'};}var F=rnd(10,100),d=parseFloat((rnd(2,20)/10).toFixed(1)),tau=parseFloat((F*d).toFixed(2));return{question:'Couple: F=<b>'+F+'N</b> each, separation=<b>'+d+'m</b>. Torque?',hints:['Torque of couple = Fd'],ans:tau,tol:tau*0.02,unit:'N m',working:'Torque='+F+'\u00d7'+d+' = '+tau+' N m'};})},
+]},
+{ey:'Q3 \u2022 Y12 Physics \u2022 Vectors',ti:'Three-Force Equilibrium',su:'Apply Lami\'s theorem and triangle rule to three-force problems.',steps:[
+  {lb:'Triangle of forces',dr:dQ3,ht:'<p>Three forces in equilibrium form a closed triangle (drawn tip-to-tail). The three force vectors connect head to tail in a loop. Use: sine rule (a/sinA = b/sinB = c/sinC) or cosine rule to find unknown magnitudes or directions.</p>'},
+  {lb:'Lami\u2019s theorem',dr:dQ3,ht:'<p>Three concurrent coplanar forces in equilibrium: F\u2081/sin\u03b1\u2081 = F\u2082/sin\u03b1\u2082 = F\u2083/sin\u03b1\u2083 where \u03b1\u2081 is the angle between F\u2082 and F\u2083 (opposite to F\u2081). Useful when three forces have known directions but unknown magnitudes. Equivalent to the sine rule on the force triangle.</p>'},
+  {lb:'Resolving for equilibrium',dr:dQ3,ht:'<p>Alternative: resolve all three forces into x and y. For equilibrium: \u03a3F_x=0 and \u03a3F_y=0. Two simultaneous equations in two unknowns. Usually simpler to resolve than Lami\u2019s theorem, especially when one force is vertical or horizontal.</p>'},
+  {lb:'Common examples',dr:dQ3,ht:'<p>Sign hanging from ceiling: weight W vertical; two cables at angles \u03b8\u2081 and \u03b8\u2082. T\u2081 cos\u03b8\u2081 + T\u2082 cos\u03b8\u2082 = W (\u03a3F_y=0). T\u2081 sin\u03b8\u2081 = T\u2082 sin\u03b8\u2082 (\u03a3F_x=0). Solve simultaneously. If symmetric (\u03b8\u2081=\u03b8\u2082): T\u2081 = T\u2082 = W/(2cos\u03b8).</p>'},
+  {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var type=pick(['symmetric_cables','single_cable','resolve_eq']);if(type==='symmetric_cables'){var W=rnd(50,500),th=pick([20,30,40,45,50,60]);var T=parseFloat((W/(2*Math.cos(th*Math.PI/180))).toFixed(2));return{question:'Weight W=<b>'+W+'N</b> hung from two equal cables at <b>'+th+'\u00b0</b> to horizontal. Tension T in each?',hints:['2T cos\u03b8 = W (vertical eq.)'],ans:T,tol:T*0.02,unit:'N',working:'T=W/(2cos'+th+'\u00b0)='+W+'/(2\u00d7'+Math.cos(th*Math.PI/180).toFixed(3)+') = '+T+' N'};}if(type==='single_cable'){var W=rnd(20,200),th=pick([30,45,60]);var T=parseFloat((W/Math.sin(th*Math.PI/180)).toFixed(2));return{question:'Weight W=<b>'+W+'N</b> on cable at <b>'+th+'\u00b0</b> to wall. Tension T?',hints:['T sin\u03b8 = W (vertical)'],ans:T,tol:T*0.02,unit:'N',working:'T='+W+'/sin'+th+'\u00b0 = '+T+' N'};}var F1=rnd(50,200),th=pick([30,45,60]),F2=parseFloat((F1*Math.cos(th*Math.PI/180)).toFixed(2));return{question:'F\u2081=<b>'+F1+'N</b> at <b>'+th+'\u00b0</b> above horizontal; balanced by F\u2082 (horizontal). F\u2082?',hints:['\u03a3F_y=0: F\u2082=F\u2081 sin\u03b8 (find the right component)'],ans:parseFloat((F1*Math.sin(th*Math.PI/180)).toFixed(2)),tol:1,unit:'N',working:'vertical balance gives F\u2082=F\u2081 sin\u03b8='+F1+' sin'+th+'\u00b0='+parseFloat((F1*Math.sin(th*Math.PI/180)).toFixed(2))+' N'};})},
+]},
+{ey:'Q4 \u2022 Y12 Physics \u2022 Vectors',ti:'Moments and Levers',su:'Calculate moments. Apply the principle of moments to levers and beams.',steps:[
+  {lb:'Moment definition',dr:dQ4,ht:'<div class="fm">\u03c4 = F \u00d7 d (N m)</div><p>Moment (torque) = force \u00d7 perpendicular distance from line of action to pivot. d must be perpendicular to F. If force is at angle \u03b8 to beam: perpendicular distance = d\u202fsin\u03b8, OR use component of force perpendicular to beam: F sin\u03b8 \u00d7 d_along_beam.</p>'},
+  {lb:'Principle of moments',dr:dQ4,ht:'<p>For a body in rotational equilibrium about any point: sum of clockwise moments = sum of anticlockwise moments. Can take moments about any convenient point. Choose pivot where an unknown force acts \u2192 that force has zero moment \u2192 fewer unknowns to solve.</p>'},
+  {lb:'Uniform beam problems',dr:dQ4,ht:'<p>Uniform beam: weight W acts at midpoint (L/2 from each end). Non-uniform beam: specify where centre of gravity is. Beam on support: support provides normal reaction (upward). Free end: no support force. Beam with multiple loads: sum of moments of all loads about support.</p>'},
+  {lb:'Levers and mechanical advantage',dr:dQ4,ht:'<p>Lever: input force F\u2081 at distance d\u2081, output force F\u2082 at distance d\u2082. Principle of moments: F\u2081d\u2081 = F\u2082d\u2082. Mechanical advantage MA = F\u2082/F\u2081 = d\u2081/d\u2082. Examples: crowbar (pivot near load), wheelbarrow (pivot at wheel), see-saw (pivot in middle). Ideal: no friction, no beam weight.</p>'},
+  {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var type=pick(['moment_calc','beam_reaction','lever_MA']);if(type==='moment_calc'){var F=rnd(10,500),d=rnd(1,20)/10,tau=parseFloat((F*d).toFixed(2));return{question:'F=<b>'+F+'N</b>, perp. dist.=<b>'+d.toFixed(1)+'m</b>. Moment?',hints:['\u03c4=Fd'],ans:tau,tol:tau*0.02,unit:'N m',working:'\u03c4='+F+'\u00d7'+d.toFixed(1)+' = '+tau+' N m'};}if(type==='beam_reaction'){var W=rnd(200,2000),L=rnd(2,6),xW=parseFloat((rnd(30,70)/100*L).toFixed(1));var R2=parseFloat((W*xW/L).toFixed(1)),R1=parseFloat((W*(L-xW)/L).toFixed(1));return{question:'Beam L=<b>'+L+'m</b>, W=<b>'+W+'N</b> at <b>'+xW+'m</b> from left. Find R\u2081 (left support).',hints:['Moments about right: R\u2081\u00d7L = W\u00d7(L-'+xW+')'],ans:R1,tol:R1*0.03,unit:'N',working:'R\u2081=W\u00d7'+(L-xW).toFixed(1)+'/'+L+' = '+R1+' N'};}var d1=rnd(1,10),d2=rnd(1,10),F1=rnd(10,200),F2=parseFloat((F1*d1/d2).toFixed(1));return{question:'Lever: F\u2081=<b>'+F1+'N</b> at d\u2081=<b>'+d1+'m</b>; d\u2082=<b>'+d2+'m</b>. Output F\u2082?',hints:['F\u2081d\u2081=F\u2082d\u2082'],ans:F2,tol:F2*0.02,unit:'N',working:'F\u2082='+F1+'\u00d7'+d1+'/'+d2+' = '+F2+' N'};})},
+]},
+{ey:'Q5 \u2022 Y12 Physics \u2022 Vectors',ti:'Friction',su:'Calculate friction force. Apply laws of friction.',steps:[
+  {lb:'Laws of friction',dr:dQ5,ht:'<p>Static friction (object not moving): F_f \u2264 \u03bc_s N. At the point of sliding: F_f = \u03bc_s N. Kinetic friction (object sliding): F_k = \u03bc_k N. Always: \u03bc_k < \u03bc_s. Friction force opposes relative motion (or tendency of motion). Normal force N = weight on flat surface; N \u2260 weight on slope.</p>'},
+  {lb:'Friction on slopes',dr:dQ5,ht:'<p>On slope at angle \u03b8: normal force N = mg cos\u03b8 (perpendicular to slope). Component along slope (down): mg sin\u03b8. Friction up slope (if object tends to slide down): F_f = \u03bcmg cos\u03b8. Object moves down when mg sin\u03b8 > \u03bcmg cos\u03b8, i.e., tan\u03b8 > \u03bc.</p>'},
+  {lb:'Angle of friction',dr:dQ5,ht:'<p>Angle of friction \u03c6: tan\u03c6 = \u03bc_s. At angle \u03c6, resultant of N and F_f makes angle \u03c6 with N. Object just slides when \u03b8 (slope angle) = angle of friction \u03c6. Friction circle: maximum friction force represented as a cone of angle \u03c6 around normal.</p>'},
+  {lb:'Work done against friction',dr:dQ5,ht:'<p>Work done by friction = F_f \u00d7 d (always negative work if friction opposes motion). Converted to heat. On a slope: if object slides down: KE gained = mgh \u2212 F_f\u00d7d (d = path length along slope). For powered vehicle on slope: driving force = weight component + friction.</p>'},
+  {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var type=pick(['friction_flat','friction_slope','angle_friction']);if(type==='friction_flat'){var mu=rnd(10,60)/100,m=rnd(1,50),N=m*9.81,F=parseFloat((mu*N).toFixed(2));return{question:'\u03bc=<b>'+mu+'</b>, m=<b>'+m+'kg</b> on flat surface. Max static friction?',hints:['F_f=\u03bcN; N=mg'],ans:F,tol:F*0.02,unit:'N',working:'F_f='+mu+'\u00d7'+m+'\u00d79.81 = '+F+' N'};}if(type==='friction_slope'){var mu=rnd(10,60)/100,m=rnd(1,30),th=pick([15,20,25,30,35]);var N=parseFloat((m*9.81*Math.cos(th*Math.PI/180)).toFixed(2));var Ff=parseFloat((mu*N).toFixed(2));return{question:'\u03bc=<b>'+mu+'</b>, m=<b>'+m+'kg</b>, slope \u03b8=<b>'+th+'\u00b0</b>. Friction force?',hints:['N=mg cos\u03b8; F_f=\u03bcN'],ans:Ff,tol:Ff*0.02,unit:'N',working:'N='+m+'\u00d79.81\u00d7cos'+th+'\u00b0='+N+'N; F_f='+mu+'\u00d7'+N+' = '+Ff+' N'};}var mu=rnd(10,60)/100,phi=parseFloat((Math.atan(mu)*180/Math.PI).toFixed(1));return{question:'\u03bc_s=<b>'+mu+'</b>. Angle of friction \u03c6?',hints:['\u03c6 = arctan(\u03bc_s)'],ans:phi,tol:0.5,unit:'\u00b0',working:'\u03c6=arctan('+mu+') = '+phi+'\u00b0'};})},
+]},
+{ey:'Q6 \u2022 Y12 Physics \u2022 Vectors',ti:'Centre of Gravity and Stability',su:'Locate centre of gravity. Analyse stability conditions.',steps:[
+  {lb:'Centre of gravity',dr:dQ6,ht:'<p>Centre of gravity (CoG): point through which resultant weight acts. Same as centre of mass in uniform gravitational field. For uniform objects: geometric centre. For composite shapes: treat each part separately, find individual CoG, then combine: x_CoG = \u03a3(W_i x_i)/\u03a3W_i.</p>'},
+  {lb:'Determining CoG experimentally',dr:dQ6,ht:'<p>Hanging method: hang object from different points; vertical line through support gives position of CoG on that line. Two lines intersect at CoG. Plumb line + pin or use small plumb bob and mark line. Valid for any irregular 2D shape.</p>'},
+  {lb:'Stability',dr:dQ6,ht:'<p>Stable: CoG rises when displaced; restoring moment returns to equilibrium; CoG below pivot or tipping line. Unstable: CoG falls; topples further; CoG above pivot. Neutral: CoG height unchanged. Object topples when vertical through CoG falls outside base area.</p>'},
+  {lb:'Increasing stability',dr:dQ6,ht:'<p>To make an object more stable: (1) lower the CoG (heavier base, lower load); (2) widen the base. Racing cars: wide wheelbase, low CoG. Lorries: centre load low, ban double-decking if laden. Buildings: wide foundations. Tightrope walker: uses long pole to lower effective CoG.</p>'},
+  {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var type=pick(['com_calc','topple_check','moment_stability']);if(type==='com_calc'){var m1=rnd(1,20),x1=rnd(0,5),m2=rnd(1,20),x2=rnd(6,15),xc=parseFloat(((m1*x1+m2*x2)/(m1+m2)).toFixed(2));return{question:'m\u2081=<b>'+m1+'kg</b> at x=<b>'+x1+'m</b>, m\u2082=<b>'+m2+'kg</b> at x=<b>'+x2+'m</b>. CoG?',hints:['x_CoG=(m\u2081x\u2081+m\u2082x\u2082)/(m\u2081+m\u2082)'],ans:xc,tol:xc*0.02,unit:'m',working:'x=('+m1+'\u00d7'+x1+'+'+m2+'\u00d7'+x2+')/('+m1+'+'+m2+') = '+xc+' m'};}if(type==='topple_check'){var W=rnd(50,200),h_CoG=rnd(1,5),d_edge=rnd(0.5,3),tippling_angle=parseFloat((Math.atan(d_edge/h_CoG)*180/Math.PI).toFixed(1));return{question:'CoG at h=<b>'+h_CoG+'m</b> high, <b>'+d_edge+'m</b> from edge. Tipping angle?',hints:['\u03b8=arctan(d_edge/h_CoG)'],ans:tippling_angle,tol:1,unit:'\u00b0',working:'\u03b8=arctan('+d_edge+'/'+h_CoG+') = '+tippling_angle+'\u00b0'};}var m1=rnd(1,20),x1=rnd(1,5),m2=rnd(1,20),x2=rnd(6,15),xc=parseFloat(((m1*x1+m2*x2)/(m1+m2)).toFixed(2));return{question:'m\u2081=<b>'+m1+'kg</b> at x=<b>'+x1+'m</b>, m\u2082=<b>'+m2+'kg</b> at x=<b>'+x2+'m</b>. Centre of gravity?',hints:['x_CoG=(m\u2081x\u2081+m\u2082x\u2082)/(m\u2081+m\u2082)'],ans:xc,tol:xc*0.02,unit:'m',working:'x=('+m1+'\u00d7'+x1+'+'+m2+'\u00d7'+x2+')/('+m1+'+'+m2+') = '+xc+' m'};})},
+]},
+{ey:'Q7 \u2022 Y12 Physics \u2022 Vectors',ti:'Torque and Angular Equilibrium',su:'Apply torque to rotational equilibrium problems.',steps:[
+  {lb:'Torque definition',dr:dQ7,ht:'<div class="fm">\u03c4 = r \u00d7 F = rF sin\u03b8 (N m)</div><p>Torque (moment of force) = force \u00d7 perpendicular distance to line of action from pivot. Vector: right-hand rule (for 3D). For 2D problems in physics: just magnitude and sense (CW or ACW). Sum of CW = Sum of ACW for equilibrium.</p>'},
+  {lb:'Angular Newton\u2019s second law',dr:dQ7,ht:'<div class="fm">\u03c4_{net} = I\u03b1</div><p>I = moment of inertia (\u03a3m_i r_i\u00b2). \u03b1 = angular acceleration (rad/s\u00b2). Analogous to F = ma. Solid disk: I = \u00bdmR\u00b2. Ring: I = mR\u00b2. Solid sphere: I = \u2154mR\u00b2. Angular momentum L = I\u03c9; conserved when \u03c4_{net} = 0.</p>'},
+  {lb:'Angular kinematics',dr:dQ7,ht:'<p>Angular equations (constant \u03b1): \u03c9 = \u03c9\u2080 + \u03b1t; \u03b8 = \u03c9\u2080t + \u00bd\u03b1t\u00b2; \u03c9\u00b2 = \u03c9\u2080\u00b2 + 2\u03b1\u03b8. Linear links: v = \u03c9r; a_tangential = \u03b1r; a_centripetal = \u03c9\u00b2r. Rotational KE = \u00bdI\u03c9\u00b2. Total KE = translational + rotational = \u00bdmv\u00b2 + \u00bdI\u03c9\u00b2 (rolling object).</p>'},
+  {lb:'Conservation of angular momentum',dr:dQ7,ht:'<p>When \u03c4_{net} = 0: L = I\u03c9 = constant. Ice skater pulls in arms: I decreases, \u03c9 increases. Collapsing star: I decreases massively \u2192 very fast rotation (pulsar). Rotating chair (gyroscope principle). L = I\u03c9 is conserved; any decrease in I \u2192 increase in \u03c9.</p>'},
+  {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var type=pick(['tau_net','rotational_KE','ang_momentum']);if(type==='tau_net'){var I=rnd(1,20)*0.1,alpha=rnd(1,20),tau=parseFloat((I*alpha).toFixed(2));return{question:'I=<b>'+I.toFixed(1)+'kg m\u00b2</b>, \u03b1=<b>'+alpha+' rad/s\u00b2</b>. Net torque?',hints:['\u03c4=I\u03b1'],ans:tau,tol:tau*0.02,unit:'N m',working:'\u03c4='+I.toFixed(1)+'\u00d7'+alpha+' = '+tau+' N m'};}if(type==='rotational_KE'){var I=rnd(1,20)*0.1,omega=rnd(2,20),KE=parseFloat((0.5*I*omega*omega).toFixed(2));return{question:'I=<b>'+I.toFixed(1)+'kg m\u00b2</b>, \u03c9=<b>'+omega+' rad/s</b>. Rotational KE?',hints:['KE=\u00bdI\u03c9\u00b2'],ans:KE,tol:KE*0.02,unit:'J',working:'KE=0.5\u00d7'+I.toFixed(1)+'\u00d7'+omega+'\u00b2 = '+KE+' J'};}var I1=rnd(5,20)*0.1,omega1=rnd(5,20),I2=parseFloat((I1*rnd(3,8)/10).toFixed(2)),omega2=parseFloat((I1*omega1/I2).toFixed(1));return{question:'I\u2081=<b>'+I1.toFixed(1)+'</b>, \u03c9\u2081=<b>'+omega1+' rad/s</b>; I contracts to I\u2082=<b>'+I2+'</b>. New \u03c9?',hints:['I\u2081\u03c9\u2081=I\u2082\u03c9\u2082 (L conserved)'],ans:omega2,tol:omega2*0.02,unit:'rad/s',working:'\u03c9\u2082='+I1.toFixed(1)+'\u00d7'+omega1+'/'+I2+' = '+omega2+' rad/s'};})},
+]},
+{ey:'Q8 \u2022 Y12 Physics \u2022 Vectors',ti:'Structures and Frameworks',su:'Analyse simple structures. Find forces in framework members.',steps:[
+  {lb:'Framework analysis',dr:dQ8,ht:'<p>A framework (truss) consists of members (bars) connected at joints. Assumption: members are pinned at joints (no moment), so each member is only in tension or compression (no bending). Method of joints: at each joint, apply \u03a3F_x=0 and \u03a3F_y=0. External reactions found first from overall equilibrium.</p>'},
+  {lb:'Tension and compression',dr:dQ8,ht:'<p>Tension: member is being stretched (pulling on joints). Compression: member is being squashed (pushing on joints). Represent unknown forces as tension (if answer is negative, member is in compression). Draw a free body diagram for each joint.</p>'},
+  {lb:'Resolving at a joint',dr:dQ8,ht:'<p>At each joint: draw all forces acting (member forces + external loads + reactions). Resolve into x and y. Set \u03a3F_x=0 and \u03a3F_y=0. Solve two equations simultaneously. Work from joints with fewest unknowns (usually two). External forces are typically vertical loads and support reactions.</p>'},
+  {lb:'Ropes, pulleys and connected objects',dr:dQ8,ht:'<p>Ideal pulley: redirects tension, no friction, tension same throughout rope. Connected masses over pulley: T\u2212m\u2081g = m\u2081a (hanging mass, upward positive); T\u2212m\u2082g sin\u03b8 = m\u2082a (on slope). Combine equations to find a and T. Frictionless table: pulley redirects, tension = m\u2082a.</p>'},
+  {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var type=pick(['atwood','slope_pulley','reaction_calc']);if(type==='atwood'){var m1=rnd(3,20),m2=rnd(1,m1-1),a=parseFloat(((m1-m2)*9.81/(m1+m2)).toFixed(2));return{question:'Atwood: m\u2081=<b>'+m1+'kg</b>, m\u2082=<b>'+m2+'kg</b>. Acceleration?',hints:['a=(m\u2081-m\u2082)g/(m\u2081+m\u2082)'],ans:a,tol:a*0.02,unit:'m/s\u00b2',working:'a=('+m1+'-'+m2+')\u00d79.81/('+m1+'+'+m2+') = '+a+' m/s\u00b2'};}if(type==='slope_pulley'){var m1=rnd(2,15),m2=rnd(2,15),th=pick([30,45,60]),a=parseFloat(((m1-m2*Math.sin(th*Math.PI/180))*9.81/(m1+m2)).toFixed(2));return{question:'m\u2081=<b>'+m1+'kg</b> hanging, m\u2082=<b>'+m2+'kg</b> on slope at <b>'+th+'\u00b0</b> (frictionless). a?',hints:['a=(m\u2081-m\u2082 sin\u03b8)g/(m\u2081+m\u2082)'],ans:a,tol:a*0.02,unit:'m/s\u00b2',working:'a=('+m1+'-'+m2+'\u00d7sin'+th+'\u00b0)\u00d79.81/'+(m1+m2)+' = '+a+' m/s\u00b2'};}var F1=rnd(100,500),d1=rnd(1,5),d2=rnd(1,5),F2=parseFloat((F1*d1/d2).toFixed(1));return{question:'F\u2081=<b>'+F1+'N</b> at d\u2081=<b>'+d1+'m</b>, balance force F\u2082 at d\u2082=<b>'+d2+'m</b>?',hints:['F\u2081d\u2081=F\u2082d\u2082'],ans:F2,tol:F2*0.02,unit:'N',working:'F\u2082='+F1+'\u00d7'+d1+'/'+d2+' = '+F2+' N'};})},
+]},
+{ey:'Q9 \u2022 Y12 Physics \u2022 Vectors',ti:'Applications of Equilibrium',su:'Apply equilibrium principles to practical situations.',steps:[
+  {lb:'Ladder problems',dr:dQ9,ht:'<p>Ladder against smooth wall: wall exerts normal force (horizontal); floor exerts normal reaction (vertical) and friction (horizontal). For equilibrium: \u03a3F_x=0 (friction = wall reaction); \u03a3F_y=0 (floor reaction = weight). Take moments about base to find wall reaction. Min friction \u03bc = F_wall/R_floor.</p>'},
+  {lb:'Body equilibrium',dr:dQ9,ht:'<p>Human body: weight acts through CoG (~1 m above floor standing). Forces on feet from ground. When leaning, CoG shifts; muscles in back/legs exert large forces to maintain equilibrium. Lifting: moment arm of weight about spine creates large compressive force on discs.</p>'},
+  {lb:'Bridges and distributed loads',dr:dQ9,ht:'<p>Uniformly distributed load (UDL) on beam: total force = load per unit length \u00d7 span; acts at midpoint of span. Concentrated loads and UDLs: add separately for total load; find reactions by moment method. Traffic loading: position for max bending moment in bridge design.</p>'},
+  {lb:'Cranes and jib cranes',dr:dQ9,ht:'<p>Jib crane: horizontal jib of length L carrying load W at end; supported by cable at angle \u03b8 to horizontal and pinned at wall. Tension in cable: T sin\u03b8 = W (vertical equilibrium); T cos\u03b8 = H_reaction. Taking moments about pin: T \u00d7 L sin\u03b8 = W \u00d7 L \u2192 T = W/sin\u03b8.</p>'},
+  {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var type=pick(['ladder_wall','jib_crane','bridge_reaction']);if(type==='ladder_wall'){var W=rnd(400,1000),h=rnd(3,8),d=rnd(1,4),Fw=parseFloat((W*d/(2*h)).toFixed(1));return{question:'Ladder: W=<b>'+W+'N</b>, height=<b>'+h+'m</b>, foot=<b>'+d+'m</b> from wall. Wall reaction?',hints:['Moments about base: Fw\u00d7h = W\u00d7(d/2)'],ans:Fw,tol:Fw*0.03,unit:'N',working:'Fw=W\u00d7(d/2)/h='+W+'\u00d7'+(d/2)+'/'+h+' = '+Fw+' N'};}if(type==='jib_crane'){var W=rnd(1000,10000),th=pick([30,45,60]),T=parseFloat((W/Math.sin(th*Math.PI/180)).toFixed(0));return{question:'Jib crane: W=<b>'+W+'N</b>, cable at \u03b8=<b>'+th+'\u00b0</b>. Cable tension?',hints:['T sin\u03b8=W \u2192 T=W/sin\u03b8'],ans:T,tol:T*0.02,unit:'N',working:'T='+W+'/sin'+th+'\u00b0 = '+T+' N'};}var W=rnd(500,2000),L=rnd(4,10),x=rnd(2,L-1),R2=parseFloat((W*x/L).toFixed(1));return{question:'Beam L=<b>'+L+'m</b>, W=<b>'+W+'N</b> at x=<b>'+x+'m</b> from left. Right reaction R\u2082?',hints:['Moments about left: R\u2082\u00d7L=W\u00d7x'],ans:R2,tol:R2*0.02,unit:'N',working:'R\u2082=W\u00d7x/L='+W+'\u00d7'+x+'/'+L+' = '+R2+' N'};})},
+]},
+{ey:'Q10 \u2022 Y12 Physics \u2022 Vectors',ti:'Mixed Vectors and Equilibrium',su:'Integrated questions across all Y12-MEC-04 topics.',steps:[
+  {lb:'Summary',dr:dQ10,ht:'<p>F_x=F cos\u03b8; F_y=F sin\u03b8. R=\u221a(R_x\u00b2+R_y\u00b2). Equilibrium: \u03a3F=0 and \u03a3\u03c4=0. Moments: \u03c4=Fd. Principle of moments. Couple=Fd. CoG: x=\u03a3(m_i x_i)/\u03a3m_i. Stability: CoG outside base \u2192 topples.</p>'},
+  {lb:'WAEC emphasis',dr:dQ10,ht:'<p>WAEC regularly tests: resolving forces; equilibrium of concurrent forces; principle of moments (beams, levers); centre of gravity; stability conditions. Always draw a clear diagram, label all forces, and show the moment calculation.</p>'},
+  {lb:'Key problem types',dr:dQ10,ht:'<p>Beam on two supports: moments about one support to find the other reaction, then sum of forces for the first. Hanging sign: two cables \u2192 resolve vertically and horizontally. Ladder: three forces (weight, wall, floor). Jib crane: tension in cable from moment equation.</p>'},
+  {lb:'Key formulae',dr:dQ10,ht:'<div class="fm">F_x=F\cos\u03b8 \u2022 F_y=F\sin\u03b8 \u2022 \u03c4=Fd</div><div class="fm">\u03a3F_x=0 \u2022 \u03a3F_y=0 \u2022 \u03a3\u03c4=0 (about any point)</div>'},
+  {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var type=pick(['resolve','moment','resultant']);if(type==='resolve'){var F=rnd(10,100),th=pick([30,45,60]),Fx=parseFloat((F*Math.cos(th*Math.PI/180)).toFixed(2));return{question:'F=<b>'+F+'N</b> at <b>'+th+'\u00b0</b>. Horizontal component?',hints:['F_x=F cos\u03b8'],ans:Fx,tol:Fx*0.02,unit:'N',working:'F_x='+F+' cos'+th+'\u00b0 = '+Fx+' N'};}if(type==='moment'){var F=rnd(50,500),d=rnd(1,10)/10,tau=parseFloat((F*d).toFixed(2));return{question:'F=<b>'+F+'N</b>, d=<b>'+d.toFixed(1)+'m</b>. Moment?',hints:['\u03c4=Fd'],ans:tau,tol:tau*0.02,unit:'N m',working:'\u03c4='+F+'\u00d7'+d.toFixed(1)+' = '+tau+' N m'};}var Rx=rnd(3,40),Ry=rnd(3,40),R=parseFloat(Math.sqrt(Rx*Rx+Ry*Ry).toFixed(2));return{question:'R_x=<b>'+Rx+'N</b>, R_y=<b>'+Ry+'N</b>. Resultant magnitude?',hints:['R=\u221a(R_x\u00b2+R_y\u00b2)'],ans:R,tol:R*0.02,unit:'N',working:'R=\u221a('+Rx+'\u00b2+'+Ry+'\u00b2) = '+R+' N'};})},
+]},
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcTopicCode='Y12-MEC-04';
+window.markComplete=async function(){
+  const{data:{session}}=await _sb.auth.getSession();if(!session)return;
+  const{data:topic}=await _sb.from('topics').select('id').eq('topic_code','Y12-MEC-04').maybeSingle();if(!topic)return;
+  window._abcTopicId=topic.id;
+  await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body></html>

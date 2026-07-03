@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fluids at Rest — Year 12 Physics</title>
+<style>
+:root{--red:#1565C0;--dark:#0d47a1;--cream:#E3F2FD;--ink:#0d1b2a;--line:#BBDEFB;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#555;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#E3F2FD);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:180px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:15px;line-height:1.6;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:16px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;margin-bottom:8px;line-height:1.5;}
+.hl{font-size:14px;color:#1a2a3a;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e3f2fd;color:#0d47a1;border:1px solid #90caf9;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#1a2a3a;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <div class="ht">Fluids at Rest — Y12 Physics</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr"><div class="eyebrow" id="ey"></div><h1 id="ti"></h1><div class="sub" id="su"></div></div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ACC='#1565C0',DARK='#0d47a1',CRM='#E3F2FD',LINE='#BBDEFB';
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+var ST={};
+function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn};return buildTry(id,o);}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="any" placeholder="Answer'+(o.unit?' ('+o.unit+')':'')+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=entry.genFn();entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.05*Math.abs(o.ans)||0.05)){fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
+  }
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#0d1b2a';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||CRM;stroke=stroke||ACC;sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';}
+function arw(x1,y1,x2,y2,c,w){var id='m'+Math.round(x1*7+y2*3);return '<defs><marker id="'+id+'" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="'+(c||ACC)+'"/></marker></defs><line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||ACC)+'" stroke-width="'+(w||2)+'" marker-end="url(#'+id+')"/>';}
+function circ(cx,cy,r,fill,stroke){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||CRM)+'" stroke="'+(stroke||ACC)+'" stroke-width="1.5"/>';}
+
+function dQ1(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Fluid pressure',ACC,13,'middle',true));
+o.push(R(10,36,460,44,CRM,ACC,2));o.push(T(240,58,'p = \u03c1gh',DARK,18,'middle',true));o.push(T(240,76,'\u03c1 = fluid density (kg/m\u00b3), g = 9.81 m/s\u00b2, h = depth (m)','#555',9,'middle',false));
+if(p>=1){o.push(R(10,92,460,40,CRM,ACC,1.5));o.push(T(240,108,'Pressure acts equally in all directions at a given depth','#333',10,'middle',false));o.push(T(240,124,'Gauge pressure = above atmospheric; absolute = gauge + p_atm','#555',9,'middle',false));}
+if(p>=2){o.push(R(10,142,460,40,CRM,ACC,1.5));o.push(T(240,158,'Mercury barometer: p_atm = \u03c1_Hg\u202fg\u202fh; standard: 760 mmHg = 101 325 Pa','#333',10,'middle',false));}
+if(p>=3){o.push(R(10,192,460,40,CRM,ACC,1.5));o.push(T(240,208,'U-tube manometer: height difference gives gauge pressure p = \u03c1gh','#333',10,'middle',false));}
+if(p>=4){o.push(R(10,240,460,16,LINE,ACC,0.5));o.push(T(240,250,'Pascal: pressure in enclosed fluid transmitted equally in all directions','#555',8,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ2(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Archimedes\u2019 principle',ACC,12,'middle',true));
+o.push(R(10,36,460,44,CRM,ACC,2));o.push(T(240,54,'F\u209a = \u03c1_f V_s g',DARK,16,'middle',true));o.push(T(240,72,'Upthrust = weight of fluid displaced','#555',9,'middle',false));
+if(p>=1){o.push(R(10,92,460,40,CRM,ACC,1.5));o.push(T(240,108,'Floats when F\u209a \u2265 weight; fraction submerged = \u03c1_obj/\u03c1_fluid','#333',10,'middle',false));}
+if(p>=2){o.push(R(10,142,460,40,CRM,ACC,1.5));o.push(T(240,158,'Apparent weight in fluid = mg \u2212 F\u209a','#333',10,'middle',false));o.push(T(240,174,'Relative density = weight in air / (wt air \u2212 wt water)','#555',9,'middle',false));}
+if(p>=3){o.push(R(10,192,460,40,CRM,ACC,1.5));o.push(T(240,208,'Ship: steel hull + air \u2192 low average density below water','#333',10,'middle',false));o.push(T(240,224,'Submarine: flood/pump ballast tanks to adjust average density','#555',9,'middle',false));}
+if(p>=4){o.push(R(10,240,460,16,LINE,ACC,0.5));o.push(T(240,250,'Hot air balloon: heated air less dense than surroundings \u2192 upthrust > weight','#555',8,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Viscosity and Stokes\u2019 law',ACC,12,'middle',true));
+o.push(R(10,36,460,44,CRM,ACC,2));o.push(T(240,54,'F = 6\u03c0\u03b7rv',DARK,16,'middle',true));o.push(T(240,72,'\u03b7 = viscosity (Pa\u202fs), r = radius (m), v = speed (m/s)','#555',9,'middle',false));
+if(p>=1){o.push(R(10,92,460,40,CRM,ACC,1.5));o.push(T(240,108,'Valid for: small spheres; low speed; laminar (not turbulent) flow','#333',10,'middle',false));}
+if(p>=2){o.push(R(10,142,460,40,CRM,ACC,1.5));o.push(T(240,158,'At terminal velocity: mg \u2212 F\u209a \u2212 6\u03c0\u03b7rv_T = 0','#333',10,'middle',false));o.push(T(240,174,'v_T = 2r\u00b2(\u03c1_s \u2212 \u03c1_f)g / (9\u03b7)','#555',9,'middle',false));}
+if(p>=3){o.push(R(10,192,460,40,CRM,ACC,1.5));o.push(T(240,208,'Measuring viscosity: drop sphere; measure v_T; calculate \u03b7','#333',10,'middle',false));}
+if(p>=4){o.push(R(10,240,460,16,LINE,ACC,0.5));o.push(T(240,250,'Viscosity decreases with temperature for liquids (kinetic energy breaks bonds)','#555',8,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ4(p){dQ1(p);}
+function dQ5(p){dQ2(p);}
+function dQ6(p){dQ3(p);}
+function dQ7(p){dQ1(p);}
+function dQ8(p){dQ2(p);}
+function dQ9(p){dQ3(p);}
+function dQ10(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Fluids at rest \u2014 summary',ACC,13,'middle',true));
+[['Fluid pressure','p=\u03c1gh; increases with depth; acts all directions'],['Atmospheric','101 325 Pa = 760 mmHg; measured by barometer'],['Archimedes','F\u209a=\u03c1_f V_s g; weight of fluid displaced'],['Floating','fraction submerged = \u03c1_obj/\u03c1_fluid'],['Pascal','enclosed fluid transmits pressure equally'],['Stokes law','F=6\u03c0\u03b7rv; laminar flow around small sphere'],['Terminal v','v_T=2r\u00b2(\u03c1_s-\u03c1_f)g/(9\u03b7)']].forEach(function(r,i){if(i<p+1){o.push(R(10,36+i*30,460,24,CRM,LINE,1));o.push(T(120,52+i*30,r[0],ACC,10,'middle',true));o.push(T(330,52+i*30,r[1],'#555',9,'middle',false));}});
+s.innerHTML=o.join('');}
+var QS=[
+{ey:'Q1 \u2022 Y12 Physics \u2022 Fluids',ti:'Fluid Pressure',su:'Calculate pressure in fluids. Apply Pascal\u2019s principle to hydraulic systems.',steps:[
+  {lb:'Pressure formula',dr:dQ1,ht:'<div class="fm">p = \u03c1gh (Pa)</div><p>Pressure depends on density \u03c1 and depth h, NOT on the shape or total volume of the fluid. Acts equally in all directions at a given depth (Pascal\u2019s principle). Gauge pressure = above atmospheric; absolute = gauge + 101 325 Pa.</p>'},
+  {lb:'Pressure measurement',dr:dQ1,ht:'<p>Mercury barometer: p_atm = \u03c1_Hg\u00d7g\u00d7h = 13600\u00d79.81\u00d70.760 = 101 325 Pa. U-tube manometer: height difference gives p_gauge = \u03c1gh. Blood pressure: measured in mmHg (systolic ~120, diastolic ~80 mmHg).</p>'},
+  {lb:'Pascal\u2019s principle',dr:dQ1,ht:'<p>Pressure in enclosed fluid transmitted equally in all directions. Hydraulic press: F\u2081/A\u2081 = F\u2082/A\u2082. Mechanical advantage MA = F\u2082/F\u2081 = A\u2082/A\u2081. Work conserved: F\u2081d\u2081 = F\u2082d\u2082. Applications: car brakes, hydraulic lifts, presses.</p>'},
+  {lb:'Pressure at a point in connected vessels',dr:dQ1,ht:'<p>In connected static fluid: pressure at same height is the same everywhere. U-tube: equal pressures at the bottom \u2192 \u03c1\u2081gh\u2081 = \u03c1\u2082gh\u2082. Used to compare densities: h\u2081/h\u2082 = \u03c1\u2082/\u03c1\u2081. The shape of the container does not affect pressure at a given depth.</p>'},
+  {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var type=pick(['pressure','hydraulic','barometer']);if(type==='pressure'){var rho=pick([1000,1025,800,13600]),h=rnd(1,20),p=parseFloat((rho*9.81*h).toFixed(0));return{question:'\u03c1=<b>'+rho+'</b> kg/m\u00b3, h=<b>'+h+' m</b>. Fluid pressure?',hints:['p=\u03c1gh'],ans:p,tol:p*0.01,unit:'Pa',working:'p='+rho+'\u00d79.81\u00d7'+h+' = '+p+' Pa'};}if(type==='hydraulic'){var F1=rnd(10,200),A1=rnd(1,10)/100,A2=rnd(20,200)/100,F2=parseFloat((F1*A2/A1).toFixed(1));return{question:'Hydraulic: F\u2081=<b>'+F1+'N</b>, A\u2081=<b>'+A1.toFixed(2)+'m\u00b2</b>, A\u2082=<b>'+A2.toFixed(2)+'m\u00b2</b>. F\u2082?',hints:['F\u2081/A\u2081=F\u2082/A\u2082'],ans:F2,tol:F2*0.02,unit:'N',working:'F\u2082='+F1+'\u00d7'+A2.toFixed(2)+'/'+A1.toFixed(2)+' = '+F2+' N'};}var h=rnd(600,800)/1000,p=parseFloat((13600*9.81*h).toFixed(0));return{question:'Barometer: h=<b>'+h.toFixed(3)+' m</b> Hg (\u03c1=13600). Atmospheric pressure?',hints:['p=\u03c1gh'],ans:p,tol:p*0.01,unit:'Pa',working:'p=13600\u00d79.81\u00d7'+h.toFixed(3)+' = '+p+' Pa'};})},
+]},
+{ey:'Q2 \u2022 Y12 Physics \u2022 Fluids',ti:'Archimedes\u2019 Principle',su:'Apply Archimedes\u2019 principle to floating and sinking objects.',steps:[
+  {lb:'Upthrust formula',dr:dQ2,ht:'<div class="fm">F\u209a = \u03c1_f V_s g</div><p>Upthrust = weight of fluid displaced. Object floats when F\u209a = weight. Sinks when \u03c1_obj > \u03c1_fluid. Fraction submerged when floating = \u03c1_obj/\u03c1_fluid. Ice in water: 917/1000 = 91.7% submerged.</p>'},
+  {lb:'Apparent weight',dr:dQ2,ht:'<p>Apparent weight = true weight \u2212 upthrust = mg \u2212 \u03c1_f Vg. Object feels lighter in fluid. Weighing in water gives apparent weight; difference from air weight = upthrust = \u03c1_w Vg \u2192 V = \u0394W/(\u03c1_w g). Then \u03c1 = m/V.</p>'},
+  {lb:'Ships and submarines',dr:dQ2,ht:'<p>Steel ship: hollow hull + large air volume \u2192 average density < water \u2192 floats. Submarines: ballast tanks filled with water (denser \u2192 sinks) or blown out with compressed air (less dense \u2192 rises). Neutral buoyancy: average density = water density.</p>'},
+  {lb:'Hot air balloon',dr:dQ2,ht:'<p>Balloon: heated air inside less dense than cooler outside air. Upthrust = \u03c1_outside\u00d7V\u00d7g. Weight = \u03c1_inside\u00d7V\u00d7g + weight of envelope + basket + people. Rises when upthrust > total weight. Controls: vary temperature of air inside. Helium balloons: \u03c1_He << \u03c1_air.</p>'},
+  {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var type=pick(['upthrust','fraction','apparent']);if(type==='upthrust'){var rho=pick([1000,1025]),V=rnd(200,5000)/1e6,F=parseFloat((rho*V*9.81).toFixed(2));return{question:'\u03c1_f=<b>'+rho+'</b>, V_sub=<b>'+V.toExponential(2)+'m\u00b3</b>. Upthrust?',hints:['F=\u03c1Vg'],ans:F,tol:F*0.02,unit:'N',working:'F='+rho+'\u00d7'+V.toExponential(2)+'\u00d79.81 = '+F+' N'};}if(type==='fraction'){var rhoObj=rnd(500,900),frac=parseFloat((rhoObj/1000).toFixed(3));return{question:'\u03c1_obj=<b>'+rhoObj+'kg/m\u00b3</b>. Fraction submerged in water?',hints:['\u03c1_obj/\u03c1_water'],ans:frac,tol:0.002,unit:'',working:rhoObj+'/1000 = '+frac};}var m=rnd(1,20),V=rnd(200,2000)/1e6,Fup=parseFloat((1000*V*9.81).toFixed(2)),Wapp=parseFloat((m*9.81-Fup).toFixed(2));return{question:'m=<b>'+m+'kg</b>, V=<b>'+V.toExponential(2)+'m\u00b3</b>. Apparent weight in water?',hints:['W_app=mg-F\u209a=mg-\u03c1_w Vg'],ans:Wapp,tol:Wapp*0.02,unit:'N',working:'W_app='+m+'\u00d79.81-'+Fup+' = '+Wapp+' N'};})},
+]},
+{ey:'Q3 \u2022 Y12 Physics \u2022 Fluids',ti:'Viscosity and Stokes\u2019 Law',su:'Apply Stokes\u2019 law. Describe methods to measure viscosity.',steps:[
+  {lb:'Viscosity',dr:dQ3,ht:'<p>Viscosity \u03b7: internal friction in a fluid; resistance to flow. SI unit: Pa\u202fs (pascal-second). Water at 20\u00b0C: ~10\u207b\u00b3 Pa\u202fs. Engine oil: ~0.1\u20131 Pa\u202fs. Honey: ~2\u201310 Pa\u202fs. Liquids: \u03b7 decreases with temperature. Gases: \u03b7 increases with temperature (more collisions).</p>'},
+  {lb:'Stokes\u2019 law',dr:dQ3,ht:'<div class="fm">F = 6\u03c0\u03b7rv</div><p>Valid for: small spheres; low speed (laminar flow; Re < 1). At terminal velocity in a liquid: mg \u2212 upthrust \u2212 6\u03c0\u03b7rv_T = 0. Solving: v_T = 2r\u00b2(\u03c1_s\u2212\u03c1_f)g/(9\u03b7).</p>'},
+  {lb:'Measuring viscosity',dr:dQ3,ht:'<p>Falling sphere method: measure v_T of small sphere in liquid. From v_T = 2r\u00b2(\u03c1_s\u2212\u03c1_f)g/(9\u03b7): rearrange for \u03b7 = 2r\u00b2(\u03c1_s\u2212\u03c1_f)g/(9v_T). Accurate for high-viscosity fluids. Use: stroboscope or markings on tube. Time to fall known distance between marks.</p>'},
+  {lb:'Laminar vs turbulent flow',dr:dQ3,ht:'<p>Laminar: smooth parallel layers; occurs at low speed; Stokes\u2019 law applies. Turbulent: chaotic mixing; higher speed; drag \u221d v\u00b2. Reynolds number Re = \u03c1vd/\u03b7; Re < ~1000: laminar; Re > ~2000: turbulent. Streamlining reduces turbulence and drag.</p>'},
+  {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var type=pick(['stokes','terminal','eta']);if(type==='stokes'){var eta=rnd(1,10)/100,r=rnd(1,5)/1000,v=rnd(1,20)/1000,F=parseFloat((6*Math.PI*eta*r*v).toFixed(5));return{question:'\u03b7=<b>'+eta+' Pa\u202fs</b>, r=<b>'+r*1000+' mm</b>, v=<b>'+v*1000+' mm/s</b>. Stokes drag force?',hints:['F=6\u03c0\u03b7rv; convert to SI'],ans:F,tol:F*0.05,unit:'N',working:'F=6\u03c0\u00d7'+eta+'\u00d7'+r+'\u00d7'+v+' = '+F+' N'};}if(type==='terminal'){var r=rnd(1,5)/1000,rhos=rnd(2000,8000),rhof=1000,eta=rnd(1,10)/100;var vT=parseFloat((2*r*r*(rhos-rhof)*9.81/(9*eta)).toFixed(4));return{question:'r=<b>'+(r*1000).toFixed(1)+'mm</b>, \u03c1_s=<b>'+rhos+'</b>, \u03c1_f=1000, \u03b7=<b>'+eta+'</b>. Terminal velocity?',hints:['v_T=2r\u00b2(\u03c1_s-\u03c1_f)g/(9\u03b7)'],ans:vT,tol:vT*0.05,unit:'m/s',working:'v_T=2\u00d7'+r+'\u00b2\u00d7'+(rhos-rhof)+'\u00d79.81/(9\u00d7'+eta+') = '+vT+' m/s'};}var r=rnd(1,3)/1000,vT=rnd(1,10)/100,rhos=rnd(2000,6000),rhof=1000;var eta=parseFloat((2*r*r*(rhos-rhof)*9.81/(9*vT)).toFixed(3));return{question:'From v_T=<b>'+vT+'m/s</b>, r=<b>'+(r*1000).toFixed(1)+'mm</b>, \u0394\u03c1=<b>'+(rhos-rhof)+'kg/m\u00b3</b>. Viscosity \u03b7?',hints:['\u03b7=2r\u00b2\u0394\u03c1g/(9v_T)'],ans:eta,tol:eta*0.05,unit:'Pa\u202fs',working:'\u03b7=2\u00d7'+r+'\u00b2\u00d7'+(rhos-rhof)+'\u00d79.81/(9\u00d7'+vT+') = '+eta+' Pa\u202fs'};})},
+]},
+{ey:'Q4 \u2022 Y12 Physics \u2022 Fluids',ti:'Surface Tension',su:'Describe surface tension. Explain capillarity and soap bubbles.',steps:[
+  {lb:'Surface tension',dr:dQ4,ht:'<p>Surface tension \u03b3: force per unit length acting along surface (N/m) = energy per unit area (J/m\u00b2). Caused by net inward intermolecular attraction at surface. Water at 20\u00b0C: \u03b3 = 0.072 N/m. Mercury: \u03b3 = 0.48 N/m. Surface behaves like elastic membrane: water strider, floating needle, rain drops.</p>'},
+  {lb:'Excess pressure in bubbles',dr:dQ4,ht:'<div class="fm">Soap bubble: p = 4\u03b3/r &nbsp;&nbsp; Liquid drop: p = 2\u03b3/r</div><p>Soap bubble has TWO surfaces (inside + outside); extra factor of 2. Smaller bubble: higher internal pressure. Blowing two connected bubbles: smaller one shrinks, larger grows. Why: higher pressure in smaller bubble forces air into larger.</p>'},
+  {lb:'Capillarity',dr:dQ4,ht:'<p>Capillary rise/fall in narrow tubes. Rise: contact angle < 90\u00b0 (water in glass: adhesion > cohesion). Fall: contact angle > 90\u00b0 (mercury in glass: cohesion > adhesion). Height h = 2\u03b3cos\u03b8/(\u03c1gr). Narrower tube \u2192 greater rise. Applications: water in plants, ink in pens, blood in capillaries.</p>'},
+  {lb:'Effects of temperature and surfactants',dr:dQ4,ht:'<p>Temperature: surface tension decreases as temperature increases (more KE \u2192 weaker relative intermolecular attraction). Surfactants (soap, detergents): reduce surface tension by positioning polar heads in water, non-polar tails in air. Makes water spread more easily, cleans grease.</p>'},
+  {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var type=pick(['bubble','drop','rise']);if(type==='bubble'){var gamma=rnd(20,80)/1000,r=rnd(1,10)/1000,p=parseFloat((4*gamma/r).toFixed(1));return{question:'Soap bubble: \u03b3=<b>'+gamma+' N/m</b>, r=<b>'+r*1000+' mm</b>. Excess pressure inside?',hints:['p=4\u03b3/r (TWO surfaces)'],ans:p,tol:p*0.02,unit:'Pa',working:'p=4\u00d7'+gamma+'/'+r+' = '+p+' Pa'};}if(type==='drop'){var gamma=rnd(20,80)/1000,r=rnd(1,10)/1000,p=parseFloat((2*gamma/r).toFixed(1));return{question:'Liquid drop: \u03b3=<b>'+gamma+' N/m</b>, r=<b>'+r*1000+' mm</b>. Excess pressure?',hints:['p=2\u03b3/r (ONE surface)'],ans:p,tol:p*0.02,unit:'Pa',working:'p=2\u00d7'+gamma+'/'+r+' = '+p+' Pa'};}var gamma=rnd(20,80)/1000,theta=0,rho=1000,r_cap=rnd(1,5)/10000,h=parseFloat((2*gamma*Math.cos(theta)/(rho*9.81*r_cap)).toFixed(4));return{question:'\u03b3=<b>'+gamma+' N/m</b>, r_cap=<b>'+(r_cap*10000).toFixed(1)+' \u00d710\u207b\u2074m</b>. Capillary rise (water, \u03b8=0)?',hints:['h=2\u03b3cos\u03b8/(\u03c1gr)'],ans:h,tol:h*0.05,unit:'m',working:'h=2\u00d7'+gamma+'\u00d71/(1000\u00d79.81\u00d7'+r_cap+') = '+h+' m'};})},
+]},
+{ey:'Q5 \u2022 Y12 Physics \u2022 Fluids',ti:'Fluid Dynamics — Bernoulli\u2019s Equation',su:'Apply Bernoulli\u2019s equation to flowing fluids.',steps:[
+  {lb:'Continuity equation',dr:dQ5,ht:'<div class="fm">A\u2081v\u2081 = A\u2082v\u2082 (continuity)</div><p>For incompressible fluid in steady flow: volume flow rate Q = Av = constant. Narrow pipe: faster flow. Wide pipe: slower flow. Conservation of mass.</p>'},
+  {lb:'Bernoulli\u2019s equation',dr:dQ5,ht:'<div class="fm">p + \u00bdpv\u00b2 + \u03c1gh = constant</div><p>Conservation of energy per unit volume in ideal (non-viscous, incompressible, steady, irrotational) flow. Higher speed \u2192 lower pressure. Venturi tube: narrow section \u2192 faster flow \u2192 lower pressure.</p>'},
+  {lb:'Applications',dr:dQ5,ht:'<p>Aerofoil: flow faster over curved upper surface \u2192 lower pressure above \u2192 net upward lift force. Venturi meter: measure flow speed from pressure difference. Pitot tube: measure air speed from stagnation pressure. Bunsen burner: fast gas flow entrains air. Cricket ball swing: laminar one side, turbulent other \u2192 pressure difference \u2192 swing.</p>'},
+  {lb:'Torricelli\u2019s theorem',dr:dQ5,ht:'<div class="fm">v = \u221a(2gh)</div><p>Fluid exits hole at depth h below surface with speed v = \u221a(2gh) (same as free fall from that height). Apply Bernoulli between surface (p_atm, v\u22480, height h) and hole (p_atm, v, height 0). Used to find efflux speed from containers.</p>'},
+  {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var type=pick(['continuity','Torricelli','Bernoulli_p']);if(type==='continuity'){var A1=rnd(10,50)/10000,v1=rnd(1,5),A2=rnd(1,A1*9999/10000),v2=parseFloat((A1*v1/A2).toFixed(2));return{question:'A\u2081=<b>'+A1.toExponential(2)+'m\u00b2</b>, v\u2081=<b>'+v1+'m/s</b>, A\u2082=<b>'+A2.toExponential(2)+'m\u00b2</b>. v\u2082?',hints:['A\u2081v\u2081=A\u2082v\u2082'],ans:v2,tol:v2*0.03,unit:'m/s',working:'v\u2082='+A1.toExponential(2)+'\u00d7'+v1+'/'+A2.toExponential(2)+' = '+v2+' m/s'};}if(type==='Torricelli'){var h=rnd(1,10),v=parseFloat(Math.sqrt(2*9.81*h).toFixed(2));return{question:'Hole at depth h=<b>'+h+'m</b> below surface. Efflux speed?',hints:['v=\u221a(2gh)'],ans:v,tol:v*0.02,unit:'m/s',working:'v=\u221a(2\u00d79.81\u00d7'+h+') = '+v+' m/s'};}var v=rnd(5,30),rho=1000,dp=parseFloat((0.5*rho*v*v).toFixed(0));return{question:'Fluid \u03c1=1000 kg/m\u00b3 flowing at v=<b>'+v+'m/s</b>. Dynamic pressure (\u00bdpv\u00b2)?',hints:['\u00bd\u03c1v\u00b2'],ans:dp,tol:dp*0.02,unit:'Pa',working:'=0.5\u00d71000\u00d7'+v+'\u00b2 = '+dp+' Pa'};})},
+]},
+{ey:'Q6 \u2022 Y12 Physics \u2022 Fluids',ti:'Mixed Fluid Pressure',su:'Integrated pressure questions.',steps:[
+  {lb:'Summary',dr:dQ6,ht:'<p>p=\u03c1gh. F\u209a=\u03c1_f V_s g. F=6\u03c0\u03b7rv. p_bubble=4\u03b3/r; p_drop=2\u03b3/r. A\u2081v\u2081=A\u2082v\u2082. v_efflux=\u221a(2gh). All derivable from pressure basics and conservation laws.</p>'},
+  {lb:'WAEC emphasis',dr:dQ6,ht:'<p>WAEC regularly tests: fluid pressure at depth; upthrust and floating; hydraulic systems; surface tension formula; Stokes\u2019 law. Know all four pressure formulae: p=\u03c1gh (fluid), F/A (mechanical), 4\u03b3/r (bubble), 2\u03b3/r (drop).</p>'},
+  {lb:'Connecting concepts',dr:dQ6,ht:'<p>Terminal velocity combines: Stokes drag + upthrust + weight. Capillary rise uses surface tension force (2\u03c0r\u03b3cos\u03b8) balanced by weight of liquid column (\u03c1\u03c0r\u00b2hg). Bernoulli combines pressure, KE density and GPE density as energy conservation.</p>'},
+  {lb:'Formulae sheet',dr:dQ6,ht:'<div class="fm">p=\u03c1gh \u2022 F\u209a=\u03c1Vg \u2022 F=6\u03c0\u03b7rv</div><div class="fm">p_{bubble}=4\u03b3/r \u2022 p_{drop}=2\u03b3/r</div><div class="fm">h=2\u03b3\cos\u03b8/(\u03c1gr) \u2022 v_{efflux}=\u221a(2gh)</div>'},
+  {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var type=pick(['pressure','upthrust','bubble']);if(type==='pressure'){var rho=pick([1000,800,13600]),h=rnd(1,20),p=parseFloat((rho*9.81*h).toFixed(0));return{question:'\u03c1=<b>'+rho+'</b>, h=<b>'+h+'m</b>. Pressure?',hints:['p=\u03c1gh'],ans:p,tol:p*0.01,unit:'Pa',working:'p='+rho+'\u00d79.81\u00d7'+h+' = '+p+' Pa'};}if(type==='upthrust'){var V=rnd(100,3000)/1e6,F=parseFloat((1000*V*9.81).toFixed(2));return{question:'V_sub=<b>'+V.toExponential(2)+'m\u00b3</b> in water. Upthrust?',hints:['F=\u03c1Vg'],ans:F,tol:F*0.02,unit:'N',working:'F=1000\u00d7'+V.toExponential(2)+'\u00d79.81 = '+F+' N'};}var gamma=rnd(20,80)/1000,r=rnd(1,10)/1000,p=parseFloat((4*gamma/r).toFixed(1));return{question:'Soap bubble \u03b3=<b>'+gamma+'N/m</b>, r=<b>'+r*1000+'mm</b>. Excess pressure?',hints:['p=4\u03b3/r'],ans:p,tol:p*0.02,unit:'Pa',working:'p=4\u00d7'+gamma+'/'+r+' = '+p+' Pa'};})},
+]},
+{ey:'Q7 \u2022 Y12 Physics \u2022 Fluids',ti:'Pressure Calculations — Extended',su:'Solve complex fluid pressure problems involving multiple layers.',steps:[
+  {lb:'Pressure in layered fluids',dr:dQ7,ht:'<p>For multiple fluid layers, total pressure at depth = sum of pressure from each layer. p = \u03c1\u2081gh\u2081 + \u03c1\u2082gh\u2082 + p_atm. Example: ocean with oil on top: pressure at oil-water interface = \u03c1_oil\u00d7g\u00d7h_oil; pressure in water at depth d below interface = p_interface + \u03c1_water\u00d7g\u00d7d.</p>'},
+  {lb:'Pressure and force on surfaces',dr:dQ7,ht:'<p>Force on horizontal surface = p \u00d7 A. Pressure uniform on horizontal surfaces. Average pressure on vertical surface = p at centroid (midpoint of depth). Total force on vertical rectangular dam face of height H and width w: F = \u00bd\u03c1gH\u00b2w (average pressure \u00bd\u03c1gH times area Hw).</p>'},
+  {lb:'Manometer problems',dr:dQ7,ht:'<p>U-tube manometer: equate pressures at bottom (or any horizontal level). p_gas + \u03c1\u2081gh\u2081 = p_atm + \u03c1\u2082gh\u2082. For simple U-tube with same liquid: p_gauge = \u03c1gh. Open-ended manometer: gas pressure can be read directly as \u03c1gh above/below atmospheric.</p>'},
+  {lb:'Hydraulic systems extended',dr:dQ7,ht:'<p>Non-ideal hydraulic system: include fluid pressure difference due to height. p\u2081 + \u03c1gh\u2081 = p\u2082 + \u03c1gh\u2082 (including gravity). For pistons at different heights: F\u2081/A\u2081 + \u03c1gh\u2081 = F\u2082/A\u2082 + \u03c1gh\u2082. Usually negligible for small height differences with heavy loads.</p>'},
+  {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var type=pick(['layer_p','dam_force','manometer']);if(type==='layer_p'){var h1=rnd(1,5),h2=rnd(1,10),rho1=800,rho2=1000;var p=parseFloat((rho1*9.81*h1+rho2*9.81*h2).toFixed(0));return{question:'Oil layer (\u03c1=800) h=<b>'+h1+'m</b> above water h=<b>'+h2+'m</b>. Total gauge pressure at bottom?',hints:['p=\u03c1\u2081gh\u2081+\u03c1\u2082gh\u2082'],ans:p,tol:p*0.01,unit:'Pa',working:'p=800\u00d79.81\u00d7'+h1+'+1000\u00d79.81\u00d7'+h2+' = '+p+' Pa'};}if(type==='dam_force'){var H=rnd(5,20),w=rnd(10,50),F=parseFloat((0.5*1000*9.81*H*H*w).toFixed(0));return{question:'Vertical dam: H=<b>'+H+'m</b>, w=<b>'+w+'m</b>. Total force on face?',hints:['F=\u00bd\u03c1gH\u00b2w'],ans:F,tol:F*0.02,unit:'N',working:'F=0.5\u00d71000\u00d79.81\u00d7'+H+'\u00b2\u00d7'+w+' = '+F+' N'};}var rho=pick([1000,13600]),h=rnd(1,20),p=parseFloat((rho*9.81*h).toFixed(0));return{question:'Manometer: \u03c1=<b>'+rho+'</b>, height diff=<b>'+h+'m</b>. Gauge pressure?',hints:['p=\u03c1gh'],ans:p,tol:p*0.01,unit:'Pa',working:'p='+rho+'\u00d79.81\u00d7'+h+' = '+p+' Pa'};})},
+]},
+{ey:'Q8 \u2022 Y12 Physics \u2022 Fluids',ti:'Streamlines and Flow Types',su:'Distinguish laminar from turbulent flow. Describe streamlines.',steps:[
+  {lb:'Streamlines',dr:dQ8,ht:'<p>Streamline: path traced by a fluid particle in steady flow; velocity tangent to streamline at every point. Streamlines never cross (that would imply two different velocities at same point). Close together \u2192 faster flow (continuity). For ideal flow: Bernoulli holds along a streamline.</p>'},
+  {lb:'Laminar vs turbulent flow',dr:dQ8,ht:'<p>Laminar: smooth parallel layers; low speed; adjacent layers slide past each other; Stokes\u2019 law applies; highly viscous fluids. Turbulent: chaotic mixing; eddies; high speed; drag \u221d v\u00b2; most everyday flows. Transition depends on Reynolds number Re = \u03c1vd/\u03b7.</p>'},
+  {lb:'Reynolds number',dr:dQ8,ht:'<div class="fm">Re = \u03c1vd/\u03b7</div><p>\u03c1 = fluid density, v = flow speed, d = pipe diameter, \u03b7 = viscosity. Re < ~1000: laminar. Re > ~2000: turbulent. 1000\u20132000: transitional. Dimensionless number; predicts flow type. Used in engineering design, aerodynamics, blood flow.</p>'},
+  {lb:'Flow rate and velocity profiles',dr:dQ8,ht:'<p>Volume flow rate Q = Av (m\u00b3/s). Mass flow rate = \u03c1Av (kg/s). Laminar flow in pipe: parabolic velocity profile (fastest at centre, zero at walls). Turbulent: flatter profile (faster near walls than laminar). Poiseuille\u2019s law: Q = \u03c0r\u2074\u0394p/(8\u03b7L) for laminar flow in pipe.</p>'},
+  {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var type=pick(['Re','flow_rate','Poiseuille']);if(type==='Re'){var rho=1000,v=rnd(1,10),d=rnd(1,10)/100,eta=rnd(1,10)/1000,Re=parseFloat((rho*v*d/eta).toFixed(0));return{question:'\u03c1=1000, v=<b>'+v+'m/s</b>, d=<b>'+d.toFixed(2)+'m</b>, \u03b7=<b>'+eta+'Pa\u202fs</b>. Re?',hints:['Re=\u03c1vd/\u03b7'],ans:Re,tol:Re*0.02,unit:'(dimensionless)',working:'Re=1000\u00d7'+v+'\u00d7'+d.toFixed(2)+'/'+eta+' = '+Re};}if(type==='flow_rate'){var A=rnd(1,20)/10000,v=rnd(1,10),Q=parseFloat((A*v).toExponential(3));return{question:'A=<b>'+A.toExponential(2)+'m\u00b2</b>, v=<b>'+v+'m/s</b>. Volume flow rate Q?',hints:['Q=Av'],ans:parseFloat(Q),tol:parseFloat(Q)*0.02,unit:'m\u00b3/s',working:'Q='+A.toExponential(2)+'\u00d7'+v+' = '+Q+' m\u00b3/s'};}var r=rnd(1,5)/1000,dp=rnd(100,1000),eta=rnd(1,10)/100,L=rnd(1,3),Q=parseFloat((Math.PI*Math.pow(r,4)*dp/(8*eta*L)).toExponential(3));return{question:'Poiseuille: r=<b>'+r*1000+'mm</b>, \u0394p=<b>'+dp+'Pa</b>, \u03b7=<b>'+eta+'</b>, L=<b>'+L+'m</b>. Q?',hints:['Q=\u03c0r\u2074\u0394p/(8\u03b7L)'],ans:parseFloat(Q),tol:parseFloat(Q)*0.05,unit:'m\u00b3/s',working:'\u03c0\u00d7'+r+'\u2074\u00d7'+dp+'/(8\u00d7'+eta+'\u00d7'+L+') \u2248 '+Q+' m\u00b3/s'};})},
+]},
+{ey:'Q9 \u2022 Y12 Physics \u2022 Fluids',ti:'Applications of Fluid Mechanics',su:'Apply fluid principles to real-world problems.',steps:[
+  {lb:'Aerofoil and lift',dr:dQ9,ht:'<p>Aerofoil (wing): curved on top, flatter below. Air travels faster over curved upper surface (longer path, same time) \u2192 lower pressure (Bernoulli). Net upward pressure difference \u2192 lift force. L = \u00bdC_L\u03c1Av\u00b2 where C_L = lift coefficient, A = wing area. Stall: angle of attack too large \u2192 turbulent separation \u2192 loss of lift.</p>'},
+  {lb:'Venturi effect and applications',dr:dQ9,ht:'<p>Venturi tube: constricted section \u2192 faster flow \u2192 lower pressure (Bernoulli). Venturi meter: measure \u0394p between wide and narrow sections \u2192 calculate flow speed. Carburettor: fast air through jet \u2192 low pressure draws fuel. Spray atomiser: fast air across tube top \u2192 low pressure lifts liquid. Bunsen burner: gas jet entrains air.</p>'},
+  {lb:'Pitot tube',dr:dQ9,ht:'<p>Pitot tube: forward-facing hole at stagnation point (v=0) and side hole (ambient pressure). Stagnation pressure = static + dynamic: p_total = p_static + \u00bd\u03c1v\u00b2. Speed: v = \u221a(2\u0394p/\u03c1) where \u0394p = p_total \u2212 p_static. Used on aircraft to measure airspeed.</p>'},
+  {lb:'Blood flow and medical applications',dr:dQ9,ht:'<p>Blood flow: laminar in capillaries (Poiseuille law). Arteries: turbulent (detectable as heart sounds). Plaque (arteriosclerosis) narrows artery \u2192 must flow faster for same Q (continuity) \u2192 lower pressure (Bernoulli) \u2192 risk of arterial wall collapse. Blood pressure measured with sphygmomanometer (mmHg above brachial artery).</p>'},
+  {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var type=pick(['pitot','venturi','Bernoulli_lift']);if(type==='pitot'){var rho=1.2,dp=rnd(100,2000),v=parseFloat(Math.sqrt(2*dp/rho).toFixed(2));return{question:'Pitot: \u0394p=<b>'+dp+'Pa</b>, \u03c1=1.2 kg/m\u00b3. Airspeed v?',hints:['v=\u221a(2\u0394p/\u03c1)'],ans:v,tol:v*0.02,unit:'m/s',working:'v=\u221a(2\u00d7'+dp+'/1.2) = '+v+' m/s'};}if(type==='venturi'){var v1=rnd(2,8),A1=rnd(5,20)/10000,A2=A1/rnd(2,5),v2=parseFloat((A1*v1/A2).toFixed(2));return{question:'Venturi: v\u2081=<b>'+v1+'m/s</b>, A\u2081=<b>'+A1.toExponential(2)+'</b>, A\u2082=<b>'+A2.toExponential(2)+'m\u00b2</b>. v\u2082?',hints:['A\u2081v\u2081=A\u2082v\u2082'],ans:v2,tol:v2*0.03,unit:'m/s',working:'v\u2082='+A1.toExponential(2)+'\u00d7'+v1+'/'+A2.toExponential(2)+' = '+v2+' m/s'};}var v=rnd(50,200),rho=1.2,CL=rnd(5,15)/10,A=rnd(10,50),L=parseFloat((0.5*CL*rho*A*v*v).toFixed(0));return{question:'C_L=<b>'+CL+'</b>, \u03c1=1.2, A=<b>'+A+'m\u00b2</b>, v=<b>'+v+'m/s</b>. Lift force?',hints:['L=\u00bdC_L\u03c1Av\u00b2'],ans:L,tol:L*0.02,unit:'N',working:'L=0.5\u00d7'+CL+'\u00d71.2\u00d7'+A+'\u00d7'+v+'\u00b2 = '+L+' N'};})},
+]},
+{ey:'Q10 \u2022 Y12 Physics \u2022 Fluids',ti:'Mixed Fluids Questions',su:'Integrated questions across all Y12-MEC-02 topics.',steps:[
+  {lb:'Summary',dr:dQ10,ht:'<p>p=\u03c1gh. F\u209a=\u03c1Vg. Stokes: F=6\u03c0\u03b7rv. Bubbles: p=4\u03b3/r. Drops: p=2\u03b3/r. Bernoulli: p+\u00bd\u03c1v\u00b2+\u03c1gh=const. Continuity: Av=const. Torricelli: v=\u221a(2gh). Re=\u03c1vd/\u03b7.</p>'},
+  {lb:'Linking concepts',dr:dQ10,ht:'<p>Terminal velocity: weight = upthrust + Stokes drag. Capillary rise: surface tension force = weight of liquid column. Pitot tube: Bernoulli gives airspeed from stagnation pressure. Hydraulic systems: Pascal\u2019s principle multiplies force.</p>'},
+  {lb:'WAEC emphasis',dr:dQ10,ht:'<p>WAEC tests: p=\u03c1gh; Archimedes; hydraulic systems; Stokes\u2019 law; surface tension formula; Bernoulli qualitatively. Know all formulae and when each applies (laminar/turbulent; bubble/drop; sphere/cylinder).</p>'},
+  {lb:'Key formulae',dr:dQ10,ht:'<div class="fm">p=\u03c1gh \u2022 F\u209a=\u03c1Vg \u2022 F_{Stokes}=6\u03c0\u03b7rv</div><div class="fm">p_{bubble}=4\u03b3/r \u2022 p_{drop}=2\u03b3/r</div><div class="fm">p+\u00bd\u03c1v\u00b2+\u03c1gh=const \u2022 A\u2081v\u2081=A\u2082v\u2082</div>'},
+  {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var type=pick(['pressure','upthrust','Stokes_drag']);if(type==='pressure'){var rho=pick([1000,800,13600]),h=rnd(1,20),p=parseFloat((rho*9.81*h).toFixed(0));return{question:'\u03c1=<b>'+rho+'</b>, h=<b>'+h+'m</b>. Fluid pressure?',hints:['p=\u03c1gh'],ans:p,tol:p*0.01,unit:'Pa',working:'p='+rho+'\u00d79.81\u00d7'+h+' = '+p+' Pa'};}if(type==='upthrust'){var V=rnd(100,5000)/1e6,rho=1000,F=parseFloat((rho*V*9.81).toFixed(2));return{question:'V_sub=<b>'+V.toExponential(2)+'m\u00b3</b>. Upthrust in water?',hints:['F=\u03c1Vg'],ans:F,tol:F*0.02,unit:'N',working:'F=1000\u00d7'+V.toExponential(2)+'\u00d79.81 = '+F+' N'};}var eta=rnd(1,10)/100,r=rnd(1,5)/1000,v=rnd(1,20)/100,F=parseFloat((6*Math.PI*eta*r*v).toFixed(5));return{question:'\u03b7=<b>'+eta+'</b>, r=<b>'+r*1000+'mm</b>, v=<b>'+v*100+'cm/s</b>. Stokes drag?',hints:['F=6\u03c0\u03b7rv'],ans:F,tol:F*0.05,unit:'N',working:'F=6\u03c0\u00d7'+eta+'\u00d7'+r+'\u00d7'+v+' = '+F+' N'};})},
+]},
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcTopicCode='Y12-MEC-02';
+window.markComplete=async function(){
+  const{data:{session}}=await _sb.auth.getSession();if(!session)return;
+  const{data:topic}=await _sb.from('topics').select('id').eq('topic_code','Y12-MEC-02').maybeSingle();if(!topic)return;
+  window._abcTopicId=topic.id;
+  await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body></html>
