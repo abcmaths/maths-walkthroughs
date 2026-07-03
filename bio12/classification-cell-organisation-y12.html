@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Classification and Cell Organisation — Year 12 Biology</title>
+<style>
+:root{--red:#2E7D32;--dark:#1b5e20;--cream:#F1F8F1;--ink:#0d1b2a;--line:#C8E6C9;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#555;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#F1F8F1);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:180px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:15px;line-height:1.6;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:16px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;margin-bottom:8px;line-height:1.5;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <div class="ht">Classification — Y12 Biology</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr"><div class="eyebrow" id="ey"></div><h1 id="ti"></h1><div class="sub" id="su"></div></div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+var ST={};
+function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn};return buildTry(id,o);}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="any" placeholder="Answer'+(o.unit?' ('+o.unit+')':'')+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=entry.genFn();entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.05)){fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{fb.className='try-fb er';fb.textContent='Not quite — check your working and try again.';}
+  }
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#0d1b2a';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#F1F8F1';stroke=stroke||'#2E7D32';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';}
+function arw(x1,y1,x2,y2,c,w){var id='m'+Math.round(x1*7+y2*3);return '<defs><marker id="'+id+'" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="'+(c||'#2E7D32')+'"/></marker></defs><line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#2E7D32')+'" stroke-width="'+(w||2)+'" marker-end="url(#'+id+')"/>';}
+function circ(cx,cy,r,fill,stroke){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'#F1F8F1')+'" stroke="'+(stroke||'#2E7D32')+'" stroke-width="1.5"/>';}
+
+function dQ1(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Taxonomic hierarchy','#2E7D32',13,'middle',true));
+var ranks=[['Kingdom','highest; broadest grouping'],['Phylum','major body plan'],['Class','similar orders'],['Order','similar families'],['Family','similar genera'],['Genus','closely related species'],['Species','can interbreed to produce fertile offspring']];
+ranks.forEach(function(r,i){if(i<=p){var w=440-i*40;o.push(R(240-w/2,36+i*30,w,22,'#F1F8F1','#2E7D32',1.5));o.push(T(240,52+i*30,r[0]+' \u2014 '+r[1],'#2E7D32',9,'middle',false));}});
+s.innerHTML=o.join('');}
+function dQ2(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Five kingdoms','#2E7D32',13,'middle',true));
+[['Prokaryotae','bacteria; no nucleus; unicellular; cell wall (peptidoglycan)'],['Protoctista','unicellular eukaryotes + algae; e.g. Amoeba, Paramecium, Chlamydomonas'],['Fungi','eukaryote; heterotroph; chitin cell wall; saprophytic; e.g. Mucor, yeast'],['Plantae','eukaryote; autotroph; cellulose cell wall; chloroplasts; e.g. mosses, ferns, flowering plants'],['Animalia','eukaryote; heterotroph; no cell wall; nervous coordination; e.g. all animals']].forEach(function(r,i){if(i<p+1){o.push(R(10,38+i*42,460,36,'#F1F8F1','#C8E6C9',1));o.push(T(80,56+i*42,r[0],'#2E7D32',10,'middle',true));o.push(T(290,56+i*42,r[1],'#555',8,'middle',false));}});
+s.innerHTML=o.join('');}
+function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Viruses — classification and structure','#2E7D32',12,'middle',true));
+if(p>=1){o.push(R(10,40,460,50,'#F1F8F1','#2E7D32',1.5));o.push(T(240,58,'Viruses are NOT classified in any kingdom \u2014 not considered living organisms','#C0272D',10,'middle',true));o.push(T(240,76,'Lack MRS GREN features; cannot replicate independently','#555',8,'middle',false));}
+if(p>=2){o.push(R(10,104,460,50,'#F1F8F1','#2E7D32',1.5));o.push(T(240,122,'Structure: nucleic acid (DNA or RNA) + protein coat (capsid)','#333',10,'middle',false));o.push(T(240,140,'Some have lipid envelope (HIV, influenza); attachment proteins on surface','#555',8,'middle',false));}
+if(p>=3){o.push(R(10,168,460,50,'#F1F8F1','#2E7D32',1.5));o.push(T(240,186,'Replication: attach to host cell; inject nucleic acid; use host machinery','#333',10,'middle',false));o.push(T(240,204,'Lytic cycle (destroy host) vs lysogenic cycle (DNA integrates in host)','#555',8,'middle',false));}
+if(p>=4){o.push(R(10,232,460,22,'#C8E6C9','#2E7D32',1));o.push(T(240,247,'Examples: HIV (RNA, retrovirus), influenza (RNA), bacteriophage (DNA)','#555',8,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ4(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Tissues, organs and organ systems','#2E7D32',12,'middle',true));
+[['Cell','smallest functional unit of life'],['Tissue','group of similar cells with common function (e.g. epithelium, xylem)'],['Organ','group of tissues performing a specific function (e.g. heart, leaf)'],['Organ system','group of organs working together (e.g. digestive, circulatory system)'],['Organism','all organ systems functioning as a whole']].forEach(function(r,i){if(i<p+1){var w=440-i*50;o.push(R(240-w/2,38+i*40,w,32,'#F1F8F1','#2E7D32',1.5));o.push(T(240,54+i*40,r[0],'#2E7D32',11,'middle',true));o.push(T(240,66+i*40,r[1],'#555',8,'middle',false));}});
+s.innerHTML=o.join('');}
+function dQ5(p){dQ2(p);}
+function dQ6(p){dQ3(p);}
+function dQ7(p){dQ4(p);}
+function dQ8(p){dQ1(p);}
+function dQ9(p){dQ2(p);}
+function dQ10(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Classification summary','#2E7D32',13,'middle',true));
+[['Taxonomy hierarchy','Kingdom\u2192Phylum\u2192Class\u2192Order\u2192Family\u2192Genus\u2192Species'],['Species definition','interbreed to produce fertile offspring'],['Binomial nomenclature','Genus species (italicised; Genus capitalised)'],['5 Kingdoms','Prokaryotae, Protoctista, Fungi, Plantae, Animalia'],['Viruses','not a kingdom; not living; nucleic acid + capsid'],['Tissues','groups of similar cells performing a common function'],['Organs','groups of tissues with a specific function']].forEach(function(r,i){if(i<p+1){o.push(R(10,36+i*30,460,24,'#F1F8F1','#C8E6C9',1));o.push(T(120,52+i*30,r[0],'#2E7D32',10,'middle',true));o.push(T(340,52+i*30,r[1],'#555',8,'middle',false));}});
+s.innerHTML=o.join('');}
+var QS=[
+{ey:'Q1 \u2022 Y12 Biology \u2022 Classification',ti:'Taxonomic Hierarchy',su:'State and use the taxonomic hierarchy. Explain the species concept.',steps:[
+  {lb:'Hierarchy',dr:dQ1,ht:'<p>Taxonomy organises life into nested groups. From broadest to most specific: <b>Kingdom, Phylum, Class, Order, Family, Genus, Species</b>. Mnemonic: "King Philip Came Over For Good Soup."</p>'},
+  {lb:'Species concept',dr:dQ1,ht:'<p>A <b>species</b> is a group of organisms that can interbreed (sexually reproduce) to produce <b>fertile</b> offspring. Organisms that produce sterile hybrids (e.g. mule from horse \u00d7 donkey) belong to different species. Problems with concept: bacteria reproduce asexually; ring species; hybridisation in plants.</p>'},
+  {lb:'Binomial nomenclature',dr:dQ1,ht:'<p><b>Binomial nomenclature</b> (Linnaeus): two-part Latin name. <b>Genus</b> (capitalised) + <b>species</b> (lower case). Written in italics (or underlined when handwritten). Example: <em>Homo sapiens</em>, <em>Panthera leo</em>, <em>Zea mays</em>. Universal language avoids confusion between common names.</p>'},
+  {lb:'Phylogenetics and cladistics',dr:dQ1,ht:'<p>Modern classification uses <b>phylogenetics</b>: grouping based on evolutionary relationships inferred from shared characteristics (morphology, biochemistry, DNA sequences). Cladograms show branching evolutionary relationships; branch points = common ancestors. More shared derived features = more closely related.</p>'},
+  {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var qs=[{q:'Which level of classification is most specific (smallest group)? 1=order, 2=species.',a:2,w:'Species is the most specific level; organisms in same species interbreed to produce fertile offspring. Answer: 2.'},{q:'In <em>Homo sapiens</em>, which word represents the genus? 1=Homo, 2=sapiens.',a:1,w:'Binomial: Genus (Homo) + species (sapiens). Genus is capitalised. Answer: 1.'},{q:'A mule (horse \u00d7 donkey) is sterile. This means horses and donkeys: 1=belong to the same species, 2=belong to different species.',a:2,w:'Species definition: interbreed to produce FERTILE offspring. Mule is sterile \u2192 different species. Answer: 2.'}];var qq=pick(qs);return{question:qq.q,hints:['Kingdom\u2192Phylum\u2192Class\u2192Order\u2192Family\u2192Genus\u2192Species. Binomial: Genus species.'],ans:qq.a,tol:0,unit:'',working:qq.w};})},
+]},
+{ey:'Q2 \u2022 Y12 Biology \u2022 Classification',ti:'The Five Kingdoms',su:'Classify organisms into the five kingdoms using key features.',steps:[
+  {lb:'Prokaryotae and Protoctista',dr:dQ2,ht:'<p><b>Prokaryotae:</b> unicellular; no membrane-bound nucleus; circular naked DNA; 70S ribosomes; cell wall of peptidoglycan (bacteria); example: <em>Escherichia coli</em>, <em>Mycobacterium tuberculosis</em>. <b>Protoctista:</b> unicellular eukaryotes + algae; varied structure; some autotrophic, some heterotrophic; examples: <em>Amoeba</em>, <em>Plasmodium</em> (malaria), <em>Paramecium</em>, seaweeds.</p>'},
+  {lb:'Fungi',dr:dQ2,ht:'<p><b>Fungi:</b> eukaryotic; heterotrophic by extracellular digestion (saprophytic or parasitic); chitin cell wall; no chloroplasts; may be unicellular (yeast) or multicellular with hyphae forming mycelium (mycelial fungi); store glycogen; reproduce by spores. Examples: <em>Mucor</em>, <em>Penicillium</em>, <em>Saccharomyces</em> (yeast).</p>'},
+  {lb:'Plantae and Animalia',dr:dQ2,ht:'<p><b>Plantae:</b> multicellular eukaryotes; autotrophic (photosynthesis); cellulose cell wall; chloroplasts; vacuoles. Subdivided: bryophytes (mosses), pteridophytes (ferns), gymnosperms (conifers), angiosperms (flowering plants). <b>Animalia:</b> multicellular eukaryotes; heterotrophic (holozoic); no cell wall; nervous coordination; motile. Subdivided into phyla (Chordata, Arthropoda, Mollusca, Annelida, etc.).</p>'},
+  {lb:'Key distinguishing features',dr:dQ2,ht:'<p>WAEC tip \u2014 key differences: Cell wall: Prokaryotae (peptidoglycan), Fungi (chitin), Plantae (cellulose), absent in Animalia. Nutrition: Plantae (autotrophic), Fungi (saprophytic extracellular), Animalia (holozoic). Storage: Plantae (starch), Animalia+Fungi (glycogen).</p>'},
+  {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var qs=[{q:'Fungi differ from plants because: 1=fungi are autotrophs with chloroplasts, 2=fungi are heterotrophs with chitin cell walls (not cellulose).',a:2,w:'Fungi: heterotrophic, chitin wall, no chloroplasts. Plants: autotrophic, cellulose wall. Answer: 2.'},{q:'Plasmodium (malaria parasite) belongs to kingdom: 1=Prokaryotae, 2=Protoctista.',a:2,w:'Plasmodium: unicellular eukaryote = Protoctista. Not prokaryote (has membrane nucleus). Answer: 2.'},{q:'Which kingdom stores energy as glycogen? 1=Plantae, 2=Animalia.',a:2,w:'Animalia (and Fungi) store glycogen. Plantae store starch. Answer: 2.'}];var qq=pick(qs);return{question:qq.q,hints:['Fungi: chitin, heterotroph. Protoctista: unicellular eukaryotes. Animalia: glycogen store.'],ans:qq.a,tol:0,unit:'',working:qq.w};})},
+]},
+{ey:'Q3 \u2022 Y12 Biology \u2022 Classification',ti:'Viruses',su:'Describe virus structure and replication. Explain why viruses are not classified as living.',steps:[
+  {lb:'Virus structure',dr:dQ3,ht:'<p>Viruses are acellular and non-living. Structure: <b>nucleic acid</b> (DNA or RNA, single or double stranded) + <b>protein coat (capsid)</b>. Some have a <b>lipid envelope</b> derived from host cell membrane (HIV, influenza \u2014 destroyed by soap/detergent). <b>Attachment proteins</b> (e.g. HIV gp120) bind to specific host receptors.</p>'},
+  {lb:'Why viruses are not alive',dr:dQ3,ht:'<p>Viruses lack: metabolism (no respiration, no enzyme-controlled reactions), cellular structure, independent reproduction, homeostasis, growth. They fail to show MRS GREN independently. They are considered <b>obligate intracellular parasites</b>: can only replicate inside a living host cell using host ribosomes, ATP, amino acids and enzymes.</p>'},
+  {lb:'Lytic and lysogenic cycles',dr:dQ3,ht:'<p><b>Lytic cycle:</b> virus injects nucleic acid into host \u2192 host cell replicates viral DNA and makes capsid proteins \u2192 new virions assembled \u2192 cell lysis releases virions \u2192 infect new cells. <b>Lysogenic cycle:</b> viral DNA integrates into host chromosome (prophage/provirus) \u2192 replicated with host DNA; may switch to lytic cycle (e.g. under stress).</p>'},
+  {lb:'HIV and retrovirus',dr:dQ3,ht:'<p>HIV is an RNA retrovirus. Contains <b>reverse transcriptase</b>: converts RNA \u2192 DNA \u2192 integrates into host T-helper cell genome (provirus). Host cell transcribes provirus \u2192 new HIV RNA + proteins assembled \u2192 bud off. Destroys T-helper cells \u2192 immune suppression \u2192 AIDS. Antiretrovirals target reverse transcriptase or protease.</p>'},
+  {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var qs=[{q:'Viruses are not classified as living because: 1=they are too small, 2=they cannot carry out metabolism or reproduce independently.',a:2,w:'Viruses: no metabolism, no independent reproduction \u2192 not living. They are obligate intracellular parasites. Answer: 2.'},{q:'HIV is a retrovirus because it: 1=has a DNA genome, 2=uses reverse transcriptase to convert RNA into DNA.',a:2,w:'Retrovirus: RNA \u2192 DNA (reverse transcriptase) \u2192 integrates into host genome. Answer: 2.'},{q:'In the lytic cycle, the host cell: 1=survives and releases viruses slowly, 2=is destroyed (lysed) to release new virions.',a:2,w:'Lytic cycle: host cell bursts (lysis) releasing many virions. Lysogenic: DNA integrates, host survives. Answer: 2.'}];var qq=pick(qs);return{question:qq.q,hints:['Virus: not living (no metabolism). Retrovirus: RNA\u2192DNA. Lytic: host cell lyses.'],ans:qq.a,tol:0,unit:'',working:qq.w};})},
+]},
+{ey:'Q4 \u2022 Y12 Biology \u2022 Classification',ti:'Organisation of Multicellular Organisms',su:'Describe levels of organisation from cell to organism. Give examples of tissues and organs.',steps:[
+  {lb:'Levels of organisation',dr:dQ4,ht:'<p>Cell \u2192 Tissue \u2192 Organ \u2192 Organ system \u2192 Organism. Each level involves <b>differentiation</b>: cells specialise in structure for specific functions. All cells in an organism contain the same DNA but express different genes.</p>'},
+  {lb:'Animal tissues',dr:dQ4,ht:'<p><b>Epithelial tissue:</b> covers surfaces; varies from squamous (thin, for exchange) to columnar (secretory, absorptive). <b>Connective tissue:</b> supports and connects (bone, cartilage, blood, adipose). <b>Muscle tissue:</b> skeletal (voluntary, striated), cardiac (involuntary, intercalated discs), smooth (involuntary, internal organs). <b>Nervous tissue:</b> neurons and glia.</p>'},
+  {lb:'Plant tissues',dr:dQ4,ht:'<p><b>Meristematic tissue:</b> actively dividing (shoot apex, root apex, cambium). <b>Xylem:</b> dead cells; thick lignified walls; transports water and mineral ions. <b>Phloem:</b> living sieve tube elements + companion cells; transports assimilates (sucrose, amino acids). <b>Parenchyma:</b> thin-walled; metabolically active; storage and photosynthesis. <b>Epidermis:</b> protective outer layer.</p>'},
+  {lb:'Stem cells and differentiation',dr:dQ4,ht:'<p><b>Stem cells:</b> undifferentiated cells capable of self-renewal and differentiation. <b>Totipotent</b> (zygote, first few divisions): can become any cell type including extra-embryonic. <b>Pluripotent</b> (inner cell mass): can become any body cell. <b>Multipotent</b> (adult stem cells): limited range (e.g. haematopoietic stem cells \u2192 blood cells). Differentiation involves selective gene expression via transcription factors.</p>'},
+  {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var qs=[{q:'Xylem tissue is described as dead. This is because: 1=xylem cells lose their nucleus and cytoplasm to form hollow tubes for water transport, 2=xylem does not function.',a:1,w:'Xylem: cells die at maturity; cell wall remains (lignified); forms hollow tubes for mass flow of water. Answer: 1.'},{q:'A pluripotent stem cell can: 1=become only blood cells, 2=differentiate into almost any body cell type.',a:2,w:'Pluripotent: can become most body cell types (not extra-embryonic). Answer: 2.'},{q:'Phloem transports: 1=water and mineral ions only, 2=assimilates (sucrose, amino acids) in both directions.',a:2,w:'Phloem: sucrose, amino acids, etc. (assimilates); bidirectional. Xylem: water + minerals, one direction. Answer: 2.'}];var qq=pick(qs);return{question:qq.q,hints:['Xylem: dead, water. Phloem: living, assimilates. Pluripotent: most body cells.'],ans:qq.a,tol:0,unit:'',working:qq.w};})},
+]},
+{ey:'Q5 \u2022 Y12 Biology \u2022 Classification',ti:'Dichotomous Keys and Identification',su:'Construct and use dichotomous keys to classify organisms.',steps:[
+  {lb:'Dichotomous keys',dr:dQ5,ht:'<p>A <b>dichotomous key</b> is a tool for identifying organisms. At each step, two contrasting statements are given; one leads to the next step or to an identification. Keys must be: unambiguous, based on observable features, progressive (narrowing down options). WAEC: you may be asked to use OR construct a key.</p>'},
+  {lb:'Constructing a key',dr:dQ5,ht:'<p>Good key features: (1) use measurable/observable features; (2) each couplet presents two mutually exclusive options; (3) avoid vague terms ("large" vs "small"); (4) use positive statements first. Example: 1a. Has wings \u2192 go to 2; 1b. No wings \u2192 go to 3; 2a. Has 6 legs \u2192 insect; 2b. Has 4 wings and 8 legs \u2192 not insect.</p>'},
+  {lb:'Arthropod classification',dr:dQ5,ht:'<p>Phylum Arthropoda: exoskeleton (chitin), jointed limbs, segmented body. Classes: <b>Insecta</b> (3 body parts, 6 legs, 2 antennae, usually wings); <b>Arachnida</b> (2 body parts, 8 legs, no antennae); <b>Crustacea</b> (2 antennae pairs, varied legs, gills); <b>Myriapoda</b> (many segments, many legs; e.g. centipede, millipede).</p>'},
+  {lb:'Vertebrate classification',dr:dQ5,ht:'<p>Phylum Chordata, subphylum Vertebrata. Classes: <b>Fish</b> (scales, gills, ectotherm); <b>Amphibia</b> (moist skin, 2 life stages, ectotherm); <b>Reptilia</b> (dry scales, internal fertilisation, ectotherm); <b>Aves</b> (feathers, beak, endotherm); <b>Mammalia</b> (hair, mammary glands, live birth mostly, endotherm).</p>'},
+  {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var qs=[{q:'An organism has 8 legs, 2 body parts and no antennae. It belongs to class: 1=Insecta, 2=Arachnida.',a:2,w:'Arachnida: 8 legs, 2 body parts (cephalothorax + abdomen), no antennae. Insecta: 6 legs. Answer: 2.'},{q:'Birds (Aves) are endotherms. This means: 1=they cannot regulate body temperature, 2=they maintain a constant internal temperature using metabolic heat.',a:2,w:'Endotherm = warm-blooded; metabolic heat maintains constant body temperature. Answer: 2.'},{q:'Which feature distinguishes mammals from all other vertebrates? 1=presence of hair and mammary glands, 2=having a backbone.',a:1,w:'All vertebrates have a backbone. Mammals uniquely: hair, mammary glands, mainly live birth. Answer: 1.'}];var qq=pick(qs);return{question:qq.q,hints:['Arachnida: 8 legs, 2 parts. Insecta: 6 legs, 3 parts. Mammals: hair+mammary glands.'],ans:qq.a,tol:0,unit:'',working:qq.w};})},
+]},
+{ey:'Q6 \u2022 Y12 Biology \u2022 Classification',ti:'Flowering Plant Structure',su:'Describe external and internal structure of a flowering plant.',steps:[
+  {lb:'External morphology',dr:dQ6,ht:'<p>Angiosperm (flowering plant) body plan: <b>roots</b> (anchorage, water/mineral absorption, storage), <b>stem</b> (support, transport), <b>leaves</b> (photosynthesis, gas exchange, transpiration), <b>flowers</b> (sexual reproduction). Monocots (1 cotyledon, parallel veins, fibrous roots, flower parts in 3s) vs dicots (2 cotyledons, net veins, taproot, flower parts in 4s or 5s).</p>'},
+  {lb:'Leaf internal structure',dr:dQ6,ht:'<p>Leaf cross section: upper epidermis (waxy cuticle, reduces water loss); palisade mesophyll (columnar cells, many chloroplasts \u2014 main photosynthesis site); spongy mesophyll (irregular cells, large air spaces \u2014 gas exchange); lower epidermis (stomata with guard cells); vascular bundles (xylem above, phloem below).</p>'},
+  {lb:'Root structure',dr:dQ6,ht:'<p>Root hair cells: elongated extensions of epidermal cells; large surface area for absorption of water (osmosis) and mineral ions (active transport). Cortex: loosely packed parenchyma for storage and radial transport. Endodermis: Casparian strip (suberin) controls ion passage to xylem. Xylem and phloem form the stele at the centre of the root.</p>'},
+  {lb:'Stem transport',dr:dQ6,ht:'<p>Vascular bundles in stem: xylem (inner) and phloem (outer) separated by cambium. In dicots: vascular bundles arranged in a ring near the periphery. Xylem: thick lignified walls; conducts water upward. Phloem: sieve tubes + companion cells; conducts assimilates. Cambium: meristematic; produces secondary growth (wood).</p>'},
+  {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var qs=[{q:'The Casparian strip in the root endodermis is important because: 1=it prevents all water from entering the xylem, 2=it forces water and ions through the endodermal cell cytoplasm, allowing selective control.',a:2,w:'Casparian strip: impermeable to water in cell walls \u2192 apoplast pathway blocked \u2192 symplast route controlled. Answer: 2.'},{q:'Palisade mesophyll cells are the main site of photosynthesis because: 1=they are near the lower surface with stomata, 2=they are columnar, packed with chloroplasts and near the upper surface for maximum light.',a:2,w:'Palisade: upper layer, many chloroplasts, columnar = maximum light absorption. Answer: 2.'},{q:'In a dicot stem, phloem is located: 1=outside the xylem in vascular bundles, 2=inside the xylem.',a:1,w:'Vascular bundle: xylem (inner/adaxial) + phloem (outer/abaxial). Answer: 1.'}];var qq=pick(qs);return{question:qq.q,hints:['Casparian strip: forces symplast route. Palisade: max light. Phloem: outside xylem.'],ans:qq.a,tol:0,unit:'',working:qq.w};})},
+]},
+{ey:'Q7 \u2022 Y12 Biology \u2022 Classification',ti:'Diversity within the Plant Kingdom',su:'Compare major plant groups: bryophytes, pteridophytes, gymnosperms, angiosperms.',steps:[
+  {lb:'Bryophytes and Pteridophytes',dr:dQ7,ht:'<p><b>Bryophytes</b> (mosses, liverworts, hornworts): no true vascular tissue; no roots (rhizoids); no waterproof cuticle; depend on water for reproduction (motile sperm). <b>Pteridophytes</b> (ferns, horsetails): have vascular tissue (xylem+phloem); true roots, stems, leaves; still need water for reproduction (motile sperm); produce spores not seeds.</p>'},
+  {lb:'Gymnosperms and Angiosperms',dr:dQ7,ht:'<p><b>Gymnosperms</b> (conifers, cycads, Ginkgo): seeds exposed on cones (not enclosed in fruit); wind pollinated; needle-like leaves (reduce water loss); no double fertilisation. <b>Angiosperms</b> (flowering plants): seeds enclosed in fruit (ovary wall); flowers (attract pollinators); double fertilisation (1 sperm + egg \u2192 zygote; 1 sperm + 2 polar nuclei \u2192 endosperm).</p>'},
+  {lb:'Evolutionary trends',dr:dQ7,ht:'<p>Plant evolution: increasing independence from water: bryophytes (need standing water) \u2192 pteridophytes (water for sperm) \u2192 gymnosperms (pollen; no water for fertilisation) \u2192 angiosperms (pollen + enclosed seeds). Increasing vascular complexity. Seeds provide protection and food store for embryo.</p>'},
+  {lb:'WAEC comparison table',dr:dQ7,ht:'<p>Key WAEC comparison: Vascular tissue? Seeds? Flowers? Fruit?<br>Bryophytes: No/No/No/No. Pteridophytes: Yes/No/No/No. Gymnosperms: Yes/Yes/No/No. Angiosperms: Yes/Yes/Yes/Yes. Know examples for each group.</p>'},
+  {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var qs=[{q:'Which group of plants produces seeds enclosed in a fruit? 1=gymnosperms, 2=angiosperms.',a:2,w:'Angiosperms: seeds in fruit (ovary wall develops into fruit). Gymnosperms: naked seeds on cones. Answer: 2.'},{q:'Bryophytes depend on water for reproduction because: 1=their sperm are motile and must swim to the egg, 2=their seeds need water to germinate.',a:1,w:'Bryophytes: flagellated sperm swim through water film to reach egg. Answer: 1.'},{q:'A conifer is an example of: 1=an angiosperm, 2=a gymnosperm.',a:2,w:'Conifers: gymnosperms (naked seeds on cones; no flowers). Answer: 2.'}];var qq=pick(qs);return{question:qq.q,hints:['Angiosperm: seeds in fruit, flowers. Gymnosperm: naked seeds. Bryophytes: need water for sperm.'],ans:qq.a,tol:0,unit:'',working:qq.w};})},
+]},
+{ey:'Q8 \u2022 Y12 Biology \u2022 Classification',ti:'Animal Phyla',su:'Compare key features of major animal phyla.',steps:[
+  {lb:'Invertebrate phyla I',dr:dQ8,ht:'<p><b>Porifera</b> (sponges): no true tissues; filter feeders; sessile. <b>Cnidaria</b> (jellyfish, hydra, coral): radial symmetry; two layers (ectoderm/endoderm); stinging cells (nematocysts). <b>Platyhelminthes</b> (flatworms, tapeworms): acoelomate; bilateral symmetry; no body cavity; parasites or free-living. <b>Nematoda</b> (roundworms): pseudocoelomate; cuticle; includes many parasites (<em>Ascaris</em>, hookworm).</p>'},
+  {lb:'Invertebrate phyla II',dr:dQ8,ht:'<p><b>Annelida</b> (earthworms, leeches): true coelom; segmented; setae for movement; closed circulatory system. <b>Mollusca</b> (snails, clams, octopus): soft body; mantle; usually shell; varied body plan. <b>Arthropoda</b>: largest phylum; exoskeleton (chitin); jointed limbs; classes include Insecta, Arachnida, Crustacea, Myriapoda. <b>Echinodermata</b> (starfish, sea urchins): radial symmetry (adults); water vascular system; endoskeleton.</p>'},
+  {lb:'Phylum Chordata',dr:dQ8,ht:'<p>Chordates: (1) notochord at some stage; (2) dorsal hollow nerve cord; (3) pharyngeal gill slits; (4) post-anal tail. Vertebrates: notochord replaced by vertebral column. Five classes of vertebrates: fish (Pisces), Amphibia, Reptilia, Aves, Mammalia \u2014 arranged by increasing independence from water and complexity.</p>'},
+  {lb:'Parasitology \u2014 WAEC relevance',dr:dQ8,ht:'<p>WAEC emphasises medically important organisms. Parasitic worms: tapeworm (<em>Taenia solium</em> in pigs/humans; absorbs food via tegument, no gut), hookworm (<em>Ancylostoma</em>, blood-sucker, causes anaemia), <em>Ascaris lumbricoides</em> (intestinal roundworm). Vectors: <em>Anopheles</em> mosquito (malaria), <em>Culex</em> (filariasis), tsetse fly (sleeping sickness).</p>'},
+  {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var qs=[{q:'The largest animal phylum (most species) is: 1=Chordata, 2=Arthropoda.',a:2,w:'Arthropoda: ~80% of all known animal species; includes insects, spiders, crustaceans. Answer: 2.'},{q:'Which feature distinguishes Annelida from Nematoda? 1=Annelida are segmented with a true coelom, 2=Annelida have no body cavity.',a:1,w:'Annelida: true coelom, segmented body. Nematoda: pseudocoelom, unsegmented. Answer: 1.'},{q:'<em>Taenia</em> (tapeworm) has no gut because: 1=it absorbs digested nutrients directly through its outer tegument from the host\'s intestine, 2=it does not need food.',a:1,w:'Tapeworm: lives in host intestine; absorbs pre-digested nutrients across tegument. Answer: 1.'}];var qq=pick(qs);return{question:qq.q,hints:['Arthropoda: largest phylum. Annelida: segmented, true coelom. Tapeworm: no gut, absorbs via tegument.'],ans:qq.a,tol:0,unit:'',working:qq.w};})},
+]},
+{ey:'Q9 \u2022 Y12 Biology \u2022 Classification',ti:'Biological Nomenclature and Evidence for Evolution',su:'Use molecular and morphological evidence for classification. Evaluate the concept of species.',steps:[
+  {lb:'Evidence for classification',dr:dQ9,ht:'<p>Traditional taxonomy: morphological (body form/structure) and anatomical evidence. Modern approaches: (1) <b>Molecular systematics:</b> comparing DNA/RNA/protein sequences; more similar sequence = more closely related; cytochrome c gene widely used. (2) <b>Immunological:</b> degree of cross-reaction between antisera indicates relatedness. (3) <b>Karyotyping:</b> comparing chromosome number and banding patterns.</p>'},
+  {lb:'Homologous and analogous structures',dr:dQ9,ht:'<p><b>Homologous structures:</b> same basic structure/origin, different function \u2014 evidence of common ancestry (e.g. pentadactyl limb in mammals: human arm, whale flipper, bat wing, horse leg \u2014 all modified from same ancestral structure). <b>Analogous structures:</b> different origin, similar function (e.g. insect wing vs bird wing) \u2014 evidence of convergent evolution, NOT common ancestry.</p>'},
+  {lb:'Problems with species concept',dr:dQ9,ht:'<p>The biological species concept (interbreeding + fertile offspring) has limitations: (1) Cannot apply to asexually reproducing organisms (bacteria, many plants). (2) Ring species: adjacent populations interbreed but populations at the ends of the ring cannot. (3) Fossil organisms cannot be tested. (4) Horizontal gene transfer in bacteria complicates phylogeny. Morphological species concept used as alternative.</p>'},
+  {lb:'WAEC essay technique',dr:dQ9,ht:'<p>When comparing classification systems in WAEC: state what each system uses, give specific examples, discuss limitations. Key examples: five kingdom vs three domain (Archaea, Bacteria, Eukarya) system; Whittaker five kingdoms vs Woese domains based on rRNA sequences. Modern classification increasingly uses molecular data.</p>'},
+  {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var qs=[{q:'Homologous structures are evidence for: 1=convergent evolution from different ancestors, 2=common ancestry (divergent evolution).',a:2,w:'Homologous: same structure, different function \u2192 common ancestor. Analogous: same function, different origin \u2192 convergent evolution. Answer: 2.'},{q:'Why cannot the biological species concept apply to bacteria? 1=bacteria are too small, 2=bacteria reproduce asexually and transfer genes between species (horizontal gene transfer).',a:2,w:'Species concept requires interbreeding. Bacteria: asexual + horizontal gene transfer. Answer: 2.'},{q:'Molecular evidence for classification compares: 1=body shape and size only, 2=DNA/protein sequences (more similar = more closely related).',a:2,w:'Molecular systematics: sequence similarity reflects evolutionary relatedness. Answer: 2.'}];var qq=pick(qs);return{question:qq.q,hints:['Homologous: common ancestor. Analogous: convergent evolution. Molecular: DNA similarity.'],ans:qq.a,tol:0,unit:'',working:qq.w};})},
+]},
+{ey:'Q10 \u2022 Y12 Biology \u2022 Classification',ti:'Mixed Classification Questions',su:'Integrated questions across all Y12-CLA-01 topics.',steps:[
+  {lb:'Summary',dr:dQ10,ht:'<p>Taxonomic hierarchy: Kingdom\u2192Phylum\u2192Class\u2192Order\u2192Family\u2192Genus\u2192Species. Five kingdoms: Prokaryotae, Protoctista, Fungi, Plantae, Animalia. Viruses: not living. Arthropoda: largest phylum. Angiosperms: seeds in fruit, double fertilisation.</p>'},
+  {lb:'Cross-topic links',dr:dQ10,ht:'<p>Classification underpins all of biology. Links to: health (know which kingdom parasites belong to for treatment); ecology (species interactions); genetics (species concept); evolution (phylogenetics). WAEC often tests ability to justify kingdom membership using specific structural evidence.</p>'},
+  {lb:'WAEC practice — justify classification',dr:dQ10,ht:'<p>Practice answer structure: "<em>Plasmodium</em> belongs to the kingdom Protoctista because (1) it is a unicellular eukaryote (has membrane-bound nucleus), (2) it is not a plant (no chloroplasts), not a fungus (no chitin wall), not an animal (unicellular), and not a prokaryote (has nucleus and membrane-bound organelles)."</p>'},
+  {lb:'Calculation: magnification',dr:dQ10,ht:'<div class="fm">magnification = image size / actual size</div><div class="fm">actual size = image size / magnification</div><p>Convert units: 1 mm = 1000 \u03bcm. Scale bar: calculate actual length from image length and scale bar ratio.</p>'},
+  {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var type=pick(['magnification','kingdom','hierarchy']);if(type==='magnification'){var actual=rnd(2,20),mag=pick([100,200,400,500,1000]);var image=actual*mag;var type2=pick(['find_image','find_actual']);if(type2==='find_image')return{question:'Actual size = <b>'+actual+' \u03bcm</b>. Magnification = \u00d7<b>'+mag+'</b>. Image size?',hints:['image = actual \u00d7 magnification'],ans:image,tol:0,unit:'\u03bcm',working:'image = '+actual+'\u00d7'+mag+' = '+image+' \u03bcm'};return{question:'Image size = <b>'+image+' \u03bcm</b>. Magnification = \u00d7<b>'+mag+'</b>. Actual size?',hints:['actual = image / magnification'],ans:actual,tol:0,unit:'\u03bcm',working:'actual = '+image+'/'+mag+' = '+actual+' \u03bcm'};}if(type==='kingdom'){var qs=[{q:'Yeast belongs to kingdom: 1=Plantae, 2=Fungi.',a:2,w:'Yeast: unicellular fungus; chitin wall, heterotroph. Answer: 2.'},{q:'An organism with a membrane-bound nucleus but no chloroplasts, chitin wall, or multicellular organisation is in kingdom: 1=Protoctista, 2=Prokaryotae.',a:1,w:'Unicellular eukaryote with nucleus = Protoctista. Answer: 1.'}];var qq=pick(qs);return{question:qq.q,hints:['Fungi: chitin, heterotroph. Protoctista: unicellular eukaryotes.'],ans:qq.a,tol:0,unit:'',working:qq.w};}var ranks=['Kingdom','Phylum','Class','Order','Family','Genus','Species'];var i=rnd(0,6);return{question:'What is the correct taxonomic rank at position '+(i+1)+' (1=broadest) in the hierarchy?',hints:['K-P-C-O-F-G-S'],ans:i+1,tol:0,unit:'('+ranks[i]+')',working:'Position '+(i+1)+' = '+ranks[i]+'. Mnemonic: King Philip Came Over For Good Soup.'};})},
+]},
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcTopicCode='Y12-CLA-01';
+window.markComplete=async function(){
+  const{data:{session}}=await _sb.auth.getSession();if(!session)return;
+  const{data:topic}=await _sb.from('topics').select('id').eq('topic_code','Y12-CLA-01').maybeSingle();if(!topic)return;
+  window._abcTopicId=topic.id;
+  await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body></html>
