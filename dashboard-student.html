@@ -714,7 +714,8 @@
   }
 
   function renderStrandBars() {
-    const strandTopics = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
+    const isArtsSubjSB = ARTS_SUBJECTS.includes(currentSubject);
+    const strandTopics = allTopics.filter(t => (isArtsSubjSB || t.year_group === myYearGroup) && (t.subject || 'maths') === currentSubject);
     const strands = {};
     strandTopics.forEach(t => {
       const s = t.strand || 'Other';
@@ -746,7 +747,8 @@
   }
 
   function renderSummaryCards() {
-    const myTopics  = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
+    const isArtsSubjSC = ARTS_SUBJECTS.includes(currentSubject);
+    const myTopics  = allTopics.filter(t => (isArtsSubjSC || t.year_group === myYearGroup) && (t.subject || 'maths') === currentSubject);
     const total     = myTopics.length;
     const completed = myTopics.filter(t => progressMap[t.id] === 'completed').length;
     const started   = myTopics.filter(t => progressMap[t.id] === 'started').length;
@@ -758,7 +760,8 @@
 
     // Always-visible per-subject split across all 5 subjects
     ['maths', 'science', 'physics', 'chemistry', 'biology', 'crs', 'government'].forEach(subj => {
-      const subjTopics    = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === subj);
+      const isArtsSubjFC = ARTS_SUBJECTS.includes(subj);
+      const subjTopics    = allTopics.filter(t => (isArtsSubjFC || t.year_group === myYearGroup) && (t.subject || 'maths') === subj);
       const subjTotal     = subjTopics.length;
       const subjCompleted = subjTopics.filter(t => progressMap[t.id] === 'completed').length;
       const subjStarted   = subjTopics.filter(t => progressMap[t.id] === 'started').length;
@@ -809,7 +812,9 @@
     const subtitles = { maths: 'Maths Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal' };
     document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Portal';
 
-    // Year selector: hide Add Maths (Y13) when not in Maths
+    // Year selector: hide Add Maths (Y13) when not in Maths; hide entirely for arts
+    const yearSelector = document.querySelector('.year-selector') || document.getElementById('year-selector');
+    if (yearSelector) yearSelector.style.display = isArtsGrp ? 'none' : '';
     const addMathsOpt = document.querySelector('#year-select option[value="13"]');
     if (addMathsOpt) {
       addMathsOpt.style.display = isMaths ? '' : 'none';
@@ -827,7 +832,12 @@
     const value = document.getElementById('year-select').value;
     let filtered, label;
 
-    if (value === 'own') {
+    const isArtsSubj = ARTS_SUBJECTS.includes(currentSubject);
+    if (isArtsSubj) {
+      // CRS and Government span Y10–12 as a single syllabus — show all regardless of year
+      filtered = allTopics.filter(t => (t.subject || 'maths') === currentSubject);
+      label    = 'Showing all ' + (currentSubject === 'crs' ? 'CRS' : 'Government') + ' topics';
+    } else if (value === 'own') {
       filtered = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
       label    = 'Showing your Year ' + myYearGroup + ' topics';
     } else if (value === '13') {
