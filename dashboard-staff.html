@@ -218,6 +218,8 @@
           <option value="physics">⚡ Physics</option>
           <option value="chemistry">⚗️ Chemistry</option>
           <option value="biology">🌿 Biology</option>
+                <option value="crs">✝️ CRS</option>
+                <option value="government">🏛️ Government</option>
         </select>
         <select id="topics-filter-year" onchange="renderTopicsTab()">
           <option value="7">Year 7</option>
@@ -353,6 +355,12 @@
           <option value="teacher">Teachers</option>
           <option value="admin">Admin</option>
         </select>
+        <select id="users-filter-stream" onchange="renderUsersTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.85rem">
+          <option value="">All Streams</option>
+          <option value="science">Science</option>
+          <option value="arts">Arts</option>
+          <option value="both">Both</option>
+        </select>
         <select id="users-filter-year" onchange="renderUsersTab()">
           <option value="">All Year Groups</option>
           <option value="7">Year 7</option>
@@ -378,6 +386,7 @@
                 <th>Role</th>
                 <th>Year</th>
                 <th>Form</th>
+                <th>Stream</th>
                 <th>Last Sign In</th>
                 <th>Actions</th>
               </tr>
@@ -566,6 +575,14 @@
       <div id="edit-form-row">
         <label style="display:block;font-size:0.8rem;font-weight:600;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px">Form Class</label>
         <input type="text" id="edit-form" placeholder="e.g. 10A" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;box-sizing:border-box">
+      </div>
+      <div id="edit-stream-row">
+        <label style="display:block;font-size:0.8rem;font-weight:600;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px">Stream</label>
+        <select id="edit-stream" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;background:white;box-sizing:border-box">
+          <option value="science">Science (Physics / Chemistry / Biology)</option>
+          <option value="arts">Arts (CRS / Government)</option>
+          <option value="both">Both</option>
+        </select>
       </div>
     </div>
     <div style="display:flex;gap:10px;align-items:center">
@@ -1773,18 +1790,20 @@
     const yearFilter   = document.getElementById('users-filter-year').value;
     const searchFilter = document.getElementById('users-search').value.toLowerCase();
 
+    const streamFilter = document.getElementById('users-filter-stream') ? document.getElementById('users-filter-stream').value : '';
     const filtered = allUsersWithEmail.filter(u => {
       const matchRole   = !roleFilter   || u.role === roleFilter;
       const matchYear   = !yearFilter   || String(u.year_group) === yearFilter;
       const matchSearch = !searchFilter || u.full_name.toLowerCase().includes(searchFilter);
-      return matchRole && matchYear && matchSearch;
+      const matchStream = !streamFilter || (u.stream || 'science') === streamFilter;
+      return matchRole && matchYear && matchSearch && matchStream;
     });
 
     document.getElementById('users-count').textContent = `— ${filtered.length} user${filtered.length !== 1 ? 's' : ''}`;
 
     const tbody = document.getElementById('users-tbody');
     if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px">No users found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#aaa;padding:24px">No users found</td></tr>';
       return;
     }
 
@@ -1797,10 +1816,11 @@
         <td><span class="badge ${roleBadge}">${u.role}</span></td>
         <td>${u.year_group ? 'Year ' + u.year_group : '—'}</td>
         <td>${u.form_class || '—'}</td>
+        <td><span style="font-size:0.78rem;padding:2px 8px;border-radius:10px;font-weight:600;background:${u.stream==='arts'?'#F3E5F5':u.stream==='both'?'#E8F5E9':'#E3F2FD'};color:${u.stream==='arts'?'#6B1F1F':u.stream==='both'?'#2E7D32':'#1565C0'}">${u.stream||'science'}</span></td>
         <td style="font-size:0.82rem;color:#888">${lastSignIn}</td>
         <td>
           ${u.role === 'student' ? `<button class="btn-link" onclick="openStudentModal('${u.id}')">View</button>` : ''}
-          <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}','${u.role}','${u.year_group||''}','${u.form_class||''}')">Edit</button>
+          <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}','${u.role}','${u.year_group||''}','${u.form_class||''}','${u.stream||'science'}')">Edit</button>
         </td>
       </tr>`;
     }).join('');
@@ -1838,12 +1858,13 @@
 
   let _editUserId = null;
 
-  window.openEditUser = function(id, name, role, year, form) {
+  window.openEditUser = function(id, name, role, year, form, stream) {
     _editUserId = id;
-    document.getElementById('edit-name').value  = name;
-    document.getElementById('edit-role').value  = role;
-    document.getElementById('edit-year').value  = year;
-    document.getElementById('edit-form').value  = form;
+    document.getElementById('edit-name').value   = name;
+    document.getElementById('edit-role').value   = role;
+    document.getElementById('edit-year').value   = year;
+    document.getElementById('edit-form').value   = form;
+    document.getElementById('edit-stream').value = stream || 'science';
     document.getElementById('edit-msg').textContent = '';
     toggleEditYear();
     document.getElementById('edit-modal').classList.add('open');
@@ -1873,11 +1894,13 @@
     btn.disabled = true;
     btn.textContent = 'Saving…';
 
+    const stream = document.getElementById('edit-stream') ? document.getElementById('edit-stream').value : 'science';
     const update = {
       full_name:  name,
       role,
       year_group: year ? parseInt(year) : null,
-      form_class: form || null
+      form_class: form || null,
+      stream:     stream
     };
 
     const { error } = await supabase.from('profiles').update(update).eq('id', _editUserId);
