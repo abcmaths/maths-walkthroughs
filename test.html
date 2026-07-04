@@ -771,6 +771,27 @@
 
   document.getElementById('topic-select').addEventListener('change', checkReady);
 
+  // ── Detect CRS/Government questions that are really multiple-choice but were   ──
+  // ── authored as tryIt() numeric questions with options baked into the text     ──
+  // ── (e.g. "...?<br><small>1: A &nbsp; 2: B &nbsp; 3: C &nbsp; 4: D</small>")    ──
+  const EMBEDDED_MC_PATTERN = /^([\s\S]*?)<br>\s*<small>\s*1:\s*([\s\S]*?)\s*&nbsp;\s*2:\s*([\s\S]*?)\s*&nbsp;\s*3:\s*([\s\S]*?)\s*&nbsp;\s*4:\s*([\s\S]*?)\s*<\/small>\s*$/;
+
+  function tryExtractEmbeddedMC(raw) {
+    if (typeof raw.question !== 'string') return null;
+    const m = raw.question.match(EMBEDDED_MC_PATTERN);
+    if (!m) return null;
+    const ansNum = parseInt(raw.ans, 10);
+    if (isNaN(ansNum) || ansNum < 1 || ansNum > 4) return null;
+    return {
+      type: 'mc',
+      question: m[1],
+      options: [m[2], m[3], m[4], m[5]],
+      correct: ansNum - 1,
+      working: raw.working,
+      hints: raw.hints || []
+    };
+  }
+
   // ── Normalize a generated question to a consistent shape ──
   function normalizeQuestion(raw, type) {
     if (!raw) return null;
@@ -785,6 +806,10 @@
     }
     // numeric
     if (raw.question === undefined || raw.ans === undefined) return null;
+    // CRS/Government disguise multiple-choice as a numeric "enter 1-4" question —
+    // convert these to proper clickable options instead of a number box.
+    const embeddedMC = tryExtractEmbeddedMC(raw);
+    if (embeddedMC) return embeddedMC;
     return Object.assign({ type: 'numeric' }, raw);
   }
 
