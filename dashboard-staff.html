@@ -91,6 +91,7 @@
     <div class="subject-toggle">
       <button id="toggle-maths" class="active">📐 Maths</button>
       <button id="toggle-science">🔬 Science</button>
+      <button id="toggle-arts">✝️ Arts</button>
     </div>
     <div class="science-subtabs" id="science-subtabs">
       <button class="science-subtab" id="subtab-science" style="--subtab-accent:#1565C0" onclick="window.switchSubject('science')">🔬 Combined Sci</button>
@@ -416,8 +417,6 @@
             <option value="physics">⚡ Physics</option>
             <option value="chemistry">⚗️ Chemistry</option>
             <option value="biology">🌿 Biology</option>
-            <option value="crs">✝️ CRS</option>
-            <option value="government">🏛️ Government</option>
           </select>
           <select id="review-filter-year" onchange="renderReviewTab()">
             <option value="">All Year Groups</option>
@@ -1467,22 +1466,6 @@
     'Y12-REP-01': 'bio12/reproduction-extended-y12.html',
   };
 
-  const CRS_WALKTHROUGH_FILES = {
-    'CRS-OT-01': 'crs/sovereignty-of-god.html',
-    'CRS-OT-02': 'crs/the-covenant.html',
-    'CRS-OT-03': 'crs/leadership-ot.html',
-    'CRS-OT-04': 'crs/divine-guidance-protection-provision.html',
-    'CRS-OT-05': 'crs/the-prophets.html',
-  };
-
-  const GOV_WALKTHROUGH_FILES = {
-    'GOV-ELE-01': 'gov/meaning-and-scope-of-government.html',
-    'GOV-ELE-02': 'gov/the-state-and-nation.html',
-    'GOV-ELE-03': 'gov/constitution.html',
-    'GOV-ELE-04': 'gov/rule-of-law-and-democracy.html',
-    'GOV-ELE-05': 'gov/forms-of-government.html',
-  };
-
   const ALL_STRAND_COLOURS = {
     science:   SCIENCE_STRAND_COLOURS,
     physics:   { 'Mechanics':'#1565C0','Thermal':'#C0272D','Waves':'#6A1B9A','Electricity':'#E65100','Nuclear':'#2E7D32','Space':'#00695C','Practical':'#888','Fields':'#6A1B9A','Energy':'#C0272D','Applied':'#555','Measurement':'#555' },
@@ -1495,9 +1478,7 @@
     if (subject === 'science')   file = SCIENCE_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'physics')   file = PHYSICS_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'chemistry') file = CHEMISTRY_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'biology')    file = BIOLOGY_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'crs')        file = CRS_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'government') file = GOV_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'biology')   file = BIOLOGY_WALKTHROUGH_FILES[topicCode];
     else file = WALKTHROUGH_FILES[topicCode];
     return file || '#';
   }
@@ -1536,36 +1517,29 @@
     // Show/hide year options based on which subject ranges apply:
     //   Science (combined): Y7-9 only
     //   Physics/Chemistry/Biology: Y10-12 only
-    //   CRS / Government: not year-grouped — hide year filter entirely
     //   Maths / All: all years except Y13 shows only for Maths
     const isSciCombined = subjectFilter === 'science';
     const isSciSubject  = ['physics', 'chemistry', 'biology'].includes(subjectFilter);
     const isMathsOnly   = subjectFilter === 'maths';
-    const isArtsSubject = ['crs', 'government'].includes(subjectFilter);
 
-    const yearFilterEl = document.getElementById('review-filter-year');
-    yearFilterEl.style.display = isArtsSubject ? 'none' : '';
-
-    document.getElementById('review-opt-y7').style.display  = (isSciSubject || isArtsSubject) ? 'none' : '';
-    document.getElementById('review-opt-y8').style.display  = (isSciSubject || isArtsSubject) ? 'none' : '';
-    document.getElementById('review-opt-y9').style.display  = (isSciSubject || isArtsSubject) ? 'none' : '';
-    document.getElementById('review-opt-y10').style.display = (isSciCombined || isArtsSubject) ? 'none' : '';
-    document.getElementById('review-opt-y11').style.display = (isSciCombined || isArtsSubject) ? 'none' : '';
-    document.getElementById('review-opt-y12').style.display = (isSciCombined || isArtsSubject) ? 'none' : '';
+    document.getElementById('review-opt-y7').style.display  = isSciSubject ? 'none' : '';
+    document.getElementById('review-opt-y8').style.display  = isSciSubject ? 'none' : '';
+    document.getElementById('review-opt-y9').style.display  = isSciSubject ? 'none' : '';
+    document.getElementById('review-opt-y10').style.display = isSciCombined ? 'none' : '';
+    document.getElementById('review-opt-y11').style.display = isSciCombined ? 'none' : '';
+    document.getElementById('review-opt-y12').style.display = isSciCombined ? 'none' : '';
     document.getElementById('review-opt-y13').style.display = (isMathsOnly || !subjectFilter) ? '' : 'none';
 
     // Reset year filter if current selection is now invalid
-    const curYear = yearFilterEl.value;
+    const curYear = document.getElementById('review-filter-year').value;
     const hiddenYears = {
-      science:    ['10','11','12','13'],
-      physics:    ['7','8','9','13'],
-      chemistry:  ['7','8','9','13'],
-      biology:    ['7','8','9','13'],
-      crs:        ['7','8','9','10','11','12','13'],
-      government: ['7','8','9','10','11','12','13'],
+      science:   ['10','11','12','13'],
+      physics:   ['7','8','9','13'],
+      chemistry: ['7','8','9','13'],
+      biology:   ['7','8','9','13'],
     };
     if (subjectFilter && hiddenYears[subjectFilter]?.includes(curYear)) {
-      yearFilterEl.value = '';
+      document.getElementById('review-filter-year').value = '';
     }
     const yearFilter = document.getElementById('review-filter-year').value;
 
@@ -2095,8 +2069,10 @@
     const isMaths  = subject === 'maths';
     const isSciGrp = SCIENCE_SUBJECTS.includes(subject);
 
+    const isArtsGrp = ['crs', 'government'].includes(subject);
     document.getElementById('toggle-maths').classList.toggle('active', isMaths);
     document.getElementById('toggle-science').classList.toggle('active', isSciGrp);
+    document.getElementById('toggle-arts').classList.toggle('active', isArtsGrp);
     document.getElementById('science-subtabs').classList.toggle('visible', isSciGrp);
 
     ['science', 'physics', 'chemistry', 'biology'].forEach(s => {
@@ -2104,7 +2080,7 @@
       if (el) el.classList.toggle('active', s === subject);
     });
 
-    const subtitles = { maths: 'Maths Portal — Staff', science: 'Science Portal — Staff', physics: 'Physics Portal — Staff', chemistry: 'Chemistry Portal — Staff', biology: 'Biology Portal — Staff' };
+    const subtitles = { maths: 'Maths Portal — Staff', science: 'Science Portal — Staff', physics: 'Physics Portal — Staff', chemistry: 'Chemistry Portal — Staff', biology: 'Biology Portal — Staff', crs: 'CRS Portal — Staff', government: 'Government Portal — Staff' };
     document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Staff Portal';
 
     // Sync Browse Topics subject filter
@@ -2116,6 +2092,9 @@
   document.getElementById('toggle-maths').addEventListener('click', () => window.switchSubject('maths'));
   document.getElementById('toggle-science').addEventListener('click', () => {
     if (!SCIENCE_SUBJECTS.includes(staffSubject)) window.switchSubject('science');
+  });
+  document.getElementById('toggle-arts').addEventListener('click', () => {
+    if (!['crs', 'government'].includes(staffSubject)) window.switchSubject('crs');
   });
 </script>
 
