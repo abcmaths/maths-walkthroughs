@@ -91,7 +91,6 @@
     <div class="subject-toggle">
       <button id="toggle-maths" class="active">📐 Maths</button>
       <button id="toggle-science">🔬 Science</button>
-      <button id="toggle-arts">✝️ Arts</button>
     </div>
     <div class="science-subtabs" id="science-subtabs">
       <button class="science-subtab" id="subtab-science" style="--subtab-accent:#1565C0" onclick="window.switchSubject('science')">🔬 Combined Sci</button>
@@ -143,6 +142,12 @@
           <option value="7">Year 7</option><option value="8">Year 8</option>
           <option value="9">Year 9</option><option value="10">Year 10</option>
           <option value="11">Year 11</option><option value="12">Year 12</option>
+        </select>
+        <select id="filter-stream" onchange="renderProgressTable()">
+          <option value="">All Streams</option>
+          <option value="science">Science</option>
+          <option value="arts">Arts</option>
+          <option value="both">Both</option>
         </select>
         <input type="text" id="filter-search" placeholder="Search by name…" oninput="renderProgressTable()">
       </div>
@@ -417,8 +422,6 @@
             <option value="physics">⚡ Physics</option>
             <option value="chemistry">⚗️ Chemistry</option>
             <option value="biology">🌿 Biology</option>
-            <option value="crs">✝️ CRS</option>
-            <option value="government">🏛️ Government</option>
           </select>
           <select id="review-filter-year" onchange="renderReviewTab()">
             <option value="">All Year Groups</option>
@@ -656,7 +659,7 @@
     ] = await Promise.all([
       supabase.from('profiles').select('*').eq('role', 'student').order('full_name'),
       supabase.from('profiles').select('*').in('role', ['teacher', 'admin']),
-      supabase.from('topics').select('*').order('year_group').order('topic_code'),
+      supabase.from('topics').select('*').order('year_group').order('sort_order'),
       supabase.from('walkthrough_progress').select('*')
     ]);
 
@@ -674,8 +677,8 @@
 
     const avgPct = allStudents.length > 0 ? (() => {
       const perStudent = allStudents.map(s => {
-        const yrTopics = allTopics.filter(t => t.year_group === s.year_group);
-        const done = allProgress.filter(p => p.student_id === s.id && p.status === 'completed').length;
+        const yrTopics = topicsForStudent(s);
+        const done = allProgress.filter(p => p.student_id === s.id && p.status === 'completed' && yrTopics.some(t => t.id === p.topic_id)).length;
         return yrTopics.length > 0 ? (done / yrTopics.length) * 100 : 0;
       });
       return Math.round(perStudent.reduce((a,b) => a+b, 0) / perStudent.length);
@@ -718,11 +721,27 @@
   init();
 
   // ── Progress table ──
+  const SCIENCE_SUBJECTS_SP = ['science', 'physics', 'chemistry', 'biology'];
+  const ARTS_SUBJECTS_SP    = ['crs', 'government'];
+  function topicsForStudent(student) {
+    const stream = student.stream || 'science';
+    return allTopics.filter(t => {
+      if (t.year_group !== student.year_group) return false;
+      const subj = t.subject || 'maths';
+      if (subj === 'maths') return true;
+      if (stream === 'both') return true;
+      if (stream === 'arts') return ARTS_SUBJECTS_SP.includes(subj);
+      return SCIENCE_SUBJECTS_SP.includes(subj); // stream === 'science' (default)
+    });
+  }
+
   window.renderProgressTable = function() {
     const yearFilter   = document.getElementById('filter-year').value;
+    const streamFilter = document.getElementById('filter-stream') ? document.getElementById('filter-stream').value : '';
     const searchFilter = document.getElementById('filter-search').value.toLowerCase();
     const filtered = allStudents.filter(s => {
       return (!yearFilter || String(s.year_group) === yearFilter) &&
+             (!streamFilter || (s.stream || 'science') === streamFilter) &&
              (!searchFilter || s.full_name.toLowerCase().includes(searchFilter));
     });
     const tbody = document.getElementById('progress-tbody');
@@ -731,8 +750,8 @@
       return;
     }
     tbody.innerHTML = filtered.map(s => {
-      const yrTopics = allTopics.filter(t => t.year_group === s.year_group);
-      const done     = allProgress.filter(p => p.student_id === s.id && p.status === 'completed').length;
+      const yrTopics = topicsForStudent(s);
+      const done     = allProgress.filter(p => p.student_id === s.id && p.status === 'completed' && yrTopics.some(t => t.id === p.topic_id)).length;
       const pct      = yrTopics.length > 0 ? Math.round((done / yrTopics.length) * 100) : 0;
       const lastP    = allProgress.filter(p => p.student_id === s.id)
                         .sort((a,b) => new Date(b.last_visited_at) - new Date(a.last_visited_at))[0];
@@ -760,7 +779,7 @@
     document.getElementById('modal-title').textContent = s.full_name;
     document.getElementById('modal-body').innerHTML = '<div class="loading">Loading…</div>';
     document.getElementById('modal').classList.add('open');
-    const yrTopics = allTopics.filter(t => t.year_group === s.year_group);
+    const yrTopics = topicsForStudent(s);
     const sProg    = allProgress.filter(p => p.student_id === s.id);
     const progMap  = {};
     sProg.forEach(p => { progMap[p.topic_id] = p.status; });
@@ -1427,12 +1446,6 @@
     'Y11-ENV-01': 'che11/chemistry-environment-y11.html',
     'Y11-ANA-01': 'che11/experimental-techniques-y11.html',
     'Y11-PRA-01': 'che11/practical-skills-y11.html',
-    // Y12 Chemistry
-    'Y12-CHE-01': 'che12/atomic-structure-bonding-y12.html',
-    'Y12-CHE-02': 'che12/energetics-y12.html',
-    'Y12-CHE-03': 'che12/equilibrium-kinetics-y12.html',
-    'Y12-CHE-04': 'che12/electrochemistry-redox-y12.html',
-    'Y12-CHE-05': 'che12/organic-spectroscopy-y12.html',
   };
   const BIOLOGY_WALKTHROUGH_FILES = {
     'Y10-CLA-01': 'bio10/classification-y10.html',
@@ -1479,82 +1492,14 @@
     physics:   { 'Mechanics':'#1565C0','Thermal':'#C0272D','Waves':'#6A1B9A','Electricity':'#E65100','Nuclear':'#2E7D32','Space':'#00695C','Practical':'#888','Fields':'#6A1B9A','Energy':'#C0272D','Applied':'#555','Measurement':'#555' },
     chemistry: { 'Physical Chemistry':'#1565C0','Atomic Structure':'#6A1B9A','Bonding':'#E65100','Stoichiometry':'#C0272D','Electrochemistry':'#00695C','Energetics':'#C0272D','Kinetics':'#E65100','Redox':'#6A1B9A','Acids & Bases':'#C0272D','Periodic Table':'#1565C0','Metals':'#00695C','Environment':'#2E7D32','Organic':'#E65100','Analysis':'#555','Inorganic':'#888','Practical':'#888' },
     biology:   { 'Classification':'#2E7D32','Cell Biology':'#1565C0','Biochemistry':'#6A1B9A','Plant Biology':'#2E7D32','Human Biology':'#C0272D','Health & Disease':'#E65100','Reproduction':'#E65100','Genetics':'#6A1B9A','Ecology':'#00695C','Biotechnology':'#1565C0','Evolution':'#00695C','Practical':'#888' },
-    crs:        { 'Old Testament':'#6B1F1F','Gospels':'#4a1515','Acts & Epistles':'#7B3030' },
-    government: { 'Elements of Government':'#1A5276','Political Development':'#154360','International Relations':'#1F618D' },
   };
 
-  const CRS_WALKTHROUGH_FILES = {
-    'CRS-OT-01': 'crs/sovereignty-of-god.html',
-    'CRS-OT-02': 'crs/the-covenant.html',
-    'CRS-OT-03': 'crs/leadership-ot.html',
-    'CRS-OT-04': 'crs/divine-guidance-protection-provision.html',
-    'CRS-OT-05': 'crs/the-prophets.html',
-    'CRS-OT-06': 'crs/holiness-and-divine-call.html',
-    'CRS-OT-07': 'crs/social-justice-ot.html',
-    'CRS-OT-08': 'crs/faith-courage-trust.html',
-    'CRS-OT-09': 'crs/repentance-and-forgiveness-ot.html',
-    'CRS-OT-10': 'crs/family-life-ot.html',
-    // Section B: Gospels
-    'CRS-GO-01': 'crs/birth-early-life-jesus.html',
-    'CRS-GO-02': 'crs/ministry-of-jesus.html',
-    'CRS-GO-03': 'crs/sermon-on-the-mount.html',
-    'CRS-GO-04': 'crs/kingdom-of-god.html',
-    'CRS-GO-05': 'crs/faith-gospels.html',
-    'CRS-GO-06': 'crs/forgiveness-gospels.html',
-    'CRS-GO-07': 'crs/discipleship.html',
-    'CRS-GO-08': 'crs/wealth-and-stewardship.html',
-    'CRS-GO-09': 'crs/prayer-gospels.html',
-    'CRS-GO-10': 'crs/passion-of-christ.html',
-    // Section C: Acts & Epistles
-    'CRS-AC-01': 'crs/the-early-church.html',
-    'CRS-AC-02': 'crs/persecution.html',
-    'CRS-AC-03': 'crs/missionary-journeys-of-paul.html',
-    'CRS-AC-04': 'crs/christian-living.html',
-    'CRS-AC-05': 'crs/spiritual-gifts.html',
-    'CRS-AC-06': 'crs/christian-service.html',
-    'CRS-AC-07': 'crs/marriage-and-family-epistles.html',
-    'CRS-AC-08': 'crs/work-and-diligence.html',
-    'CRS-AC-09': 'crs/citizenship-epistles.html',
-    'CRS-AC-10': 'crs/hope-and-eternal-life.html',
-  };
-  const GOV_WALKTHROUGH_FILES = {
-    'GOV-ELE-01': 'gov/meaning-and-scope-of-government.html',
-    'GOV-ELE-02': 'gov/the-state-and-nation.html',
-    'GOV-ELE-03': 'gov/constitution.html',
-    'GOV-ELE-04': 'gov/rule-of-law-and-democracy.html',
-    'GOV-ELE-05': 'gov/forms-of-government.html',
-    'GOV-ELE-06': 'gov/arms-of-government.html',
-    'GOV-ELE-07': 'gov/citizenship-parties-pressure-groups.html',
-    'GOV-ELE-08': 'gov/public-opinion-and-media.html',
-    'GOV-ELE-09': 'gov/electoral-systems.html',
-    'GOV-ELE-10': 'gov/federalism.html',
-    // Section B: Political & Constitutional Development
-    'GOV-POL-01': 'gov/pre-colonial-political-systems.html',
-    'GOV-POL-02': 'gov/colonial-administration.html',
-    'GOV-POL-03': 'gov/nationalism-and-decolonisation.html',
-    'GOV-POL-04': 'gov/constitutional-development-nigeria.html',
-    'GOV-POL-05': 'gov/military-rule-in-nigeria.html',
-    'GOV-POL-06': 'gov/west-african-political-development.html',
-    'GOV-POL-07': 'gov/nigeria-since-1999.html',
-    // Section C: International Relations
-    'GOV-INT-01': 'gov/meaning-and-scope-of-ir.html',
-    'GOV-INT-02': 'gov/national-interest-and-foreign-policy.html',
-    'GOV-INT-03': 'gov/diplomacy.html',
-    'GOV-INT-04': 'gov/united-nations.html',
-    'GOV-INT-05': 'gov/african-union-and-ecowas.html',
-    'GOV-INT-06': 'gov/commonwealth-and-opec.html',
-    'GOV-INT-07': 'gov/nigeria-in-international-relations.html',
-    'GOV-INT-08': 'gov/conflict-resolution-and-peacekeeping.html',
-    'GOV-INT-09': 'gov/globalisation.html',
-  };
   function getWalkthroughFile(subject, topicCode) {
     let file;
-    if (subject === 'science')        file = SCIENCE_WALKTHROUGH_FILES[topicCode];
+    if (subject === 'science')   file = SCIENCE_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'physics')   file = PHYSICS_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'chemistry') file = CHEMISTRY_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'biology')   file = BIOLOGY_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'crs')       file = CRS_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'government') file = GOV_WALKTHROUGH_FILES[topicCode];
     else file = WALKTHROUGH_FILES[topicCode];
     return file || '#';
   }
@@ -1597,10 +1542,9 @@
     const isSciCombined = subjectFilter === 'science';
     const isSciSubject  = ['physics', 'chemistry', 'biology'].includes(subjectFilter);
     const isMathsOnly   = subjectFilter === 'maths';
-    const isArtsSubject = ['crs', 'government'].includes(subjectFilter);
 
-    document.getElementById('review-opt-y7').style.display  = (isSciSubject || isArtsSubject) ? 'none' : '';
-    document.getElementById('review-opt-y8').style.display  = (isSciSubject || isArtsSubject) ? 'none' : '';
+    document.getElementById('review-opt-y7').style.display  = isSciSubject ? 'none' : '';
+    document.getElementById('review-opt-y8').style.display  = isSciSubject ? 'none' : '';
     document.getElementById('review-opt-y9').style.display  = isSciSubject ? 'none' : '';
     document.getElementById('review-opt-y10').style.display = isSciCombined ? 'none' : '';
     document.getElementById('review-opt-y11').style.display = isSciCombined ? 'none' : '';
@@ -2146,10 +2090,8 @@
     const isMaths  = subject === 'maths';
     const isSciGrp = SCIENCE_SUBJECTS.includes(subject);
 
-    const isArtsGrp = ['crs', 'government'].includes(subject);
     document.getElementById('toggle-maths').classList.toggle('active', isMaths);
     document.getElementById('toggle-science').classList.toggle('active', isSciGrp);
-    document.getElementById('toggle-arts').classList.toggle('active', isArtsGrp);
     document.getElementById('science-subtabs').classList.toggle('visible', isSciGrp);
 
     ['science', 'physics', 'chemistry', 'biology'].forEach(s => {
@@ -2157,7 +2099,7 @@
       if (el) el.classList.toggle('active', s === subject);
     });
 
-    const subtitles = { maths: 'Maths Portal — Staff', science: 'Science Portal — Staff', physics: 'Physics Portal — Staff', chemistry: 'Chemistry Portal — Staff', biology: 'Biology Portal — Staff', crs: 'CRS Portal — Staff', government: 'Government Portal — Staff' };
+    const subtitles = { maths: 'Maths Portal — Staff', science: 'Science Portal — Staff', physics: 'Physics Portal — Staff', chemistry: 'Chemistry Portal — Staff', biology: 'Biology Portal — Staff' };
     document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Staff Portal';
 
     // Sync Browse Topics subject filter
@@ -2169,9 +2111,6 @@
   document.getElementById('toggle-maths').addEventListener('click', () => window.switchSubject('maths'));
   document.getElementById('toggle-science').addEventListener('click', () => {
     if (!SCIENCE_SUBJECTS.includes(staffSubject)) window.switchSubject('science');
-  });
-  document.getElementById('toggle-arts').addEventListener('click', () => {
-    if (!['crs', 'government'].includes(staffSubject)) window.switchSubject('crs');
   });
 </script>
 
