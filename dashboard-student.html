@@ -409,8 +409,8 @@
     'ENG-WRIT-09': '#','ENG-WRIT-10': '#','ENG-WRIT-11': '#',
     // Grammar (year-agnostic, Y10-12)
     'ENG-GRAM-01': 'eng/sentence-types.html',
-    'ENG-GRAM-02': '#','ENG-GRAM-03': '#','ENG-GRAM-04': '#','ENG-GRAM-05': '#',
-    'ENG-GRAM-06': '#','ENG-GRAM-07': '#','ENG-GRAM-08': '#','ENG-GRAM-09': '#',
+    'ENG-GRAM-02': 'eng/clauses.html','ENG-GRAM-03': 'eng/phrase-vs-clause.html','ENG-GRAM-04': 'eng/active-passive-voice.html','ENG-GRAM-05': 'eng/direct-indirect-speech.html',
+    'ENG-GRAM-06': 'eng/tenses.html','ENG-GRAM-07': '#','ENG-GRAM-08': '#','ENG-GRAM-09': '#',
     'ENG-GRAM-10': '#','ENG-GRAM-11': '#','ENG-GRAM-12': '#','ENG-GRAM-13': '#',
     'ENG-GRAM-14': '#','ENG-GRAM-15': '#','ENG-GRAM-16': '#','ENG-GRAM-17': '#',
     'ENG-GRAM-18': '#','ENG-GRAM-19': '#',
@@ -853,16 +853,13 @@
   const SCIENCE_SUBJECTS = ['science', 'physics', 'chemistry', 'biology'];
   const ARTS_SUBJECTS   = ['crs', 'government'];
 
-  // English Grammar & Vocabulary topics (IGCSE strand, codes ENG-GRAM-xx /
-  // ENG-VOC-xx) are stored under year_group=10 (the topics.year_group check
-  // constraint only allows valid years, 7-13 — no NULL/0 sentinel possible)
-  // but are treated as year-agnostic, shown for Y10-12 regardless of the
-  // student's exact year. Checkpoint Grammar/Vocab (ENG7/8/9-GRAM/VOC-xx)
-  // stay year-locked as normal — matched by topic_code prefix, not strand,
-  // since both share the same strand names.
+  // English IGCSE Grammar & Vocabulary topics (ENG-GRAM-xx / ENG-VOC-xx) are
+  // stored under year_group=10 but shown across Y10-12 (KS4) regardless of the
+  // student's exact year within that range. They are NOT shown to Y7-9
+  // Checkpoint students, who have their own separate ENG7/8/9-GRAM/VOC-xx codes.
   function topicMatchesYear(t, subject, yearGroup) {
     if (ARTS_SUBJECTS.includes(subject)) return true;
-    if (subject === 'english' && /^ENG-(GRAM|VOC)-\d+$/.test(t.topic_code)) return true;
+    if (subject === 'english' && yearGroup >= 10 && /^ENG-(GRAM|VOC)-\d+$/.test(t.topic_code)) return true;
     return t.year_group === yearGroup;
   }
 
