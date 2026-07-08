@@ -48,6 +48,7 @@
     .subject-progress-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 28px; }
     .subject-panel { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 18px 20px; border-top: 3px solid var(--accent); }
     .subject-panel.maths-panel    { --accent: #C0272D; }
+    .subject-panel.english-panel  { --accent: #E65100; }
     .subject-panel.science-panel  { --accent: #1565C0; }
     .subject-panel.physics-panel  { --accent: #1565C0; }
     .subject-panel.chemistry-panel{ --accent: #6A1B9A; }
@@ -120,6 +121,7 @@
   <div class="header-right">
     <div class="subject-toggle">
       <button id="toggle-maths" class="active">📐 Maths</button>
+      <button id="toggle-english">✏️ English</button>
       <button id="toggle-science">🔬 Science</button>
       <button id="toggle-crs" style="display:none">✝️ CRS</button>
       <button id="toggle-gov" style="display:none">🏛️ Government</button>
@@ -170,6 +172,15 @@
           <div class="subject-panel-stat"><div class="big" id="maths-stat-completed">—</div><div class="label">Completed</div></div>
           <div class="subject-panel-stat"><div class="big" id="maths-stat-started">—</div><div class="label">In Progress</div></div>
           <div class="subject-panel-stat"><div class="big" id="maths-stat-pct">—</div><div class="label">Progress</div></div>
+        </div>
+      </div>
+      <div class="subject-panel english-panel" id="english-panel">
+        <div class="subject-panel-title">✏️ English Progress<span class="subject-panel-soon-badge" id="english-soon-badge" style="display:none">Coming Soon</span></div>
+        <div class="subject-panel-stats">
+          <div class="subject-panel-stat"><div class="big" id="english-stat-total">—</div><div class="label">Topics</div></div>
+          <div class="subject-panel-stat"><div class="big" id="english-stat-completed">—</div><div class="label">Completed</div></div>
+          <div class="subject-panel-stat"><div class="big" id="english-stat-started">—</div><div class="label">In Progress</div></div>
+          <div class="subject-panel-stat"><div class="big" id="english-stat-pct">—</div><div class="label">Progress</div></div>
         </div>
       </div>
       <div class="subject-panel science-panel" id="science-panel">
@@ -366,6 +377,46 @@
     'AM-TRI-02': 'addmaths/trig-identities-addmaths.html',
     'AM-TRI-03': 'addmaths/circular-measure-addmaths.html',
     'AM-STA-01': 'addmaths/permutation-combination-addmaths.html',
+  };
+
+  // English walkthrough files — single eng/ folder for all years. Grammar & Vocabulary
+  // are year-agnostic (topics.year_group = null) and shared across Y10–12.
+  const ENGLISH_WALKTHROUGH_FILES = {
+    // Year 7-9 Checkpoint
+    'ENG7-READ-01': '#','ENG7-READ-02': '#','ENG7-READ-03': '#','ENG7-READ-04': '#',
+    'ENG7-WRIT-01': '#','ENG7-WRIT-02': '#','ENG7-WRIT-03': '#',
+    'ENG7-GRAM-01': '#','ENG7-GRAM-02': '#','ENG7-GRAM-03': '#',
+    'ENG7-VOC-01': '#',
+    'ENG8-READ-01': '#','ENG8-READ-02': '#',
+    'ENG8-WRIT-01': '#','ENG8-WRIT-02': '#',
+    'ENG8-GRAM-01': '#','ENG8-GRAM-02': '#','ENG8-GRAM-03': '#',
+    'ENG8-VOC-01': '#',
+    'ENG9-READ-01': '#','ENG9-READ-02': '#',
+    'ENG9-WRIT-01': '#','ENG9-WRIT-02': '#',
+    'ENG9-GRAM-01': '#','ENG9-GRAM-02': '#',
+    'ENG9-VOC-01': '#',
+    'ENG9-EOY-01': '#',
+    // IGCSE Reading (Y10-11)
+    'ENG-READ-01': '#','ENG-READ-02': '#','ENG-READ-03': '#','ENG-READ-04': '#',
+    'ENG-READ-05': '#','ENG-READ-06': '#','ENG-READ-07': '#','ENG-READ-08': '#',
+    'ENG-READ-09': '#','ENG-READ-10': '#','ENG-READ-11': '#','ENG-READ-12': '#',
+    // IGCSE Writing (Y10-11)
+    'ENG-WRIT-01': '#','ENG-WRIT-02': '#','ENG-WRIT-03': '#','ENG-WRIT-04': '#',
+    'ENG-WRIT-05': '#','ENG-WRIT-06': '#','ENG-WRIT-07': '#','ENG-WRIT-08': '#',
+    'ENG-WRIT-09': '#','ENG-WRIT-10': '#','ENG-WRIT-11': '#',
+    // Grammar (year-agnostic, Y10-12)
+    'ENG-GRAM-01': 'eng/sentence-types.html',
+    'ENG-GRAM-02': '#','ENG-GRAM-03': '#','ENG-GRAM-04': '#','ENG-GRAM-05': '#',
+    'ENG-GRAM-06': '#','ENG-GRAM-07': '#','ENG-GRAM-08': '#','ENG-GRAM-09': '#',
+    'ENG-GRAM-10': '#','ENG-GRAM-11': '#','ENG-GRAM-12': '#','ENG-GRAM-13': '#',
+    'ENG-GRAM-14': '#','ENG-GRAM-15': '#','ENG-GRAM-16': '#','ENG-GRAM-17': '#',
+    'ENG-GRAM-18': '#','ENG-GRAM-19': '#',
+    // Vocabulary (year-agnostic, Y10-12)
+    'ENG-VOC-01': '#','ENG-VOC-02': '#','ENG-VOC-03': '#','ENG-VOC-04': '#',
+    'ENG-VOC-05': '#','ENG-VOC-06': '#','ENG-VOC-07': '#','ENG-VOC-08': '#',
+    'ENG-VOC-09': '#','ENG-VOC-10': '#','ENG-VOC-11': '#',
+    // WAEC/NECO bridge (Y11-12)
+    'ENG-WAEC-01': '#','ENG-WAEC-02': '#','ENG-WAEC-03': '#','ENG-WAEC-04': '#','ENG-WAEC-05': '#',
   };
 
   // Science walkthrough files — add entries here only when the file is built and deployed
@@ -588,7 +639,8 @@
   // Resolve walkthrough file for any subject/topic_code combination
   function getWalkthroughFile(subject, topicCode) {
     let file;
-    if (subject === 'science')   file = SCIENCE_WALKTHROUGH_FILES[topicCode];
+    if (subject === 'english')   file = ENGLISH_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'science')   file = SCIENCE_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'physics')   file = PHYSICS_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'chemistry') file = CHEMISTRY_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'biology')    file = BIOLOGY_WALKTHROUGH_FILES[topicCode];
@@ -597,6 +649,14 @@
     else file = WALKTHROUGH_FILES[topicCode];
     return file || '#';
   }
+
+  const ENGLISH_STRAND_COLOURS = {
+    'Reading':    '#E65100',
+    'Writing':    '#BF360C',
+    'Grammar':    '#C8922A',
+    'Vocabulary': '#6A1B9A',
+    'Review':     '#555',
+  };
 
   const SCIENCE_STRAND_COLOURS = {
     'Biology':           '#2E7D32',
@@ -722,8 +782,7 @@
   }
 
   function renderStrandBars() {
-    const isArtsSubjSB = ARTS_SUBJECTS.includes(currentSubject);
-    const strandTopics = allTopics.filter(t => (isArtsSubjSB || t.year_group === myYearGroup) && (t.subject || 'maths') === currentSubject);
+    const strandTopics = allTopics.filter(t => topicMatchesYear(t, currentSubject, myYearGroup) && (t.subject || 'maths') === currentSubject);
     const strands = {};
     strandTopics.forEach(t => {
       const s = t.strand || 'Other';
@@ -735,7 +794,7 @@
     const PHYS_COLOURS = { 'Mechanics':'#1565C0','Thermal':'#C0272D','Waves':'#6A1B9A','Electricity':'#E65100','Nuclear':'#2E7D32','Space':'#00695C','Practical':'#888','Fields':'#6A1B9A','Energy':'#C0272D','Applied':'#555','Measurement':'#555' };
     const CHEM_COLOURS = { 'Physical Chemistry':'#1565C0','Atomic Structure':'#6A1B9A','Bonding':'#E65100','Stoichiometry':'#C0272D','Electrochemistry':'#00695C','Energetics':'#C0272D','Kinetics':'#E65100','Redox':'#6A1B9A','Acids & Bases':'#C0272D','Periodic Table':'#1565C0','Metals':'#00695C','Environment':'#2E7D32','Organic':'#E65100','Analysis':'#555','Inorganic':'#888','Practical':'#888' };
     const BIO_COLOURS  = { 'Classification':'#2E7D32','Cell Biology':'#1565C0','Biochemistry':'#6A1B9A','Plant Biology':'#2E7D32','Human Biology':'#C0272D','Health & Disease':'#E65100','Reproduction':'#E65100','Genetics':'#6A1B9A','Ecology':'#00695C','Biotechnology':'#1565C0','Evolution':'#00695C','Practical':'#888' };
-    const strandColourMap = { science: SCIENCE_STRAND_COLOURS, physics: PHYS_COLOURS, chemistry: CHEM_COLOURS, biology: BIO_COLOURS };
+    const strandColourMap = { science: SCIENCE_STRAND_COLOURS, physics: PHYS_COLOURS, chemistry: CHEM_COLOURS, biology: BIO_COLOURS, english: ENGLISH_STRAND_COLOURS };
     const colourLookup = strandColourMap[currentSubject] || null;
 
     document.getElementById('strand-bars').innerHTML = Object.entries(strands).length > 0
@@ -755,8 +814,7 @@
   }
 
   function renderSummaryCards() {
-    const isArtsSubjSC = ARTS_SUBJECTS.includes(currentSubject);
-    const myTopics  = allTopics.filter(t => (isArtsSubjSC || t.year_group === myYearGroup) && (t.subject || 'maths') === currentSubject);
+    const myTopics  = allTopics.filter(t => topicMatchesYear(t, currentSubject, myYearGroup) && (t.subject || 'maths') === currentSubject);
     const total     = myTopics.length;
     const completed = myTopics.filter(t => progressMap[t.id] === 'completed').length;
     const started   = myTopics.filter(t => progressMap[t.id] === 'started').length;
@@ -767,9 +825,8 @@
     document.getElementById('stat-pct').textContent       = pct + '%';
 
     // Always-visible per-subject split across all 5 subjects
-    ['maths', 'science', 'physics', 'chemistry', 'biology', 'crs', 'government'].forEach(subj => {
-      const isArtsSubjFC = ARTS_SUBJECTS.includes(subj);
-      const subjTopics    = allTopics.filter(t => (isArtsSubjFC || t.year_group === myYearGroup) && (t.subject || 'maths') === subj);
+    ['maths', 'english', 'science', 'physics', 'chemistry', 'biology', 'crs', 'government'].forEach(subj => {
+      const subjTopics    = allTopics.filter(t => topicMatchesYear(t, subj, myYearGroup) && (t.subject || 'maths') === subj);
       const subjTotal     = subjTopics.length;
       const subjCompleted = subjTopics.filter(t => progressMap[t.id] === 'completed').length;
       const subjStarted   = subjTopics.filter(t => progressMap[t.id] === 'started').length;
@@ -793,6 +850,15 @@
   const SCIENCE_SUBJECTS = ['science', 'physics', 'chemistry', 'biology'];
   const ARTS_SUBJECTS   = ['crs', 'government'];
 
+  // English Grammar & Vocabulary topics are year-agnostic (topics.year_group = null),
+  // shared across Y10-12; other English topics (Checkpoint/IGCSE Reading & Writing/WAEC)
+  // are tagged to a specific year_group as usual.
+  function topicMatchesYear(t, subject, yearGroup) {
+    if (ARTS_SUBJECTS.includes(subject)) return true;
+    if (subject === 'english') return t.year_group === yearGroup || t.year_group === null;
+    return t.year_group === yearGroup;
+  }
+
   window.switchSubject = function(subject) {
     currentSubject = subject;
     const isMaths   = subject === 'maths';
@@ -801,6 +867,8 @@
 
     // Main toggle active state
     document.getElementById('toggle-maths').classList.toggle('active', isMaths);
+    const engBt = document.getElementById('toggle-english');
+    if (engBt) engBt.classList.toggle('active', subject === 'english');
     document.getElementById('toggle-science').classList.toggle('active', isSciGrp);
     const crsBt = document.getElementById('toggle-crs');
     const govBt = document.getElementById('toggle-gov');
@@ -817,7 +885,7 @@
     });
 
     // Header subtitle
-    const subtitles = { maths: 'Maths Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal' };
+    const subtitles = { maths: 'Maths Portal', english: 'English Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal' };
     document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Portal';
 
     // Year selector: hide Add Maths (Y13) when not in Maths; hide entirely for arts
@@ -846,15 +914,15 @@
       filtered = allTopics.filter(t => (t.subject || 'maths') === currentSubject);
       label    = 'Showing all ' + (currentSubject === 'crs' ? 'CRS' : 'Government') + ' topics';
     } else if (value === 'own') {
-      filtered = allTopics.filter(t => t.year_group === myYearGroup && (t.subject || 'maths') === currentSubject);
+      filtered = allTopics.filter(t => topicMatchesYear(t, currentSubject, myYearGroup) && (t.subject || 'maths') === currentSubject);
       label    = 'Showing your Year ' + myYearGroup + ' topics';
     } else if (value === '13') {
       filtered = allTopics.filter(t => t.year_group === 13 && (t.subject || 'maths') === 'maths');
       label    = 'Showing Add Maths topics';
     } else {
       const yr = parseInt(value);
-      filtered = allTopics.filter(t => t.year_group === yr && (t.subject || 'maths') === currentSubject);
-      label    = 'Showing Year ' + yr + ' topics' + (yr !== myYearGroup ? ' — browsing another year' : '');
+      filtered = allTopics.filter(t => topicMatchesYear(t, currentSubject, yr) && (t.subject || 'maths') === currentSubject);
+      label    = 'Showing Year ' + yr + ' topics' + (yr !== myYearGroup ? ' — browsing another year' : '') + (currentSubject === 'english' ? ' (Grammar & Vocabulary shown for every year)' : '');
     }
 
     document.getElementById('viewing-label').textContent = label;
@@ -875,6 +943,7 @@
       const subj  = t.subject || 'maths';
       const file  = getWalkthroughFile(subj, t.topic_code) || '#';
       const STRAND_COLOURS = {
+        english:   ENGLISH_STRAND_COLOURS,
         science:   SCIENCE_STRAND_COLOURS,
         physics:   { 'Mechanics':'#1565C0','Thermal':'#C0272D','Waves':'#6A1B9A','Electricity':'#E65100','Nuclear':'#2E7D32','Space':'#00695C','Practical':'#888','Fields':'#6A1B9A','Energy':'#C0272D','Applied':'#555','Measurement':'#555' },
         chemistry: { 'Physical Chemistry':'#1565C0','Atomic Structure':'#6A1B9A','Bonding':'#E65100','Stoichiometry':'#C0272D','Electrochemistry':'#00695C','Energetics':'#C0272D','Kinetics':'#E65100','Redox':'#6A1B9A','Acids & Bases':'#C0272D','Periodic Table':'#1565C0','Metals':'#00695C','Environment':'#2E7D32','Organic':'#E65100','Analysis':'#555','Inorganic':'#888','Practical':'#888' },
@@ -972,6 +1041,8 @@
   };
 
   document.getElementById('toggle-maths').addEventListener('click', () => window.switchSubject('maths'));
+  if (document.getElementById('toggle-english'))
+    document.getElementById('toggle-english').addEventListener('click', () => window.switchSubject('english'));
   if (document.getElementById('toggle-crs'))
     document.getElementById('toggle-crs').addEventListener('click', () => window.switchSubject('crs'));
   if (document.getElementById('toggle-gov'))
