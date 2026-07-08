@@ -120,8 +120,8 @@
   </div>
   <div class="header-right">
     <div class="subject-toggle">
-      <button id="toggle-maths" class="active">📐 Maths</button>
       <button id="toggle-english">✏️ English</button>
+      <button id="toggle-maths" class="active">📐 Maths</button>
       <button id="toggle-science">🔬 Science</button>
       <button id="toggle-crs" style="display:none">✝️ CRS</button>
       <button id="toggle-gov" style="display:none">🏛️ Government</button>
@@ -850,12 +850,16 @@
   const SCIENCE_SUBJECTS = ['science', 'physics', 'chemistry', 'biology'];
   const ARTS_SUBJECTS   = ['crs', 'government'];
 
-  // English Grammar & Vocabulary topics are year-agnostic (topics.year_group = null),
-  // shared across Y10-12; other English topics (Checkpoint/IGCSE Reading & Writing/WAEC)
-  // are tagged to a specific year_group as usual.
+  // English Grammar & Vocabulary topics (IGCSE strand, codes ENG-GRAM-xx /
+  // ENG-VOC-xx) are stored under year_group=10 (the topics.year_group check
+  // constraint only allows valid years, 7-13 — no NULL/0 sentinel possible)
+  // but are treated as year-agnostic, shown for Y10-12 regardless of the
+  // student's exact year. Checkpoint Grammar/Vocab (ENG7/8/9-GRAM/VOC-xx)
+  // stay year-locked as normal — matched by topic_code prefix, not strand,
+  // since both share the same strand names.
   function topicMatchesYear(t, subject, yearGroup) {
     if (ARTS_SUBJECTS.includes(subject)) return true;
-    if (subject === 'english') return t.year_group === yearGroup || t.year_group === null;
+    if (subject === 'english' && /^ENG-(GRAM|VOC)-\d+$/.test(t.topic_code)) return true;
     return t.year_group === yearGroup;
   }
 
