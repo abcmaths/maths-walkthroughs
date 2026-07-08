@@ -122,6 +122,9 @@
         <div class="subject-btn" id="subj-english" onclick="selectSubject('english')">✏️ English</div>
         <div class="subject-btn on" id="subj-maths" onclick="selectSubject('maths')">📐 Maths</div>
         <div class="subject-btn" id="subj-science" onclick="selectSubject('science')">🔬 Science</div>
+        <div class="subject-btn" id="subj-physics" onclick="selectSubject('physics')">⚡ Physics</div>
+        <div class="subject-btn" id="subj-chemistry" onclick="selectSubject('chemistry')">⚗️ Chemistry</div>
+        <div class="subject-btn" id="subj-biology" onclick="selectSubject('biology')">🌿 Biology</div>
         <div class="subject-btn" id="subj-crs" onclick="selectSubject('crs')" style="display:none">✝️ CRS</div>
         <div class="subject-btn" id="subj-government" onclick="selectSubject('government')" style="display:none">🏛️ Government</div>
       </div>
@@ -131,9 +134,9 @@
       <label>Year Group</label>
       <select id="year-select" onchange="loadTopics()">
         <option value="">— Select year group —</option>
-        <option value="7">Year 7</option>
-        <option value="8">Year 8</option>
-        <option value="9">Year 9</option>
+        <option value="7" id="opt-y7">Year 7</option>
+        <option value="8" id="opt-y8">Year 8</option>
+        <option value="9" id="opt-y9">Year 9</option>
         <option value="10" id="opt-y10">Year 10</option>
         <option value="11" id="opt-y11">Year 11</option>
         <option value="12" id="opt-y12">Year 12</option>
@@ -508,15 +511,15 @@
   // for every year — matched by topic_code prefix, same logic as dashboard-student.html.
   const ENGLISH_WALKTHROUGH_FILES = {
     // Year 7-9 Checkpoint
-    'ENG7-READ-01': '#','ENG7-READ-02': 'eng/y7-inference.html','ENG7-READ-03': '#','ENG7-READ-04': '#',
-    'ENG7-WRIT-01': '#','ENG7-WRIT-02': 'eng/y7-descriptive-writing.html','ENG7-WRIT-03': '#',
-    'ENG7-GRAM-01': 'eng/y7-sentence-types.html','ENG7-GRAM-02': 'eng/y7-tenses.html','ENG7-GRAM-03': '#',
+    'ENG7-READ-01': '#','ENG7-READ-02': 'eng/y7-inference.html','ENG7-READ-03': 'eng/y7-purpose-audience.html','ENG7-READ-04': 'eng/y7-fact-opinion.html',
+    'ENG7-WRIT-01': '#','ENG7-WRIT-02': 'eng/y7-descriptive-writing.html','ENG7-WRIT-03': 'eng/y7-letter-writing.html',
+    'ENG7-GRAM-01': 'eng/y7-sentence-types.html','ENG7-GRAM-02': 'eng/y7-tenses.html','ENG7-GRAM-03': 'eng/y7-punctuation.html',
     'ENG7-VOC-01': '#',
-    'ENG8-READ-01': '#','ENG8-READ-02': '#',
-    'ENG8-WRIT-01': '#','ENG8-WRIT-02': '#',
-    'ENG8-GRAM-01': 'eng/y8-clauses.html','ENG8-GRAM-02': '#','ENG8-GRAM-03': '#',
-    'ENG8-VOC-01': '#',
-    'ENG9-READ-01': '#','ENG9-READ-02': '#',
+    'ENG8-READ-01': 'eng/y8-inference-deeper.html','ENG8-READ-02': 'eng/y8-summary-writing.html',
+    'ENG8-WRIT-01': 'eng/y8-report-writing.html','ENG8-WRIT-02': 'eng/y8-speech-writing.html',
+    'ENG8-GRAM-01': 'eng/y8-clauses.html','ENG8-GRAM-02': 'eng/y8-subject-verb-agreement.html','ENG8-GRAM-03': 'eng/y8-direct-indirect-speech.html',
+    'ENG8-VOC-01': 'eng/y8-prefixes-suffixes.html',
+    'ENG9-READ-01': 'eng/y9-tone.html','ENG9-READ-02': '#',
     'ENG9-WRIT-01': '#','ENG9-WRIT-02': '#',
     'ENG9-GRAM-01': 'eng/y9-active-passive.html','ENG9-GRAM-02': '#',
     'ENG9-VOC-01': '#',
@@ -612,14 +615,117 @@
     'GOV-INT-09': 'gov/globalisation.html',
   };
 
+const PHYSICS_WALKTHROUGH_FILES = {
+    'Y10-MEA-01': 'phy10/physical-quantities-y10.html',
+    'Y10-MEC-01': 'phy10/motion-y10.html',
+    'Y10-MEC-02': 'phy10/mass-weight-density-y10.html',
+    'Y10-MEC-03': 'phy10/forces-y10.html',
+    'Y10-MEC-04': 'phy10/momentum-y10.html',
+    'Y10-ENE-01': 'phy10/energy-y10.html',
+    'Y10-MEC-05': 'phy10/pressure-y10.html',
+    'Y10-THE-01': 'phy10/particle-model-y10.html',
+    'Y10-THE-02': 'phy10/thermal-physics-y10.html',
+    // Y11 Physics
+    'Y11-WAV-01': 'phy11/waves-y11.html',
+    'Y11-WAV-02': 'phy11/light-y11.html',
+    'Y11-WAV-03': 'phy11/electromagnetic-spectrum-y11.html',
+    'Y11-WAV-04': 'phy11/sound-y11.html',
+    'Y11-ELE-01': 'phy11/magnetism-y11.html',
+    'Y11-ELE-02': 'phy11/electricity-y11.html',
+    'Y11-ELE-03': 'phy11/electric-circuits-y11.html',
+    'Y11-ELE-04': 'phy11/electrical-safety-y11.html',
+    'Y11-ELE-05': 'phy11/electromagnetism-y11.html',
+    'Y11-NUC-01': 'phy11/nuclear-physics-y11.html',
+    'Y11-SPA-01': 'phy11/space-physics-y11.html',
+    // Y12 Physics
+    'Y12-MEA-01': 'phy12/matter-position-measurement-y12.html',
+    'Y12-MEC-01': 'phy12/mass-weight-time-y12.html',
+    'Y12-MEC-02': 'phy12/fluids-at-rest-y12.html',
+    'Y12-MEC-03': 'phy12/motion-extended-y12.html',
+    'Y12-MEC-04': 'phy12/scalars-vectors-equilibrium-y12.html',
+    'Y12-MEC-05': 'phy12/simple-harmonic-motion-y12.html',
+    'Y12-MEC-06': 'phy12/newtons-laws-y12.html',
+    'Y12-WAV-01': 'phy12/waves-extended-y12.html',
+    'Y12-WAV-02': 'phy12/light-extended-y12.html',
+    'Y12-WAV-03': 'phy12/electromagnetic-waves-sound-y12.html',
+    'Y12-ELE-01': 'phy12/current-electricity-extended-y12.html',
+    'Y12-ELE-02': 'phy12/magnetic-em-fields-y12.html',
+    'Y12-ELE-03': 'phy12/ac-circuits-y12.html',
+    'Y12-FIE-01': 'phy12/fields-gravitational-electric-y12.html',
+    'Y12-THE-01': 'phy12/heat-energy-extended-y12.html',
+    'Y12-NUC-01': 'phy12/atomic-nuclear-physics-y12.html',
+    'Y12-NUC-02': 'phy12/wave-particle-duality-y12.html',
+    'Y12-APP-01': 'phy12/waec-harmonised-extra-y12.html',
+  };
+const CHEMISTRY_WALKTHROUGH_FILES = {
+    'Y10-PHY-01': 'che10/states-matter-y10.html',
+    'Y10-ATO-01': 'che10/atoms-elements-y10.html',
+    'Y10-BON-01': 'che10/bonding-y10.html',
+    'Y10-STO-01': 'che10/stoichiometry-y10.html',
+    'Y10-ELC-01': 'che10/electrochemistry-y10.html',
+    'Y10-ENG-01': 'che10/chemical-energetics-y10.html',
+    'Y10-KIN-01': 'che10/rates-reaction-y10.html',
+    'Y10-RED-01': 'che10/redox-y10.html',
+    // Y11 Chemistry
+    'Y11-PER-01': 'che11/periodic-table-y11.html',
+    'Y11-ACI-01': 'che11/acids-bases-salts-y11.html',
+    'Y11-MET-01': 'che11/metals-y11.html',
+    'Y11-ORG-01': 'che11/organic-chemistry-y11.html',
+    'Y11-ENV-01': 'che11/chemistry-environment-y11.html',
+    'Y11-ANA-01': 'che11/experimental-techniques-y11.html',
+    'Y11-PRA-01': 'che11/practical-skills-y11.html',
+  };
+const BIOLOGY_WALKTHROUGH_FILES = {
+    'Y10-CLA-01': 'bio10/classification-y10.html',
+    'Y10-CEL-01': 'bio10/cell-organisation-y10.html',
+    'Y10-CEL-02': 'bio10/cell-transport-y10.html',
+    'Y10-BIO-01': 'bio10/biological-molecules-y10.html',
+    'Y10-BIO-02': 'bio10/enzymes-y10.html',
+    'Y10-PLA-01': 'bio10/plant-nutrition-y10.html',
+    'Y10-HUM-01': 'bio10/human-nutrition-y10.html',
+    'Y10-PLA-02': 'bio10/transport-plants-y10.html',
+    'Y10-HUM-02': 'bio10/transport-animals-y10.html',
+    'Y10-HEA-01': 'bio10/disease-immunity-y10.html',
+    'Y10-HUM-03': 'bio10/gas-exchange-y10.html',
+    'Y10-HUM-04': 'bio10/respiration-y10.html',
+    'Y10-HUM-05': 'bio10/excretion-y10.html',
+    'Y10-HUM-06': 'bio10/coordination-y10.html',
+    'Y10-HEA-02': 'bio10/drugs-y10.html',
+    // Y11 Biology
+    'Y11-REP-01': 'bio11/reproduction-asexual-sexual-y11.html',
+    'Y11-REP-02': 'bio11/sexual-reproduction-humans-y11.html',
+    'Y11-PLA-01': 'bio11/sexual-reproduction-plants-y11.html',
+    'Y11-GEN-01': 'bio11/inheritance-y11.html',
+    'Y11-GEN-02': 'bio11/variation-selection-y11.html',
+    'Y11-ECO-01': 'bio11/organisms-environment-y11.html',
+    'Y11-ECO-02': 'bio11/human-influences-ecosystems-y11.html',
+    'Y11-BIT-01': 'bio11/biotechnology-genetic-modification-y11.html',
+    // Y12 Biology
+    'Y12-CEL-01': 'bio12/cell-physiology-y12.html',
+    'Y12-CLA-01': 'bio12/classification-cell-organisation-y12.html',
+    'Y12-ECO-01': 'bio12/ecology-y12.html',
+    'Y12-ECO-02': 'bio12/applied-agricultural-biology-y12.html',
+    'Y12-EVO-01': 'bio12/adaptation-behaviour-evolution-y12.html',
+    'Y12-GEN-01': 'bio12/conservation-variation-heredity-y12.html',
+    'Y12-HEA-01': 'bio12/microorganisms-health-y12.html',
+    'Y12-HUM-01': 'bio12/transport-coordination-y12.html',
+    'Y12-HUM-02': 'bio12/gas-exchange-excretion-homeostasis-y12.html',
+    'Y12-HUM-03': 'bio12/hormonal-nervous-coordination-y12.html',
+    'Y12-PLA-01': 'bio12/nutrition-y12.html',
+    'Y12-REP-01': 'bio12/reproduction-extended-y12.html',
+  };
+
   // ── Extract tryIt/tryItMC generators from a walkthrough HTML file ──
   async function extractGenerators(topicCode, subject) {
     let file;
-    if (subject === 'english')        file = ENGLISH_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'science')        file = SCIENCE_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'crs')        file = CRS_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'government') file = GOV_WALKTHROUGH_FILES[topicCode];
-    else                               file = WALKTHROUGH_FILES[topicCode];
+    if (subject === 'english')          file = ENGLISH_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'science')     file = SCIENCE_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'physics')     file = PHYSICS_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'chemistry')   file = CHEMISTRY_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'biology')     file = BIOLOGY_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'crs')         file = CRS_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'government')  file = GOV_WALKTHROUGH_FILES[topicCode];
+    else                                 file = WALKTHROUGH_FILES[topicCode];
     if (!file) return [];
 
     try {
@@ -697,6 +803,10 @@
 
     // Science button: hide for pure arts
     document.getElementById('subj-science').style.display = isArts ? 'none' : '';
+    // Physics/Chemistry/Biology: same gating as Science
+    ['subj-physics', 'subj-chemistry', 'subj-biology'].forEach(id => {
+      document.getElementById(id).style.display = isArts ? 'none' : '';
+    });
     // CRS / Government buttons: show for arts or both
     document.getElementById('subj-crs').style.display        = (isArts || isBoth) ? '' : 'none';
     document.getElementById('subj-government').style.display = (isArts || isBoth) ? '' : 'none';
@@ -753,7 +863,7 @@
     const isArtsSubject = ARTS_SUBJECTS.includes(subject);
 
     // Toggle button active states
-    ['english','maths','science','crs','government'].forEach(s => {
+    ['english','maths','science','physics','chemistry','biology','crs','government'].forEach(s => {
       const el = document.getElementById('subj-' + s);
       if (el) el.classList.toggle('on', s === subject);
     });
@@ -762,7 +872,7 @@
     document.body.classList.toggle('subject-science', subject === 'science');
 
     // Header subtitle
-    const subtitles = { maths: 'Topic Test — Maths', english: 'Topic Test — English', science: 'Topic Test — Science', crs: 'Topic Test — CRS', government: 'Topic Test — Government' };
+    const subtitles = { maths: 'Topic Test — Maths', english: 'Topic Test — English', science: 'Topic Test — Science', physics: 'Topic Test — Physics', chemistry: 'Topic Test — Chemistry', biology: 'Topic Test — Biology', crs: 'Topic Test — CRS', government: 'Topic Test — Government' };
     document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Topic Test';
 
     // Year select visibility — hide entire row for arts subjects
@@ -773,9 +883,14 @@
     ['opt-y13', 'opt-y14'].forEach(id => {
       document.getElementById(id).style.display = (subject === 'maths') ? '' : 'none';
     });
-    // Y10–12 unavailable for combined science
+    // Y10–12 unavailable for combined science (Y7-9 only)
     ['opt-y10', 'opt-y11', 'opt-y12'].forEach(id => {
       document.getElementById(id).style.display = (subject === 'science') ? 'none' : '';
+    });
+    // Y7–9 unavailable for Physics/Chemistry/Biology (Y10-12 only)
+    const isSplitScience = ['physics', 'chemistry', 'biology'].includes(subject);
+    ['opt-y7', 'opt-y8', 'opt-y9'].forEach(id => {
+      document.getElementById(id).style.display = isSplitScience ? 'none' : '';
     });
 
     // Reset selections
