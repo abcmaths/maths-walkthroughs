@@ -119,6 +119,7 @@
     <div class="form-group">
       <label>Subject</label>
       <div class="subject-toggle">
+        <div class="subject-btn" id="subj-english" onclick="selectSubject('english')">✏️ English</div>
         <div class="subject-btn on" id="subj-maths" onclick="selectSubject('maths')">📐 Maths</div>
         <div class="subject-btn" id="subj-science" onclick="selectSubject('science')">🔬 Science</div>
         <div class="subject-btn" id="subj-crs" onclick="selectSubject('crs')" style="display:none">✝️ CRS</div>
@@ -502,6 +503,47 @@
     'Y11-PRA-01': 'che11/practical-skills-y11.html',
   };
 
+  // English walkthrough files — single eng/ folder for all years. Grammar & Vocabulary
+  // (ENG-GRAM-xx / ENG-VOC-xx) are year-agnostic, stored under year_group=10 but shown
+  // for every year — matched by topic_code prefix, same logic as dashboard-student.html.
+  const ENGLISH_WALKTHROUGH_FILES = {
+    // Year 7-9 Checkpoint
+    'ENG7-READ-01': '#','ENG7-READ-02': '#','ENG7-READ-03': '#','ENG7-READ-04': '#',
+    'ENG7-WRIT-01': '#','ENG7-WRIT-02': '#','ENG7-WRIT-03': '#',
+    'ENG7-GRAM-01': '#','ENG7-GRAM-02': '#','ENG7-GRAM-03': '#',
+    'ENG7-VOC-01': '#',
+    'ENG8-READ-01': '#','ENG8-READ-02': '#',
+    'ENG8-WRIT-01': '#','ENG8-WRIT-02': '#',
+    'ENG8-GRAM-01': '#','ENG8-GRAM-02': '#','ENG8-GRAM-03': '#',
+    'ENG8-VOC-01': '#',
+    'ENG9-READ-01': '#','ENG9-READ-02': '#',
+    'ENG9-WRIT-01': '#','ENG9-WRIT-02': '#',
+    'ENG9-GRAM-01': '#','ENG9-GRAM-02': '#',
+    'ENG9-VOC-01': '#',
+    'ENG9-EOY-01': '#',
+    // IGCSE Reading (Y10-11)
+    'ENG-READ-01': '#','ENG-READ-02': '#','ENG-READ-03': '#','ENG-READ-04': '#',
+    'ENG-READ-05': '#','ENG-READ-06': '#','ENG-READ-07': '#','ENG-READ-08': '#',
+    'ENG-READ-09': '#','ENG-READ-10': '#','ENG-READ-11': '#','ENG-READ-12': '#',
+    // IGCSE Writing (Y10-11)
+    'ENG-WRIT-01': '#','ENG-WRIT-02': '#','ENG-WRIT-03': '#','ENG-WRIT-04': '#',
+    'ENG-WRIT-05': '#','ENG-WRIT-06': '#','ENG-WRIT-07': '#','ENG-WRIT-08': '#',
+    'ENG-WRIT-09': '#','ENG-WRIT-10': '#','ENG-WRIT-11': '#',
+    // Grammar (year-agnostic, Y10-12)
+    'ENG-GRAM-01': 'eng/sentence-types.html',
+    'ENG-GRAM-02': '#','ENG-GRAM-03': '#','ENG-GRAM-04': '#','ENG-GRAM-05': '#',
+    'ENG-GRAM-06': '#','ENG-GRAM-07': '#','ENG-GRAM-08': '#','ENG-GRAM-09': '#',
+    'ENG-GRAM-10': '#','ENG-GRAM-11': '#','ENG-GRAM-12': '#','ENG-GRAM-13': '#',
+    'ENG-GRAM-14': '#','ENG-GRAM-15': '#','ENG-GRAM-16': '#','ENG-GRAM-17': '#',
+    'ENG-GRAM-18': '#','ENG-GRAM-19': '#',
+    // Vocabulary (year-agnostic, Y10-12)
+    'ENG-VOC-01': '#','ENG-VOC-02': '#','ENG-VOC-03': '#','ENG-VOC-04': '#',
+    'ENG-VOC-05': '#','ENG-VOC-06': '#','ENG-VOC-07': '#','ENG-VOC-08': '#',
+    'ENG-VOC-09': '#','ENG-VOC-10': '#','ENG-VOC-11': '#',
+    // WAEC/NECO bridge (Y11-12)
+    'ENG-WAEC-01': '#','ENG-WAEC-02': '#','ENG-WAEC-03': '#','ENG-WAEC-04': '#','ENG-WAEC-05': '#',
+  };
+
   const CRS_WALKTHROUGH_FILES = {
     // Old Testament
     'CRS-OT-01': 'crs/sovereignty-of-god.html',
@@ -573,7 +615,8 @@
   // ── Extract tryIt/tryItMC generators from a walkthrough HTML file ──
   async function extractGenerators(topicCode, subject) {
     let file;
-    if (subject === 'science')        file = SCIENCE_WALKTHROUGH_FILES[topicCode];
+    if (subject === 'english')        file = ENGLISH_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'science')        file = SCIENCE_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'crs')        file = CRS_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'government') file = GOV_WALKTHROUGH_FILES[topicCode];
     else                               file = WALKTHROUGH_FILES[topicCode];
@@ -663,6 +706,7 @@
   window.loadTopics = async function() {
     const ARTS_SUBJECTS = ['crs', 'government'];
     const isArtsSubject = ARTS_SUBJECTS.includes(selectedSubject);
+    const ENGLISH_AGNOSTIC_RE = /^ENG-(GRAM|VOC)-\d+$/;
 
     let topics;
     if (isArtsSubject) {
@@ -670,6 +714,15 @@
       const { data } = await supabase
         .from('topics').select('*').eq('subject', selectedSubject).order('topic_code');
       topics = data;
+    } else if (selectedSubject === 'english') {
+      // English: load the selected year's topics PLUS the year-agnostic
+      // IGCSE Grammar/Vocabulary set (stored under year_group=10 but shown
+      // for every year), matched by topic_code prefix.
+      const yr = parseInt(document.getElementById('year-select').value);
+      if (!yr) return;
+      const { data } = await supabase
+        .from('topics').select('*').eq('subject', 'english').order('topic_code');
+      topics = (data || []).filter(t => t.year_group === yr || ENGLISH_AGNOSTIC_RE.test(t.topic_code));
     } else {
       const yr = parseInt(document.getElementById('year-select').value);
       if (!yr) return;
@@ -700,7 +753,7 @@
     const isArtsSubject = ARTS_SUBJECTS.includes(subject);
 
     // Toggle button active states
-    ['maths','science','crs','government'].forEach(s => {
+    ['english','maths','science','crs','government'].forEach(s => {
       const el = document.getElementById('subj-' + s);
       if (el) el.classList.toggle('on', s === subject);
     });
@@ -709,7 +762,7 @@
     document.body.classList.toggle('subject-science', subject === 'science');
 
     // Header subtitle
-    const subtitles = { maths: 'Topic Test — Maths', science: 'Topic Test — Science', crs: 'Topic Test — CRS', government: 'Topic Test — Government' };
+    const subtitles = { maths: 'Topic Test — Maths', english: 'Topic Test — English', science: 'Topic Test — Science', crs: 'Topic Test — CRS', government: 'Topic Test — Government' };
     document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Topic Test';
 
     // Year select visibility — hide entire row for arts subjects
