@@ -85,7 +85,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -98,7 +99,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -173,7 +174,7 @@ function dQ8(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'A Common Mistake',ACC,13,'middle',true));
 if(p>=1){o.push(R(10,40,460,44,'#fde8e8',ACC,2));o.push(T(240,60,'Assuming every word part is a root',DARK,10,'middle',false));o.push(T(240,80,'✗ Treating "car" in "carpet" as a related root','#555',10,'middle',false));}
 if(p>=2){o.push(R(10,96,460,44,'#e8f5e9',ACC,1));o.push(T(240,116,'✓ "Carpet" has no connection to "car" at all',DARK,10,'middle',false));}
-if(p>=3){o.push(R(10,152,460,44,CRM,ACC,1));o.push(T(240,176,'Coincidental letter patterns aren\'t always real roots','#555',10,'middle',false));}
+if(p>=3){o.push(R(10,152,460,44,CRM,ACC,1));o.push(T(240,176,'Coincidental letter patterns aren\\u2019t always real roots','#555',10,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ9(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -233,8 +234,8 @@ var QS=[
 {ey:'Q8 &bull; English &bull; Vocabulary (Year 9)',ti:'A Common Mistake',su:'Learn to avoid assuming every letter pattern is a meaningful root.',steps:[
 {lb:'The mistake',dr:dQ8,ht:'<p>Assuming every word part is a root: <b>✗ treating "car" in "carpet" as a related root.</b></p>'},
 {lb:'The truth',dr:dQ8,ht:'<p><b>✓ "Carpet" has no connection to "car" at all</b> — it just happens to share those letters.</p>'},
-{lb:'The lesson',dr:dQ8,ht:'<p>Coincidental letter patterns aren\'t always <b>real, meaningful roots</b>.</p>'},
-{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'Is "car" a real root in "carpet"?',o:['No, it is just a coincidental letter pattern','Yes, "carpet" is related to cars','Yes, all four-letter patterns are roots','Only in British English'],a:0,w:'"Car" in "carpet" is not a real root — it is just a coincidental letter pattern.'},{q:'What lesson does the "carpet" example teach?',o:['Coincidental letter patterns aren\'t always real roots','Every word part is always a meaningful root','Roots only exist in Latin, never elsewhere','Words with "car" always relate to vehicles'],a:0,w:'This example teaches that coincidental letter patterns aren\'t always real, meaningful roots.'},{q:'What should you be careful about when spotting roots?',o:['Not assuming every letter pattern is a real root','Assuming every word has exactly one root','Avoiding all root-spotting entirely','Only looking at the first letter of a word'],a:0,w:'Be careful not to assume every letter pattern is a genuine, meaningful root.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'The lesson',dr:dQ8,ht:'<p>Coincidental letter patterns aren\\u2019t always <b>real, meaningful roots</b>.</p>'},
+{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'Is "car" a real root in "carpet"?',o:['No, it is just a coincidental letter pattern','Yes, "carpet" is related to cars','Yes, all four-letter patterns are roots','Only in British English'],a:0,w:'"Car" in "carpet" is not a real root — it is just a coincidental letter pattern.'},{q:'What lesson does the "carpet" example teach?',o:['Coincidental letter patterns aren\\u2019t always real roots','Every word part is always a meaningful root','Roots only exist in Latin, never elsewhere','Words with "car" always relate to vehicles'],a:0,w:'This example teaches that coincidental letter patterns aren\\u2019t always real, meaningful roots.'},{q:'What should you be careful about when spotting roots?',o:['Not assuming every letter pattern is a real root','Assuming every word has exactly one root','Avoiding all root-spotting entirely','Only looking at the first letter of a word'],a:0,w:'Be careful not to assume every letter pattern is a genuine, meaningful root.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q9 &bull; English &bull; Vocabulary (Year 9)',ti:'Why Root Words Matter',su:'Understand how learning roots benefits your reading and writing.',steps:[
 {lb:'Faster vocabulary growth',dr:dQ9,ht:'<p>Learn <b>one root</b>, and unlock <b>many words</b> at once.</p>'},

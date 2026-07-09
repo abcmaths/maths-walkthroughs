@@ -85,7 +85,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -98,7 +99,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -135,7 +136,7 @@ s.innerHTML=o.join('');}
 
 function dQ2(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Starting a Formal Letter',ACC,13,'middle',true));
-[['Know the name?','"Dear Mr Smith,"'],['Don\'t know the name?','"Dear Sir/Madam,"'],['Your address','Top right corner'],['The date','Underneath your address']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(140,56+i*36,r[0],ACC,9,'middle',true));o.push(T(360,56+i*36,r[1],'#444',8,'middle',false));}});
+[['Know the name?','"Dear Mr Smith,"'],['Don\\u2019t know the name?','"Dear Sir/Madam,"'],['Your address','Top right corner'],['The date','Underneath your address']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(140,56+i*36,r[0],ACC,9,'middle',true));o.push(T(360,56+i*36,r[1],'#444',8,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -159,7 +160,7 @@ s.innerHTML=o.join('');}
 
 function dQ6(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Organising Your Letter',ACC,13,'middle',true));
-[['Paragraph 1','Say why you\'re writing'],['Paragraph 2','Give the main details/information'],['Paragraph 3','Add anything extra needed'],['Final paragraph','Wrap up and say what happens next']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',8,'middle',false));}});
+[['Paragraph 1','Say why you\\u2019re writing'],['Paragraph 2','Give the main details/information'],['Paragraph 3','Add anything extra needed'],['Final paragraph','Wrap up and say what happens next']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',8,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ7(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -194,10 +195,10 @@ var QS=[
 {lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'Who might you write a formal letter to?',o:['A headteacher or a company','Your best friend','Your younger sibling','Your pet'],a:0,w:'A formal letter might be written to a headteacher or a company.'},{q:'What tone does a formal letter use?',o:['Polite, proper English, no slang','Chatty and relaxed','Full of jokes','Very short with no detail'],a:0,w:'A formal letter uses polite, proper English with no slang.'},{q:'What tone does an informal letter use?',o:['Friendly and relaxed','Extremely formal','Full of legal language','Cold and distant'],a:0,w:'An informal letter uses a friendly, relaxed, chatty tone.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q2 &bull; English &bull; Writing (Year 7)',ti:'Starting a Formal Letter',su:'Learn the correct way to open a formal letter.',steps:[
-{lb:'If you know the name',dr:dQ2,ht:'<p>If you know the person\'s name, write <b>"Dear Mr Smith,"</b></p>'},
-{lb:'If you don\'t know the name',dr:dQ2,ht:'<p>If you don\'t know the name, write <b>"Dear Sir/Madam,"</b></p>'},
+{lb:'If you know the name',dr:dQ2,ht:'<p>If you know the person\\u2019s name, write <b>"Dear Mr Smith,"</b></p>'},
+{lb:'If you don\\u2019t know the name',dr:dQ2,ht:'<p>If you don\\u2019t know the name, write <b>"Dear Sir/Madam,"</b></p>'},
 {lb:'Address and date',dr:dQ2,ht:'<p>Put your <b>address</b> in the top right corner, and the <b>date</b> underneath it.</p>'},
-{lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'How should you start a formal letter if you know the name?',o:['"Dear Mr Smith,"','"Hi Smith!"','"Yo Mr Smith,"','"To whom it may concern, mate"'],a:0,w:'"Dear Mr Smith," is the correct formal opening when you know the name.'},{q:'How should you start if you don\'t know the name?',o:['"Dear Sir/Madam,"','"Dear Mr Smith,"','"Hey there,"','"Hello friend,"'],a:0,w:'"Dear Sir/Madam," is used when you don\'t know the recipient\'s name.'},{q:'Where does your address usually go in a formal letter?',o:['Top right corner','Bottom left corner','In the middle of the page','At the very end'],a:0,w:'Your address usually goes in the top right corner of a formal letter.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'How should you start a formal letter if you know the name?',o:['"Dear Mr Smith,"','"Hi Smith!"','"Yo Mr Smith,"','"To whom it may concern, mate"'],a:0,w:'"Dear Mr Smith," is the correct formal opening when you know the name.'},{q:'How should you start if you don\\u2019t know the name?',o:['"Dear Sir/Madam,"','"Dear Mr Smith,"','"Hey there,"','"Hello friend,"'],a:0,w:'"Dear Sir/Madam," is used when you don\\u2019t know the recipient\\u2019s name.'},{q:'Where does your address usually go in a formal letter?',o:['Top right corner','Bottom left corner','In the middle of the page','At the very end'],a:0,w:'Your address usually goes in the top right corner of a formal letter.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q3 &bull; English &bull; Writing (Year 7)',ti:'Ending a Formal Letter',su:'Learn how to correctly match your ending to your opening.',steps:[
 {lb:'"Dear Mr Smith" ending',dr:dQ3,ht:'<p>If you used <b>"Dear Mr Smith,"</b> end with <b>"Yours sincerely,"</b></p>'},
@@ -209,7 +210,7 @@ var QS=[
 {lb:'The greeting',dr:dQ4,ht:'<p>Start with <b>"Dear Ada,"</b> or even <b>"Hi Ada,"</b></p>'},
 {lb:'The tone',dr:dQ4,ht:'<p>Be <b>warm and friendly</b> straight away.</p>'},
 {lb:'A good first line',dr:dQ4,ht:'<p>Ask how they are, or share some <b>good news</b>.</p>'},
-{lb:'What you don\'t need',dr:dQ4,ht:'<p>You don\'t need formal addresses or <b>"Dear Sir/Madam."</b></p>'},
+{lb:'What you don\\u2019t need',dr:dQ4,ht:'<p>You don\\u2019t need formal addresses or <b>"Dear Sir/Madam."</b></p>'},
 {lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[{q:'How might you start an informal letter?',o:['"Hi Ada,"','"Dear Sir/Madam,"','"To whom it may concern,"','"Dear Mr Smith,"'],a:0,w:'"Hi Ada," is a friendly, informal way to start a letter.'},{q:'What tone should an informal letter have from the start?',o:['Warm and friendly','Cold and formal','Full of legal terms','Distant and businesslike'],a:0,w:'An informal letter should be warm and friendly from the very start.'},{q:'What is a good way to begin the first line of an informal letter?',o:['Ask how they are, or share good news','Use "Dear Sir/Madam"','List your qualifications','Include your full postal address'],a:0,w:'A good first line asks how they are, or shares some good news.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q5 &bull; English &bull; Writing (Year 7)',ti:'Ending an Informal Letter',su:'Learn friendly ways to end a letter to someone you know well.',steps:[
@@ -219,11 +220,11 @@ var QS=[
 {lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'Which of these is a friendly, informal ending?',o:['"Lots of love,"','"Yours sincerely,"','"Yours faithfully,"','"Regards, The Management"'],a:0,w:'"Lots of love," is a warm, informal ending suitable for friends and family.'},{q:'What do you write after your friendly ending?',o:['Just your first name','Your full name and address','Your full formal title','Nothing at all'],a:0,w:'Just your first name is needed after a friendly, informal ending.'},{q:'How does an informal ending compare to a formal one?',o:['Much more relaxed','Much more formal','Exactly the same','Always longer'],a:0,w:'An informal ending is much more relaxed than a formal one.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q6 &bull; English &bull; Writing (Year 7)',ti:'Organising Your Letter',su:'Learn how to structure the paragraphs of a letter clearly.',steps:[
-{lb:'Paragraph 1',dr:dQ6,ht:'<p>Say <b>why you\'re writing</b> the letter.</p>'},
+{lb:'Paragraph 1',dr:dQ6,ht:'<p>Say <b>why you\\u2019re writing</b> the letter.</p>'},
 {lb:'Paragraph 2',dr:dQ6,ht:'<p>Give the <b>main details or information</b>.</p>'},
-{lb:'Paragraph 3',dr:dQ6,ht:'<p>Add anything <b>extra</b> that\'s needed.</p>'},
+{lb:'Paragraph 3',dr:dQ6,ht:'<p>Add anything <b>extra</b> that\\u2019s needed.</p>'},
 {lb:'Final paragraph',dr:dQ6,ht:'<p>Wrap up and say <b>what happens next</b>.</p>'},
-{lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'What should the first paragraph of a letter usually cover?',o:['Why you\'re writing','A random unrelated topic','Your full address again','The ending signature'],a:0,w:'The first paragraph should say why you\'re writing the letter.'},{q:'What should the second paragraph usually cover?',o:['The main details or information','A totally new topic','The ending only','Just a greeting'],a:0,w:'The second paragraph gives the main details or information.'},{q:'What should the final paragraph usually do?',o:['Wrap up and say what happens next','Introduce a brand new topic','Repeat the first paragraph exactly','Contain only the address'],a:0,w:'The final paragraph wraps up the letter and says what happens next.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'What should the first paragraph of a letter usually cover?',o:['Why you\\u2019re writing','A random unrelated topic','Your full address again','The ending signature'],a:0,w:'The first paragraph should say why you\\u2019re writing the letter.'},{q:'What should the second paragraph usually cover?',o:['The main details or information','A totally new topic','The ending only','Just a greeting'],a:0,w:'The second paragraph gives the main details or information.'},{q:'What should the final paragraph usually do?',o:['Wrap up and say what happens next','Introduce a brand new topic','Repeat the first paragraph exactly','Contain only the address'],a:0,w:'The final paragraph wraps up the letter and says what happens next.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q7 &bull; English &bull; Writing (Year 7)',ti:'Formal Language Choices',su:'Learn to avoid casual language in formal letters.',steps:[
 {lb:'Too casual',dr:dQ7,ht:'<p><b>✗ "I wanna ask about..."</b> — this is too casual for a formal letter.</p>'},
@@ -232,10 +233,10 @@ var QS=[
 {lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'What is wrong with "I wanna ask about..." in a formal letter?',o:['It is too casual for formal writing','It has no verb','It has no subject','Nothing is wrong with it'],a:0,w:'"I wanna" is too casual for formal writing.'},{q:'What is the correct formal version?',o:['"I would like to ask about..."','"I wanna know about..."','"Gimme info about..."','"Tell me about..."'],a:0,w:'"I would like to ask about..." is the correct, more formal version.'},{q:'What should formal letters avoid?',o:['Slang and shortened words','All punctuation','All paragraphs','All greetings'],a:0,w:'Formal letters should avoid slang and shortened words.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q8 &bull; English &bull; Writing (Year 7)',ti:'A Common Mistake',su:'Learn to correctly pair your greeting with your ending.',steps:[
-{lb:'The mistake',dr:dQ8,ht:'<p>Mixing <b>"Dear Sir/Madam"</b> with <b>"Yours sincerely"</b> — these don\'t go together!</p>'},
+{lb:'The mistake',dr:dQ8,ht:'<p>Mixing <b>"Dear Sir/Madam"</b> with <b>"Yours sincerely"</b> — these don\\u2019t go together!</p>'},
 {lb:'The correct pairing',dr:dQ8,ht:'<p><b>Sir/Madam &rarr; Faithfully.</b> <b>Named person &rarr; Sincerely.</b></p>'},
-{lb:'A memory trick',dr:dQ8,ht:'<p>Remember: when you don\'t know someone\'s name, you end more formally with "faithfully."</p>'},
-{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is the mistake in pairing "Dear Sir/Madam" with "Yours sincerely"?',o:['They don\'t correctly pair together','Nothing is wrong with this pairing','"Sincerely" is not a real word','"Sir/Madam" cannot be used in letters'],a:0,w:'"Dear Sir/Madam" should pair with "Yours faithfully," not "Yours sincerely."'},{q:'What is the correct ending for "Dear Sir/Madam"?',o:['"Yours faithfully,"','"Yours sincerely,"','"Lots of love,"','"Best wishes,"'],a:0,w:'"Dear Sir/Madam" correctly pairs with "Yours faithfully."'},{q:'What is the correct ending for "Dear Mr Smith"?',o:['"Yours sincerely,"','"Yours faithfully,"','"See you soon,"','"Cheers,"'],a:0,w:'"Dear Mr Smith" correctly pairs with "Yours sincerely."'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'A memory trick',dr:dQ8,ht:'<p>Remember: when you don\\u2019t know someone\\u2019s name, you end more formally with "faithfully."</p>'},
+{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is the mistake in pairing "Dear Sir/Madam" with "Yours sincerely"?',o:['They don\\u2019t correctly pair together','Nothing is wrong with this pairing','"Sincerely" is not a real word','"Sir/Madam" cannot be used in letters'],a:0,w:'"Dear Sir/Madam" should pair with "Yours faithfully," not "Yours sincerely."'},{q:'What is the correct ending for "Dear Sir/Madam"?',o:['"Yours faithfully,"','"Yours sincerely,"','"Lots of love,"','"Best wishes,"'],a:0,w:'"Dear Sir/Madam" correctly pairs with "Yours faithfully."'},{q:'What is the correct ending for "Dear Mr Smith"?',o:['"Yours sincerely,"','"Yours faithfully,"','"See you soon,"','"Cheers,"'],a:0,w:'"Dear Mr Smith" correctly pairs with "Yours sincerely."'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q9 &bull; English &bull; Writing (Year 7)',ti:'Checking Your Letter',su:'Learn how to review your letter before finishing.',steps:[
 {lb:'Right tone?',dr:dQ9,ht:'<p>Check: is it <b>formal</b> for a formal letter, or <b>friendly</b> for an informal one?</p>'},
@@ -247,9 +248,9 @@ var QS=[
 {ey:'Q10 &bull; English &bull; Writing (Year 7)',ti:'Mixed Questions — Letter Writing',su:'Revise formal and informal letters, greetings, endings and structure.',steps:[
 {lb:'Formal vs informal',dr:dQ10,ht:'<p><b>Formal</b> letters use polite, proper English. <b>Informal</b> letters use a friendly, relaxed tone.</p>'},
 {lb:'Correct pairings',dr:dQ10,ht:'<p><b>"Dear Sir/Madam"</b> pairs with <b>"Yours faithfully."</b> <b>"Dear [Name]"</b> pairs with <b>"Yours sincerely."</b></p>'},
-{lb:'Structure',dr:dQ10,ht:'<p>Organise into clear paragraphs: <b>why you\'re writing, main details, extra information, wrap-up</b>.</p>'},
+{lb:'Structure',dr:dQ10,ht:'<p>Organise into clear paragraphs: <b>why you\\u2019re writing, main details, extra information, wrap-up</b>.</p>'},
 {lb:'Language choices',dr:dQ10,ht:'<p>Avoid <b>slang</b> in formal letters; be <b>warm</b> in informal ones.</p>'},
-{lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[{q:'What tone does a formal letter use?',o:['Polite, proper English','Casual slang','Text-message abbreviations','Random capital letters'],a:0,w:'A formal letter uses polite, proper English.'},{q:'What ending pairs with "Dear Sir/Madam"?',o:['"Yours faithfully,"','"Yours sincerely,"','"Lots of love,"','"Cheers,"'],a:0,w:'"Dear Sir/Madam" pairs with "Yours faithfully."'},{q:'What ending pairs with "Dear Mr Smith"?',o:['"Yours sincerely,"','"Yours faithfully,"','"Best wishes,"','"See you soon,"'],a:0,w:'"Dear Mr Smith" pairs with "Yours sincerely."'},{q:'What should the first paragraph of a letter usually say?',o:['Why you\'re writing','Your full address again','A totally unrelated topic','The ending signature'],a:0,w:'The first paragraph should say why you\'re writing.'},{q:'What should formal letters avoid?',o:['Slang and casual language','All punctuation','All paragraphs','Politeness'],a:0,w:'Formal letters should avoid slang and casual language.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[{q:'What tone does a formal letter use?',o:['Polite, proper English','Casual slang','Text-message abbreviations','Random capital letters'],a:0,w:'A formal letter uses polite, proper English.'},{q:'What ending pairs with "Dear Sir/Madam"?',o:['"Yours faithfully,"','"Yours sincerely,"','"Lots of love,"','"Cheers,"'],a:0,w:'"Dear Sir/Madam" pairs with "Yours faithfully."'},{q:'What ending pairs with "Dear Mr Smith"?',o:['"Yours sincerely,"','"Yours faithfully,"','"Best wishes,"','"See you soon,"'],a:0,w:'"Dear Mr Smith" pairs with "Yours sincerely."'},{q:'What should the first paragraph of a letter usually say?',o:['Why you\\u2019re writing','Your full address again','A totally unrelated topic','The ending signature'],a:0,w:'The first paragraph should say why you\\u2019re writing.'},{q:'What should formal letters avoid?',o:['Slang and casual language','All punctuation','All paragraphs','Politeness'],a:0,w:'Formal letters should avoid slang and casual language.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 
 ];

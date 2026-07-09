@@ -84,7 +84,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -97,7 +98,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -140,7 +141,7 @@ s.innerHTML=o.join('');}
 function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Formal Letter Conventions',ACC,13,'middle',true));
 if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'Sir/Madam &rarr; Yours faithfully. Named person &rarr; Yours sincerely.',DARK,9,'middle',false));}
-if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'No contractions: "cannot" not "can\'t"',DARK,10,'middle',false));}
+if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'No contractions: "cannot" not "can\\u2019t"',DARK,10,'middle',false));}
 if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'Modal verbs for politeness: "I would be grateful if..."','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
 
@@ -158,7 +159,7 @@ s.innerHTML=o.join('');}
 
 function dQ6(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Informal Letter Conventions',ACC,13,'middle',true));
-[['Greeting','"Dear Ada," or "Hi Ada,"'],['Contractions fine','"I\'m", "can\'t", "didn\'t" all acceptable'],['Personal, warm tone','Share feelings, ask questions, use humour'],['Ending','"Lots of love," "Best wishes," + first name only']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',7,'middle',false));}});
+[['Greeting','"Dear Ada," or "Hi Ada,"'],['Contractions fine','"I\\u2019m", "can\\u2019t", "didn\\u2019t" all acceptable'],['Personal, warm tone','Share feelings, ask questions, use humour'],['Ending','"Lots of love," "Best wishes," + first name only']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ7(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -170,7 +171,7 @@ s.innerHTML=o.join('');}
 
 function dQ8(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'A Common Mistake',ACC,13,'middle',true));
-if(p>=1){o.push(R(10,38,460,44,'#fde8e8',ACC,2));o.push(T(240,56,'Mixing formal and informal features in one letter',DARK,10,'middle',false));o.push(T(240,74,'"Dear Sir, hope you\'re doing great!"','#555',9,'middle',false));}
+if(p>=1){o.push(R(10,38,460,44,'#fde8e8',ACC,2));o.push(T(240,56,'Mixing formal and informal features in one letter',DARK,10,'middle',false));o.push(T(240,74,'"Dear Sir, hope you\\u2019re doing great!"','#555',9,'middle',false));}
 if(p>=2){o.push(R(10,92,460,44,'#e8f5e9',ACC,1));o.push(T(240,110,'Keep register CONSISTENT throughout the whole letter',DARK,10,'middle',false));}
 if(p>=3){o.push(R(10,146,460,44,CRM,ACC,1));o.push(T(240,170,'Mixed register is one of the most common IGCSE letter errors','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
@@ -191,7 +192,7 @@ var QS=[
 {lb:'Register must match precisely',dr:dQ1,ht:'<p>Register must match the relationship <b>AND</b> purpose precisely — formal, semi-formal, and informal each have exact conventions.</p>'},
 {lb:'Matching the task exactly',dr:dQ1,ht:'<p>IGCSE tasks specify audience and purpose — match register <b>exactly</b>.</p>'},
 {lb:'The stakes of getting it wrong',dr:dQ1,ht:'<p>Getting register wrong <b>undermines</b> an otherwise well-written letter.</p>'},
-{lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'What must register match precisely in letter writing?',o:['The relationship and purpose of the letter','Only the length of the task','Only the date given in the task','Only the writer\'s own preference'],a:0,w:'Register must match the relationship and purpose precisely.'},{q:'What should you do when an IGCSE task specifies audience and purpose?',o:['Match the register exactly','Choose whichever register you prefer','Ignore the specified audience','Use informal register regardless'],a:0,w:'Match the register exactly to the audience and purpose specified in the task.'},{q:'What happens if register is wrong, even if the writing is otherwise good?',o:['It undermines the whole letter','It has no effect on marks','It always earns bonus marks','It only matters for informal letters'],a:0,w:'Getting register wrong undermines an otherwise well-written letter.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'What must register match precisely in letter writing?',o:['The relationship and purpose of the letter','Only the length of the task','Only the date given in the task','Only the writer\\u2019s own preference'],a:0,w:'Register must match the relationship and purpose precisely.'},{q:'What should you do when an IGCSE task specifies audience and purpose?',o:['Match the register exactly','Choose whichever register you prefer','Ignore the specified audience','Use informal register regardless'],a:0,w:'Match the register exactly to the audience and purpose specified in the task.'},{q:'What happens if register is wrong, even if the writing is otherwise good?',o:['It undermines the whole letter','It has no effect on marks','It always earns bonus marks','It only matters for informal letters'],a:0,w:'Getting register wrong undermines an otherwise well-written letter.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q2 &bull; English &bull; Writing (IGCSE)',ti:'Three Registers, Three Conventions',su:'Learn to distinguish formal, semi-formal, and informal letter registers.',steps:[
 {lb:'Formal',dr:dQ2,ht:'<p><b>Formal:</b> a complaint to a company, or an application — "Dear Sir/Madam."</p>'},
@@ -202,9 +203,9 @@ var QS=[
 ]},
 {ey:'Q3 &bull; English &bull; Writing (IGCSE)',ti:'Formal Letter Conventions',su:'Learn the precise conventions expected in a formal letter.',steps:[
 {lb:'Greeting and ending pairs',dr:dQ3,ht:'<p><b>"Sir/Madam"</b> pairs with <b>"Yours faithfully."</b> A <b>named person</b> pairs with <b>"Yours sincerely."</b></p>'},
-{lb:'No contractions',dr:dQ3,ht:'<p>Formal letters avoid contractions: <b>"cannot"</b> not "can\'t."</p>'},
+{lb:'No contractions',dr:dQ3,ht:'<p>Formal letters avoid contractions: <b>"cannot"</b> not "can\\u2019t."</p>'},
 {lb:'Polite modal verbs',dr:dQ3,ht:'<p>Use modal verbs for politeness: <b>"I would be grateful if..."</b></p>'},
-{lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'What ending pairs with "Dear Sir/Madam"?',o:['"Yours faithfully,"','"Yours sincerely,"','"Lots of love,"','"Best wishes,"'],a:0,w:'"Dear Sir/Madam" pairs with "Yours faithfully."'},{q:'Should formal letters use contractions like "can\'t"?',o:['No, use the full form, e.g. "cannot"','Yes, contractions are always fine','Yes, but only in the first paragraph','Yes, but only in the ending'],a:0,w:'Formal letters should avoid contractions, using the full form instead, e.g. "cannot."'},{q:'Which of these is a polite modal phrase suited to formal letters?',o:['"I would be grateful if..."','"I wanna know if..."','"Gimme an answer..."','"Tell me now..."'],a:0,w:'"I would be grateful if..." is a polite modal phrase suited to formal letters.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'What ending pairs with "Dear Sir/Madam"?',o:['"Yours faithfully,"','"Yours sincerely,"','"Lots of love,"','"Best wishes,"'],a:0,w:'"Dear Sir/Madam" pairs with "Yours faithfully."'},{q:'Should formal letters use contractions like "can\\u2019t"?',o:['No, use the full form, e.g. "cannot"','Yes, contractions are always fine','Yes, but only in the first paragraph','Yes, but only in the ending'],a:0,w:'Formal letters should avoid contractions, using the full form instead, e.g. "cannot."'},{q:'Which of these is a polite modal phrase suited to formal letters?',o:['"I would be grateful if..."','"I wanna know if..."','"Gimme an answer..."','"Tell me now..."'],a:0,w:'"I would be grateful if..." is a polite modal phrase suited to formal letters.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q4 &bull; English &bull; Writing (IGCSE)',ti:'Complaint Letters: A Specific Structure',su:'Learn the standard structure for an effective complaint letter.',steps:[
 {lb:'Paragraph 1',dr:dQ4,ht:'<p>State the <b>issue clearly and factually</b>.</p>'},
@@ -221,22 +222,22 @@ var QS=[
 ]},
 {ey:'Q6 &bull; English &bull; Writing (IGCSE)',ti:'Informal Letter Conventions',su:'Learn the relaxed conventions appropriate for a letter to a friend or family.',steps:[
 {lb:'Greeting',dr:dQ6,ht:'<p>Use <b>"Dear Ada,"</b> or even <b>"Hi Ada,"</b></p>'},
-{lb:'Contractions are fine',dr:dQ6,ht:'<p><b>"I\'m," "can\'t," "didn\'t"</b> are all acceptable in informal letters.</p>'},
+{lb:'Contractions are fine',dr:dQ6,ht:'<p><b>"I\\u2019m," "can\\u2019t," "didn\\u2019t"</b> are all acceptable in informal letters.</p>'},
 {lb:'A personal, warm tone',dr:dQ6,ht:'<p>Share feelings, ask questions, and use <b>humour</b> where appropriate.</p>'},
 {lb:'Ending',dr:dQ6,ht:'<p><b>"Lots of love," "Best wishes,"</b> plus your first name only.</p>'},
-{lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'What greeting suits an informal letter?',o:['"Hi Ada,"','"Dear Sir/Madam,"','"To whom it may concern,"','"Dear Mr Smith,"'],a:0,w:'"Hi Ada," suits an informal letter to a friend.'},{q:'Are contractions acceptable in informal letters?',o:['Yes','No, never','Only in the greeting','Only in the ending'],a:0,w:'Contractions like "I\'m" and "can\'t" are acceptable in informal letters.'},{q:'What should the ending of an informal letter include?',o:['A warm phrase like "Lots of love," plus first name only','A full formal signature with title','"Yours faithfully," plus full name','No ending at all is needed'],a:0,w:'The ending should include a warm phrase like "Lots of love," plus just the first name.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'What greeting suits an informal letter?',o:['"Hi Ada,"','"Dear Sir/Madam,"','"To whom it may concern,"','"Dear Mr Smith,"'],a:0,w:'"Hi Ada," suits an informal letter to a friend.'},{q:'Are contractions acceptable in informal letters?',o:['Yes','No, never','Only in the greeting','Only in the ending'],a:0,w:'Contractions like "I\\u2019m" and "can\\u2019t" are acceptable in informal letters.'},{q:'What should the ending of an informal letter include?',o:['A warm phrase like "Lots of love," plus first name only','A full formal signature with title','"Yours faithfully," plus full name','No ending at all is needed'],a:0,w:'The ending should include a warm phrase like "Lots of love," plus just the first name.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q7 &bull; English &bull; Writing (IGCSE)',ti:'Matching Tone to Task Precisely',su:'Learn to check that your tone precisely matches what the task requires.',steps:[
 {lb:'Too aggressive undermines',dr:dQ7,ht:'<p>A complaint that is too aggressive <b>undermines the writer</b>.</p>'},
 {lb:'Too casual seems disrespectful',dr:dQ7,ht:'<p>A formal letter that is too casual seems <b>disrespectful</b>.</p>'},
 {lb:'Always re-check',dr:dQ7,ht:'<p>Re-read the task: does my tone <b>match what is being asked</b>?</p>'},
-{lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'What effect does an overly aggressive complaint have?',o:['It undermines the writer','It always guarantees a solution','It has no real effect','It makes the letter more persuasive'],a:0,w:'An overly aggressive complaint undermines the writer\'s credibility.'},{q:'What effect does a too-casual formal letter have?',o:['It seems disrespectful','It seems perfectly appropriate','It always earns full marks','It has no effect on the reader'],a:0,w:'A formal letter that is too casual can seem disrespectful.'},{q:'What should you always check before submitting a letter?',o:['Whether the tone matches what the task requires','Only the exact word count','Only the spelling of names','Only whether it rhymes'],a:0,w:'Always check whether your tone matches what the task requires.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'What effect does an overly aggressive complaint have?',o:['It undermines the writer','It always guarantees a solution','It has no real effect','It makes the letter more persuasive'],a:0,w:'An overly aggressive complaint undermines the writer\\u2019s credibility.'},{q:'What effect does a too-casual formal letter have?',o:['It seems disrespectful','It seems perfectly appropriate','It always earns full marks','It has no effect on the reader'],a:0,w:'A formal letter that is too casual can seem disrespectful.'},{q:'What should you always check before submitting a letter?',o:['Whether the tone matches what the task requires','Only the exact word count','Only the spelling of names','Only whether it rhymes'],a:0,w:'Always check whether your tone matches what the task requires.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q8 &bull; English &bull; Writing (IGCSE)',ti:'A Common Mistake',su:'Learn to avoid mixing formal and informal features within one letter.',steps:[
-{lb:'The mistake',dr:dQ8,ht:'<p>Mixing formal and informal features in one letter: <b>"Dear Sir, hope you\'re doing great!"</b></p>'},
+{lb:'The mistake',dr:dQ8,ht:'<p>Mixing formal and informal features in one letter: <b>"Dear Sir, hope you\\u2019re doing great!"</b></p>'},
 {lb:'The fix',dr:dQ8,ht:'<p>Keep register <b>CONSISTENT</b> throughout the whole letter.</p>'},
 {lb:'Why this matters',dr:dQ8,ht:'<p>Mixed register is one of the <b>most common IGCSE letter errors</b>.</p>'},
-{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is the mistake in "Dear Sir, hope you\'re doing great!"?',o:['It mixes formal and informal register in one sentence','It uses too many words','It has no subject','Nothing is wrong with it'],a:0,w:'This mixes a formal greeting ("Dear Sir") with an informal phrase ("hope you\'re doing great!").'},{q:'What should you keep consistent throughout a letter?',o:['The register','The exact word count','The number of paragraphs','The colour of ink'],a:0,w:'Keep the register consistent throughout the whole letter.'},{q:'How common is the mixed-register mistake at IGCSE?',o:['It is one of the most common letter errors','It is extremely rare','It never actually happens','It only happens in informal letters'],a:0,w:'Mixed register is one of the most common IGCSE letter errors.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is the mistake in "Dear Sir, hope you\\u2019re doing great!"?',o:['It mixes formal and informal register in one sentence','It uses too many words','It has no subject','Nothing is wrong with it'],a:0,w:'This mixes a formal greeting ("Dear Sir") with an informal phrase ("hope you\\u2019re doing great!").'},{q:'What should you keep consistent throughout a letter?',o:['The register','The exact word count','The number of paragraphs','The colour of ink'],a:0,w:'Keep the register consistent throughout the whole letter.'},{q:'How common is the mixed-register mistake at IGCSE?',o:['It is one of the most common letter errors','It is extremely rare','It never actually happens','It only happens in informal letters'],a:0,w:'Mixed register is one of the most common IGCSE letter errors.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q9 &bull; English &bull; Writing (IGCSE)',ti:'Why Register Precision Matters',su:'Understand why matching register exactly is so heavily assessed.',steps:[
 {lb:'Directly assessed',dr:dQ9,ht:'<p>Examiners check register match <b>explicitly</b> against the task.</p>'},

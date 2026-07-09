@@ -85,7 +85,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -98,7 +99,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -166,7 +167,7 @@ s.innerHTML=o.join('');}
 
 function dQ7(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Selecting the Right Evidence',ACC,12,'middle',true));
-[['Relevant only','Choose quotes that directly relate to your comparison point'],['One from each text','Balance evidence across both texts'],['Short and precise','Don\'t over-quote — brief, targeted evidence'],['Match with explanation','Every quote needs analysis, not just presence']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',7,'middle',false));}});
+[['Relevant only','Choose quotes that directly relate to your comparison point'],['One from each text','Balance evidence across both texts'],['Short and precise','Don\\u2019t over-quote — brief, targeted evidence'],['Match with explanation','Every quote needs analysis, not just presence']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ8(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -198,7 +199,7 @@ var QS=[
 {lb:'Attitudes and tone',dr:dQ2,ht:'<p>Compare <b>attitudes/opinions</b> (how do the writers feel?) and <b>tone</b> (is one more serious, the other lighter?).</p>'},
 {lb:'Purpose',dr:dQ2,ht:'<p>Compare <b>purpose</b>: does one text inform while the other persuades?</p>'},
 {lb:'Language and structure',dr:dQ2,ht:'<p>Compare <b>language/structure</b>: different techniques used to create effect.</p>'},
-{lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'What might you compare about the writers\' attitudes?',o:['How do the writers feel about the topic?','What font is used?','How long each text is','The publication date only'],a:0,w:'You might compare how the writers feel about the topic — their attitudes and opinions.'},{q:'What might you compare about purpose?',o:['Whether one text informs and another persuades','The colour of the page','The number of paragraphs only','The author\'s age'],a:0,w:'You might compare whether one text informs while another persuades, for example.'},{q:'What might you compare about language and structure?',o:['Different techniques used to create effect','Only the exact word count','Only the font size','Only the title length'],a:0,w:'You might compare the different techniques each writer uses to create effect.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'What might you compare about the writers\\u2019 attitudes?',o:['How do the writers feel about the topic?','What font is used?','How long each text is','The publication date only'],a:0,w:'You might compare how the writers feel about the topic — their attitudes and opinions.'},{q:'What might you compare about purpose?',o:['Whether one text informs and another persuades','The colour of the page','The number of paragraphs only','The author\\u2019s age'],a:0,w:'You might compare whether one text informs while another persuades, for example.'},{q:'What might you compare about language and structure?',o:['Different techniques used to create effect','Only the exact word count','Only the font size','Only the title length'],a:0,w:'You might compare the different techniques each writer uses to create effect.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q3 &bull; English &bull; Reading (IGCSE)',ti:'The Point-by-Point Method',su:'Learn a structure that keeps comparison explicit throughout.',steps:[
 {lb:'The method',dr:dQ3,ht:'<p>Compare <b>ONE aspect</b> across both texts, then move on to the next aspect.</p>'},
@@ -228,7 +229,7 @@ var QS=[
 {ey:'Q7 &bull; English &bull; Reading (IGCSE)',ti:'Selecting the Right Evidence',su:'Learn to choose evidence carefully to support your comparison.',steps:[
 {lb:'Relevance is key',dr:dQ7,ht:'<p>Choose quotes that <b>directly relate</b> to your comparison point.</p>'},
 {lb:'Balance across texts',dr:dQ7,ht:'<p>Use <b>one quote from each text</b> to balance your evidence.</p>'},
-{lb:'Short and precise',dr:dQ7,ht:'<p>Don\'t over-quote — use <b>brief, targeted</b> evidence.</p>'},
+{lb:'Short and precise',dr:dQ7,ht:'<p>Don\\u2019t over-quote — use <b>brief, targeted</b> evidence.</p>'},
 {lb:'Always explain',dr:dQ7,ht:'<p>Every quote needs <b>analysis</b>, not just presence in your answer.</p>'},
 {lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'What kind of quotes should you choose for a comparison?',o:['Ones that directly relate to your comparison point','The longest quotes available','Quotes chosen at random','Only quotes from one text'],a:0,w:'Choose quotes that directly relate to your specific comparison point.'},{q:'How should evidence be balanced in a comparison answer?',o:['With one quote from each text','With only quotes from one text','With no quotes at all','With ten quotes from a single text'],a:0,w:'Balance your evidence with a quote from each text where possible.'},{q:'What should you avoid doing with quotations?',o:['Over-quoting — use brief, targeted evidence instead','Using any evidence at all','Explaining the evidence you use','Balancing evidence across both texts'],a:0,w:'Avoid over-quoting — use brief, targeted evidence instead.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},

@@ -85,7 +85,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -98,7 +99,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -128,7 +129,7 @@ function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1=
 
 function dQ1(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'What is Structure?',ACC,13,'middle',true));
-if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'HOW a text is organised, not what words are used',DARK,10,'middle',false));o.push(T(240,74,'The writer\'s design decisions','#555',9,'middle',false));}
+if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'HOW a text is organised, not what words are used',DARK,10,'middle',false));o.push(T(240,74,'The writer\\u2019s design decisions','#555',9,'middle',false));}
 if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'Order of events, shifts in focus, narrative viewpoint',DARK,10,'middle',false));}
 if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'A separate skill from language analysis — often confused','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
@@ -142,7 +143,7 @@ function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Narrative Viewpoint Shifts',ACC,12,'middle',true));
 if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'Wide shot &rarr; close-up (or the reverse)',DARK,10,'middle',false));}
 if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'Starts describing a whole city, then zooms to one window',DARK,9,'middle',false));}
-if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'Draws the reader\'s attention from general to specific','#555',9,'middle',false));}
+if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'Draws the reader\\u2019s attention from general to specific','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ4(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -154,13 +155,13 @@ function dQ5(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Cyclical Structure',ACC,13,'middle',true));
 if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'The text ends where it began',DARK,10,'middle',false));}
 if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'Same image, setting, or line reappears at the close',DARK,10,'middle',false));}
-if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'Can suggest things haven\'t changed, or a cycle repeating','#555',9,'middle',false));}
+if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'Can suggest things haven\\u2019t changed, or a cycle repeating','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ6(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Withholding Information',ACC,13,'middle',true));
 if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'Writers deliberately DELAY key information',DARK,10,'middle',false));}
-if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'A character\'s name withheld until the final paragraph',DARK,10,'middle',false));}
+if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'A character\\u2019s name withheld until the final paragraph',DARK,10,'middle',false));}
 if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'Creates mystery, suspense, or a dramatic reveal','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
 
@@ -171,14 +172,14 @@ s.innerHTML=o.join('');}
 
 function dQ8(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'A Common Mistake',ACC,13,'middle',true));
-if(p>=1){o.push(R(10,38,460,44,'#fde8e8',ACC,2));o.push(T(240,56,'Confusing STRUCTURE with LANGUAGE',DARK,10,'middle',false));o.push(T(240,74,'✗ "This is a metaphor, so it\'s a structural feature."','#555',8,'middle',false));}
+if(p>=1){o.push(R(10,38,460,44,'#fde8e8',ACC,2));o.push(T(240,56,'Confusing STRUCTURE with LANGUAGE',DARK,10,'middle',false));o.push(T(240,74,'✗ "This is a metaphor, so it\\u2019s a structural feature."','#555',8,'middle',false));}
 if(p>=2){o.push(R(10,92,460,44,'#e8f5e9',ACC,1));o.push(T(240,110,'✓ Structure = organisation/order; Language = word choice',DARK,9,'middle',false));}
 if(p>=3){o.push(R(10,146,460,44,CRM,ACC,1));o.push(T(240,170,'Keep these two skills clearly separate in your answers','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ9(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Why Structure Analysis Matters',ACC,12,'middle',true));
-[['Distinct exam question','Often a dedicated question, separate from language'],['Shows writer\'s craft','Structure is a deliberate authorial choice too'],['Whole-text thinking','Forces you to consider the text as a whole'],['Often under-practised','Many students focus only on language, missing marks here']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(125,56+i*36,r[0],ACC,9,'middle',true));o.push(T(340,56+i*36,r[1],'#444',7,'middle',false));}});
+[['Distinct exam question','Often a dedicated question, separate from language'],['Shows writer\\u2019s craft','Structure is a deliberate authorial choice too'],['Whole-text thinking','Forces you to consider the text as a whole'],['Often under-practised','Many students focus only on language, missing marks here']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(125,56+i*36,r[0],ACC,9,'middle',true));o.push(T(340,56+i*36,r[1],'#444',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ10(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -189,23 +190,23 @@ s.innerHTML=o.join('');}
 var QS=[
 
 {ey:'Q1 &bull; English &bull; Reading (IGCSE)',ti:'What is Structure?',su:'Distinguish structure from language as a separate reading skill.',steps:[
-{lb:'Definition',dr:dQ1,ht:'<p><b>Structure</b> means HOW a text is organised — the writer\'s design decisions — not what words are used.</p>'},
+{lb:'Definition',dr:dQ1,ht:'<p><b>Structure</b> means HOW a text is organised — the writer\\u2019s design decisions — not what words are used.</p>'},
 {lb:'What structure covers',dr:dQ1,ht:'<p>Structure includes the <b>order of events</b>, <b>shifts in focus</b>, and <b>narrative viewpoint</b>.</p>'},
 {lb:'A separate skill',dr:dQ1,ht:'<p>Structure is a <b>separate skill</b> from language analysis — the two are often confused.</p>'},
-{lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'What does "structure" refer to in a text?',o:['How the text is organised','What individual words mean','The spelling used','The title of the text'],a:0,w:'Structure refers to how a text is organised — the writer\'s design decisions.'},{q:'Which of these is a structural feature?',o:['The order of events','A single metaphor','A single adjective','A single verb choice'],a:0,w:'The order of events is a structural feature, unlike individual word choices.'},{q:'Is structure the same skill as language analysis?',o:['No, it is a separate skill, often confused with language','Yes, they are identical','Yes, but only in non-fiction','Yes, but only in poetry'],a:0,w:'Structure is a separate skill from language analysis, though the two are often confused.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'What does "structure" refer to in a text?',o:['How the text is organised','What individual words mean','The spelling used','The title of the text'],a:0,w:'Structure refers to how a text is organised — the writer\\u2019s design decisions.'},{q:'Which of these is a structural feature?',o:['The order of events','A single metaphor','A single adjective','A single verb choice'],a:0,w:'The order of events is a structural feature, unlike individual word choices.'},{q:'Is structure the same skill as language analysis?',o:['No, it is a separate skill, often confused with language','Yes, they are identical','Yes, but only in non-fiction','Yes, but only in poetry'],a:0,w:'Structure is a separate skill from language analysis, though the two are often confused.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
-{ey:'Q2 &bull; English &bull; Reading (IGCSE)',ti:'Beginning, Middle, End',su:'Learn to analyse the choices a writer makes across a text\'s overall shape.',steps:[
+{ey:'Q2 &bull; English &bull; Reading (IGCSE)',ti:'Beginning, Middle, End',su:'Learn to analyse the choices a writer makes across a text\\u2019s overall shape.',steps:[
 {lb:'The opening',dr:dQ2,ht:'<p>Ask: what does the writer choose to <b>start with</b>?</p>'},
 {lb:'Shifts',dr:dQ2,ht:'<p>Ask: where does the <b>focus change</b>, and why?</p>'},
 {lb:'The ending',dr:dQ2,ht:'<p>Ask: what is left with the reader at the <b>close</b> of the text?</p>'},
 {lb:'The key question always',dr:dQ2,ht:'<p>Always ask: why <b>THIS order</b>, and not a different one?</p>'},
-{lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'What should you ask about a text\'s opening?',o:['What does the writer choose to start with?','What is the exact word count?','What font is used?','Who published the text?'],a:0,w:'Ask what the writer chooses to start with, and why.'},{q:'What should you ask about a shift in the text?',o:['Where does the focus change, and why?','How many paragraphs are there?','What is the title of the text?','Is there a picture included?'],a:0,w:'Ask where the focus changes within the text, and why.'},{q:'What key question should you always ask about text order?',o:['Why THIS order, and not a different one?','Is the order alphabetical?','Is the order the same as another text?','Does the order rhyme?'],a:0,w:'Always ask why the writer chose this particular order, rather than a different one.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'What should you ask about a text\\u2019s opening?',o:['What does the writer choose to start with?','What is the exact word count?','What font is used?','Who published the text?'],a:0,w:'Ask what the writer chooses to start with, and why.'},{q:'What should you ask about a shift in the text?',o:['Where does the focus change, and why?','How many paragraphs are there?','What is the title of the text?','Is there a picture included?'],a:0,w:'Ask where the focus changes within the text, and why.'},{q:'What key question should you always ask about text order?',o:['Why THIS order, and not a different one?','Is the order alphabetical?','Is the order the same as another text?','Does the order rhyme?'],a:0,w:'Always ask why the writer chose this particular order, rather than a different one.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q3 &bull; English &bull; Reading (IGCSE)',ti:'Narrative Viewpoint Shifts',su:'Analyse how writers move between wide and close focus.',steps:[
 {lb:'Wide shot to close-up',dr:dQ3,ht:'<p>A text can move from a <b>wide shot</b> to a <b>close-up</b>, or the reverse.</p>'},
 {lb:'Example',dr:dQ3,ht:'<p>A text starts describing a whole city, then zooms into <b>one window</b>.</p>'},
-{lb:'The effect',dr:dQ3,ht:'<p>This draws the reader\'s attention from <b>general to specific</b>, focusing our attention deliberately.</p>'},
-{lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'What is a "wide shot to close-up" structural technique?',o:['Moving from a broad view to a specific, narrow focus','Repeating the same sentence twice','Using only short sentences','Only describing sounds, never sights'],a:0,w:'This technique moves from a broad view to a specific, narrow focus.'},{q:'What effect does zooming from a whole city to one window create?',o:['Draws attention from general to specific','Confuses the reader with no purpose','Makes the text shorter overall','Removes any sense of setting'],a:0,w:'This zooming effect draws the reader\'s attention from general to specific.'},{q:'Can this technique also work in reverse (close-up to wide shot)?',o:['Yes','No, it only works one way','No, this technique does not exist','Only in non-fiction texts'],a:0,w:'This technique can work in reverse too, moving from close-up to a wider view.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'The effect',dr:dQ3,ht:'<p>This draws the reader\\u2019s attention from <b>general to specific</b>, focusing our attention deliberately.</p>'},
+{lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'What is a "wide shot to close-up" structural technique?',o:['Moving from a broad view to a specific, narrow focus','Repeating the same sentence twice','Using only short sentences','Only describing sounds, never sights'],a:0,w:'This technique moves from a broad view to a specific, narrow focus.'},{q:'What effect does zooming from a whole city to one window create?',o:['Draws attention from general to specific','Confuses the reader with no purpose','Makes the text shorter overall','Removes any sense of setting'],a:0,w:'This zooming effect draws the reader\\u2019s attention from general to specific.'},{q:'Can this technique also work in reverse (close-up to wide shot)?',o:['Yes','No, it only works one way','No, this technique does not exist','Only in non-fiction texts'],a:0,w:'This technique can work in reverse too, moving from close-up to a wider view.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q4 &bull; English &bull; Reading (IGCSE)',ti:'Time Shifts',su:'Analyse the effects of flashback and flash-forward on the reader.',steps:[
 {lb:'Flashback',dr:dQ4,ht:'<p>A <b>flashback</b> interrupts the present with a past memory.</p>'},
@@ -217,14 +218,14 @@ var QS=[
 {ey:'Q5 &bull; English &bull; Reading (IGCSE)',ti:'Cyclical Structure',su:'Analyse the effect of a text ending where it began.',steps:[
 {lb:'What it is',dr:dQ5,ht:'<p>A <b>cyclical structure</b> means the text ends where it began.</p>'},
 {lb:'Example',dr:dQ5,ht:'<p>The same <b>image, setting,</b> or <b>line</b> reappears at the close of the text.</p>'},
-{lb:'The effect',dr:dQ5,ht:'<p>This can suggest things <b>haven\'t changed</b>, or that a <b>cycle is repeating</b>.</p>'},
-{lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'What is a "cyclical structure"?',o:['The text ends where it began','The text has no clear ending','The text uses only short sentences','The text alternates between two narrators'],a:0,w:'A cyclical structure means the text ends where it began.'},{q:'What might reappear at the end of a cyclically structured text?',o:['The same image, setting, or line as the opening','A brand new, unrelated image','A list of characters','The title repeated'],a:0,w:'The same image, setting, or line from the opening often reappears at the close.'},{q:'What can a cyclical structure suggest?',o:['That things haven\'t changed, or a cycle is repeating','That the story has ended happily','That the writer ran out of ideas','Nothing meaningful at all'],a:0,w:'A cyclical structure can suggest that things haven\'t changed, or a cycle is repeating.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'The effect',dr:dQ5,ht:'<p>This can suggest things <b>haven\\u2019t changed</b>, or that a <b>cycle is repeating</b>.</p>'},
+{lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'What is a "cyclical structure"?',o:['The text ends where it began','The text has no clear ending','The text uses only short sentences','The text alternates between two narrators'],a:0,w:'A cyclical structure means the text ends where it began.'},{q:'What might reappear at the end of a cyclically structured text?',o:['The same image, setting, or line as the opening','A brand new, unrelated image','A list of characters','The title repeated'],a:0,w:'The same image, setting, or line from the opening often reappears at the close.'},{q:'What can a cyclical structure suggest?',o:['That things haven\\u2019t changed, or a cycle is repeating','That the story has ended happily','That the writer ran out of ideas','Nothing meaningful at all'],a:0,w:'A cyclical structure can suggest that things haven\\u2019t changed, or a cycle is repeating.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q6 &bull; English &bull; Reading (IGCSE)',ti:'Withholding Information',su:'Analyse how delaying key information creates a structural effect.',steps:[
 {lb:'Deliberate delay',dr:dQ6,ht:'<p>Writers deliberately <b>delay key information</b> for structural effect.</p>'},
-{lb:'Example',dr:dQ6,ht:'<p>A character\'s name might be <b>withheld</b> until the final paragraph.</p>'},
+{lb:'Example',dr:dQ6,ht:'<p>A character\\u2019s name might be <b>withheld</b> until the final paragraph.</p>'},
 {lb:'The effect',dr:dQ6,ht:'<p>This creates <b>mystery, suspense,</b> or a <b>dramatic reveal</b>.</p>'},
-{lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'What might a writer deliberately delay for structural effect?',o:['Key information, like a character\'s name','The title of the text','The font used','The page number'],a:0,w:'Writers can deliberately delay key information, like a character\'s name, for effect.'},{q:'What effect does withholding a character\'s name until the end create?',o:['Mystery, suspense, or a dramatic reveal','No effect at all','Confusion with no purpose','A shorter overall text'],a:0,w:'Withholding a character\'s name can create mystery, suspense, or a dramatic reveal.'},{q:'Is withholding information a language or structural technique?',o:['A structural technique','A language technique','Neither a language nor structural technique','Only a punctuation technique'],a:0,w:'Withholding information is a structural technique, related to the ordering/timing of reveal.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'What might a writer deliberately delay for structural effect?',o:['Key information, like a character\\u2019s name','The title of the text','The font used','The page number'],a:0,w:'Writers can deliberately delay key information, like a character\\u2019s name, for effect.'},{q:'What effect does withholding a character\\u2019s name until the end create?',o:['Mystery, suspense, or a dramatic reveal','No effect at all','Confusion with no purpose','A shorter overall text'],a:0,w:'Withholding a character\\u2019s name can create mystery, suspense, or a dramatic reveal.'},{q:'Is withholding information a language or structural technique?',o:['A structural technique','A language technique','Neither a language nor structural technique','Only a punctuation technique'],a:0,w:'Withholding information is a structural technique, related to the ordering/timing of reveal.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q7 &bull; English &bull; Reading (IGCSE)',ti:'Structure in Non-Fiction',su:'Learn to analyse structural choices in non-fiction texts.',steps:[
 {lb:'Paragraph order',dr:dQ7,ht:'<p>Ask: why does <b>this point</b> come before <b>that one</b>?</p>'},
@@ -233,14 +234,14 @@ var QS=[
 {lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'What question should you ask about paragraph order in non-fiction?',o:['Why does this point come before that one?','How many paragraphs are there in total?','What font is used for each paragraph?','Is the paragraph the correct length?'],a:0,w:'Ask why a particular point comes before another in the paragraph order.'},{q:'What does "building an argument" from weak to strongest achieve?',o:['Builds towards a climax, strengthening the overall case','Weakens the argument over time','Confuses the reader on purpose','Has no structural effect'],a:0,w:'Ordering points from weak to strongest builds towards a climax, strengthening the case.'},{q:'What does a "contrast structure" involve?',o:['Two opposing viewpoints placed side by side','Only one viewpoint throughout','A single repeated fact','No clear structure at all'],a:0,w:'A contrast structure places two opposing viewpoints side by side.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q8 &bull; English &bull; Reading (IGCSE)',ti:'A Common Mistake',su:'Learn to avoid confusing structure with language.',steps:[
-{lb:'The mistake',dr:dQ8,ht:'<p>Confusing <b>structure</b> with <b>language</b>: <b>✗ "This is a metaphor, so it\'s a structural feature."</b></p>'},
+{lb:'The mistake',dr:dQ8,ht:'<p>Confusing <b>structure</b> with <b>language</b>: <b>✗ "This is a metaphor, so it\\u2019s a structural feature."</b></p>'},
 {lb:'The correction',dr:dQ8,ht:'<p><b>✓ Structure = organisation/order.</b> <b>Language = word choice.</b> A metaphor is a language feature, not structural.</p>'},
 {lb:'The rule to remember',dr:dQ8,ht:'<p>Keep these two skills <b>clearly separate</b> in your answers.</p>'},
-{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is the mistake in calling a metaphor a "structural feature"?',o:['A metaphor is a language feature, not structural','Metaphors are never used in real texts','Structure and language are exactly the same thing','Nothing is wrong with this statement'],a:0,w:'A metaphor is a language feature (word choice), not a structural feature (organisation).'},{q:'What does "structure" refer to?',o:['Organisation and order','Individual word choice','Punctuation only','Spelling only'],a:0,w:'Structure refers to organisation and order, distinct from language (word choice).'},{q:'Why is it important to keep structure and language separate in your answers?',o:['They are distinct skills tested separately at IGCSE','They are identical and interchangeable','Structure questions don\'t really exist','Language questions don\'t really exist'],a:0,w:'Structure and language are distinct skills, often tested separately at IGCSE.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is the mistake in calling a metaphor a "structural feature"?',o:['A metaphor is a language feature, not structural','Metaphors are never used in real texts','Structure and language are exactly the same thing','Nothing is wrong with this statement'],a:0,w:'A metaphor is a language feature (word choice), not a structural feature (organisation).'},{q:'What does "structure" refer to?',o:['Organisation and order','Individual word choice','Punctuation only','Spelling only'],a:0,w:'Structure refers to organisation and order, distinct from language (word choice).'},{q:'Why is it important to keep structure and language separate in your answers?',o:['They are distinct skills tested separately at IGCSE','They are identical and interchangeable','Structure questions don\\u2019t really exist','Language questions don\\u2019t really exist'],a:0,w:'Structure and language are distinct skills, often tested separately at IGCSE.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q9 &bull; English &bull; Reading (IGCSE)',ti:'Why Structure Analysis Matters',su:'Understand the value of this often under-practised skill.',steps:[
 {lb:'A distinct exam question',dr:dQ9,ht:'<p>Structure is often a <b>dedicated question</b>, separate from language analysis.</p>'},
-{lb:'Shows the writer\'s craft',dr:dQ9,ht:'<p>Structure is a <b>deliberate authorial choice</b> too, not an accident.</p>'},
+{lb:'Shows the writer\\u2019s craft',dr:dQ9,ht:'<p>Structure is a <b>deliberate authorial choice</b> too, not an accident.</p>'},
 {lb:'Whole-text thinking',dr:dQ9,ht:'<p>Analysing structure forces you to consider the text <b>as a whole</b>, not just isolated details.</p>'},
 {lb:'Often under-practised',dr:dQ9,ht:'<p>Many students focus only on <b>language</b>, missing marks available for structural analysis.</p>'},
 {lb:'Your turn',dr:dQ9,ht:tryItMC(function(){var qs=[{q:'Is structure often tested as a separate question at IGCSE?',o:['Yes, it is often a dedicated question','No, it is never tested separately','Only in non-fiction papers','Only at A-Level'],a:0,w:'Structure is often tested as a dedicated question, separate from language analysis.'},{q:'What does structural analysis force you to consider?',o:['The text as a whole, not just isolated details','Only a single word in the text','Only the title of the text','Only the punctuation used'],a:0,w:'Structural analysis forces you to consider the text as a whole.'},{q:'Why might students miss marks on structure questions?',o:['They often focus only on language, neglecting structure','Structure questions are impossible to answer','There are no marks available for structure','Structure is not actually assessed'],a:0,w:'Many students focus only on language, missing available marks for structural analysis.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},

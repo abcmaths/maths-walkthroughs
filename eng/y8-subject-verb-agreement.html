@@ -85,7 +85,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -98,7 +99,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -136,7 +137,7 @@ s.innerHTML=o.join('');}
 
 function dQ2(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Singular Subjects',ACC,13,'middle',true));
-[['He / She / It','Add -s to the verb: "he walks"'],['One person\'s name','"Ada walks to school."'],['One thing','"The dog barks loudly."'],['Rule','Singular subject + verb ending in -s']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(130,56+i*36,r[0],ACC,9,'middle',true));o.push(T(340,56+i*36,r[1],'#444',8,'middle',false));}});
+[['He / She / It','Add -s to the verb: "he walks"'],['One person\\u2019s name','"Ada walks to school."'],['One thing','"The dog barks loudly."'],['Rule','Singular subject + verb ending in -s']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(130,56+i*36,r[0],ACC,9,'middle',true));o.push(T(340,56+i*36,r[1],'#444',8,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -148,14 +149,14 @@ s.innerHTML=o.join('');}
 
 function dQ4(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Tricky Subjects: "Everyone", "Each"',ACC,11,'middle',true));
-if(p>=1){o.push(R(10,40,460,44,'#fde8e8',ACC,2));o.push(T(240,60,'✗ "Everyone are here." (sounds plural, but ISN\'T)',DARK,9,'middle',false));}
+if(p>=1){o.push(R(10,40,460,44,'#fde8e8',ACC,2));o.push(T(240,60,'✗ "Everyone are here." (sounds plural, but ISN\\u2019T)',DARK,9,'middle',false));}
 if(p>=2){o.push(R(10,96,460,44,'#e8f5e9',ACC,1));o.push(T(240,116,'✓ "Everyone IS here."',DARK,10,'middle',false));}
 if(p>=3){o.push(R(10,152,460,44,CRM,ACC,1));o.push(T(240,176,'Everyone, everybody, each, either — all SINGULAR','#555',10,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ5(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'When Words Come Between',ACC,12,'middle',true));
-if(p>=1){o.push(R(10,40,460,44,CRM,ACC,2));o.push(T(240,60,'Don\'t let extra words confuse you!',DARK,10,'middle',false));}
+if(p>=1){o.push(R(10,40,460,44,CRM,ACC,2));o.push(T(240,60,'Don\\u2019t let extra words confuse you!',DARK,10,'middle',false));}
 if(p>=2){o.push(R(10,96,460,44,'#fff',ACC,1));o.push(T(240,116,'"The box of chocolates IS on the table."',DARK,10,'middle',false));o.push(T(240,134,'"box" is the real subject, not "chocolates"','#555',9,'middle',false));}
 if(p>=3){o.push(R(10,152,460,44,'#e8f5e9',ACC,1));o.push(T(240,176,'Find the TRUE subject before choosing the verb','#555',10,'middle',false));}
 s.innerHTML=o.join('');}
@@ -198,7 +199,7 @@ var QS=[
 ]},
 {ey:'Q2 &bull; English &bull; Grammar (Year 8)',ti:'Singular Subjects',su:'Learn how singular subjects take a verb with -s.',steps:[
 {lb:'He / She / It',dr:dQ2,ht:'<p>With <b>he, she,</b> or <b>it</b>, add <b>-s</b> to the verb: "he walks."</p>'},
-{lb:'One person\'s name',dr:dQ2,ht:'<p><b>"Ada walks to school."</b> — one named person, so the verb takes -s.</p>'},
+{lb:'One person\\u2019s name',dr:dQ2,ht:'<p><b>"Ada walks to school."</b> — one named person, so the verb takes -s.</p>'},
 {lb:'One thing',dr:dQ2,ht:'<p><b>"The dog barks loudly."</b> — one thing (the dog), so the verb takes -s.</p>'},
 {lb:'The rule',dr:dQ2,ht:'<p>A singular subject takes a verb ending in <b>-s</b>.</p>'},
 {lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'What happens to the verb with a singular subject like "he"?',o:['It adds -s, e.g. "he walks"','It removes the -s, e.g. "he walk"','It changes to the past tense always','Nothing changes at all'],a:0,w:'A singular subject like "he" adds -s to the verb: "he walks."'},{q:'Which is correctly matched?',o:['"Ada walks to school."','"Ada walk to school."','"Ada walking to school."','"Ada walked-s to school."'],a:0,w:'"Ada walks" correctly matches the singular subject "Ada" with an -s verb.'},{q:'What is the rule for a singular subject?',o:['It takes a verb ending in -s','It takes a verb with no ending at all','It always uses the past tense','It always uses "are"'],a:0,w:'A singular subject takes a verb ending in -s.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
@@ -210,13 +211,13 @@ var QS=[
 {lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'What happens to the verb with a plural subject like "they"?',o:['It has no -s, e.g. "they walk"','It adds -s, e.g. "they walks"','It changes to the past tense always','Nothing changes at all'],a:0,w:'A plural subject like "they" uses a verb with no -s: "they walk."'},{q:'Which is correct?',o:['"They walk to school."','"They walks to school."','"They walking to school is."','"They walked-s to school."'],a:0,w:'"They walk to school" correctly matches the plural subject with no -s on the verb.'},{q:'What does "more than one" mean for the verb?',o:['No -s on the verb','Always adds -s to the verb','Always uses the past tense','Always uses "is"'],a:0,w:'More than one person or thing means no -s on the verb.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q4 &bull; English &bull; Grammar (Year 8)',ti:'Tricky Subjects: "Everyone", "Each"',su:'Learn that words like "everyone" and "each" are actually singular.',steps:[
-{lb:'The mistake',dr:dQ4,ht:'<p><b>✗ "Everyone are here."</b> — this sounds plural, but it isn\'t!</p>'},
+{lb:'The mistake',dr:dQ4,ht:'<p><b>✗ "Everyone are here."</b> — this sounds plural, but it isn\\u2019t!</p>'},
 {lb:'The correct version',dr:dQ4,ht:'<p><b>✓ "Everyone IS here."</b></p>'},
 {lb:'The rule',dr:dQ4,ht:'<p><b>Everyone, everybody, each, either</b> — all treated as <b>SINGULAR</b>.</p>'},
 {lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[{q:'Is "everyone" treated as singular or plural?',o:['Singular','Plural','Neither','It depends on context'],a:0,w:'"Everyone" is treated as singular, even though it refers to many people.'},{q:'Which is correct?',o:['"Everyone is here."','"Everyone are here."','"Everyone were here."','"Everyone been here."'],a:0,w:'"Everyone is here" correctly treats "everyone" as singular.'},{q:'Which of these words is treated as singular?',o:['Each','They','We','Both'],a:0,w:'"Each" is treated as singular, like "everyone" and "everybody."'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q5 &bull; English &bull; Grammar (Year 8)',ti:'When Words Come Between',su:'Learn to find the true subject when extra words come between subject and verb.',steps:[
-{lb:'Don\'t get confused',dr:dQ5,ht:'<p>Don\'t let <b>extra words</b> between the subject and verb confuse you.</p>'},
+{lb:'Don\\u2019t get confused',dr:dQ5,ht:'<p>Don\\u2019t let <b>extra words</b> between the subject and verb confuse you.</p>'},
 {lb:'Example',dr:dQ5,ht:'<p><b>"The box of chocolates IS on the table."</b> "Box" is the real subject, not "chocolates."</p>'},
 {lb:'The rule',dr:dQ5,ht:'<p>Find the <b>TRUE subject</b> before choosing the verb.</p>'},
 {lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'In "The box of chocolates IS on the table," what is the true subject?',o:['Box','Chocolates','Table','Is'],a:0,w:'"Box" is the true subject; "of chocolates" is just extra description.'},{q:'What should you do when extra words come between subject and verb?',o:['Find the true subject before choosing the verb','Match the verb to the nearest word always','Ignore the subject entirely','Use a plural verb every time'],a:0,w:'Find the true subject before choosing the verb, ignoring extra descriptive words.'},{q:'Which is correct: "The box of chocolates ___ on the table"?',o:['Is','Are','Were','Have'],a:0,w:'"Is" is correct since "box" (the true subject) is singular.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
@@ -237,10 +238,10 @@ var QS=[
 {lb:'The mistake',dr:dQ8,ht:'<p><b>✗ "The list of items ARE long."</b> — this is incorrect.</p>'},
 {lb:'The fix',dr:dQ8,ht:'<p><b>✓ "The list of items IS long."</b></p>'},
 {lb:'Why',dr:dQ8,ht:'<p><b>"List"</b> (singular) is the true subject, not <b>"items."</b></p>'},
-{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is wrong with "The list of items ARE long"?',o:['"List" is the true subject and is singular, so it should be "IS"','"Items" should be singular','"Long" is the wrong word','Nothing is wrong with it'],a:0,w:'"List" (singular) is the true subject, so the verb should be "is," not "are."'},{q:'What is the correct version?',o:['"The list of items is long."','"The list of items are long."','"The list of item is long."','"The lists of items is long."'],a:0,w:'"The list of items is long" correctly matches the singular subject "list."'},{q:'Why is "list" the true subject, not "items"?',o:['"Of items" is just extra description, not the subject','"Items" always comes before the subject','"List" is always plural','The rule doesn\'t apply here'],a:0,w:'"Of items" is extra description; "list" is the true subject of the sentence.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is wrong with "The list of items ARE long"?',o:['"List" is the true subject and is singular, so it should be "IS"','"Items" should be singular','"Long" is the wrong word','Nothing is wrong with it'],a:0,w:'"List" (singular) is the true subject, so the verb should be "is," not "are."'},{q:'What is the correct version?',o:['"The list of items is long."','"The list of items are long."','"The list of item is long."','"The lists of items is long."'],a:0,w:'"The list of items is long" correctly matches the singular subject "list."'},{q:'Why is "list" the true subject, not "items"?',o:['"Of items" is just extra description, not the subject','"Items" always comes before the subject','"List" is always plural','The rule doesn\\u2019t apply here'],a:0,w:'"Of items" is extra description; "list" is the true subject of the sentence.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q9 &bull; English &bull; Grammar (Year 8)',ti:'Why Subject-Verb Agreement Matters',su:'Understand why this grammar rule is important for clear writing.',steps:[
-{lb:'Sounds correct',dr:dQ9,ht:'<p>Mistakes here <b>stand out immediately</b> to readers, even if they can\'t explain why.</p>'},
+{lb:'Sounds correct',dr:dQ9,ht:'<p>Mistakes here <b>stand out immediately</b> to readers, even if they can\\u2019t explain why.</p>'},
 {lb:'Clarity',dr:dQ9,ht:'<p>Correct agreement helps the reader know exactly <b>who or what</b> you mean.</p>'},
 {lb:'Marks matter',dr:dQ9,ht:'<p>This is checked closely in <b>writing assessments</b>.</p>'},
 {lb:'Practice helps',dr:dQ9,ht:'<p>This becomes <b>automatic</b> the more you write and check your work.</p>'},

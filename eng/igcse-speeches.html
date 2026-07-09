@@ -84,7 +84,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -97,7 +98,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -198,7 +199,7 @@ var QS=[
 {lb:'Logical progression',dr:dQ2,ht:'<p>Each point should <b>build on the last</b>, not appear in random order.</p>'},
 {lb:'Acknowledging counter-argument',dr:dQ2,ht:'<p>Shows maturity: <b>"Some may say... but"</b></p>'},
 {lb:'A strong conclusion',dr:dQ2,ht:'<p>Return to the <b>central claim</b> with renewed force.</p>'},
-{lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'What should you know before beginning a persuasive speech?',o:['Your clear central claim','Only the audience\'s names','Only the exact time limit','Only the venue'],a:0,w:'You should know your clear central claim before beginning.'},{q:'What should each point in the speech do?',o:['Build on the last, in logical progression','Appear in completely random order','Repeat the previous point exactly','Contradict the previous point'],a:0,w:'Each point should build on the last, in a logical progression.'},{q:'What does acknowledging a counter-argument show?',o:['Maturity','Weakness in the argument','A lack of preparation','Confusion about the topic'],a:0,w:'Acknowledging a counter-argument shows maturity in the persuasive writing.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'What should you know before beginning a persuasive speech?',o:['Your clear central claim','Only the audience\\u2019s names','Only the exact time limit','Only the venue'],a:0,w:'You should know your clear central claim before beginning.'},{q:'What should each point in the speech do?',o:['Build on the last, in logical progression','Appear in completely random order','Repeat the previous point exactly','Contradict the previous point'],a:0,w:'Each point should build on the last, in a logical progression.'},{q:'What does acknowledging a counter-argument show?',o:['Maturity','Weakness in the argument','A lack of preparation','Confusion about the topic'],a:0,w:'Acknowledging a counter-argument shows maturity in the persuasive writing.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q3 &bull; English &bull; Writing (IGCSE)',ti:'The Three Classical Appeals',su:'Learn ethos, logos, and pathos as the foundation of persuasive speech.',steps:[
 {lb:'Ethos',dr:dQ3,ht:'<p><b>Ethos:</b> establishing credibility and trustworthiness.</p>'},
@@ -250,7 +251,7 @@ var QS=[
 {lb:'The three appeals',dr:dQ10,ht:'<p><b>Ethos</b> (credibility), <b>logos</b> (logic), <b>pathos</b> (emotion) — strong speeches blend these.</p>'},
 {lb:'Advanced devices and rhythm',dr:dQ10,ht:'<p><b>Anaphora, antithesis, tricolon</b> used sparingly; vary sentence length for rhythm.</p>'},
 {lb:'The common error to avoid',dr:dQ10,ht:'<p>Never pile up <b>technique with no genuine argument</b> underneath.</p>'},
-{lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[{q:'What should you know before beginning a persuasive speech?',o:['Your clear central claim','Only the audience\'s names','Only the venue','Only the time limit'],a:0,w:'Know your clear central claim before beginning the speech.'},{q:'What does "ethos" appeal to?',o:['Credibility and trustworthiness','Logic only','Emotion only','Grammar rules'],a:0,w:'Ethos appeals to credibility and trustworthiness.'},{q:'What is anaphora?',o:['Repeating the start of successive sentences','Contrasting ideas in balance','A group of three ideas','A rhetorical question'],a:0,w:'Anaphora is repeating the start of successive sentences.'},{q:'Why should sentence length vary in a speech?',o:['To prevent monotony when read aloud','To make the speech much shorter','To avoid all punctuation','To remove the need for an ending'],a:0,w:'Varying sentence length prevents monotony when the speech is read aloud.'},{q:'What is the common mistake to avoid in speech writing?',o:['Piling up technique with no genuine argument underneath','Building a genuine case first','Using the three classical appeals','Ending with a call to action'],a:0,w:'Avoid piling up technique with no genuine argument underneath it.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[{q:'What should you know before beginning a persuasive speech?',o:['Your clear central claim','Only the audience\\u2019s names','Only the venue','Only the time limit'],a:0,w:'Know your clear central claim before beginning the speech.'},{q:'What does "ethos" appeal to?',o:['Credibility and trustworthiness','Logic only','Emotion only','Grammar rules'],a:0,w:'Ethos appeals to credibility and trustworthiness.'},{q:'What is anaphora?',o:['Repeating the start of successive sentences','Contrasting ideas in balance','A group of three ideas','A rhetorical question'],a:0,w:'Anaphora is repeating the start of successive sentences.'},{q:'Why should sentence length vary in a speech?',o:['To prevent monotony when read aloud','To make the speech much shorter','To avoid all punctuation','To remove the need for an ending'],a:0,w:'Varying sentence length prevents monotony when the speech is read aloud.'},{q:'What is the common mistake to avoid in speech writing?',o:['Piling up technique with no genuine argument underneath','Building a genuine case first','Using the three classical appeals','Ending with a call to action'],a:0,w:'Avoid piling up technique with no genuine argument underneath it.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 
 ];

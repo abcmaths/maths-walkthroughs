@@ -85,7 +85,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -98,7 +99,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -128,7 +129,7 @@ function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1=
 
 function dQ1(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'What is a Fact?',ACC,14,'middle',true));
-if(p>=1){o.push(R(10,40,460,50,CRM,ACC,2));o.push(T(240,60,'A fact can be PROVEN to be true',DARK,11,'middle',false));o.push(T(240,80,'It doesn\'t change person to person','#555',10,'middle',false));}
+if(p>=1){o.push(R(10,40,460,50,CRM,ACC,2));o.push(T(240,60,'A fact can be PROVEN to be true',DARK,11,'middle',false));o.push(T(240,80,'It doesn\\u2019t change person to person','#555',10,'middle',false));}
 if(p>=2){o.push(R(10,100,460,44,'#fff',ACC,1));o.push(T(240,120,'"Lagos is in Nigeria."',DARK,11,'middle',false));o.push(T(240,138,'This can be checked and proven true','#555',9,'middle',false));}
 if(p>=3){o.push(R(10,154,460,40,'#e8f5e9',ACC,1));o.push(T(240,178,'Facts often include numbers, dates, and measurable things',DARK,10,'middle',false));}
 s.innerHTML=o.join('');}
@@ -136,7 +137,7 @@ s.innerHTML=o.join('');}
 function dQ2(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'What is an Opinion?',ACC,14,'middle',true));
 if(p>=1){o.push(R(10,40,460,50,CRM,ACC,2));o.push(T(240,60,'An opinion is what someone THINKS or BELIEVES',DARK,10,'middle',false));o.push(T(240,80,'It can be different from person to person','#555',10,'middle',false));}
-if(p>=2){o.push(R(10,100,460,44,'#fff',ACC,1));o.push(T(240,120,'"Lagos is the best city in Nigeria."',DARK,10,'middle',false));o.push(T(240,138,'This cannot be proven — it\'s a personal view','#555',9,'middle',false));}
+if(p>=2){o.push(R(10,100,460,44,'#fff',ACC,1));o.push(T(240,120,'"Lagos is the best city in Nigeria."',DARK,10,'middle',false));o.push(T(240,138,'This cannot be proven — it\\u2019s a personal view','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -155,7 +156,7 @@ function dQ5(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Facts Can Still Be Wrong!',ACC,13,'middle',true));
 if(p>=1){o.push(R(10,40,460,44,CRM,ACC,2));o.push(T(240,60,'A "fact" statement can still be FALSE',DARK,10,'middle',false));}
 if(p>=2){o.push(R(10,96,460,44,'#fff',ACC,1));o.push(T(240,116,'"The Earth is flat." — stated as a fact, but WRONG',DARK,10,'middle',false));}
-if(p>=3){o.push(R(10,152,460,44,'#e8f5e9',ACC,1));o.push(T(240,176,'What matters: CAN it be checked/proven? Not whether it\'s true.','#555',10,'middle',false));}
+if(p>=3){o.push(R(10,152,460,44,'#e8f5e9',ACC,1));o.push(T(240,176,'What matters: CAN it be checked/proven? Not whether it\\u2019s true.','#555',10,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ6(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -166,7 +167,7 @@ s.innerHTML=o.join('');}
 function dQ7(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Why Advertisers Use Opinions',ACC,12,'middle',true));
 if(p>=1){o.push(R(10,40,460,44,CRM,ACC,2));o.push(T(240,60,'Adverts often use opinions dressed up as facts',DARK,10,'middle',false));}
-if(p>=2){o.push(R(10,96,460,44,'#fff',ACC,1));o.push(T(240,116,'"The BEST chocolate in the world!"',DARK,10,'middle',false));o.push(T(240,134,'Sounds like a fact, but it\'s really an opinion','#555',9,'middle',false));}
+if(p>=2){o.push(R(10,96,460,44,'#fff',ACC,1));o.push(T(240,116,'"The BEST chocolate in the world!"',DARK,10,'middle',false));o.push(T(240,134,'Sounds like a fact, but it\\u2019s really an opinion','#555',9,'middle',false));}
 if(p>=3){o.push(R(10,152,460,44,'#e8f5e9',ACC,1));o.push(T(240,176,'Being able to spot this makes you a smarter reader!','#555',10,'middle',false));}
 s.innerHTML=o.join('');}
 
@@ -190,21 +191,21 @@ s.innerHTML=o.join('');}
 var QS=[
 
 {ey:'Q1 &bull; English &bull; Reading (Year 7)',ti:'What is a Fact?',su:'Learn what makes a statement a fact.',steps:[
-{lb:'Definition',dr:dQ1,ht:'<p>A <b>fact</b> can be proven to be true. It doesn\'t change from person to person.</p>'},
+{lb:'Definition',dr:dQ1,ht:'<p>A <b>fact</b> can be proven to be true. It doesn\\u2019t change from person to person.</p>'},
 {lb:'Example',dr:dQ1,ht:'<p><b>"Lagos is in Nigeria."</b> This can be checked and proven true.</p>'},
 {lb:'What facts often include',dr:dQ1,ht:'<p>Facts often include <b>numbers, dates,</b> and other <b>measurable</b> things.</p>'},
 {lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'What is a fact?',o:['Something that can be proven to be true','Something only some people believe','A statement that always sounds confident','A guess about the future'],a:0,w:'A fact can be proven to be true.'},{q:'Which of these is a fact?',o:['"Lagos is in Nigeria."','"Lagos is the best city."','"Lagos feels too crowded."','"Lagos is boring."'],a:0,w:'"Lagos is in Nigeria" can be checked and proven true — a fact.'},{q:'What do facts often include?',o:['Numbers, dates, and measurable things','Only feelings','Only opinions','Nothing specific'],a:0,w:'Facts often include numbers, dates, and other measurable things.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q2 &bull; English &bull; Reading (Year 7)',ti:'What is an Opinion?',su:'Learn what makes a statement an opinion.',steps:[
 {lb:'Definition',dr:dQ2,ht:'<p>An <b>opinion</b> is what someone thinks or believes. It can be different from person to person.</p>'},
-{lb:'Example',dr:dQ2,ht:'<p><b>"Lagos is the best city in Nigeria."</b> This cannot be proven — it\'s a personal view.</p>'},
+{lb:'Example',dr:dQ2,ht:'<p><b>"Lagos is the best city in Nigeria."</b> This cannot be proven — it\\u2019s a personal view.</p>'},
 {lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'What is an opinion?',o:['What someone thinks or believes','Something that can always be proven true','A fact stated confidently','A measurement using numbers'],a:0,w:'An opinion is what someone thinks or believes.'},{q:'Which of these is an opinion?',o:['"Lagos is the best city in Nigeria."','"Lagos is in Nigeria."','"Lagos has over 20 million people."','"Lagos is a coastal city."'],a:0,w:'"Lagos is the best city" is a personal view — an opinion.'},{q:'Can opinions differ from person to person?',o:['Yes','No, they are always the same','No, opinions are facts','Only in fiction books'],a:0,w:'Opinions can differ from person to person, unlike facts.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q3 &bull; English &bull; Reading (Year 7)',ti:'Fact vs Opinion Side by Side',su:'Compare a fact and an opinion about the same topic.',steps:[
 {lb:'The fact',dr:dQ3,ht:'<p><b>"It is 30 degrees today."</b> This can be measured with a thermometer.</p>'},
-{lb:'The opinion',dr:dQ3,ht:'<p><b>"It is too hot today."</b> Whether it\'s "too hot" depends on the person.</p>'},
+{lb:'The opinion',dr:dQ3,ht:'<p><b>"It is too hot today."</b> Whether it\\u2019s "too hot" depends on the person.</p>'},
 {lb:'The key difference',dr:dQ3,ht:'<p>The fact can be <b>measured</b>; the opinion depends on <b>personal feeling</b>.</p>'},
-{lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'Which is the fact: "It is 30 degrees" or "It is too hot"?',o:['"It is 30 degrees" — it can be measured','"It is too hot" — it can be measured','Both are facts','Neither is a fact'],a:0,w:'"It is 30 degrees" can be measured with a thermometer — a fact.'},{q:'Why is "it is too hot" an opinion?',o:['It depends on the person\'s feeling','It can be measured exactly','It is always true for everyone','It uses a number'],a:0,w:'"Too hot" depends on the individual person\'s feeling, making it an opinion.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'Which is the fact: "It is 30 degrees" or "It is too hot"?',o:['"It is 30 degrees" — it can be measured','"It is too hot" — it can be measured','Both are facts','Neither is a fact'],a:0,w:'"It is 30 degrees" can be measured with a thermometer — a fact.'},{q:'Why is "it is too hot" an opinion?',o:['It depends on the person\\u2019s feeling','It can be measured exactly','It is always true for everyone','It uses a number'],a:0,w:'"Too hot" depends on the individual person\\u2019s feeling, making it an opinion.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q4 &bull; English &bull; Reading (Year 7)',ti:'Clue Words for Opinions',su:'Learn to spot words that often signal an opinion.',steps:[
 {lb:'"I think" / "I believe"',dr:dQ4,ht:'<p>Phrases like <b>"I think..."</b> and <b>"I believe..."</b> show a personal view.</p>'},
@@ -216,7 +217,7 @@ var QS=[
 {lb:'A surprising truth',dr:dQ5,ht:'<p>A "fact" statement can still be <b>false</b>.</p>'},
 {lb:'Example',dr:dQ5,ht:'<p><b>"The Earth is flat."</b> This is stated as a fact, but it is <b>wrong</b>.</p>'},
 {lb:'What actually matters',dr:dQ5,ht:'<p>What matters is: <b>can it be checked or proven?</b> Not whether it happens to be true.</p>'},
-{lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'Can a fact statement still be false?',o:['Yes','No, facts are always true','No, only opinions can be false','Only in fiction'],a:0,w:'A fact statement can still be false, e.g. "The Earth is flat."'},{q:'What matters when deciding if something is a "fact" statement?',o:['Whether it CAN be checked or proven','Whether it happens to be true','Whether it sounds confident','Whether everyone agrees with it'],a:0,w:'What matters is whether the statement can be checked or proven, not whether it happens to be true.'},{q:'Is "The Earth is flat" a fact-type statement, even though it\'s wrong?',o:['Yes, because it can be checked and proven false','No, because it is false it cannot be a fact-type statement','Yes, because everyone once believed it','No, only true statements count as facts'],a:0,w:'It is a fact-type statement because it can be checked and proven — even though the check shows it\'s false.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'Can a fact statement still be false?',o:['Yes','No, facts are always true','No, only opinions can be false','Only in fiction'],a:0,w:'A fact statement can still be false, e.g. "The Earth is flat."'},{q:'What matters when deciding if something is a "fact" statement?',o:['Whether it CAN be checked or proven','Whether it happens to be true','Whether it sounds confident','Whether everyone agrees with it'],a:0,w:'What matters is whether the statement can be checked or proven, not whether it happens to be true.'},{q:'Is "The Earth is flat" a fact-type statement, even though it\\u2019s wrong?',o:['Yes, because it can be checked and proven false','No, because it is false it cannot be a fact-type statement','Yes, because everyone once believed it','No, only true statements count as facts'],a:0,w:'It is a fact-type statement because it can be checked and proven — even though the check shows it\\u2019s false.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q6 &bull; English &bull; Reading (Year 7)',ti:'Mixing Facts and Opinions',su:'Learn to spot when a single sentence contains both a fact and an opinion.',steps:[
 {lb:'Watch out!',dr:dQ6,ht:'<p>A single sentence can contain <b>both</b> a fact and an opinion.</p>'},
@@ -226,13 +227,13 @@ var QS=[
 ]},
 {ey:'Q7 &bull; English &bull; Reading (Year 7)',ti:'Why Advertisers Use Opinions',su:'Learn how adverts often disguise opinions as facts.',steps:[
 {lb:'A common trick',dr:dQ7,ht:'<p>Adverts often use <b>opinions dressed up as facts</b>.</p>'},
-{lb:'Example',dr:dQ7,ht:'<p><b>"The BEST chocolate in the world!"</b> Sounds like a fact, but it\'s really an <b>opinion</b>.</p>'},
+{lb:'Example',dr:dQ7,ht:'<p><b>"The BEST chocolate in the world!"</b> Sounds like a fact, but it\\u2019s really an <b>opinion</b>.</p>'},
 {lb:'Why this matters',dr:dQ7,ht:'<p>Being able to spot this makes you a <b>smarter, more critical reader</b>.</p>'},
 {lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'What do adverts often do with opinions?',o:['Dress them up as facts','Always label them clearly as opinions','Avoid using opinions completely','Only use scientific facts'],a:0,w:'Adverts often dress up opinions as if they were facts.'},{q:'Is "The BEST chocolate in the world!" a fact or opinion?',o:['An opinion, despite sounding confident','A fact, because it sounds certain','Neither a fact nor an opinion','Both a fact and an opinion equally'],a:0,w:'"The BEST chocolate" is an opinion, even though it is stated confidently.'},{q:'Why is spotting this trick useful?',o:['It makes you a smarter, more critical reader','It has no real benefit','It only matters for adverts, nothing else','It removes the need to read carefully'],a:0,w:'Spotting this trick makes you a smarter, more critical reader of adverts and other texts.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q8 &bull; English &bull; Reading (Year 7)',ti:'A Common Mistake',su:'Learn to avoid assuming confident statements are always facts.',steps:[
 {lb:'The mistake',dr:dQ8,ht:'<p>Thinking all confident-sounding statements are facts: <b>✗ "It MUST be true, it sounds so certain!"</b></p>'},
-{lb:'The fix',dr:dQ8,ht:'<p><b>✓ Ask: "Can this be checked or proven?"</b> — that\'s the real test.</p>'},
+{lb:'The fix',dr:dQ8,ht:'<p><b>✓ Ask: "Can this be checked or proven?"</b> — that\\u2019s the real test.</p>'},
 {lb:'The rule to remember',dr:dQ8,ht:'<p>Confidence in tone does <b>NOT</b> make something a fact.</p>'},
 {lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is the mistake in assuming confident statements are facts?',o:['Confidence in tone does not make something a fact','Confident statements are always true','Opinions are never stated confidently','Facts are never stated confidently'],a:0,w:'Confidence in tone does not make a statement a fact — this is a common mistake to avoid.'},{q:'What question should you ask instead?',o:['"Can this be checked or proven?"','"Does this sound confident?"','"Is this written in capital letters?"','"Is this a long sentence?"'],a:0,w:'"Can this be checked or proven?" is the real test for whether something is a fact.'},{q:'Does sounding certain make a statement true?',o:['No','Yes, always','Yes, but only in adverts','Yes, but only in the news'],a:0,w:'Sounding certain does not make a statement true or a fact.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},

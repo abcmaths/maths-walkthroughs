@@ -85,7 +85,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -98,7 +99,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -127,7 +128,7 @@ function R(x,y,w,h,fill,stroke,sw){fill=fill||CRM;stroke=stroke||ACC;sw=sw||1.5;
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';}
 
 function dQ1(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
-o.push(T(240,20,'What is a Writer\'s Purpose?',ACC,12,'middle',true));
+o.push(T(240,20,'What is a Writer\\u2019s Purpose?',ACC,12,'middle',true));
 if(p>=1){o.push(R(10,40,460,50,CRM,ACC,2));o.push(T(240,60,'Purpose = WHY the writer wrote the text',DARK,11,'middle',false));o.push(T(240,80,'Every text is written for a reason','#555',10,'middle',false));}
 if(p>=2){o.push(R(10,100,460,44,'#fff',ACC,1));o.push(T(240,120,'A joke book: to entertain',DARK,10,'middle',false));o.push(T(240,138,'An instruction manual: to inform','#555',9,'middle',false));}
 if(p>=3){o.push(R(10,154,460,40,'#e8f5e9',ACC,1));o.push(T(240,178,'Spotting the purpose helps you understand the text better',DARK,10,'middle',false));}
@@ -135,7 +136,7 @@ s.innerHTML=o.join('');}
 
 function dQ2(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'The Four Main Purposes',ACC,13,'middle',true));
-[['To inform','Gives facts and information'],['To entertain','Amuses or excites the reader'],['To persuade','Tries to change the reader\'s mind'],['To instruct','Tells the reader how to do something']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,10,'middle',true));o.push(T(330,56+i*36,r[1],'#444',8,'middle',false));}});
+[['To inform','Gives facts and information'],['To entertain','Amuses or excites the reader'],['To persuade','Tries to change the reader\\u2019s mind'],['To instruct','Tells the reader how to do something']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,10,'middle',true));o.push(T(330,56+i*36,r[1],'#444',8,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -147,7 +148,7 @@ s.innerHTML=o.join('');}
 
 function dQ4(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Clues About the Audience',ACC,12,'middle',true));
-[['Vocabulary','Simple words = younger audience'],['Tone','Friendly/chatty = wider audience'],['Topic','Subject matter often hints at who it\'s for'],['Where it\'s published','A children\'s magazine vs a business journal']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',7,'middle',false));}});
+[['Vocabulary','Simple words = younger audience'],['Tone','Friendly/chatty = wider audience'],['Topic','Subject matter often hints at who it\\u2019s for'],['Where it\\u2019s published','A children\\u2019s magazine vs a business journal']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ5(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -159,14 +160,14 @@ s.innerHTML=o.join('');}
 
 function dQ6(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'A Text Can Have More Than One Purpose',ACC,11,'middle',true));
-[['Example','A funny advert'],['Purpose 1','To entertain (it\'s funny)'],['Purpose 2','To persuade (it wants you to buy something)'],['Think carefully','What is the MAIN purpose overall?']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',8,'middle',false));}});
+[['Example','A funny advert'],['Purpose 1','To entertain (it\\u2019s funny)'],['Purpose 2','To persuade (it wants you to buy something)'],['Think carefully','What is the MAIN purpose overall?']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',8,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ7(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Purpose and Audience Work Together',ACC,12,'middle',true));
 if(p>=1){o.push(R(10,40,460,44,CRM,ACC,2));o.push(T(240,60,'Writers choose their style to suit BOTH',DARK,10,'middle',false));}
 if(p>=2){o.push(R(10,96,460,44,'#fff',ACC,1));o.push(T(240,116,'A safety leaflet for children uses simple words',DARK,10,'middle',false));o.push(T(240,134,'AND pictures to inform them clearly','#555',9,'middle',false));}
-if(p>=3){o.push(R(10,152,460,44,'#e8f5e9',ACC,1));o.push(T(240,176,'Purpose = why. Audience = who. They shape HOW it\'s written.','#555',10,'middle',false));}
+if(p>=3){o.push(R(10,152,460,44,'#e8f5e9',ACC,1));o.push(T(240,176,'Purpose = why. Audience = who. They shape HOW it\\u2019s written.','#555',10,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ8(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -188,8 +189,8 @@ s.innerHTML=o.join('');}
 
 var QS=[
 
-{ey:'Q1 &bull; English &bull; Reading (Year 7)',ti:'What is a Writer\'s Purpose?',su:'Learn what "purpose" means when reading a text.',steps:[
-{lb:'Definition',dr:dQ1,ht:'<p>A writer\'s <b>purpose</b> is WHY they wrote the text. Every text is written for a reason.</p>'},
+{ey:'Q1 &bull; English &bull; Reading (Year 7)',ti:'What is a Writer\\u2019s Purpose?',su:'Learn what "purpose" means when reading a text.',steps:[
+{lb:'Definition',dr:dQ1,ht:'<p>A writer\\u2019s <b>purpose</b> is WHY they wrote the text. Every text is written for a reason.</p>'},
 {lb:'Examples',dr:dQ1,ht:'<p>A joke book is written <b>to entertain</b>. An instruction manual is written <b>to inform</b>.</p>'},
 {lb:'Why it helps',dr:dQ1,ht:'<p>Spotting the purpose helps you <b>understand the text better</b>.</p>'},
 {lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'What does "purpose" mean when reading a text?',o:['Why the text was written','Who wrote the text','How long the text is','Where the text was published'],a:0,w:'Purpose means why the text was written.'},{q:'What is the purpose of a joke book?',o:['To entertain','To inform','To instruct','To persuade'],a:0,w:'A joke book is written to entertain the reader.'},{q:'What is the purpose of an instruction manual?',o:['To inform/instruct','To entertain','To persuade','To confuse'],a:0,w:'An instruction manual is written to inform or instruct the reader.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
@@ -197,9 +198,9 @@ var QS=[
 {ey:'Q2 &bull; English &bull; Reading (Year 7)',ti:'The Four Main Purposes',su:'Learn the four common reasons a text might be written.',steps:[
 {lb:'To inform',dr:dQ2,ht:'<p>A text written <b>to inform</b> gives facts and information.</p>'},
 {lb:'To entertain',dr:dQ2,ht:'<p>A text written <b>to entertain</b> amuses or excites the reader.</p>'},
-{lb:'To persuade',dr:dQ2,ht:'<p>A text written <b>to persuade</b> tries to change the reader\'s mind.</p>'},
+{lb:'To persuade',dr:dQ2,ht:'<p>A text written <b>to persuade</b> tries to change the reader\\u2019s mind.</p>'},
 {lb:'To instruct',dr:dQ2,ht:'<p>A text written <b>to instruct</b> tells the reader how to do something.</p>'},
-{lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'What does a text written "to inform" do?',o:['Gives facts and information','Tries to change your mind','Tells jokes','Gives step-by-step instructions'],a:0,w:'A text written to inform gives facts and information.'},{q:'What does a text written "to persuade" do?',o:['Tries to change the reader\'s mind','Gives only facts','Amuses the reader','Gives instructions only'],a:0,w:'A text written to persuade tries to change the reader\'s mind.'},{q:'What does a text written "to instruct" do?',o:['Tells the reader how to do something','Only entertains','Only informs','Only persuades'],a:0,w:'A text written to instruct tells the reader how to do something.'},{q:'What does a text written "to entertain" do?',o:['Amuses or excites the reader','Gives only facts','Changes the reader\'s opinion','Tells the reader what to do'],a:0,w:'A text written to entertain amuses or excites the reader.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'What does a text written "to inform" do?',o:['Gives facts and information','Tries to change your mind','Tells jokes','Gives step-by-step instructions'],a:0,w:'A text written to inform gives facts and information.'},{q:'What does a text written "to persuade" do?',o:['Tries to change the reader\\u2019s mind','Gives only facts','Amuses the reader','Gives instructions only'],a:0,w:'A text written to persuade tries to change the reader\\u2019s mind.'},{q:'What does a text written "to instruct" do?',o:['Tells the reader how to do something','Only entertains','Only informs','Only persuades'],a:0,w:'A text written to instruct tells the reader how to do something.'},{q:'What does a text written "to entertain" do?',o:['Amuses or excites the reader','Gives only facts','Changes the reader\\u2019s opinion','Tells the reader what to do'],a:0,w:'A text written to entertain amuses or excites the reader.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q3 &bull; English &bull; Reading (Year 7)',ti:'What is an Audience?',su:'Learn what "audience" means when reading a text.',steps:[
 {lb:'Definition',dr:dQ3,ht:'<p>The <b>audience</b> is WHO the text was written for.</p>'},
@@ -210,18 +211,18 @@ var QS=[
 {ey:'Q4 &bull; English &bull; Reading (Year 7)',ti:'Clues About the Audience',su:'Learn to spot clues that reveal who a text is written for.',steps:[
 {lb:'Vocabulary',dr:dQ4,ht:'<p>Simple words often suggest a <b>younger audience</b>.</p>'},
 {lb:'Tone',dr:dQ4,ht:'<p>A friendly, chatty tone often suggests a <b>wider, general audience</b>.</p>'},
-{lb:'Topic and publication',dr:dQ4,ht:'<p>The <b>subject matter</b> and where it\'s published (e.g. a children\'s magazine vs a business journal) both give clues.</p>'},
-{lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[{q:'What might simple vocabulary suggest about the audience?',o:['A younger audience','An adult-only audience','No specific audience','A scientific audience'],a:0,w:'Simple vocabulary often suggests a younger audience.'},{q:'What might a friendly, chatty tone suggest?',o:['A wider, general audience','A very formal, academic audience','No audience at all','Only an audience of teachers'],a:0,w:'A friendly, chatty tone often suggests a wider, general audience.'},{q:'What can "where it\'s published" tell us about the audience?',o:['It gives clues, e.g. children\'s magazine vs business journal','It tells us nothing at all','It only tells us the price','It only tells us the date'],a:0,w:'Where something is published (e.g. a children\'s magazine) gives clues about the intended audience.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Topic and publication',dr:dQ4,ht:'<p>The <b>subject matter</b> and where it\\u2019s published (e.g. a children\\u2019s magazine vs a business journal) both give clues.</p>'},
+{lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[{q:'What might simple vocabulary suggest about the audience?',o:['A younger audience','An adult-only audience','No specific audience','A scientific audience'],a:0,w:'Simple vocabulary often suggests a younger audience.'},{q:'What might a friendly, chatty tone suggest?',o:['A wider, general audience','A very formal, academic audience','No audience at all','Only an audience of teachers'],a:0,w:'A friendly, chatty tone often suggests a wider, general audience.'},{q:'What can "where it\\u2019s published" tell us about the audience?',o:['It gives clues, e.g. children\\u2019s magazine vs business journal','It tells us nothing at all','It only tells us the price','It only tells us the date'],a:0,w:'Where something is published (e.g. a children\\u2019s magazine) gives clues about the intended audience.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q5 &bull; English &bull; Reading (Year 7)',ti:'Clues About the Purpose',su:'Learn to spot clues that reveal why a text was written.',steps:[
-{lb:'Look at how it\'s written',dr:dQ5,ht:'<p>Look at <b>how</b> the text is written to work out its purpose.</p>'},
+{lb:'Look at how it\\u2019s written',dr:dQ5,ht:'<p>Look at <b>how</b> the text is written to work out its purpose.</p>'},
 {lb:'Facts and jokes',dr:dQ5,ht:'<p><b>Lots of facts and numbers</b> suggest a purpose to inform. <b>Jokes and exciting language</b> suggest a purpose to entertain.</p>'},
 {lb:'Opinions',dr:dQ5,ht:'<p><b>Strong opinions and persuasive words</b> suggest a purpose to persuade.</p>'},
-{lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'What might lots of facts and numbers suggest about a text\'s purpose?',o:['To inform','To entertain','To persuade','To confuse'],a:0,w:'Lots of facts and numbers suggest a purpose to inform.'},{q:'What might jokes and exciting language suggest?',o:['To entertain','To inform only','To instruct only','To confuse the reader'],a:0,w:'Jokes and exciting language suggest a purpose to entertain.'},{q:'What might strong opinions and persuasive words suggest?',o:['To persuade','To inform only','To entertain only','To instruct only'],a:0,w:'Strong opinions and persuasive words suggest a purpose to persuade.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'What might lots of facts and numbers suggest about a text\\u2019s purpose?',o:['To inform','To entertain','To persuade','To confuse'],a:0,w:'Lots of facts and numbers suggest a purpose to inform.'},{q:'What might jokes and exciting language suggest?',o:['To entertain','To inform only','To instruct only','To confuse the reader'],a:0,w:'Jokes and exciting language suggest a purpose to entertain.'},{q:'What might strong opinions and persuasive words suggest?',o:['To persuade','To inform only','To entertain only','To instruct only'],a:0,w:'Strong opinions and persuasive words suggest a purpose to persuade.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q6 &bull; English &bull; Reading (Year 7)',ti:'A Text Can Have More Than One Purpose',su:'Learn that texts can serve multiple purposes at once.',steps:[
 {lb:'Example',dr:dQ6,ht:'<p>Think about a <b>funny advert</b>.</p>'},
-{lb:'Two purposes at once',dr:dQ6,ht:'<p><b>Purpose 1:</b> to entertain (it\'s funny). <b>Purpose 2:</b> to persuade (it wants you to buy something).</p>'},
+{lb:'Two purposes at once',dr:dQ6,ht:'<p><b>Purpose 1:</b> to entertain (it\\u2019s funny). <b>Purpose 2:</b> to persuade (it wants you to buy something).</p>'},
 {lb:'Thinking carefully',dr:dQ6,ht:'<p>Ask yourself: what is the <b>MAIN</b> purpose overall?</p>'},
 {lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'Can a text have more than one purpose?',o:['Yes','No, only one purpose is ever possible','No, purpose only applies to books','Only in poetry'],a:0,w:'A text can have more than one purpose at once, e.g. a funny advert.'},{q:'A funny advert entertains AND does what else?',o:['Persuades you to buy something','Instructs you on cooking','Informs you about history','Nothing else at all'],a:0,w:'A funny advert entertains and also persuades you to buy something.'},{q:'What should you think about when a text has multiple purposes?',o:['What the MAIN purpose is overall','Only the first purpose you notice','Ignoring purpose altogether','Only the length of the text'],a:0,w:'Think carefully about what the main purpose is overall, even if there are multiple purposes.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
@@ -235,7 +236,7 @@ var QS=[
 {lb:'The mistake',dr:dQ8,ht:'<p>Confusing the <b>topic</b> with the <b>purpose</b>: <b>✗ "The purpose is about football."</b></p>'},
 {lb:'The fix',dr:dQ8,ht:'<p><b>✓ "The purpose is to inform readers about a football match."</b></p>'},
 {lb:'The rule to remember',dr:dQ8,ht:'<p>Purpose is always <b>inform/entertain/persuade/instruct</b> — not just a subject matter.</p>'},
-{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is the mistake in "The purpose is about football"?',o:['It confuses the topic with the purpose','It uses too many words','It has no subject','Nothing is wrong'],a:0,w:'"The purpose is about football" confuses the topic (football) with the actual purpose.'},{q:'How should this be corrected?',o:['"The purpose is to inform readers about a football match."','"The topic is to inform."','"Football is the audience."','It cannot be corrected'],a:0,w:'"The purpose is to inform readers about a football match" correctly separates topic from purpose.'},{q:'What should "purpose" always relate to?',o:['Inform, entertain, persuade, or instruct','Any random subject matter','Only sports topics','Only children\'s books'],a:0,w:'Purpose should always relate to inform, entertain, persuade, or instruct — not just a topic.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is the mistake in "The purpose is about football"?',o:['It confuses the topic with the purpose','It uses too many words','It has no subject','Nothing is wrong'],a:0,w:'"The purpose is about football" confuses the topic (football) with the actual purpose.'},{q:'How should this be corrected?',o:['"The purpose is to inform readers about a football match."','"The topic is to inform."','"Football is the audience."','It cannot be corrected'],a:0,w:'"The purpose is to inform readers about a football match" correctly separates topic from purpose.'},{q:'What should "purpose" always relate to?',o:['Inform, entertain, persuade, or instruct','Any random subject matter','Only sports topics','Only children\\u2019s books'],a:0,w:'Purpose should always relate to inform, entertain, persuade, or instruct — not just a topic.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q9 &bull; English &bull; Reading (Year 7)',ti:'Why This Skill Matters',su:'Understand why identifying purpose and audience is a useful skill.',steps:[
 {lb:'Understanding texts',dr:dQ9,ht:'<p>This skill helps you see <b>why</b> a text is written the way it is.</p>'},

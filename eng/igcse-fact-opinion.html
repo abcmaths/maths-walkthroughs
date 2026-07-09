@@ -85,7 +85,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -98,7 +99,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -135,7 +136,7 @@ s.innerHTML=o.join('');}
 
 function dQ2(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Superlatives Signal Opinion',ACC,13,'middle',true));
-[['Superlatives','best, worst, greatest, most important'],['Example','"This is the greatest achievement in history."'],['Why it\'s opinion','No objective measure makes this verifiably true'],['Watch for these words','They often mark a claim as opinion, not fact']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(130,56+i*36,r[0],ACC,9,'middle',true));o.push(T(340,56+i*36,r[1],'#444',7,'middle',false));}});
+[['Superlatives','best, worst, greatest, most important'],['Example','"This is the greatest achievement in history."'],['Why it\\u2019s opinion','No objective measure makes this verifiably true'],['Watch for these words','They often mark a claim as opinion, not fact']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(130,56+i*36,r[0],ACC,9,'middle',true));o.push(T(340,56+i*36,r[1],'#444',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -154,7 +155,7 @@ s.innerHTML=o.join('');}
 
 function dQ5(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Modal Verbs and Hedging',ACC,13,'middle',true));
-[['"Might", "could", "may"','Signal uncertainty — often surrounds opinion'],['"Will", "is", "are"','Signal certainty — often (but not always) fact'],['Hedging language','"It could be argued that..." softens a claim'],['Caution','Certainty in TONE doesn\'t guarantee factual accuracy']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(130,56+i*36,r[0],ACC,9,'middle',true));o.push(T(340,56+i*36,r[1],'#444',7,'middle',false));}});
+[['"Might", "could", "may"','Signal uncertainty — often surrounds opinion'],['"Will", "is", "are"','Signal certainty — often (but not always) fact'],['Hedging language','"It could be argued that..." softens a claim'],['Caution','Certainty in TONE doesn\\u2019t guarantee factual accuracy']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(130,56+i*36,r[0],ACC,9,'middle',true));o.push(T(340,56+i*36,r[1],'#444',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ6(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -210,14 +211,14 @@ var QS=[
 {lb:'Example',dr:dQ4,ht:'<p><b>"Experts agree this policy will fail."</b></p>'},
 {lb:'The problem',dr:dQ4,ht:'<p>This sounds authoritative — but <b>WHICH experts?</b> Verified how?</p>'},
 {lb:'The lesson',dr:dQ4,ht:'<p>Vague appeals to authority often hide <b>unverified opinion</b>.</p>'},
-{lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[{q:'What is the problem with "Experts agree this policy will fail"?',o:['It doesn\'t specify which experts or how this was verified','It uses too many words','It has no subject','Nothing is wrong with it'],a:0,w:'This statement doesn\'t specify which experts or how the claim was verified.'},{q:'What does a vague appeal to authority often hide?',o:['Unverified opinion','A guaranteed fact','A joke','A question'],a:0,w:'Vague appeals to authority often hide unverified opinion.'},{q:'Why might "experts agree" sound convincing despite being vague?',o:['It sounds authoritative, even without naming specific evidence','It always cites a specific named expert','It always includes a verified statistic','It is always followed by a citation'],a:0,w:'It sounds authoritative due to the appeal to "experts," even without specific evidence.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[{q:'What is the problem with "Experts agree this policy will fail"?',o:['It doesn\\u2019t specify which experts or how this was verified','It uses too many words','It has no subject','Nothing is wrong with it'],a:0,w:'This statement doesn\\u2019t specify which experts or how the claim was verified.'},{q:'What does a vague appeal to authority often hide?',o:['Unverified opinion','A guaranteed fact','A joke','A question'],a:0,w:'Vague appeals to authority often hide unverified opinion.'},{q:'Why might "experts agree" sound convincing despite being vague?',o:['It sounds authoritative, even without naming specific evidence','It always cites a specific named expert','It always includes a verified statistic','It is always followed by a citation'],a:0,w:'It sounds authoritative due to the appeal to "experts," even without specific evidence.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q5 &bull; English &bull; Reading (IGCSE)',ti:'Modal Verbs and Hedging',su:'Learn how modal verbs and hedging language relate to fact and opinion.',steps:[
 {lb:'Uncertainty modals',dr:dQ5,ht:'<p><b>"Might," "could," "may"</b> signal uncertainty — often surrounding opinion.</p>'},
 {lb:'Certainty modals',dr:dQ5,ht:'<p><b>"Will," "is," "are"</b> signal certainty — often (but not always) fact.</p>'},
 {lb:'Hedging language',dr:dQ5,ht:'<p><b>"It could be argued that..."</b> is hedging language that softens a claim.</p>'},
-{lb:'A word of caution',dr:dQ5,ht:'<p>Certainty in <b>TONE</b> doesn\'t guarantee factual accuracy.</p>'},
-{lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'What do words like "might" or "could" often signal?',o:['Uncertainty, often surrounding opinion','Absolute, verified fact','A question','A command'],a:0,w:'"Might" and "could" signal uncertainty, often surrounding opinion.'},{q:'What does hedging language like "it could be argued that..." do?',o:['Softens a claim','Makes a claim more certain','Turns an opinion into a verified fact','Removes all meaning from a sentence'],a:0,w:'Hedging language softens a claim, often signalling it is opinion.'},{q:'Does certainty in tone guarantee factual accuracy?',o:['No','Yes, always','Yes, but only in non-fiction','Yes, but only in formal writing'],a:0,w:'Certainty in tone does not guarantee factual accuracy — confidence isn\'t proof.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'A word of caution',dr:dQ5,ht:'<p>Certainty in <b>TONE</b> doesn\\u2019t guarantee factual accuracy.</p>'},
+{lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'What do words like "might" or "could" often signal?',o:['Uncertainty, often surrounding opinion','Absolute, verified fact','A question','A command'],a:0,w:'"Might" and "could" signal uncertainty, often surrounding opinion.'},{q:'What does hedging language like "it could be argued that..." do?',o:['Softens a claim','Makes a claim more certain','Turns an opinion into a verified fact','Removes all meaning from a sentence'],a:0,w:'Hedging language softens a claim, often signalling it is opinion.'},{q:'Does certainty in tone guarantee factual accuracy?',o:['No','Yes, always','Yes, but only in non-fiction','Yes, but only in formal writing'],a:0,w:'Certainty in tone does not guarantee factual accuracy — confidence isn\\u2019t proof.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q6 &bull; English &bull; Reading (IGCSE)',ti:'Mixed Sentences: Fact + Opinion',su:'Learn to separate fact and opinion within the same sentence.',steps:[
 {lb:'Blending within one clause',dr:dQ6,ht:'<p>Many IGCSE sentences blend <b>both fact and opinion</b> in one clause.</p>'},
@@ -248,7 +249,7 @@ var QS=[
 {lb:'Signals of opinion',dr:dQ10,ht:'<p><b>Superlatives</b> and <b>vague appeals to authority</b> often signal disguised opinion.</p>'},
 {lb:'Facts can sound dramatic',dr:dQ10,ht:'<p>Verifiability matters, not emotional tone — dramatic facts are still facts.</p>'},
 {lb:'Mixed sentences',dr:dQ10,ht:'<p>Fact and opinion often <b>blend</b> in a single sentence — learn to separate them.</p>'},
-{lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[{q:'What is the test for whether something is a fact?',o:['Can it be verified/proven true or false?','Does it sound confident?','Is it stated by an expert?','Is it a short sentence?'],a:0,w:'The test for a fact is whether it can be verified or proven true or false.'},{q:'What kind of words often signal opinion?',o:['Superlatives like "best" or "greatest"','Numbers and statistics','Dates','Proper nouns'],a:0,w:'Superlatives like "best" or "greatest" often signal opinion.'},{q:'Can a fact sound dramatic and still be verifiable?',o:['Yes','No, facts must always sound neutral','No, dramatic statements are always opinions','Only in fiction'],a:0,w:'A fact can sound dramatic and still be verifiable — tone does not determine factual status.'},{q:'What is the problem with "Experts agree this will fail"?',o:['It doesn\'t specify which experts or how verified','It is definitely a fact','It uses too many words','It has no subject'],a:0,w:'This statement doesn\'t specify which experts or how the claim was verified.'},{q:'Can fact and opinion blend within a single sentence?',o:['Yes','No, never','Only in poetry','Only in very long texts'],a:0,w:'Fact and opinion can blend within a single sentence, requiring careful separation.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[{q:'What is the test for whether something is a fact?',o:['Can it be verified/proven true or false?','Does it sound confident?','Is it stated by an expert?','Is it a short sentence?'],a:0,w:'The test for a fact is whether it can be verified or proven true or false.'},{q:'What kind of words often signal opinion?',o:['Superlatives like "best" or "greatest"','Numbers and statistics','Dates','Proper nouns'],a:0,w:'Superlatives like "best" or "greatest" often signal opinion.'},{q:'Can a fact sound dramatic and still be verifiable?',o:['Yes','No, facts must always sound neutral','No, dramatic statements are always opinions','Only in fiction'],a:0,w:'A fact can sound dramatic and still be verifiable — tone does not determine factual status.'},{q:'What is the problem with "Experts agree this will fail"?',o:['It doesn\\u2019t specify which experts or how verified','It is definitely a fact','It uses too many words','It has no subject'],a:0,w:'This statement doesn\\u2019t specify which experts or how the claim was verified.'},{q:'Can fact and opinion blend within a single sentence?',o:['Yes','No, never','Only in poetry','Only in very long texts'],a:0,w:'Fact and opinion can blend within a single sentence, requiring careful separation.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 
 ];

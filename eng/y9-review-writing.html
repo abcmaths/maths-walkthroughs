@@ -85,7 +85,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -98,7 +99,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -141,7 +142,7 @@ s.innerHTML=o.join('');}
 function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Giving Specific Examples',ACC,13,'middle',true));
 if(p>=1){o.push(R(10,40,460,44,'#fde8e8',ACC,2));o.push(T(240,60,'✗ "The acting was bad." (vague)',DARK,10,'middle',false));}
-if(p>=2){o.push(R(10,96,460,44,'#e8f5e9',ACC,1));o.push(T(240,116,'✓ "The lead actor\'s wooden delivery in the final scene..."',DARK,9,'middle',false));}
+if(p>=2){o.push(R(10,96,460,44,'#e8f5e9',ACC,1));o.push(T(240,116,'✓ "The lead actor\\u2019s wooden delivery in the final scene..."',DARK,9,'middle',false));}
 if(p>=3){o.push(R(10,152,460,44,CRM,ACC,1));o.push(T(240,176,'Specific examples make your opinion convincing','#555',10,'middle',false));}
 s.innerHTML=o.join('');}
 
@@ -166,7 +167,7 @@ s.innerHTML=o.join('');}
 
 function dQ7(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Considering the Audience',ACC,13,'middle',true));
-[['Who is it for?','Different products suit different people'],['Example','"This game suits fans of strategy, not action."'],['Being helpful','Tells readers if it\'s right for THEM'],['Avoid assuming','Not everyone wants the same things']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',8,'middle',false));}});
+[['Who is it for?','Different products suit different people'],['Example','"This game suits fans of strategy, not action."'],['Being helpful','Tells readers if it\\u2019s right for THEM'],['Avoid assuming','Not everyone wants the same things']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',8,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ8(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -192,7 +193,7 @@ var QS=[
 {lb:'Definition',dr:dQ1,ht:'<p>A <b>review</b> gives an opinion about something — a film, book, restaurant, game, and so on.</p>'},
 {lb:'What it combines',dr:dQ1,ht:'<p>A review combines <b>personal opinion</b> with <b>useful information</b>.</p>'},
 {lb:'Its purpose',dr:dQ1,ht:'<p>A review helps the reader decide whether to <b>try it themselves</b>.</p>'},
-{lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'What does a review do?',o:['Gives an opinion about something','Only lists facts, no opinion at all','Only tells a fictional story','Gives strict step-by-step instructions'],a:0,w:'A review gives an opinion about something, e.g. a film, book, or restaurant.'},{q:'What does a review combine?',o:['Personal opinion with useful information','Only jokes and humour','Only technical specifications','Only the author\'s biography'],a:0,w:'A review combines personal opinion with useful information.'},{q:'What is the purpose of a review?',o:['To help the reader decide whether to try it themselves','To replace the need for the reader to think','To confuse the reader','To sell only one specific brand'],a:0,w:'A review helps the reader decide whether to try the thing themselves.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'What does a review do?',o:['Gives an opinion about something','Only lists facts, no opinion at all','Only tells a fictional story','Gives strict step-by-step instructions'],a:0,w:'A review gives an opinion about something, e.g. a film, book, or restaurant.'},{q:'What does a review combine?',o:['Personal opinion with useful information','Only jokes and humour','Only technical specifications','Only the author\\u2019s biography'],a:0,w:'A review combines personal opinion with useful information.'},{q:'What is the purpose of a review?',o:['To help the reader decide whether to try it themselves','To replace the need for the reader to think','To confuse the reader','To sell only one specific brand'],a:0,w:'A review helps the reader decide whether to try the thing themselves.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q2 &bull; English &bull; Writing (Year 9)',ti:'Balanced Opinion',su:'Learn why fair, balanced reviews build reader trust.',steps:[
 {lb:'Not just negative',dr:dQ2,ht:'<p>Even a critical review should mention some <b>positives</b>.</p>'},
@@ -203,16 +204,16 @@ var QS=[
 ]},
 {ey:'Q3 &bull; English &bull; Writing (Year 9)',ti:'Giving Specific Examples',su:'Learn to support your opinions with concrete details.',steps:[
 {lb:'Vague opinion',dr:dQ3,ht:'<p><b>✗ "The acting was bad."</b> — this is vague and unconvincing.</p>'},
-{lb:'A specific example',dr:dQ3,ht:'<p><b>✓ "The lead actor\'s wooden delivery in the final scene..."</b></p>'},
+{lb:'A specific example',dr:dQ3,ht:'<p><b>✓ "The lead actor\\u2019s wooden delivery in the final scene..."</b></p>'},
 {lb:'Why this matters',dr:dQ3,ht:'<p>Specific examples make your opinion <b>convincing</b> to the reader.</p>'},
-{lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'What is wrong with "The acting was bad" as a review comment?',o:['It is too vague and unconvincing','It uses too many words','It has no subject','Nothing is wrong with it'],a:0,w:'"The acting was bad" is too vague and unconvincing without specific detail.'},{q:'Which is a more specific, convincing version?',o:['"The lead actor\'s wooden delivery in the final scene..."','"The acting was bad."','"Acting: bad."','"I didn\'t like the acting."'],a:0,w:'Naming the specific scene and detail makes the opinion far more convincing.'},{q:'Why do specific examples matter in a review?',o:['They make your opinion convincing','They make the review shorter','They remove the need for an opinion','They confuse the reader on purpose'],a:0,w:'Specific examples make your opinion convincing and credible to the reader.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'What is wrong with "The acting was bad" as a review comment?',o:['It is too vague and unconvincing','It uses too many words','It has no subject','Nothing is wrong with it'],a:0,w:'"The acting was bad" is too vague and unconvincing without specific detail.'},{q:'Which is a more specific, convincing version?',o:['"The lead actor\\u2019s wooden delivery in the final scene..."','"The acting was bad."','"Acting: bad."','"I didn\\u2019t like the acting."'],a:0,w:'Naming the specific scene and detail makes the opinion far more convincing.'},{q:'Why do specific examples matter in a review?',o:['They make your opinion convincing','They make the review shorter','They remove the need for an opinion','They confuse the reader on purpose'],a:0,w:'Specific examples make your opinion convincing and credible to the reader.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q4 &bull; English &bull; Writing (Year 9)',ti:'Structuring a Review',su:'Learn the standard structure of an effective review.',steps:[
 {lb:'Introduction',dr:dQ4,ht:'<p>State <b>what is being reviewed</b>, with a brief overview.</p>'},
 {lb:'Main body',dr:dQ4,ht:'<p>Give <b>detailed opinions with examples</b> to support them.</p>'},
 {lb:'Comparisons (optional)',dr:dQ4,ht:'<p>Optionally compare it to <b>similar things</b>.</p>'},
 {lb:'Conclusion',dr:dQ4,ht:'<p>Give your <b>overall verdict</b> — do you recommend it or not?</p>'},
-{lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[{q:'What does the introduction of a review usually cover?',o:['What is being reviewed, with a brief overview','The final verdict','A list of similar products only','The author\'s biography'],a:0,w:'The introduction states what is being reviewed, with a brief overview.'},{q:'What goes in the main body of a review?',o:['Detailed opinions with examples','Only the introduction repeated','A single star rating only','A brand new unrelated topic'],a:0,w:'The main body gives detailed opinions supported by specific examples.'},{q:'What does the conclusion of a review usually give?',o:['An overall verdict — recommend or not','A brand new set of facts','The opening greeting again','Nothing important'],a:0,w:'The conclusion gives an overall verdict, recommending the item or not.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[{q:'What does the introduction of a review usually cover?',o:['What is being reviewed, with a brief overview','The final verdict','A list of similar products only','The author\\u2019s biography'],a:0,w:'The introduction states what is being reviewed, with a brief overview.'},{q:'What goes in the main body of a review?',o:['Detailed opinions with examples','Only the introduction repeated','A single star rating only','A brand new unrelated topic'],a:0,w:'The main body gives detailed opinions supported by specific examples.'},{q:'What does the conclusion of a review usually give?',o:['An overall verdict — recommend or not','A brand new set of facts','The opening greeting again','Nothing important'],a:0,w:'The conclusion gives an overall verdict, recommending the item or not.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q5 &bull; English &bull; Writing (Year 9)',ti:'Star Ratings and Scores',su:'Learn how ratings add a quick summary to a review.',steps:[
 {lb:'What ratings do',dr:dQ5,ht:'<p>Many reviews include a rating, e.g. <b>4/5 stars</b>.</p>'},
@@ -237,7 +238,7 @@ var QS=[
 {lb:'The mistake',dr:dQ8,ht:'<p>Only <b>summarising the plot</b>, with no actual opinion given.</p>'},
 {lb:'The fix',dr:dQ8,ht:'<p>Give <b>YOUR judgement</b>, supported by evidence from the thing being reviewed.</p>'},
 {lb:'The rule to remember',dr:dQ8,ht:'<p>A review must <b>express an opinion</b>, not just retell the story.</p>'},
-{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is a common mistake in review writing?',o:['Only summarising the plot, with no opinion given','Giving a clear opinion','Using specific examples','Considering the audience'],a:0,w:'A common mistake is only summarising the plot without giving an actual opinion.'},{q:'What should a review always include, instead of just plot summary?',o:['The writer\'s own judgement, supported by evidence','Only a list of characters','Only the release date','Only technical specifications'],a:0,w:'A review should include the writer\'s own judgement, supported by evidence.'},{q:'What must a review do, according to this lesson?',o:['Express an opinion, not just retell the story','Only retell the story in full','Avoid giving any opinion at all','Focus only on technical details'],a:0,w:'A review must express an opinion, not just retell the story or plot.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is a common mistake in review writing?',o:['Only summarising the plot, with no opinion given','Giving a clear opinion','Using specific examples','Considering the audience'],a:0,w:'A common mistake is only summarising the plot without giving an actual opinion.'},{q:'What should a review always include, instead of just plot summary?',o:['The writer\\u2019s own judgement, supported by evidence','Only a list of characters','Only the release date','Only technical specifications'],a:0,w:'A review should include the writer\\u2019s own judgement, supported by evidence.'},{q:'What must a review do, according to this lesson?',o:['Express an opinion, not just retell the story','Only retell the story in full','Avoid giving any opinion at all','Focus only on technical details'],a:0,w:'A review must express an opinion, not just retell the story or plot.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q9 &bull; English &bull; Writing (Year 9)',ti:'Why Review Writing Matters',su:'Understand why this skill is valuable in real life and in exams.',steps:[
 {lb:'A real-world skill',dr:dQ9,ht:'<p>Review writing is widely used online for <b>films, products, and restaurants</b>.</p>'},

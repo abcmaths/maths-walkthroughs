@@ -84,7 +84,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -97,7 +98,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -140,13 +141,13 @@ s.innerHTML=o.join('');}
 function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'A Compelling Feature Headline',ACC,13,'middle',true));
 if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'More creative than news headlines - can be witty, teasing',DARK,10,'middle',false));}
-if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'"Why We Can\'t Stop Talking About..." invites curiosity',DARK,9,'middle',false));}
+if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'"Why We Can\\u2019t Stop Talking About..." invites curiosity',DARK,9,'middle',false));}
 if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'Subheadings/standfirsts often expand on the headline','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ4(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'A Strong Personal Angle',ACC,13,'middle',true));
-[['Anecdote openings','A specific story draws readers in'],['First-person voice','"I" is welcomed, unlike news reporting'],['Distinctive style','The writer\'s personality should come through'],['Still needs substance','Voice alone isn\'t enough - content must inform too']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',7,'middle',false));}});
+[['Anecdote openings','A specific story draws readers in'],['First-person voice','"I" is welcomed, unlike news reporting'],['Distinctive style','The writer\\u2019s personality should come through'],['Still needs substance','Voice alone isn\\u2019t enough - content must inform too']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ5(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -201,16 +202,16 @@ var QS=[
 ]},
 {ey:'Q3 &bull; English &bull; Writing (IGCSE)',ti:'A Compelling Feature Headline',su:'Learn how magazine headlines differ from news headlines.',steps:[
 {lb:'More creative freedom',dr:dQ3,ht:'<p>Magazine headlines are more creative than news headlines — can be <b>witty, teasing</b>.</p>'},
-{lb:'Example',dr:dQ3,ht:'<p><b>"Why We Can\'t Stop Talking About..."</b> invites curiosity.</p>'},
-{lb:'Subheadings/standfirsts',dr:dQ3,ht:'<p><b>Subheadings or standfirsts</b> often expand on the headline\'s idea.</p>'},
-{lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'How do magazine headlines compare to news headlines?',o:['More creative, can be witty or teasing','Always shorter than news headlines','Always identical to news headlines','Never allowed to be creative'],a:0,w:'Magazine headlines are more creative than news headlines, and can be witty or teasing.'},{q:'What does "Why We Can\'t Stop Talking About..." do?',o:['Invites curiosity','States a plain fact','Gives a strict instruction','Ends the article'],a:0,w:'This headline style invites curiosity from the reader.'},{q:'What often expands on a magazine headline?',o:['A subheading or standfirst','Only the final paragraph','Only the title page','Nothing else is needed'],a:0,w:'A subheading or standfirst often expands on the headline\'s idea.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Example',dr:dQ3,ht:'<p><b>"Why We Can\\u2019t Stop Talking About..."</b> invites curiosity.</p>'},
+{lb:'Subheadings/standfirsts',dr:dQ3,ht:'<p><b>Subheadings or standfirsts</b> often expand on the headline\\u2019s idea.</p>'},
+{lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'How do magazine headlines compare to news headlines?',o:['More creative, can be witty or teasing','Always shorter than news headlines','Always identical to news headlines','Never allowed to be creative'],a:0,w:'Magazine headlines are more creative than news headlines, and can be witty or teasing.'},{q:'What does "Why We Can\\u2019t Stop Talking About..." do?',o:['Invites curiosity','States a plain fact','Gives a strict instruction','Ends the article'],a:0,w:'This headline style invites curiosity from the reader.'},{q:'What often expands on a magazine headline?',o:['A subheading or standfirst','Only the final paragraph','Only the title page','Nothing else is needed'],a:0,w:'A subheading or standfirst often expands on the headline\\u2019s idea.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q4 &bull; English &bull; Writing (IGCSE)',ti:'A Strong Personal Angle',su:'Learn to bring personality and a human angle to a magazine feature.',steps:[
 {lb:'Anecdote openings',dr:dQ4,ht:'<p>A <b>specific story</b> draws readers in at the start.</p>'},
 {lb:'First-person voice',dr:dQ4,ht:'<p><b>"I"</b> is welcomed in magazine writing, unlike in news reporting.</p>'},
-{lb:'Distinctive style',dr:dQ4,ht:'<p>The writer\'s <b>personality</b> should come through clearly.</p>'},
-{lb:'Still needs substance',dr:dQ4,ht:'<p>Voice alone isn\'t enough — <b>content must inform too</b>.</p>'},
-{lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[{q:'What can draw readers in at the start of a magazine feature?',o:['A specific anecdote or story','Only a list of facts','Only a formal greeting','Only a quotation from an expert'],a:0,w:'A specific anecdote or story can draw readers in at the start.'},{q:'Is "I" welcomed in magazine writing?',o:['Yes, unlike in news reporting','No, never','Only in the conclusion','Only if the task allows it, otherwise never'],a:0,w:'"I" is welcomed in magazine writing, unlike the objective style of news reporting.'},{q:'What is needed alongside a strong personal voice?',o:['Substance — content must inform too','Nothing else is needed','Only more personal opinion','Only more anecdotes'],a:0,w:'Voice alone isn\'t enough — the content must still inform the reader.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Distinctive style',dr:dQ4,ht:'<p>The writer\\u2019s <b>personality</b> should come through clearly.</p>'},
+{lb:'Still needs substance',dr:dQ4,ht:'<p>Voice alone isn\\u2019t enough — <b>content must inform too</b>.</p>'},
+{lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[{q:'What can draw readers in at the start of a magazine feature?',o:['A specific anecdote or story','Only a list of facts','Only a formal greeting','Only a quotation from an expert'],a:0,w:'A specific anecdote or story can draw readers in at the start.'},{q:'Is "I" welcomed in magazine writing?',o:['Yes, unlike in news reporting','No, never','Only in the conclusion','Only if the task allows it, otherwise never'],a:0,w:'"I" is welcomed in magazine writing, unlike the objective style of news reporting.'},{q:'What is needed alongside a strong personal voice?',o:['Substance — content must inform too','Nothing else is needed','Only more personal opinion','Only more anecdotes'],a:0,w:'Voice alone isn\\u2019t enough — the content must still inform the reader.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q5 &bull; English &bull; Writing (IGCSE)',ti:'Structuring a Feature',su:'Learn the typical structure of a magazine feature article.',steps:[
 {lb:'The typical pattern',dr:dQ5,ht:'<p><b>Hook &rarr; context &rarr; exploration &rarr; reflection/conclusion.</b></p>'},
@@ -223,13 +224,13 @@ var QS=[
 {lb:'Varied sentence structure',dr:dQ6,ht:'<p>This creates <b>rhythm</b> and reading pleasure.</p>'},
 {lb:'Sensory/descriptive detail',dr:dQ6,ht:'<p>Brings a scene or subject <b>to life</b>.</p>'},
 {lb:'Balancing style with clarity',dr:dQ6,ht:'<p>Style should <b>never obscure meaning</b>.</p>'},
-{lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'Is figurative language welcome in magazine writing?',o:['Yes, unlike in hard news writing','No, never used in magazine writing','Only in the headline','Only in the final paragraph'],a:0,w:'Figurative language, like similes and metaphors, is welcome in magazine writing.'},{q:'What does varied sentence structure create?',o:['Rhythm and reading pleasure','Confusion for the reader','A shorter overall piece','No noticeable effect'],a:0,w:'Varied sentence structure creates rhythm and reading pleasure.'},{q:'What should style never do?',o:['Obscure meaning','Add rhythm to the writing','Bring a scene to life','Show the writer\'s personality'],a:0,w:'Style should never obscure meaning, even while adding richness to the writing.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'Is figurative language welcome in magazine writing?',o:['Yes, unlike in hard news writing','No, never used in magazine writing','Only in the headline','Only in the final paragraph'],a:0,w:'Figurative language, like similes and metaphors, is welcome in magazine writing.'},{q:'What does varied sentence structure create?',o:['Rhythm and reading pleasure','Confusion for the reader','A shorter overall piece','No noticeable effect'],a:0,w:'Varied sentence structure creates rhythm and reading pleasure.'},{q:'What should style never do?',o:['Obscure meaning','Add rhythm to the writing','Bring a scene to life','Show the writer\\u2019s personality'],a:0,w:'Style should never obscure meaning, even while adding richness to the writing.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
-{ey:'Q7 &bull; English &bull; Writing (IGCSE)',ti:'Knowing Your Readership',su:'Learn to match tone and content to the specific magazine\'s audience.',steps:[
+{ey:'Q7 &bull; English &bull; Writing (IGCSE)',ti:'Knowing Your Readership',su:'Learn to match tone and content to the specific magazine\\u2019s audience.',steps:[
 {lb:'Different readerships',dr:dQ7,ht:'<p>A <b>teen fashion magazine</b> differs greatly from a <b>business journal</b>.</p>'},
 {lb:'Matching vocabulary and tone',dr:dQ7,ht:'<p><b>Vocabulary, references,</b> and <b>tone</b> should reflect the readership.</p>'},
 {lb:'Always check the task',dr:dQ7,ht:'<p>Always check what magazine or reader the <b>task specifies</b>.</p>'},
-{lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'How does a teen fashion magazine differ from a business journal?',o:['They have very different readerships and tones','They are exactly the same','They only differ in length','They only differ in the headline style'],a:0,w:'A teen fashion magazine and a business journal have very different readerships and tones.'},{q:'What should reflect the readership of a magazine?',o:['Vocabulary, references, and tone','Only the exact word count','Only the font used','Only the headline length'],a:0,w:'Vocabulary, references, and tone should all reflect the intended readership.'},{q:'What should you always check before writing?',o:['What magazine/reader the task specifies','Only the exact word limit','Only the date','Only the author\'s name'],a:0,w:'Always check what magazine or reader the task specifies before writing.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'How does a teen fashion magazine differ from a business journal?',o:['They have very different readerships and tones','They are exactly the same','They only differ in length','They only differ in the headline style'],a:0,w:'A teen fashion magazine and a business journal have very different readerships and tones.'},{q:'What should reflect the readership of a magazine?',o:['Vocabulary, references, and tone','Only the exact word count','Only the font used','Only the headline length'],a:0,w:'Vocabulary, references, and tone should all reflect the intended readership.'},{q:'What should you always check before writing?',o:['What magazine/reader the task specifies','Only the exact word limit','Only the date','Only the author\\u2019s name'],a:0,w:'Always check what magazine or reader the task specifies before writing.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q8 &bull; English &bull; Writing (IGCSE)',ti:'A Common Mistake',su:'Learn to avoid writing a magazine piece exactly like a news report.',steps:[
 {lb:'The mistake',dr:dQ8,ht:'<p>Writing a magazine piece exactly like a <b>news report</b>, losing all personal voice and stylish language.</p>'},

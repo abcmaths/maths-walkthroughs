@@ -85,7 +85,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -98,7 +99,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -128,14 +129,14 @@ function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1=
 
 function dQ1(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Bias and Persuasion at IGCSE',ACC,12,'middle',true));
-if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'Bias: a one-sided, unbalanced viewpoint',DARK,10,'middle',false));o.push(T(240,74,'Persuasion: deliberate techniques to change the reader\'s mind','#555',9,'middle',false));}
+if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'Bias: a one-sided, unbalanced viewpoint',DARK,10,'middle',false));o.push(T(240,74,'Persuasion: deliberate techniques to change the reader\\u2019s mind','#555',9,'middle',false));}
 if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'Related but distinct — bias can exist without deliberate persuasion',DARK,9,'middle',false));}
 if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'IGCSE expects you to identify BOTH the technique and its effect','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ2(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Recognising One-Sidedness',ACC,13,'middle',true));
-[['Selective evidence','Only facts supporting one view are included'],['Missing counter-view','No opposing perspective given space'],['Loaded questions','"Isn\'t it obvious that...?" assumes the answer'],['Ask always','What is being LEFT OUT of this account?']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(130,56+i*36,r[0],ACC,9,'middle',true));o.push(T(340,56+i*36,r[1],'#444',7,'middle',false));}});
+[['Selective evidence','Only facts supporting one view are included'],['Missing counter-view','No opposing perspective given space'],['Loaded questions','"Isn\\u2019t it obvious that...?" assumes the answer'],['Ask always','What is being LEFT OUT of this account?']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(130,56+i*36,r[0],ACC,9,'middle',true));o.push(T(340,56+i*36,r[1],'#444',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -166,7 +167,7 @@ function dQ7(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Bias Through Word Connotation',ACC,12,'middle',true));
 if(p>=1){o.push(R(10,38,220,50,'#fff',ACC,1.5));o.push(T(120,58,'"Freedom fighter"',ACC,9,'middle',true));o.push(T(120,78,'Positive connotation','#555',8,'middle',false));
   o.push(R(250,38,220,50,'#fff',ACC,1.5));o.push(T(360,58,'"Terrorist"',ACC,10,'middle',true));o.push(T(360,78,'Negative connotation','#555',8,'middle',false));}
-if(p>=2){o.push(R(10,100,460,44,CRM,ACC,1));o.push(T(240,118,'Same action, different word choice, opposite bias',DARK,10,'middle',false));o.push(T(240,136,'Word choice alone can reveal a writer\'s allegiance','#555',9,'middle',false));}
+if(p>=2){o.push(R(10,100,460,44,CRM,ACC,1));o.push(T(240,118,'Same action, different word choice, opposite bias',DARK,10,'middle',false));o.push(T(240,136,'Word choice alone can reveal a writer\\u2019s allegiance','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ8(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -183,23 +184,23 @@ s.innerHTML=o.join('');}
 
 function dQ10(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Bias & Persuasion — Summary',ACC,12,'middle',true));
-[['Bias','A one-sided, unbalanced viewpoint'],['Persuasion','Deliberate techniques to change the reader\'s mind'],['Spotting bias','Selective evidence, missing counter-view'],['Persuasive techniques','Emotive language, rhetorical devices, statistics'],['Three appeals','Pathos (emotion), logos (logic), ethos (authority)']].forEach(function(r,i){if(i<p+1){o.push(R(10,32+i*30,460,25,CRM,LINE,1));o.push(T(130,49+i*30,r[0],ACC,9,'middle',true));o.push(T(350,49+i*30,r[1],'#555',7,'middle',false));}});
+[['Bias','A one-sided, unbalanced viewpoint'],['Persuasion','Deliberate techniques to change the reader\\u2019s mind'],['Spotting bias','Selective evidence, missing counter-view'],['Persuasive techniques','Emotive language, rhetorical devices, statistics'],['Three appeals','Pathos (emotion), logos (logic), ethos (authority)']].forEach(function(r,i){if(i<p+1){o.push(R(10,32+i*30,460,25,CRM,LINE,1));o.push(T(130,49+i*30,r[0],ACC,9,'middle',true));o.push(T(350,49+i*30,r[1],'#555',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 var QS=[
 
 {ey:'Q1 &bull; English &bull; Reading (IGCSE)',ti:'Bias and Persuasion at IGCSE',su:'Distinguish bias from persuasion as related but separate concepts.',steps:[
-{lb:'Definitions',dr:dQ1,ht:'<p><b>Bias</b> is a one-sided, unbalanced viewpoint. <b>Persuasion</b> is the deliberate use of techniques to change the reader\'s mind.</p>'},
+{lb:'Definitions',dr:dQ1,ht:'<p><b>Bias</b> is a one-sided, unbalanced viewpoint. <b>Persuasion</b> is the deliberate use of techniques to change the reader\\u2019s mind.</p>'},
 {lb:'Related but distinct',dr:dQ1,ht:'<p>These are related but distinct — bias can exist <b>without deliberate persuasion</b> being intended.</p>'},
 {lb:'What IGCSE expects',dr:dQ1,ht:'<p>IGCSE expects you to identify <b>BOTH the technique and its effect</b>.</p>'},
-{lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'What is bias?',o:['A one-sided, unbalanced viewpoint','A deliberate technique to persuade','A type of punctuation','A grammar rule'],a:0,w:'Bias is a one-sided, unbalanced viewpoint.'},{q:'What is persuasion?',o:['The deliberate use of techniques to change the reader\'s mind','An accidental, unintentional viewpoint','A type of factual statement','A neutral description'],a:0,w:'Persuasion is the deliberate use of techniques to change the reader\'s mind.'},{q:'Are bias and persuasion exactly the same thing?',o:['No, they are related but distinct','Yes, they are identical','No, they have no relationship at all','Yes, but only in non-fiction'],a:0,w:'Bias and persuasion are related but distinct — bias can exist without deliberate persuasion.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'What is bias?',o:['A one-sided, unbalanced viewpoint','A deliberate technique to persuade','A type of punctuation','A grammar rule'],a:0,w:'Bias is a one-sided, unbalanced viewpoint.'},{q:'What is persuasion?',o:['The deliberate use of techniques to change the reader\\u2019s mind','An accidental, unintentional viewpoint','A type of factual statement','A neutral description'],a:0,w:'Persuasion is the deliberate use of techniques to change the reader\\u2019s mind.'},{q:'Are bias and persuasion exactly the same thing?',o:['No, they are related but distinct','Yes, they are identical','No, they have no relationship at all','Yes, but only in non-fiction'],a:0,w:'Bias and persuasion are related but distinct — bias can exist without deliberate persuasion.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q2 &bull; English &bull; Reading (IGCSE)',ti:'Recognising One-Sidedness',su:'Learn to spot signs that a text presents an unbalanced view.',steps:[
 {lb:'Selective evidence',dr:dQ2,ht:'<p><b>Selective evidence</b>: only facts supporting one view are included.</p>'},
 {lb:'Missing counter-view',dr:dQ2,ht:'<p>No <b>opposing perspective</b> is given space in the text.</p>'},
-{lb:'Loaded questions',dr:dQ2,ht:'<p><b>"Isn\'t it obvious that...?"</b> assumes the answer, a loaded question.</p>'},
+{lb:'Loaded questions',dr:dQ2,ht:'<p><b>"Isn\\u2019t it obvious that...?"</b> assumes the answer, a loaded question.</p>'},
 {lb:'The key question always',dr:dQ2,ht:'<p>Always ask: what is being <b>LEFT OUT</b> of this account?</p>'},
-{lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'What does "selective evidence" mean?',o:['Only facts supporting one view are included','All facts are given equal space','No facts are given at all','Only opinions are included, no facts'],a:0,w:'Selective evidence means only facts supporting one view are included.'},{q:'What is a "loaded question"?',o:['A question that assumes the answer, e.g. "Isn\'t it obvious that...?"','A neutral, open question','A question with no possible answer','A question asked only in fiction'],a:0,w:'A loaded question assumes the answer, e.g. "Isn\'t it obvious that...?"'},{q:'What key question should you always ask about a potentially biased text?',o:['What is being left out of this account?','What is the exact word count?','Who is the publisher?','What font is used?'],a:0,w:'Always ask what is being left out of the account, to spot potential bias.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'What does "selective evidence" mean?',o:['Only facts supporting one view are included','All facts are given equal space','No facts are given at all','Only opinions are included, no facts'],a:0,w:'Selective evidence means only facts supporting one view are included.'},{q:'What is a "loaded question"?',o:['A question that assumes the answer, e.g. "Isn\\u2019t it obvious that...?"','A neutral, open question','A question with no possible answer','A question asked only in fiction'],a:0,w:'A loaded question assumes the answer, e.g. "Isn\\u2019t it obvious that...?"'},{q:'What key question should you always ask about a potentially biased text?',o:['What is being left out of this account?','What is the exact word count?','Who is the publisher?','What font is used?'],a:0,w:'Always ask what is being left out of the account, to spot potential bias.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q3 &bull; English &bull; Reading (IGCSE)',ti:'Emotive Language as Persuasion',su:'Learn to identify language chosen to trigger feeling rather than inform.',steps:[
 {lb:'What emotive language does',dr:dQ3,ht:'<p>Words are chosen to <b>trigger a feeling</b>, not just to inform.</p>'},
@@ -226,17 +227,17 @@ var QS=[
 {lb:'Blending appeals',dr:dQ6,ht:'<p>Strong persuasive texts often <b>blend more than one</b> appeal.</p>'},
 {lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'What does "pathos" appeal to?',o:['Emotion — fear, sympathy, hope','Logic and reason','Credibility and authority','Punctuation rules'],a:0,w:'Pathos appeals to emotion — fear, sympathy, hope.'},{q:'What does "logos" appeal to?',o:['Logic and reason','Emotion only','Credibility only','Nothing meaningful'],a:0,w:'Logos appeals to logic and reason, e.g. evidence and cause-effect reasoning.'},{q:'What does "ethos" appeal to?',o:['Credibility and authority','Emotion only','Logic only','Punctuation'],a:0,w:'Ethos appeals to credibility and authority, e.g. citing experts.'},{q:'Do strong persuasive texts use just one appeal?',o:['No, they often blend more than one','Yes, always just one','Yes, but only pathos','Yes, but only logos'],a:0,w:'Strong persuasive texts often blend more than one appeal together.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
-{ey:'Q7 &bull; English &bull; Reading (IGCSE)',ti:'Bias Through Word Connotation',su:'Learn how word choice alone can reveal a writer\'s bias.',steps:[
+{ey:'Q7 &bull; English &bull; Reading (IGCSE)',ti:'Bias Through Word Connotation',su:'Learn how word choice alone can reveal a writer\\u2019s bias.',steps:[
 {lb:'Two words, same action',dr:dQ7,ht:'<p><b>"Freedom fighter"</b> has a positive connotation. <b>"Terrorist"</b> has a negative connotation.</p>'},
 {lb:'What this reveals',dr:dQ7,ht:'<p>The same action, described with different word choice, reveals <b>opposite bias</b>.</p>'},
-{lb:'The bigger lesson',dr:dQ7,ht:'<p>Word choice alone can reveal a writer\'s <b>allegiance</b> or standpoint.</p>'},
-{lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'What connotation does "freedom fighter" carry?',o:['Positive','Negative','Neutral','No connotation at all'],a:0,w:'"Freedom fighter" carries a positive connotation.'},{q:'What connotation does "terrorist" carry?',o:['Negative','Positive','Neutral','No connotation at all'],a:0,w:'"Terrorist" carries a negative connotation.'},{q:'What can word choice alone reveal about a writer?',o:['Their allegiance or standpoint on an issue','Nothing meaningful at all','Only their vocabulary size','Only their level of education'],a:0,w:'Word choice alone can reveal a writer\'s allegiance or standpoint on an issue.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'The bigger lesson',dr:dQ7,ht:'<p>Word choice alone can reveal a writer\\u2019s <b>allegiance</b> or standpoint.</p>'},
+{lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'What connotation does "freedom fighter" carry?',o:['Positive','Negative','Neutral','No connotation at all'],a:0,w:'"Freedom fighter" carries a positive connotation.'},{q:'What connotation does "terrorist" carry?',o:['Negative','Positive','Neutral','No connotation at all'],a:0,w:'"Terrorist" carries a negative connotation.'},{q:'What can word choice alone reveal about a writer?',o:['Their allegiance or standpoint on an issue','Nothing meaningful at all','Only their vocabulary size','Only their level of education'],a:0,w:'Word choice alone can reveal a writer\\u2019s allegiance or standpoint on an issue.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q8 &bull; English &bull; Reading (IGCSE)',ti:'A Common Mistake',su:'Learn to avoid labelling a text "biased" with no supporting evidence.',steps:[
 {lb:'The mistake',dr:dQ8,ht:'<p>Just labelling a text <b>"biased"</b> with no evidence: <b>✗ "This text is biased."</b></p>'},
 {lb:'The fix',dr:dQ8,ht:'<p><b>✓ Identify the SPECIFIC technique AND its effect</b>.</p>'},
 {lb:'The consequence',dr:dQ8,ht:'<p>Vague bias-spotting earns <b>almost no credit</b>.</p>'},
-{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is the mistake in just writing "This text is biased"?',o:['It gives no specific technique or evidence','It uses too many words','It has no subject','Nothing is wrong with it'],a:0,w:'"This text is biased" gives no specific technique or supporting evidence.'},{q:'What should you identify instead of just labelling a text "biased"?',o:['The specific technique AND its effect','Only the word "biased" repeated','Only the author\'s name','Nothing more is needed'],a:0,w:'Identify the specific technique used and its effect on the reader.'},{q:'What happens to vague bias-spotting with no evidence?',o:['It earns almost no credit','It earns full marks','It is ignored entirely by examiners','It earns bonus marks'],a:0,w:'Vague bias-spotting with no evidence earns almost no credit in the marking scheme.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'What is the mistake in just writing "This text is biased"?',o:['It gives no specific technique or evidence','It uses too many words','It has no subject','Nothing is wrong with it'],a:0,w:'"This text is biased" gives no specific technique or supporting evidence.'},{q:'What should you identify instead of just labelling a text "biased"?',o:['The specific technique AND its effect','Only the word "biased" repeated','Only the author\\u2019s name','Nothing more is needed'],a:0,w:'Identify the specific technique used and its effect on the reader.'},{q:'What happens to vague bias-spotting with no evidence?',o:['It earns almost no credit','It earns full marks','It is ignored entirely by examiners','It earns bonus marks'],a:0,w:'Vague bias-spotting with no evidence earns almost no credit in the marking scheme.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q9 &bull; English &bull; Reading (IGCSE)',ti:'Why This Skill Matters Beyond Exams',su:'Understand the real-world importance of spotting bias and persuasion.',steps:[
 {lb:'Media literacy',dr:dQ9,ht:'<p>This skill is vital for navigating <b>news, adverts,</b> and <b>social media</b>.</p>'},

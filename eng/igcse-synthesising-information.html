@@ -85,7 +85,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -98,7 +99,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -129,7 +130,7 @@ function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1=
 function dQ1(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Synthesising Information',ACC,13,'middle',true));
 if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'Combining ideas from MULTIPLE sources into one account',DARK,10,'middle',false));o.push(T(240,74,'The most advanced Reading skill at IGCSE','#555',9,'middle',false));}
-if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'Different from comparison — synthesis MERGES, doesn\'t just contrast',DARK,9,'middle',false));}
+if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'Different from comparison — synthesis MERGES, doesn\\u2019t just contrast',DARK,9,'middle',false));}
 if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'Requires understanding overlap AND unique contributions of each source','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
 
@@ -142,7 +143,7 @@ function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Identifying Overlapping Information',ACC,12,'middle',true));
 if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'Look for the SAME point made in more than one source',DARK,10,'middle',false));}
 if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'If both sources agree, this strengthens the combined account',DARK,9,'middle',false));}
-if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'State it ONCE in synthesis — don\'t repeat the same point twice','#555',9,'middle',false));}
+if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'State it ONCE in synthesis — don\\u2019t repeat the same point twice','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ4(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -159,7 +160,7 @@ s.innerHTML=o.join('');}
 
 function dQ6(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Handling Contradictions Between Sources',ACC,11,'middle',true));
-[['Sources may disagree','One says X, another says the opposite'],['Don\'t ignore it','Acknowledge the contradiction explicitly'],['Example phrase','"While Source A claims X, Source B suggests Y instead."'],['Show judgement','Note which seems more reliable, if relevant']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',7,'middle',false));}});
+[['Sources may disagree','One says X, another says the opposite'],['Don\\u2019t ignore it','Acknowledge the contradiction explicitly'],['Example phrase','"While Source A claims X, Source B suggests Y instead."'],['Show judgement','Note which seems more reliable, if relevant']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ7(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -183,7 +184,7 @@ s.innerHTML=o.join('');}
 
 function dQ10(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Synthesising Information — Summary',ACC,11,'middle',true));
-[['Synthesis','Combines multiple sources into ONE coherent account'],['Different from comparison','Merges, rather than just contrasting'],['Find overlap AND uniqueness','State shared points once; include unique details from each'],['Organise by theme','Not source-by-source — shows genuine blending'],['Handle contradictions','Acknowledge disagreements explicitly, don\'t ignore them']].forEach(function(r,i){if(i<p+1){o.push(R(10,32+i*30,460,25,CRM,LINE,1));o.push(T(130,49+i*30,r[0],ACC,8,'middle',true));o.push(T(350,49+i*30,r[1],'#555',7,'middle',false));}});
+[['Synthesis','Combines multiple sources into ONE coherent account'],['Different from comparison','Merges, rather than just contrasting'],['Find overlap AND uniqueness','State shared points once; include unique details from each'],['Organise by theme','Not source-by-source — shows genuine blending'],['Handle contradictions','Acknowledge disagreements explicitly, don\\u2019t ignore them']].forEach(function(r,i){if(i<p+1){o.push(R(10,32+i*30,460,25,CRM,LINE,1));o.push(T(130,49+i*30,r[0],ACC,8,'middle',true));o.push(T(350,49+i*30,r[1],'#555',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 var QS=[
@@ -203,7 +204,7 @@ var QS=[
 {ey:'Q3 &bull; English &bull; Reading (IGCSE)',ti:'Identifying Overlapping Information',su:'Learn to spot and handle points made in more than one source.',steps:[
 {lb:'Finding overlap',dr:dQ3,ht:'<p>Look for the <b>SAME point</b> made in more than one source.</p>'},
 {lb:'What overlap tells us',dr:dQ3,ht:'<p>If both sources agree, this <b>strengthens</b> the combined account.</p>'},
-{lb:'How to handle overlap',dr:dQ3,ht:'<p>State it <b>ONCE</b> in your synthesis — don\'t repeat the same point twice.</p>'},
+{lb:'How to handle overlap',dr:dQ3,ht:'<p>State it <b>ONCE</b> in your synthesis — don\\u2019t repeat the same point twice.</p>'},
 {lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'What should you look for when identifying overlap?',o:['The same point made in more than one source','Only differences between sources','Only unique points in one source','Nothing — overlap is not important'],a:0,w:'Look for the same point made in more than one source when identifying overlap.'},{q:'What does agreement between sources do for your synthesis?',o:['Strengthens the combined account','Weakens the combined account','Has no effect at all','Makes the synthesis invalid'],a:0,w:'Agreement between sources strengthens the combined synthesised account.'},{q:'How should overlapping points be handled in your synthesis?',o:['State it once, not repeated','State it once for each source separately','Ignore it entirely','Only mention it if it contradicts another point'],a:0,w:'Overlapping points should be stated once in your synthesis, not repeated for each source.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q4 &bull; English &bull; Reading (IGCSE)',ti:'Identifying Unique Contributions',su:'Learn to preserve distinctive information that each source adds.',steps:[
@@ -220,7 +221,7 @@ var QS=[
 ]},
 {ey:'Q6 &bull; English &bull; Reading (IGCSE)',ti:'Handling Contradictions Between Sources',su:'Learn to acknowledge disagreements between sources explicitly.',steps:[
 {lb:'Sources may disagree',dr:dQ6,ht:'<p>One source may say <b>X</b>, while another says the <b>opposite</b>.</p>'},
-{lb:'Don\'t ignore it',dr:dQ6,ht:'<p><b>Acknowledge the contradiction</b> explicitly, rather than glossing over it.</p>'},
+{lb:'Don\\u2019t ignore it',dr:dQ6,ht:'<p><b>Acknowledge the contradiction</b> explicitly, rather than glossing over it.</p>'},
 {lb:'Example phrase',dr:dQ6,ht:'<p><b>"While Source A claims X, Source B suggests Y instead."</b></p>'},
 {lb:'Showing judgement',dr:dQ6,ht:'<p>You can note which seems <b>more reliable</b>, if relevant to the task.</p>'},
 {lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'What should you do if two sources disagree?',o:['Acknowledge the contradiction explicitly','Ignore the disagreement entirely','Only report the source you prefer','Remove both sources from your synthesis'],a:0,w:'You should acknowledge the contradiction between sources explicitly.'},{q:'Which phrase acknowledges a contradiction well?',o:['"While Source A claims X, Source B suggests Y instead."','"Both sources completely agree on everything."','"Source A is correct and Source B is wrong."','"This detail is not important."'],a:0,w:'This phrase explicitly acknowledges the contradiction between the two sources.'},{q:'What might you note if relevant to the task?',o:['Which source seems more reliable','Only the exact word count of each source','Only the publication date of each source','Nothing further than the contradiction itself'],a:0,w:'You might note which source seems more reliable, if relevant to the task.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},

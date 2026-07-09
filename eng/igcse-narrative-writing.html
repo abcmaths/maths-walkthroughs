@@ -85,7 +85,8 @@ var ACC='#E65100',DARK='#BF360C',CRM='#FFF3E0',LINE='#FFE0B2';
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
@@ -98,7 +99,7 @@ document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
-    var o=entry.genFn();entry.o=o;
+    var o=shuffleMC(entry.genFn());entry.o=o;
     var wrap=el.closest('.try');if(!wrap)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
@@ -128,7 +129,7 @@ function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1=
 
 function dQ1(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Narrative Writing at IGCSE',ACC,12,'middle',true));
-if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'A complete, controlled story within a strict word limit',DARK,10,'middle',false));o.push(T(240,74,'Every choice must serve the story\'s impact','#555',9,'middle',false));}
+if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'A complete, controlled story within a strict word limit',DARK,10,'middle',false));o.push(T(240,74,'Every choice must serve the story\\u2019s impact','#555',9,'middle',false));}
 if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'Examiners reward CONTROL over ambition alone',DARK,10,'middle',false));}
 if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'A tightly-focused single moment beats a rushed epic','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
@@ -141,13 +142,13 @@ s.innerHTML=o.join('');}
 function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Sophisticated Openings',ACC,13,'middle',true));
 if(p>=1){o.push(R(10,38,460,44,'#fde8e8',ACC,2));o.push(T(240,56,'✗ Weak: "One day I went to the park."',DARK,10,'middle',false));}
-if(p>=2){o.push(R(10,92,460,50,'#e8f5e9',ACC,1));o.push(T(240,108,'✓ Strong: "The gate creaked. I hadn\'t noticed how loud',DARK,9,'middle',false));o.push(T(240,124,'silence could be, until that morning."','#555',9,'middle',false));}
+if(p>=2){o.push(R(10,92,460,50,'#e8f5e9',ACC,1));o.push(T(240,108,'✓ Strong: "The gate creaked. I hadn\\u2019t noticed how loud',DARK,9,'middle',false));o.push(T(240,124,'silence could be, until that morning."','#555',9,'middle',false));}
 if(p>=3){o.push(R(10,150,460,44,CRM,ACC,1));o.push(T(240,174,'In medias res / a striking image / an unusual perspective','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
 
 function dQ4(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
-o.push(T(240,20,'Show, Don\'t Tell',ACC,13,'middle',true));
-[['Telling (weak)','"She was nervous."'],['Showing (strong)','"Her hands trembled as she reached for the door."'],['Why it matters','Showing creates immersion; telling summarises flatly'],['Balance needed','Some telling is fine for pace — don\'t overdo showing']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',7,'middle',false));}});
+o.push(T(240,20,'Show, Don\\u2019t Tell',ACC,13,'middle',true));
+[['Telling (weak)','"She was nervous."'],['Showing (strong)','"Her hands trembled as she reached for the door."'],['Why it matters','Showing creates immersion; telling summarises flatly'],['Balance needed','Some telling is fine for pace — don\\u2019t overdo showing']].forEach(function(r,i){if(i<=p){o.push(R(10,36+i*36,460,30,i===0?LINE:CRM,i===0?ACC:LINE,1));o.push(T(120,56+i*36,r[0],ACC,9,'middle',true));o.push(T(330,56+i*36,r[1],'#444',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 function dQ5(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
@@ -164,7 +165,7 @@ s.innerHTML=o.join('');}
 
 function dQ7(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Satisfying, Controlled Endings',ACC,12,'middle',true));
-if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'Resolve the central tension — don\'t just stop',DARK,10,'middle',false));}
+if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'Resolve the central tension — don\\u2019t just stop',DARK,10,'middle',false));}
 if(p>=2){o.push(R(10,92,460,44,'#fff',ACC,1));o.push(T(240,110,'Circular structure: echo the opening image/line',DARK,10,'middle',false));}
 if(p>=3){o.push(R(10,146,460,44,'#e8f5e9',ACC,1));o.push(T(240,170,'Ambiguous endings work IF deliberate, not accidental','#555',9,'middle',false));}
 s.innerHTML=o.join('');}
@@ -183,16 +184,16 @@ s.innerHTML=o.join('');}
 
 function dQ10(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
 o.push(T(240,20,'Narrative Writing — Summary',ACC,12,'middle',true));
-[['Scope','One pivotal moment, not an entire life story'],['Openings','In medias res, striking image, unusual perspective'],['Show, don\'t tell','Actions/senses over stated emotions'],['Pace','Short sentences=tension; long=reflection'],['Endings','Resolve tension; consider circular structure']].forEach(function(r,i){if(i<p+1){o.push(R(10,32+i*30,460,25,CRM,LINE,1));o.push(T(130,49+i*30,r[0],ACC,9,'middle',true));o.push(T(350,49+i*30,r[1],'#555',7,'middle',false));}});
+[['Scope','One pivotal moment, not an entire life story'],['Openings','In medias res, striking image, unusual perspective'],['Show, don\\u2019t tell','Actions/senses over stated emotions'],['Pace','Short sentences=tension; long=reflection'],['Endings','Resolve tension; consider circular structure']].forEach(function(r,i){if(i<p+1){o.push(R(10,32+i*30,460,25,CRM,LINE,1));o.push(T(130,49+i*30,r[0],ACC,9,'middle',true));o.push(T(350,49+i*30,r[1],'#555',7,'middle',false));}});
 s.innerHTML=o.join('');}
 
 var QS=[
 
 {ey:'Q1 &bull; English &bull; Writing (IGCSE)',ti:'Narrative Writing at IGCSE',su:'Understand what IGCSE examiners specifically reward in narrative writing.',steps:[
-{lb:'Definition',dr:dQ1,ht:'<p>IGCSE narrative writing means a complete, <b>controlled</b> story within a strict word limit — every choice must serve the story\'s impact.</p>'},
+{lb:'Definition',dr:dQ1,ht:'<p>IGCSE narrative writing means a complete, <b>controlled</b> story within a strict word limit — every choice must serve the story\\u2019s impact.</p>'},
 {lb:'What examiners reward',dr:dQ1,ht:'<p>Examiners reward <b>CONTROL</b> over ambition alone.</p>'},
 {lb:'The key principle',dr:dQ1,ht:'<p>A tightly-focused <b>single moment</b> beats a rushed epic every time.</p>'},
-{lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'What do examiners specifically reward in narrative writing?',o:['Control over ambition alone','Only the length of the story','Only exciting plot twists','Only correct spelling'],a:0,w:'Examiners reward control over ambition alone in narrative writing.'},{q:'What is the key principle about scope in narrative writing?',o:['A tightly-focused single moment beats a rushed epic','A story covering many years is always better','Longer stories always score higher','Scope does not matter at all'],a:0,w:'A tightly-focused single moment beats a rushed epic covering too much ground.'},{q:'What must every choice in the story serve?',o:['The story\'s impact','Only the word count target','Only the title','Nothing in particular'],a:0,w:'Every choice in the story must serve the story\'s overall impact.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'What do examiners specifically reward in narrative writing?',o:['Control over ambition alone','Only the length of the story','Only exciting plot twists','Only correct spelling'],a:0,w:'Examiners reward control over ambition alone in narrative writing.'},{q:'What is the key principle about scope in narrative writing?',o:['A tightly-focused single moment beats a rushed epic','A story covering many years is always better','Longer stories always score higher','Scope does not matter at all'],a:0,w:'A tightly-focused single moment beats a rushed epic covering too much ground.'},{q:'What must every choice in the story serve?',o:['The story\\u2019s impact','Only the word count target','Only the title','Nothing in particular'],a:0,w:'Every choice in the story must serve the story\\u2019s overall impact.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q2 &bull; English &bull; Writing (IGCSE)',ti:'Scope: Small Story, Big Impact',su:'Learn to focus on one pivotal moment rather than an entire life story.',steps:[
 {lb:'A common error',dr:dQ2,ht:'<p>A common error is trying to tell an <b>entire life story</b> in only 500 words.</p>'},
@@ -203,22 +204,22 @@ var QS=[
 ]},
 {ey:'Q3 &bull; English &bull; Writing (IGCSE)',ti:'Sophisticated Openings',su:'Learn techniques for a strong opening beyond the clich\\u00e9d "one day...".',steps:[
 {lb:'A weak opening',dr:dQ3,ht:'<p><b>✗ Weak: "One day I went to the park."</b></p>'},
-{lb:'A strong opening',dr:dQ3,ht:'<p><b>✓ Strong: "The gate creaked. I hadn\'t noticed how loud silence could be, until that morning."</b></p>'},
+{lb:'A strong opening',dr:dQ3,ht:'<p><b>✓ Strong: "The gate creaked. I hadn\\u2019t noticed how loud silence could be, until that morning."</b></p>'},
 {lb:'Techniques to try',dr:dQ3,ht:'<p>Try starting <b>in medias res</b> (in the middle of the action), with <b>a striking image</b>, or from an <b>unusual perspective</b>.</p>'},
 {lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'What is wrong with "One day I went to the park" as an opening?',o:['It is weak and clich\\u00e9d','It is grammatically incorrect','It has no subject','Nothing is wrong with it'],a:0,w:'"One day I went to the park" is a weak, clich\\u00e9d opening.'},{q:'What does "in medias res" mean as an opening technique?',o:['Starting in the middle of the action','Starting with a full introduction of all characters','Starting with the ending revealed','Starting with a formal greeting'],a:0,w:'"In medias res" means starting in the middle of the action.'},{q:'Which of these is a strong opening technique?',o:['A striking image or unusual perspective','A generic time phrase like "one day"','A full character biography','A list of settings'],a:0,w:'A striking image or unusual perspective makes for a strong, sophisticated opening.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
-{ey:'Q4 &bull; English &bull; Writing (IGCSE)',ti:'Show, Don\'t Tell',su:'Learn to convey emotion and character through action rather than direct statement.',steps:[
+{ey:'Q4 &bull; English &bull; Writing (IGCSE)',ti:'Show, Don\\u2019t Tell',su:'Learn to convey emotion and character through action rather than direct statement.',steps:[
 {lb:'Telling (weak)',dr:dQ4,ht:'<p><b>Telling (weak):</b> "She was nervous."</p>'},
 {lb:'Showing (strong)',dr:dQ4,ht:'<p><b>Showing (strong):</b> "Her hands trembled as she reached for the door."</p>'},
 {lb:'Why it matters',dr:dQ4,ht:'<p>Showing creates <b>immersion</b>; telling merely summarises flatly.</p>'},
-{lb:'A balance is needed',dr:dQ4,ht:'<p>Some telling is fine for pace — <b>don\'t overdo</b> showing everywhere.</p>'},
+{lb:'A balance is needed',dr:dQ4,ht:'<p>Some telling is fine for pace — <b>don\\u2019t overdo</b> showing everywhere.</p>'},
 {lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[{q:'Which is an example of "telling" rather than "showing"?',o:['"She was nervous."','"Her hands trembled as she reached for the door."','"The door creaked open slowly."','"Sweat beaded on her forehead."'],a:0,w:'"She was nervous" states the emotion directly — telling, not showing.'},{q:'Which is an example of "showing"?',o:['"Her hands trembled as she reached for the door."','"She was nervous."','"She felt scared."','"She was worried."'],a:0,w:'"Her hands trembled..." shows the emotion through physical detail — showing, not telling.'},{q:'Why does "showing" matter in narrative writing?',o:['It creates immersion, unlike flat telling','It makes the story much shorter','It removes the need for any plot','It is always required for every single sentence'],a:0,w:'Showing creates immersion for the reader, unlike flat, summarising telling.'},{q:'Should a writer only ever "show," never "tell"?',o:['No, some telling is fine for pace','Yes, telling should never be used','Yes, showing must be used in every sentence','No telling or showing matters at all'],a:0,w:'Some telling is fine for pace — overdoing showing everywhere can slow the story down.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
-{ey:'Q5 &bull; English &bull; Writing (IGCSE)',ti:'Controlling Pace',su:'Learn to use sentence length deliberately to control the story\'s pace.',steps:[
+{ey:'Q5 &bull; English &bull; Writing (IGCSE)',ti:'Controlling Pace',su:'Learn to use sentence length deliberately to control the story\\u2019s pace.',steps:[
 {lb:'Slowing down and speeding up',dr:dQ5,ht:'<p>Slow down for the <b>key moment</b>; speed up elsewhere.</p>'},
 {lb:'Short sentences at the climax',dr:dQ5,ht:'<p>Short sentences at the climax create <b>tension and urgency</b>.</p>'},
 {lb:'Longer sentences elsewhere',dr:dQ5,ht:'<p>Longer sentences elsewhere allow <b>reflection and description</b>.</p>'},
-{lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'What effect do short sentences at a story\'s climax create?',o:['Tension and urgency','Slow, reflective calm','Confusion with no purpose','No particular effect'],a:0,w:'Short sentences at the climax create tension and urgency.'},{q:'What effect do longer sentences elsewhere in the story create?',o:['Reflection and description','Sudden shock','Confusion','No particular effect'],a:0,w:'Longer sentences elsewhere allow for reflection and description.'},{q:'When should a writer "slow down" the pace?',o:['For the key moment in the story','Throughout the entire story equally','Only at the very beginning','Only in dialogue'],a:0,w:'A writer should slow down for the key, most important moment in the story.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'What effect do short sentences at a story\\u2019s climax create?',o:['Tension and urgency','Slow, reflective calm','Confusion with no purpose','No particular effect'],a:0,w:'Short sentences at the climax create tension and urgency.'},{q:'What effect do longer sentences elsewhere in the story create?',o:['Reflection and description','Sudden shock','Confusion','No particular effect'],a:0,w:'Longer sentences elsewhere allow for reflection and description.'},{q:'When should a writer "slow down" the pace?',o:['For the key moment in the story','Throughout the entire story equally','Only at the very beginning','Only in dialogue'],a:0,w:'A writer should slow down for the key, most important moment in the story.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q6 &bull; English &bull; Writing (IGCSE)',ti:'Purposeful Dialogue',su:'Learn to use dialogue that reveals character and advances the plot.',steps:[
 {lb:'Revealing character',dr:dQ6,ht:'<p>Speech patterns can <b>reveal character</b> — personality and background.</p>'},
@@ -228,7 +229,7 @@ var QS=[
 {lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'What can speech patterns in dialogue reveal?',o:['Character, personality and background','Only the exact time of the scene','Only the weather','Nothing meaningful'],a:0,w:'Speech patterns can reveal character, personality, and background.'},{q:'What should dialogue do for the plot?',o:['Advance the plot, moving the story forward','Only fill space with small talk','Repeat information already given','Slow the story down unnecessarily'],a:0,w:'Dialogue should advance the plot, moving the story forward.'},{q:'What should be cut from dialogue?',o:['Filler greetings and small talk that add nothing','All punctuation','All character names','All emotion'],a:0,w:'Filler greetings and small talk that add nothing to the story should be cut.'},{q:'When should a new paragraph start in dialogue?',o:['Every time a new speaker begins talking','Only at the end of the whole conversation','Never — dialogue should be one paragraph','Only if the speaker changes topic'],a:0,w:'A new paragraph should always start when a new speaker begins talking.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 {ey:'Q7 &bull; English &bull; Writing (IGCSE)',ti:'Satisfying, Controlled Endings',su:'Learn to end a narrative with resolution and deliberate craft.',steps:[
-{lb:'Resolve the tension',dr:dQ7,ht:'<p>Resolve the <b>central tension</b> — don\'t just stop abruptly.</p>'},
+{lb:'Resolve the tension',dr:dQ7,ht:'<p>Resolve the <b>central tension</b> — don\\u2019t just stop abruptly.</p>'},
 {lb:'Circular structure',dr:dQ7,ht:'<p>Try a <b>circular structure</b>: echo the opening image or line.</p>'},
 {lb:'Ambiguous endings',dr:dQ7,ht:'<p>Ambiguous endings work <b>IF deliberate</b>, not if they seem accidental or unfinished.</p>'},
 {lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'What should a satisfying ending do to the central tension?',o:['Resolve it, rather than just stopping','Introduce a brand new, unrelated tension','Ignore it completely','Repeat it without any change'],a:0,w:'A satisfying ending should resolve the central tension, rather than just stopping abruptly.'},{q:'What is a "circular structure" ending?',o:['One that echoes the opening image or line','One with no connection to the opening at all','One that introduces a new character','One with no ending at all'],a:0,w:'A circular structure ending echoes the opening image or line.'},{q:'When do ambiguous endings work well?',o:['When they are deliberate, not accidental','Only when the story is very short','Never — endings must always be fully resolved','Only in non-fiction writing'],a:0,w:'Ambiguous endings work well when they are deliberate, showing clear authorial control.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
@@ -246,12 +247,12 @@ var QS=[
 {lb:'Editing skill',dr:dQ9,ht:'<p>Knowing what to <b>CUT</b> is as important as knowing what to add.</p>'},
 {lb:'Your turn',dr:dQ9,ht:tryItMC(function(){var qs=[{q:'What do examiners reward more than scale or ambition?',o:['Controlled craft','The length of the story','The number of characters','The number of settings used'],a:0,w:'Examiners reward controlled craft over scale or ambition alone.'},{q:'What does a focused piece maintain throughout?',o:['Consistency in tone and voice','A random mix of unrelated tones','No consistent tone at all','A constantly changing narrator'],a:0,w:'A focused piece stays consistent in tone and voice throughout.'},{q:'What is emphasised as being just as important as adding content?',o:['Knowing what to cut','Adding as much detail as possible','Using every possible technique','Making the piece as long as possible'],a:0,w:'Knowing what to cut is emphasised as being just as important as what to add.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
-{ey:'Q10 &bull; English &bull; Writing (IGCSE)',ti:'Mixed Questions — Narrative Writing',su:'Integrated revision across scope, openings, show-don\'t-tell, pace and endings.',steps:[
+{ey:'Q10 &bull; English &bull; Writing (IGCSE)',ti:'Mixed Questions — Narrative Writing',su:'Integrated revision across scope, openings, show-don\\u2019t-tell, pace and endings.',steps:[
 {lb:'Scope and openings',dr:dQ10,ht:'<p>Focus on <b>one pivotal moment</b>, and use a sophisticated opening — not "one day..."</p>'},
-{lb:'Show, don\'t tell, and pace',dr:dQ10,ht:'<p>Use <b>action/senses</b> over stated emotion, and control <b>pace</b> through sentence length.</p>'},
+{lb:'Show, don\\u2019t tell, and pace',dr:dQ10,ht:'<p>Use <b>action/senses</b> over stated emotion, and control <b>pace</b> through sentence length.</p>'},
 {lb:'Dialogue and endings',dr:dQ10,ht:'<p>Dialogue should be <b>purposeful</b>; endings should <b>resolve tension</b> deliberately.</p>'},
 {lb:'The common error to avoid',dr:dQ10,ht:'<p>Never overload sentences with too many <b>similar adjectives</b> — precision wins.</p>'},
-{lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[{q:'What scope should a narrative story usually have?',o:['One pivotal moment, not an entire life story','As many years of a character\'s life as possible','Multiple unrelated storylines','No clear focus at all'],a:0,w:'A narrative should focus on one pivotal moment, not an entire life story.'},{q:'Which is "showing" rather than "telling"?',o:['"Her hands trembled as she reached for the door."','"She was nervous."','"She felt anxious."','"She was worried."'],a:0,w:'"Her hands trembled..." shows the emotion through action, rather than stating it directly.'},{q:'What effect do short sentences create at a climax?',o:['Tension and urgency','Slow reflection','Confusion','No effect'],a:0,w:'Short sentences at a climax create tension and urgency.'},{q:'What should dialogue in a story do?',o:['Reveal character and advance the plot','Only fill space with small talk','Slow the story down unnecessarily','Repeat information already given'],a:0,w:'Dialogue should reveal character and advance the plot.'},{q:'What is the common mistake to avoid with adjectives?',o:['Overloading sentences with too many similar adjectives','Using precise, single adjectives','Avoiding all adjectives entirely','Using adjectives only in dialogue'],a:0,w:'Avoid overloading sentences with too many similar adjectives — precision is more effective.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
+{lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[{q:'What scope should a narrative story usually have?',o:['One pivotal moment, not an entire life story','As many years of a character\\u2019s life as possible','Multiple unrelated storylines','No clear focus at all'],a:0,w:'A narrative should focus on one pivotal moment, not an entire life story.'},{q:'Which is "showing" rather than "telling"?',o:['"Her hands trembled as she reached for the door."','"She was nervous."','"She felt anxious."','"She was worried."'],a:0,w:'"Her hands trembled..." shows the emotion through action, rather than stating it directly.'},{q:'What effect do short sentences create at a climax?',o:['Tension and urgency','Slow reflection','Confusion','No effect'],a:0,w:'Short sentences at a climax create tension and urgency.'},{q:'What should dialogue in a story do?',o:['Reveal character and advance the plot','Only fill space with small talk','Slow the story down unnecessarily','Repeat information already given'],a:0,w:'Dialogue should reveal character and advance the plot.'},{q:'What is the common mistake to avoid with adjectives?',o:['Overloading sentences with too many similar adjectives','Using precise, single adjectives','Avoiding all adjectives entirely','Using adjectives only in dialogue'],a:0,w:'Avoid overloading sentences with too many similar adjectives — precision is more effective.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})},
 ]},
 
 ];
