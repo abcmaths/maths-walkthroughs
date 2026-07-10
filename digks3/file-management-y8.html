@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Management — Digital Technologies | Adorable Portal</title>
+<style>
+  :root {
+    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
+  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
+  header .title { font-size:1.05rem; font-weight:700; }
+  header .strand { font-size:0.8rem; opacity:0.85; }
+  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
+  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
+  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
+  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
+  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
+  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
+  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
+  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
+  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
+  .opt-btn:hover { border-color:var(--red); }
+  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
+  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
+  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
+  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .btn:disabled { background:#ccc; cursor:not-allowed; }
+  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .sb-lbl { font-size:0.8rem; color:#888; }
+  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="title">File Management</div>
+    <div class="strand">Digital Technologies · Networking</div>
+  </div>
+  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+</header>
+<main>
+  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
+  <div class="card">
+    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
+      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
+      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
+      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
+      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
+      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
+    </svg>
+    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
+    <div class="q-title" id="cp-title"></div>
+    <div class="teach" id="teach-content"></div>
+    <div class="your-turn" id="your-turn" style="display:none">
+      <div class="yt-q" id="yt-question"></div>
+      <div id="yt-opts"></div>
+      <div class="try-fb" id="try-fb"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
+      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const QS = [
+  {ey:'Q1',ti:'What is File Management?',teach:'<p>File management is the process of organising, storing, naming and retrieving digital files.</p><p>Good file management saves time and reduces the risk of losing important work.</p><p>Files are organised into folders (directories), which can contain sub-folders.</p><p>Consistent naming conventions make files easier to find later.</p>',q:'What is the main purpose of file management?',opts:["To organise, store and retrieve digital files effectively", "To delete all files automatically", "To make files impossible to find", "To slow down a computer"],correct:0,expl:'File management is about organising, naming and storing files so they can be found and used efficiently.'},
+  {ey:'Q2',ti:'Folders and Directories',teach:'<p>A folder (directory) is a container used to organise related files together.</p><p>Folders can be nested inside other folders to create a hierarchy.</p><p>A clear folder structure (e.g. by subject, then by term) helps avoid clutter.</p><p>The "root" directory is the top level of a storage device\'s file system.</p>',q:'What is it called when folders are placed inside other folders?',opts:["Nesting / a hierarchy", "Deleting", "Formatting", "Compressing"],correct:0,expl:'Placing folders inside other folders creates a nested hierarchy, helping organise related files logically.'},
+  {ey:'Q3',ti:'File Naming Conventions',teach:'<p>Good file names are descriptive, consistent, and avoid special characters.</p><p>Including dates (YYYY-MM-DD) in file names helps with sorting chronologically.</p><p>Avoid vague names like "Document1" or "Untitled" for important files.</p><p>Consistent naming makes files easier to search for and identify.</p>',q:'Which is the best practice for naming an important file?',opts:["\"Document1\"", "\"Untitled\"", "A clear, descriptive name like \"Y8_Science_Report_2026\"", "A completely random string of letters"],correct:2,expl:'A clear, descriptive name makes it much easier to identify and locate the file later.'},
+  {ey:'Q4',ti:'File Types and Extensions',teach:'<p>File extensions (like .docx, .jpg, .mp4) indicate what type of file it is.</p><p>Different programs are needed to open different file types.</p><p>Compressed file formats (like .zip) bundle multiple files into one smaller file.</p><p>Knowing common file extensions helps you manage files more effectively.</p>',q:'What does a ".zip" file typically represent?',opts:["An image file", "A compressed bundle of one or more files", "An audio file only", "A type of computer virus"],correct:1,expl:'A .zip file compresses one or more files together into a single, smaller archive file.'},
+  {ey:'Q5',ti:'Copying, Moving and Deleting Files',teach:'<p>Copying creates a duplicate of a file in a new location, keeping the original.</p><p>Moving relocates a file, removing it from its original location.</p><p>Deleted files often go to a "Recycle Bin" or "Trash" before permanent deletion.</p><p>Understanding these operations prevents accidental data loss.</p>',q:'What typically happens to a file immediately after you delete it on most systems?',opts:["It is permanently destroyed instantly with no recovery option", "It usually moves to a Recycle Bin/Trash first", "It is automatically emailed to you", "It is uploaded to a random website"],correct:1,expl:'Most systems move deleted files to a Recycle Bin or Trash folder first, allowing recovery before permanent deletion.'},
+  {ey:'Q6',ti:'Searching for Files',teach:'<p>Search tools let you find files by name, type, date, or content.</p><p>Using specific, accurate keywords improves search results.</p><p>Well-organised folder structures reduce the need for frequent searching.</p><p>Search indexes are built automatically by most modern operating systems.</p>',q:'What can improve the accuracy of a file search?',opts:["Using vague, random keywords", "Using specific, accurate keywords related to the file", "Searching with no keywords at all", "Deleting the file first"],correct:1,expl:'Specific and accurate keywords help the search tool find the exact file you\'re looking for more reliably.'},
+  {ey:'Q7',ti:'Backups',teach:'<p>A backup is a copy of files kept separately in case the original is lost or damaged.</p><p>Backups can be stored locally (external drive) or in the cloud.</p><p>The "3-2-1 rule" suggests 3 copies, on 2 different media, with 1 offsite.</p><p>Regular backups protect against device failure, theft, or accidental deletion.</p>',q:'What does the "3-2-1 backup rule" recommend?',opts:["3 copies, on 2 different media, with 1 stored offsite", "1 copy stored in 3 different rooms", "No backups are ever necessary", "3 different passwords for one file"],correct:0,expl:'The 3-2-1 rule recommends keeping 3 copies of data, on 2 different types of media, with 1 copy stored offsite.'},
+  {ey:'Q8',ti:'File Permissions and Sharing',teach:'<p>File permissions control who can view, edit, or delete a file.</p><p>Shared files/folders let multiple people collaborate on the same content.</p><p>Setting appropriate permissions protects sensitive or important files.</p><p>Cloud platforms often let you control sharing with specific people or "anyone with the link".</p>',q:'What do file permissions primarily control?',opts:["The colour of the file icon", "Who can view, edit, or delete a file", "How large the file can be", "The file's creation date"],correct:1,expl:'File permissions determine who is allowed to view, edit, or delete a particular file.'},
+  {ey:'Q9',ti:'Compression',teach:'<p>Compression reduces file size, making files easier to store and transfer.</p><p>Common formats include .zip and .rar.</p><p>Some compression is "lossless" (no quality lost); some is "lossy" (some quality lost, e.g. JPEG, MP3).</p><p>Compressing large files before emailing them can avoid attachment size limits.</p>',q:'What is the main benefit of file compression?',opts:["It increases file size", "It reduces file size, making storage and sharing easier", "It deletes the file permanently", "It changes the file's creation date"],correct:1,expl:'File compression reduces the size of a file or group of files, making them easier to store and share.'},
+  {ey:'Q10',ti:'Organising a Digital Workspace',teach:'<p>A tidy digital workspace mirrors a tidy physical one — both improve efficiency.</p><p>Regularly reviewing and archiving old files prevents clutter build-up.</p><p>Using consistent folder structures across devices improves consistency.</p><p>Good digital organisation habits benefit both school work and future careers.</p>',q:'What habit helps prevent digital clutter from building up over time?',opts:["Never deleting or archiving anything, ever", "Regularly reviewing and archiving old files", "Randomly renaming files every day", "Storing everything directly on the desktop with no folders"],correct:1,expl:'Regularly reviewing and archiving unneeded files helps keep a digital workspace organised and efficient.'}
+  ];
+  const TOTAL = QS.length;
+  let idx = 0;
+  let answered = new Array(TOTAL).fill(false);
+
+  function render() {
+    const q = QS[idx];
+    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
+    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
+    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
+    document.getElementById('cp-title').textContent = q.ti;
+    document.getElementById('ey').innerHTML = q.teach;
+    document.getElementById('diagram-title').textContent = q.ti;
+    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
+    const yt = document.getElementById('your-turn');
+    yt.style.display = 'block';
+    document.getElementById('yt-question').textContent = q.q;
+    const optsDiv = document.getElementById('yt-opts');
+    optsDiv.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.textContent = opt;
+      b.onclick = () => selectAnswer(i, b);
+      optsDiv.appendChild(b);
+    });
+    document.getElementById('try-fb').className = 'try-fb';
+    document.getElementById('try-fb').textContent = '';
+    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
+    document.getElementById('prev-btn').disabled = (idx === 0);
+  }
+
+  function selectAnswer(i, btn) {
+    const q = QS[idx];
+    const fb = document.getElementById('try-fb');
+    const allBtns = document.querySelectorAll('.opt-btn');
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+    if (i === q.correct) {
+      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
+      fb.className = 'try-fb ok';
+      fb.textContent = '✓ Correct! ' + q.expl;
+      answered[idx] = true;
+    } else {
+      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
+      fb.className = 'try-fb er';
+      fb.textContent = '✗ Not quite. ' + q.expl;
+    }
+  }
+
+  function nextStep() {
+    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
+    render();
+  }
+  function prevStep() {
+    if (idx > 0) { idx--; render(); }
+  }
+
+  render();
+</script>
+
+<!-- hidden element used by render() per gold-standard pattern -->
+<div id="ey" style="display:none"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+  const _abcTopicCode = 'DT8-FIL-01';
+
+  (async function checkLogin() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    window._abcSession = session;
+    window._abcSupabase = supabase;
+  })();
+
+  window.markComplete = async function() {
+    const session = window._abcSession;
+    if (!session) return;
+    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
+    if (!topicRow) return;
+    await supabase.from('walkthrough_progress').upsert({
+      student_id: session.user.id,
+      topic_id: topicRow.id,
+      status: 'completed',
+      last_visited_at: new Date().toISOString()
+    }, { onConflict: 'student_id,topic_id' });
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Productivity Software — Digital Technologies | Adorable Portal</title>
+<style>
+  :root {
+    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
+  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
+  header .title { font-size:1.05rem; font-weight:700; }
+  header .strand { font-size:0.8rem; opacity:0.85; }
+  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
+  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
+  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
+  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
+  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
+  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
+  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
+  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
+  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
+  .opt-btn:hover { border-color:var(--red); }
+  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
+  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
+  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
+  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .btn:disabled { background:#ccc; cursor:not-allowed; }
+  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .sb-lbl { font-size:0.8rem; color:#888; }
+  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="title">Productivity Software</div>
+    <div class="strand">Digital Technologies · Productivity & Internet</div>
+  </div>
+  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+</header>
+<main>
+  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
+  <div class="card">
+    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
+      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
+      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
+      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
+      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
+      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
+    </svg>
+    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
+    <div class="q-title" id="cp-title"></div>
+    <div class="teach" id="teach-content"></div>
+    <div class="your-turn" id="your-turn" style="display:none">
+      <div class="yt-q" id="yt-question"></div>
+      <div id="yt-opts"></div>
+      <div class="try-fb" id="try-fb"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
+      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const QS = [
+  {ey:'Q1',ti:'What is Productivity Software?',teach:'<p>Productivity software helps people complete work tasks efficiently.</p><p>Examples: word processors, spreadsheets, presentation software.</p><p>Common suites include Microsoft Office and Google Workspace.</p><p>These tools are used in almost every workplace and school.</p>',q:'Which of these is an example of productivity software?',opts:["A word processor", "A video game", "A web browser game", "A music streaming app"],correct:0,expl:'A word processor (like Microsoft Word) is a classic example of productivity software used for writing documents.'},
+  {ey:'Q2',ti:'Word Processing Basics',teach:'<p>Word processors let you write, format and edit text documents.</p><p>Formatting includes font, size, bold, italic, alignment and spacing.</p><p>Spell-check and grammar-check help catch errors.</p><p>Templates speed up creating common documents like letters and CVs.</p>',q:'What feature helps catch spelling mistakes in a word processor?',opts:["Spell-check", "A calculator function", "A video player", "A web browser"],correct:0,expl:'Spell-check automatically scans text for spelling errors and suggests corrections.'},
+  {ey:'Q3',ti:'Spreadsheets Basics',teach:'<p>Spreadsheets organise data into rows and columns (cells).</p><p>Formulas can calculate totals, averages and more automatically.</p><p>Charts can be created directly from spreadsheet data.</p><p>Spreadsheets are widely used for budgeting, planning and analysis.</p>',q:'What is the basic unit where data is entered in a spreadsheet?',opts:["A slide", "A cell", "A paragraph", "A folder"],correct:1,expl:'Data is entered into individual cells, organised in a grid of rows and columns.'},
+  {ey:'Q4',ti:'Presentation Software',teach:'<p>Presentation software (like PowerPoint) creates slide-based presentations.</p><p>Slides can include text, images, charts and animations.</p><p>Good presentations avoid cramming too much text onto one slide.</p><p>Presenter notes help remind the speaker of key points.</p>',q:'What might presenter notes be used for?',opts:["To confuse the audience", "To remind the speaker of key points during a talk", "To replace the need for slides entirely", "To automatically translate the presentation"],correct:1,expl:'Presenter notes are private reminders visible only to the speaker, helping them recall key talking points.'},
+  {ey:'Q5',ti:'File Formats',teach:'<p>Common file formats include .docx (Word), .xlsx (Excel), .pptx (PowerPoint), .pdf.</p><p>PDF files preserve formatting and are widely used for sharing final documents.</p><p>Choosing the right file format matters for compatibility and sharing.</p><p>Some formats compress files to save storage space.</p>',q:'Which file format is commonly used to share a final, non-editable document?',opts:[".docx", ".pdf", ".xlsx", ".pptx"],correct:1,expl:'PDF preserves formatting exactly and is widely used for sharing finished, generally non-editable documents.'},
+  {ey:'Q6',ti:'Collaboration Tools',teach:'<p>Cloud-based tools (like Google Docs) let multiple people edit a document together in real time.</p><p>Comments and suggestions allow feedback without changing the original text.</p><p>Version history lets you see and restore earlier versions of a document.</p><p>Collaboration tools are essential for group projects and workplace teams.</p>',q:'What lets you see and restore earlier versions of a shared document?',opts:["Version history", "Spell-check", "A printer", "The desktop wallpaper"],correct:0,expl:'Version history tracks changes over time, letting users view or restore previous versions of a document.'},
+  {ey:'Q7',ti:'Formatting for Clarity',teach:'<p>Headings and subheadings organise long documents.</p><p>Bullet points break information into clear, scannable chunks.</p><p>Consistent fonts and colours make documents look professional.</p><p>Good formatting improves readability and understanding.</p>',q:'What is a benefit of using headings in a long document?',opts:["They make the document harder to navigate", "They help organise and structure the document for readers", "They automatically fix spelling errors", "They delete unnecessary paragraphs"],correct:1,expl:'Headings break a document into clear sections, making it easier for readers to navigate and understand.'},
+  {ey:'Q8',ti:'Working with Images and Charts',teach:'<p>Images and charts can make documents and presentations more engaging.</p><p>Charts should be clearly labelled with titles and axis labels.</p><p>Resizing and cropping images helps them fit neatly into documents.</p><p>Overusing images can distract from the main message.</p>',q:'What should a good chart always include?',opts:["No labels at all", "Clear titles and axis labels", "Random colours with no meaning", "As much data as physically possible, unlabelled"],correct:1,expl:'Clear titles and axis labels help readers understand exactly what a chart is showing.'},
+  {ey:'Q9',ti:'Saving and Backing Up Work',teach:'<p>Save work regularly to avoid losing progress.</p><p>Cloud storage (like Google Drive or OneDrive) backs up files automatically.</p><p>Naming files clearly helps you find them again later.</p><p>Losing unsaved work is a common and frustrating mistake to avoid.</p>',q:'What is one benefit of cloud storage for saving work?',opts:["It automatically deletes your files", "It backs up files so they aren't lost if a device fails", "It makes files impossible to share", "It requires no internet connection ever"],correct:1,expl:'Cloud storage keeps a backup copy of files online, protecting against loss if a local device fails.'},
+  {ey:'Q10',ti:'Productivity Software in the Real World',teach:'<p>Businesses use spreadsheets for budgets, reports and forecasting.</p><p>Schools use presentation software for lessons and student projects.</p><p>Government offices use word processors for official documents and reports.</p><p>Productivity skills are valuable in almost every future career.</p>',q:'Which productivity tool would be most useful for creating a school budget?',opts:["A spreadsheet", "A presentation slide", "A single photo", "A video game"],correct:0,expl:'A spreadsheet is designed for numerical calculations, making it ideal for creating and managing a budget.'}
+  ];
+  const TOTAL = QS.length;
+  let idx = 0;
+  let answered = new Array(TOTAL).fill(false);
+
+  function render() {
+    const q = QS[idx];
+    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
+    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
+    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
+    document.getElementById('cp-title').textContent = q.ti;
+    document.getElementById('ey').innerHTML = q.teach;
+    document.getElementById('diagram-title').textContent = q.ti;
+    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
+    const yt = document.getElementById('your-turn');
+    yt.style.display = 'block';
+    document.getElementById('yt-question').textContent = q.q;
+    const optsDiv = document.getElementById('yt-opts');
+    optsDiv.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.textContent = opt;
+      b.onclick = () => selectAnswer(i, b);
+      optsDiv.appendChild(b);
+    });
+    document.getElementById('try-fb').className = 'try-fb';
+    document.getElementById('try-fb').textContent = '';
+    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
+    document.getElementById('prev-btn').disabled = (idx === 0);
+  }
+
+  function selectAnswer(i, btn) {
+    const q = QS[idx];
+    const fb = document.getElementById('try-fb');
+    const allBtns = document.querySelectorAll('.opt-btn');
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+    if (i === q.correct) {
+      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
+      fb.className = 'try-fb ok';
+      fb.textContent = '✓ Correct! ' + q.expl;
+      answered[idx] = true;
+    } else {
+      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
+      fb.className = 'try-fb er';
+      fb.textContent = '✗ Not quite. ' + q.expl;
+    }
+  }
+
+  function nextStep() {
+    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
+    render();
+  }
+  function prevStep() {
+    if (idx > 0) { idx--; render(); }
+  }
+
+  render();
+</script>
+
+<!-- hidden element used by render() per gold-standard pattern -->
+<div id="ey" style="display:none"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+  const _abcTopicCode = 'DT7-PRD-01';
+
+  (async function checkLogin() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    window._abcSession = session;
+    window._abcSupabase = supabase;
+  })();
+
+  window.markComplete = async function() {
+    const session = window._abcSession;
+    if (!session) return;
+    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
+    if (!topicRow) return;
+    await supabase.from('walkthrough_progress').upsert({
+      student_id: session.user.id,
+      topic_id: topicRow.id,
+      status: 'completed',
+      last_visited_at: new Date().toISOString()
+    }, { onConflict: 'student_id,topic_id' });
+  };
+</script>
+</body>
+</html>

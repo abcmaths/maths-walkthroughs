@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flowcharts — Digital Technologies | Adorable Portal</title>
+<style>
+  :root {
+    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
+  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
+  header .title { font-size:1.05rem; font-weight:700; }
+  header .strand { font-size:0.8rem; opacity:0.85; }
+  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
+  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
+  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
+  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
+  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
+  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
+  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
+  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
+  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
+  .opt-btn:hover { border-color:var(--red); }
+  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
+  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
+  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
+  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .btn:disabled { background:#ccc; cursor:not-allowed; }
+  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .sb-lbl { font-size:0.8rem; color:#888; }
+  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="title">Flowcharts</div>
+    <div class="strand">Digital Technologies · Computational Thinking</div>
+  </div>
+  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+</header>
+<main>
+  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
+  <div class="card">
+    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
+      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
+      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
+      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
+      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
+      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
+    </svg>
+    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
+    <div class="q-title" id="cp-title"></div>
+    <div class="teach" id="teach-content"></div>
+    <div class="your-turn" id="your-turn" style="display:none">
+      <div class="yt-q" id="yt-question"></div>
+      <div id="yt-opts"></div>
+      <div class="try-fb" id="try-fb"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
+      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const QS = [
+  {ey:'Q1',ti:'Purpose of Flowcharts',teach:'<p>Flowcharts visually represent the logic and flow of an algorithm.</p><p>They help communicate a solution before any code is written.</p><p>Flowcharts are useful for planning, documenting, and explaining processes.</p><p>A clear flowchart can reveal logical errors before coding begins.</p>',q:'What is a key benefit of drawing a flowchart before coding?',opts:["It guarantees the program will run twice as fast", "It can reveal logical errors before any code is written", "It removes the need to ever test the program", "It automatically writes the code for you"],correct:1,expl:'A flowchart helps visualise the logic clearly, which can reveal errors or gaps before code is even written.'},
+  {ey:'Q2',ti:'Standard Flowchart Symbols',teach:'<p>Oval/rounded shapes represent the start and end of a process.</p><p>Rectangles represent a process or action step.</p><p>Diamonds represent decisions (yes/no branches).</p><p>Parallelograms often represent input or output.</p>',q:'What shape typically represents the start or end of a flowchart?',opts:["Rectangle", "Diamond", "Oval/rounded shape", "Triangle"],correct:2,expl:'Oval or rounded shapes are the standard symbol used to mark the start and end points of a flowchart.'},
+  {ey:'Q3',ti:'Sequence in Flowcharts',teach:'<p>Arrows connect symbols to show the order steps should be followed.</p><p>A straightforward flowchart with no branches shows simple sequencing.</p><p>Following the arrows precisely shows exactly how the algorithm executes.</p><p>Sequence is the simplest structure to represent in a flowchart.</p>',q:'What do arrows in a flowchart represent?',opts:["Decorative lines with no meaning", "The order/direction the process should follow", "A type of data storage", "A programming language"],correct:1,expl:'Arrows show the direction and order in which the process flows from one step to the next.'},
+  {ey:'Q4',ti:'Decisions in Flowcharts',teach:'<p>A diamond shape represents a decision, usually with two possible paths.</p><p>Decision paths are often labelled "Yes/No" or "True/False".</p><p>Each path from a decision leads to a different next step.</p><p>Complex algorithms may include multiple decision points in sequence.</p>',q:'How many typical output paths does a standard decision diamond have?',opts:["One", "Two (e.g. Yes/No)", "Five", "Zero"],correct:1,expl:'A standard decision diamond typically has two output paths, often labelled "Yes" and "No".'},
+  {ey:'Q5',ti:'Loops in Flowcharts',teach:'<p>Loops are shown by an arrow looping back to an earlier point in the flowchart.</p><p>A decision diamond often controls whether the loop continues or exits.</p><p>Flowcharted loops make it clear exactly when repetition starts and stops.</p><p>Understanding loop flowcharts prepares students for coding real loops.</p>',q:'How is a loop typically represented in a flowchart?',opts:["An arrow looping back to an earlier point, controlled by a decision", "A single straight arrow with no return", "A blank rectangle", "There is no way to represent loops in flowcharts"],correct:0,expl:'A loop is shown by an arrow that returns to an earlier point, usually controlled by a decision diamond checking a condition.'},
+  {ey:'Q6',ti:'From Flowchart to Pseudocode',teach:'<p>Flowcharts and pseudocode both represent algorithm logic, in different styles.</p><p>Converting a flowchart to pseudocode practises translating visual logic into text.</p><p>This skill bridges planning (flowcharts) and implementation (code).</p><p>Both approaches should produce the same underlying logic and results.</p>',q:'What skill does converting a flowchart into pseudocode help develop?',opts:["Drawing skills only", "Translating visual logic into text-based logic", "Deleting unnecessary code", "Designing hardware"],correct:1,expl:'This exercise helps students practise turning a visual representation of logic into a text-based, code-like format.'},
+  {ey:'Q7',ti:'Common Flowchart Mistakes',teach:'<p>Missing a decision path can leave an algorithm incomplete.</p><p>Unclear labelling makes flowcharts confusing to follow.</p><p>Overly complex flowcharts can be simplified by breaking them into sub-processes.</p><p>Testing a flowchart by "walking through" it with sample data catches errors.</p>',q:'What can help catch errors in a flowchart before coding it?',opts:["Ignoring it entirely", "Walking through it step by step with sample data", "Making it as complicated as possible", "Removing all labels"],correct:1,expl:'"Walking through" a flowchart with sample data helps verify the logic works correctly before implementation.'},
+  {ey:'Q8',ti:'Real-World Flowchart Examples',teach:'<p>Flowcharts can model real processes: ordering food, admission procedures, troubleshooting guides.</p><p>Businesses use flowcharts to document and improve their processes.</p><p>Flowcharts make complex processes easier for teams to understand and follow.</p><p>Practising with real-world examples strengthens flowchart design skills.</p>',q:'Besides programming, where else are flowcharts commonly used?',opts:["Only in professional programming", "Documenting real-world business processes", "Never used outside computer science", "Only in cooking recipes"],correct:1,expl:'Flowcharts are widely used across many fields to document and communicate real-world processes clearly.'},
+  {ey:'Q9',ti:'Flowcharting Tools',teach:'<p>Flowcharts can be drawn by hand or using digital tools (like diagramming software).</p><p>Digital tools make it easy to edit, reorganise, and share flowcharts.</p><p>Consistent symbol use across a flowchart improves clarity for all readers.</p><p>Choosing the right tool depends on complexity and collaboration needs.</p>',q:'What is an advantage of using digital flowcharting tools over hand drawing?',opts:["Easier editing, reorganising and sharing", "They automatically write full programs", "They cannot be shared with anyone", "They are always slower to use"],correct:0,expl:'Digital tools make it much easier to edit, rearrange, and share flowcharts compared with drawing by hand.'},
+  {ey:'Q10',ti:'Practising Flowchart Design',teach:'<p>Start with a simple, clearly defined problem before attempting complex flowcharts.</p><p>Review and refine a flowchart after walking through it with test cases.</p><p>Peer review can catch mistakes the original designer may have missed.</p><p>Regular practice builds confidence in translating problems into clear logical steps.</p>',q:'What is a good first step when designing a flowchart for a new problem?',opts:["Start with the most complex part first", "Start with a simple, clearly defined problem", "Skip planning and go straight to code", "Avoid thinking about the problem at all"],correct:1,expl:'Starting with a simple, clearly understood problem makes it easier to design an accurate, useful flowchart.'}
+  ];
+  const TOTAL = QS.length;
+  let idx = 0;
+  let answered = new Array(TOTAL).fill(false);
+
+  function render() {
+    const q = QS[idx];
+    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
+    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
+    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
+    document.getElementById('cp-title').textContent = q.ti;
+    document.getElementById('ey').innerHTML = q.teach;
+    document.getElementById('diagram-title').textContent = q.ti;
+    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
+    const yt = document.getElementById('your-turn');
+    yt.style.display = 'block';
+    document.getElementById('yt-question').textContent = q.q;
+    const optsDiv = document.getElementById('yt-opts');
+    optsDiv.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.textContent = opt;
+      b.onclick = () => selectAnswer(i, b);
+      optsDiv.appendChild(b);
+    });
+    document.getElementById('try-fb').className = 'try-fb';
+    document.getElementById('try-fb').textContent = '';
+    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
+    document.getElementById('prev-btn').disabled = (idx === 0);
+  }
+
+  function selectAnswer(i, btn) {
+    const q = QS[idx];
+    const fb = document.getElementById('try-fb');
+    const allBtns = document.querySelectorAll('.opt-btn');
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+    if (i === q.correct) {
+      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
+      fb.className = 'try-fb ok';
+      fb.textContent = '✓ Correct! ' + q.expl;
+      answered[idx] = true;
+    } else {
+      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
+      fb.className = 'try-fb er';
+      fb.textContent = '✗ Not quite. ' + q.expl;
+    }
+  }
+
+  function nextStep() {
+    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
+    render();
+  }
+  function prevStep() {
+    if (idx > 0) { idx--; render(); }
+  }
+
+  render();
+</script>
+
+<!-- hidden element used by render() per gold-standard pattern -->
+<div id="ey" style="display:none"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+  const _abcTopicCode = 'DT8-PRG-02';
+
+  (async function checkLogin() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    window._abcSession = session;
+    window._abcSupabase = supabase;
+  })();
+
+  window.markComplete = async function() {
+    const session = window._abcSession;
+    if (!session) return;
+    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
+    if (!topicRow) return;
+    await supabase.from('walkthrough_progress').upsert({
+      student_id: session.user.id,
+      topic_id: topicRow.id,
+      status: 'completed',
+      last_visited_at: new Date().toISOString()
+    }, { onConflict: 'student_id,topic_id' });
+  };
+</script>
+</body>
+</html>
