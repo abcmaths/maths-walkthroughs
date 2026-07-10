@@ -1,174 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Data Representation — Digital Technologies | Adorable Portal</title>
 <style>
-  :root {
-    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
-  }
-  * { box-sizing: border-box; margin:0; padding:0; }
-  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
-  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
-  header .title { font-size:1.05rem; font-weight:700; }
-  header .strand { font-size:0.8rem; opacity:0.85; }
-  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
-  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
-  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
-  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
-  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
-  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
-  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
-  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
-  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
-  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
-  .opt-btn:hover { border-color:var(--red); }
-  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
-  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
-  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
-  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
-  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
-  .btn:disabled { background:#ccc; cursor:not-allowed; }
-  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
-  .sb-lbl { font-size:0.8rem; color:#888; }
-  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+:root{--red:#37474F;--dark:#263238;--cream:#ECEFF1;--ink:#0d1b2a;--line:#CFD8DC;--gold:#00ACC1;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#555;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,var(--cream));padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:180px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:15px;line-height:1.6;margin:0 0 8px;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;margin-bottom:8px;line-height:1.5;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.mc-opt{text-align:left;padding:10px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold);background:#f0fbfc;}
+.mc-opt:disabled{cursor:default;opacity:.9;}
+.mc-opt.mc-correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600;}
+.mc-opt.mc-wrong{border-color:#c62828;background:#fde8e8;color:#a01820;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e0f7fa;color:#00838f;border:1px solid #80deea;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#1a2a3a;}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#00838f;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
 <body>
 <header>
-  <div>
-    <div class="title">Data Representation</div>
-    <div class="strand">Digital Technologies · Data & Programming</div>
-  </div>
-  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+  <a href="../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <div class="ht">Data Representation</div>
+  <div style="width:80px"></div>
 </header>
-<main>
-  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
-  <div class="card">
-    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
-      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
-      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
-      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
-      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
-      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
-    </svg>
-    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
-    <div class="q-title" id="cp-title"></div>
-    <div class="teach" id="teach-content"></div>
-    <div class="your-turn" id="your-turn" style="display:none">
-      <div class="yt-q" id="yt-question"></div>
-      <div id="yt-opts"></div>
-      <div class="try-fb" id="try-fb"></div>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr"><div class="eyebrow" id="ey"></div><h1 id="ti"></h1><div class="sub" id="su"></div></div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
     </div>
-    <div class="nav-row">
-      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
-      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
     </div>
   </div>
-</main>
-
+</div>
 <script>
-  const QS = [
-  {ey:'Q1',ti:'Representing Numbers in Binary',teach:'<p>Computers represent all numbers using binary (base 2): only 0s and 1s.</p><p>Each binary digit is called a "bit"; 8 bits make a "byte".</p><p>Binary place values double each time: 1, 2, 4, 8, 16, 32...</p><p>Converting between binary and decimal is a foundational computing skill.</p>',q:'What number base does binary use?',opts:["Base 10", "Base 2", "Base 16", "Base 8"],correct:1,expl:'Binary is a base-2 number system, using only the digits 0 and 1.'},
-  {ey:'Q2',ti:'Representing Text',teach:'<p>Text is stored using character encoding systems like ASCII or Unicode.</p><p>ASCII assigns each letter, number and symbol a unique numeric code.</p><p>Unicode extends this to support many more characters and languages worldwide.</p><p>Every letter you type is ultimately stored as a binary number.</p>',q:'What do character encoding systems like ASCII assign to each character?',opts:["A colour", "A unique numeric code", "A sound", "A physical location"],correct:1,expl:'ASCII and similar systems assign each character a unique numeric code so it can be stored digitally.'},
-  {ey:'Q3',ti:'Representing Images',teach:'<p>Digital images are made of tiny coloured dots called pixels.</p><p>Each pixel\'s colour is often represented using RGB (Red, Green, Blue) values.</p><p>More pixels generally means higher image resolution and detail.</p><p>Image file size depends on resolution, colour depth, and compression.</p>',q:'What does RGB stand for in image representation?',opts:["Red, Green, Blue", "Red, Grey, Black", "Round, Grid, Binary", "Radio, Graphics, Broadband"],correct:0,expl:'RGB stands for Red, Green, Blue — the three colour channels combined to create the colours in digital images.'},
-  {ey:'Q4',ti:'Representing Sound',teach:'<p>Sound is captured by sampling an analogue wave at regular intervals.</p><p>Sample rate (measured in Hz) affects the quality of the digital recording.</p><p>Higher sample rates capture more detail but create larger file sizes.</p><p>Common audio formats include MP3 (compressed) and WAV (uncompressed).</p>',q:'What does a higher audio sample rate generally provide?',opts:["Lower quality recordings", "More detail, at the cost of larger file size", "Smaller file sizes with no quality change", "No effect on quality or size"],correct:1,expl:'A higher sample rate captures sound more accurately, but produces larger file sizes as a trade-off.'},
-  {ey:'Q5',ti:'Binary to Decimal Conversion',teach:'<p>To convert binary to decimal, add up the place values where there is a 1.</p><p>Example: 1011 in binary = 8+0+2+1 = 11 in decimal.</p><p>Practising conversions builds a deeper understanding of how computers "think".</p><p>This skill underlies more advanced topics like data structures and networking.</p>',q:'What is the decimal value of the binary number 1010?',opts:["8", "10", "12", "5"],correct:1,expl:'1010 in binary = 8+0+2+0 = 10 in decimal.'},
-  {ey:'Q6',ti:'Data Compression Basics',teach:'<p>Compression reduces the size of data for storage or transmission.</p><p>Lossless compression preserves all original data exactly (e.g. ZIP, PNG).</p><p>Lossy compression removes some data to save more space (e.g. JPEG, MP3).</p><p>Choosing lossy vs lossless depends on whether perfect quality is required.</p>',q:'Which compression type removes some data permanently to save more space?',opts:["Lossless compression", "Lossy compression", "No compression", "Encryption"],correct:1,expl:'Lossy compression sacrifices some quality/data to achieve greater file size reduction.'},
-  {ey:'Q7',ti:'Hexadecimal',teach:'<p>Hexadecimal is a base-16 number system using digits 0-9 and letters A-F.</p><p>It is often used as a shorthand for binary, since each hex digit represents 4 bits.</p><p>Colour codes in web design (like #FF0000 for red) use hexadecimal.</p><p>Programmers often use hex to represent memory addresses concisely.</p>',q:'What does a web colour code like "#FF0000" use?',opts:["Binary only", "Hexadecimal", "Decimal only", "Roman numerals"],correct:1,expl:'Web colour codes are written in hexadecimal, representing red, green and blue values as hex pairs.'},
-  {ey:'Q8',ti:'Data Types in Programming',teach:'<p>Common data types include integers (whole numbers), floats (decimals), strings (text), and booleans (true/false).</p><p>Choosing the correct data type ensures programs behave correctly and efficiently.</p><p>Type errors occur when a program tries to use data of the wrong type incorrectly.</p><p>Understanding data types is essential before writing more advanced programs.</p>',q:'Which data type would best store the value "true" or "false"?',opts:["Integer", "Boolean", "String", "Float"],correct:1,expl:'A Boolean data type is specifically designed to store one of two values: true or false.'},
-  {ey:'Q9',ti:'Why Binary Matters',teach:'<p>Electronic circuits naturally have two clear states: on and off, matching binary perfectly.</p><p>This makes binary reliable, since it\'s easy to distinguish just two states electrically.</p><p>All complex data — text, images, sound, video — is ultimately built from binary.</p><p>Understanding binary helps explain how computers can be so reliable and fast.</p>',q:'Why is binary well-suited to electronic computers?',opts:["Because electronic circuits naturally have two clear states: on and off", "Because binary is the prettiest number system", "Because computers cannot understand any other system in theory", "Because binary uses ten different digits"],correct:0,expl:'Binary matches the two clear physical states (on/off) that electronic circuits can reliably distinguish.'},
-  {ey:'Q10',ti:'Data Representation in Practice',teach:'<p>Every file you save — document, photo, song — is stored as binary data.</p><p>Understanding representation helps explain file sizes and compatibility issues.</p><p>Corrupted data representation can cause files to become unreadable.</p><p>This foundational knowledge supports later topics like databases and networking.</p>',q:'What is ultimately true about every digital file, whether text, image or sound?',opts:["It is stored as binary data", "It is stored as handwriting", "It requires no storage at all", "It cannot be compressed"],correct:0,expl:'Regardless of file type, all digital files are ultimately represented and stored as binary data.'}
-  ];
-  const TOTAL = QS.length;
-  let idx = 0;
-  let answered = new Array(TOTAL).fill(false);
+var ACC='#37474F',DARK='#263238',CRM='#ECEFF1',LINE='#CFD8DC';
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#0d1b2a';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||CRM;stroke=stroke||ACC;sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
 
-  function render() {
-    const q = QS[idx];
-    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
-    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
-    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
-    document.getElementById('cp-title').textContent = q.ti;
-    document.getElementById('ey').innerHTML = q.teach;
-    document.getElementById('diagram-title').textContent = q.ti;
-    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
-    const yt = document.getElementById('your-turn');
-    yt.style.display = 'block';
-    document.getElementById('yt-question').textContent = q.q;
-    const optsDiv = document.getElementById('yt-opts');
-    optsDiv.innerHTML = '';
-    q.opts.forEach((opt, i) => {
-      const b = document.createElement('button');
-      b.className = 'opt-btn';
-      b.textContent = opt;
-      b.onclick = () => selectAnswer(i, b);
-      optsDiv.appendChild(b);
-    });
-    document.getElementById('try-fb').className = 'try-fb';
-    document.getElementById('try-fb').textContent = '';
-    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
-    document.getElementById('prev-btn').disabled = (idx === 0);
+var ST={};
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=entry.genFn();entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');
+    tmp.innerHTML=buildTryMC(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
   }
-
-  function selectAnswer(i, btn) {
-    const q = QS[idx];
-    const fb = document.getElementById('try-fb');
-    const allBtns = document.querySelectorAll('.opt-btn');
-    allBtns.forEach(b => b.style.pointerEvents = 'none');
-    if (i === q.correct) {
-      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
-      fb.className = 'try-fb ok';
-      fb.textContent = '✓ Correct! ' + q.expl;
-      answered[idx] = true;
-    } else {
-      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
-      fb.className = 'try-fb er';
-      fb.textContent = '✗ Not quite. ' + q.expl;
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');
+    allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){
+      el.classList.add('mc-correct');
+      fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;
+    }else{
+      el.classList.add('mc-wrong');
+      allBtns[o.correct].classList.add('mc-correct');
+      fb.className='try-fb er';fb.textContent='Not quite \u2014 the correct answer is highlighted above.';
     }
   }
+});
 
-  function nextStep() {
-    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
-    render();
-  }
-  function prevStep() {
-    if (idx > 0) { idx--; render(); }
-  }
-
-  render();
-</script>
-
-<!-- hidden element used by render() per gold-standard pattern -->
-<div id="ey" style="display:none"></div>
-
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
-  const _abcTopicCode = 'DT8-DAT-01';
-
-  (async function checkLogin() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { window.location.href = '../login.html'; return; }
-    window._abcSession = session;
-    window._abcSupabase = supabase;
-  })();
-
-  window.markComplete = async function() {
-    const session = window._abcSession;
-    if (!session) return;
-    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
-    if (!topicRow) return;
-    await supabase.from('walkthrough_progress').upsert({
-      student_id: session.user.id,
-      topic_id: topicRow.id,
-      status: 'completed',
-      last_visited_at: new Date().toISOString()
-    }, { onConflict: 'student_id,topic_id' });
+function makeDiagram(title, points){
+  return function(p){
+    var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+    o.push(T(240,20,title,ACC,12,'middle',true));
+    points.forEach(function(txt,i){
+      if(p>=i){
+        var y=36+i*44;
+        o.push(R(10,y,460,38,i===p?LINE:CRM,ACC,i===p?2:1));
+        o.push(T(240,y+23,txt,DARK,10,'middle',false));
+      }
+    });
+    s.innerHTML=o.join('');
   };
+}
+
+var dQ1=makeDiagram('Representing Numbers in Binary',['Computers represent all numbers using binary (base 2): only 0s and 1s.','Each binary digit is called a "bit"; 8 bits make a "byte".','Binary place values double each time: 1, 2, 4, 8, 16, 32...','Converting between binary and decimal is a foundational computing skil…']);
+var dQ2=makeDiagram('Representing Text',['Text is stored using character encoding systems like ASCII or Unicode.','ASCII assigns each letter, number and symbol a unique numeric code.','Unicode extends this to support many more characters and languages wor…','Every letter you type is ultimately stored as a binary number.']);
+var dQ3=makeDiagram('Representing Images',['Digital images are made of tiny coloured dots called pixels.','Each pixel\'s colour is often represented using RGB (Red, Green, Blue) …','More pixels generally means higher image resolution and detail.','Image file size depends on resolution, colour depth, and compression.']);
+var dQ4=makeDiagram('Representing Sound',['Sound is captured by sampling an analogue wave at regular intervals.','Sample rate (measured in Hz) affects the quality of the digital record…','Higher sample rates capture more detail but create larger file sizes.','Common audio formats include MP3 (compressed) and WAV (uncompressed).']);
+var dQ5=makeDiagram('Binary to Decimal Conversion',['To convert binary to decimal, add up the place values where there is a…','Example: 1011 in binary = 8+0+2+1 = 11 in decimal.','Practising conversions builds a deeper understanding of how computers …','This skill underlies more advanced topics like data structures and net…']);
+var dQ6=makeDiagram('Data Compression Basics',['Compression reduces the size of data for storage or transmission.','Lossless compression preserves all original data exactly (e.g. ZIP, PN…','Lossy compression removes some data to save more space (e.g. JPEG, MP3…','Choosing lossy vs lossless depends on whether perfect quality is requi…']);
+var dQ7=makeDiagram('Hexadecimal',['Hexadecimal is a base-16 number system using digits 0-9 and letters A-…','It is often used as a shorthand for binary, since each hex digit repre…','Colour codes in web design (like #FF0000 for red) use hexadecimal.','Programmers often use hex to represent memory addresses concisely.']);
+var dQ8=makeDiagram('Data Types in Programming',['Common data types include integers (whole numbers), floats (decimals),…','Choosing the correct data type ensures programs behave correctly and e…','Type errors occur when a program tries to use data of the wrong type i…','Understanding data types is essential before writing more advanced pro…']);
+var dQ9=makeDiagram('Why Binary Matters',['Electronic circuits naturally have two clear states: on and off, match…','This makes binary reliable, since it\'s easy to distinguish just two st…','All complex data — text, images, sound, video — is ultimately built fr…','Understanding binary helps explain how computers can be so reliable an…']);
+var dQ10=makeDiagram('Data Representation in Practice',['Every file you save — document, photo, song — is stored as binary data…','Understanding representation helps explain file sizes and compatibilit…','Corrupted data representation can cause files to become unreadable.','This foundational knowledge supports later topics like databases and n…']);
+
+var QS=[
+{ey:'Q1 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Representing Numbers in Binary',su:'Learn about Representing Numbers in Binary and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ1,ht:'<p>Computers represent all numbers using binary (base 2): only 0s and 1s.</p>'},
+  {lb:'Key details',dr:dQ1,ht:'<p>Each binary digit is called a "bit"; 8 bits make a "byte".</p>'},
+  {lb:'How it works',dr:dQ1,ht:'<p>Binary place values double each time: 1, 2, 4, 8, 16, 32...</p>'},
+  {lb:'Why it matters',dr:dQ1,ht:'<p>Converting between binary and decimal is a foundational computing skill.</p>'},
+  {lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[
+      {q:'What number base does binary use?',o:['Base 10','Base 2','Base 16','Base 8'],a:1,w:'Binary is a base-2 number system, using only the digits 0 and 1.'},
+      {q:'What number base does binary use?',o:['Base 2','Base 8','Base 10','Base 16'],a:0,w:'Binary is a base-2 number system, using only the digits 0 and 1.'},
+      {q:'According to what you just learned: what number base does binary use?',o:['Base 10','Base 8','Base 16','Base 2'],a:3,w:'Binary is a base-2 number system, using only the digits 0 and 1.'},
+      {q:'Check your understanding — what number base does binary use?',o:['Base 10','Base 16','Base 2','Base 8'],a:2,w:'Binary is a base-2 number system, using only the digits 0 and 1.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q2 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Representing Text',su:'Learn about Representing Text and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ2,ht:'<p>Text is stored using character encoding systems like ASCII or Unicode.</p>'},
+  {lb:'Key details',dr:dQ2,ht:'<p>ASCII assigns each letter, number and symbol a unique numeric code.</p>'},
+  {lb:'How it works',dr:dQ2,ht:'<p>Unicode extends this to support many more characters and languages worldwide.</p>'},
+  {lb:'Why it matters',dr:dQ2,ht:'<p>Every letter you type is ultimately stored as a binary number.</p>'},
+  {lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[
+      {q:'What do character encoding systems like ASCII assign to each character?',o:['A colour','A unique numeric code','A sound','A physical location'],a:1,w:'ASCII and similar systems assign each character a unique numeric code so it can be stored digitally.'},
+      {q:'What do character encoding systems like ASCII assign to each character?',o:['A sound','A colour','A unique numeric code','A physical location'],a:2,w:'ASCII and similar systems assign each character a unique numeric code so it can be stored digitally.'},
+      {q:'According to what you just learned: what do character encoding systems like ASCII assign to each character?',o:['A physical location','A colour','A sound','A unique numeric code'],a:3,w:'ASCII and similar systems assign each character a unique numeric code so it can be stored digitally.'},
+      {q:'Check your understanding — what do character encoding systems like ASCII assign to each character?',o:['A colour','A sound','A unique numeric code','A physical location'],a:2,w:'ASCII and similar systems assign each character a unique numeric code so it can be stored digitally.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q3 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Representing Images',su:'Learn about Representing Images and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ3,ht:'<p>Digital images are made of tiny coloured dots called pixels.</p>'},
+  {lb:'Key details',dr:dQ3,ht:'<p>Each pixel\'s colour is often represented using RGB (Red, Green, Blue) values.</p>'},
+  {lb:'How it works',dr:dQ3,ht:'<p>More pixels generally means higher image resolution and detail.</p>'},
+  {lb:'Why it matters',dr:dQ3,ht:'<p>Image file size depends on resolution, colour depth, and compression.</p>'},
+  {lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[
+      {q:'What does RGB stand for in image representation?',o:['Red, Green, Blue','Red, Grey, Black','Round, Grid, Binary','Radio, Graphics, Broadband'],a:0,w:'RGB stands for Red, Green, Blue — the three colour channels combined to create the colours in digital images.'},
+      {q:'What does RGB stand for in image representation?',o:['Red, Grey, Black','Round, Grid, Binary','Red, Green, Blue','Radio, Graphics, Broadband'],a:2,w:'RGB stands for Red, Green, Blue — the three colour channels combined to create the colours in digital images.'},
+      {q:'According to what you just learned: what does RGB stand for in image representation?',o:['Radio, Graphics, Broadband','Red, Grey, Black','Round, Grid, Binary','Red, Green, Blue'],a:3,w:'RGB stands for Red, Green, Blue — the three colour channels combined to create the colours in digital images.'},
+      {q:'Check your understanding — what does RGB stand for in image representation?',o:['Round, Grid, Binary','Red, Green, Blue','Red, Grey, Black','Radio, Graphics, Broadband'],a:1,w:'RGB stands for Red, Green, Blue — the three colour channels combined to create the colours in digital images.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q4 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Representing Sound',su:'Learn about Representing Sound and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ4,ht:'<p>Sound is captured by sampling an analogue wave at regular intervals.</p>'},
+  {lb:'Key details',dr:dQ4,ht:'<p>Sample rate (measured in Hz) affects the quality of the digital recording.</p>'},
+  {lb:'How it works',dr:dQ4,ht:'<p>Higher sample rates capture more detail but create larger file sizes.</p>'},
+  {lb:'Why it matters',dr:dQ4,ht:'<p>Common audio formats include MP3 (compressed) and WAV (uncompressed).</p>'},
+  {lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[
+      {q:'What does a higher audio sample rate generally provide?',o:['Lower quality recordings','More detail, at the cost of larger file size','Smaller file sizes with no quality change','No effect on quality or size'],a:1,w:'A higher sample rate captures sound more accurately, but produces larger file sizes as a trade-off.'},
+      {q:'What does a higher audio sample rate generally provide?',o:['Smaller file sizes with no quality change','Lower quality recordings','More detail, at the cost of larger file size','No effect on quality or size'],a:2,w:'A higher sample rate captures sound more accurately, but produces larger file sizes as a trade-off.'},
+      {q:'According to what you just learned: what does a higher audio sample rate generally provide?',o:['Smaller file sizes with no quality change','No effect on quality or size','More detail, at the cost of larger file size','Lower quality recordings'],a:2,w:'A higher sample rate captures sound more accurately, but produces larger file sizes as a trade-off.'},
+      {q:'Check your understanding — what does a higher audio sample rate generally provide?',o:['No effect on quality or size','Lower quality recordings','More detail, at the cost of larger file size','Smaller file sizes with no quality change'],a:2,w:'A higher sample rate captures sound more accurately, but produces larger file sizes as a trade-off.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q5 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Binary to Decimal Conversion',su:'Learn about Binary to Decimal Conversion and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ5,ht:'<p>To convert binary to decimal, add up the place values where there is a 1.</p>'},
+  {lb:'Key details',dr:dQ5,ht:'<p>Example: 1011 in binary = 8+0+2+1 = 11 in decimal.</p>'},
+  {lb:'How it works',dr:dQ5,ht:'<p>Practising conversions builds a deeper understanding of how computers "think".</p>'},
+  {lb:'Why it matters',dr:dQ5,ht:'<p>This skill underlies more advanced topics like data structures and networking.</p>'},
+  {lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[
+      {q:'What is the decimal value of the binary number 1010?',o:['8','10','12','5'],a:1,w:'1010 in binary = 8+0+2+0 = 10 in decimal.'},
+      {q:'What is the decimal value of the binary number 1010?',o:['5','10','8','12'],a:1,w:'1010 in binary = 8+0+2+0 = 10 in decimal.'},
+      {q:'According to what you just learned: what is the decimal value of the binary number 1010?',o:['5','12','10','8'],a:2,w:'1010 in binary = 8+0+2+0 = 10 in decimal.'},
+      {q:'Check your understanding — what is the decimal value of the binary number 1010?',o:['5','10','12','8'],a:1,w:'1010 in binary = 8+0+2+0 = 10 in decimal.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q6 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Data Compression Basics',su:'Learn about Data Compression Basics and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ6,ht:'<p>Compression reduces the size of data for storage or transmission.</p>'},
+  {lb:'Key details',dr:dQ6,ht:'<p>Lossless compression preserves all original data exactly (e.g. ZIP, PNG).</p>'},
+  {lb:'How it works',dr:dQ6,ht:'<p>Lossy compression removes some data to save more space (e.g. JPEG, MP3).</p>'},
+  {lb:'Why it matters',dr:dQ6,ht:'<p>Choosing lossy vs lossless depends on whether perfect quality is required.</p>'},
+  {lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[
+      {q:'Which compression type removes some data permanently to save more space?',o:['Lossless compression','Lossy compression','No compression','Encryption'],a:1,w:'Lossy compression sacrifices some quality/data to achieve greater file size reduction.'},
+      {q:'Which compression type removes some data permanently to save more space?',o:['Lossless compression','Lossy compression','Encryption','No compression'],a:1,w:'Lossy compression sacrifices some quality/data to achieve greater file size reduction.'},
+      {q:'According to what you just learned: which compression type removes some data permanently to save more space?',o:['Lossy compression','No compression','Encryption','Lossless compression'],a:0,w:'Lossy compression sacrifices some quality/data to achieve greater file size reduction.'},
+      {q:'Check your understanding — which compression type removes some data permanently to save more space?',o:['Lossless compression','Encryption','Lossy compression','No compression'],a:2,w:'Lossy compression sacrifices some quality/data to achieve greater file size reduction.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q7 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Hexadecimal',su:'Learn about Hexadecimal and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ7,ht:'<p>Hexadecimal is a base-16 number system using digits 0-9 and letters A-F.</p>'},
+  {lb:'Key details',dr:dQ7,ht:'<p>It is often used as a shorthand for binary, since each hex digit represents 4 bits.</p>'},
+  {lb:'How it works',dr:dQ7,ht:'<p>Colour codes in web design (like #FF0000 for red) use hexadecimal.</p>'},
+  {lb:'Why it matters',dr:dQ7,ht:'<p>Programmers often use hex to represent memory addresses concisely.</p>'},
+  {lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[
+      {q:'What does a web colour code like "#FF0000" use?',o:['Binary only','Hexadecimal','Decimal only','Roman numerals'],a:1,w:'Web colour codes are written in hexadecimal, representing red, green and blue values as hex pairs.'},
+      {q:'What does a web colour code like "#FF0000" use?',o:['Decimal only','Hexadecimal','Roman numerals','Binary only'],a:1,w:'Web colour codes are written in hexadecimal, representing red, green and blue values as hex pairs.'},
+      {q:'According to what you just learned: what does a web colour code like "#FF0000" use?',o:['Hexadecimal','Decimal only','Roman numerals','Binary only'],a:0,w:'Web colour codes are written in hexadecimal, representing red, green and blue values as hex pairs.'},
+      {q:'Check your understanding — what does a web colour code like "#FF0000" use?',o:['Roman numerals','Binary only','Decimal only','Hexadecimal'],a:3,w:'Web colour codes are written in hexadecimal, representing red, green and blue values as hex pairs.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q8 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Data Types in Programming',su:'Learn about Data Types in Programming and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ8,ht:'<p>Common data types include integers (whole numbers), floats (decimals), strings (text), and booleans (true/false).</p>'},
+  {lb:'Key details',dr:dQ8,ht:'<p>Choosing the correct data type ensures programs behave correctly and efficiently.</p>'},
+  {lb:'How it works',dr:dQ8,ht:'<p>Type errors occur when a program tries to use data of the wrong type incorrectly.</p>'},
+  {lb:'Why it matters',dr:dQ8,ht:'<p>Understanding data types is essential before writing more advanced programs.</p>'},
+  {lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[
+      {q:'Which data type would best store the value "true" or "false"?',o:['Integer','Boolean','String','Float'],a:1,w:'A Boolean data type is specifically designed to store one of two values: true or false.'},
+      {q:'Which data type would best store the value "true" or "false"?',o:['Integer','Float','String','Boolean'],a:3,w:'A Boolean data type is specifically designed to store one of two values: true or false.'},
+      {q:'According to what you just learned: which data type would best store the value "true" or "false"?',o:['Integer','String','Float','Boolean'],a:3,w:'A Boolean data type is specifically designed to store one of two values: true or false.'},
+      {q:'Check your understanding — which data type would best store the value "true" or "false"?',o:['Boolean','String','Float','Integer'],a:0,w:'A Boolean data type is specifically designed to store one of two values: true or false.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q9 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Why Binary Matters',su:'Learn about Why Binary Matters and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ9,ht:'<p>Electronic circuits naturally have two clear states: on and off, matching binary perfectly.</p>'},
+  {lb:'Key details',dr:dQ9,ht:'<p>This makes binary reliable, since it\'s easy to distinguish just two states electrically.</p>'},
+  {lb:'How it works',dr:dQ9,ht:'<p>All complex data — text, images, sound, video — is ultimately built from binary.</p>'},
+  {lb:'Why it matters',dr:dQ9,ht:'<p>Understanding binary helps explain how computers can be so reliable and fast.</p>'},
+  {lb:'Your turn',dr:dQ9,ht:tryItMC(function(){var qs=[
+      {q:'Why is binary well-suited to electronic computers?',o:['Because electronic circuits naturally have two clear states: on and off','Because binary is the prettiest number system','Because computers cannot understand any other system in theory','Because binary uses ten different digits'],a:0,w:'Binary matches the two clear physical states (on/off) that electronic circuits can reliably distinguish.'},
+      {q:'Why is binary well-suited to electronic computers?',o:['Because binary is the prettiest number system','Because computers cannot understand any other system in theory','Because binary uses ten different digits','Because electronic circuits naturally have two clear states: on and off'],a:3,w:'Binary matches the two clear physical states (on/off) that electronic circuits can reliably distinguish.'},
+      {q:'According to what you just learned: why is binary well-suited to electronic computers?',o:['Because computers cannot understand any other system in theory','Because electronic circuits naturally have two clear states: on and off','Because binary is the prettiest number system','Because binary uses ten different digits'],a:1,w:'Binary matches the two clear physical states (on/off) that electronic circuits can reliably distinguish.'},
+      {q:'Check your understanding — why is binary well-suited to electronic computers?',o:['Because computers cannot understand any other system in theory','Because binary uses ten different digits','Because binary is the prettiest number system','Because electronic circuits naturally have two clear states: on and off'],a:3,w:'Binary matches the two clear physical states (on/off) that electronic circuits can reliably distinguish.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q10 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Data Representation in Practice',su:'Learn about Data Representation in Practice and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ10,ht:'<p>Every file you save — document, photo, song — is stored as binary data.</p>'},
+  {lb:'Key details',dr:dQ10,ht:'<p>Understanding representation helps explain file sizes and compatibility issues.</p>'},
+  {lb:'How it works',dr:dQ10,ht:'<p>Corrupted data representation can cause files to become unreadable.</p>'},
+  {lb:'Why it matters',dr:dQ10,ht:'<p>This foundational knowledge supports later topics like databases and networking.</p>'},
+  {lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[
+      {q:'What is ultimately true about every digital file, whether text, image or sound?',o:['It is stored as binary data','It is stored as handwriting','It requires no storage at all','It cannot be compressed'],a:0,w:'Regardless of file type, all digital files are ultimately represented and stored as binary data.'},
+      {q:'What is ultimately true about every digital file, whether text, image or sound?',o:['It is stored as handwriting','It cannot be compressed','It is stored as binary data','It requires no storage at all'],a:2,w:'Regardless of file type, all digital files are ultimately represented and stored as binary data.'},
+      {q:'According to what you just learned: what is ultimately true about every digital file, whether text, image or sound?',o:['It is stored as handwriting','It is stored as binary data','It requires no storage at all','It cannot be compressed'],a:1,w:'Regardless of file type, all digital files are ultimately represented and stored as binary data.'},
+      {q:'Check your understanding — what is ultimately true about every digital file, whether text, image or sound?',o:['It requires no storage at all','It cannot be compressed','It is stored as binary data','It is stored as handwriting'],a:2,w:'Regardless of file type, all digital files are ultimately represented and stored as binary data.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
 </script>
-</body>
-</html>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcTopicCode='DT8-DAT-01';
+window.markComplete=async function(){
+  const{data:{session}}=await _sb.auth.getSession();if(!session)return;
+  const{data:topic}=await _sb.from('topics').select('id').eq('topic_code','DT8-DAT-01').maybeSingle();if(!topic)return;
+  window._abcTopicId=topic.id;
+  await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body></html>

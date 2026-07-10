@@ -1,174 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Digital Devices — Digital Technologies | Adorable Portal</title>
 <style>
-  :root {
-    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
-  }
-  * { box-sizing: border-box; margin:0; padding:0; }
-  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
-  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
-  header .title { font-size:1.05rem; font-weight:700; }
-  header .strand { font-size:0.8rem; opacity:0.85; }
-  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
-  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
-  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
-  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
-  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
-  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
-  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
-  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
-  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
-  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
-  .opt-btn:hover { border-color:var(--red); }
-  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
-  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
-  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
-  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
-  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
-  .btn:disabled { background:#ccc; cursor:not-allowed; }
-  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
-  .sb-lbl { font-size:0.8rem; color:#888; }
-  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+:root{--red:#37474F;--dark:#263238;--cream:#ECEFF1;--ink:#0d1b2a;--line:#CFD8DC;--gold:#00ACC1;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#555;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,var(--cream));padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:180px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:15px;line-height:1.6;margin:0 0 8px;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;margin-bottom:8px;line-height:1.5;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.mc-opt{text-align:left;padding:10px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold);background:#f0fbfc;}
+.mc-opt:disabled{cursor:default;opacity:.9;}
+.mc-opt.mc-correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600;}
+.mc-opt.mc-wrong{border-color:#c62828;background:#fde8e8;color:#a01820;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e0f7fa;color:#00838f;border:1px solid #80deea;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#1a2a3a;}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#00838f;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
 <body>
 <header>
-  <div>
-    <div class="title">Digital Devices</div>
-    <div class="strand">Digital Technologies · Foundations</div>
-  </div>
-  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+  <a href="../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <div class="ht">Digital Devices</div>
+  <div style="width:80px"></div>
 </header>
-<main>
-  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
-  <div class="card">
-    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
-      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
-      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
-      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
-      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
-      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
-    </svg>
-    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
-    <div class="q-title" id="cp-title"></div>
-    <div class="teach" id="teach-content"></div>
-    <div class="your-turn" id="your-turn" style="display:none">
-      <div class="yt-q" id="yt-question"></div>
-      <div id="yt-opts"></div>
-      <div class="try-fb" id="try-fb"></div>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr"><div class="eyebrow" id="ey"></div><h1 id="ti"></h1><div class="sub" id="su"></div></div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
     </div>
-    <div class="nav-row">
-      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
-      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
     </div>
   </div>
-</main>
-
+</div>
 <script>
-  const QS = [
-  {ey:'Q1',ti:'Categories of Digital Devices',teach:'<p>Digital devices include computers, phones, tablets, wearables and smart appliances.</p><p>Each device type is optimised for particular tasks and portability needs.</p><p>The line between device categories is blurring (e.g. tablets acting like laptops).</p><p>Choosing a device depends on the task, budget and portability needed.</p>',q:'Which of these is a wearable digital device?',opts:["Desktop computer", "Smartwatch", "Server rack", "Router"],correct:1,expl:'A smartwatch is worn on the body and is a clear example of a wearable digital device.'},
-  {ey:'Q2',ti:'Smartphones',teach:'<p>Smartphones combine a phone, camera, computer and internet device in one.</p><p>They run apps (applications) for almost every task imaginable.</p><p>Mobile operating systems (Android, iOS) manage smartphone hardware and apps.</p><p>Smartphones have transformed communication, banking and commerce in Nigeria.</p>',q:'What operating systems commonly run on smartphones?',opts:["Windows Server and Linux Server", "Android and iOS", "MS-DOS", "None — phones don't need an OS"],correct:1,expl:'Android and iOS are the two dominant mobile operating systems used on smartphones today.'},
-  {ey:'Q3',ti:'Tablets and Laptops',teach:'<p>Tablets are touch-focused, portable, and good for media consumption.</p><p>Laptops offer more processing power and physical keyboards for productivity.</p><p>2-in-1 devices combine features of both tablets and laptops.</p><p>Battery life and portability are key factors when choosing between them.</p>',q:'Which device type typically offers more raw processing power for demanding tasks?',opts:["Tablet", "Laptop", "Smartwatch", "Digital camera"],correct:1,expl:'Laptops generally have more powerful processors and better cooling, suited to demanding tasks.'},
-  {ey:'Q4',ti:'Wearable Technology',teach:'<p>Wearables include smartwatches, fitness trackers and smart glasses.</p><p>They often track health data like heart rate, steps and sleep patterns.</p><p>Wearables sync data to smartphone apps via Bluetooth.</p><p>Privacy is an important concern since wearables collect personal health data.</p>',q:'How do wearables typically send their data to a smartphone?',opts:["Via a fax machine", "Via Bluetooth", "Via a landline", "They can't send data"],correct:1,expl:'Wearables commonly use Bluetooth, a short-range wireless technology, to sync with smartphones.'},
-  {ey:'Q5',ti:'Smart Home Devices',teach:'<p>Smart home devices include smart speakers, thermostats, lights and cameras.</p><p>They connect to Wi-Fi and can be controlled remotely via apps.</p><p>Voice assistants (like Siri or Google Assistant) let users control devices by voice.</p><p>Smart devices raise privacy and security concerns since they are always listening/connected.</p>',q:'What technology do most smart home devices use to connect?',opts:["Wi-Fi", "A physical wired-only connection with no internet", "Radio waves from the 1980s", "Morse code"],correct:0,expl:'Most smart home devices connect to the internet via Wi-Fi to communicate with apps and services.'},
-  {ey:'Q6',ti:'Gaming Devices',teach:'<p>Gaming consoles (like PlayStation, Xbox) are specialised computers for games.</p><p>Gaming PCs use powerful graphics cards (GPUs) for realistic visuals.</p><p>Mobile gaming has grown massively due to widespread smartphone ownership.</p><p>Cloud gaming lets players stream games without powerful local hardware.</p>',q:'What specialised hardware helps produce realistic graphics in gaming devices?',opts:["GPU (Graphics Processing Unit)", "A basic keyboard", "A dot-matrix printer", "A landline modem"],correct:0,expl:'A GPU is specialised hardware designed to render graphics quickly and realistically.'},
-  {ey:'Q7',ti:'Digital Cameras',teach:'<p>Digital cameras capture images as data instead of on film.</p><p>Image quality is often measured in megapixels.</p><p>Smartphones have largely replaced standalone cameras for casual photography.</p><p>Professional photographers still prefer dedicated cameras for greater control.</p>',q:'What replaced film in digital cameras?',opts:["Digital sensors that capture images as data", "Nothing — film is still used", "Paper", "Magnetic tape only"],correct:0,expl:'Digital cameras use electronic sensors to capture and store images as digital data instead of on film.'},
-  {ey:'Q8',ti:'The Internet of Things (IoT)',teach:'<p>IoT refers to everyday objects connected to the internet, sharing data.</p><p>Examples: smart fridges, connected cars, industrial sensors.</p><p>IoT enables automation, like a thermostat learning your schedule.</p><p>Security is a major concern as more devices connect to networks.</p>',q:'What best describes the Internet of Things?',opts:["Everyday objects connected to the internet, sharing data", "A single very powerful supercomputer", "An old telephone network", "A type of paper filing system"],correct:0,expl:'IoT connects everyday physical objects to the internet so they can collect and share data.'},
-  {ey:'Q9',ti:'Choosing the Right Device for a Task',teach:'<p>Consider portability, power, battery life, cost, and intended use.</p><p>A student writing essays may prefer a laptop over a tablet.</p><p>A fitness enthusiast may prioritise a wearable fitness tracker.</p><p>Matching device to task avoids wasted money and frustration.</p>',q:'Which device would best suit someone who mainly needs to write long essays?',opts:["A smartwatch", "A laptop", "A basic feature phone", "A digital camera"],correct:1,expl:'A laptop, with its keyboard and processing power, suits long-form writing tasks better than the alternatives.'},
-  {ey:'Q10',ti:'Caring for Digital Devices',teach:'<p>Keep devices clean, charged sensibly, and protected from drops and liquids.</p><p>Update software regularly to keep devices secure and running well.</p><p>Back up important data in case a device is lost, stolen or damaged.</p><p>Recycle old devices responsibly through e-waste programmes.</p>',q:'What should you do with important data in case a device is lost or damaged?',opts:["Nothing, it doesn't matter", "Back it up regularly", "Store it only in one place", "Delete it to save space"],correct:1,expl:'Regular backups protect important data from being lost if a device is damaged, lost or stolen.'}
-  ];
-  const TOTAL = QS.length;
-  let idx = 0;
-  let answered = new Array(TOTAL).fill(false);
+var ACC='#37474F',DARK='#263238',CRM='#ECEFF1',LINE='#CFD8DC';
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#0d1b2a';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||CRM;stroke=stroke||ACC;sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
 
-  function render() {
-    const q = QS[idx];
-    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
-    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
-    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
-    document.getElementById('cp-title').textContent = q.ti;
-    document.getElementById('ey').innerHTML = q.teach;
-    document.getElementById('diagram-title').textContent = q.ti;
-    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
-    const yt = document.getElementById('your-turn');
-    yt.style.display = 'block';
-    document.getElementById('yt-question').textContent = q.q;
-    const optsDiv = document.getElementById('yt-opts');
-    optsDiv.innerHTML = '';
-    q.opts.forEach((opt, i) => {
-      const b = document.createElement('button');
-      b.className = 'opt-btn';
-      b.textContent = opt;
-      b.onclick = () => selectAnswer(i, b);
-      optsDiv.appendChild(b);
-    });
-    document.getElementById('try-fb').className = 'try-fb';
-    document.getElementById('try-fb').textContent = '';
-    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
-    document.getElementById('prev-btn').disabled = (idx === 0);
+var ST={};
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=entry.genFn();entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');
+    tmp.innerHTML=buildTryMC(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
   }
-
-  function selectAnswer(i, btn) {
-    const q = QS[idx];
-    const fb = document.getElementById('try-fb');
-    const allBtns = document.querySelectorAll('.opt-btn');
-    allBtns.forEach(b => b.style.pointerEvents = 'none');
-    if (i === q.correct) {
-      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
-      fb.className = 'try-fb ok';
-      fb.textContent = '✓ Correct! ' + q.expl;
-      answered[idx] = true;
-    } else {
-      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
-      fb.className = 'try-fb er';
-      fb.textContent = '✗ Not quite. ' + q.expl;
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');
+    allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){
+      el.classList.add('mc-correct');
+      fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;
+    }else{
+      el.classList.add('mc-wrong');
+      allBtns[o.correct].classList.add('mc-correct');
+      fb.className='try-fb er';fb.textContent='Not quite \u2014 the correct answer is highlighted above.';
     }
   }
+});
 
-  function nextStep() {
-    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
-    render();
-  }
-  function prevStep() {
-    if (idx > 0) { idx--; render(); }
-  }
-
-  render();
-</script>
-
-<!-- hidden element used by render() per gold-standard pattern -->
-<div id="ey" style="display:none"></div>
-
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
-  const _abcTopicCode = 'DT7-FND-04';
-
-  (async function checkLogin() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { window.location.href = '../login.html'; return; }
-    window._abcSession = session;
-    window._abcSupabase = supabase;
-  })();
-
-  window.markComplete = async function() {
-    const session = window._abcSession;
-    if (!session) return;
-    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
-    if (!topicRow) return;
-    await supabase.from('walkthrough_progress').upsert({
-      student_id: session.user.id,
-      topic_id: topicRow.id,
-      status: 'completed',
-      last_visited_at: new Date().toISOString()
-    }, { onConflict: 'student_id,topic_id' });
+function makeDiagram(title, points){
+  return function(p){
+    var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+    o.push(T(240,20,title,ACC,12,'middle',true));
+    points.forEach(function(txt,i){
+      if(p>=i){
+        var y=36+i*44;
+        o.push(R(10,y,460,38,i===p?LINE:CRM,ACC,i===p?2:1));
+        o.push(T(240,y+23,txt,DARK,10,'middle',false));
+      }
+    });
+    s.innerHTML=o.join('');
   };
+}
+
+var dQ1=makeDiagram('Categories of Digital Devices',['Digital devices include computers, phones, tablets, wearables and smar…','Each device type is optimised for particular tasks and portability nee…','The line between device categories is blurring (e.g. tablets acting li…','Choosing a device depends on the task, budget and portability needed.']);
+var dQ2=makeDiagram('Smartphones',['Smartphones combine a phone, camera, computer and internet device in o…','They run apps (applications) for almost every task imaginable.','Mobile operating systems (Android, iOS) manage smartphone hardware and…','Smartphones have transformed communication, banking and commerce in Ni…']);
+var dQ3=makeDiagram('Tablets and Laptops',['Tablets are touch-focused, portable, and good for media consumption.','Laptops offer more processing power and physical keyboards for product…','2-in-1 devices combine features of both tablets and laptops.','Battery life and portability are key factors when choosing between the…']);
+var dQ4=makeDiagram('Wearable Technology',['Wearables include smartwatches, fitness trackers and smart glasses.','They often track health data like heart rate, steps and sleep patterns…','Wearables sync data to smartphone apps via Bluetooth.','Privacy is an important concern since wearables collect personal healt…']);
+var dQ5=makeDiagram('Smart Home Devices',['Smart home devices include smart speakers, thermostats, lights and cam…','They connect to Wi-Fi and can be controlled remotely via apps.','Voice assistants (like Siri or Google Assistant) let users control dev…','Smart devices raise privacy and security concerns since they are alway…']);
+var dQ6=makeDiagram('Gaming Devices',['Gaming consoles (like PlayStation, Xbox) are specialised computers for…','Gaming PCs use powerful graphics cards (GPUs) for realistic visuals.','Mobile gaming has grown massively due to widespread smartphone ownersh…','Cloud gaming lets players stream games without powerful local hardware…']);
+var dQ7=makeDiagram('Digital Cameras',['Digital cameras capture images as data instead of on film.','Image quality is often measured in megapixels.','Smartphones have largely replaced standalone cameras for casual photog…','Professional photographers still prefer dedicated cameras for greater …']);
+var dQ8=makeDiagram('The Internet of Things (IoT)',['IoT refers to everyday objects connected to the internet, sharing data…','Examples: smart fridges, connected cars, industrial sensors.','IoT enables automation, like a thermostat learning your schedule.','Security is a major concern as more devices connect to networks.']);
+var dQ9=makeDiagram('Choosing the Right Device for a Task',['Consider portability, power, battery life, cost, and intended use.','A student writing essays may prefer a laptop over a tablet.','A fitness enthusiast may prioritise a wearable fitness tracker.','Matching device to task avoids wasted money and frustration.']);
+var dQ10=makeDiagram('Caring for Digital Devices',['Keep devices clean, charged sensibly, and protected from drops and liq…','Update software regularly to keep devices secure and running well.','Back up important data in case a device is lost, stolen or damaged.','Recycle old devices responsibly through e-waste programmes.']);
+
+var QS=[
+{ey:'Q1 \u2022 Digital Technologies \u2022 Foundations',ti:'Categories of Digital Devices',su:'Learn about Categories of Digital Devices and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ1,ht:'<p>Digital devices include computers, phones, tablets, wearables and smart appliances.</p>'},
+  {lb:'Key details',dr:dQ1,ht:'<p>Each device type is optimised for particular tasks and portability needs.</p>'},
+  {lb:'How it works',dr:dQ1,ht:'<p>The line between device categories is blurring (e.g. tablets acting like laptops).</p>'},
+  {lb:'Why it matters',dr:dQ1,ht:'<p>Choosing a device depends on the task, budget and portability needed.</p>'},
+  {lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[
+      {q:'Which of these is a wearable digital device?',o:['Desktop computer','Smartwatch','Server rack','Router'],a:1,w:'A smartwatch is worn on the body and is a clear example of a wearable digital device.'},
+      {q:'Which of these is a wearable digital device?',o:['Desktop computer','Server rack','Router','Smartwatch'],a:3,w:'A smartwatch is worn on the body and is a clear example of a wearable digital device.'},
+      {q:'According to what you just learned: which of these is a wearable digital device?',o:['Desktop computer','Router','Server rack','Smartwatch'],a:3,w:'A smartwatch is worn on the body and is a clear example of a wearable digital device.'},
+      {q:'Check your understanding — which of these is a wearable digital device?',o:['Smartwatch','Server rack','Router','Desktop computer'],a:0,w:'A smartwatch is worn on the body and is a clear example of a wearable digital device.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q2 \u2022 Digital Technologies \u2022 Foundations',ti:'Smartphones',su:'Learn about Smartphones and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ2,ht:'<p>Smartphones combine a phone, camera, computer and internet device in one.</p>'},
+  {lb:'Key details',dr:dQ2,ht:'<p>They run apps (applications) for almost every task imaginable.</p>'},
+  {lb:'How it works',dr:dQ2,ht:'<p>Mobile operating systems (Android, iOS) manage smartphone hardware and apps.</p>'},
+  {lb:'Why it matters',dr:dQ2,ht:'<p>Smartphones have transformed communication, banking and commerce in Nigeria.</p>'},
+  {lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[
+      {q:'What operating systems commonly run on smartphones?',o:['Windows Server and Linux Server','Android and iOS','MS-DOS','None — phones don\'t need an OS'],a:1,w:'Android and iOS are the two dominant mobile operating systems used on smartphones today.'},
+      {q:'What operating systems commonly run on smartphones?',o:['MS-DOS','Android and iOS','Windows Server and Linux Server','None — phones don\'t need an OS'],a:1,w:'Android and iOS are the two dominant mobile operating systems used on smartphones today.'},
+      {q:'According to what you just learned: what operating systems commonly run on smartphones?',o:['Android and iOS','MS-DOS','Windows Server and Linux Server','None — phones don\'t need an OS'],a:0,w:'Android and iOS are the two dominant mobile operating systems used on smartphones today.'},
+      {q:'Check your understanding — what operating systems commonly run on smartphones?',o:['Android and iOS','MS-DOS','None — phones don\'t need an OS','Windows Server and Linux Server'],a:0,w:'Android and iOS are the two dominant mobile operating systems used on smartphones today.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q3 \u2022 Digital Technologies \u2022 Foundations',ti:'Tablets and Laptops',su:'Learn about Tablets and Laptops and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ3,ht:'<p>Tablets are touch-focused, portable, and good for media consumption.</p>'},
+  {lb:'Key details',dr:dQ3,ht:'<p>Laptops offer more processing power and physical keyboards for productivity.</p>'},
+  {lb:'How it works',dr:dQ3,ht:'<p>2-in-1 devices combine features of both tablets and laptops.</p>'},
+  {lb:'Why it matters',dr:dQ3,ht:'<p>Battery life and portability are key factors when choosing between them.</p>'},
+  {lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[
+      {q:'Which device type typically offers more raw processing power for demanding tasks?',o:['Tablet','Laptop','Smartwatch','Digital camera'],a:1,w:'Laptops generally have more powerful processors and better cooling, suited to demanding tasks.'},
+      {q:'Which device type typically offers more raw processing power for demanding tasks?',o:['Laptop','Tablet','Smartwatch','Digital camera'],a:0,w:'Laptops generally have more powerful processors and better cooling, suited to demanding tasks.'},
+      {q:'According to what you just learned: which device type typically offers more raw processing power for demanding tasks?',o:['Digital camera','Tablet','Smartwatch','Laptop'],a:3,w:'Laptops generally have more powerful processors and better cooling, suited to demanding tasks.'},
+      {q:'Check your understanding — which device type typically offers more raw processing power for demanding tasks?',o:['Tablet','Smartwatch','Laptop','Digital camera'],a:2,w:'Laptops generally have more powerful processors and better cooling, suited to demanding tasks.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q4 \u2022 Digital Technologies \u2022 Foundations',ti:'Wearable Technology',su:'Learn about Wearable Technology and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ4,ht:'<p>Wearables include smartwatches, fitness trackers and smart glasses.</p>'},
+  {lb:'Key details',dr:dQ4,ht:'<p>They often track health data like heart rate, steps and sleep patterns.</p>'},
+  {lb:'How it works',dr:dQ4,ht:'<p>Wearables sync data to smartphone apps via Bluetooth.</p>'},
+  {lb:'Why it matters',dr:dQ4,ht:'<p>Privacy is an important concern since wearables collect personal health data.</p>'},
+  {lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[
+      {q:'How do wearables typically send their data to a smartphone?',o:['Via a fax machine','Via Bluetooth','Via a landline','They can\'t send data'],a:1,w:'Wearables commonly use Bluetooth, a short-range wireless technology, to sync with smartphones.'},
+      {q:'How do wearables typically send their data to a smartphone?',o:['Via Bluetooth','Via a landline','They can\'t send data','Via a fax machine'],a:0,w:'Wearables commonly use Bluetooth, a short-range wireless technology, to sync with smartphones.'},
+      {q:'According to what you just learned: how do wearables typically send their data to a smartphone?',o:['Via a fax machine','They can\'t send data','Via Bluetooth','Via a landline'],a:2,w:'Wearables commonly use Bluetooth, a short-range wireless technology, to sync with smartphones.'},
+      {q:'Check your understanding — how do wearables typically send their data to a smartphone?',o:['They can\'t send data','Via a fax machine','Via a landline','Via Bluetooth'],a:3,w:'Wearables commonly use Bluetooth, a short-range wireless technology, to sync with smartphones.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q5 \u2022 Digital Technologies \u2022 Foundations',ti:'Smart Home Devices',su:'Learn about Smart Home Devices and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ5,ht:'<p>Smart home devices include smart speakers, thermostats, lights and cameras.</p>'},
+  {lb:'Key details',dr:dQ5,ht:'<p>They connect to Wi-Fi and can be controlled remotely via apps.</p>'},
+  {lb:'How it works',dr:dQ5,ht:'<p>Voice assistants (like Siri or Google Assistant) let users control devices by voice.</p>'},
+  {lb:'Why it matters',dr:dQ5,ht:'<p>Smart devices raise privacy and security concerns since they are always listening/connected.</p>'},
+  {lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[
+      {q:'What technology do most smart home devices use to connect?',o:['Wi-Fi','A physical wired-only connection with no internet','Radio waves from the 1980s','Morse code'],a:0,w:'Most smart home devices connect to the internet via Wi-Fi to communicate with apps and services.'},
+      {q:'What technology do most smart home devices use to connect?',o:['Wi-Fi','A physical wired-only connection with no internet','Morse code','Radio waves from the 1980s'],a:0,w:'Most smart home devices connect to the internet via Wi-Fi to communicate with apps and services.'},
+      {q:'According to what you just learned: what technology do most smart home devices use to connect?',o:['Wi-Fi','Morse code','Radio waves from the 1980s','A physical wired-only connection with no internet'],a:0,w:'Most smart home devices connect to the internet via Wi-Fi to communicate with apps and services.'},
+      {q:'Check your understanding — what technology do most smart home devices use to connect?',o:['Radio waves from the 1980s','Morse code','Wi-Fi','A physical wired-only connection with no internet'],a:2,w:'Most smart home devices connect to the internet via Wi-Fi to communicate with apps and services.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q6 \u2022 Digital Technologies \u2022 Foundations',ti:'Gaming Devices',su:'Learn about Gaming Devices and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ6,ht:'<p>Gaming consoles (like PlayStation, Xbox) are specialised computers for games.</p>'},
+  {lb:'Key details',dr:dQ6,ht:'<p>Gaming PCs use powerful graphics cards (GPUs) for realistic visuals.</p>'},
+  {lb:'How it works',dr:dQ6,ht:'<p>Mobile gaming has grown massively due to widespread smartphone ownership.</p>'},
+  {lb:'Why it matters',dr:dQ6,ht:'<p>Cloud gaming lets players stream games without powerful local hardware.</p>'},
+  {lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[
+      {q:'What specialised hardware helps produce realistic graphics in gaming devices?',o:['GPU (Graphics Processing Unit)','A basic keyboard','A dot-matrix printer','A landline modem'],a:0,w:'A GPU is specialised hardware designed to render graphics quickly and realistically.'},
+      {q:'What specialised hardware helps produce realistic graphics in gaming devices?',o:['GPU (Graphics Processing Unit)','A basic keyboard','A landline modem','A dot-matrix printer'],a:0,w:'A GPU is specialised hardware designed to render graphics quickly and realistically.'},
+      {q:'According to what you just learned: what specialised hardware helps produce realistic graphics in gaming devices?',o:['GPU (Graphics Processing Unit)','A basic keyboard','A dot-matrix printer','A landline modem'],a:0,w:'A GPU is specialised hardware designed to render graphics quickly and realistically.'},
+      {q:'Check your understanding — what specialised hardware helps produce realistic graphics in gaming devices?',o:['A dot-matrix printer','A landline modem','A basic keyboard','GPU (Graphics Processing Unit)'],a:3,w:'A GPU is specialised hardware designed to render graphics quickly and realistically.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q7 \u2022 Digital Technologies \u2022 Foundations',ti:'Digital Cameras',su:'Learn about Digital Cameras and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ7,ht:'<p>Digital cameras capture images as data instead of on film.</p>'},
+  {lb:'Key details',dr:dQ7,ht:'<p>Image quality is often measured in megapixels.</p>'},
+  {lb:'How it works',dr:dQ7,ht:'<p>Smartphones have largely replaced standalone cameras for casual photography.</p>'},
+  {lb:'Why it matters',dr:dQ7,ht:'<p>Professional photographers still prefer dedicated cameras for greater control.</p>'},
+  {lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[
+      {q:'What replaced film in digital cameras?',o:['Digital sensors that capture images as data','Nothing — film is still used','Paper','Magnetic tape only'],a:0,w:'Digital cameras use electronic sensors to capture and store images as digital data instead of on film.'},
+      {q:'What replaced film in digital cameras?',o:['Digital sensors that capture images as data','Nothing — film is still used','Magnetic tape only','Paper'],a:0,w:'Digital cameras use electronic sensors to capture and store images as digital data instead of on film.'},
+      {q:'According to what you just learned: what replaced film in digital cameras?',o:['Nothing — film is still used','Magnetic tape only','Paper','Digital sensors that capture images as data'],a:3,w:'Digital cameras use electronic sensors to capture and store images as digital data instead of on film.'},
+      {q:'Check your understanding — what replaced film in digital cameras?',o:['Magnetic tape only','Paper','Nothing — film is still used','Digital sensors that capture images as data'],a:3,w:'Digital cameras use electronic sensors to capture and store images as digital data instead of on film.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q8 \u2022 Digital Technologies \u2022 Foundations',ti:'The Internet of Things (IoT)',su:'Learn about The Internet of Things (IoT) and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ8,ht:'<p>IoT refers to everyday objects connected to the internet, sharing data.</p>'},
+  {lb:'Key details',dr:dQ8,ht:'<p>Examples: smart fridges, connected cars, industrial sensors.</p>'},
+  {lb:'How it works',dr:dQ8,ht:'<p>IoT enables automation, like a thermostat learning your schedule.</p>'},
+  {lb:'Why it matters',dr:dQ8,ht:'<p>Security is a major concern as more devices connect to networks.</p>'},
+  {lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[
+      {q:'What best describes the Internet of Things?',o:['Everyday objects connected to the internet, sharing data','A single very powerful supercomputer','An old telephone network','A type of paper filing system'],a:0,w:'IoT connects everyday physical objects to the internet so they can collect and share data.'},
+      {q:'What best describes the Internet of Things?',o:['Everyday objects connected to the internet, sharing data','An old telephone network','A single very powerful supercomputer','A type of paper filing system'],a:0,w:'IoT connects everyday physical objects to the internet so they can collect and share data.'},
+      {q:'According to what you just learned: what best describes the Internet of Things?',o:['A single very powerful supercomputer','A type of paper filing system','An old telephone network','Everyday objects connected to the internet, sharing data'],a:3,w:'IoT connects everyday physical objects to the internet so they can collect and share data.'},
+      {q:'Check your understanding — what best describes the Internet of Things?',o:['A type of paper filing system','A single very powerful supercomputer','Everyday objects connected to the internet, sharing data','An old telephone network'],a:2,w:'IoT connects everyday physical objects to the internet so they can collect and share data.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q9 \u2022 Digital Technologies \u2022 Foundations',ti:'Choosing the Right Device for a Task',su:'Learn about Choosing the Right Device for a Task and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ9,ht:'<p>Consider portability, power, battery life, cost, and intended use.</p>'},
+  {lb:'Key details',dr:dQ9,ht:'<p>A student writing essays may prefer a laptop over a tablet.</p>'},
+  {lb:'How it works',dr:dQ9,ht:'<p>A fitness enthusiast may prioritise a wearable fitness tracker.</p>'},
+  {lb:'Why it matters',dr:dQ9,ht:'<p>Matching device to task avoids wasted money and frustration.</p>'},
+  {lb:'Your turn',dr:dQ9,ht:tryItMC(function(){var qs=[
+      {q:'Which device would best suit someone who mainly needs to write long essays?',o:['A smartwatch','A laptop','A basic feature phone','A digital camera'],a:1,w:'A laptop, with its keyboard and processing power, suits long-form writing tasks better than the alternatives.'},
+      {q:'Which device would best suit someone who mainly needs to write long essays?',o:['A laptop','A smartwatch','A digital camera','A basic feature phone'],a:0,w:'A laptop, with its keyboard and processing power, suits long-form writing tasks better than the alternatives.'},
+      {q:'According to what you just learned: which device would best suit someone who mainly needs to write long essays?',o:['A laptop','A digital camera','A smartwatch','A basic feature phone'],a:0,w:'A laptop, with its keyboard and processing power, suits long-form writing tasks better than the alternatives.'},
+      {q:'Check your understanding — which device would best suit someone who mainly needs to write long essays?',o:['A basic feature phone','A digital camera','A smartwatch','A laptop'],a:3,w:'A laptop, with its keyboard and processing power, suits long-form writing tasks better than the alternatives.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q10 \u2022 Digital Technologies \u2022 Foundations',ti:'Caring for Digital Devices',su:'Learn about Caring for Digital Devices and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ10,ht:'<p>Keep devices clean, charged sensibly, and protected from drops and liquids.</p>'},
+  {lb:'Key details',dr:dQ10,ht:'<p>Update software regularly to keep devices secure and running well.</p>'},
+  {lb:'How it works',dr:dQ10,ht:'<p>Back up important data in case a device is lost, stolen or damaged.</p>'},
+  {lb:'Why it matters',dr:dQ10,ht:'<p>Recycle old devices responsibly through e-waste programmes.</p>'},
+  {lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[
+      {q:'What should you do with important data in case a device is lost or damaged?',o:['Nothing, it doesn\'t matter','Back it up regularly','Store it only in one place','Delete it to save space'],a:1,w:'Regular backups protect important data from being lost if a device is damaged, lost or stolen.'},
+      {q:'What should you do with important data in case a device is lost or damaged?',o:['Delete it to save space','Store it only in one place','Nothing, it doesn\'t matter','Back it up regularly'],a:3,w:'Regular backups protect important data from being lost if a device is damaged, lost or stolen.'},
+      {q:'According to what you just learned: what should you do with important data in case a device is lost or damaged?',o:['Nothing, it doesn\'t matter','Back it up regularly','Store it only in one place','Delete it to save space'],a:1,w:'Regular backups protect important data from being lost if a device is damaged, lost or stolen.'},
+      {q:'Check your understanding — what should you do with important data in case a device is lost or damaged?',o:['Store it only in one place','Delete it to save space','Nothing, it doesn\'t matter','Back it up regularly'],a:3,w:'Regular backups protect important data from being lost if a device is damaged, lost or stolen.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
 </script>
-</body>
-</html>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcTopicCode='DT7-FND-04';
+window.markComplete=async function(){
+  const{data:{session}}=await _sb.auth.getSession();if(!session)return;
+  const{data:topic}=await _sb.from('topics').select('id').eq('topic_code','DT7-FND-04').maybeSingle();if(!topic)return;
+  window._abcTopicId=topic.id;
+  await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body></html>

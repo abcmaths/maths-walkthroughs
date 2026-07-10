@@ -1,174 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Introduction to Databases — Digital Technologies | Adorable Portal</title>
 <style>
-  :root {
-    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
-  }
-  * { box-sizing: border-box; margin:0; padding:0; }
-  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
-  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
-  header .title { font-size:1.05rem; font-weight:700; }
-  header .strand { font-size:0.8rem; opacity:0.85; }
-  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
-  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
-  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
-  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
-  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
-  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
-  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
-  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
-  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
-  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
-  .opt-btn:hover { border-color:var(--red); }
-  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
-  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
-  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
-  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
-  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
-  .btn:disabled { background:#ccc; cursor:not-allowed; }
-  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
-  .sb-lbl { font-size:0.8rem; color:#888; }
-  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+:root{--red:#37474F;--dark:#263238;--cream:#ECEFF1;--ink:#0d1b2a;--line:#CFD8DC;--gold:#00ACC1;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#555;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,var(--cream));padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:180px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:15px;line-height:1.6;margin:0 0 8px;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;margin-bottom:8px;line-height:1.5;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.mc-opt{text-align:left;padding:10px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold);background:#f0fbfc;}
+.mc-opt:disabled{cursor:default;opacity:.9;}
+.mc-opt.mc-correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600;}
+.mc-opt.mc-wrong{border-color:#c62828;background:#fde8e8;color:#a01820;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e0f7fa;color:#00838f;border:1px solid #80deea;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#1a2a3a;}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#00838f;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
 <body>
 <header>
-  <div>
-    <div class="title">Introduction to Databases</div>
-    <div class="strand">Digital Technologies · Data & Programming</div>
-  </div>
-  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+  <a href="../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <div class="ht">Introduction to Databases</div>
+  <div style="width:80px"></div>
 </header>
-<main>
-  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
-  <div class="card">
-    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
-      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
-      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
-      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
-      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
-      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
-    </svg>
-    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
-    <div class="q-title" id="cp-title"></div>
-    <div class="teach" id="teach-content"></div>
-    <div class="your-turn" id="your-turn" style="display:none">
-      <div class="yt-q" id="yt-question"></div>
-      <div id="yt-opts"></div>
-      <div class="try-fb" id="try-fb"></div>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr"><div class="eyebrow" id="ey"></div><h1 id="ti"></h1><div class="sub" id="su"></div></div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
     </div>
-    <div class="nav-row">
-      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
-      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
     </div>
   </div>
-</main>
-
+</div>
 <script>
-  const QS = [
-  {ey:'Q1',ti:'What is a Database?',teach:'<p>A database is an organised collection of related data, stored electronically.</p><p>Databases let large amounts of data be stored, searched, and updated efficiently.</p><p>Examples include a school\'s student records system or a library catalogue.</p><p>Databases are far more powerful than simple spreadsheets for large, complex data.</p>',q:'What best describes a database?',opts:["A random pile of unrelated files", "An organised collection of related data stored electronically", "A type of printer", "A single photograph"],correct:1,expl:'A database is a structured, organised collection of related data designed for efficient storage and retrieval.'},
-  {ey:'Q2',ti:'Tables, Records and Fields',teach:'<p>A database table organises data into rows and columns, similar to a spreadsheet.</p><p>Each row is a "record" — one complete set of related data (e.g. one student).</p><p>Each column is a "field" — one type of data (e.g. Name, Age, Year Group).</p><p>Well-designed tables avoid unnecessary duplication of data.</p>',q:'What does one row in a database table typically represent?',opts:["One field", "One record (a complete set of related data)", "The entire database", "A password"],correct:1,expl:'A row (record) represents one complete entry, such as all the information about a single student.'},
-  {ey:'Q3',ti:'Primary Keys',teach:'<p>A primary key is a unique identifier for each record in a table (e.g. Student ID).</p><p>Primary keys ensure no two records are mistaken for one another.</p><p>They are essential for linking related tables together correctly.</p><p>A good primary key never changes and is always unique.</p>',q:'What is the purpose of a primary key in a database table?',opts:["To make the table more colourful", "To uniquely identify each record", "To delete duplicate records automatically", "To store passwords only"],correct:1,expl:'A primary key uniquely identifies each record, ensuring no two records can be confused with one another.'},
-  {ey:'Q4',ti:'Queries',teach:'<p>A query is a request to search, filter, or retrieve specific data from a database.</p><p>Queries can filter by conditions, like "Year Group = 8".</p><p>Well-written queries return exactly the data needed, nothing more.</p><p>Queries are often written using a language called SQL (in more advanced systems).</p>',q:'What is the purpose of a database query?',opts:["To permanently delete the database", "To search, filter or retrieve specific data", "To design the database's colour scheme", "To connect to Wi-Fi"],correct:1,expl:'A query is a request used to search for, filter, and retrieve specific data from a database.'},
-  {ey:'Q5',ti:'Sorting and Filtering Data',teach:'<p>Sorting arranges records in a chosen order (e.g. alphabetically, by date).</p><p>Filtering narrows down records to only those meeting specific criteria.</p><p>Combining sorting and filtering helps quickly find exactly what\'s needed.</p><p>These operations are core to making large databases genuinely useful.</p>',q:'What does filtering do to a set of database records?',opts:["Deletes them permanently", "Narrows records down to only those meeting specific criteria", "Sorts them alphabetically only", "Encrypts them"],correct:1,expl:'Filtering narrows a large set of records down to only those that match specific chosen criteria.'},
-  {ey:'Q6',ti:'Relational Databases',teach:'<p>A relational database links multiple related tables together.</p><p>Relationships are usually created using primary and "foreign" keys.</p><p>This avoids duplicating the same data across many separate tables.</p><p>Most large-scale systems (banks, schools, hospitals) use relational databases.</p>',q:'What links tables together in a relational database?',opts:["Primary and foreign keys", "Random chance", "File compression", "The colour of the table"],correct:0,expl:'Primary and foreign keys create the links (relationships) between separate tables in a relational database.'},
-  {ey:'Q7',ti:'Data Validation',teach:'<p>Validation checks that data entered into a database meets expected rules.</p><p>Example: a "Year Group" field might only accept numbers 7-12.</p><p>Validation helps prevent errors and maintain data quality.</p><p>Well-designed forms guide users to enter data correctly the first time.</p>',q:'What is the purpose of data validation?',opts:["To make data entry more confusing", "To check that entered data meets expected rules, reducing errors", "To delete valid data", "To slow down the database intentionally"],correct:1,expl:'Validation rules check that entered data is reasonable and correctly formatted, helping prevent errors.'},
-  {ey:'Q8',ti:'Databases in Everyday Life',teach:'<p>Schools use databases for student records, attendance, and grades.</p><p>Hospitals use databases to manage patient records securely.</p><p>Online shops use databases to track products, orders, and customers.</p><p>Banks rely on databases to manage millions of accounts and transactions.</p>',q:'Which organisation would most likely use a database to track patient records?',opts:["A hospital", "A single street vendor with no records", "A library with only 5 books", "None of these need databases"],correct:0,expl:'Hospitals rely on databases to securely store and manage large volumes of patient records.'},
-  {ey:'Q9',ti:'Data Security in Databases',teach:'<p>Databases often store sensitive information, making security essential.</p><p>Access controls limit who can view or edit specific data.</p><p>Encryption protects data even if it is stolen or intercepted.</p><p>Regular backups protect against data loss from hardware failure or attacks.</p>',q:'Why is security especially important for databases?',opts:["Databases never contain sensitive information", "Databases often store large amounts of sensitive information", "Security slows down data entry unnecessarily", "Only small databases need security"],correct:1,expl:'Databases frequently store sensitive personal or organisational information, making strong security essential.'},
-  {ey:'Q10',ti:'Designing a Simple Database',teach:'<p>Good database design starts by identifying what data needs to be stored.</p><p>Deciding on tables, fields, and relationships comes before building the database.</p><p>Avoiding duplicate data (normalisation) improves efficiency and consistency.</p><p>Testing a database with sample data helps confirm the design works well.</p>',q:'What should come first when designing a database?',opts:["Building the final database immediately", "Identifying what data needs to be stored", "Choosing a colour scheme", "Deleting all existing data"],correct:1,expl:'Good design starts by carefully identifying exactly what data needs to be stored before building any structure.'}
-  ];
-  const TOTAL = QS.length;
-  let idx = 0;
-  let answered = new Array(TOTAL).fill(false);
+var ACC='#37474F',DARK='#263238',CRM='#ECEFF1',LINE='#CFD8DC';
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#0d1b2a';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||CRM;stroke=stroke||ACC;sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
 
-  function render() {
-    const q = QS[idx];
-    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
-    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
-    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
-    document.getElementById('cp-title').textContent = q.ti;
-    document.getElementById('ey').innerHTML = q.teach;
-    document.getElementById('diagram-title').textContent = q.ti;
-    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
-    const yt = document.getElementById('your-turn');
-    yt.style.display = 'block';
-    document.getElementById('yt-question').textContent = q.q;
-    const optsDiv = document.getElementById('yt-opts');
-    optsDiv.innerHTML = '';
-    q.opts.forEach((opt, i) => {
-      const b = document.createElement('button');
-      b.className = 'opt-btn';
-      b.textContent = opt;
-      b.onclick = () => selectAnswer(i, b);
-      optsDiv.appendChild(b);
-    });
-    document.getElementById('try-fb').className = 'try-fb';
-    document.getElementById('try-fb').textContent = '';
-    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
-    document.getElementById('prev-btn').disabled = (idx === 0);
+var ST={};
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=entry.genFn();entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');
+    tmp.innerHTML=buildTryMC(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:true};return;
   }
-
-  function selectAnswer(i, btn) {
-    const q = QS[idx];
-    const fb = document.getElementById('try-fb');
-    const allBtns = document.querySelectorAll('.opt-btn');
-    allBtns.forEach(b => b.style.pointerEvents = 'none');
-    if (i === q.correct) {
-      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
-      fb.className = 'try-fb ok';
-      fb.textContent = '✓ Correct! ' + q.expl;
-      answered[idx] = true;
-    } else {
-      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
-      fb.className = 'try-fb er';
-      fb.textContent = '✗ Not quite. ' + q.expl;
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');
+    allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){
+      el.classList.add('mc-correct');
+      fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;
+    }else{
+      el.classList.add('mc-wrong');
+      allBtns[o.correct].classList.add('mc-correct');
+      fb.className='try-fb er';fb.textContent='Not quite \u2014 the correct answer is highlighted above.';
     }
   }
+});
 
-  function nextStep() {
-    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
-    render();
-  }
-  function prevStep() {
-    if (idx > 0) { idx--; render(); }
-  }
-
-  render();
-</script>
-
-<!-- hidden element used by render() per gold-standard pattern -->
-<div id="ey" style="display:none"></div>
-
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
-  const _abcTopicCode = 'DT8-DAT-02';
-
-  (async function checkLogin() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { window.location.href = '../login.html'; return; }
-    window._abcSession = session;
-    window._abcSupabase = supabase;
-  })();
-
-  window.markComplete = async function() {
-    const session = window._abcSession;
-    if (!session) return;
-    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
-    if (!topicRow) return;
-    await supabase.from('walkthrough_progress').upsert({
-      student_id: session.user.id,
-      topic_id: topicRow.id,
-      status: 'completed',
-      last_visited_at: new Date().toISOString()
-    }, { onConflict: 'student_id,topic_id' });
+function makeDiagram(title, points){
+  return function(p){
+    var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+    o.push(T(240,20,title,ACC,12,'middle',true));
+    points.forEach(function(txt,i){
+      if(p>=i){
+        var y=36+i*44;
+        o.push(R(10,y,460,38,i===p?LINE:CRM,ACC,i===p?2:1));
+        o.push(T(240,y+23,txt,DARK,10,'middle',false));
+      }
+    });
+    s.innerHTML=o.join('');
   };
+}
+
+var dQ1=makeDiagram('What is a Database?',['A database is an organised collection of related data, stored electron…','Databases let large amounts of data be stored, searched, and updated e…','Examples include a school\'s student records system or a library catalo…','Databases are far more powerful than simple spreadsheets for large, co…']);
+var dQ2=makeDiagram('Tables, Records and Fields',['A database table organises data into rows and columns, similar to a sp…','Each row is a "record" — one complete set of related data (e.g. one st…','Each column is a "field" — one type of data (e.g. Name, Age, Year Grou…','Well-designed tables avoid unnecessary duplication of data.']);
+var dQ3=makeDiagram('Primary Keys',['A primary key is a unique identifier for each record in a table (e.g. …','Primary keys ensure no two records are mistaken for one another.','They are essential for linking related tables together correctly.','A good primary key never changes and is always unique.']);
+var dQ4=makeDiagram('Queries',['A query is a request to search, filter, or retrieve specific data from…','Queries can filter by conditions, like "Year Group = 8".','Well-written queries return exactly the data needed, nothing more.','Queries are often written using a language called SQL (in more advance…']);
+var dQ5=makeDiagram('Sorting and Filtering Data',['Sorting arranges records in a chosen order (e.g. alphabetically, by da…','Filtering narrows down records to only those meeting specific criteria…','Combining sorting and filtering helps quickly find exactly what\'s need…','These operations are core to making large databases genuinely useful.']);
+var dQ6=makeDiagram('Relational Databases',['A relational database links multiple related tables together.','Relationships are usually created using primary and "foreign" keys.','This avoids duplicating the same data across many separate tables.','Most large-scale systems (banks, schools, hospitals) use relational da…']);
+var dQ7=makeDiagram('Data Validation',['Validation checks that data entered into a database meets expected rul…','Example: a "Year Group" field might only accept numbers 7-12.','Validation helps prevent errors and maintain data quality.','Well-designed forms guide users to enter data correctly the first time…']);
+var dQ8=makeDiagram('Databases in Everyday Life',['Schools use databases for student records, attendance, and grades.','Hospitals use databases to manage patient records securely.','Online shops use databases to track products, orders, and customers.','Banks rely on databases to manage millions of accounts and transaction…']);
+var dQ9=makeDiagram('Data Security in Databases',['Databases often store sensitive information, making security essential…','Access controls limit who can view or edit specific data.','Encryption protects data even if it is stolen or intercepted.','Regular backups protect against data loss from hardware failure or att…']);
+var dQ10=makeDiagram('Designing a Simple Database',['Good database design starts by identifying what data needs to be store…','Deciding on tables, fields, and relationships comes before building th…','Avoiding duplicate data (normalisation) improves efficiency and consis…','Testing a database with sample data helps confirm the design works wel…']);
+
+var QS=[
+{ey:'Q1 \u2022 Digital Technologies \u2022 Data & Programming',ti:'What is a Database?',su:'Learn about What is a Database? and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ1,ht:'<p>A database is an organised collection of related data, stored electronically.</p>'},
+  {lb:'Key details',dr:dQ1,ht:'<p>Databases let large amounts of data be stored, searched, and updated efficiently.</p>'},
+  {lb:'How it works',dr:dQ1,ht:'<p>Examples include a school\'s student records system or a library catalogue.</p>'},
+  {lb:'Why it matters',dr:dQ1,ht:'<p>Databases are far more powerful than simple spreadsheets for large, complex data.</p>'},
+  {lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[
+      {q:'What best describes a database?',o:['A random pile of unrelated files','An organised collection of related data stored electronically','A type of printer','A single photograph'],a:1,w:'A database is a structured, organised collection of related data designed for efficient storage and retrieval.'},
+      {q:'What best describes a database?',o:['A single photograph','A type of printer','A random pile of unrelated files','An organised collection of related data stored electronically'],a:3,w:'A database is a structured, organised collection of related data designed for efficient storage and retrieval.'},
+      {q:'According to what you just learned: what best describes a database?',o:['A random pile of unrelated files','A type of printer','A single photograph','An organised collection of related data stored electronically'],a:3,w:'A database is a structured, organised collection of related data designed for efficient storage and retrieval.'},
+      {q:'Check your understanding — what best describes a database?',o:['A type of printer','A single photograph','An organised collection of related data stored electronically','A random pile of unrelated files'],a:2,w:'A database is a structured, organised collection of related data designed for efficient storage and retrieval.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q2 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Tables, Records and Fields',su:'Learn about Tables, Records and Fields and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ2,ht:'<p>A database table organises data into rows and columns, similar to a spreadsheet.</p>'},
+  {lb:'Key details',dr:dQ2,ht:'<p>Each row is a "record" — one complete set of related data (e.g. one student).</p>'},
+  {lb:'How it works',dr:dQ2,ht:'<p>Each column is a "field" — one type of data (e.g. Name, Age, Year Group).</p>'},
+  {lb:'Why it matters',dr:dQ2,ht:'<p>Well-designed tables avoid unnecessary duplication of data.</p>'},
+  {lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[
+      {q:'What does one row in a database table typically represent?',o:['One field','One record (a complete set of related data)','The entire database','A password'],a:1,w:'A row (record) represents one complete entry, such as all the information about a single student.'},
+      {q:'What does one row in a database table typically represent?',o:['One record (a complete set of related data)','The entire database','A password','One field'],a:0,w:'A row (record) represents one complete entry, such as all the information about a single student.'},
+      {q:'According to what you just learned: what does one row in a database table typically represent?',o:['One record (a complete set of related data)','A password','One field','The entire database'],a:0,w:'A row (record) represents one complete entry, such as all the information about a single student.'},
+      {q:'Check your understanding — what does one row in a database table typically represent?',o:['The entire database','One field','A password','One record (a complete set of related data)'],a:3,w:'A row (record) represents one complete entry, such as all the information about a single student.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q3 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Primary Keys',su:'Learn about Primary Keys and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ3,ht:'<p>A primary key is a unique identifier for each record in a table (e.g. Student ID).</p>'},
+  {lb:'Key details',dr:dQ3,ht:'<p>Primary keys ensure no two records are mistaken for one another.</p>'},
+  {lb:'How it works',dr:dQ3,ht:'<p>They are essential for linking related tables together correctly.</p>'},
+  {lb:'Why it matters',dr:dQ3,ht:'<p>A good primary key never changes and is always unique.</p>'},
+  {lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[
+      {q:'What is the purpose of a primary key in a database table?',o:['To make the table more colourful','To uniquely identify each record','To delete duplicate records automatically','To store passwords only'],a:1,w:'A primary key uniquely identifies each record, ensuring no two records can be confused with one another.'},
+      {q:'What is the purpose of a primary key in a database table?',o:['To delete duplicate records automatically','To store passwords only','To make the table more colourful','To uniquely identify each record'],a:3,w:'A primary key uniquely identifies each record, ensuring no two records can be confused with one another.'},
+      {q:'According to what you just learned: what is the purpose of a primary key in a database table?',o:['To delete duplicate records automatically','To uniquely identify each record','To store passwords only','To make the table more colourful'],a:1,w:'A primary key uniquely identifies each record, ensuring no two records can be confused with one another.'},
+      {q:'Check your understanding — what is the purpose of a primary key in a database table?',o:['To make the table more colourful','To store passwords only','To delete duplicate records automatically','To uniquely identify each record'],a:3,w:'A primary key uniquely identifies each record, ensuring no two records can be confused with one another.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q4 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Queries',su:'Learn about Queries and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ4,ht:'<p>A query is a request to search, filter, or retrieve specific data from a database.</p>'},
+  {lb:'Key details',dr:dQ4,ht:'<p>Queries can filter by conditions, like "Year Group = 8".</p>'},
+  {lb:'How it works',dr:dQ4,ht:'<p>Well-written queries return exactly the data needed, nothing more.</p>'},
+  {lb:'Why it matters',dr:dQ4,ht:'<p>Queries are often written using a language called SQL (in more advanced systems).</p>'},
+  {lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[
+      {q:'What is the purpose of a database query?',o:['To permanently delete the database','To search, filter or retrieve specific data','To design the database\'s colour scheme','To connect to Wi-Fi'],a:1,w:'A query is a request used to search for, filter, and retrieve specific data from a database.'},
+      {q:'What is the purpose of a database query?',o:['To connect to Wi-Fi','To permanently delete the database','To search, filter or retrieve specific data','To design the database\'s colour scheme'],a:2,w:'A query is a request used to search for, filter, and retrieve specific data from a database.'},
+      {q:'According to what you just learned: what is the purpose of a database query?',o:['To design the database\'s colour scheme','To connect to Wi-Fi','To permanently delete the database','To search, filter or retrieve specific data'],a:3,w:'A query is a request used to search for, filter, and retrieve specific data from a database.'},
+      {q:'Check your understanding — what is the purpose of a database query?',o:['To connect to Wi-Fi','To design the database\'s colour scheme','To permanently delete the database','To search, filter or retrieve specific data'],a:3,w:'A query is a request used to search for, filter, and retrieve specific data from a database.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q5 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Sorting and Filtering Data',su:'Learn about Sorting and Filtering Data and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ5,ht:'<p>Sorting arranges records in a chosen order (e.g. alphabetically, by date).</p>'},
+  {lb:'Key details',dr:dQ5,ht:'<p>Filtering narrows down records to only those meeting specific criteria.</p>'},
+  {lb:'How it works',dr:dQ5,ht:'<p>Combining sorting and filtering helps quickly find exactly what\'s needed.</p>'},
+  {lb:'Why it matters',dr:dQ5,ht:'<p>These operations are core to making large databases genuinely useful.</p>'},
+  {lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[
+      {q:'What does filtering do to a set of database records?',o:['Deletes them permanently','Narrows records down to only those meeting specific criteria','Sorts them alphabetically only','Encrypts them'],a:1,w:'Filtering narrows a large set of records down to only those that match specific chosen criteria.'},
+      {q:'What does filtering do to a set of database records?',o:['Deletes them permanently','Encrypts them','Narrows records down to only those meeting specific criteria','Sorts them alphabetically only'],a:2,w:'Filtering narrows a large set of records down to only those that match specific chosen criteria.'},
+      {q:'According to what you just learned: what does filtering do to a set of database records?',o:['Encrypts them','Sorts them alphabetically only','Deletes them permanently','Narrows records down to only those meeting specific criteria'],a:3,w:'Filtering narrows a large set of records down to only those that match specific chosen criteria.'},
+      {q:'Check your understanding — what does filtering do to a set of database records?',o:['Narrows records down to only those meeting specific criteria','Deletes them permanently','Encrypts them','Sorts them alphabetically only'],a:0,w:'Filtering narrows a large set of records down to only those that match specific chosen criteria.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q6 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Relational Databases',su:'Learn about Relational Databases and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ6,ht:'<p>A relational database links multiple related tables together.</p>'},
+  {lb:'Key details',dr:dQ6,ht:'<p>Relationships are usually created using primary and "foreign" keys.</p>'},
+  {lb:'How it works',dr:dQ6,ht:'<p>This avoids duplicating the same data across many separate tables.</p>'},
+  {lb:'Why it matters',dr:dQ6,ht:'<p>Most large-scale systems (banks, schools, hospitals) use relational databases.</p>'},
+  {lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[
+      {q:'What links tables together in a relational database?',o:['Primary and foreign keys','Random chance','File compression','The colour of the table'],a:0,w:'Primary and foreign keys create the links (relationships) between separate tables in a relational database.'},
+      {q:'What links tables together in a relational database?',o:['Random chance','Primary and foreign keys','File compression','The colour of the table'],a:1,w:'Primary and foreign keys create the links (relationships) between separate tables in a relational database.'},
+      {q:'According to what you just learned: what links tables together in a relational database?',o:['Primary and foreign keys','File compression','Random chance','The colour of the table'],a:0,w:'Primary and foreign keys create the links (relationships) between separate tables in a relational database.'},
+      {q:'Check your understanding — what links tables together in a relational database?',o:['File compression','Random chance','The colour of the table','Primary and foreign keys'],a:3,w:'Primary and foreign keys create the links (relationships) between separate tables in a relational database.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q7 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Data Validation',su:'Learn about Data Validation and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ7,ht:'<p>Validation checks that data entered into a database meets expected rules.</p>'},
+  {lb:'Key details',dr:dQ7,ht:'<p>Example: a "Year Group" field might only accept numbers 7-12.</p>'},
+  {lb:'How it works',dr:dQ7,ht:'<p>Validation helps prevent errors and maintain data quality.</p>'},
+  {lb:'Why it matters',dr:dQ7,ht:'<p>Well-designed forms guide users to enter data correctly the first time.</p>'},
+  {lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[
+      {q:'What is the purpose of data validation?',o:['To make data entry more confusing','To check that entered data meets expected rules, reducing errors','To delete valid data','To slow down the database intentionally'],a:1,w:'Validation rules check that entered data is reasonable and correctly formatted, helping prevent errors.'},
+      {q:'What is the purpose of data validation?',o:['To slow down the database intentionally','To check that entered data meets expected rules, reducing errors','To delete valid data','To make data entry more confusing'],a:1,w:'Validation rules check that entered data is reasonable and correctly formatted, helping prevent errors.'},
+      {q:'According to what you just learned: what is the purpose of data validation?',o:['To slow down the database intentionally','To delete valid data','To make data entry more confusing','To check that entered data meets expected rules, reducing errors'],a:3,w:'Validation rules check that entered data is reasonable and correctly formatted, helping prevent errors.'},
+      {q:'Check your understanding — what is the purpose of data validation?',o:['To make data entry more confusing','To delete valid data','To slow down the database intentionally','To check that entered data meets expected rules, reducing errors'],a:3,w:'Validation rules check that entered data is reasonable and correctly formatted, helping prevent errors.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q8 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Databases in Everyday Life',su:'Learn about Databases in Everyday Life and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ8,ht:'<p>Schools use databases for student records, attendance, and grades.</p>'},
+  {lb:'Key details',dr:dQ8,ht:'<p>Hospitals use databases to manage patient records securely.</p>'},
+  {lb:'How it works',dr:dQ8,ht:'<p>Online shops use databases to track products, orders, and customers.</p>'},
+  {lb:'Why it matters',dr:dQ8,ht:'<p>Banks rely on databases to manage millions of accounts and transactions.</p>'},
+  {lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[
+      {q:'Which organisation would most likely use a database to track patient records?',o:['A hospital','A single street vendor with no records','A library with only 5 books','None of these need databases'],a:0,w:'Hospitals rely on databases to securely store and manage large volumes of patient records.'},
+      {q:'Which organisation would most likely use a database to track patient records?',o:['None of these need databases','A library with only 5 books','A hospital','A single street vendor with no records'],a:2,w:'Hospitals rely on databases to securely store and manage large volumes of patient records.'},
+      {q:'According to what you just learned: which organisation would most likely use a database to track patient records?',o:['A hospital','A library with only 5 books','A single street vendor with no records','None of these need databases'],a:0,w:'Hospitals rely on databases to securely store and manage large volumes of patient records.'},
+      {q:'Check your understanding — which organisation would most likely use a database to track patient records?',o:['A hospital','None of these need databases','A single street vendor with no records','A library with only 5 books'],a:0,w:'Hospitals rely on databases to securely store and manage large volumes of patient records.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q9 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Data Security in Databases',su:'Learn about Data Security in Databases and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ9,ht:'<p>Databases often store sensitive information, making security essential.</p>'},
+  {lb:'Key details',dr:dQ9,ht:'<p>Access controls limit who can view or edit specific data.</p>'},
+  {lb:'How it works',dr:dQ9,ht:'<p>Encryption protects data even if it is stolen or intercepted.</p>'},
+  {lb:'Why it matters',dr:dQ9,ht:'<p>Regular backups protect against data loss from hardware failure or attacks.</p>'},
+  {lb:'Your turn',dr:dQ9,ht:tryItMC(function(){var qs=[
+      {q:'Why is security especially important for databases?',o:['Databases never contain sensitive information','Databases often store large amounts of sensitive information','Security slows down data entry unnecessarily','Only small databases need security'],a:1,w:'Databases frequently store sensitive personal or organisational information, making strong security essential.'},
+      {q:'Why is security especially important for databases?',o:['Databases never contain sensitive information','Only small databases need security','Databases often store large amounts of sensitive information','Security slows down data entry unnecessarily'],a:2,w:'Databases frequently store sensitive personal or organisational information, making strong security essential.'},
+      {q:'According to what you just learned: why is security especially important for databases?',o:['Only small databases need security','Security slows down data entry unnecessarily','Databases never contain sensitive information','Databases often store large amounts of sensitive information'],a:3,w:'Databases frequently store sensitive personal or organisational information, making strong security essential.'},
+      {q:'Check your understanding — why is security especially important for databases?',o:['Only small databases need security','Databases never contain sensitive information','Security slows down data entry unnecessarily','Databases often store large amounts of sensitive information'],a:3,w:'Databases frequently store sensitive personal or organisational information, making strong security essential.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]},
+{ey:'Q10 \u2022 Digital Technologies \u2022 Data & Programming',ti:'Designing a Simple Database',su:'Learn about Designing a Simple Database and test your understanding.',steps:[
+  {lb:'The basics',dr:dQ10,ht:'<p>Good database design starts by identifying what data needs to be stored.</p>'},
+  {lb:'Key details',dr:dQ10,ht:'<p>Deciding on tables, fields, and relationships comes before building the database.</p>'},
+  {lb:'How it works',dr:dQ10,ht:'<p>Avoiding duplicate data (normalisation) improves efficiency and consistency.</p>'},
+  {lb:'Why it matters',dr:dQ10,ht:'<p>Testing a database with sample data helps confirm the design works well.</p>'},
+  {lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[
+      {q:'What should come first when designing a database?',o:['Building the final database immediately','Identifying what data needs to be stored','Choosing a colour scheme','Deleting all existing data'],a:1,w:'Good design starts by carefully identifying exactly what data needs to be stored before building any structure.'},
+      {q:'What should come first when designing a database?',o:['Building the final database immediately','Choosing a colour scheme','Identifying what data needs to be stored','Deleting all existing data'],a:2,w:'Good design starts by carefully identifying exactly what data needs to be stored before building any structure.'},
+      {q:'According to what you just learned: what should come first when designing a database?',o:['Deleting all existing data','Building the final database immediately','Choosing a colour scheme','Identifying what data needs to be stored'],a:3,w:'Good design starts by carefully identifying exactly what data needs to be stored before building any structure.'},
+      {q:'Check your understanding — what should come first when designing a database?',o:['Identifying what data needs to be stored','Choosing a colour scheme','Building the final database immediately','Deleting all existing data'],a:0,w:'Good design starts by carefully identifying exactly what data needs to be stored before building any structure.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
 </script>
-</body>
-</html>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcTopicCode='DT8-DAT-02';
+window.markComplete=async function(){
+  const{data:{session}}=await _sb.auth.getSession();if(!session)return;
+  const{data:topic}=await _sb.from('topics').select('id').eq('topic_code','DT8-DAT-02').maybeSingle();if(!topic)return;
+  window._abcTopicId=topic.id;
+  await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body></html>
