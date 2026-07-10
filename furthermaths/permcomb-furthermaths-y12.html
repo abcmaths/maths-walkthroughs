@@ -60,15 +60,6 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
-
-/* ── Topic card ─────────────────────────────────── */
-.topic-card{display:flex;align-items:flex-start;gap:18px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:18px 20px;margin-bottom:28px;max-width:760px;}
-.tc-icon{font-size:32px;line-height:1;flex-shrink:0;margin-top:2px;}
-.tc-body{flex:1;}
-.tc-title{font-family:Georgia,serif;font-size:20px;font-weight:700;color:var(--ink);margin-bottom:2px;}
-.tc-sub{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:10px;}
-.tc-tags{display:flex;flex-wrap:wrap;gap:6px;}
-.tc-tag{font-size:12px;background:var(--cream);border:1px solid var(--line);border-radius:3px;padding:3px 9px;color:#555;}
 </style>
 </head>
 <body>
@@ -101,8 +92,7 @@ var ST={};
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
 function fact(n){var r=1;for(var i=2;i<=n;i++)r*=i;return r;}
-function nPr(n,r){return fact(n)/fact(n-r);}
-function nCr(n,r){return fact(n)/(fact(r)*fact(n-r));}
+function nCr(n,r){if(r<0||r>n)return 0;return fact(n)/(fact(r)*fact(n-r));}
 function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,fn:genFn};return buildTry(id,o);}
 function buildTry(id,o){var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');var ph='Answer'+(o.unit?' ('+o.unit+')':'');return '<div class="try" data-tryid="'+id+'"><div class="try-t">\u2714 Your Turn <button class="nq-btn" data-tryid="'+id+'">\u21bb New</button></div><div class="try-q">'+o.question+'</div><ul class="hl">'+(h||'')+'</ul><div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div><div class="try-fb" data-tryid="'+id+'"></div><details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
 document.addEventListener('click',function(e){var el=e.target;if(el.classList.contains('nq-btn')){var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;var o=en.fn();en.o=o;ST[id]={o:o,fn:en.fn};var wrap=document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);wrap.parentNode.replaceChild(tmp.firstChild,wrap);return;}if(el.classList.contains('try-ck')){var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;var o=en.o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}var tol=o.tol!=null?o.tol:0;if(Math.abs(v-o.ans)<=tol){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;}else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}}});
@@ -111,317 +101,239 @@ function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text 
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
 function L(x1,y1,x2,y2,c,w){c=c||'#C0272D';w=w||2;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"/>';}
 
+// Session values
+
+function nPr(n,r){if(r<0||r>n)return 0;return fact(n)/fact(n-r);}
+
 var V={};
 (function(){
-  V.q1n=rnd(4,6);
-  V.q1fact=fact(V.q1n);
-
-  V.q2n=rnd(5,7);V.q2r=rnd(2,Math.min(3,V.q2n-1));
-  V.q2perm=nPr(V.q2n,V.q2r);
-
-  V.q3n=rnd(5,8);V.q3r=rnd(2,Math.min(4,V.q3n-1));
-  V.q3comb=nCr(V.q3n,V.q3r);
-
-  V.q4n=rnd(6,9);V.q4r=rnd(3,4);
-  V.q4perm=nPr(V.q4n,V.q4r);
-  V.q4comb=nCr(V.q4n,V.q4r);
-
-  V.q5total=rnd(8,12);V.q5choose=rnd(3,5);
-  V.q5comb=nCr(V.q5total,V.q5choose);
+  V.n1=rnd(4,6);
+  V.n2=rnd(5,7);V.r2=rnd(2,4);
+  V.n3=rnd(6,8);V.r3=rnd(2,4);
+  V.n4=rnd(5,7);V.r4=rnd(2,4);
+  V.n5=rnd(8,10);V.r5=rnd(2,4);
+  V.n6=rnd(5,7);V.r6=rnd(2,3);
 })();
 
 function dQ1(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Factorial: '+V.q1n+'! = '+V.q1fact,'#C0272D',14,'middle',true));
+  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
+  o.push(R(14,8,452,36));
+  o.push(T(240,30,'How many ways to arrange all '+V.n1+' letters of a word?','#C0272D',13,'middle',true));
   if(p>=1){
-    o.push(R(40,52,400,36,'#f8f8f8','#ccc',1));
-    o.push(T(240,66,'n! = n \u00d7 (n\u22121) \u00d7 (n\u22122) \u00d7 \u2026 \u00d7 2 \u00d7 1','#241A17',12,'middle',true));
-    o.push(T(240,82,'(read "n factorial")','#888',10,'middle'));
+    o.push(R(30,52,420,50,'#f8f8f8','#ccc',1));
+    o.push(T(240,72,'n! (n factorial) = n \u00d7 (n\u22121) \u00d7 (n\u22122) \u00d7 ... \u00d7 2 \u00d7 1','#241A17',12,'middle',true));
+    o.push(T(240,92,'Counts the number of ways to arrange n DISTINCT items','#888',9,'middle'));
   }
   if(p>=2){
-    var chain=''+V.q1n+'! = ';
-    for(var i=V.q1n;i>=1;i--)chain+=i+(i>1?' \u00d7 ':'');
-    o.push(T(240,108,chain,'#C0272D',12,'middle'));
-    o.push(T(240,124,'= '+V.q1fact,'#C0272D',16,'middle',true));
+    o.push(R(14,114,452,60,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,134,V.n1+'! = '+V.n1+' \u00d7 '+(V.n1-1)+' \u00d7 ... \u00d7 2 \u00d7 1','#241A17',12,'middle',true));
+    o.push(T(240,156,'= '+fact(V.n1),'#C0272D',15,'middle',true));
   }
   if(p>=3){
-    // slot diagram for 3! arrangements of A,B,C
-    o.push(T(240,154,'Arrangements of A, B, C (3 items):','#888',11,'middle'));
-    var arr=['ABC','ACB','BAC','BCA','CAB','CBA'];
-    arr.forEach(function(a,i){
-      o.push(R(30+i*74,162,66,40,'#fff5f0','#C0272D',1));
-      o.push(T(63+i*74,187,a,'#C0272D',13,'middle',true));
-    });
-    o.push(T(240,220,'3! = 6 arrangements','#1a7a3a',13,'middle',true));
+    o.push(R(14,176,452,64,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,196,'Reminder: 0! = 1 by definition','#1a7a3a',11,'middle',true));
+    o.push(T(240,216,'If some letters repeat, divide by the factorial of each','#1a7a3a',11,'middle',true));
+    o.push(T(240,232,'repeated group\u2019s count to avoid overcounting','#1a7a3a',11,'middle',true));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ2(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'\u207f\u1d56\u1d63 = Arrangements of '+V.q2r+' from '+V.q2n+' = '+V.q2perm,'#C0272D',13,'middle',true));
+  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
+  o.push(R(14,8,452,36));
+  o.push(T(240,30,'Arrange '+V.r2+' of '+V.n2+' runners in order (1st, 2nd, ...)','#C0272D',13,'middle',true));
   if(p>=1){
-    o.push(R(40,52,400,40,'#f8f8f8','#ccc',1));
-    o.push(T(240,66,'Permutation: ORDER MATTERS (arranging, ranking, seating)','#888',11,'middle'));
-    o.push(T(240,82,'\u207f\u1d56\u1d63 = n! / (n\u2212r)!','#241A17',13,'middle',true));
+    o.push(R(30,52,420,44,'#f8f8f8','#ccc',1));
+    o.push(T(240,78,'This is a PERMUTATION \u2014 order matters (medal positions differ)','#241A17',12,'middle',true));
   }
-  // slot diagram
   if(p>=2){
-    for(var i=0;i<V.q2r;i++){
-      o.push(R(60+i*90,100,80,46,'#e8f4ff','#1a5a8a',1.5));
-      o.push(T(100+i*90,120,'Slot '+(i+1),'#888',9,'middle'));
-      o.push(T(100+i*90,138,''+(V.q2n-i)+' choices','#1a5a8a',12,'middle',true));
-    }
-    var mul='';for(var j=0;j<V.q2r;j++)mul+=(V.q2n-j)+(j<V.q2r-1?' \u00d7 ':'');
-    o.push(T(240,166,mul+' = '+V.q2perm,'#C0272D',13,'middle',true));
+    o.push(R(14,104,452,60,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,124,'nPr = n! / (n\u2212r)!','#241A17',13,'middle',true));
+    o.push(T(240,146,V.n2+'P'+V.r2+' = '+V.n2+'! / ('+V.n2+'\u2212'+V.r2+')!','#C0272D',12,'middle',true));
   }
   if(p>=3){
-    o.push(R(60,180,360,48,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,198,'\u207f\u1d56\u1d63 = '+V.q2n+'! / '+(V.q2n-V.q2r)+'! = '+V.q2perm,'#1a7a3a',14,'middle',true));
-    o.push(T(240,216,'(dividing cancels the unwanted factorial terms)','#888',10,'middle'));
+    o.push(R(14,172,452,68,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,192,'= '+fact(V.n2)+' / '+fact(V.n2-V.r2),'#1a7a3a',12,'middle',true));
+    o.push(T(240,212,'= '+nPr(V.n2,V.r2),'#1a7a3a',16,'middle',true));
+    o.push(T(240,232,'Same as multiplying '+V.r2+' descending numbers from '+V.n2,'#888',9,'middle'));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ3(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'\u207f\u1d9c\u1d63 = Selections of '+V.q3r+' from '+V.q3n+' = '+V.q3comb,'#C0272D',13,'middle',true));
+  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
+  o.push(R(14,8,452,36));
+  o.push(T(240,30,'Arrange '+V.n3+' people in a row, but 2 must sit together','#C0272D',13,'middle',true));
   if(p>=1){
-    o.push(R(40,52,400,40,'#f8f8f8','#ccc',1));
-    o.push(T(240,66,'Combination: ORDER DOES NOT MATTER (choosing, selecting)','#888',11,'middle'));
-    o.push(T(240,82,'\u207f\u1d9c\u1d63 = n! / [r!(n\u2212r)!]','#241A17',13,'middle',true));
+    o.push(R(30,52,420,50,'#f8f8f8','#ccc',1));
+    o.push(T(240,72,'Trick: glue the pair together as ONE unit first','#241A17',12,'middle',true));
+    o.push(T(240,92,'Now you have ('+V.n3+'\u22121) items to arrange, not '+V.n3,'#C0272D',11,'middle',true));
   }
   if(p>=2){
-    o.push(R(40,100,400,60,'#e8f4ff','#1a5a8a',1.5));
-    o.push(T(240,116,'Start with \u207f\u1d56\u1d63 = '+nPr(V.q3n,V.q3r),' #1a5a8a',12,'middle'));
-    o.push(T(240,134,'Divide by r! = '+V.q3r+'! = '+fact(V.q3r)+' (remove duplicate orderings)','#1a5a8a',11,'middle'));
-    o.push(T(240,150,'\u207f\u1d9c\u1d63 = '+nPr(V.q3n,V.q3r)+' / '+fact(V.q3r)+' = '+V.q3comb,'#1a5a8a',13,'middle',true));
+    o.push(R(14,114,452,64,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,134,'Arrangements of the '+(V.n3-1)+' units: ('+(V.n3-1)+')!','#241A17',12,'middle',true));
+    o.push(T(240,154,'The 2 glued people can swap places WITHIN their unit: \u00d72','#241A17',11,'middle',true));
+    o.push(T(240,170,'Total: ('+(V.n3-1)+')! \u00d7 2','#C0272D',12,'middle',true));
   }
   if(p>=3){
-    o.push(R(60,172,360,50,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,192,V.q3n+'C'+V.q3r+' = '+V.q3n+'! / ('+V.q3r+'! \u00d7 '+(V.q3n-V.q3r)+'!)','#1a7a3a',12,'middle'));
-    o.push(T(240,210,'= '+V.q3comb,'#1a7a3a',16,'middle',true));
+    o.push(R(14,184,452,64,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,204,'= '+fact(V.n3-1)+' \u00d7 2 = '+(fact(V.n3-1)*2),'#1a7a3a',13,'middle',true));
+    o.push(T(240,224,'This \u201cglue the group\u201d method works for any "must be together" restriction','#888',9,'middle'));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ4(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Permutation vs Combination — '+V.q4n+' people, choose '+V.q4r,'#C0272D',13,'middle',true));
+  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
+  o.push(R(14,8,452,36));
+  o.push(T(240,30,'Choose '+V.r4+' from '+V.n4+' people for a committee','#C0272D',13,'middle',true));
   if(p>=1){
-    o.push(R(30,52,205,140,'#fff5f0','#C0272D',1.5));
-    o.push(T(132,70,'PERMUTATION','#C0272D',11,'middle',true));
-    o.push(T(132,86,'Order MATTERS','#C0272D',10,'middle'));
-    o.push(T(132,104,'\u207f\u1d56\u1d63 = '+V.q4n+'P'+V.q4r,'#241A17',12,'middle'));
-    o.push(T(132,122,'= '+V.q4n+'! / '+(V.q4n-V.q4r)+'!','#888',11,'middle'));
-    o.push(T(132,142,'= '+V.q4perm,'#C0272D',18,'middle',true));
-    o.push(T(132,160,'e.g. President, VP, Sec','#888',9,'middle'));
+    o.push(R(30,52,420,44,'#f8f8f8','#ccc',1));
+    o.push(T(240,78,'This is a COMBINATION \u2014 order does NOT matter (no roles)','#241A17',12,'middle',true));
   }
   if(p>=2){
-    o.push(R(245,52,205,140,'#e8f4ff','#1a5a8a',1.5));
-    o.push(T(348,70,'COMBINATION','#1a5a8a',11,'middle',true));
-    o.push(T(348,86,'Order does NOT matter','#1a5a8a',10,'middle'));
-    o.push(T(348,104,'\u207f\u1d9c\u1d63 = '+V.q4n+'C'+V.q4r,'#241A17',12,'middle'));
-    o.push(T(348,122,'= '+V.q4n+'! / ('+V.q4r+'! \u00d7 '+(V.q4n-V.q4r)+'!)','#888',11,'middle'));
-    o.push(T(348,142,'= '+V.q4comb,'#1a5a8a',18,'middle',true));
-    o.push(T(348,160,'e.g. Select a committee','#888',9,'middle'));
+    o.push(R(14,104,452,60,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,124,'nCr = n! / [r! \u00d7 (n\u2212r)!]','#241A17',13,'middle',true));
+    o.push(T(240,146,V.n4+'C'+V.r4+' = '+V.n4+'! / ['+V.r4+'! \u00d7 ('+V.n4+'\u2212'+V.r4+')!]','#C0272D',12,'middle',true));
   }
   if(p>=3){
-    o.push(R(14,202,452,50,'#fff8e8','#C8922A',1.5));
-    o.push(T(240,220,'Key question: does swapping two choices give a different outcome?','#C8922A',11,'middle',true));
-    o.push(T(240,238,'YES \u2192 Permutation  \u2502  NO \u2192 Combination','#C8922A',11,'middle'));
+    o.push(R(14,172,452,68,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,192,'= '+nCr(V.n4,V.r4),'#1a7a3a',16,'middle',true));
+    o.push(T(240,214,'Compare: '+V.n4+'P'+V.r4+' = '+nPr(V.n4,V.r4)+' (much bigger \u2014 order would matter)','#888',9,'middle'));
+    o.push(T(240,232,'nCr = nPr \u00f7 r!  (divide out the duplicate orderings)','#888',9,'middle'));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ5(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Committee of '+V.q5choose+' from '+V.q5total+' people','#C0272D',13,'middle',true));
+  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
+  o.push(R(14,8,452,36));
+  o.push(T(240,30,'From '+V.n5+' people, choose '+V.r5+', but 1 specific person must be included','#C0272D',12,'middle',true));
   if(p>=1){
-    o.push(R(40,52,400,36,'#f8f8f8','#ccc',1));
-    o.push(T(240,66,'Choosing a committee — order does not matter \u2192 Combination','#888',11,'middle'));
-    o.push(T(240,82,'Use \u207f\u1d9c\u1d63 = '+V.q5total+'C'+V.q5choose,'#241A17',13,'middle',true));
+    o.push(R(30,52,420,50,'#f8f8f8','#ccc',1));
+    o.push(T(240,72,'Trick: that person is ALREADY chosen, so remove them','#241A17',11,'middle',true));
+    o.push(T(240,92,'Now choose the remaining ('+(V.r5-1)+') from the other ('+(V.n5-1)+')','#C0272D',11,'middle',true));
   }
   if(p>=2){
-    o.push(R(40,96,400,64,'#e8f4ff','#1a5a8a',1.5));
-    o.push(T(240,112,V.q5total+'! / ('+V.q5choose+'! \u00d7 '+(V.q5total-V.q5choose)+'!)','#1a5a8a',13,'middle'));
-    o.push(T(240,132,fact(V.q5total)+' / ('+fact(V.q5choose)+' \u00d7 '+fact(V.q5total-V.q5choose)+')','#888',11,'middle'));
-    // show a simplified form
-    o.push(T(240,150,'= '+V.q5comb,'#1a5a8a',16,'middle',true));
+    o.push(R(14,114,452,54,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,134,'('+(V.n5-1)+')C('+(V.r5-1)+') = '+(V.n5-1)+'! / [('+(V.r5-1)+')! \u00d7 ('+(V.n5-V.r5)+')!]','#241A17',11,'middle',true));
   }
   if(p>=3){
-    o.push(R(80,172,320,50,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,188,'There are '+V.q5comb+' possible committees','#1a7a3a',15,'middle',true));
-    o.push(T(240,210,'Notice: '+V.q5total+'C'+V.q5choose+' = '+V.q5total+'C'+(V.q5total-V.q5choose)+'  (symmetry property)','#888',10,'middle'));
+    o.push(R(14,172,452,64,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,192,'= '+nCr(V.n5-1,V.r5-1),'#1a7a3a',16,'middle',true));
+    o.push(T(240,214,'This "must include" trick reduces both n and r by 1','#888',9,'middle'));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ6(p){
-  // restricted permutation — must/must not include
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Restrictions — fixed positions and excluded items','#C0272D',13,'middle',true));
+  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
+  o.push(R(14,8,452,36));
+  o.push(T(240,30,'Probability using combinations','#C0272D',14,'middle',true));
   if(p>=1){
     o.push(R(30,52,420,50,'#f8f8f8','#ccc',1));
-    o.push(T(240,68,'Example: arrange 6 people in a row, two specific people (A and B)','#888',10,'middle'));
-    o.push(T(240,84,'must be at the ends (first or last position).','#888',10,'middle'));
+    o.push(T(240,72,'Probability = (favourable combinations) / (total combinations)','#241A17',12,'middle',true));
+    o.push(T(240,92,'Use nCr to count both the favourable and total outcomes','#888',9,'middle'));
   }
   if(p>=2){
-    o.push(R(30,110,420,70,'#e8f4ff','#1a5a8a',1.5));
-    o.push(T(240,128,'Step 1: Place A and B in the end positions.','#1a5a8a',11,'middle',true));
-    o.push(T(240,144,'2 ways (A first or B first) = 2! = 2','#241A17',12,'middle'));
-    o.push(T(240,162,'Step 2: Arrange remaining 4 people in middle 4 spots = 4! = 24','#241A17',11,'middle'));
+    o.push(R(14,114,452,56,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,134,'e.g. choosing '+V.r6+' from '+V.n6+' people, all from one specific group of '+(V.r6+1),'#241A17',10,'middle',true));
+    o.push(T(240,154,'Favourable: ('+(V.r6+1)+')C'+V.r6+'  \u00f7  Total: '+V.n6+'C'+V.r6,'#C0272D',11,'middle',true));
   }
   if(p>=3){
-    o.push(R(80,190,320,44,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,206,'Total = 2 \u00d7 24 = 48 arrangements','#1a7a3a',15,'middle',true));
-    o.push(T(240,226,'Multiply independent choices together','#888',10,'middle'));
-  }
-  s.innerHTML=o.join('');
-}
-
-function dQ7(p){
-  // choosing with conditions
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'Combinations with conditions','#C0272D',13,'middle',true));
-  if(p>=1){
-    o.push(R(30,52,420,50,'#f8f8f8','#ccc',1));
-    o.push(T(240,68,'Choose 4 from 10 people (6 men, 4 women).','#888',11,'middle'));
-    o.push(T(240,84,'At least one woman must be included.','#888',11,'middle'));
-  }
-  if(p>=2){
-    o.push(R(30,110,420,50,'#e8f4ff','#1a5a8a',1.5));
-    o.push(T(240,126,'Strategy: Total \u2212 (none of the restricted type)','#1a5a8a',12,'middle',true));
-    o.push(T(240,144,'= All ways to choose 4 \u2212 ways with NO women','#241A17',11,'middle'));
-  }
-  if(p>=3){
-    o.push(R(30,168,420,60,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,184,'10C4 \u2212 6C4 = '+nCr(10,4)+' \u2212 '+nCr(6,4),'#1a7a3a',13,'middle',true));
-    o.push(T(240,200,'= '+(nCr(10,4)-nCr(6,4))+' committees with at least one woman','#1a7a3a',14,'middle',true));
-  }
-  if(p>=4){
-    o.push(R(14,238,452,16,'#fff8e8','#C8922A',1));
-    o.push(T(240,250,'"At least one" \u2192 complement method is almost always fastest','#C8922A',9,'middle'));
+    o.push(R(14,178,452,66,'#e8f8ee','#1a7a3a',1.5));
+    var fav=nCr(V.r6+1,V.r6),tot=nCr(V.n6,V.r6);
+    o.push(T(240,198,'= '+fav+' / '+tot+' = '+(Math.round((fav/tot)*1000)/1000),'#1a7a3a',13,'middle',true));
+    o.push(T(240,220,'Always check: is order relevant? If not, use nCr not nPr','#888',9,'middle'));
   }
   s.innerHTML=o.join('');
 }
 
 var QS=[
-  {ey:'Q1 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Factorials',
-   su:V.q1n+'! = '+V.q1fact+'. Understand factorial notation.',
+  {ey:'Q1 \u00b7 Permutations &amp; Combinations \u00b7 Further Maths',ti:'Factorial and Basic Counting',
+   su:'Counting arrangements of distinct items using n!.',
    steps:[
-    {lb:'What is n!?',dr:dQ1,ht:'<p><b>n!</b> (n factorial) is the product of all positive integers from 1 to n.</p><div class="fm">n! = n \u00d7 (n\u22121) \u00d7 (n\u22122) \u00d7 \u2026 \u00d7 1</div><p>Special case: 0! = 1 (by definition).</p>'},
-    {lb:'Calculate '+V.q1n+'!',dr:dQ1,ht:'<div class="fm">'+V.q1n+'! = '+Array.from({length:V.q1n},function(_,i){return V.q1n-i;}).join(' \u00d7 ')+' = '+V.q1fact+'</div>'},
-    {lb:'Why factorials?',dr:dQ1,ht:'<p>n! counts the number of ways to arrange n distinct objects in a row. 3 objects (A,B,C) can be arranged in 3! = 6 ways.</p>'},
+    {lb:'What is n! (n factorial)?',dr:dQ1,ht:'<p>n! means n \u00d7 (n\u22121) \u00d7 (n\u22122) \u00d7 ... \u00d7 2 \u00d7 1. It counts the number of ways to arrange n distinct items in a row.</p>'},
+    {lb:'Calculating a factorial',dr:dQ1,ht:'<p>Multiply down from n to 1. Factorials grow very quickly \u2014 even 10! is over 3.6 million.</p>'},
+    {lb:'Special cases and repeats',dr:dQ1,ht:'<p>By definition 0! = 1. If some items in the arrangement are identical (repeated), divide by the factorial of the count of each repeated group to avoid overcounting identical arrangements.</p>'},
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
-      var n=rnd(3,7);
-      return {question:'Calculate '+n+'!',
-        hints:['Multiply '+n+' \u00d7 '+(n-1)+' \u00d7 \u2026 \u00d7 1'],
+      var n=rnd(3,6);
+      return {question:'How many ways can '+n+' different books be arranged in a row on a shelf?',
+        hints:['This is '+n+'! (factorial)'],
         ans:fact(n),tol:0,unit:'',working:n+'! = '+fact(n)};
     })}
    ]},
 
-  {ey:'Q2 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Permutations \u207f\u1d56\u1d63',
-   su:'Arrange '+V.q2r+' from '+V.q2n+' objects where order matters.',
+  {ey:'Q2 \u00b7 Permutations &amp; Combinations \u00b7 Further Maths',ti:'Permutations (Order Matters)',
+   su:'Using nPr when the arrangement order is important.',
    steps:[
-    {lb:'What is a permutation?',dr:dQ2,ht:'<p>A <b>permutation</b> is an arrangement where <b>order matters</b>. Choosing 1st, 2nd, 3rd place is a permutation — ABC and BAC are different.</p><div class="fm">\u207f\u1d56\u1d63 = n! / (n\u2212r)!</div>'},
-    {lb:'Slot method',dr:dQ2,ht:'<p>Think of r empty slots. Fill slot 1 (n choices), slot 2 (n\u22121 choices), etc:</p><div class="fm">\u207f\u1d56\u1d63 = n \u00d7 (n\u22121) \u00d7 \u2026 \u00d7 (n\u2212r+1)</div>'},
-    {lb:'Calculate '+V.q2n+'P'+V.q2r,dr:dQ2,ht:'<div class="fm">'+Array.from({length:V.q2r},function(_,i){return V.q2n-i;}).join(' \u00d7 ')+' = '+V.q2perm+'</div>'},
+    {lb:'When to use a permutation',dr:dQ2,ht:'<p>Use a permutation whenever ORDER matters \u2014 e.g. 1st/2nd/3rd place medals, or a PIN code, where swapping two items gives a genuinely different outcome.</p>'},
+    {lb:'The nPr formula',dr:dQ2,ht:'<p>nPr = n! / (n\u2212r)!  counts the number of ways to choose AND arrange r items from n distinct items.</p>'},
+    {lb:'Working it through',dr:dQ2,ht:'<p>Expand the factorials, or equivalently multiply r descending numbers starting from n (e.g. for 5P3: 5\u00d74\u00d73).</p>'},
     {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
-      var n=rnd(5,8),r=rnd(2,3);
-      return {question:'Find \u207f\u1d56\u1d63 where n='+n+' and r='+r+' (\u207f\u1d56\u1d63 = n\u00d7(n\u22121)\u00d7\u2026).',
-        hints:['Start at n='+n+', multiply '+r+' terms'],
-        ans:nPr(n,r),tol:0,unit:'',working:n+'P'+r+' = '+nPr(n,r)};
+      var n=rnd(5,8),r=rnd(2,4);
+      return {question:'In how many ways can 1st, 2nd and up to '+r+'th place be awarded among '+n+' competitors? (i.e. find '+n+'P'+r+')',
+        hints:[n+'P'+r+' = '+n+'! / ('+n+'\u2212'+r+')!'],
+        ans:nPr(n,r),tol:0,unit:'',working:n+'P'+r+' = '+n+'!/('+(n-r)+')! = '+nPr(n,r)};
     })}
    ]},
 
-  {ey:'Q3 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Combinations \u207f\u1d9c\u1d63',
-   su:'Select '+V.q3r+' from '+V.q3n+' objects where order does NOT matter.',
+  {ey:'Q3 \u00b7 Permutations &amp; Combinations \u00b7 Further Maths',ti:'Permutations with Restrictions',
+   su:'Handling "must sit together" and similar conditions.',
    steps:[
-    {lb:'What is a combination?',dr:dQ3,ht:'<p>A <b>combination</b> is a selection where <b>order does not matter</b>. Choosing a team of 3 from 8 is a combination — {A,B,C} and {B,A,C} are the same team.</p><div class="fm">\u207f\u1d9c\u1d63 = n! / [r!(n\u2212r)!]</div>'},
-    {lb:'Relationship to permutations',dr:dQ3,ht:'<p>Divide the permutation by r! to remove duplicate orderings:</p><div class="fm">\u207f\u1d9c\u1d63 = \u207f\u1d56\u1d63 / r!</div>'},
-    {lb:'Calculate '+V.q3n+'C'+V.q3r,dr:dQ3,ht:'<div class="fm">'+V.q3n+'C'+V.q3r+' = '+nPr(V.q3n,V.q3r)+' / '+fact(V.q3r)+' = '+V.q3comb+'</div>'},
+    {lb:'The "glue together" trick',dr:dQ3,ht:'<p>When two (or more) items must stay together, temporarily treat them as a single combined unit \u2014 this reduces the total number of items to arrange by (group size \u2212 1).</p>'},
+    {lb:'Arranging the units',dr:dQ3,ht:'<p>Arrange the combined unit alongside the other separate items as normal, using factorial counting.</p>'},
+    {lb:'Don\u2019t forget internal arrangements',dr:dQ3,ht:'<p>Multiply by the number of ways the items WITHIN the glued group can be arranged among themselves (e.g. 2 people can swap in 2! = 2 ways).</p>'},
     {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
-      var n=rnd(5,9),r=rnd(2,4);
-      return {question:'Find \u207f\u1d9c\u1d63 where n='+n+' and r='+r+'.',
-        hints:['\u207f\u1d9c\u1d63 = \u207f\u1d56\u1d63 / r!','= '+nPr(n,r)+' / '+fact(r)],
+      var n=rnd(4,7);
+      return {question:'How many ways can '+n+' people be arranged in a row if two specific people must sit next to each other?',
+        hints:['Glue the pair: now arrange ('+(n-1)+') units: ('+(n-1)+')!','Then multiply by 2! for the pair swapping internally'],
+        ans:fact(n-1)*2,tol:0,unit:'',working:'('+(n-1)+')! \u00d7 2 = '+fact(n-1)+' \u00d7 2 = '+(fact(n-1)*2)};
+    })}
+   ]},
+
+  {ey:'Q4 \u00b7 Permutations &amp; Combinations \u00b7 Further Maths',ti:'Combinations (Order Doesn\u2019t Matter)',
+   su:'Using nCr when only the selection matters, not the order.',
+   steps:[
+    {lb:'When to use a combination',dr:dQ4,ht:'<p>Use a combination when only WHICH items are chosen matters, not the order \u2014 e.g. choosing a committee, or a hand of cards, where the items chosen have no distinct roles.</p>'},
+    {lb:'The nCr formula',dr:dQ4,ht:'<p>nCr = n! / [r! \u00d7 (n\u2212r)!]. This divides the permutation count nPr by r! to remove all the duplicate orderings of the same selection.</p>'},
+    {lb:'Comparing nPr and nCr',dr:dQ4,ht:'<p>nCr is always smaller than (or equal to) nPr for the same n and r, since many different orderings collapse into the same combination.</p>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
+      var n=rnd(5,8),r=rnd(2,4);
+      return {question:'How many different committees of '+r+' people can be chosen from '+n+' candidates? (find '+n+'C'+r+')',
+        hints:[n+'C'+r+' = '+n+'! / ['+r+'! \u00d7 ('+n+'\u2212'+r+')!]'],
         ans:nCr(n,r),tol:0,unit:'',working:n+'C'+r+' = '+nCr(n,r)};
     })}
    ]},
 
-  {ey:'Q4 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Permutation vs Combination',
-   su:'When to use each — the key question to always ask.',
+  {ey:'Q5 \u00b7 Permutations &amp; Combinations \u00b7 Further Maths',ti:'Combinations with Restrictions',
+   su:'Handling "must include" or "must exclude" conditions.',
    steps:[
-    {lb:'The key question',dr:dQ4,ht:'<p>Ask: <b>"Does swapping two items give a different outcome?"</b></p><ul class="hl"><li>YES \u2192 Permutation (order matters)</li><li>NO \u2192 Combination (order irrelevant)</li></ul>'},
-    {lb:'Permutation examples',dr:dQ4,ht:'<p>President + VP + Secretary from 8 people — order matters (President \u2260 VP). Use \u207f\u1d56\u1d63.</p><p>PIN codes, race positions, seating arrangements.</p>'},
-    {lb:'Combination examples',dr:dQ4,ht:'<p>Choose a committee of 3 from 8 — {A,B,C} same as {C,B,A}. Use \u207f\u1d9c\u1d63.</p><p>Choosing pizza toppings, selecting a hand of cards, lottery numbers.</p>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){
-      var n=rnd(6,10),r=rnd(2,4);
-      var scenarios=[
-        {q:'How many ways to award 1st, 2nd and 3rd prizes to '+n+' contestants?',ans:nPr(n,r>3?3:r),r:r>3?3:r,type:'P'},
-        {q:'How many ways to choose a team of '+r+' from '+n+' players?',ans:nCr(n,r),r:r,type:'C'}
-      ];
-      var sc=pick(scenarios);
-      return {question:sc.q,
-        hints:[sc.type==='P'?'Order matters \u2192 use permutation':'Order does not matter \u2192 use combination'],
-        ans:sc.ans,tol:0,unit:'ways',working:(sc.type==='P'?n+'P'+sc.r:n+'C'+sc.r)+' = '+sc.ans};
-    })}
-   ]},
-
-  {ey:'Q5 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Committee Selection',
-   su:'Choose '+V.q5choose+' people from a group of '+V.q5total+'.',
-   steps:[
-    {lb:'Set up',dr:dQ5,ht:'<p>Forming a committee: order does not matter, so use a combination.</p><div class="fm">'+V.q5total+'C'+V.q5choose+' = '+V.q5total+'! / ('+V.q5choose+'! \u00d7 '+(V.q5total-V.q5choose)+'!)</div>'},
-    {lb:'Calculate',dr:dQ5,ht:'<div class="fm">= '+V.q5comb+' possible committees</div>'},
-    {lb:'Symmetry property',dr:dQ5,ht:'<div class="fm">\u207f\u1d9c\u1d63 = \u207f\u1d9c\u207f\u207b\u1d63</div><p>Choosing who IS in the team is the same count as choosing who is NOT. '+V.q5total+'C'+V.q5choose+' = '+V.q5total+'C'+(V.q5total-V.q5choose)+' = '+V.q5comb+'</p>'},
+    {lb:'The "must include" trick',dr:dQ5,ht:'<p>If a specific person or item MUST be chosen, treat them as already selected. Then choose the remaining (r\u22121) spots from the remaining (n\u22121) people.</p>'},
+    {lb:'The "must exclude" trick',dr:dQ5,ht:'<p>If a specific person or item must NOT be chosen, simply remove them from the pool entirely. Then choose all r spots from the remaining (n\u22121).</p>'},
+    {lb:'Applying nCr to the reduced problem',dr:dQ5,ht:'<p>Once the restriction is handled, apply the normal nCr formula to whatever reduced n and r values remain.</p>'},
     {lb:'Your turn',dr:dQ5,ht:tryIt(function(){
-      var total=rnd(7,12),choose=rnd(2,4);
-      return {question:'How many ways can a committee of '+choose+' be chosen from '+total+' people?',
-        hints:[total+'C'+choose+' = ?','Use combination formula'],
-        ans:nCr(total,choose),tol:0,unit:'ways',working:total+'C'+choose+' = '+nCr(total,choose)};
+      var n=rnd(6,9),r=rnd(2,4);
+      return {question:'From '+n+' people, a committee of '+r+' is chosen, but one specific person MUST be included. How many different committees are possible? (Hint: choose the remaining ('+(r-1)+') from ('+(n-1)+'))',
+        hints:['Reduces to ('+(n-1)+')C('+(r-1)+')'],
+        ans:nCr(n-1,r-1),tol:0,unit:'',working:'('+(n-1)+')C('+(r-1)+') = '+nCr(n-1,r-1)};
     })}
    ]},
 
-  {ey:'Q6 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Permutations with Restrictions',
-   su:'Arranging 6 people where two must be at the ends.',
+  {ey:'Q6 \u00b7 Permutations &amp; Combinations \u00b7 Further Maths',ti:'Probability Using Permutations and Combinations',
+   su:'Combining counting techniques with probability.',
    steps:[
-    {lb:'Strategy for restrictions',dr:dQ6,ht:'<p>Handle restrictions first, then count the remaining freely. Multiply independent choices together.</p>'},
-    {lb:'Fix the restricted positions',dr:dQ6,ht:'<p>Place A and B at the two ends: 2! = 2 ways (AB or BA at the ends).</p>'},
-    {lb:'Fill remaining positions',dr:dQ6,ht:'<p>Arrange remaining 4 people in the middle 4 spots: 4! = 24 ways.</p><div class="fm">Total = 2 \u00d7 24 = 48</div>'},
+    {lb:'The probability formula',dr:dQ6,ht:'<p>Probability = (number of favourable outcomes) / (total number of possible outcomes). Both counts can be found using nCr or nPr, depending on whether order matters.</p>'},
+    {lb:'Counting favourable outcomes',dr:dQ6,ht:'<p>Carefully identify what counts as "favourable" (e.g. all chosen from one particular subgroup) and use nCr to count those specific selections.</p>'},
+    {lb:'Counting total outcomes',dr:dQ6,ht:'<p>Count the TOTAL number of equally likely selections possible (usually nCr of the full group), ignoring which outcomes are favourable.</p>'},
     {lb:'Your turn',dr:dQ6,ht:tryIt(function(){
-      var n=rnd(5,7);
-      // how many ways to arrange n people in a line with 2 specific people adjacent (treat as block)
-      var ans=fact(n-1)*fact(2);
-      return {question:'In how many ways can '+n+' people sit in a row if two specific people must sit next to each other?',
-        hints:['Treat the pair as a single block: '+(n-1)+' units to arrange','Then multiply by 2! for the pair\'s internal order'],
-        ans:ans,tol:0,unit:'ways',working:(n-1)+'! \u00d7 2! = '+fact(n-1)+' \u00d7 2 = '+ans};
-    })}
-   ]},
-
-  {ey:'Q7 \u00b7 Perm & Comb \u00b7 Further Maths',ti:'Combinations with Conditions',
-   su:'"At least one" problems — use the complement method.',
-   steps:[
-    {lb:'Complement method',dr:dQ7,ht:'<p>For "at least one of type X" problems, it is often easier to count:</p><div class="fm">At least one = Total \u2212 None</div><p>This avoids adding many separate cases.</p>'},
-    {lb:'Set up the subtraction',dr:dQ7,ht:'<div class="fm">10C4 \u2212 6C4</div><p>10C4 = all ways to choose 4 from 10.<br>6C4 = ways to choose 4 with NO women (all from 6 men).</p>'},
-    {lb:'Calculate',dr:dQ7,ht:'<div class="fm">'+ nCr(10,4)+' \u2212 '+nCr(6,4)+' = '+(nCr(10,4)-nCr(6,4))+'</div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){
-      var men=rnd(4,6),women=rnd(3,5),choose=rnd(3,4);
-      var total=men+women;
-      var ans=nCr(total,choose)-nCr(men,choose);
-      return {question:'Choose '+choose+' from '+men+' men and '+women+' women. How many selections include at least one woman?',
-        hints:['Use complement: Total \u2212 (all men)',total+'C'+choose+' \u2212 '+men+'C'+choose],
-        ans:ans,tol:0,unit:'ways',working:total+'C'+choose+'\u2212'+men+'C'+choose+'='+nCr(total,choose)+'\u2212'+nCr(men,choose)+'='+ans};
+      var n=rnd(6,8),r=2,fav=rnd(3,4);
+      return {question:'A committee of '+r+' is chosen at random from '+n+' people, of whom '+fav+' are teachers. What is the numerator (favourable count) when finding the probability both chosen are teachers? (find '+fav+'C'+r+')',
+        hints:[fav+'C'+r+' = '+fav+'! / ['+r+'! \u00d7 ('+fav+'\u2212'+r+')!]'],
+        ans:nCr(fav,r),tol:0,unit:'',working:fav+'C'+r+' = '+nCr(fav,r)+' (this would then be divided by '+n+'C'+r+' for the full probability)'};
     })}
    ]}
 ];
-
 var qi=0,si=0;
 function bSB(){var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
 function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
