@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI & Machine Learning — Digital Technologies | Adorable Portal</title>
+<style>
+  :root {
+    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
+  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
+  header .title { font-size:1.05rem; font-weight:700; }
+  header .strand { font-size:0.8rem; opacity:0.85; }
+  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
+  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
+  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
+  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
+  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
+  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
+  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
+  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
+  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
+  .opt-btn:hover { border-color:var(--red); }
+  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
+  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
+  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
+  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .btn:disabled { background:#ccc; cursor:not-allowed; }
+  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .sb-lbl { font-size:0.8rem; color:#888; }
+  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="title">AI & Machine Learning</div>
+    <div class="strand">Digital Technologies · Emerging Technology</div>
+  </div>
+  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+</header>
+<main>
+  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
+  <div class="card">
+    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
+      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
+      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
+      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
+      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
+      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
+    </svg>
+    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
+    <div class="q-title" id="cp-title"></div>
+    <div class="teach" id="teach-content"></div>
+    <div class="your-turn" id="your-turn" style="display:none">
+      <div class="yt-q" id="yt-question"></div>
+      <div id="yt-opts"></div>
+      <div class="try-fb" id="try-fb"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
+      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const QS = [
+  {ey:'Q1',ti:'Reviewing AI and Machine Learning',teach:'<p>This unit builds on JS3 AI awareness with deeper technical understanding.</p><p>Machine learning is a subset of AI where systems learn patterns from data.</p><p>Deep learning, a further subset, uses layered neural networks for complex pattern recognition.</p><p>Understanding these distinctions clarifies often-confused AI terminology.</p>',q:'What is machine learning a subset of?',opts:["Artificial Intelligence (AI)", "Web development", "Database management", "Network administration"],correct:0,expl:'Machine learning is a specific subset of the broader field of Artificial Intelligence.'},
+  {ey:'Q2',ti:'Types of Machine Learning',teach:'<p>Supervised learning trains models using labelled example data with known correct answers.</p><p>Unsupervised learning finds patterns in data without predefined labels.</p><p>Reinforcement learning trains models through trial, error, and reward feedback.</p><p>Choosing the right approach depends on the problem and available data.</p>',q:'What does supervised learning use to train a model?',opts:["Labelled example data with known correct answers", "No data at all", "Only random guesses", "Only unlabelled data"],correct:0,expl:'Supervised learning trains a model using labelled data, where the correct answers are already known.'},
+  {ey:'Q3',ti:'Neural Networks Basics',teach:'<p>Neural networks are loosely inspired by how neurons connect in the human brain.</p><p>They consist of layers of interconnected nodes that process and pass on information.</p><p>Training adjusts the connections\' "weights" to improve the network\'s predictions.</p><p>Deep learning uses neural networks with many layers to model complex patterns.</p>',q:'What does training a neural network adjust?',opts:["The connections' \"weights\"", "The colour of the network diagram", "The physical hardware itself", "The internet connection speed"],correct:0,expl:'Training adjusts the weights of connections within a neural network to improve its predictive accuracy.'},
+  {ey:'Q4',ti:'Training and Testing Data',teach:'<p>Data is typically split into training data (to build the model) and testing data (to evaluate it).</p><p>Overfitting occurs when a model performs well on training data but poorly on new data.</p><p>A good model generalises well to data it has never seen before.</p><p>Careful data splitting helps produce reliable, trustworthy AI models.</p>',q:'What does "overfitting" describe?',opts:["A model performing well on training data but poorly on new data", "A model that never makes any errors", "A dataset that is too small to use at all", "A model with no training data whatsoever"],correct:0,expl:'Overfitting occurs when a model learns the training data too specifically, failing to generalise well to new, unseen data.'},
+  {ey:'Q5',ti:'AI Bias and Fairness',teach:'<p>AI models can inherit and amplify biases present in their training data.</p><p>Biased AI can lead to unfair or discriminatory outcomes in areas like hiring or lending.</p><p>Diverse, representative training data helps reduce (though not eliminate) bias.</p><p>Ongoing monitoring and auditing help catch bias that emerges after deployment.</p>',q:'What can biased training data lead an AI model to produce?',opts:["Unfair or discriminatory outcomes", "Guaranteed perfectly fair outcomes always", "No outcomes of any kind", "Faster processing with no other effect"],correct:0,expl:'Biased training data can cause an AI model to produce unfair or discriminatory outcomes, reflecting that underlying bias.'},
+  {ey:'Q6',ti:'Practical Machine Learning Tools',teach:'<p>Libraries like scikit-learn provide accessible tools for building machine learning models in Python.</p><p>Pre-trained models allow developers to use powerful AI capabilities without training from scratch.</p><p>Cloud AI services offer machine learning capabilities without needing specialised local hardware.</p><p>Hands-on practice with real tools builds practical, employable AI skills.</p>',q:'What advantage do pre-trained models offer developers?',opts:["Powerful AI capabilities without training a model from scratch", "Guaranteed 100% accuracy in every situation", "No need for any data whatsoever", "Free unlimited computing power forever"],correct:0,expl:'Pre-trained models allow developers to leverage existing AI capabilities without the time and resources needed to train a model from scratch.'},
+  {ey:'Q7',ti:'AI Applications Across Industries',teach:'<p>Healthcare uses AI for diagnostic support and medical image analysis.</p><p>Finance uses AI for fraud detection and algorithmic trading.</p><p>Agriculture uses AI for crop monitoring and yield prediction.</p><p>Understanding real applications helps connect AI theory to practical impact.</p>',q:'What is one healthcare application of AI mentioned here?',opts:["Diagnostic support and medical image analysis", "Only scheduling staff holidays", "Only managing hospital parking", "Only designing hospital logos"],correct:0,expl:'AI is used in healthcare to support diagnostics and analyse medical images, among other applications.'},
+  {ey:'Q8',ti:'Limitations of Current AI',teach:'<p>Current AI systems generally excel at narrow, specific tasks rather than general reasoning.</p><p>AI models can produce confident but factually incorrect outputs.</p><p>AI lacks genuine understanding — it identifies statistical patterns, not meaning.</p><p>Recognising these limitations supports responsible, realistic use of AI tools.</p>',q:'What do current AI systems generally excel at?',opts:["Narrow, specific tasks rather than general reasoning", "Complete, human-like general reasoning about anything", "Physical labour tasks exclusively", "Nothing useful whatsoever"],correct:0,expl:'Most current AI systems excel at narrow, specific tasks, rather than possessing broad, general human-like reasoning.'},
+  {ey:'Q9',ti:'Building a Simple Machine Learning Model',teach:'<p>A simple project (like predicting house prices from data) applies core ML concepts practically.</p><p>Following a clear process — gather data, train, test, evaluate — builds genuine understanding.</p><p>Reflecting on model accuracy and limitations deepens critical AI literacy.</p><p>This hands-on approach connects theory directly to practical machine learning skill.</p>',q:'What process helps build genuine understanding when creating a simple ML model?',opts:["Gather data, train, test, evaluate", "Guess randomly with no structured process", "Skip testing and evaluation entirely", "Avoid using any real data at all"],correct:0,expl:'Following a clear process of gathering data, training, testing, and evaluating builds genuine, practical machine learning understanding.'},
+  {ey:'Q10',ti:'The Ethical and Societal Impact of AI',teach:'<p>AI raises important questions about jobs, privacy, bias, and accountability.</p><p>Global regulation of AI is still developing and varies significantly between countries.</p><p>Responsible AI development considers societal impact, not just technical performance.</p><p>Preparing for an AI-shaped future requires both technical and ethical understanding.</p>',q:'What kind of understanding does preparing for an AI-shaped future require?',opts:["Both technical and ethical understanding", "Only technical understanding, with no ethical consideration", "Only ethical understanding, with no technical skill", "Neither technical nor ethical understanding"],correct:0,expl:'Preparing responsibly for an AI-influenced future requires both strong technical skills and genuine ethical understanding.'}
+  ];
+  const TOTAL = QS.length;
+  let idx = 0;
+  let answered = new Array(TOTAL).fill(false);
+
+  function render() {
+    const q = QS[idx];
+    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
+    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
+    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
+    document.getElementById('cp-title').textContent = q.ti;
+    document.getElementById('ey').innerHTML = q.teach;
+    document.getElementById('diagram-title').textContent = q.ti;
+    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
+    const yt = document.getElementById('your-turn');
+    yt.style.display = 'block';
+    document.getElementById('yt-question').textContent = q.q;
+    const optsDiv = document.getElementById('yt-opts');
+    optsDiv.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.textContent = opt;
+      b.onclick = () => selectAnswer(i, b);
+      optsDiv.appendChild(b);
+    });
+    document.getElementById('try-fb').className = 'try-fb';
+    document.getElementById('try-fb').textContent = '';
+    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
+    document.getElementById('prev-btn').disabled = (idx === 0);
+  }
+
+  function selectAnswer(i, btn) {
+    const q = QS[idx];
+    const fb = document.getElementById('try-fb');
+    const allBtns = document.querySelectorAll('.opt-btn');
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+    if (i === q.correct) {
+      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
+      fb.className = 'try-fb ok';
+      fb.textContent = '✓ Correct! ' + q.expl;
+      answered[idx] = true;
+    } else {
+      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
+      fb.className = 'try-fb er';
+      fb.textContent = '✗ Not quite. ' + q.expl;
+    }
+  }
+
+  function nextStep() {
+    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
+    render();
+  }
+  function prevStep() {
+    if (idx > 0) { idx--; render(); }
+  }
+
+  render();
+</script>
+
+<!-- hidden element used by render() per gold-standard pattern -->
+<div id="ey" style="display:none"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+  const _abcTopicCode = 'DT11-AIM-01';
+
+  (async function checkLogin() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    window._abcSession = session;
+    window._abcSupabase = supabase;
+  })();
+
+  window.markComplete = async function() {
+    const session = window._abcSession;
+    if (!session) return;
+    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
+    if (!topicRow) return;
+    await supabase.from('walkthrough_progress').upsert({
+      student_id: session.user.id,
+      topic_id: topicRow.id,
+      status: 'completed',
+      last_visited_at: new Date().toISOString()
+    }, { onConflict: 'student_id,topic_id' });
+  };
+</script>
+</body>
+</html>

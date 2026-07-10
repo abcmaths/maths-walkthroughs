@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Databases (Advanced) — Digital Technologies | Adorable Portal</title>
+<style>
+  :root {
+    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
+  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
+  header .title { font-size:1.05rem; font-weight:700; }
+  header .strand { font-size:0.8rem; opacity:0.85; }
+  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
+  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
+  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
+  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
+  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
+  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
+  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
+  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
+  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
+  .opt-btn:hover { border-color:var(--red); }
+  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
+  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
+  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
+  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .btn:disabled { background:#ccc; cursor:not-allowed; }
+  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .sb-lbl { font-size:0.8rem; color:#888; }
+  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="title">SQL Databases (Advanced)</div>
+    <div class="strand">Digital Technologies · Data & Databases</div>
+  </div>
+  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+</header>
+<main>
+  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
+  <div class="card">
+    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
+      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
+      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
+      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
+      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
+      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
+    </svg>
+    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
+    <div class="q-title" id="cp-title"></div>
+    <div class="teach" id="teach-content"></div>
+    <div class="your-turn" id="your-turn" style="display:none">
+      <div class="yt-q" id="yt-question"></div>
+      <div id="yt-opts"></div>
+      <div class="try-fb" id="try-fb"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
+      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const QS = [
+  {ey:'Q1',ti:'Advanced Querying',teach:'<p>Subqueries let you nest one SQL query inside another for more complex filtering.</p><p>The HAVING clause filters aggregated results, unlike WHERE which filters individual rows.</p><p>ORDER BY sorts query results, ascending or descending.</p><p>Mastering advanced queries unlocks much more powerful data analysis.</p>',q:'What does the HAVING clause filter, unlike WHERE?',opts:["Aggregated (grouped) results", "Individual unaggregated rows only", "Only column names", "Only table names"],correct:0,expl:'HAVING filters aggregated/grouped results, while WHERE filters individual rows before aggregation.'},
+  {ey:'Q2',ti:'Multiple Table Joins',teach:'<p>Complex queries often join three or more related tables together.</p><p>Understanding table relationships (one-to-many, many-to-many) is essential for correct joins.</p><p>Junction tables help manage many-to-many relationships between two tables.</p><p>Well-designed joins retrieve exactly the combined data needed, without duplication errors.</p>',q:'What kind of table helps manage a many-to-many relationship?',opts:["A junction table", "A primary key only", "A foreign key alone", "A single unrelated table"],correct:0,expl:'A junction table sits between two related tables, managing the connections in a many-to-many relationship.'},
+  {ey:'Q3',ti:'Views',teach:'<p>A view is a saved, reusable SQL query that behaves like a virtual table.</p><p>Views can simplify complex queries by hiding underlying complexity.</p><p>Views can also help restrict what data certain users are able to see.</p><p>Understanding views supports both usability and security in database design.</p>',q:'What does a database view behave like?',opts:["A virtual, reusable table based on a saved query", "A physical storage device", "A type of index only", "A type of encryption key"],correct:0,expl:'A view acts like a virtual table, built from a saved query, that can be queried like a regular table.'},
+  {ey:'Q4',ti:'Indexes',teach:'<p>An index speeds up data retrieval by creating a fast lookup structure for a column.</p><p>Indexes trade some extra storage space and write speed for much faster reads.</p><p>Choosing which columns to index depends on how the data will be queried.</p><p>Well-chosen indexes can dramatically improve database performance for large tables.</p>',q:'What is the main benefit of a database index?',opts:["Faster data retrieval", "Reduced storage space always", "Simpler table design", "Guaranteed data encryption"],correct:0,expl:'An index creates a fast lookup structure that speeds up data retrieval for the indexed column(s).'},
+  {ey:'Q5',ti:'Transactions',teach:'<p>A transaction groups multiple database operations so they succeed or fail together.</p><p>ACID properties (Atomicity, Consistency, Isolation, Durability) describe reliable transactions.</p><p>Transactions prevent partial, inconsistent updates if something goes wrong mid-process.</p><p>Understanding transactions is essential for reliable, real-world database applications like banking.</p>',q:'What does the "A" in ACID stand for?',opts:["Atomicity", "Availability", "Authentication", "Aggregation"],correct:0,expl:'The "A" in ACID stands for Atomicity — meaning a transaction either fully completes or has no effect at all.'},
+  {ey:'Q6',ti:'Database Design Patterns',teach:'<p>Well-designed schemas balance normalisation with practical query performance.</p><p>Denormalisation sometimes trades some redundancy for faster read performance.</p><p>Understanding common patterns helps design databases that scale well.</p><p>Real-world database design often balances multiple, sometimes competing, priorities.</p>',q:'What does denormalisation sometimes trade for faster read performance?',opts:["Some data redundancy", "Guaranteed data loss", "Complete data security", "Slower write speed only, with no other trade-off"],correct:0,expl:'Denormalisation intentionally introduces some data redundancy in exchange for improved read performance.'},
+  {ey:'Q7',ti:'NoSQL Databases',teach:'<p>NoSQL databases store data in formats other than traditional relational tables, like documents or key-value pairs.</p><p>They are often used for large-scale, flexible, or rapidly changing data.</p><p>Examples include MongoDB (document-based) and Redis (key-value based).</p><p>Choosing SQL vs NoSQL depends on the structure and scale of the data involved.</p>',q:'What is a key difference of NoSQL databases compared to relational databases?',opts:["They store data in formats other than traditional tables", "They cannot store any data at all", "They always require SQL to query them", "They are identical to relational databases in every way"],correct:0,expl:'NoSQL databases store data using alternative formats, such as documents or key-value pairs, rather than traditional relational tables.'},
+  {ey:'Q8',ti:'Database Backup and Recovery',teach:'<p>Regular backups protect against data loss from hardware failure, errors, or attacks.</p><p>A recovery plan defines how to restore data and resume operations after a failure.</p><p>Testing backups regularly ensures they will actually work when genuinely needed.</p><p>Backup strategies balance frequency, storage cost, and acceptable data loss.</p>',q:'Why should backups be tested regularly?',opts:["To ensure they will actually work when genuinely needed", "Testing backups is never necessary", "To intentionally corrupt old data", "To increase storage costs unnecessarily"],correct:0,expl:'Regularly testing backups ensures that, when a real failure occurs, the backup can actually be used to restore data successfully.'},
+  {ey:'Q9',ti:'Database Performance Tuning',teach:'<p>Query optimisation improves how efficiently a database retrieves requested data.</p><p>Analysing query execution plans reveals where performance bottlenecks occur.</p><p>Proper indexing, efficient queries, and good schema design all support performance.</p><p>Performance tuning becomes increasingly important as databases grow larger.</p>',q:'What can reveal where performance bottlenecks occur in a database query?',opts:["A query execution plan", "A colour scheme", "A file extension", "A password policy"],correct:0,expl:'A query execution plan shows how the database processes a query, helping identify performance bottlenecks.'},
+  {ey:'Q10',ti:'Building a Database-Driven Application',teach:'<p>Combining SQL skills with programming (like Python) enables full database-driven applications.</p><p>Applications typically connect to a database, run queries, and display results to users.</p><p>Security practices (like parameterised queries) remain essential when connecting code to databases.</p><p>This integration connects directly to the SS2 web/mobile development work.</p>',q:'What security practice helps prevent SQL injection when code connects to a database?',opts:["Using parameterised queries", "Disabling all security checks", "Storing passwords in plain text", "Removing all input validation"],correct:0,expl:'Parameterised queries safely separate SQL code from user input, helping prevent SQL injection attacks.'}
+  ];
+  const TOTAL = QS.length;
+  let idx = 0;
+  let answered = new Array(TOTAL).fill(false);
+
+  function render() {
+    const q = QS[idx];
+    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
+    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
+    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
+    document.getElementById('cp-title').textContent = q.ti;
+    document.getElementById('ey').innerHTML = q.teach;
+    document.getElementById('diagram-title').textContent = q.ti;
+    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
+    const yt = document.getElementById('your-turn');
+    yt.style.display = 'block';
+    document.getElementById('yt-question').textContent = q.q;
+    const optsDiv = document.getElementById('yt-opts');
+    optsDiv.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.textContent = opt;
+      b.onclick = () => selectAnswer(i, b);
+      optsDiv.appendChild(b);
+    });
+    document.getElementById('try-fb').className = 'try-fb';
+    document.getElementById('try-fb').textContent = '';
+    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
+    document.getElementById('prev-btn').disabled = (idx === 0);
+  }
+
+  function selectAnswer(i, btn) {
+    const q = QS[idx];
+    const fb = document.getElementById('try-fb');
+    const allBtns = document.querySelectorAll('.opt-btn');
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+    if (i === q.correct) {
+      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
+      fb.className = 'try-fb ok';
+      fb.textContent = '✓ Correct! ' + q.expl;
+      answered[idx] = true;
+    } else {
+      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
+      fb.className = 'try-fb er';
+      fb.textContent = '✗ Not quite. ' + q.expl;
+    }
+  }
+
+  function nextStep() {
+    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
+    render();
+  }
+  function prevStep() {
+    if (idx > 0) { idx--; render(); }
+  }
+
+  render();
+</script>
+
+<!-- hidden element used by render() per gold-standard pattern -->
+<div id="ey" style="display:none"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+  const _abcTopicCode = 'DT11-DB-01';
+
+  (async function checkLogin() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    window._abcSession = session;
+    window._abcSupabase = supabase;
+  })();
+
+  window.markComplete = async function() {
+    const session = window._abcSession;
+    if (!session) return;
+    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
+    if (!topicRow) return;
+    await supabase.from('walkthrough_progress').upsert({
+      student_id: session.user.id,
+      topic_id: topicRow.id,
+      status: 'completed',
+      last_visited_at: new Date().toISOString()
+    }, { onConflict: 'student_id,topic_id' });
+  };
+</script>
+</body>
+</html>

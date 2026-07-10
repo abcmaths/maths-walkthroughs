@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basic Algorithms — Digital Technologies | Adorable Portal</title>
+<style>
+  :root {
+    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
+  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
+  header .title { font-size:1.05rem; font-weight:700; }
+  header .strand { font-size:0.8rem; opacity:0.85; }
+  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
+  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
+  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
+  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
+  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
+  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
+  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
+  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
+  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
+  .opt-btn:hover { border-color:var(--red); }
+  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
+  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
+  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
+  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .btn:disabled { background:#ccc; cursor:not-allowed; }
+  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .sb-lbl { font-size:0.8rem; color:#888; }
+  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="title">Basic Algorithms</div>
+    <div class="strand">Digital Technologies · Computational Thinking</div>
+  </div>
+  <div class="sb-lbl" id="sb">Step 1 / 50</div>
+</header>
+<main>
+  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:2%"></div></div>
+  <div class="card">
+    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
+      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
+      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
+      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
+      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
+      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
+    </svg>
+    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
+    <div class="q-title" id="cp-title"></div>
+    <div class="teach" id="ey"></div>
+    <div class="your-turn" id="your-turn" style="display:none">
+      <div class="yt-q" id="yt-question"></div>
+      <div id="yt-opts"></div>
+      <div class="try-fb" id="try-fb"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
+      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Each checkpoint: ti = title, teach = array of 4 explanation paragraphs (one per step),
+  // then a 5th "Your Turn" step with the question.
+  const QS = [
+  {ey:'Q1',ti:'What is an Algorithm?',teach:[
+    '<p>An algorithm is a precise, step-by-step set of instructions to solve a problem.</p>',
+    '<p>Recipes, directions and dance steps are all everyday examples of algorithms.</p>',
+    '<p>Good algorithms are clear, unambiguous, and produce a correct result.</p>',
+    '<p>Computer programs are built from algorithms.</p>'
+  ],q:'Which best describes an algorithm?',opts:["A random guess", "A step-by-step set of instructions to solve a problem", "A type of computer virus", "A brand of laptop"],correct:1,expl:'An algorithm is a precise sequence of steps designed to solve a specific problem.'},
+  {ey:'Q2',ti:'Sequencing',teach:[
+    '<p>Sequencing means putting steps in the correct order.</p>',
+    '<p>If steps are out of order, the algorithm may fail or give wrong results.</p>',
+    '<p>Everyday tasks like making tea rely on correct sequencing.</p>',
+    '<p>Programmers must carefully plan the order of instructions.</p>'
+  ],q:'What happens if the steps of an algorithm are in the wrong order?',opts:["Nothing changes", "It may fail or produce incorrect results", "It always still works perfectly", "It becomes faster"],correct:1,expl:'Incorrect sequencing can cause an algorithm to fail or produce the wrong outcome.'},
+  {ey:'Q3',ti:'Decisions (Selection)',teach:[
+    '<p>Selection means making a choice based on a condition (if/else).</p>',
+    '<p>Example: "IF it is raining, THEN take an umbrella."</p>',
+    '<p>Decisions let algorithms respond differently depending on circumstances.</p>',
+    '<p>Selection is one of the three core building blocks of algorithms.</p>'
+  ],q:'Which statement is an example of "selection" in an algorithm?',opts:["Do step 1, then step 2, then step 3", "IF it is raining, THEN take an umbrella", "Repeat this 10 times", "Print \"hello\""],correct:1,expl:'This is a decision (if/then) — the classic structure of selection in algorithms.'},
+  {ey:'Q4',ti:'Loops (Iteration)',teach:[
+    '<p>Iteration means repeating a set of steps multiple times.</p>',
+    '<p>Loops save us from writing the same instructions over and over.</p>',
+    '<p>Example: "Repeat 10 times: do a push-up."</p>',
+    '<p>Loops can repeat a fixed number of times, or until a condition is met.</p>'
+  ],q:'What is another name for repeating steps in an algorithm?',opts:["Selection", "Sequencing", "Iteration (looping)", "Debugging"],correct:2,expl:'Iteration, or looping, is the term for repeating a set of steps multiple times.'},
+  {ey:'Q5',ti:'Flowcharts',teach:[
+    '<p>Flowcharts represent algorithms visually using standard symbols.</p>',
+    '<p>Ovals show start/end; rectangles show processes; diamonds show decisions.</p>',
+    '<p>Arrows show the direction/flow of the algorithm.</p>',
+    '<p>Flowcharts help plan and communicate algorithms before coding them.</p>'
+  ],q:'What shape is typically used to show a decision in a flowchart?',opts:["Rectangle", "Oval", "Diamond", "Circle"],correct:2,expl:'A diamond shape represents a decision point (yes/no branch) in a flowchart.'},
+  {ey:'Q6',ti:'Pseudocode',teach:[
+    '<p>Pseudocode is a way of writing algorithms using informal, code-like language.</p>',
+    '<p>It focuses on logic, not exact programming syntax.</p>',
+    '<p>Pseudocode makes it easier to plan a program before writing real code.</p>',
+    '<p>Example: "IF score > 50 THEN print PASS ELSE print FAIL".</p>'
+  ],q:'What is the main purpose of pseudocode?',opts:["To confuse programmers", "To plan algorithm logic without worrying about exact syntax", "To replace all real programming languages", "To design graphics"],correct:1,expl:'Pseudocode lets you plan the logic of an algorithm in plain, code-like language before writing actual code.'},
+  {ey:'Q7',ti:'Searching Algorithms',teach:[
+    '<p>A linear search checks items one by one until it finds a match.</p>',
+    '<p>A binary search repeatedly halves a sorted list to find items faster.</p>',
+    '<p>Binary search only works on already-sorted data.</p>',
+    '<p>Choosing the right search algorithm affects speed, especially with large data.</p>'
+  ],q:'Which search method requires the data to already be sorted?',opts:["Linear search", "Binary search", "Random search", "No search method needs sorted data"],correct:1,expl:'Binary search relies on the data being sorted so it can repeatedly eliminate half the remaining items.'},
+  {ey:'Q8',ti:'Sorting Algorithms',teach:[
+    '<p>Sorting arranges data into a specific order (ascending or descending).</p>',
+    '<p>Bubble sort repeatedly swaps adjacent items that are out of order.</p>',
+    '<p>Sorted data makes searching and analysis much easier.</p>',
+    '<p>Different sorting algorithms have different speeds for large datasets.</p>'
+  ],q:'What does a sorting algorithm do?',opts:["Deletes random data", "Arranges data into a specific order", "Encrypts data", "Connects to the internet"],correct:1,expl:'Sorting algorithms arrange a list of data into a defined order, like ascending or descending.'},
+  {ey:'Q9',ti:'Debugging Algorithms',teach:[
+    '<p>A "bug" is an error that causes incorrect or unexpected behaviour.</p>',
+    '<p>Debugging is the process of finding and fixing bugs.</p>',
+    '<p>Tracing through an algorithm step by step helps locate errors.</p>',
+    '<p>Testing with different inputs helps reveal hidden bugs.</p>'
+  ],q:'What is "debugging"?',opts:["Adding more bugs to a program", "Finding and fixing errors in an algorithm or program", "Deleting a program entirely", "Designing a new computer"],correct:1,expl:'Debugging is the process of identifying and correcting errors ("bugs") in an algorithm or program.'},
+  {ey:'Q10',ti:'Real-World Algorithm Design',teach:[
+    '<p>Algorithms solve real problems: GPS route-finding, exam timetabling, recipe scaling.</p>',
+    '<p>Good algorithm design breaks a big problem into smaller sub-problems (decomposition).</p>',
+    '<p>Testing an algorithm with edge cases (unusual inputs) reveals weaknesses.</p>',
+    '<p>Well-designed algorithms are efficient, correct, and easy to understand.</p>'
+  ],q:'Breaking a big problem into smaller sub-problems is called what?',opts:["Decomposition", "Deletion", "Decoration", "Duplication"],correct:0,expl:'Decomposition means breaking a complex problem down into smaller, more manageable parts.'}
+  ];
+
+  const STEPS_PER_Q = 5; // 4 teach steps + 1 Your Turn step
+  const TOTAL = QS.length * STEPS_PER_Q;
+  let idx = 0; // global step index across all questions
+  let answered = new Array(QS.length).fill(false);
+
+  function currentQuestionIndex() { return Math.floor(idx / STEPS_PER_Q); }
+  function currentSubStep() { return idx % STEPS_PER_Q; } // 0-3 = teach, 4 = your turn
+
+  function render() {
+    const qi = currentQuestionIndex();
+    const sub = currentSubStep();
+    const q = QS[qi];
+
+    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
+    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
+    document.getElementById('step-label').textContent = 'Checkpoint ' + (qi+1) + ' of ' + QS.length;
+    document.getElementById('cp-title').textContent = q.ti;
+    document.getElementById('diagram-title').textContent = q.ti;
+    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
+
+    const yt = document.getElementById('your-turn');
+    const eyDiv = document.getElementById('ey');
+
+    if (sub < 4) {
+      // Teaching step: show this paragraph, hide Your Turn
+      eyDiv.innerHTML = q.teach[sub];
+      eyDiv.style.display = 'block';
+      yt.style.display = 'none';
+    } else {
+      // Your Turn step: show full teaching recap + question
+      eyDiv.innerHTML = q.teach.join('');
+      eyDiv.style.display = 'block';
+      yt.style.display = 'block';
+      document.getElementById('yt-question').textContent = q.q;
+      const optsDiv = document.getElementById('yt-opts');
+      optsDiv.innerHTML = '';
+      q.opts.forEach((opt, i) => {
+        const b = document.createElement('button');
+        b.className = 'opt-btn';
+        b.textContent = opt;
+        b.onclick = () => selectAnswer(i, b);
+        optsDiv.appendChild(b);
+      });
+      document.getElementById('try-fb').className = 'try-fb';
+      document.getElementById('try-fb').textContent = '';
+    }
+
+    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
+    document.getElementById('prev-btn').disabled = (idx === 0);
+  }
+
+  function selectAnswer(i, btn) {
+    const qi = currentQuestionIndex();
+    const q = QS[qi];
+    const fb = document.getElementById('try-fb');
+    const allBtns = document.querySelectorAll('.opt-btn');
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+    if (i === q.correct) {
+      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
+      fb.className = 'try-fb ok';
+      fb.textContent = '✓ Correct! ' + q.expl;
+      answered[qi] = true;
+    } else {
+      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
+      fb.className = 'try-fb er';
+      fb.textContent = '✗ Not quite. ' + q.expl;
+    }
+  }
+
+  function nextStep() {
+    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
+    render();
+  }
+  function prevStep() {
+    if (idx > 0) { idx--; render(); }
+  }
+
+  render();
+</script>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+  const _abcTopicCode = 'DT7-PRG-01';
+
+  (async function checkLogin() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    window._abcSession = session;
+    window._abcSupabase = supabase;
+  })();
+
+  window.markComplete = async function() {
+    const session = window._abcSession;
+    if (!session) return;
+    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
+    if (!topicRow) return;
+    await supabase.from('walkthrough_progress').upsert({
+      student_id: session.user.id,
+      topic_id: topicRow.id,
+      status: 'completed',
+      last_visited_at: new Date().toISOString()
+    }, { onConflict: 'student_id,topic_id' });
+  };
+</script>
+</body>
+</html>

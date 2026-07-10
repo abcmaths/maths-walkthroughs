@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scratch / Block Programming — Digital Technologies | Adorable Portal</title>
+<style>
+  :root {
+    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
+  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
+  header .title { font-size:1.05rem; font-weight:700; }
+  header .strand { font-size:0.8rem; opacity:0.85; }
+  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
+  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
+  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
+  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
+  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
+  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
+  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
+  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
+  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
+  .opt-btn:hover { border-color:var(--red); }
+  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
+  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
+  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
+  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .btn:disabled { background:#ccc; cursor:not-allowed; }
+  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .sb-lbl { font-size:0.8rem; color:#888; }
+  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="title">Scratch / Block Programming</div>
+    <div class="strand">Digital Technologies · Computational Thinking</div>
+  </div>
+  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+</header>
+<main>
+  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
+  <div class="card">
+    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
+      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
+      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
+      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
+      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
+      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
+    </svg>
+    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
+    <div class="q-title" id="cp-title"></div>
+    <div class="teach" id="teach-content"></div>
+    <div class="your-turn" id="your-turn" style="display:none">
+      <div class="yt-q" id="yt-question"></div>
+      <div id="yt-opts"></div>
+      <div class="try-fb" id="try-fb"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
+      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const QS = [
+  {ey:'Q1',ti:'Introducing Scratch',teach:'<p>Scratch is a visual, block-based programming environment developed by MIT.</p><p>Users snap coloured blocks together to build programs (called "scripts").</p><p>Scratch is widely used to teach programming logic to beginners worldwide.</p><p>Programs in Scratch can control sprites (characters) on a stage.</p>',q:'What organisation developed Scratch?',opts:["Google", "MIT", "Microsoft", "NERDC"],correct:1,expl:'Scratch was developed by the MIT Media Lab as an educational programming environment.'},
+  {ey:'Q2',ti:'Sprites and the Stage',teach:'<p>A sprite is a character or object that a Scratch program controls.</p><p>The stage is the visual area where sprites move and interact.</p><p>Multiple sprites can exist in one project, each with their own scripts.</p><p>Backdrops set the scene or environment behind the sprites.</p>',q:'What is a "sprite" in Scratch?',opts:["The background of the stage", "A character or object controlled by the program", "A type of loop", "A file format"],correct:1,expl:'A sprite is a character or object in Scratch that can be programmed to move, change, and interact.'},
+  {ey:'Q3',ti:'Motion Blocks',teach:'<p>Motion blocks control how a sprite moves: "move steps", "turn degrees", "go to x,y".</p><p>Combining motion blocks with loops creates continuous or repeated movement.</p><p>Coordinates on the Scratch stage define exact sprite positions.</p><p>Motion is often the first type of block beginners experiment with.</p>',q:'What might a "move 10 steps" block do to a sprite?',opts:["Delete the sprite", "Move the sprite forward by 10 steps", "Change the sprite's colour", "Play a sound"],correct:1,expl:'This block moves the sprite forward by the specified number of steps in the direction it is facing.'},
+  {ey:'Q4',ti:'Events Blocks',teach:'<p>Event blocks (like "when green flag clicked") trigger scripts to start running.</p><p>Other events include "when key pressed" or "when sprite clicked".</p><p>Event-driven scripts respond directly to user interaction.</p><p>Nearly every Scratch script begins with an event block.</p>',q:'What triggers most Scratch scripts to start running?',opts:["Nothing — they run automatically with no trigger", "An event block, like clicking the green flag", "A random number generator only", "The sprite's colour changing"],correct:1,expl:'Scratch scripts are typically triggered by an event block, such as clicking the green flag or pressing a key.'},
+  {ey:'Q5',ti:'Control Blocks (Loops and Selection)',teach:'<p>"Repeat" blocks create loops that run a set number of times.</p><p>"Forever" blocks loop endlessly until the program is stopped.</p><p>"If/else" blocks let scripts branch based on a condition.</p><p>Control blocks bring the three core programming structures into Scratch.</p>',q:'Which Scratch block would loop forever until stopped?',opts:["\"Repeat 10\"", "\"Forever\"", "\"If/else\"", "\"Move 10 steps\""],correct:1,expl:'The "Forever" block creates an infinite loop that continues until the program is stopped.'},
+  {ey:'Q6',ti:'Sensing Blocks',teach:'<p>Sensing blocks detect things like mouse position, key presses, or collisions.</p><p>"Touching" blocks detect if a sprite is touching another sprite or the edge.</p><p>Sensing enables interactivity — reacting to the player or environment.</p><p>Combining sensing with control blocks creates responsive, game-like behaviour.</p>',q:'What might a "touching" sensing block be used to detect?',opts:["The current time only", "Whether a sprite is touching another sprite or edge", "The internet connection speed", "The colour of the desktop wallpaper"],correct:1,expl:'"Touching" blocks detect collisions — whether a sprite is touching another sprite, the edge, or a specific colour.'},
+  {ey:'Q7',ti:'Variables in Scratch',teach:'<p>Variables in Scratch store values like score, lives, or a player\'s name.</p><p>You can create custom variables and display them on the stage.</p><p>Variables can be changed using blocks like "change [variable] by 1".</p><p>Using variables well is essential for building interactive games.</p>',q:'What might a variable called "score" be used to track in a Scratch game?',opts:["The player's current score", "The internet connection status", "The sprite's costume number only", "The colour palette"],correct:0,expl:'A variable named "score" is commonly used to track and update a player\'s current score during a game.'},
+  {ey:'Q8',ti:'Broadcasting Messages',teach:'<p>Broadcast blocks let one sprite send a message that other sprites can receive.</p><p>This allows sprites to coordinate actions without being directly connected.</p><p>"When I receive [message]" blocks trigger a response to a broadcast.</p><p>Broadcasting is powerful for building multi-sprite interactive stories or games.</p>',q:'What does a "broadcast" block allow one sprite to do?',opts:["Delete another sprite permanently", "Send a message that other sprites can respond to", "Change the internet settings", "Print a physical document"],correct:1,expl:'Broadcast blocks send a message that other sprites can detect and respond to, enabling coordination between sprites.'},
+  {ey:'Q9',ti:'Debugging Scratch Projects',teach:'<p>Running a script step by step helps spot where behaviour goes wrong.</p><p>Checking block order and nesting often reveals logical mistakes.</p><p>Testing with different inputs (like key presses) reveals edge-case bugs.</p><p>The Scratch community forums are a helpful resource for troubleshooting.</p>',q:'What is a useful strategy for debugging a Scratch project?',opts:["Deleting the whole project immediately", "Running the script step by step to find where it goes wrong", "Ignoring the problem", "Changing the sprite's costume randomly"],correct:1,expl:'Carefully running through a script step by step helps identify exactly where the logic goes wrong.'},
+  {ey:'Q10',ti:'From Scratch to Text-Based Code',teach:'<p>Concepts learned in Scratch (sequence, selection, iteration, variables) transfer directly to text-based languages like Python.</p><p>Scratch removes syntax worries, letting learners focus purely on logic first.</p><p>Many programmers begin with block-based tools before moving to text-based coding.</p><p>This progression builds confidence before tackling JS3\'s Python content.</p>',q:'Why is Scratch often used before learning a text-based language like Python?',opts:["It teaches completely unrelated skills", "It builds core logic concepts without syntax worries, easing the transition", "It is more difficult than Python", "It cannot represent loops or variables"],correct:1,expl:'Scratch lets learners build core programming logic without worrying about exact typing syntax, easing the transition to text-based languages.'}
+  ];
+  const TOTAL = QS.length;
+  let idx = 0;
+  let answered = new Array(TOTAL).fill(false);
+
+  function render() {
+    const q = QS[idx];
+    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
+    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
+    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
+    document.getElementById('cp-title').textContent = q.ti;
+    document.getElementById('ey').innerHTML = q.teach;
+    document.getElementById('diagram-title').textContent = q.ti;
+    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
+    const yt = document.getElementById('your-turn');
+    yt.style.display = 'block';
+    document.getElementById('yt-question').textContent = q.q;
+    const optsDiv = document.getElementById('yt-opts');
+    optsDiv.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.textContent = opt;
+      b.onclick = () => selectAnswer(i, b);
+      optsDiv.appendChild(b);
+    });
+    document.getElementById('try-fb').className = 'try-fb';
+    document.getElementById('try-fb').textContent = '';
+    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
+    document.getElementById('prev-btn').disabled = (idx === 0);
+  }
+
+  function selectAnswer(i, btn) {
+    const q = QS[idx];
+    const fb = document.getElementById('try-fb');
+    const allBtns = document.querySelectorAll('.opt-btn');
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+    if (i === q.correct) {
+      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
+      fb.className = 'try-fb ok';
+      fb.textContent = '✓ Correct! ' + q.expl;
+      answered[idx] = true;
+    } else {
+      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
+      fb.className = 'try-fb er';
+      fb.textContent = '✗ Not quite. ' + q.expl;
+    }
+  }
+
+  function nextStep() {
+    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
+    render();
+  }
+  function prevStep() {
+    if (idx > 0) { idx--; render(); }
+  }
+
+  render();
+</script>
+
+<!-- hidden element used by render() per gold-standard pattern -->
+<div id="ey" style="display:none"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+  const _abcTopicCode = 'DT8-PRG-03';
+
+  (async function checkLogin() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    window._abcSession = session;
+    window._abcSupabase = supabase;
+  })();
+
+  window.markComplete = async function() {
+    const session = window._abcSession;
+    if (!session) return;
+    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
+    if (!topicRow) return;
+    await supabase.from('walkthrough_progress').upsert({
+      student_id: session.user.id,
+      topic_id: topicRow.id,
+      status: 'completed',
+      last_visited_at: new Date().toISOString()
+    }, { onConflict: 'student_id,topic_id' });
+  };
+</script>
+</body>
+</html>

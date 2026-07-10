@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Databases & SQL — Digital Technologies | Adorable Portal</title>
+<style>
+  :root {
+    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
+  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
+  header .title { font-size:1.05rem; font-weight:700; }
+  header .strand { font-size:0.8rem; opacity:0.85; }
+  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
+  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
+  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
+  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
+  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
+  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
+  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
+  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
+  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
+  .opt-btn:hover { border-color:var(--red); }
+  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
+  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
+  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
+  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .btn:disabled { background:#ccc; cursor:not-allowed; }
+  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .sb-lbl { font-size:0.8rem; color:#888; }
+  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="title">Databases & SQL</div>
+    <div class="strand">Digital Technologies · Data & Databases</div>
+  </div>
+  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+</header>
+<main>
+  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
+  <div class="card">
+    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
+      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
+      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
+      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
+      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
+      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
+    </svg>
+    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
+    <div class="q-title" id="cp-title"></div>
+    <div class="teach" id="teach-content"></div>
+    <div class="your-turn" id="your-turn" style="display:none">
+      <div class="yt-q" id="yt-question"></div>
+      <div id="yt-opts"></div>
+      <div class="try-fb" id="try-fb"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
+      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const QS = [
+  {ey:'Q1',ti:'Relational Databases Revisited',teach:'<p>A relational database organises data into related tables, linked by keys.</p><p>This unit introduces SQL — Structured Query Language — for interacting with such databases.</p><p>SQL lets users create, read, update, and delete data (often called CRUD operations).</p><p>Databases underpin nearly every modern application, from banking to social media.</p>',q:'What does SQL stand for?',opts:["Structured Query Language", "Simple Question List", "System Quality Level", "Standard Queue Logic"],correct:0,expl:'SQL stands for Structured Query Language, the standard language for interacting with relational databases.'},
+  {ey:'Q2',ti:'The SELECT Statement',teach:'<p>SELECT retrieves data from one or more database tables.</p><p>"SELECT * FROM table" retrieves all columns from a table.</p><p>WHERE clauses filter results based on specific conditions.</p><p>SELECT is the most frequently used SQL command for reading data.</p>',q:'What does a SQL SELECT statement do?',opts:["Retrieves data from a database table", "Deletes a database table", "Creates a new database", "Formats a document"],correct:0,expl:'The SELECT statement is used to retrieve (query) data from one or more database tables.'},
+  {ey:'Q3',ti:'Filtering with WHERE',teach:'<p>The WHERE clause narrows results to only rows matching specific criteria.</p><p>Comparison operators (=, >, <, LIKE) can be used within WHERE clauses.</p><p>Combining conditions with AND/OR allows more complex filtering.</p><p>Effective use of WHERE avoids retrieving unnecessary data.</p>',q:'What does a WHERE clause do in SQL?',opts:["Narrows results to rows matching specific criteria", "Deletes the entire database", "Creates a new table", "Sorts data alphabetically only"],correct:0,expl:'A WHERE clause filters query results, returning only rows that match the specified condition(s).'},
+  {ey:'Q4',ti:'Inserting, Updating and Deleting Data',teach:'<p>INSERT adds new rows of data into a table.</p><p>UPDATE modifies existing data in one or more rows.</p><p>DELETE removes rows from a table, based on a WHERE condition.</p><p>Care must be taken with UPDATE and DELETE to avoid unintentionally affecting the wrong rows.</p>',q:'Which SQL command adds new rows into a table?',opts:["INSERT", "SELECT", "DELETE", "UPDATE"],correct:0,expl:'The INSERT command is used to add new rows of data into a database table.'},
+  {ey:'Q5',ti:'Joining Tables',teach:'<p>A JOIN combines rows from two or more related tables based on a shared key.</p><p>An INNER JOIN returns only rows with matches in both tables.</p><p>Joins are essential for working with normalised, relational data spread across tables.</p><p>Understanding joins unlocks the real power of relational databases.</p>',q:'What does a JOIN allow you to do in SQL?',opts:["Combine rows from two or more related tables", "Delete an entire database", "Change a column's data type", "Format text output"],correct:0,expl:'A JOIN combines related data from two or more tables based on a shared key, such as a foreign key.'},
+  {ey:'Q6',ti:'Database Normalisation',teach:'<p>Normalisation organises data to reduce duplication and improve consistency.</p><p>Poorly normalised databases can waste storage and create update anomalies.</p><p>Normal forms (like 1NF, 2NF, 3NF) provide structured guidelines for good design.</p><p>Well-normalised databases are easier to maintain and less prone to errors.</p>',q:'What is the main goal of database normalisation?',opts:["Reducing duplication and improving data consistency", "Making a database as large as possible", "Removing all relationships between tables", "Slowing down queries intentionally"],correct:0,expl:'Normalisation aims to organise data efficiently, reducing duplication and improving overall consistency and integrity.'},
+  {ey:'Q7',ti:'Primary and Foreign Keys Revisited',teach:'<p>A primary key uniquely identifies each row within its own table.</p><p>A foreign key references a primary key in another table, creating a relationship.</p><p>Keys enforce data integrity, preventing invalid or orphaned relationships.</p><p>Understanding keys is essential for designing correct relational databases.</p>',q:'What does a foreign key do?',opts:["References a primary key in another table", "Deletes duplicate rows automatically", "Encrypts the entire database", "Formats text within a cell"],correct:0,expl:'A foreign key references the primary key of another table, creating and enforcing a relationship between the two.'},
+  {ey:'Q8',ti:'SQL Aggregate Functions',teach:'<p>COUNT, SUM, AVG, MIN, and MAX summarise data across multiple rows.</p><p>Aggregate functions are often used alongside GROUP BY to summarise by category.</p><p>These functions are essential for reports and business intelligence.</p><p>Understanding aggregation turns raw data into meaningful summary information.</p>',q:'Which SQL function would calculate the average value in a column?',opts:["AVG", "COUNT", "DELETE", "JOIN"],correct:0,expl:'The AVG function calculates the average (mean) value across the specified column.'},
+  {ey:'Q9',ti:'Database Security',teach:'<p>Access control limits who can view, edit, or delete specific database data.</p><p>SQL injection is a common attack exploiting poorly secured input fields.</p><p>Prepared statements/parameterised queries help prevent SQL injection attacks.</p><p>Backups and encryption further protect databases from loss or unauthorised access.</p>',q:'What is SQL injection?',opts:["A common attack exploiting poorly secured input fields", "A method of backing up a database", "A type of database normalisation", "A type of aggregate function"],correct:0,expl:'SQL injection is an attack technique that exploits poorly secured input fields to run unintended, malicious SQL commands.'},
+  {ey:'Q10',ti:'Designing a Database for a Real Application',teach:'<p>Good database design starts with understanding what data needs to be stored and how it relates.</p><p>Entity-relationship diagrams help visually plan tables and their relationships before building.</p><p>Testing with realistic sample data reveals design flaws early.</p><p>This foundation prepares students for full-stack web/app development in SS2.</p>',q:'What is the purpose of an entity-relationship diagram?',opts:["To visually plan tables and their relationships before building", "To encrypt a database", "To write final application code", "To design a company logo"],correct:0,expl:'An entity-relationship diagram helps visually plan a database\'s tables and their relationships before implementation begins.'}
+  ];
+  const TOTAL = QS.length;
+  let idx = 0;
+  let answered = new Array(TOTAL).fill(false);
+
+  function render() {
+    const q = QS[idx];
+    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
+    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
+    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
+    document.getElementById('cp-title').textContent = q.ti;
+    document.getElementById('ey').innerHTML = q.teach;
+    document.getElementById('diagram-title').textContent = q.ti;
+    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
+    const yt = document.getElementById('your-turn');
+    yt.style.display = 'block';
+    document.getElementById('yt-question').textContent = q.q;
+    const optsDiv = document.getElementById('yt-opts');
+    optsDiv.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.textContent = opt;
+      b.onclick = () => selectAnswer(i, b);
+      optsDiv.appendChild(b);
+    });
+    document.getElementById('try-fb').className = 'try-fb';
+    document.getElementById('try-fb').textContent = '';
+    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
+    document.getElementById('prev-btn').disabled = (idx === 0);
+  }
+
+  function selectAnswer(i, btn) {
+    const q = QS[idx];
+    const fb = document.getElementById('try-fb');
+    const allBtns = document.querySelectorAll('.opt-btn');
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+    if (i === q.correct) {
+      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
+      fb.className = 'try-fb ok';
+      fb.textContent = '✓ Correct! ' + q.expl;
+      answered[idx] = true;
+    } else {
+      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
+      fb.className = 'try-fb er';
+      fb.textContent = '✗ Not quite. ' + q.expl;
+    }
+  }
+
+  function nextStep() {
+    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
+    render();
+  }
+  function prevStep() {
+    if (idx > 0) { idx--; render(); }
+  }
+
+  render();
+</script>
+
+<!-- hidden element used by render() per gold-standard pattern -->
+<div id="ey" style="display:none"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+  const _abcTopicCode = 'DT10-DB-01';
+
+  (async function checkLogin() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    window._abcSession = session;
+    window._abcSupabase = supabase;
+  })();
+
+  window.markComplete = async function() {
+    const session = window._abcSession;
+    if (!session) return;
+    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
+    if (!topicRow) return;
+    await supabase.from('walkthrough_progress').upsert({
+      student_id: session.user.id,
+      topic_id: topicRow.id,
+      status: 'completed',
+      last_visited_at: new Date().toISOString()
+    }, { onConflict: 'student_id,topic_id' });
+  };
+</script>
+</body>
+</html>

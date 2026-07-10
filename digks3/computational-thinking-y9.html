@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Computational Thinking — Digital Technologies | Adorable Portal</title>
+<style>
+  :root {
+    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
+  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
+  header .title { font-size:1.05rem; font-weight:700; }
+  header .strand { font-size:0.8rem; opacity:0.85; }
+  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
+  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
+  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
+  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
+  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
+  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
+  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
+  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
+  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
+  .opt-btn:hover { border-color:var(--red); }
+  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
+  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
+  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
+  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .btn:disabled { background:#ccc; cursor:not-allowed; }
+  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .sb-lbl { font-size:0.8rem; color:#888; }
+  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="title">Computational Thinking</div>
+    <div class="strand">Digital Technologies · Computational Thinking</div>
+  </div>
+  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+</header>
+<main>
+  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
+  <div class="card">
+    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
+      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
+      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
+      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
+      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
+      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
+    </svg>
+    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
+    <div class="q-title" id="cp-title"></div>
+    <div class="teach" id="teach-content"></div>
+    <div class="your-turn" id="your-turn" style="display:none">
+      <div class="yt-q" id="yt-question"></div>
+      <div id="yt-opts"></div>
+      <div class="try-fb" id="try-fb"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
+      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const QS = [
+  {ey:'Q1',ti:'Decomposition',teach:'<p>Decomposition means breaking a complex problem into smaller, manageable parts.</p><p>Each smaller part can be solved separately, then combined into a full solution.</p><p>This makes large, intimidating problems feel achievable step by step.</p><p>Software projects are almost always decomposed into modules or components.</p>',q:'What does decomposition mean in computational thinking?',opts:["Breaking a problem into smaller parts", "Making a problem more complicated", "Deleting a problem", "Ignoring a problem"],correct:0,expl:'Decomposition breaks a large problem into smaller, more manageable pieces that are easier to solve.'},
+  {ey:'Q2',ti:'Pattern Recognition',teach:'<p>Pattern recognition means spotting similarities or trends across different problems.</p><p>Recognising a pattern lets you reuse a known solution instead of starting from scratch.</p><p>Patterns can be found in data, in code structures, or in real-world processes.</p><p>Skilled problem-solvers often notice patterns others miss.</p>',q:'What is the benefit of recognising a pattern in a new problem?',opts:["You can reuse a known solution approach", "You must always start completely from scratch", "It makes the problem impossible", "It has no benefit"],correct:0,expl:'Recognising a pattern often means a previously solved approach can be adapted and reused, saving effort.'},
+  {ey:'Q3',ti:'Abstraction',teach:'<p>Abstraction means focusing on important details while ignoring irrelevant ones.</p><p>A map is a good example — it abstracts a city into a simple, useful diagram.</p><p>Abstraction helps manage complexity by hiding unnecessary detail.</p><p>Good abstraction makes systems easier to understand and use.</p>',q:'What does abstraction help a problem-solver do?',opts:["Focus on important details while ignoring irrelevant ones", "Add every possible detail", "Delete useful information", "Make things more confusing"],correct:0,expl:'Abstraction simplifies a problem by hiding unnecessary complexity and keeping focus on what matters.'},
+  {ey:'Q4',ti:'Algorithm Design',teach:'<p>Algorithm design combines decomposition, pattern recognition and abstraction into a working solution.</p><p>A well-designed algorithm is efficient, correct, and easy to follow.</p><p>Testing an algorithm with different inputs verifies it works as intended.</p><p>Good algorithm design is a transferable skill used across all of computing.</p>',q:'Which combination of skills feeds into algorithm design?',opts:["Decomposition, pattern recognition and abstraction", "Only typing speed", "Only memory size", "Only screen resolution"],correct:0,expl:'Algorithm design draws on decomposition, pattern recognition and abstraction together to build an effective solution.'},
+  {ey:'Q5',ti:'Computational Thinking in Everyday Life',teach:'<p>Computational thinking isn\'t just for computers — it applies to planning a trip or organising a timetable.</p><p>Breaking a big task (like planning an event) into smaller steps is decomposition in action.</p><p>Spotting that similar problems recur (like packing for different trips) uses pattern recognition.</p><p>These transferable skills benefit far more than just programming.</p>',q:'Which everyday task could use computational thinking skills?',opts:["Planning a school event", "Nothing outside computing benefits", "Only mathematics benefits", "Only chemistry benefits"],correct:0,expl:'Planning an event involves breaking it into smaller tasks, exactly like decomposition in computational thinking.'},
+  {ey:'Q6',ti:'Solving Problems Systematically',teach:'<p>A systematic approach avoids jumping randomly between possible solutions.</p><p>Clearly defining the problem is the essential first step.</p><p>Testing possible solutions against real criteria narrows down the best option.</p><p>Systematic thinking reduces wasted effort and increases the chance of success.</p>',q:'What is usually the essential first step in systematic problem-solving?',opts:["Clearly defining the problem", "Guessing randomly", "Deleting the problem", "Ignoring requirements"],correct:0,expl:'Clearly understanding and defining the problem is the essential foundation for systematic problem-solving.'},
+  {ey:'Q7',ti:'Evaluating Solutions',teach:'<p>A good solution is efficient, correct, and appropriately simple.</p><p>Evaluating means checking whether a solution actually meets the original requirements.</p><p>Comparing multiple possible solutions helps choose the most suitable one.</p><p>Evaluation often reveals improvements that weren\'t obvious at first.</p>',q:'What does evaluating a solution primarily check?',opts:["Whether it meets the original requirements effectively", "Whether it looks colourful", "Whether it is the longest possible solution", "Whether it uses the most memory possible"],correct:0,expl:'Evaluation checks whether a proposed solution actually solves the problem correctly and efficiently.'},
+  {ey:'Q8',ti:'Computational Thinking and Programming',teach:'<p>Computational thinking is the reasoning process; programming is writing the resulting instructions.</p><p>Strong computational thinking makes learning any programming language easier.</p><p>Many real-world jobs (not just "coding" jobs) benefit from this reasoning approach.</p><p>This unit connects earlier algorithm work directly to the Python programming ahead.</p>',q:'What is the relationship between computational thinking and programming?',opts:["Computational thinking is the reasoning process behind writing programs", "They are entirely unrelated", "Programming replaces the need for computational thinking", "Computational thinking only applies after programs are finished"],correct:0,expl:'Computational thinking provides the reasoning approach that underlies effective programming.'},
+  {ey:'Q9',ti:'Case Study: Solving a Real Problem',teach:'<p>Consider optimising a school timetable — a genuinely complex real-world problem.</p><p>Decomposition splits it into subjects, teachers, rooms and time slots.</p><p>Pattern recognition notices recurring constraints, like avoiding teacher clashes.</p><p>Abstraction focuses on essential constraints while ignoring less important preferences.</p>',q:'When timetabling, what does decomposition involve?',opts:["Splitting the problem into subjects, teachers, rooms and time slots", "Ignoring the problem entirely", "Only considering the classroom colour", "Deleting all constraints"],correct:0,expl:'Decomposition breaks the complex timetabling problem into smaller, separately manageable components.'},
+  {ey:'Q10',ti:'Building Computational Thinking Habits',teach:'<p>Practising these skills regularly builds long-term problem-solving confidence.</p><p>Reflecting on past solutions helps improve future problem-solving approaches.</p><p>These habits transfer well beyond digital technology into science, business and daily life.</p><p>Strong computational thinkers approach unfamiliar problems calmly and systematically.</p>',q:'What is a benefit of regularly practising computational thinking skills?',opts:["It builds long-term problem-solving confidence across many fields", "It only helps with one specific problem, forever", "It has no lasting benefit", "It only applies to mathematics homework"],correct:0,expl:'Regular practice builds transferable problem-solving confidence that helps across many fields, not just computing.'}
+  ];
+  const TOTAL = QS.length;
+  let idx = 0;
+  let answered = new Array(TOTAL).fill(false);
+
+  function render() {
+    const q = QS[idx];
+    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
+    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
+    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
+    document.getElementById('cp-title').textContent = q.ti;
+    document.getElementById('ey').innerHTML = q.teach;
+    document.getElementById('diagram-title').textContent = q.ti;
+    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
+    const yt = document.getElementById('your-turn');
+    yt.style.display = 'block';
+    document.getElementById('yt-question').textContent = q.q;
+    const optsDiv = document.getElementById('yt-opts');
+    optsDiv.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.textContent = opt;
+      b.onclick = () => selectAnswer(i, b);
+      optsDiv.appendChild(b);
+    });
+    document.getElementById('try-fb').className = 'try-fb';
+    document.getElementById('try-fb').textContent = '';
+    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
+    document.getElementById('prev-btn').disabled = (idx === 0);
+  }
+
+  function selectAnswer(i, btn) {
+    const q = QS[idx];
+    const fb = document.getElementById('try-fb');
+    const allBtns = document.querySelectorAll('.opt-btn');
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+    if (i === q.correct) {
+      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
+      fb.className = 'try-fb ok';
+      fb.textContent = '✓ Correct! ' + q.expl;
+      answered[idx] = true;
+    } else {
+      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
+      fb.className = 'try-fb er';
+      fb.textContent = '✗ Not quite. ' + q.expl;
+    }
+  }
+
+  function nextStep() {
+    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
+    render();
+  }
+  function prevStep() {
+    if (idx > 0) { idx--; render(); }
+  }
+
+  render();
+</script>
+
+<!-- hidden element used by render() per gold-standard pattern -->
+<div id="ey" style="display:none"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+  const _abcTopicCode = 'DT9-CT-01';
+
+  (async function checkLogin() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    window._abcSession = session;
+    window._abcSupabase = supabase;
+  })();
+
+  window.markComplete = async function() {
+    const session = window._abcSession;
+    if (!session) return;
+    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
+    if (!topicRow) return;
+    await supabase.from('walkthrough_progress').upsert({
+      student_id: session.user.id,
+      topic_id: topicRow.id,
+      status: 'completed',
+      last_visited_at: new Date().toISOString()
+    }, { onConflict: 'student_id,topic_id' });
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introduction to Programming — Digital Technologies | Adorable Portal</title>
+<style>
+  :root {
+    --red: #37474F; --dark: #263238; --cream: #ECEFF1; --line: #CFD8DC; --gold: #00ACC1;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI', Arial, sans-serif; background:var(--cream); min-height:100vh; }
+  header { background:var(--red); color:white; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; }
+  header .title { font-size:1.05rem; font-weight:700; }
+  header .strand { font-size:0.8rem; opacity:0.85; }
+  main { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+  .card { background:white; border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.08); padding:26px 28px; margin-bottom:20px; }
+  .progress-bar { background:var(--line); border-radius:99px; height:8px; margin-bottom:22px; overflow:hidden; }
+  .progress-fill { background:var(--red); height:100%; border-radius:99px; transition:width 0.3s; }
+  .step-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--red); margin-bottom:6px; }
+  .q-title { font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:14px; }
+  .teach p { margin-bottom:10px; line-height:1.55; color:#333; font-size:0.95rem; }
+  .your-turn { background:var(--cream); border:1.5px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:16px; }
+  .yt-q { font-weight:600; margin-bottom:12px; color:var(--dark); }
+  .opt-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin-bottom:8px; border:1.5px solid var(--line); border-radius:6px; background:white; cursor:pointer; font-size:0.9rem; color:#333; transition:all 0.15s; }
+  .opt-btn:hover { border-color:var(--red); }
+  .try-fb { margin-top:10px; padding:10px 12px; border-radius:6px; font-size:0.88rem; display:none; }
+  .try-fb.ok { background:#e8f5e9; color:#2e7d32; display:block; }
+  .try-fb.er { background:#fde8e8; color:#c0272d; display:block; }
+  .nav-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+  .btn { padding:10px 22px; background:var(--red); color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .btn:disabled { background:#ccc; cursor:not-allowed; }
+  .btn-outline { padding:10px 22px; background:white; color:var(--red); border:2px solid var(--red); border-radius:6px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+  .sb-lbl { font-size:0.8rem; color:#888; }
+  svg.diagram { width:100%; height:auto; max-height:180px; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="title">Introduction to Programming</div>
+    <div class="strand">Digital Technologies · Computational Thinking</div>
+  </div>
+  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+</header>
+<main>
+  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
+  <div class="card">
+    <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
+      <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
+      <circle cx="60" cy="70" r="34" fill="var(--red)" opacity="0.15"/>
+      <text x="60" y="78" font-size="28" text-anchor="middle" fill="var(--red)" font-family="Arial">DT</text>
+      <text x="130" y="65" font-size="18" fill="var(--dark)" font-family="Arial" font-weight="bold" id="diagram-title"></text>
+      <text x="130" y="88" font-size="13" fill="#555" font-family="Arial" id="diagram-sub"></text>
+    </svg>
+    <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
+    <div class="q-title" id="cp-title"></div>
+    <div class="teach" id="teach-content"></div>
+    <div class="your-turn" id="your-turn" style="display:none">
+      <div class="yt-q" id="yt-question"></div>
+      <div id="yt-opts"></div>
+      <div class="try-fb" id="try-fb"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-outline" id="prev-btn" onclick="prevStep()">Back</button>
+      <button class="btn" id="next-btn" onclick="nextStep()">Continue</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const QS = [
+  {ey:'Q1',ti:'What is Programming?',teach:'<p>Programming means writing instructions (code) that a computer can execute.</p><p>Programs are written in programming languages like Python, Scratch or JavaScript.</p><p>Programming turns algorithms into something a computer can actually run.</p><p>Learning to program develops logical thinking and problem-solving skills.</p>',q:'What does programming involve?',opts:["Writing instructions a computer can execute", "Only using a mouse to click icons", "Repairing broken hardware", "Drawing pictures by hand"],correct:0,expl:'Programming is the process of writing code — instructions a computer can carry out.'},
+  {ey:'Q2',ti:'Block-Based Programming',teach:'<p>Block-based tools like Scratch let you build programs by snapping visual blocks together.</p><p>This removes the need to memorise exact typing syntax.</p><p>Block-based programming is a gentle introduction before text-based coding.</p><p>Scratch is widely used to teach programming concepts to beginners.</p>',q:'What is an advantage of block-based programming for beginners?',opts:["It requires memorising complex syntax", "It removes the need to memorise exact typing syntax", "It only works on supercomputers", "It cannot create any real programs"],correct:1,expl:'Block-based tools let beginners focus on logic rather than exact syntax, since blocks snap together visually.'},
+  {ey:'Q3',ti:'Variables',teach:'<p>A variable stores a value that a program can use and change.</p><p>Variables have names, like "score" or "playerName".</p><p>Variables can hold different data types: numbers, text, true/false.</p><p>Using clear variable names makes programs easier to read.</p>',q:'What is a variable used for in programming?',opts:["To store a value a program can use and change", "To physically connect hardware", "To print documents", "To browse the internet"],correct:0,expl:'A variable is a named storage location that holds a value which the program can read and update.'},
+  {ey:'Q4',ti:'Sequences in Code',teach:'<p>Programs run instructions in sequence, from top to bottom (usually).</p><p>Changing the order of instructions can change the outcome.</p><p>Sequencing is the simplest of the three core programming structures.</p><p>Careful planning of sequence avoids logical errors.</p>',q:'In what order do most simple programs execute instructions?',opts:["Randomly", "From bottom to top only", "In sequence, from top to bottom", "All at exactly the same instant"],correct:2,expl:'Most simple programs execute their instructions in sequence, one after another, from top to bottom.'},
+  {ey:'Q5',ti:'Selection in Code (if/else)',teach:'<p>"If/else" statements let a program make decisions.</p><p>Example: IF age >= 18 THEN print "adult" ELSE print "minor".</p><p>Selection allows different outcomes depending on conditions.</p><p>Nested if statements can handle more complex decisions.</p>',q:'What does an "if/else" structure allow a program to do?',opts:["Repeat forever", "Make decisions based on conditions", "Delete all variables", "Connect to Wi-Fi"],correct:1,expl:'If/else structures let a program choose between different actions depending on whether a condition is true or false.'},
+  {ey:'Q6',ti:'Loops in Code',teach:'<p>A "for" loop repeats a set number of times.</p><p>A "while" loop repeats as long as a condition remains true.</p><p>Loops are essential for repeating actions without duplicating code.</p><p>An infinite loop (that never stops) is usually a bug to avoid.</p>',q:'Which loop type repeats as long as a condition remains true?',opts:["For loop", "While loop", "No loop does this", "A print statement"],correct:1,expl:'A "while" loop continues to repeat as long as its condition evaluates to true.'},
+  {ey:'Q7',ti:'Functions/Procedures',teach:'<p>A function (or procedure) is a named, reusable block of code.</p><p>Functions let you avoid repeating the same code multiple times.</p><p>You can "call" a function whenever you need that action performed.</p><p>Good functions do one clear task, making programs easier to understand.</p>',q:'What is a key benefit of using functions in a program?',opts:["They make code harder to read", "They allow code reuse instead of repeating instructions", "They slow down the computer intentionally", "They remove the need for variables"],correct:1,expl:'Functions let you reuse the same block of code multiple times without duplicating it, keeping programs cleaner.'},
+  {ey:'Q8',ti:'Events in Programming',teach:'<p>An event is something that triggers a piece of code to run, like a click or key press.</p><p>Scratch programs often start with "when green flag clicked".</p><p>Event-driven programming is common in games and interactive apps.</p><p>Understanding events helps build interactive, responsive programs.</p>',q:'What might trigger an event-driven program to start?',opts:["Nothing — event-driven programs run at random", "A user action like a mouse click or key press", "Only the passage of exactly one hour", "The computer being unplugged"],correct:1,expl:'Event-driven programs respond to triggers like user clicks, key presses or other input signals.'},
+  {ey:'Q9',ti:'Testing Your Program',teach:'<p>Testing means running a program to check it behaves as expected.</p><p>Test with normal inputs, then unusual (edge case) inputs.</p><p>Fixing errors found during testing is part of debugging.</p><p>Good programmers test frequently, not just at the very end.</p>',q:'Why should you test a program with unusual "edge case" inputs?',opts:["To make the program crash on purpose for no reason", "To reveal hidden bugs that normal inputs might not show", "Edge cases are never useful", "To slow down development unnecessarily"],correct:1,expl:'Edge cases often reveal bugs that wouldn\'t appear with typical, expected inputs.'},
+  {ey:'Q10',ti:'Your First Simple Program',teach:'<p>A simple "Hello World" program is often the first program people write.</p><p>Start small: print a message, then add variables, then add logic.</p><p>Building programs incrementally makes debugging much easier.</p><p>Practice and experimentation are the best ways to improve programming skills.</p>',q:'What is a traditional first program many beginners write?',opts:["A complex 3D game", "A program that prints \"Hello, World!\"", "A cybersecurity firewall", "An operating system"],correct:1,expl:'"Hello, World!" is the classic first program many beginners write to test their setup and basic syntax.'}
+  ];
+  const TOTAL = QS.length;
+  let idx = 0;
+  let answered = new Array(TOTAL).fill(false);
+
+  function render() {
+    const q = QS[idx];
+    document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
+    document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
+    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
+    document.getElementById('cp-title').textContent = q.ti;
+    document.getElementById('ey').innerHTML = q.teach;
+    document.getElementById('diagram-title').textContent = q.ti;
+    document.getElementById('diagram-sub').textContent = 'Digital Technologies';
+    const yt = document.getElementById('your-turn');
+    yt.style.display = 'block';
+    document.getElementById('yt-question').textContent = q.q;
+    const optsDiv = document.getElementById('yt-opts');
+    optsDiv.innerHTML = '';
+    q.opts.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'opt-btn';
+      b.textContent = opt;
+      b.onclick = () => selectAnswer(i, b);
+      optsDiv.appendChild(b);
+    });
+    document.getElementById('try-fb').className = 'try-fb';
+    document.getElementById('try-fb').textContent = '';
+    document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
+    document.getElementById('prev-btn').disabled = (idx === 0);
+  }
+
+  function selectAnswer(i, btn) {
+    const q = QS[idx];
+    const fb = document.getElementById('try-fb');
+    const allBtns = document.querySelectorAll('.opt-btn');
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+    if (i === q.correct) {
+      btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
+      fb.className = 'try-fb ok';
+      fb.textContent = '✓ Correct! ' + q.expl;
+      answered[idx] = true;
+    } else {
+      btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
+      fb.className = 'try-fb er';
+      fb.textContent = '✗ Not quite. ' + q.expl;
+    }
+  }
+
+  function nextStep() {
+    if (idx === TOTAL - 1) { idx = 0; } else { idx++; }
+    render();
+  }
+  function prevStep() {
+    if (idx > 0) { idx--; render(); }
+  }
+
+  render();
+</script>
+
+<!-- hidden element used by render() per gold-standard pattern -->
+<div id="ey" style="display:none"></div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const SUPABASE_URL  = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+  const _abcTopicCode = 'DT7-PRG-02';
+
+  (async function checkLogin() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    window._abcSession = session;
+    window._abcSupabase = supabase;
+  })();
+
+  window.markComplete = async function() {
+    const session = window._abcSession;
+    if (!session) return;
+    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).single();
+    if (!topicRow) return;
+    await supabase.from('walkthrough_progress').upsert({
+      student_id: session.user.id,
+      topic_id: topicRow.id,
+      status: 'completed',
+      last_visited_at: new Date().toISOString()
+    }, { onConflict: 'student_id,topic_id' });
+  };
+</script>
+</body>
+</html>
