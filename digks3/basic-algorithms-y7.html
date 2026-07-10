@@ -41,10 +41,10 @@
     <div class="title">Basic Algorithms</div>
     <div class="strand">Digital Technologies · Computational Thinking</div>
   </div>
-  <div class="sb-lbl" id="sb">Step 1 / 10</div>
+  <div class="sb-lbl" id="sb">Step 1 / 50</div>
 </header>
 <main>
-  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:10%"></div></div>
+  <div class="progress-bar"><div class="progress-fill" id="pfill" style="width:2%"></div></div>
   <div class="card">
     <svg class="diagram" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" id="diagram">
       <rect x="0" y="0" width="700" height="140" fill="var(--cream)"/>
@@ -55,7 +55,7 @@
     </svg>
     <div class="step-label" id="step-label">Checkpoint 1 of 10</div>
     <div class="q-title" id="cp-title"></div>
-    <div class="teach" id="teach-content"></div>
+    <div class="teach" id="ey"></div>
     <div class="your-turn" id="your-turn" style="display:none">
       <div class="yt-q" id="yt-question"></div>
       <div id="yt-opts"></div>
@@ -69,51 +69,125 @@
 </main>
 
 <script>
+  // Each checkpoint: ti = title, teach = array of 4 explanation paragraphs (one per step),
+  // then a 5th "Your Turn" step with the question.
   const QS = [
-  {ey:'Q1',ti:'What is an Algorithm?',teach:'<p>An algorithm is a precise, step-by-step set of instructions to solve a problem.</p><p>Recipes, directions and dance steps are all everyday examples of algorithms.</p><p>Good algorithms are clear, unambiguous, and produce a correct result.</p><p>Computer programs are built from algorithms.</p>',q:'Which best describes an algorithm?',opts:["A random guess", "A step-by-step set of instructions to solve a problem", "A type of computer virus", "A brand of laptop"],correct:1,expl:'An algorithm is a precise sequence of steps designed to solve a specific problem.'},
-  {ey:'Q2',ti:'Sequencing',teach:'<p>Sequencing means putting steps in the correct order.</p><p>If steps are out of order, the algorithm may fail or give wrong results.</p><p>Everyday tasks like making tea rely on correct sequencing.</p><p>Programmers must carefully plan the order of instructions.</p>',q:'What happens if the steps of an algorithm are in the wrong order?',opts:["Nothing changes", "It may fail or produce incorrect results", "It always still works perfectly", "It becomes faster"],correct:1,expl:'Incorrect sequencing can cause an algorithm to fail or produce the wrong outcome.'},
-  {ey:'Q3',ti:'Decisions (Selection)',teach:'<p>Selection means making a choice based on a condition (if/else).</p><p>Example: "IF it is raining, THEN take an umbrella."</p><p>Decisions let algorithms respond differently depending on circumstances.</p><p>Selection is one of the three core building blocks of algorithms.</p>',q:'Which statement is an example of "selection" in an algorithm?',opts:["Do step 1, then step 2, then step 3", "IF it is raining, THEN take an umbrella", "Repeat this 10 times", "Print \"hello\""],correct:1,expl:'This is a decision (if/then) — the classic structure of selection in algorithms.'},
-  {ey:'Q4',ti:'Loops (Iteration)',teach:'<p>Iteration means repeating a set of steps multiple times.</p><p>Loops save us from writing the same instructions over and over.</p><p>Example: "Repeat 10 times: do a push-up."</p><p>Loops can repeat a fixed number of times, or until a condition is met.</p>',q:'What is another name for repeating steps in an algorithm?',opts:["Selection", "Sequencing", "Iteration (looping)", "Debugging"],correct:2,expl:'Iteration, or looping, is the term for repeating a set of steps multiple times.'},
-  {ey:'Q5',ti:'Flowcharts',teach:'<p>Flowcharts represent algorithms visually using standard symbols.</p><p>Ovals show start/end; rectangles show processes; diamonds show decisions.</p><p>Arrows show the direction/flow of the algorithm.</p><p>Flowcharts help plan and communicate algorithms before coding them.</p>',q:'What shape is typically used to show a decision in a flowchart?',opts:["Rectangle", "Oval", "Diamond", "Circle"],correct:2,expl:'A diamond shape represents a decision point (yes/no branch) in a flowchart.'},
-  {ey:'Q6',ti:'Pseudocode',teach:'<p>Pseudocode is a way of writing algorithms using informal, code-like language.</p><p>It focuses on logic, not exact programming syntax.</p><p>Pseudocode makes it easier to plan a program before writing real code.</p><p>Example: "IF score > 50 THEN print PASS ELSE print FAIL".</p>',q:'What is the main purpose of pseudocode?',opts:["To confuse programmers", "To plan algorithm logic without worrying about exact syntax", "To replace all real programming languages", "To design graphics"],correct:1,expl:'Pseudocode lets you plan the logic of an algorithm in plain, code-like language before writing actual code.'},
-  {ey:'Q7',ti:'Searching Algorithms',teach:'<p>A linear search checks items one by one until it finds a match.</p><p>A binary search repeatedly halves a sorted list to find items faster.</p><p>Binary search only works on already-sorted data.</p><p>Choosing the right search algorithm affects speed, especially with large data.</p>',q:'Which search method requires the data to already be sorted?',opts:["Linear search", "Binary search", "Random search", "No search method needs sorted data"],correct:1,expl:'Binary search relies on the data being sorted so it can repeatedly eliminate half the remaining items.'},
-  {ey:'Q8',ti:'Sorting Algorithms',teach:'<p>Sorting arranges data into a specific order (ascending or descending).</p><p>Bubble sort repeatedly swaps adjacent items that are out of order.</p><p>Sorted data makes searching and analysis much easier.</p><p>Different sorting algorithms have different speeds for large datasets.</p>',q:'What does a sorting algorithm do?',opts:["Deletes random data", "Arranges data into a specific order", "Encrypts data", "Connects to the internet"],correct:1,expl:'Sorting algorithms arrange a list of data into a defined order, like ascending or descending.'},
-  {ey:'Q9',ti:'Debugging Algorithms',teach:'<p>A "bug" is an error that causes incorrect or unexpected behaviour.</p><p>Debugging is the process of finding and fixing bugs.</p><p>Tracing through an algorithm step by step helps locate errors.</p><p>Testing with different inputs helps reveal hidden bugs.</p>',q:'What is "debugging"?',opts:["Adding more bugs to a program", "Finding and fixing errors in an algorithm or program", "Deleting a program entirely", "Designing a new computer"],correct:1,expl:'Debugging is the process of identifying and correcting errors ("bugs") in an algorithm or program.'},
-  {ey:'Q10',ti:'Real-World Algorithm Design',teach:'<p>Algorithms solve real problems: GPS route-finding, exam timetabling, recipe scaling.</p><p>Good algorithm design breaks a big problem into smaller sub-problems (decomposition).</p><p>Testing an algorithm with edge cases (unusual inputs) reveals weaknesses.</p><p>Well-designed algorithms are efficient, correct, and easy to understand.</p>',q:'Breaking a big problem into smaller sub-problems is called what?',opts:["Decomposition", "Deletion", "Decoration", "Duplication"],correct:0,expl:'Decomposition means breaking a complex problem down into smaller, more manageable parts.'}
+  {ey:'Q1',ti:'What is an Algorithm?',teach:[
+    '<p>An algorithm is a precise, step-by-step set of instructions to solve a problem.</p>',
+    '<p>Recipes, directions and dance steps are all everyday examples of algorithms.</p>',
+    '<p>Good algorithms are clear, unambiguous, and produce a correct result.</p>',
+    '<p>Computer programs are built from algorithms.</p>'
+  ],q:'Which best describes an algorithm?',opts:["A random guess", "A step-by-step set of instructions to solve a problem", "A type of computer virus", "A brand of laptop"],correct:1,expl:'An algorithm is a precise sequence of steps designed to solve a specific problem.'},
+  {ey:'Q2',ti:'Sequencing',teach:[
+    '<p>Sequencing means putting steps in the correct order.</p>',
+    '<p>If steps are out of order, the algorithm may fail or give wrong results.</p>',
+    '<p>Everyday tasks like making tea rely on correct sequencing.</p>',
+    '<p>Programmers must carefully plan the order of instructions.</p>'
+  ],q:'What happens if the steps of an algorithm are in the wrong order?',opts:["Nothing changes", "It may fail or produce incorrect results", "It always still works perfectly", "It becomes faster"],correct:1,expl:'Incorrect sequencing can cause an algorithm to fail or produce the wrong outcome.'},
+  {ey:'Q3',ti:'Decisions (Selection)',teach:[
+    '<p>Selection means making a choice based on a condition (if/else).</p>',
+    '<p>Example: "IF it is raining, THEN take an umbrella."</p>',
+    '<p>Decisions let algorithms respond differently depending on circumstances.</p>',
+    '<p>Selection is one of the three core building blocks of algorithms.</p>'
+  ],q:'Which statement is an example of "selection" in an algorithm?',opts:["Do step 1, then step 2, then step 3", "IF it is raining, THEN take an umbrella", "Repeat this 10 times", "Print \"hello\""],correct:1,expl:'This is a decision (if/then) — the classic structure of selection in algorithms.'},
+  {ey:'Q4',ti:'Loops (Iteration)',teach:[
+    '<p>Iteration means repeating a set of steps multiple times.</p>',
+    '<p>Loops save us from writing the same instructions over and over.</p>',
+    '<p>Example: "Repeat 10 times: do a push-up."</p>',
+    '<p>Loops can repeat a fixed number of times, or until a condition is met.</p>'
+  ],q:'What is another name for repeating steps in an algorithm?',opts:["Selection", "Sequencing", "Iteration (looping)", "Debugging"],correct:2,expl:'Iteration, or looping, is the term for repeating a set of steps multiple times.'},
+  {ey:'Q5',ti:'Flowcharts',teach:[
+    '<p>Flowcharts represent algorithms visually using standard symbols.</p>',
+    '<p>Ovals show start/end; rectangles show processes; diamonds show decisions.</p>',
+    '<p>Arrows show the direction/flow of the algorithm.</p>',
+    '<p>Flowcharts help plan and communicate algorithms before coding them.</p>'
+  ],q:'What shape is typically used to show a decision in a flowchart?',opts:["Rectangle", "Oval", "Diamond", "Circle"],correct:2,expl:'A diamond shape represents a decision point (yes/no branch) in a flowchart.'},
+  {ey:'Q6',ti:'Pseudocode',teach:[
+    '<p>Pseudocode is a way of writing algorithms using informal, code-like language.</p>',
+    '<p>It focuses on logic, not exact programming syntax.</p>',
+    '<p>Pseudocode makes it easier to plan a program before writing real code.</p>',
+    '<p>Example: "IF score > 50 THEN print PASS ELSE print FAIL".</p>'
+  ],q:'What is the main purpose of pseudocode?',opts:["To confuse programmers", "To plan algorithm logic without worrying about exact syntax", "To replace all real programming languages", "To design graphics"],correct:1,expl:'Pseudocode lets you plan the logic of an algorithm in plain, code-like language before writing actual code.'},
+  {ey:'Q7',ti:'Searching Algorithms',teach:[
+    '<p>A linear search checks items one by one until it finds a match.</p>',
+    '<p>A binary search repeatedly halves a sorted list to find items faster.</p>',
+    '<p>Binary search only works on already-sorted data.</p>',
+    '<p>Choosing the right search algorithm affects speed, especially with large data.</p>'
+  ],q:'Which search method requires the data to already be sorted?',opts:["Linear search", "Binary search", "Random search", "No search method needs sorted data"],correct:1,expl:'Binary search relies on the data being sorted so it can repeatedly eliminate half the remaining items.'},
+  {ey:'Q8',ti:'Sorting Algorithms',teach:[
+    '<p>Sorting arranges data into a specific order (ascending or descending).</p>',
+    '<p>Bubble sort repeatedly swaps adjacent items that are out of order.</p>',
+    '<p>Sorted data makes searching and analysis much easier.</p>',
+    '<p>Different sorting algorithms have different speeds for large datasets.</p>'
+  ],q:'What does a sorting algorithm do?',opts:["Deletes random data", "Arranges data into a specific order", "Encrypts data", "Connects to the internet"],correct:1,expl:'Sorting algorithms arrange a list of data into a defined order, like ascending or descending.'},
+  {ey:'Q9',ti:'Debugging Algorithms',teach:[
+    '<p>A "bug" is an error that causes incorrect or unexpected behaviour.</p>',
+    '<p>Debugging is the process of finding and fixing bugs.</p>',
+    '<p>Tracing through an algorithm step by step helps locate errors.</p>',
+    '<p>Testing with different inputs helps reveal hidden bugs.</p>'
+  ],q:'What is "debugging"?',opts:["Adding more bugs to a program", "Finding and fixing errors in an algorithm or program", "Deleting a program entirely", "Designing a new computer"],correct:1,expl:'Debugging is the process of identifying and correcting errors ("bugs") in an algorithm or program.'},
+  {ey:'Q10',ti:'Real-World Algorithm Design',teach:[
+    '<p>Algorithms solve real problems: GPS route-finding, exam timetabling, recipe scaling.</p>',
+    '<p>Good algorithm design breaks a big problem into smaller sub-problems (decomposition).</p>',
+    '<p>Testing an algorithm with edge cases (unusual inputs) reveals weaknesses.</p>',
+    '<p>Well-designed algorithms are efficient, correct, and easy to understand.</p>'
+  ],q:'Breaking a big problem into smaller sub-problems is called what?',opts:["Decomposition", "Deletion", "Decoration", "Duplication"],correct:0,expl:'Decomposition means breaking a complex problem down into smaller, more manageable parts.'}
   ];
-  const TOTAL = QS.length;
-  let idx = 0;
-  let answered = new Array(TOTAL).fill(false);
+
+  const STEPS_PER_Q = 5; // 4 teach steps + 1 Your Turn step
+  const TOTAL = QS.length * STEPS_PER_Q;
+  let idx = 0; // global step index across all questions
+  let answered = new Array(QS.length).fill(false);
+
+  function currentQuestionIndex() { return Math.floor(idx / STEPS_PER_Q); }
+  function currentSubStep() { return idx % STEPS_PER_Q; } // 0-3 = teach, 4 = your turn
 
   function render() {
-    const q = QS[idx];
+    const qi = currentQuestionIndex();
+    const sub = currentSubStep();
+    const q = QS[qi];
+
     document.getElementById('sb').textContent = 'Step ' + (idx+1) + ' / ' + TOTAL;
     document.getElementById('pfill').style.width = Math.round(((idx+1)/TOTAL)*100) + '%';
-    document.getElementById('step-label').textContent = 'Checkpoint ' + (idx+1) + ' of ' + TOTAL;
+    document.getElementById('step-label').textContent = 'Checkpoint ' + (qi+1) + ' of ' + QS.length;
     document.getElementById('cp-title').textContent = q.ti;
-    document.getElementById('ey').innerHTML = q.teach;
     document.getElementById('diagram-title').textContent = q.ti;
     document.getElementById('diagram-sub').textContent = 'Digital Technologies';
+
     const yt = document.getElementById('your-turn');
-    yt.style.display = 'block';
-    document.getElementById('yt-question').textContent = q.q;
-    const optsDiv = document.getElementById('yt-opts');
-    optsDiv.innerHTML = '';
-    q.opts.forEach((opt, i) => {
-      const b = document.createElement('button');
-      b.className = 'opt-btn';
-      b.textContent = opt;
-      b.onclick = () => selectAnswer(i, b);
-      optsDiv.appendChild(b);
-    });
-    document.getElementById('try-fb').className = 'try-fb';
-    document.getElementById('try-fb').textContent = '';
+    const eyDiv = document.getElementById('ey');
+
+    if (sub < 4) {
+      // Teaching step: show this paragraph, hide Your Turn
+      eyDiv.innerHTML = q.teach[sub];
+      eyDiv.style.display = 'block';
+      yt.style.display = 'none';
+    } else {
+      // Your Turn step: show full teaching recap + question
+      eyDiv.innerHTML = q.teach.join('');
+      eyDiv.style.display = 'block';
+      yt.style.display = 'block';
+      document.getElementById('yt-question').textContent = q.q;
+      const optsDiv = document.getElementById('yt-opts');
+      optsDiv.innerHTML = '';
+      q.opts.forEach((opt, i) => {
+        const b = document.createElement('button');
+        b.className = 'opt-btn';
+        b.textContent = opt;
+        b.onclick = () => selectAnswer(i, b);
+        optsDiv.appendChild(b);
+      });
+      document.getElementById('try-fb').className = 'try-fb';
+      document.getElementById('try-fb').textContent = '';
+    }
+
     document.getElementById('next-btn').textContent = (idx === TOTAL - 1) ? 'Restart' : 'Continue';
     document.getElementById('prev-btn').disabled = (idx === 0);
   }
 
   function selectAnswer(i, btn) {
-    const q = QS[idx];
+    const qi = currentQuestionIndex();
+    const q = QS[qi];
     const fb = document.getElementById('try-fb');
     const allBtns = document.querySelectorAll('.opt-btn');
     allBtns.forEach(b => b.style.pointerEvents = 'none');
@@ -121,7 +195,7 @@
       btn.style.borderColor = '#2e7d32'; btn.style.background = '#e8f5e9';
       fb.className = 'try-fb ok';
       fb.textContent = '✓ Correct! ' + q.expl;
-      answered[idx] = true;
+      answered[qi] = true;
     } else {
       btn.style.borderColor = '#c0272d'; btn.style.background = '#fde8e8';
       fb.className = 'try-fb er';
@@ -139,9 +213,6 @@
 
   render();
 </script>
-
-<!-- hidden element used by render() per gold-standard pattern -->
-<div id="ey" style="display:none"></div>
 
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
