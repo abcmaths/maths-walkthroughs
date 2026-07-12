@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Year 7 Entry Diagnostic — ABC</title>
+<style>
+  :root { --abc-red:#C0272D; --abc-red-dark:#8f1d22; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--abc-red); color:#fff; padding:18px 20px; text-align:center; }
+  header h1 { margin:0; font-size:1.3rem; }
+  .wrap { max-width:700px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .progress { height:8px; background:#eee; border-radius:4px; overflow:hidden; margin-bottom:20px; }
+  .progress-bar { height:100%; background:var(--abc-red); transition:width .3s; }
+  .q-num { font-size:.85rem; color:#888; margin-bottom:6px; }
+  .q-text { font-size:1.05rem; margin-bottom:16px; line-height:1.5; }
+  .opt { display:block; width:100%; text-align:left; padding:12px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; font-size:1rem; }
+  .opt:hover { border-color:var(--abc-red); }
+  .opt.selected { border-color:var(--abc-red); background:#fdeceb; }
+  input[type=text], input[type=number] { width:100%; padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; }
+  textarea { width:100%; min-height:180px; padding:12px; font-size:1rem; border:2px solid #ddd; border-radius:8px; font-family:inherit; }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:var(--abc-red); color:#fff; border:none; padding:12px 24px; border-radius:8px;
+         font-size:1rem; cursor:pointer; }
+  button.nav-btn:disabled { background:#ccc; cursor:not-allowed; }
+  button.nav-btn.secondary { background:#eee; color:#333; }
+  .passage { background:#fafafa; border-left:4px solid var(--abc-red); padding:16px; margin-bottom:20px;
+             font-size:1rem; line-height:1.6; max-height:300px; overflow-y:auto; }
+  .section-title { color:var(--abc-red); font-size:1.1rem; margin-bottom:4px; }
+  .hint { color:#888; font-size:.85rem; margin-bottom:16px; }
+  #screen-locked { text-align:center; padding:60px 20px; }
+  #screen-done { text-align:center; padding:60px 20px; }
+  .word-count { font-size:.85rem; color:#888; margin-top:6px; }
+</style>
+</head>
+<body>
+<header><h1>Year 7 Entry Diagnostic</h1></header>
+<div class="wrap">
+
+  <div id="screen-locked" class="card" style="display:none;">
+    <h2>Loading…</h2>
+  </div>
+
+  <div id="screen-intro" class="card" style="display:none;">
+    <h2>Welcome!</h2>
+    <p>This short diagnostic helps your teachers understand how best to support you when you start at ABC.
+    It covers Maths and English, and takes about 45–60 minutes. There's no need to revise — just do your best.</p>
+    <p>You can't go back once you move to the next question, so take your time on each one.</p>
+    <button class="nav-btn" onclick="startDiagnostic()">Start</button>
+  </div>
+
+  <div id="screen-quiz" class="card" style="display:none;">
+    <div class="progress"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+    <div id="sectionTitle" class="section-title"></div>
+    <div id="passageBox" class="passage" style="display:none;"></div>
+    <div id="qNum" class="q-num"></div>
+    <div id="qText" class="q-text"></div>
+    <div id="qBody"></div>
+    <div class="nav">
+      <span></span>
+      <button class="nav-btn" id="nextBtn" onclick="nextQuestion()" disabled>Next</button>
+    </div>
+  </div>
+
+  <div id="screen-writing" class="card" style="display:none;">
+    <div class="section-title">Writing Sample</div>
+    <p><strong>Continue the story of Amara and the tin box. What is inside the folded paper, and what happens next? Write at least one paragraph.</strong></p>
+    <div class="hint">Aim for at least 80–100 words. Take your time — there's no strict time limit.</div>
+    <textarea id="writingInput" placeholder="Start writing here..."></textarea>
+    <div class="word-count" id="wordCount">0 words</div>
+    <div class="nav">
+      <span></span>
+      <button class="nav-btn" onclick="submitDiagnostic()">Submit Diagnostic</button>
+    </div>
+  </div>
+
+  <div id="screen-done" class="card" style="display:none;">
+    <h2>Thank you!</h2>
+    <p>Your diagnostic has been submitted. Your teachers will use this to help plan your first weeks at ABC.</p>
+    <p><a href="dashboard-student.html">Go to your dashboard</a></p>
+  </div>
+
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+
+// ---------- Session check ----------
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = 'login.html';
+    return;
+  }
+  currentUser = session.user;
+
+  // Check if already completed
+  const { data: profile } = await supabase.from('profiles').select('diagnostic_completed').eq('id', currentUser.id).single();
+  if (profile && profile.diagnostic_completed) {
+    document.getElementById('screen-done').style.display = 'block';
+    document.querySelector('#screen-done p').textContent = "You've already completed the diagnostic.";
+  } else {
+    document.getElementById('screen-intro').style.display = 'block';
+  }
+})();
+
+// ---------- Question bank ----------
+// type: 'mc' | 'numeric' | 'text'
+const mathsQs = [
+  { id:'m1', section:'Maths — Number', type:'numeric', text:'Write 3,459,102 to the nearest thousand.', answer:'3459000' },
+  { id:'m2', section:'Maths — Number', type:'numeric', text:'Work out: 4,672 + 1,839', answer:'6511' },
+  { id:'m3', section:'Maths — Number', type:'numeric', text:'Work out: 6,003 − 2,847', answer:'3156' },
+  { id:'m4', section:'Maths — Number', type:'mc', text:'Order from smallest to largest: −5, 3, −8, 0, 2', options:['−8, −5, 0, 2, 3','−5, −8, 0, 2, 3','3, 2, 0, −5, −8','0, −5, −8, 2, 3'], answer:0 },
+  { id:'m5', section:'Maths — Fractions', type:'mc', text:'Which fraction is equivalent to 2/3?', options:['4/6','3/4','5/8','6/8'], answer:0 },
+  { id:'m6', section:'Maths — Fractions', type:'numeric', text:'Convert 0.35 to a percentage (number only).', answer:'35' },
+  { id:'m7', section:'Maths — Fractions', type:'mc', text:'Work out: 1/4 + 1/2', options:['2/6','3/4','1/6','2/4'], answer:1 },
+  { id:'m8', section:'Maths — Algebra', type:'numeric', text:'A function machine: input → ×3 → +2 → output. If input = 5, what is the output?', answer:'17' },
+  { id:'m9', section:'Maths — Algebra', type:'numeric', text:'Solve: x + 7 = 12. What is x?', answer:'5' },
+  { id:'m10', section:'Maths — Geometry', type:'mc', text:'What type of angle is 110°?', options:['Acute','Right','Obtuse','Reflex'], answer:2 },
+  { id:'m11', section:'Maths — Geometry', type:'numeric', text:'Find the perimeter of a rectangle 8cm × 5cm.', answer:'26' },
+  { id:'m12', section:'Maths — Data', type:'mc', text:'A class recorded favourite subjects: Maths 8, English 5, Science 10, Art 4. Which subject was most popular?', options:['Maths','English','Science','Art'], answer:2 },
+  { id:'m13', section:'Maths — Data', type:'numeric', text:'Using the same data (Maths 8, English 5, Science 10, Art 4), what is the difference between Science and Art?', answer:'6' },
+  { id:'m14', section:'Maths — Reasoning', type:'mc', text:'Ada shares ₦2,400 between herself and her brother in the ratio 3:5. How much does her brother get?', options:['₦900','₦1,500','₦800','₦1,200'], answer:1 },
+  { id:'m15', section:'Maths — Reasoning', type:'numeric', text:'A pattern goes 2, 5, 10, 17, 26 ... What is the next number?', answer:'37' },
+];
+
+const gateQs = [
+  { id:'g1', section:'English', type:'mc', text:'Which of these is a real word?', options:['vut','cat','zeb','flim'], answer:1 },
+  { id:'g2', section:'English', type:'mc', text:'Which spelling matches the sound "fap"?', options:['faip','fap','phap','fapp'], answer:1 },
+  { id:'g3', section:'English', type:'mc', text:'Which of these is a real word?', options:['hows','mowse','house','fon'], answer:2 },
+  { id:'g4', section:'English', type:'mc', text:'Which word contains the "sh" sound?', options:['ship','sip','tip','sit'], answer:0 },
+];
+
+const phonicsQs = [
+  { id:'p1', section:'Phonics', type:'mc', text:'Which letter makes the first sound in "sun"?', options:['s','f','t','m'], answer:0 },
+  { id:'p2', section:'Phonics', type:'mc', text:'Which letter makes the first sound in "map"?', options:['n','m','w','b'], answer:1 },
+  { id:'p3', section:'Phonics', type:'mc', text:'Which word contains the "ch" sound?', options:['chip','ship','sip','tip'], answer:0 },
+  { id:'p4', section:'Phonics', type:'mc', text:'Which word contains the "th" sound?', options:['fin','thin','tin','sin'], answer:1 },
+  { id:'p5', section:'Phonics', type:'mc', text:'Which word contains the "ai" sound?', options:['rain','ran','run','rin'], answer:0 },
+  { id:'p6', section:'Phonics', type:'mc', text:'Which word contains the "ee" sound?', options:['bet','beet','bit','but'], answer:1 },
+  { id:'p7', section:'Phonics', type:'mc', text:'Which spelling would make the sound "tob"?', options:['tob','toab','tobe','tobb'], answer:0 },
+  { id:'p8', section:'Phonics', type:'mc', text:'Which spelling would make the sound "lin"?', options:['lyn','line','lin','linn'], answer:2 },
+  { id:'p9', section:'Phonics', type:'mc', text:'Which is the correct spelling?', options:['sed','said','sayd','saed'], answer:1 },
+  { id:'p10', section:'Phonics', type:'mc', text:'Which is the correct spelling?', options:['wuz','was','waz','woz'], answer:1 },
+  // Note: shortened proxy set (10 shown here) — extend to full 34 following this pattern before go-live.
+];
+
+const compQs = [
+  { id:'c1', type:'mc', text:'Where was the canoe located?', options:['In the market','Half-buried in sand by the river','Floating on the river','In a shed'], answer:1 },
+  { id:'c2', type:'mc', text:'What colour was the paint on the canoe?', options:['Red','Green','Blue','Yellow'], answer:2 },
+  { id:'c3', type:'mc', text:'What did Amara find inside the tin box?', options:['A coin and a photograph','A folded paper and a coin','A key and a letter','Nothing, it was empty'], answer:1 },
+  { id:'c4', type:'mc', text:'Why does the passage mention Amara\'s grandmother?', options:['She owns the canoe','She told Amara a story that might be connected','She asked Amara to fix the canoe','She warned Amara to stay away'], answer:1 },
+  { id:'c5', type:'mc', text:'What does "faded blue paint clung to the sides" suggest about the canoe?', options:['It was recently painted','It is very old and worn','It was never painted','It is new'], answer:1 },
+  { id:'c6', type:'mc', text:'How does Amara feel at the end of the passage?', options:['Frightened and wants to leave','Bored and uninterested','Curious and determined','Angry'], answer:2 },
+  { id:'c7', type:'mc', text:'Which word in the passage suggests the box was hard to open?', options:['glinted','creaked','folded','crumbled'], answer:1 },
+  { id:'c8', type:'mc', text:'What might Amara do next?', options:['Throw the box away','Try to read the paper and learn more','Put the canoe back in the river','Go home and forget about it'], answer:1 },
+];
+
+const passageText = `Amara had walked past the canoe every day on her way to the market, but she had never really looked at it. Today, something made her stop. The wooden hull was cracked and grey, half-buried in the sand where the river never quite reached. Faded blue paint clung to the sides in patches, like the last leaves before harmattan.
+
+She stepped closer. A rope, thick with dust and age, was still tied to a rusted metal ring. Amara wondered how long the canoe had been there — years, maybe longer. Her grandmother had once mentioned a fisherman who disappeared during a storm on the river, but she couldn't remember if it was this canoe or just a story told at night.
+
+Something glinted inside the hull. Amara climbed carefully over the broken side and found a small tin box, its lid stuck fast with rust. She worked at it with a stick until it finally creaked open. Inside was a folded piece of paper, so old it nearly crumbled at her touch, and a single old coin.
+
+She sat back on her heels, holding the coin up to the light. Whatever story this canoe had to tell, she was determined to find out.`;
+
+// ---------- State ----------
+let queue = [];
+let idx = 0;
+let answers = {};
+let currentSelection = null;
+
+window.startDiagnostic = function() {
+  document.getElementById('screen-intro').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  queue = [...mathsQs, ...gateQs]; // phonics/comprehension appended dynamically
+  idx = 0;
+  renderQuestion();
+};
+
+function renderQuestion() {
+  const q = queue[idx];
+  document.getElementById('progressBar').style.width = `${Math.round((idx/(queue.length+8))*100)}%`;
+  document.getElementById('sectionTitle').textContent = q.section || '';
+  document.getElementById('qNum').textContent = `Question ${idx+1}`;
+  document.getElementById('qText').textContent = q.text;
+  currentSelection = null;
+
+  const passageBox = document.getElementById('passageBox');
+  if (q.showPassage) {
+    passageBox.style.display = 'block';
+    passageBox.textContent = passageText;
+  } else {
+    passageBox.style.display = 'none';
+  }
+
+  const body = document.getElementById('qBody');
+  body.innerHTML = '';
+  document.getElementById('nextBtn').disabled = true;
+
+  if (q.type === 'mc') {
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      btn.onclick = () => {
+        document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+        btn.classList.add('selected');
+        currentSelection = i;
+        document.getElementById('nextBtn').disabled = false;
+      };
+      body.appendChild(btn);
+    });
+  } else if (q.type === 'numeric') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.inputMode = 'numeric';
+    input.oninput = () => {
+      currentSelection = input.value.trim();
+      document.getElementById('nextBtn').disabled = currentSelection === '';
+    };
+    body.appendChild(input);
+  }
+}
+
+window.nextQuestion = function() {
+  const q = queue[idx];
+  answers[q.id] = currentSelection;
+  idx++;
+
+  // After gate questions, decide whether to insert phonics
+  if (idx === mathsQs.length + gateQs.length) {
+    const gateCorrect = gateQs.filter(gq => answers[gq.id] === gq.answer).length;
+    if (gateCorrect <= 3) {
+      queue = queue.concat(phonicsQs);
+    }
+    // Append comprehension after (first comp question shows passage)
+    const comp = compQs.map((c,i) => i===0 ? {...c, showPassage:true} : c);
+    queue = queue.concat(comp);
+  }
+
+  if (idx >= queue.length) {
+    document.getElementById('screen-quiz').style.display = 'none';
+    document.getElementById('screen-writing').style.display = 'block';
+    return;
+  }
+  renderQuestion();
+};
+
+document.getElementById('writingInput')?.addEventListener('input', (e) => {
+  const words = e.target.value.trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById('wordCount').textContent = `${words} words`;
+});
+
+window.submitDiagnostic = async function() {
+  const writingSample = document.getElementById('writingInput').value.trim();
+
+  // ---- Scoring ----
+  const mathsCorrect = mathsQs.slice(0,13).filter(q => answers[q.id] === q.answer || String(answers[q.id]) === String(q.answer)).length;
+  const reasoningCorrect = mathsQs.slice(13,15).filter(q => answers[q.id] === q.answer || String(answers[q.id]) === String(q.answer)).length;
+  const mathsScore = mathsCorrect + reasoningCorrect;
+
+  const gateCorrect = gateQs.filter(q => answers[q.id] === q.answer).length;
+  const phonicsTriggered = gateCorrect <= 3;
+  const phonicsCorrect = phonicsTriggered ? phonicsQs.filter(q => answers[q.id] === q.answer).length : null;
+
+  const compCorrect = compQs.filter(q => answers[q.id] === q.answer).length;
+
+  const extension = mathsScore >= 13 && reasoningCorrect === 2 && compCorrect >= 7;
+  const bridgeNeeded = mathsScore < 9 || compCorrect < 5;
+  const phonicsSupport = phonicsTriggered && phonicsCorrect !== null && (phonicsCorrect / phonicsQs.length) < 0.70;
+
+  // ---- Write to Supabase ----
+  const { error: insertErr } = await supabase.from('diagnostic_results').insert({
+    student_id: currentUser.id,
+    maths_score: mathsScore,
+    maths_reasoning_score: reasoningCorrect,
+    gate_score: gateCorrect,
+    phonics_triggered: phonicsTriggered,
+    phonics_score: phonicsCorrect,
+    comprehension_score: compCorrect,
+    writing_sample: writingSample,
+    raw_answers: answers
+  });
+
+  const { error: profileErr } = await supabase.from('profiles').update({
+    diagnostic_completed: true,
+    extension: extension,
+    bridge_needed: bridgeNeeded,
+    phonics_support: phonicsSupport,
+    writing_sample_needs_review: true
+  }).eq('id', currentUser.id);
+
+  if (insertErr || profileErr) {
+    alert('There was a problem submitting. Please try again or ask a teacher for help.');
+    console.error(insertErr, profileErr);
+    return;
+  }
+
+  document.getElementById('screen-writing').style.display = 'none';
+  document.getElementById('screen-done').style.display = 'block';
+};
+</script>
+</body>
+</html>
