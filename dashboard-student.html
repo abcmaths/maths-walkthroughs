@@ -130,12 +130,18 @@
       <button id="toggle-crs" style="display:none">✝️ CRS</button>
       <button id="toggle-gov" style="display:none">🏛️ Government</button>
       <button id="toggle-digitaltech">💻 Digital Tech</button>
+      <button id="toggle-bridge" style="display:none">🌉 Bridge</button>
+      <button id="toggle-phonics" style="display:none">🔤 Phonics</button>
     </div>
     <div class="science-subtabs" id="science-subtabs">
       <button class="science-subtab" id="subtab-science" style="--subtab-accent:#1565C0" onclick="window.switchSubject('science')">🔬 Combined Sci</button>
       <button class="science-subtab" id="subtab-physics" style="--subtab-accent:#1565C0" onclick="window.switchSubject('physics')">⚡ Physics</button>
       <button class="science-subtab" id="subtab-chemistry" style="--subtab-accent:#6A1B9A" onclick="window.switchSubject('chemistry')">⚗️ Chemistry</button>
       <button class="science-subtab" id="subtab-biology" style="--subtab-accent:#2E7D32" onclick="window.switchSubject('biology')">🌿 Biology</button>
+    </div>
+    <div class="science-subtabs" id="bridge-subtabs">
+      <button class="science-subtab" id="subtab-bridge_maths" style="--subtab-accent:#C0272D" onclick="window.switchSubject('bridge_maths')">📐 Bridge Maths</button>
+      <button class="science-subtab" id="subtab-bridge_english" style="--subtab-accent:#C0272D; display:none" onclick="window.switchSubject('bridge_english')">✏️ Bridge English</button>
     </div>
     <span class="user-name" id="header-name"></span>
     <button class="btn-chpwd" onclick="openChangePwd()">Change Password</button>
@@ -733,6 +739,48 @@
     'DT12-PM-01': 'digks4/project-management-careers-y12.html',
   };
 
+  const PHONICS_WALKTHROUGH_FILES = {
+    'PHO-01': 'phonics/PHO-01.html',
+    'PHO-02': 'phonics/PHO-02.html',
+    'PHO-03': 'phonics/PHO-03.html',
+    'PHO-04': 'phonics/PHO-04.html',
+    'PHO-05': 'phonics/PHO-05.html',
+    'PHO-06': 'phonics/PHO-06.html',
+    'PHO-07': 'phonics/PHO-07.html',
+    'PHO-08': 'phonics/PHO-08.html',
+    'PHO-09': 'phonics/PHO-09.html',
+    'PHO-10': 'phonics/PHO-10.html',
+    'PHO-11': 'phonics/PHO-11.html',
+    'PHO-12': 'phonics/PHO-12.html',
+  };
+
+  const BRIDGE_MTH_WALKTHROUGH_FILES = {
+    'BRG-MTH-01': 'bridge_mth/BRG-MTH-01.html',
+    'BRG-MTH-02': 'bridge_mth/BRG-MTH-02.html',
+    'BRG-MTH-03': 'bridge_mth/BRG-MTH-03.html',
+    'BRG-MTH-04': 'bridge_mth/BRG-MTH-04.html',
+    'BRG-MTH-05': 'bridge_mth/BRG-MTH-05.html',
+    'BRG-MTH-06': 'bridge_mth/BRG-MTH-06.html',
+    'BRG-MTH-07': 'bridge_mth/BRG-MTH-07.html',
+    'BRG-MTH-08': 'bridge_mth/BRG-MTH-08.html',
+    'BRG-MTH-09': 'bridge_mth/BRG-MTH-09.html',
+    'BRG-MTH-10': 'bridge_mth/BRG-MTH-10.html',
+  };
+
+  // Bridge English files
+  const BRIDGE_ENG_WALKTHROUGH_FILES = {
+    'BRG-ENG-01': 'bridge_eng/BRG-ENG-01.html',
+    'BRG-ENG-02': 'bridge_eng/BRG-ENG-02.html',
+    'BRG-ENG-03': 'bridge_eng/BRG-ENG-03.html',
+    'BRG-ENG-04': 'bridge_eng/BRG-ENG-04.html',
+    'BRG-ENG-05': 'bridge_eng/BRG-ENG-05.html',
+    'BRG-ENG-06': 'bridge_eng/BRG-ENG-06.html',
+    'BRG-ENG-07': 'bridge_eng/BRG-ENG-07.html',
+    'BRG-ENG-08': 'bridge_eng/BRG-ENG-08.html',
+    'BRG-ENG-09': 'bridge_eng/BRG-ENG-09.html',
+    'BRG-ENG-10': 'bridge_eng/BRG-ENG-10.html',
+  };
+
   const DIGITALTECH_STRAND_COLOURS = {
     'Foundations':             '#37474F',
     'Data & Safety':           '#00838F',
@@ -766,6 +814,9 @@
     else if (subject === 'crs')        file = CRS_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'government') file = GOV_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'digitaltech') file = DIGITALTECH_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'bridge_maths') file = BRIDGE_MTH_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'bridge_english') file = BRIDGE_ENG_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'phonics') file = PHONICS_WALKTHROUGH_FILES[topicCode];
     else file = WALKTHROUGH_FILES[topicCode];
     return file || '#';
   }
@@ -849,6 +900,22 @@
       // Default subject for arts-only students
       if (isArtsTrack) window.switchSubject('crs');
 
+      // Show Bridge tab if the student has been flagged as needing bridge support
+      const needsBridgeMaths = profile.bridge_maths_number || profile.bridge_maths_fractions ||
+                                profile.bridge_maths_algebra || profile.bridge_maths_geometry ||
+                                profile.bridge_maths_data || profile.bridge_needed;
+      const needsBridgeEnglish = profile.bridge_english_comprehension || profile.bridge_english_writing;
+      const bridgeBt2 = document.getElementById('toggle-bridge');
+      if (bridgeBt2) bridgeBt2.style.display = (needsBridgeMaths || needsBridgeEnglish) ? '' : 'none';
+      const subtabBridgeMaths = document.getElementById('subtab-bridge_maths');
+      const subtabBridgeEnglish = document.getElementById('subtab-bridge_english');
+      if (subtabBridgeMaths) subtabBridgeMaths.style.display = needsBridgeMaths ? '' : 'none';
+      if (subtabBridgeEnglish) subtabBridgeEnglish.style.display = needsBridgeEnglish ? '' : 'none';
+
+      // Show Phonics tab if flagged
+      const phonicsBt2 = document.getElementById('toggle-phonics');
+      if (phonicsBt2) phonicsBt2.style.display = profile.phonics_support ? '' : 'none';
+
       document.getElementById('header-name').textContent = profile.full_name;
       document.getElementById('welcome-name').textContent = 'Hello, ' + profile.full_name.split(' ')[0] + '!';
       document.getElementById('welcome-sub').textContent = 'Year ' + myYearGroup + (profile.form_class ? ' · ' + profile.form_class : '');
@@ -919,7 +986,7 @@
     const PHYS_COLOURS = { 'Mechanics':'#1565C0','Thermal':'#C0272D','Waves':'#6A1B9A','Electricity':'#E65100','Nuclear':'#2E7D32','Space':'#00695C','Practical':'#888','Fields':'#6A1B9A','Energy':'#C0272D','Applied':'#555','Measurement':'#555' };
     const CHEM_COLOURS = { 'Physical Chemistry':'#1565C0','Atomic Structure':'#6A1B9A','Bonding':'#E65100','Stoichiometry':'#C0272D','Electrochemistry':'#00695C','Energetics':'#C0272D','Kinetics':'#E65100','Redox':'#6A1B9A','Acids & Bases':'#C0272D','Periodic Table':'#1565C0','Metals':'#00695C','Environment':'#2E7D32','Organic':'#E65100','Analysis':'#555','Inorganic':'#888','Practical':'#888' };
     const BIO_COLOURS  = { 'Classification':'#2E7D32','Cell Biology':'#1565C0','Biochemistry':'#6A1B9A','Plant Biology':'#2E7D32','Human Biology':'#C0272D','Health & Disease':'#E65100','Reproduction':'#E65100','Genetics':'#6A1B9A','Ecology':'#00695C','Biotechnology':'#1565C0','Evolution':'#00695C','Practical':'#888' };
-    const strandColourMap = { science: SCIENCE_STRAND_COLOURS, physics: PHYS_COLOURS, chemistry: CHEM_COLOURS, biology: BIO_COLOURS, english: ENGLISH_STRAND_COLOURS, digitaltech: DIGITALTECH_STRAND_COLOURS };
+    const strandColourMap = { science: SCIENCE_STRAND_COLOURS, physics: PHYS_COLOURS, chemistry: CHEM_COLOURS, biology: BIO_COLOURS, english: ENGLISH_STRAND_COLOURS, digitaltech: DIGITALTECH_STRAND_COLOURS, bridge_maths: BRIDGE_STRAND_COLOURS, bridge_english: BRIDGE_STRAND_COLOURS, phonics: PHONICS_STRAND_COLOURS };
     const colourLookup = strandColourMap[currentSubject] || null;
 
     document.getElementById('strand-bars').innerHTML = Object.entries(strands).length > 0
@@ -974,6 +1041,15 @@
 
   const SCIENCE_SUBJECTS = ['science', 'physics', 'chemistry', 'biology'];
   const ARTS_SUBJECTS   = ['crs', 'government'];
+  const BRIDGE_SUBJECTS = ['bridge_maths', 'bridge_english'];
+  const PHONICS_SUBJECTS = ['phonics'];
+
+  const BRIDGE_STRAND_COLOURS = {
+    'bridge': '#C0272D',
+  };
+  const PHONICS_STRAND_COLOURS = {
+    'phonics': '#C0272D',
+  };
 
   // English IGCSE Grammar & Vocabulary topics (ENG-GRAM-xx / ENG-VOC-xx) are
   // stored under year_group=10 but shown across Y10-12 (KS4) regardless of the
@@ -990,6 +1066,8 @@
     const isMaths   = subject === 'maths';
     const isSciGrp  = SCIENCE_SUBJECTS.includes(subject);
     const isArtsGrp = ARTS_SUBJECTS.includes(subject);
+    const isBridgeGrp = BRIDGE_SUBJECTS.includes(subject);
+    const isPhonicsGrp = PHONICS_SUBJECTS.includes(subject);
 
     // Main toggle active state
     document.getElementById('toggle-maths').classList.toggle('active', isMaths);
@@ -1002,23 +1080,32 @@
     if (govBt) govBt.classList.toggle('active', subject === 'government');
     const dtBt = document.getElementById('toggle-digitaltech');
     if (dtBt) dtBt.classList.toggle('active', subject === 'digitaltech');
+    const bridgeBt = document.getElementById('toggle-bridge');
+    if (bridgeBt) bridgeBt.classList.toggle('active', isBridgeGrp);
+    const phonicsBt = document.getElementById('toggle-phonics');
+    if (phonicsBt) phonicsBt.classList.toggle('active', isPhonicsGrp);
 
     // Show/hide science sub-tabs
     document.getElementById('science-subtabs').classList.toggle('visible', isSciGrp);
+    document.getElementById('bridge-subtabs').classList.toggle('visible', isBridgeGrp);
 
     // Sub-tab active state (only applies if in science group)
     ['science', 'physics', 'chemistry', 'biology'].forEach(s => {
       const el = document.getElementById('subtab-' + s);
       if (el) el.classList.toggle('active', s === subject);
     });
+    ['bridge_maths', 'bridge_english'].forEach(s => {
+      const el = document.getElementById('subtab-' + s);
+      if (el) el.classList.toggle('active', s === subject);
+    });
 
     // Header subtitle
-    const subtitles = { maths: 'Maths Portal', english: 'English Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal', digitaltech: 'Digital Technologies Portal' };
+    const subtitles = { maths: 'Maths Portal', english: 'English Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal', digitaltech: 'Digital Technologies Portal', bridge_maths: 'Bridge Maths', bridge_english: 'Bridge English', phonics: 'Phonics Support' };
     document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Portal';
 
-    // Year selector: hide Add Maths (Y13) when not in Maths; hide entirely for arts
+    // Year selector: hide Add Maths (Y13) when not in Maths; hide entirely for arts/bridge/phonics
     const yearSelector = document.querySelector('.year-selector') || document.getElementById('year-selector');
-    if (yearSelector) yearSelector.style.display = isArtsGrp ? 'none' : '';
+    if (yearSelector) yearSelector.style.display = (isArtsGrp || isBridgeGrp || isPhonicsGrp) ? 'none' : '';
     const addMathsOpt = document.querySelector('#year-select option[value="13"]');
     if (addMathsOpt) {
       addMathsOpt.style.display = isMaths ? '' : 'none';
@@ -1036,11 +1123,11 @@
     const value = document.getElementById('year-select').value;
     let filtered, label;
 
-    const isArtsSubj = ARTS_SUBJECTS.includes(currentSubject);
+    const isArtsSubj = ARTS_SUBJECTS.includes(currentSubject) || BRIDGE_SUBJECTS.includes(currentSubject) || PHONICS_SUBJECTS.includes(currentSubject);
     if (isArtsSubj) {
-      // CRS and Government span Y10–12 as a single syllabus — show all regardless of year
+      // CRS, Government, Bridge, and Phonics span a fixed set of topics regardless of year — show all
       filtered = allTopics.filter(t => (t.subject || 'maths') === currentSubject);
-      label    = 'Showing all ' + (currentSubject === 'crs' ? 'CRS' : 'Government') + ' topics';
+      label    = BRIDGE_SUBJECTS.includes(currentSubject) ? 'Your Bridge topics' : (PHONICS_SUBJECTS.includes(currentSubject) ? 'Your Phonics topics' : ('Showing all ' + (currentSubject === 'crs' ? 'CRS' : 'Government') + ' topics'));
     } else if (value === 'own') {
       filtered = allTopics.filter(t => topicMatchesYear(t, currentSubject, myYearGroup) && (t.subject || 'maths') === currentSubject);
       label    = 'Showing your Year ' + myYearGroup + ' topics';
@@ -1208,6 +1295,14 @@
     // If coming from Maths, default to combined science
     if (!SCIENCE_SUBJECTS.includes(currentSubject)) window.switchSubject('science');
   });
+  if (document.getElementById('toggle-bridge'))
+    document.getElementById('toggle-bridge').addEventListener('click', () => {
+      if (!BRIDGE_SUBJECTS.includes(currentSubject)) window.switchSubject('bridge_maths');
+    });
+  if (document.getElementById('toggle-phonics'))
+    document.getElementById('toggle-phonics').addEventListener('click', () => {
+      if (!PHONICS_SUBJECTS.includes(currentSubject)) window.switchSubject('phonics');
+    });
 
   init();
 </script>
