@@ -19,8 +19,12 @@
   .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.7; font-size:1.15rem; }
   .big-word { font-size:1.8rem; font-weight:700; text-align:center; margin:14px 0; color:var(--dark); }
   .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
-  .opt { display:block; width:100%; text-align:center; padding:14px; margin-bottom:10px;
+  .opt { display:flex; align-items:center; justify-content:space-between; width:100%; text-align:center; padding:14px; margin-bottom:10px;
          border:2px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; font-size:1.3rem; font-weight:600; }
+  .opt-text { flex:1; text-align:center; }
+  .opt-speak { background:none; border:none; font-size:1.1rem; cursor:pointer; padding:0 4px; flex-shrink:0; }
+  .listen-btn { display:inline-flex; align-items:center; gap:6px; background:var(--dark); color:#fff; border:none;
+         padding:8px 16px; border-radius:20px; font-size:0.95rem; cursor:pointer; margin:8px auto; }
   .opt:hover { border-color:var(--red); }
   .opt.selected { border-color:var(--red); background:#fdeceb; }
   .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
@@ -64,6 +68,15 @@ function ytGen_8() { return {q:'happy + un- = unhappy. Does "happy" change spell
 function ytGen_9() { return {q:'replay', options:['re-','un-','dis-'], answer_index:0}; }
 const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
 
+function speak(text) {
+  if (!('speechSynthesis' in window)) { alert('Sorry, your device does not support audio playback.'); return; }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.85;
+  utter.lang = 'en-GB';
+  window.speechSynthesis.speak(utter);
+}
+
 let qIdx = 0;
 let stepIdx = 0;
 const STEPS_PER_Q = 4;
@@ -87,13 +100,18 @@ function render() {
     currentYT = YT_GENS[qIdx]();
     answered = false;
     let optsHtml = currentYT.options.map((opt, i) =>
-      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">
+        <span class="opt-text">${opt}</span>
+        <span class="opt-speak" onclick="event.stopPropagation(); speak('${opt.replace(/'/g, "\\'")}')">🔊</span>
+      </button>`
     ).join('');
+    const listenBtn = currentYT.q ? `<button class="listen-btn" onclick="speak('${currentYT.q.replace(/'/g, "\\'").replace(/-/g,' ')}')">🔊 Listen</button>` : '';
     box.innerHTML = `
       <div class="teach"><strong>${q.title}</strong></div>
       <div class="yt-box">
         <div>${q.yt_prompt}</div>
         ${currentYT.q ? `<div class="big-word">${currentYT.q}</div>` : ''}
+        ${listenBtn}
         ${optsHtml}
         <div id="ytFeedback"></div>
       </div>`;
