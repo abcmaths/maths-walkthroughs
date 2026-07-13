@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Angles: Types, Measuring, Angles on a Line/Point — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths: Angles: Types, Measuring, Angles on a Line/Point</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Types of angles", "teach": ["An acute angle is less than 90\u00b0. A right angle is exactly 90\u00b0. An obtuse angle is between 90\u00b0 and 180\u00b0. A reflex angle is more than 180\u00b0.", "Example: 45\u00b0 is acute, 90\u00b0 is right, 120\u00b0 is obtuse, 250\u00b0 is reflex.", "Learning these four categories helps you estimate and check answers quickly."], "yt_prompt": "What type of angle is this?"}, {"title": "Measuring angles with a protractor", "teach": ["Line up the base line of the protractor with one arm of the angle, with the centre point on the angle's vertex.", "Read the scale where the second arm crosses it \u2014 make sure you're using the correct inner/outer scale.", "Always double-check your reading makes sense \u2014 e.g. if the angle looks obtuse, don't accidentally read the acute-scale number."], "yt_prompt": "If a protractor reading shows the angle is between the following: is it acute or obtuse?"}, {"title": "Angles on a straight line", "teach": ["Angles on a straight line always add up to 180\u00b0.", "Example: if one angle is 120\u00b0, the other on the same straight line is 180\u2212120=60\u00b0.", "This is one of the most useful angle facts \u2014 look out for straight lines in diagrams."], "yt_prompt": "Find the missing angle:"}, {"title": "Angles around a point", "teach": ["Angles that meet at a single point (all the way around) add up to 360\u00b0.", "Example: if three angles around a point are 120\u00b0, 100\u00b0, and x\u00b0, then x = 360\u2212120\u2212100 = 140\u00b0.", "Always add up the known angles first, then subtract from 360\u00b0."], "yt_prompt": "Find the missing angle:"}, {"title": "Angles in a triangle", "teach": ["The three angles inside any triangle always add up to 180\u00b0.", "Example: if two angles are 50\u00b0 and 60\u00b0, the third is 180\u221250\u221260=70\u00b0.", "This fact applies to every triangle, no matter its shape or size."], "yt_prompt": "Find the missing angle:"}, {"title": "Vertically opposite angles", "teach": ["When two straight lines cross, the angles opposite each other (vertically opposite) are always equal.", "Example: if one angle is 70\u00b0, the angle directly opposite it is also 70\u00b0.", "Look for an 'X' shape in a diagram \u2014 the two pairs of opposite angles are always equal to each other."], "yt_prompt": "If one angle is given, what is the vertically opposite angle?"}, {"title": "Angles on a straight line \u2014 algebraic version", "teach": ["Sometimes angle facts are combined with simple equations \u2014 set up an equation using the 180\u00b0 rule, then solve it.", "Example: 2x + 60 = 180 (angles on a straight line) \u2192 2x=120 \u2192 x=60.", "Use the same equation-solving skills from earlier: isolate x step by step."], "yt_prompt": "Solve for x (angles on a straight line):"}, {"title": "Interior angles of a quadrilateral", "teach": ["The four interior angles of any quadrilateral (4-sided shape) always add up to 360\u00b0.", "Example: if three angles are 90\u00b0, 90\u00b0, and 80\u00b0, the fourth is 360\u221290\u221290\u221280=100\u00b0.", "This works for any quadrilateral, not just rectangles or squares."], "yt_prompt": "Find the missing angle:"}, {"title": "Estimating angles", "teach": ["Being able to estimate an angle's size (without measuring) helps you sanity-check your answers.", "A right angle (90\u00b0) is a good reference point \u2014 angles smaller than that are acute, larger are obtuse.", "Practising estimation regularly makes you faster and more confident with real protractor measurements."], "yt_prompt": "Is this angle closer to acute, right, or obtuse?"}, {"title": "Mixed angle practice", "teach": ["You've now covered angle types, straight lines, points, triangles, quadrilaterals, and vertically opposite angles.", "These angle facts are used constantly in Year 7 and beyond geometry topics \u2014 they're worth memorising well.", "This final question brings a couple of the rules together."], "yt_prompt": "Find the missing angle x:"}];
+function ytGen_0() { const opts=[[45,'acute'],[90,'right'],[120,'obtuse'],[250,'reflex'],[30,'acute'],[160,'obtuse'],[300,'reflex']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:`${p[0]}°`, answer:p[1]}; }
+function ytGen_1() { const deg=[35,140,60,110,25,155][Math.floor(Math.random()*6)]; const type = deg<90?'acute':'obtuse'; return {q:`An angle measures ${deg}°. Is it acute or obtuse?`, answer:type}; }
+function ytGen_2() { const a=Math.floor(Math.random()*140)+20; const b=180-a; return {q:`Two angles on a straight line are ${a}° and x°. What is x?`, answer:String(b)}; }
+function ytGen_3() { const a=Math.floor(Math.random()*100)+40; const b=Math.floor(Math.random()*100)+40; const c=360-a-b; return {q:`Three angles around a point are ${a}°, ${b}°, and x°. What is x?`, answer:String(c)}; }
+function ytGen_4() { const a=Math.floor(Math.random()*60)+30; const b=Math.floor(Math.random()*60)+30; const c=180-a-b; return {q:`A triangle has angles ${a}°, ${b}°, and x°. What is x?`, answer:String(c)}; }
+function ytGen_5() { const a=Math.floor(Math.random()*150)+20; return {q:`Two lines cross, making an angle of ${a}°. What is the vertically opposite angle?`, answer:String(a)}; }
+function ytGen_6() { const a=Math.floor(Math.random()*4)+2; const x=Math.floor(Math.random()*40)+10; const b=180-a*x; return {q:`${a}x + ${b} = 180. What is x?`, answer:String(x)}; }
+function ytGen_7() { const a=Math.floor(Math.random()*80)+50; const b=Math.floor(Math.random()*80)+50; const c=Math.floor(Math.random()*80)+50; const d=360-a-b-c; return {q:`A quadrilateral has angles ${a}°, ${b}°, ${c}°, and x°. What is x?`, answer:String(d)}; }
+function ytGen_8() { const deg=[20,88,92,135,175,300][Math.floor(Math.random()*6)]; let type; if(deg<80) type='acute'; else if(deg<=100) type='right'; else if(deg<180) type='obtuse'; else type='reflex'; return {q:`${deg}°`, answer:type}; }
+function ytGen_9() { const a=Math.floor(Math.random()*50)+40; const b=Math.floor(Math.random()*50)+40; const c=180-a-b; return {q:`A triangle has angles ${a}°, ${b}°, and x°. What is x?`, answer:String(c)}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val == currentYT.answer) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG-MTH-08';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

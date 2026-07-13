@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Function Machines & Simple Equations — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths: Function Machines & Simple Equations</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "What is a function machine?", "teach": ["A function machine takes an input number, applies one or more operations, and produces an output.", "Example: input \u2192 \u00d72 \u2192 +3 \u2192 output. If input = 4: 4\u00d72=8, then 8+3=11.", "Always apply the operations in the order shown, left to right."], "yt_prompt": "Work out the output:"}, {"title": "Function machines with subtraction", "teach": ["Function machines can use any operation, including subtraction \u2014 just apply them in order.", "Example: input \u2192 \u00d73 \u2192 \u22124 \u2192 output. If input=5: 5\u00d73=15, then 15\u22124=11.", "Be careful with the order \u2014 \u00d73 then \u22124 gives a different answer than \u22124 then \u00d73."], "yt_prompt": "Work out the output:"}, {"title": "Working backwards through a function machine", "teach": ["To find the input from the output, reverse each step and reverse each operation (+ becomes \u2212, \u00d7 becomes \u00f7).", "Example: output=11, machine was \u00d72 then +3 \u2192 reverse: 11\u22123=8, then 8\u00f72=4 \u2192 input was 4.", "Always reverse the order of the steps as well as the operations themselves."], "yt_prompt": "Work out the input:"}, {"title": "What is an equation?", "teach": ["An equation says two things are equal, using an '=' sign, and usually contains a letter representing an unknown number.", "Example: x + 7 = 12 means 'some number plus 7 equals 12'.", "Solving an equation means finding the value of the letter that makes it true."], "yt_prompt": "What value of x makes this equation true?"}, {"title": "Solving equations with subtraction", "teach": ["To solve x \u2212 a = b, add 'a' to both sides to isolate x.", "Example: x \u2212 5 = 8 \u2192 add 5 to both sides \u2192 x = 13.", "Whatever you do to one side of an equation, you must do to the other side too."], "yt_prompt": "What value of x makes this equation true?"}, {"title": "Solving equations with multiplication", "teach": ["To solve ax = b, divide both sides by 'a' to find x.", "Example: 3x = 15 \u2192 divide both sides by 3 \u2192 x = 5.", "Check your answer by substituting it back into the original equation."], "yt_prompt": "What value of x makes this equation true?"}, {"title": "Solving two-step equations", "teach": ["Some equations need two steps: first deal with the added/subtracted number, then the multiplied number.", "Example: 2x + 3 = 11 \u2192 subtract 3 from both sides (2x=8), then divide by 2 \u2192 x=4.", "Always undo addition/subtraction first, then multiplication/division \u2014 the reverse of BODMAS order."], "yt_prompt": "What value of x makes this equation true?"}, {"title": "Writing an equation from a word problem", "teach": ["Turn the words into maths symbols \u2014 look for phrases like 'add', 'times', 'is equal to'.", "Example: 'A number multiplied by 4, then add 3, gives 19' becomes 4x + 3 = 19.", "Once it's written as an equation, solve it using the same steps as before."], "yt_prompt": "Solve: A number multiplied by 3, then add 5, gives the total shown. What is the number?"}, {"title": "Checking your solution", "teach": ["Always substitute your answer back into the original equation to check it works.", "Example: if you found x=4 for 2x+3=11, check: 2\u00d74+3 = 8+3 = 11 \u2713 correct!", "This habit catches most mistakes before you move on."], "yt_prompt": "Solve and the check will be built into scoring \u2014 what value of x makes this true?"}, {"title": "Mixed practice \u2014 function machines and equations", "teach": ["Function machines and equations are two ways of looking at the same idea: applying operations to an unknown number.", "In Year 7, you'll move between these two representations often, so being confident with both matters.", "This last question brings the two together."], "yt_prompt": "What value of x makes this equation true?"}];
+function ytGen_0() { const inp=Math.floor(Math.random()*8)+1; const mult=Math.floor(Math.random()*4)+2; const add=Math.floor(Math.random()*8)+1; return {q:`input=${inp} → ×${mult} → +${add} → output=?`, answer:String(inp*mult+add)}; }
+function ytGen_1() { const inp=Math.floor(Math.random()*8)+3; const mult=Math.floor(Math.random()*4)+2; const sub=Math.floor(Math.random()*6)+1; return {q:`input=${inp} → ×${mult} → −${sub} → output=?`, answer:String(inp*mult-sub)}; }
+function ytGen_2() { const inp=Math.floor(Math.random()*8)+1; const mult=Math.floor(Math.random()*4)+2; const add=Math.floor(Math.random()*8)+1; const out=inp*mult+add; return {q:`input=? → ×${mult} → +${add} → output=${out}`, answer:String(inp)}; }
+function ytGen_3() { const x=Math.floor(Math.random()*15)+1; const add=Math.floor(Math.random()*15)+1; const total=x+add; return {q:`x + ${add} = ${total}`, answer:String(x)}; }
+function ytGen_4() { const x=Math.floor(Math.random()*15)+10; const sub=Math.floor(Math.random()*8)+1; const total=x-sub; return {q:`x − ${sub} = ${total}`, answer:String(x)}; }
+function ytGen_5() { const a=Math.floor(Math.random()*6)+2; const x=Math.floor(Math.random()*10)+1; const total=a*x; return {q:`${a}x = ${total}`, answer:String(x)}; }
+function ytGen_6() { const a=Math.floor(Math.random()*4)+2; const x=Math.floor(Math.random()*8)+1; const b=Math.floor(Math.random()*8)+1; const total=a*x+b; return {q:`${a}x + ${b} = ${total}`, answer:String(x)}; }
+function ytGen_7() { const x=Math.floor(Math.random()*10)+1; const total=3*x+5; return {q:`3x + 5 = ${total}`, answer:String(x)}; }
+function ytGen_8() { const a=Math.floor(Math.random()*3)+2; const x=Math.floor(Math.random()*6)+2; const b=Math.floor(Math.random()*6)+1; const total=a*x-b; return {q:`${a}x − ${b} = ${total}`, answer:String(x)}; }
+function ytGen_9() { const x=Math.floor(Math.random()*8)+2; const total=2*x+4; return {q:`2x + 4 = ${total}`, answer:String(x)}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val == currentYT.answer) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG-MTH-07';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

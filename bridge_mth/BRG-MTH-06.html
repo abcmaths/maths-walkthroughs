@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fractions, Decimals & Percentages Links — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths: Fractions, Decimals & Percentages Links</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Converting fractions to decimals", "teach": ["To convert a fraction to a decimal, divide the numerator by the denominator.", "Example: 3/4 \u2192 3 \u00f7 4 = 0.75.", "Some fractions like 1/3 give repeating decimals \u2014 for now, round to 2 decimal places if this happens."], "yt_prompt": "Convert to a decimal:"}, {"title": "Converting decimals to fractions", "teach": ["Write the decimal as a fraction over 10, 100, or 1000 (matching the number of decimal places), then simplify.", "Example: 0.35 = 35/100, which simplifies to 7/20.", "One decimal place \u2192 over 10. Two decimal places \u2192 over 100. Three decimal places \u2192 over 1000."], "yt_prompt": "Convert to a fraction, fully simplified (e.g. 7/20):"}, {"title": "Converting decimals to percentages", "teach": ["To convert a decimal to a percentage, multiply by 100 (which just moves the decimal point two places right).", "Example: 0.35 \u00d7 100 = 35%.", "The percentage sign (%) means 'out of 100', so this conversion always works the same way."], "yt_prompt": "Convert to a percentage (number only):"}, {"title": "Converting percentages to decimals", "teach": ["To convert a percentage to a decimal, divide by 100 (moving the decimal point two places left).", "Example: 35% \u00f7 100 = 0.35.", "This is simply the reverse of the previous step."], "yt_prompt": "Convert to a decimal:"}, {"title": "Converting fractions to percentages", "teach": ["Convert the fraction to a decimal first (divide top by bottom), then multiply by 100 to get a percentage.", "Example: 3/4 \u2192 0.75 \u2192 75%.", "This two-step process works for any fraction."], "yt_prompt": "Convert to a percentage (number only):"}, {"title": "Converting percentages to fractions", "teach": ["Write the percentage as a fraction over 100, then simplify.", "Example: 35% = 35/100, which simplifies to 7/20.", "This is the reverse of the fraction-to-percentage conversion."], "yt_prompt": "Convert to a fraction, fully simplified (e.g. 7/20):"}, {"title": "Ordering mixed FDP values", "teach": ["To compare fractions, decimals, and percentages together, convert them all to the same form \u2014 percentages are usually easiest.", "Example: 1/2, 0.4, 45% \u2192 convert all to percentages: 50%, 40%, 45% \u2192 order is 0.4, 45%, 1/2.", "Once everything is in percentage form, ordering is just like ordering normal numbers."], "yt_prompt": "Which of these three is the smallest \u2014 type it exactly as shown:"}, {"title": "Finding a percentage of an amount", "teach": ["Convert the percentage to a decimal, then multiply by the amount.", "Example: 20% of 60 \u2192 0.2 \u00d7 60 = 12.", "Alternatively, find 10% first (divide by 10) then scale up or down as needed."], "yt_prompt": "Work out the percentage of the amount:"}, {"title": "Real-life FDP problem \u2014 discounts", "teach": ["Shops often use percentages for discounts \u2014 you need to work out the percentage of the price, then subtract it.", "Example: a \u20a62,000 item with 25% off \u2192 25% of 2,000 = 500 \u2192 new price = 2,000 \u2212 500 = \u20a61,500.", "Always calculate the discount amount first, then subtract from the original price."], "yt_prompt": "Work out the new price after the discount:"}, {"title": "Mixed FDP practice", "teach": ["You've now covered converting between all three forms, ordering them, and finding percentages of amounts.", "These conversions come up constantly \u2014 in shopping, exam grade boundaries, and everyday measurements.", "This final question brings a couple of these ideas together."], "yt_prompt": "Convert to a percentage (number only):"}];
+function ytGen_0() { const pairs=[[1,2,'0.5'],[1,4,'0.25'],[3,4,'0.75'],[1,5,'0.2'],[3,5,'0.6'],[7,10,'0.7']]; const p=pairs[Math.floor(Math.random()*pairs.length)]; return {q:`${p[0]}/${p[1]}`, answer:p[2]}; }
+function ytGen_1() { const pairs=[['0.5','1/2'],['0.25','1/4'],['0.75','3/4'],['0.2','1/5'],['0.6','3/5'],['0.35','7/20']]; const p=pairs[Math.floor(Math.random()*pairs.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_2() { const dec=(Math.floor(Math.random()*90)+5)/100; return {q:String(dec), answer:String(Math.round(dec*100))}; }
+function ytGen_3() { const pct=Math.floor(Math.random()*90)+5; return {q:`${pct}%`, answer:String(pct/100)}; }
+function ytGen_4() { const pairs=[[1,2,50],[1,4,25],[3,4,75],[1,5,20],[3,5,60],[9,10,90]]; const p=pairs[Math.floor(Math.random()*pairs.length)]; return {q:`${p[0]}/${p[1]}`, answer:String(p[2])}; }
+function ytGen_5() { const pairs=[[50,'1/2'],[25,'1/4'],[75,'3/4'],[20,'1/5'],[60,'3/5'],[90,'9/10']]; const p=pairs[Math.floor(Math.random()*pairs.length)]; return {q:`${p[0]}%`, answer:p[1]}; }
+function ytGen_6() { const sets=[['1/2','0.4','45%','0.4'],['3/4','0.6','65%','0.6'],['1/4','0.3','20%','20%']]; const s=sets[Math.floor(Math.random()*sets.length)]; return {q:`${s[0]}, ${s[1]}, ${s[2]}`, answer:s[3]}; }
+function ytGen_7() { const pct=[10,20,25,50,75][Math.floor(Math.random()*5)]; const amount=(Math.floor(Math.random()*10)+1)*20; return {q:`${pct}% of ${amount}`, answer:String(amount*pct/100)}; }
+function ytGen_8() { const price=(Math.floor(Math.random()*20)+5)*100; const pct=[10,20,25,50][Math.floor(Math.random()*4)]; const discount=price*pct/100; return {q:`A ₦${price} item has ${pct}% off. What is the new price?`, answer:String(price-discount)}; }
+function ytGen_9() { return {q:'7/20', answer:'35'}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val == currentYT.answer) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG-MTH-06';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

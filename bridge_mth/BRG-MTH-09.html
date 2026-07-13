@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perimeter & Area of Rectangles/Triangles — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths: Perimeter & Area of Rectangles/Triangles</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "What is perimeter?", "teach": ["Perimeter is the total distance around the outside of a shape.", "For a rectangle, add up all four sides \u2014 or use the shortcut: 2 \u00d7 (length + width).", "Example: a rectangle 8cm \u00d7 5cm has perimeter 2\u00d7(8+5) = 26cm."], "yt_prompt": "Find the perimeter:"}, {"title": "Perimeter of irregular shapes", "teach": ["For any shape, perimeter is just the sum of all its side lengths \u2014 even if it's not a simple rectangle.", "Example: an L-shape with sides 5, 3, 2, 2, 3, 1 has perimeter 5+3+2+2+3+1=16cm.", "Make sure every side is included, even the ones that aren't labelled directly \u2014 you may need to work some out first."], "yt_prompt": "Find the total perimeter (add up these side lengths):"}, {"title": "What is area?", "teach": ["Area measures how much surface a shape covers, measured in square units (like cm\u00b2 or m\u00b2).", "For a rectangle, area = length \u00d7 width.", "Example: a rectangle 8cm \u00d7 5cm has area 8\u00d75=40cm\u00b2."], "yt_prompt": "Find the area:"}, {"title": "Area of a square", "teach": ["A square is a special rectangle where all sides are equal \u2014 so area = side \u00d7 side (or side\u00b2).", "Example: a square with side 6cm has area 6\u00d76=36cm\u00b2.", "Remember: area is always measured in square units."], "yt_prompt": "Find the area:"}, {"title": "Finding a missing side from area", "teach": ["If you know the area and one side of a rectangle, you can find the other side by dividing.", "Example: area=40cm\u00b2, one side=8cm \u2192 other side = 40\u00f78=5cm.", "This is just rearranging the area formula: side = area \u00f7 other side."], "yt_prompt": "Find the missing side:"}, {"title": "Area of a triangle", "teach": ["The area of a triangle is half of base \u00d7 height: Area = (base \u00d7 height) \u00f7 2.", "Example: a triangle with base 10cm and height 6cm has area (10\u00d76)\u00f72 = 30cm\u00b2.", "The height must be measured at a right angle to the base \u2014 not along a slanted side."], "yt_prompt": "Find the area:"}, {"title": "Finding height or base from triangle area", "teach": ["Rearrange the triangle area formula to find a missing base or height: base = (2 \u00d7 area) \u00f7 height (or the other way round).", "Example: area=30cm\u00b2, base=10cm \u2192 height = (2\u00d730)\u00f710 = 6cm.", "Always double the area first before dividing, since the normal formula halves it."], "yt_prompt": "Find the missing height:"}, {"title": "Combined rectangle and triangle shapes", "teach": ["Some shapes are made of a rectangle plus a triangle \u2014 find each area separately, then add them together.", "Example: a rectangle 40cm\u00b2 plus a triangle 15cm\u00b2 gives a total shape area of 55cm\u00b2.", "Always split compound shapes into simple parts you already know how to calculate."], "yt_prompt": "Find the total area (rectangle + triangle):"}, {"title": "Perimeter and area \u2014 real-life problem", "teach": ["Real problems often ask for perimeter (e.g. fencing) or area (e.g. flooring/paint) \u2014 read carefully to see which is needed.", "Example: 'How much fencing is needed for a garden 12m \u00d7 8m?' \u2192 this needs perimeter, not area.", "Underline the key word (fence/border = perimeter; cover/paint/carpet = area) before calculating."], "yt_prompt": "Solve the problem \u2014 how much fencing is needed?"}, {"title": "Mixed perimeter and area practice", "teach": ["You've now covered perimeter and area of rectangles, squares, and triangles, plus compound shapes.", "These skills come up regularly across Year 7 and beyond, especially combined with real-world problems.", "This final question brings a couple of these ideas together."], "yt_prompt": "Find the area:"}];
+function ytGen_0() { const l=Math.floor(Math.random()*10)+4; const w=Math.floor(Math.random()*8)+2; return {q:`A rectangle is ${l}cm × ${w}cm. What is the perimeter?`, answer:String(2*(l+w))}; }
+function ytGen_1() { const sides=[]; const n=Math.floor(Math.random()*2)+4; let total=0; for(let i=0;i<n;i++){const s=Math.floor(Math.random()*8)+1; sides.push(s); total+=s;} return {q:sides.join('cm, ')+'cm', answer:String(total)}; }
+function ytGen_2() { const l=Math.floor(Math.random()*10)+4; const w=Math.floor(Math.random()*8)+2; return {q:`A rectangle is ${l}cm × ${w}cm. What is the area?`, answer:String(l*w)}; }
+function ytGen_3() { const s=Math.floor(Math.random()*10)+3; return {q:`A square has sides of ${s}cm. What is the area?`, answer:String(s*s)}; }
+function ytGen_4() { const w=Math.floor(Math.random()*8)+2; const l=Math.floor(Math.random()*10)+4; const area=l*w; return {q:`A rectangle has area ${area}cm² and one side ${w}cm. What is the other side?`, answer:String(l)}; }
+function ytGen_5() { const b=Math.floor(Math.random()*10)+4; const h=Math.floor(Math.random()*8)+2; return {q:`A triangle has base ${b}cm and height ${h}cm. What is the area?`, answer:String((b*h)/2)}; }
+function ytGen_6() { const b=Math.floor(Math.random()*10)+4; const h=Math.floor(Math.random()*8)+2; const area=(b*h)/2; return {q:`A triangle has base ${b}cm and area ${area}cm². What is the height?`, answer:String(h)}; }
+function ytGen_7() { const rectArea=Math.floor(Math.random()*40)+20; const triArea=Math.floor(Math.random()*20)+10; return {q:`A shape is made of a rectangle (area ${rectArea}cm²) and a triangle (area ${triArea}cm²). What is the total area?`, answer:String(rectArea+triArea)}; }
+function ytGen_8() { const l=Math.floor(Math.random()*10)+6; const w=Math.floor(Math.random()*8)+4; return {q:`A garden is ${l}m × ${w}m. How much fencing is needed to go all the way around?`, answer:String(2*(l+w))}; }
+function ytGen_9() { const b=Math.floor(Math.random()*10)+6; const h=Math.floor(Math.random()*8)+4; return {q:`A triangle has base ${b}cm and height ${h}cm. What is the area?`, answer:String((b*h)/2)}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val == currentYT.answer) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG-MTH-09';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

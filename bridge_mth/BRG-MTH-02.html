@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Four Operations With Larger Numbers — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths: Four Operations With Larger Numbers</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Column addition \u2014 no carrying", "teach": ["Line up numbers by place value, units under units, tens under tens.", "Add each column separately starting from the units (right-hand side).", "Example: 4,213 + 1,532 \u2192 units 3+2=5, tens 1+3=4, hundreds 2+5=7, thousands 4+1=5 \u2192 5,745."], "yt_prompt": "Work out the answer:"}, {"title": "Column addition \u2014 with carrying", "teach": ["When a column adds to 10 or more, write down the units digit and carry the ten into the next column.", "Example: 4,672 + 1,839 \u2192 units 2+9=11, write 1 carry 1 \u2192 tens 7+3+1=11, write 1 carry 1 \u2192 hundreds 6+8+1=15, write 5 carry 1 \u2192 thousands 4+1+1=6 \u2192 6,511.", "Always work right to left, and don't forget to add any carried digit into the next column."], "yt_prompt": "Work out the answer:"}, {"title": "Column subtraction \u2014 no borrowing", "teach": ["Line the numbers up the same way as addition, then subtract each column from right to left.", "Example: 8,946 \u2212 2,314 \u2192 units 6\u22124=2, tens 4\u22121=3, hundreds 9\u22123=6, thousands 8\u22122=6 \u2192 6,632.", "Check your answer by adding the result to the number you subtracted \u2014 you should get back the original."], "yt_prompt": "Work out the answer:"}, {"title": "Column subtraction \u2014 with borrowing", "teach": ["When the top digit is smaller than the bottom digit, borrow 10 from the next column to the left.", "Example: 6,003 \u2212 2,847 \u2192 units 3\u22127 needs borrowing, becomes 13\u22127=6, next column becomes 9 (borrowed) \u22124=... continue right to left until you reach 3,156.", "This is the trickiest column method \u2014 go slowly and double check each borrow."], "yt_prompt": "Work out the answer:"}, {"title": "Long multiplication \u2014 multiplying by a single digit", "teach": ["Multiply each digit of the larger number by the single digit, working right to left, carrying as needed \u2014 just like column addition but with multiplication.", "Example: 234 \u00d7 6 \u2192 4\u00d76=24 (write 4, carry 2), 3\u00d76=18+2=20 (write 0, carry 2), 2\u00d76=12+2=14 \u2192 1,404.", "Estimate first (234 is about 200, \u00d76 is about 1,200) so you can sanity-check your final answer."], "yt_prompt": "Work out the answer:"}, {"title": "Long multiplication \u2014 two digits by two digits", "teach": ["Break the second number into tens and units, multiply separately, then add the results.", "Example: 23 \u00d7 14 = (23\u00d710) + (23\u00d74) = 230 + 92 = 322.", "This 'partitioning' method works for any size number \u2014 it's the same idea behind the full grid/column method."], "yt_prompt": "Work out the answer:"}, {"title": "Short division \u2014 no remainder", "teach": ["Divide starting from the left-most digit, carrying any remainder into the next digit.", "Example: 846 \u00f7 6 \u2192 8\u00f76=1 remainder 2, bring down 4 \u2192 24\u00f76=4, bring down 6 \u2192 6\u00f76=1 \u2192 answer 141.", "Check by multiplying your answer by the divisor \u2014 it should give back the original number."], "yt_prompt": "Work out the answer:"}, {"title": "Short division \u2014 with a remainder", "teach": ["Sometimes a division doesn't divide exactly \u2014 whatever is left over at the end is the remainder.", "Example: 149 \u00f7 6 = 24 remainder 5, because 24\u00d76=144 and 149\u2212144=5.", "Write remainders as 'r' followed by the number, e.g. 24r5."], "yt_prompt": "Work out the answer, writing it as e.g. 24r5:"}, {"title": "Order of operations (BODMAS)", "teach": ["When a calculation has more than one operation, follow the order: Brackets, Orders (powers), Division/Multiplication, Addition/Subtraction.", "Example: 3 + 4 \u00d7 5 \u2192 do the multiplication first (4\u00d75=20), then add 3 \u2192 23. Not 7\u00d75=35!", "Always scan for brackets first, then powers, then multiply/divide, then add/subtract, working left to right within each level."], "yt_prompt": "Work out the answer using BODMAS:"}, {"title": "Mixed four-operations word problem", "teach": ["Real problems often need more than one operation \u2014 read carefully to work out which order to use them in.", "Example: 'A shop has 240 sweets, packed into bags of 8. How many bags are needed?' \u2192 this is a division problem: 240 \u00f7 8 = 30 bags.", "Always underline the numbers and the operation words (share, total, difference, product) before calculating."], "yt_prompt": "Solve the word problem:"}];
+function ytGen_0() { const a=Math.floor(Math.random()*4000)+1000; const b=Math.floor(Math.random()*4000)+1000; return {q:`${a} + ${b}`, answer:String(a+b)}; }
+function ytGen_1() { const a=Math.floor(Math.random()*4000)+1000; const b=Math.floor(Math.random()*4000)+1000; return {q:`${a} + ${b}`, answer:String(a+b)}; }
+function ytGen_2() { const b=Math.floor(Math.random()*3000)+1000; const a=b+Math.floor(Math.random()*4000)+1000; return {q:`${a} − ${b}`, answer:String(a-b)}; }
+function ytGen_3() { const b=Math.floor(Math.random()*3000)+1000; const a=b+Math.floor(Math.random()*3000)+500; return {q:`${a} − ${b}`, answer:String(a-b)}; }
+function ytGen_4() { const a=Math.floor(Math.random()*800)+100; const b=Math.floor(Math.random()*7)+2; return {q:`${a} × ${b}`, answer:String(a*b)}; }
+function ytGen_5() { const a=Math.floor(Math.random()*70)+15; const b=Math.floor(Math.random()*70)+15; return {q:`${a} × ${b}`, answer:String(a*b)}; }
+function ytGen_6() { const ans=Math.floor(Math.random()*80)+20; const d=Math.floor(Math.random()*7)+2; const n=ans*d; return {q:`${n} ÷ ${d}`, answer:String(ans)}; }
+function ytGen_7() { const d=Math.floor(Math.random()*6)+3; const whole=Math.floor(Math.random()*40)+10; const rem=Math.floor(Math.random()*(d-1))+1; const n=whole*d+rem; return {q:`${n} ÷ ${d}`, answer:`${whole}r${rem}`}; }
+function ytGen_8() { const a=Math.floor(Math.random()*8)+2; const b=Math.floor(Math.random()*8)+2; const c=Math.floor(Math.random()*8)+2; return {q:`${a} + ${b} × ${c}`, answer:String(a+b*c)}; }
+function ytGen_9() { const bags=Math.floor(Math.random()*20)+10; const each=Math.floor(Math.random()*8)+4; const total=bags*each; return {q:`A shop has ${total} sweets, packed into bags of ${each}. How many bags are there?`, answer:String(bags)}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val == currentYT.answer) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG-MTH-02';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>
