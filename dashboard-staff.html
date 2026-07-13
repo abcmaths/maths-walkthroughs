@@ -112,6 +112,7 @@
   <div class="nav-tab" onclick="showTab('feedback')">Feedback</div>
   <div class="nav-tab" onclick="showTab('bugs')">Bug Reports</div>
   <div class="nav-tab" onclick="showTab('users')">Users</div>
+  <div class="nav-tab" onclick="showTab('diagnostic')">Diagnostic</div>
   <div class="nav-tab" onclick="showTab('reviews')">Review Walkthroughs</div>
   <div class="nav-tab" onclick="showTab('import')">Import Users</div>
 </div>
@@ -401,6 +402,58 @@
               </tr>
             </thead>
             <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAGNOSTIC -->
+    <div class="tab-panel" id="tab-diagnostic">
+      <div class="filter-bar">
+        <select id="diag-filter-status" onchange="renderDiagnosticTab()">
+          <option value="">All Students</option>
+          <option value="completed">Diagnostic Completed</option>
+          <option value="not_completed">Diagnostic Not Completed</option>
+          <option value="needs_review">Writing Sample Needs Review</option>
+        </select>
+        <select id="diag-filter-flag" onchange="renderDiagnosticTab()">
+          <option value="">All Flags</option>
+          <option value="phonics_support">Phonics Support</option>
+          <option value="bridge_needed">Bridge Needed</option>
+          <option value="bridge_maths_number">Bridge Maths — Number</option>
+          <option value="bridge_maths_fractions">Bridge Maths — Fractions</option>
+          <option value="bridge_maths_algebra">Bridge Maths — Algebra</option>
+          <option value="bridge_maths_geometry">Bridge Maths — Geometry</option>
+          <option value="bridge_maths_data">Bridge Maths — Data</option>
+          <option value="bridge_english_comprehension">Bridge English — Comprehension</option>
+          <option value="bridge_english_writing">Bridge English — Writing</option>
+          <option value="extension">Extension</option>
+          <option value="summer_only">Summer Only</option>
+        </select>
+        <input type="text" id="diag-search" placeholder="Search by name or email…" oninput="renderDiagnosticTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.88rem;color:#333;min-width:200px">
+        <button class="btn-outline" style="font-size:0.82rem;padding:6px 14px" onclick="exportDiagnostic()">↓ Export CSV</button>
+      </div>
+      <div class="section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="section-title">Diagnostic & Support Status <span id="diag-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Year</th>
+                <th>Diagnostic</th>
+                <th>Writing Sample</th>
+                <th>Phonics</th>
+                <th>Bridge Maths</th>
+                <th>Bridge English</th>
+                <th>Extension</th>
+                <th>Summer Only</th>
+              </tr>
+            </thead>
+            <tbody id="diag-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -914,7 +967,7 @@
 
   // ── Tab switching ──
   window.showTab = function(name) {
-    const names = ['overview','progress','tests','topics','feedback','bugs','users','reviews','import'];
+    const names = ['overview','progress','tests','topics','feedback','bugs','users','diagnostic','reviews','import'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
@@ -923,6 +976,7 @@
     if (name === 'bugs')     window.renderBugTab();
     if (name === 'users')    window.renderUsersTab();
     if (name === 'tests')    window.renderTestsTab();
+    if (name === 'diagnostic') window.renderDiagnosticTab();
     if (name === 'reviews')  window.renderReviewTab();
   };
 
@@ -2114,6 +2168,87 @@
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     a.download = 'abc_users_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+  };
+
+  // ── Diagnostic tab ──
+  function getDiagnosticRows() {
+    const emailMap = {};
+    allUsersWithEmail.forEach(u => { emailMap[u.id] = u.email; });
+    return allStudents.map(s => ({
+      ...s,
+      email: emailMap[s.id] || '—'
+    }));
+  }
+
+  window.renderDiagnosticTab = function() {
+    const statusFilter = document.getElementById('diag-filter-status').value;
+    const flagFilter    = document.getElementById('diag-filter-flag').value;
+    const searchFilter  = document.getElementById('diag-search').value.toLowerCase();
+
+    const rows = getDiagnosticRows().filter(s => {
+      const matchSearch = !searchFilter || s.full_name.toLowerCase().includes(searchFilter) || (s.email||'').toLowerCase().includes(searchFilter);
+      const matchStatus = !statusFilter ||
+        (statusFilter === 'completed' && s.diagnostic_completed) ||
+        (statusFilter === 'not_completed' && !s.diagnostic_completed) ||
+        (statusFilter === 'needs_review' && s.writing_sample_needs_review);
+      const matchFlag = !flagFilter || s[flagFilter] === true;
+      return matchSearch && matchStatus && matchFlag;
+    });
+
+    document.getElementById('diag-count').textContent = `— ${rows.length} student${rows.length !== 1 ? 's' : ''}`;
+
+    const tbody = document.getElementById('diag-tbody');
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#aaa;padding:24px">No students found</td></tr>';
+      return;
+    }
+
+    const yn = (v) => v ? '<span class="badge badge-green">Yes</span>' : '<span style="color:#ccc">—</span>';
+    const bridgeMathsAny = (s) => s.bridge_maths_number || s.bridge_maths_fractions || s.bridge_maths_algebra || s.bridge_maths_geometry || s.bridge_maths_data;
+    const bridgeEnglishAny = (s) => s.bridge_english_comprehension || s.bridge_english_writing;
+
+    tbody.innerHTML = rows.map(s => `
+      <tr>
+        <td><strong>${s.full_name}</strong></td>
+        <td style="font-size:0.82rem;color:#666">${s.email}</td>
+        <td>${s.year_group ? 'Year ' + s.year_group : '—'}</td>
+        <td>${s.diagnostic_completed ? '<span class="badge badge-green">Completed</span>' : '<span class="badge badge-grey">Not yet</span>'}</td>
+        <td>${s.writing_sample_needs_review ? '<span class="badge badge-yellow">Needs review</span>' : (s.diagnostic_completed ? '<span style="color:#ccc">Reviewed</span>' : '—')}</td>
+        <td>${yn(s.phonics_support)}</td>
+        <td>${yn(bridgeMathsAny(s))}</td>
+        <td>${yn(bridgeEnglishAny(s))}</td>
+        <td>${yn(s.extension)}</td>
+        <td>${yn(s.summer_only)}</td>
+      </tr>`).join('');
+  };
+
+  window.exportDiagnostic = function() {
+    const rows = getDiagnosticRows();
+    const csvRows = [['Full Name','Email','Year','Diagnostic Completed','Writing Sample Needs Review',
+      'Phonics Support','Bridge Maths Number','Bridge Maths Fractions','Bridge Maths Algebra','Bridge Maths Geometry','Bridge Maths Data',
+      'Bridge English Comprehension','Bridge English Writing','Extension','Summer Only']];
+    rows.forEach(s => {
+      csvRows.push([
+        s.full_name, s.email, s.year_group || '',
+        s.diagnostic_completed ? 'Yes' : 'No',
+        s.writing_sample_needs_review ? 'Yes' : 'No',
+        s.phonics_support ? 'Yes' : 'No',
+        s.bridge_maths_number ? 'Yes' : 'No',
+        s.bridge_maths_fractions ? 'Yes' : 'No',
+        s.bridge_maths_algebra ? 'Yes' : 'No',
+        s.bridge_maths_geometry ? 'Yes' : 'No',
+        s.bridge_maths_data ? 'Yes' : 'No',
+        s.bridge_english_comprehension ? 'Yes' : 'No',
+        s.bridge_english_writing ? 'Yes' : 'No',
+        s.extension ? 'Yes' : 'No',
+        s.summer_only ? 'Yes' : 'No'
+      ]);
+    });
+    const csv = csvRows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'abc_diagnostic_status_' + new Date().toISOString().slice(0,10) + '.csv';
     a.click();
   };
 
