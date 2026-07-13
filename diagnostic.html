@@ -127,8 +127,8 @@ const mathsQs = [
   { id:'m9', section:'Maths — Algebra', type:'numeric', text:'Solve: x + 7 = 12. What is x?', answer:'5' },
   { id:'m10', section:'Maths — Geometry', type:'mc', text:'What type of angle is 110°?', options:['Acute','Right','Obtuse','Reflex'], answer:2 },
   { id:'m11', section:'Maths — Geometry', type:'numeric', text:'Find the perimeter of a rectangle 8cm × 5cm.', answer:'26' },
-  { id:'m12', section:'Maths — Data', type:'mc', text:'A class recorded favourite subjects: Maths 8, English 5, Science 10, Art 4. Which subject was most popular?', options:['Maths','English','Science','Art'], answer:2 },
-  { id:'m13', section:'Maths — Data', type:'numeric', text:'Using the same data (Maths 8, English 5, Science 10, Art 4), what is the difference between Science and Art?', answer:'6' },
+  { id:'m12', section:'Maths — Data', type:'mc', text:'This bar chart shows favourite subjects in a class. Which subject was most popular?', chartData:{labels:['Maths','English','Science','Art'], values:[8,5,10,4]}, options:['Maths','English','Science','Art'], answer:2 },
+  { id:'m13', section:'Maths — Data', type:'numeric', text:'Using the same bar chart, what is the difference between Science and Art?', chartData:{labels:['Maths','English','Science','Art'], values:[8,5,10,4]}, answer:'6' },
   { id:'m14', section:'Maths — Reasoning', type:'mc', text:'Ada shares ₦2,400 between herself and her brother in the ratio 3:5. How much does her brother get?', options:['₦900','₦1,500','₦800','₦1,200'], answer:1 },
   { id:'m15', section:'Maths — Reasoning', type:'numeric', text:'A pattern goes 2, 5, 10, 17, 26 ... What is the next number?', answer:'37' },
 ];
@@ -187,6 +187,31 @@ window.startDiagnostic = function() {
   renderQuestion();
 };
 
+function renderBarChartSVG(labels, values) {
+  const width = 320, height = 220, padding = 36, barGap = 14;
+  const maxVal = Math.max(...values) * 1.15;
+  const chartHeight = height - padding * 2;
+  const barWidth = (width - padding * 2 - barGap * (values.length - 1)) / values.length;
+  const colours = ['#C0272D', '#1565C0', '#2E7D32', '#6A1B9A', '#E67E22'];
+
+  let bars = '';
+  values.forEach((v, i) => {
+    const barHeight = (v / maxVal) * chartHeight;
+    const x = padding + i * (barWidth + barGap);
+    const y = height - padding - barHeight;
+    bars += `
+      <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${colours[i % colours.length]}" rx="3"></rect>
+      <text x="${x + barWidth/2}" y="${y - 6}" text-anchor="middle" font-size="13" font-weight="700" fill="#333">${v}</text>
+      <text x="${x + barWidth/2}" y="${height - padding + 16}" text-anchor="middle" font-size="11" fill="#555">${labels[i]}</text>
+    `;
+  });
+
+  return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;max-width:360px;height:auto;display:block;margin:0 auto">
+    <line x1="${padding}" y1="${height-padding}" x2="${width-padding}" y2="${height-padding}" stroke="#ccc" stroke-width="1.5"></line>
+    ${bars}
+  </svg>`;
+}
+
 function renderQuestion() {
   const q = queue[idx];
   document.getElementById('progressBar').style.width = `${Math.round((idx/(queue.length+8))*100)}%`;
@@ -201,6 +226,21 @@ function renderQuestion() {
     passageBox.textContent = passageText;
   } else {
     passageBox.style.display = 'none';
+  }
+
+  // Render a bar chart if this question includes chartData
+  let chartBox = document.getElementById('chartBox');
+  if (!chartBox) {
+    chartBox = document.createElement('div');
+    chartBox.id = 'chartBox';
+    passageBox.insertAdjacentElement('afterend', chartBox);
+  }
+  if (q.chartData) {
+    chartBox.style.display = 'block';
+    chartBox.innerHTML = renderBarChartSVG(q.chartData.labels, q.chartData.values);
+  } else {
+    chartBox.style.display = 'none';
+    chartBox.innerHTML = '';
   }
 
   const body = document.getElementById('qBody');
@@ -275,8 +315,38 @@ window.submitDiagnostic = async function() {
 
   const compCorrect = compQs.filter(q => answers[q.id] === q.answer).length;
 
+  // Per-cluster maths scoring — drives which specific Bridge Maths sub-flags get set
+  function clusterScore(sectionName) {
+    const qs = mathsQs.filter(q => q.section === sectionName);
+    const correct = qs.filter(q => answers[q.id] === q.answer || String(answers[q.id]) === String(q.answer)).length;
+    return { correct, total: qs.length, pct: qs.length ? correct / qs.length : 1 };
+  }
+  const numberCluster    = clusterScore('Maths — Number');
+  const fractionsCluster = clusterScore('Maths — Fractions');
+  const algebraCluster   = clusterScore('Maths — Algebra');
+  const geometryCluster  = clusterScore('Maths — Geometry');
+  const dataCluster      = clusterScore('Maths — Data');
+
+  // A cluster is flagged as needing bridging if the student got 50% or fewer correct
+  const bridgeMathsNumber    = numberCluster.pct    <= 0.5;
+  const bridgeMathsFractions = fractionsCluster.pct <= 0.5;
+  const bridgeMathsAlgebra   = algebraCluster.pct   <= 0.5;
+  const bridgeMathsGeometry  = geometryCluster.pct  <= 0.5;
+  const bridgeMathsData      = dataCluster.pct      <= 0.5;
+
+  // English comprehension bridging — based on comprehension score out of 8
+  const bridgeEnglishComprehension = compCorrect < 5;
+
+  // Writing is not auto-scored for quality, but a very short sample is a
+  // reasonable proxy flag for needing writing support — staff review confirms
+  const wordCount = writingSample.split(/\s+/).filter(Boolean).length;
+  const bridgeEnglishWriting = wordCount < 40;
+
+  const anyBridgeMaths   = bridgeMathsNumber || bridgeMathsFractions || bridgeMathsAlgebra || bridgeMathsGeometry || bridgeMathsData;
+  const anyBridgeEnglish = bridgeEnglishComprehension || bridgeEnglishWriting;
+  const bridgeNeeded = anyBridgeMaths || anyBridgeEnglish;
+
   const extension = mathsScore >= 13 && reasoningCorrect === 2 && compCorrect >= 7;
-  const bridgeNeeded = mathsScore < 9 || compCorrect < 5;
   const phonicsSupport = phonicsTriggered && phonicsCorrect !== null && (phonicsCorrect / phonicsQs.length) < 0.70;
 
   // ---- Write to Supabase ----
@@ -296,6 +366,13 @@ window.submitDiagnostic = async function() {
     diagnostic_completed: true,
     extension: extension,
     bridge_needed: bridgeNeeded,
+    bridge_maths_number: bridgeMathsNumber,
+    bridge_maths_fractions: bridgeMathsFractions,
+    bridge_maths_algebra: bridgeMathsAlgebra,
+    bridge_maths_geometry: bridgeMathsGeometry,
+    bridge_maths_data: bridgeMathsData,
+    bridge_english_comprehension: bridgeEnglishComprehension,
+    bridge_english_writing: bridgeEnglishWriting,
     phonics_support: phonicsSupport,
     writing_sample_needs_review: true
   }).eq('id', currentUser.id);
