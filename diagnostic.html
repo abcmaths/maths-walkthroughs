@@ -22,11 +22,13 @@
   .opt.selected { border-color:var(--abc-red); background:#fdeceb; }
   input[type=text], input[type=number] { width:100%; padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; }
   textarea { width:100%; min-height:180px; padding:12px; font-size:1rem; border:2px solid #ddd; border-radius:8px; font-family:inherit; }
-  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; align-items:center; }
   button.nav-btn { background:var(--abc-red); color:#fff; border:none; padding:12px 24px; border-radius:8px;
          font-size:1rem; cursor:pointer; }
   button.nav-btn:disabled { background:#ccc; cursor:not-allowed; }
   button.nav-btn.secondary { background:#eee; color:#333; }
+  .btn-save { background:none; border:1.5px solid #ddd; color:#666; padding:10px 16px; border-radius:8px; font-size:0.9rem; cursor:pointer; }
+  .btn-save:hover { border-color:var(--abc-red); color:var(--abc-red); }
   .passage { background:#fafafa; border-left:4px solid var(--abc-red); padding:16px; margin-bottom:20px;
              font-size:1rem; line-height:1.6; max-height:300px; overflow-y:auto; }
   .section-title { color:var(--abc-red); font-size:1.1rem; margin-bottom:4px; }
@@ -34,6 +36,18 @@
   #screen-locked { text-align:center; padding:60px 20px; }
   #screen-done { text-align:center; padding:60px 20px; }
   .word-count { font-size:.85rem; color:#888; margin-top:6px; }
+  .instr-list { margin:14px 0; padding-left:0; list-style:none; }
+  .instr-list li { padding:10px 0 10px 32px; position:relative; border-bottom:1px solid #f0f0f0; }
+  .instr-list li:last-child { border-bottom:none; }
+  .instr-list li:before { content:"•"; position:absolute; left:8px; color:var(--abc-red); font-weight:700; font-size:1.3rem; }
+  .no-calc-banner { background:#fdeceb; border:1.5px solid var(--abc-red); border-radius:8px; padding:12px 16px;
+      margin-bottom:16px; font-size:0.92rem; font-weight:600; color:var(--abc-red-dark); display:flex; align-items:center; gap:8px; }
+  .timer-chip { display:inline-flex; align-items:center; gap:6px; background:#f0f0f0; border-radius:20px;
+      padding:4px 12px; font-size:0.85rem; color:#666; font-weight:600; }
+  .timer-chip.warn { background:#fdeceb; color:var(--abc-red); }
+  .mistake-box { background:#fafafa; border-left:4px solid #999; padding:14px 16px; border-radius:6px;
+      margin-bottom:16px; font-size:1rem; line-height:1.6; }
+  .resume-card { text-align:center; }
 </style>
 </head>
 <body>
@@ -44,23 +58,48 @@
     <h2>Loading…</h2>
   </div>
 
+  <div id="screen-resume" class="card resume-card" style="display:none;">
+    <h2>Welcome back!</h2>
+    <p>It looks like you started this diagnostic before but didn't finish. Would you like to carry on where you left off, or start again from the beginning?</p>
+    <div class="nav" style="justify-content:center; gap:12px;">
+      <button class="nav-btn secondary" onclick="restartDiagnostic()">Start Over</button>
+      <button class="nav-btn" onclick="resumeDiagnostic()">Continue Where I Left Off</button>
+    </div>
+  </div>
+
   <div id="screen-intro" class="card" style="display:none;">
     <h2>Welcome!</h2>
-    <p>This short diagnostic helps your teachers understand how best to support you when you start at ABC.
-    It covers Maths and English, and takes about 45–60 minutes. There's no need to revise — just do your best.</p>
-    <p>You can't go back once you move to the next question, so take your time on each one.</p>
+    <p>This diagnostic helps your teachers understand how best to support you when you start at ABC. There's no need to revise — just do your best, working steadily through each section.</p>
+
+    <ul class="instr-list">
+      <li><strong>Mental Arithmetic</strong> — quick number questions, answered from memory</li>
+      <li><strong>Maths</strong> — number, fractions, algebra, geometry, data and reasoning</li>
+      <li><strong>English</strong> — reading, spotting mistakes, and a short writing task</li>
+    </ul>
+
+    <div class="no-calc-banner">🚫 No calculators for any part of this diagnostic — we want to see what you can do on your own.</div>
+
+    <p>You don't have to finish in one sitting. Use the <strong>Save & Continue Later</strong> button at any point, and when you log back in you'll be able to pick up exactly where you stopped.</p>
     <button class="nav-btn" onclick="startDiagnostic()">Start</button>
+  </div>
+
+  <div id="screen-mental-intro" class="card" style="display:none;">
+    <h2>Mental Arithmetic</h2>
+    <p>This section tests quick recall — times tables and number bonds. Answer as quickly as you can without using a calculator or working things out on paper. We're timing each question, but don't worry if one takes you a bit longer — just do your best.</p>
+    <button class="nav-btn" onclick="startMentalSection()">Start Mental Arithmetic</button>
   </div>
 
   <div id="screen-quiz" class="card" style="display:none;">
     <div class="progress"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
     <div id="sectionTitle" class="section-title"></div>
+    <div id="timerChipWrap"></div>
     <div id="passageBox" class="passage" style="display:none;"></div>
+    <div id="mistakeBox" class="mistake-box" style="display:none;"></div>
     <div id="qNum" class="q-num"></div>
     <div id="qText" class="q-text"></div>
     <div id="qBody"></div>
     <div class="nav">
-      <span></span>
+      <button class="btn-save" onclick="saveAndPause()">💾 Save &amp; Continue Later</button>
       <button class="nav-btn" id="nextBtn" onclick="nextQuestion()" disabled>Next</button>
     </div>
   </div>
@@ -72,9 +111,15 @@
     <textarea id="writingInput" placeholder="Start writing here..."></textarea>
     <div class="word-count" id="wordCount">0 words</div>
     <div class="nav">
-      <span></span>
+      <button class="btn-save" onclick="saveAndPause()">💾 Save &amp; Continue Later</button>
       <button class="nav-btn" onclick="submitDiagnostic()">Submit Diagnostic</button>
     </div>
+  </div>
+
+  <div id="screen-saved" class="card resume-card" style="display:none;">
+    <h2>Progress saved</h2>
+    <p>Your answers so far have been saved. You can close this page and come back any time — just log back in and you'll be able to continue exactly where you left off.</p>
+    <p><a href="dashboard-student.html">Go to your dashboard</a></p>
   </div>
 
   <div id="screen-done" class="card" style="display:none;">
@@ -93,6 +138,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
+let savedProgress = null;
 
 // ---------- Session check ----------
 (async () => {
@@ -103,18 +149,41 @@ let currentUser = null;
   }
   currentUser = session.user;
 
-  // Check if already completed
   const { data: profile } = await supabase.from('profiles').select('diagnostic_completed').eq('id', currentUser.id).single();
   if (profile && profile.diagnostic_completed) {
     document.getElementById('screen-done').style.display = 'block';
     document.querySelector('#screen-done p').textContent = "You've already completed the diagnostic.";
+    return;
+  }
+
+  // Check for saved in-progress attempt
+  const { data: progress } = await supabase.from('diagnostic_progress').select('*').eq('student_id', currentUser.id).maybeSingle();
+  if (progress) {
+    savedProgress = progress;
+    document.getElementById('screen-resume').style.display = 'block';
   } else {
     document.getElementById('screen-intro').style.display = 'block';
   }
 })();
 
-// ---------- Question bank ----------
-// type: 'mc' | 'numeric' | 'text'
+// ---------- Mental Arithmetic question bank (12 Qs, timed) ----------
+const mentalQs = [
+  { id:'ma1', text:'7 × 8', answer:'56' },
+  { id:'ma2', text:'9 × 6', answer:'54' },
+  { id:'ma3', text:'12 × 4', answer:'48' },
+  { id:'ma4', text:'8 × 7', answer:'56' },
+  { id:'ma5', text:'What number bonds with 7 to make 10?', answer:'3' },
+  { id:'ma6', text:'What number bonds with 35 to make 100?', answer:'65' },
+  { id:'ma7', text:'6 × 9', answer:'54' },
+  { id:'ma8', text:'Double 45', answer:'90' },
+  { id:'ma9', text:'Half of 84', answer:'42' },
+  { id:'ma10', text:'What number bonds with 18 to make 20?', answer:'2' },
+  { id:'ma11', text:'11 × 7', answer:'77' },
+  { id:'ma12', text:'9 × 9', answer:'81' },
+];
+const MENTAL_TIME_LIMIT_MS = 8000; // "fluent" threshold per question
+
+// ---------- Maths question bank (15 Qs) ----------
 const mathsQs = [
   { id:'m1', section:'Maths — Number', type:'numeric', text:'Write 3,459,102 to the nearest thousand.', answer:'3459000' },
   { id:'m2', section:'Maths — Number', type:'numeric', text:'Work out: 4,672 + 1,839', answer:'6511' },
@@ -151,7 +220,6 @@ const phonicsQs = [
   { id:'p8', section:'Phonics', type:'mc', text:'Which spelling would make the sound "lin"?', options:['lyn','line','lin','linn'], answer:2 },
   { id:'p9', section:'Phonics', type:'mc', text:'Which is the correct spelling?', options:['sed','said','sayd','saed'], answer:1 },
   { id:'p10', section:'Phonics', type:'mc', text:'Which is the correct spelling?', options:['wuz','was','waz','woz'], answer:1 },
-  // Note: shortened proxy set (10 shown here) — extend to full 34 following this pattern before go-live.
 ];
 
 const compQs = [
@@ -165,6 +233,35 @@ const compQs = [
   { id:'c8', type:'mc', text:'What might Amara do next?', options:['Throw the box away','Try to read the paper and learn more','Put the canoe back in the river','Go home and forget about it'], answer:1 },
 ];
 
+// ---------- Spot the Mistake (5 Qs) — proofreading, picks out common errors ----------
+const spotMistakeQs = [
+  { id:'sm1', text:'Which sentence has a mistake?', options:[
+      'The dog ran quickly across the field.',
+      'Their going to the market later today.',
+      'She opened the door and walked inside.'
+    ], mistakeIndex:1, answer:1 },
+  { id:'sm2', text:'Which sentence has a mistake?', options:[
+      'I dont want to go to the shop.',
+      'I don\'t want to go to the shop.',
+      'She doesn\'t want to go either.'
+    ], mistakeIndex:0, answer:0 },
+  { id:'sm3', text:'Which sentence has a mistake?', options:[
+      'we went to lagos for the holidays.',
+      'We went to Lagos for the holidays.',
+      'They stayed in Abuja for a week.'
+    ], mistakeIndex:0, answer:0 },
+  { id:'sm4', text:'Which sentence has a mistake?', options:[
+      'The teacher said, "Please sit down."',
+      'The teacher said "please sit down."',
+      'The teacher asked us to be quiet.'
+    ], mistakeIndex:1, answer:1 },
+  { id:'sm5', text:'Which sentence has a mistake?', options:[
+      'The boys books were left on the table.',
+      'The boy\'s books were left on the table.',
+      'The girls\' books were left on the shelf.'
+    ], mistakeIndex:0, answer:0 },
+];
+
 const passageText = `Amara had walked past the canoe every day on her way to the market, but she had never really looked at it. Today, something made her stop. The wooden hull was cracked and grey, half-buried in the sand where the river never quite reached. Faded blue paint clung to the sides in patches, like the last leaves before harmattan.
 
 She stepped closer. A rope, thick with dust and age, was still tied to a rusted metal ring. Amara wondered how long the canoe had been there — years, maybe longer. Her grandmother had once mentioned a fisherman who disappeared during a storm on the river, but she couldn't remember if it was this canoe or just a story told at night.
@@ -173,27 +270,13 @@ Something glinted inside the hull. Amara climbed carefully over the broken side 
 
 She sat back on her heels, holding the coin up to the light. Whatever story this canoe had to tell, she was determined to find out.`;
 
-// ---------- State ----------
-let queue = [];
-let idx = 0;
-let answers = {};
-let currentSelection = null;
-
-window.startDiagnostic = function() {
-  document.getElementById('screen-intro').style.display = 'none';
-  document.getElementById('screen-quiz').style.display = 'block';
-  queue = [...mathsQs, ...gateQs]; // phonics/comprehension appended dynamically
-  idx = 0;
-  renderQuestion();
-};
-
+// ---------- Bar chart SVG helper ----------
 function renderBarChartSVG(labels, values) {
   const width = 320, height = 220, padding = 36, barGap = 14;
   const maxVal = Math.max(...values) * 1.15;
   const chartHeight = height - padding * 2;
   const barWidth = (width - padding * 2 - barGap * (values.length - 1)) / values.length;
   const colours = ['#C0272D', '#1565C0', '#2E7D32', '#6A1B9A', '#E67E22'];
-
   let bars = '';
   values.forEach((v, i) => {
     const barHeight = (v / maxVal) * chartHeight;
@@ -205,20 +288,67 @@ function renderBarChartSVG(labels, values) {
       <text x="${x + barWidth/2}" y="${height - padding + 16}" text-anchor="middle" font-size="11" fill="#555">${labels[i]}</text>
     `;
   });
-
   return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;max-width:360px;height:auto;display:block;margin:0 auto">
     <line x1="${padding}" y1="${height-padding}" x2="${width-padding}" y2="${height-padding}" stroke="#ccc" stroke-width="1.5"></line>
     ${bars}
   </svg>`;
 }
 
+// ---------- State ----------
+let queue = [];
+let idx = 0;
+let answers = {};
+let currentSelection = null;
+let mentalTimes = {};       // { qid: ms }
+let mentalQuestionStart = null;
+let inMentalSection = false;
+
+window.startDiagnostic = function() {
+  document.getElementById('screen-intro').style.display = 'none';
+  document.getElementById('screen-mental-intro').style.display = 'block';
+};
+
+window.startMentalSection = function() {
+  document.getElementById('screen-mental-intro').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  queue = [...mentalQs];
+  inMentalSection = true;
+  idx = 0;
+  renderQuestion();
+};
+
+function totalQueueEstimate() {
+  // rough total for progress bar: mental(12) + maths(15) + gate(4) + comp(8) + spotMistake(5), phonics added if triggered
+  return 12 + 15 + 4 + 8 + 5 + 8; // +8 buffer for phonics possibility, matches prior estimate style
+}
+
 function renderQuestion() {
   const q = queue[idx];
+  const isMental = inMentalSection && mentalQs.some(m => m.id === q.id);
+
   document.getElementById('progressBar').style.width = `${Math.round((idx/(queue.length+8))*100)}%`;
-  document.getElementById('sectionTitle').textContent = q.section || '';
-  document.getElementById('qNum').textContent = `Question ${idx+1}`;
+  document.getElementById('sectionTitle').textContent = isMental ? 'Mental Arithmetic' : (q.section || (q.mistakeIndex !== undefined ? 'Spot the Mistake' : ''));
+  document.getElementById('qNum').textContent = isMental ? `Question ${idx+1} of ${mentalQs.length}` : `Question ${idx+1}`;
   document.getElementById('qText').textContent = q.text;
   currentSelection = null;
+
+  const timerWrap = document.getElementById('timerChipWrap');
+  if (isMental) {
+    timerWrap.innerHTML = `<span class="timer-chip" id="liveTimer">⏱ 0.0s</span>`;
+    mentalQuestionStart = Date.now();
+    if (window._timerInterval) clearInterval(window._timerInterval);
+    window._timerInterval = setInterval(() => {
+      const secs = ((Date.now() - mentalQuestionStart) / 1000).toFixed(1);
+      const chip = document.getElementById('liveTimer');
+      if (chip) {
+        chip.textContent = `⏱ ${secs}s`;
+        chip.classList.toggle('warn', (Date.now() - mentalQuestionStart) > MENTAL_TIME_LIMIT_MS);
+      }
+    }, 100);
+  } else {
+    timerWrap.innerHTML = '';
+    if (window._timerInterval) clearInterval(window._timerInterval);
+  }
 
   const passageBox = document.getElementById('passageBox');
   if (q.showPassage) {
@@ -228,7 +358,9 @@ function renderQuestion() {
     passageBox.style.display = 'none';
   }
 
-  // Render a bar chart if this question includes chartData
+  const mistakeBox = document.getElementById('mistakeBox');
+  mistakeBox.style.display = 'none';
+
   let chartBox = document.getElementById('chartBox');
   if (!chartBox) {
     chartBox = document.createElement('div');
@@ -247,7 +379,8 @@ function renderQuestion() {
   body.innerHTML = '';
   document.getElementById('nextBtn').disabled = true;
 
-  if (q.type === 'mc') {
+  if (q.mistakeIndex !== undefined) {
+    // Spot the Mistake — three sentence options, click the one with the error
     q.options.forEach((opt, i) => {
       const btn = document.createElement('button');
       btn.className = 'opt';
@@ -260,7 +393,20 @@ function renderQuestion() {
       };
       body.appendChild(btn);
     });
-  } else if (q.type === 'numeric') {
+  } else if (q.type === 'mc') {
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = opt;
+      btn.onclick = () => {
+        document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+        btn.classList.add('selected');
+        currentSelection = i;
+        document.getElementById('nextBtn').disabled = false;
+      };
+      body.appendChild(btn);
+    });
+  } else if (q.type === 'numeric' || isMental) {
     const input = document.createElement('input');
     input.type = 'text';
     input.inputMode = 'numeric';
@@ -269,23 +415,38 @@ function renderQuestion() {
       document.getElementById('nextBtn').disabled = currentSelection === '';
     };
     body.appendChild(input);
+    input.focus();
   }
 }
 
 window.nextQuestion = function() {
   const q = queue[idx];
+  const isMental = inMentalSection && mentalQs.some(m => m.id === q.id);
+
+  if (isMental) {
+    const timeTaken = Date.now() - mentalQuestionStart;
+    mentalTimes[q.id] = timeTaken;
+    if (window._timerInterval) clearInterval(window._timerInterval);
+  }
+
   answers[q.id] = currentSelection;
   idx++;
 
-  // After gate questions, decide whether to insert phonics
-  if (idx === mathsQs.length + gateQs.length) {
+  // Transition out of mental section into maths + gate
+  if (inMentalSection && idx >= mentalQs.length) {
+    inMentalSection = false;
+    queue = queue.concat(mathsQs).concat(gateQs);
+  }
+
+  // After gate questions, decide whether to insert phonics, then comprehension + spot the mistake
+  const gateEndIndex = mentalQs.length + mathsQs.length + gateQs.length;
+  if (idx === gateEndIndex) {
     const gateCorrect = gateQs.filter(gq => answers[gq.id] === gq.answer).length;
     if (gateCorrect <= 3) {
       queue = queue.concat(phonicsQs);
     }
-    // Append comprehension after (first comp question shows passage)
     const comp = compQs.map((c,i) => i===0 ? {...c, showPassage:true} : c);
-    queue = queue.concat(comp);
+    queue = queue.concat(comp).concat(spotMistakeQs);
   }
 
   if (idx >= queue.length) {
@@ -301,10 +462,73 @@ document.getElementById('writingInput')?.addEventListener('input', (e) => {
   document.getElementById('wordCount').textContent = `${words} words`;
 });
 
+// ---------- Save & Resume ----------
+window.saveAndPause = async function() {
+  const writingSample = document.getElementById('writingInput') && document.getElementById('screen-writing').style.display === 'block'
+    ? document.getElementById('writingInput').value : null;
+
+  await supabase.from('diagnostic_progress').upsert({
+    student_id: currentUser.id,
+    queue_state: queue.map(q => q.id),
+    current_index: idx,
+    answers: { ...answers, _writingDraft: writingSample },
+    mental_maths_times: mentalTimes,
+    updated_at: new Date().toISOString()
+  }, { onConflict: 'student_id' });
+
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-writing').style.display = 'none';
+  document.getElementById('screen-saved').style.display = 'block';
+};
+
+window.restartDiagnostic = async function() {
+  await supabase.from('diagnostic_progress').delete().eq('student_id', currentUser.id);
+  document.getElementById('screen-resume').style.display = 'none';
+  document.getElementById('screen-intro').style.display = 'block';
+};
+
+window.resumeDiagnostic = function() {
+  document.getElementById('screen-resume').style.display = 'none';
+
+  // Rebuild the full question bank in the same order it would have been built,
+  // then slice using the saved queue_state id order
+  const allQById = {};
+  [...mentalQs, ...mathsQs, ...gateQs, ...phonicsQs, ...compQs, ...spotMistakeQs].forEach(q => { allQById[q.id] = q; });
+
+  queue = savedProgress.queue_state.map(qid => {
+    if (qid === 'c1') return { ...allQById[qid], showPassage: true };
+    return allQById[qid];
+  });
+  idx = savedProgress.current_index || 0;
+  answers = savedProgress.answers || {};
+  mentalTimes = savedProgress.mental_maths_times || {};
+  inMentalSection = idx < mentalQs.length;
+
+  const writingDraft = answers._writingDraft;
+  delete answers._writingDraft;
+
+  if (idx >= queue.length) {
+    document.getElementById('screen-writing').style.display = 'block';
+    if (writingDraft) {
+      document.getElementById('writingInput').value = writingDraft;
+      const words = writingDraft.trim().split(/\s+/).filter(Boolean).length;
+      document.getElementById('wordCount').textContent = `${words} words`;
+    }
+  } else {
+    document.getElementById('screen-quiz').style.display = 'block';
+    renderQuestion();
+  }
+};
+
+// ---------- Submit ----------
 window.submitDiagnostic = async function() {
   const writingSample = document.getElementById('writingInput').value.trim();
 
-  // ---- Scoring ----
+  // ---- Mental arithmetic scoring ----
+  const mentalAccuracy = mentalQs.filter(q => String(answers[q.id]) === String(q.answer)).length;
+  const mentalFluent = mentalQs.filter(q => String(answers[q.id]) === String(q.answer) && (mentalTimes[q.id] || Infinity) <= MENTAL_TIME_LIMIT_MS).length;
+
+  // ---- Maths scoring ----
   const mathsCorrect = mathsQs.slice(0,13).filter(q => answers[q.id] === q.answer || String(answers[q.id]) === String(q.answer)).length;
   const reasoningCorrect = mathsQs.slice(13,15).filter(q => answers[q.id] === q.answer || String(answers[q.id]) === String(q.answer)).length;
   const mathsScore = mathsCorrect + reasoningCorrect;
@@ -314,8 +538,9 @@ window.submitDiagnostic = async function() {
   const phonicsCorrect = phonicsTriggered ? phonicsQs.filter(q => answers[q.id] === q.answer).length : null;
 
   const compCorrect = compQs.filter(q => answers[q.id] === q.answer).length;
+  const spotMistakeCorrect = spotMistakeQs.filter(q => answers[q.id] === q.answer).length;
 
-  // Per-cluster maths scoring — drives which specific Bridge Maths sub-flags get set
+  // Per-cluster maths scoring
   function clusterScore(sectionName) {
     const qs = mathsQs.filter(q => q.section === sectionName);
     const correct = qs.filter(q => answers[q.id] === q.answer || String(answers[q.id]) === String(q.answer)).length;
@@ -327,18 +552,19 @@ window.submitDiagnostic = async function() {
   const geometryCluster  = clusterScore('Maths — Geometry');
   const dataCluster      = clusterScore('Maths — Data');
 
-  // A cluster is flagged as needing bridging if the student got 50% or fewer correct
-  const bridgeMathsNumber    = numberCluster.pct    <= 0.5;
+  // Weak mental arithmetic fluency also feeds into Number bridging, since fast
+  // recall of number bonds/times tables underpins the Number strand
+  const mentalWeak = mentalFluent < 8; // fewer than 8/12 fast-and-correct
+
+  const bridgeMathsNumber    = numberCluster.pct    <= 0.5 || mentalWeak;
   const bridgeMathsFractions = fractionsCluster.pct <= 0.5;
   const bridgeMathsAlgebra   = algebraCluster.pct   <= 0.5;
   const bridgeMathsGeometry  = geometryCluster.pct  <= 0.5;
   const bridgeMathsData      = dataCluster.pct      <= 0.5;
 
-  // English comprehension bridging — based on comprehension score out of 8
-  const bridgeEnglishComprehension = compCorrect < 5;
+  // English comprehension bridging — combines passage comprehension AND spot-the-mistake proofreading
+  const bridgeEnglishComprehension = compCorrect < 5 || spotMistakeCorrect < 3;
 
-  // Writing is not auto-scored for quality, but a very short sample is a
-  // reasonable proxy flag for needing writing support — staff review confirms
   const wordCount = writingSample.split(/\s+/).filter(Boolean).length;
   const bridgeEnglishWriting = wordCount < 40;
 
@@ -346,7 +572,7 @@ window.submitDiagnostic = async function() {
   const anyBridgeEnglish = bridgeEnglishComprehension || bridgeEnglishWriting;
   const bridgeNeeded = anyBridgeMaths || anyBridgeEnglish;
 
-  const extension = mathsScore >= 13 && reasoningCorrect === 2 && compCorrect >= 7;
+  const extension = mathsScore >= 13 && reasoningCorrect === 2 && compCorrect >= 7 && mentalFluent >= 10;
   const phonicsSupport = phonicsTriggered && phonicsCorrect !== null && (phonicsCorrect / phonicsQs.length) < 0.70;
 
   // ---- Write to Supabase ----
@@ -354,12 +580,15 @@ window.submitDiagnostic = async function() {
     student_id: currentUser.id,
     maths_score: mathsScore,
     maths_reasoning_score: reasoningCorrect,
+    mental_maths_score: mentalFluent,
+    mental_maths_accuracy: mentalAccuracy,
     gate_score: gateCorrect,
     phonics_triggered: phonicsTriggered,
     phonics_score: phonicsCorrect,
     comprehension_score: compCorrect,
+    spot_mistake_score: spotMistakeCorrect,
     writing_sample: writingSample,
-    raw_answers: answers
+    raw_answers: { ...answers, mentalTimes }
   });
 
   const { error: profileErr } = await supabase.from('profiles').update({
@@ -382,6 +611,9 @@ window.submitDiagnostic = async function() {
     console.error(insertErr, profileErr);
     return;
   }
+
+  // Clean up saved progress now that the diagnostic is fully submitted
+  await supabase.from('diagnostic_progress').delete().eq('student_id', currentUser.id);
 
   document.getElementById('screen-writing').style.display = 'none';
   document.getElementById('screen-done').style.display = 'block';
