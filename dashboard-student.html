@@ -132,6 +132,7 @@
       <button id="toggle-digitaltech">💻 Digital Tech</button>
       <button id="toggle-bridge" style="display:none">🌉 Bridge</button>
       <button id="toggle-phonics" style="display:none">🔤 Phonics</button>
+      <button id="toggle-extension" style="display:none">⭐ Extension</button>
     </div>
     <div class="science-subtabs" id="science-subtabs">
       <button class="science-subtab" id="subtab-science" style="--subtab-accent:#1565C0" onclick="window.switchSubject('science')">🔬 Combined Sci</button>
@@ -142,6 +143,10 @@
     <div class="science-subtabs" id="bridge-subtabs">
       <button class="science-subtab" id="subtab-bridge_maths" style="--subtab-accent:#C0272D" onclick="window.switchSubject('bridge_maths')">📐 Bridge Maths</button>
       <button class="science-subtab" id="subtab-bridge_english" style="--subtab-accent:#C0272D; display:none" onclick="window.switchSubject('bridge_english')">✏️ Bridge English</button>
+    </div>
+    <div class="science-subtabs" id="extension-subtabs">
+      <button class="science-subtab" id="subtab-ext_maths" style="--subtab-accent:#C0272D" onclick="window.switchSubject('ext_maths')">📐 Extension Maths</button>
+      <button class="science-subtab" id="subtab-ext_english" style="--subtab-accent:#C0272D" onclick="window.switchSubject('ext_english')">✏️ Extension English</button>
     </div>
     <span class="user-name" id="header-name"></span>
     <button class="btn-chpwd" onclick="openChangePwd()">Change Password</button>
@@ -739,6 +744,28 @@
     'DT12-PM-01': 'digks4/project-management-careers-y12.html',
   };
 
+  const EXT_MTH_WALKTHROUGH_FILES = {
+    'EXT-MTH-01': 'ext_mth/EXT-MTH-01.html',
+    'EXT-MTH-02': 'ext_mth/EXT-MTH-02.html',
+    'EXT-MTH-03': 'ext_mth/EXT-MTH-03.html',
+    'EXT-MTH-04': 'ext_mth/EXT-MTH-04.html',
+    'EXT-MTH-05': 'ext_mth/EXT-MTH-05.html',
+    'EXT-MTH-06': 'ext_mth/EXT-MTH-06.html',
+    'EXT-MTH-07': 'ext_mth/EXT-MTH-07.html',
+    'EXT-MTH-08': 'ext_mth/EXT-MTH-08.html',
+  };
+
+  const EXT_ENG_WALKTHROUGH_FILES = {
+    'EXT-ENG-01': 'ext_eng/EXT-ENG-01.html',
+    'EXT-ENG-02': 'ext_eng/EXT-ENG-02.html',
+    'EXT-ENG-03': 'ext_eng/EXT-ENG-03.html',
+    'EXT-ENG-04': 'ext_eng/EXT-ENG-04.html',
+    'EXT-ENG-05': 'ext_eng/EXT-ENG-05.html',
+    'EXT-ENG-06': 'ext_eng/EXT-ENG-06.html',
+    'EXT-ENG-07': 'ext_eng/EXT-ENG-07.html',
+    'EXT-ENG-08': 'ext_eng/EXT-ENG-08.html',
+  };
+
   const PHONICS_WALKTHROUGH_FILES = {
     'PHO-01': 'phonics/PHO-01.html',
     'PHO-02': 'phonics/PHO-02.html',
@@ -817,6 +844,8 @@
     else if (subject === 'bridge_maths') file = BRIDGE_MTH_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'bridge_english') file = BRIDGE_ENG_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'phonics') file = PHONICS_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'ext_maths') file = EXT_MTH_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'ext_english') file = EXT_ENG_WALKTHROUGH_FILES[topicCode];
     else file = WALKTHROUGH_FILES[topicCode];
     return file || '#';
   }
@@ -916,6 +945,10 @@
       const phonicsBt2 = document.getElementById('toggle-phonics');
       if (phonicsBt2) phonicsBt2.style.display = profile.phonics_support ? '' : 'none';
 
+      // Show Extension tab if flagged
+      const extBt2 = document.getElementById('toggle-extension');
+      if (extBt2) extBt2.style.display = profile.extension ? '' : 'none';
+
       document.getElementById('header-name').textContent = profile.full_name;
       document.getElementById('welcome-name').textContent = 'Hello, ' + profile.full_name.split(' ')[0] + '!';
       document.getElementById('welcome-sub').textContent = 'Year ' + myYearGroup + (profile.form_class ? ' · ' + profile.form_class : '');
@@ -986,7 +1019,7 @@
     const PHYS_COLOURS = { 'Mechanics':'#1565C0','Thermal':'#C0272D','Waves':'#6A1B9A','Electricity':'#E65100','Nuclear':'#2E7D32','Space':'#00695C','Practical':'#888','Fields':'#6A1B9A','Energy':'#C0272D','Applied':'#555','Measurement':'#555' };
     const CHEM_COLOURS = { 'Physical Chemistry':'#1565C0','Atomic Structure':'#6A1B9A','Bonding':'#E65100','Stoichiometry':'#C0272D','Electrochemistry':'#00695C','Energetics':'#C0272D','Kinetics':'#E65100','Redox':'#6A1B9A','Acids & Bases':'#C0272D','Periodic Table':'#1565C0','Metals':'#00695C','Environment':'#2E7D32','Organic':'#E65100','Analysis':'#555','Inorganic':'#888','Practical':'#888' };
     const BIO_COLOURS  = { 'Classification':'#2E7D32','Cell Biology':'#1565C0','Biochemistry':'#6A1B9A','Plant Biology':'#2E7D32','Human Biology':'#C0272D','Health & Disease':'#E65100','Reproduction':'#E65100','Genetics':'#6A1B9A','Ecology':'#00695C','Biotechnology':'#1565C0','Evolution':'#00695C','Practical':'#888' };
-    const strandColourMap = { science: SCIENCE_STRAND_COLOURS, physics: PHYS_COLOURS, chemistry: CHEM_COLOURS, biology: BIO_COLOURS, english: ENGLISH_STRAND_COLOURS, digitaltech: DIGITALTECH_STRAND_COLOURS, bridge_maths: BRIDGE_STRAND_COLOURS, bridge_english: BRIDGE_STRAND_COLOURS, phonics: PHONICS_STRAND_COLOURS };
+    const strandColourMap = { science: SCIENCE_STRAND_COLOURS, physics: PHYS_COLOURS, chemistry: CHEM_COLOURS, biology: BIO_COLOURS, english: ENGLISH_STRAND_COLOURS, digitaltech: DIGITALTECH_STRAND_COLOURS, bridge_maths: BRIDGE_STRAND_COLOURS, bridge_english: BRIDGE_STRAND_COLOURS, phonics: PHONICS_STRAND_COLOURS, ext_maths: EXTENSION_STRAND_COLOURS, ext_english: EXTENSION_STRAND_COLOURS };
     const colourLookup = strandColourMap[currentSubject] || null;
 
     document.getElementById('strand-bars').innerHTML = Object.entries(strands).length > 0
@@ -1043,12 +1076,16 @@
   const ARTS_SUBJECTS   = ['crs', 'government'];
   const BRIDGE_SUBJECTS = ['bridge_maths', 'bridge_english'];
   const PHONICS_SUBJECTS = ['phonics'];
+  const EXTENSION_SUBJECTS = ['ext_maths', 'ext_english'];
 
   const BRIDGE_STRAND_COLOURS = {
     'bridge': '#C0272D',
   };
   const PHONICS_STRAND_COLOURS = {
     'phonics': '#C0272D',
+  };
+  const EXTENSION_STRAND_COLOURS = {
+    'extension': '#C0272D',
   };
 
   // English IGCSE Grammar & Vocabulary topics (ENG-GRAM-xx / ENG-VOC-xx) are
@@ -1068,6 +1105,7 @@
     const isArtsGrp = ARTS_SUBJECTS.includes(subject);
     const isBridgeGrp = BRIDGE_SUBJECTS.includes(subject);
     const isPhonicsGrp = PHONICS_SUBJECTS.includes(subject);
+    const isExtGrp = EXTENSION_SUBJECTS.includes(subject);
 
     // Main toggle active state
     document.getElementById('toggle-maths').classList.toggle('active', isMaths);
@@ -1084,10 +1122,13 @@
     if (bridgeBt) bridgeBt.classList.toggle('active', isBridgeGrp);
     const phonicsBt = document.getElementById('toggle-phonics');
     if (phonicsBt) phonicsBt.classList.toggle('active', isPhonicsGrp);
+    const extBt = document.getElementById('toggle-extension');
+    if (extBt) extBt.classList.toggle('active', isExtGrp);
 
     // Show/hide science sub-tabs
     document.getElementById('science-subtabs').classList.toggle('visible', isSciGrp);
     document.getElementById('bridge-subtabs').classList.toggle('visible', isBridgeGrp);
+    document.getElementById('extension-subtabs').classList.toggle('visible', isExtGrp);
 
     // Sub-tab active state (only applies if in science group)
     ['science', 'physics', 'chemistry', 'biology'].forEach(s => {
@@ -1098,14 +1139,18 @@
       const el = document.getElementById('subtab-' + s);
       if (el) el.classList.toggle('active', s === subject);
     });
+    ['ext_maths', 'ext_english'].forEach(s => {
+      const el = document.getElementById('subtab-' + s);
+      if (el) el.classList.toggle('active', s === subject);
+    });
 
     // Header subtitle
-    const subtitles = { maths: 'Maths Portal', english: 'English Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal', digitaltech: 'Digital Technologies Portal', bridge_maths: 'Bridge Maths', bridge_english: 'Bridge English', phonics: 'Phonics Support' };
+    const subtitles = { maths: 'Maths Portal', english: 'English Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal', digitaltech: 'Digital Technologies Portal', bridge_maths: 'Bridge Maths', bridge_english: 'Bridge English', phonics: 'Phonics Support', ext_maths: 'Extension Maths', ext_english: 'Extension English' };
     document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Portal';
 
-    // Year selector: hide Add Maths (Y13) when not in Maths; hide entirely for arts/bridge/phonics
+    // Year selector: hide Add Maths (Y13) when not in Maths; hide entirely for arts/bridge/phonics/extension
     const yearSelector = document.querySelector('.year-selector') || document.getElementById('year-selector');
-    if (yearSelector) yearSelector.style.display = (isArtsGrp || isBridgeGrp || isPhonicsGrp) ? 'none' : '';
+    if (yearSelector) yearSelector.style.display = (isArtsGrp || isBridgeGrp || isPhonicsGrp || isExtGrp) ? 'none' : '';
     const addMathsOpt = document.querySelector('#year-select option[value="13"]');
     if (addMathsOpt) {
       addMathsOpt.style.display = isMaths ? '' : 'none';
@@ -1123,11 +1168,11 @@
     const value = document.getElementById('year-select').value;
     let filtered, label;
 
-    const isArtsSubj = ARTS_SUBJECTS.includes(currentSubject) || BRIDGE_SUBJECTS.includes(currentSubject) || PHONICS_SUBJECTS.includes(currentSubject);
+    const isArtsSubj = ARTS_SUBJECTS.includes(currentSubject) || BRIDGE_SUBJECTS.includes(currentSubject) || PHONICS_SUBJECTS.includes(currentSubject) || EXTENSION_SUBJECTS.includes(currentSubject);
     if (isArtsSubj) {
-      // CRS, Government, Bridge, and Phonics span a fixed set of topics regardless of year — show all
+      // CRS, Government, Bridge, Phonics, and Extension span a fixed set of topics regardless of year — show all
       filtered = allTopics.filter(t => (t.subject || 'maths') === currentSubject);
-      label    = BRIDGE_SUBJECTS.includes(currentSubject) ? 'Your Bridge topics' : (PHONICS_SUBJECTS.includes(currentSubject) ? 'Your Phonics topics' : ('Showing all ' + (currentSubject === 'crs' ? 'CRS' : 'Government') + ' topics'));
+      label    = BRIDGE_SUBJECTS.includes(currentSubject) ? 'Your Bridge topics' : (PHONICS_SUBJECTS.includes(currentSubject) ? 'Your Phonics topics' : (EXTENSION_SUBJECTS.includes(currentSubject) ? 'Your Extension topics' : ('Showing all ' + (currentSubject === 'crs' ? 'CRS' : 'Government') + ' topics')));
     } else if (value === 'own') {
       filtered = allTopics.filter(t => topicMatchesYear(t, currentSubject, myYearGroup) && (t.subject || 'maths') === currentSubject);
       label    = 'Showing your Year ' + myYearGroup + ' topics';
@@ -1302,6 +1347,10 @@
   if (document.getElementById('toggle-phonics'))
     document.getElementById('toggle-phonics').addEventListener('click', () => {
       if (!PHONICS_SUBJECTS.includes(currentSubject)) window.switchSubject('phonics');
+    });
+  if (document.getElementById('toggle-extension'))
+    document.getElementById('toggle-extension').addEventListener('click', () => {
+      if (!EXTENSION_SUBJECTS.includes(currentSubject)) window.switchSubject('ext_maths');
     });
 
   init();
