@@ -47,22 +47,45 @@
 
 <script>
 const QUESTIONS = [{"title": "Reading values from a bar chart", "teach": ["A bar chart shows values as the height (or length) of bars \u2014 read across from the top of the bar to the scale on the axis.", "Example: if a bar for 'Maths' reaches the 8 line, then 8 students chose Maths.", "Always check what the axis scale is counting in \u2014 sometimes it goes up in 2s, 5s, or 10s, not just 1s."], "yt_prompt": "A bar chart shows: Maths=8, English=5, Science=10, Art=4. How many chose Science?"}, {"title": "Finding the most popular category", "teach": ["The most popular (or highest) category on a bar chart is simply the tallest bar.", "Example: with Maths=8, English=5, Science=10, Art=4 \u2014 Science is the tallest, so it's most popular.", "Compare all the values carefully before deciding, especially when two bars look close in height."], "yt_prompt": "Which subject was most popular?"}, {"title": "Finding the difference between two bars", "teach": ["To find the difference between two categories, subtract the smaller value from the larger one.", "Example: Science=10, Art=4 \u2192 difference = 10\u22124 = 6.", "Always subtract smaller from larger, so your answer is positive."], "yt_prompt": "Find the difference:"}, {"title": "Finding the total from a bar chart", "teach": ["To find a total, add up all the values shown across every category.", "Example: Maths=8, English=5, Science=10, Art=4 \u2192 total = 8+5+10+4 = 27.", "This is useful for finding the total number of students, votes, or items surveyed."], "yt_prompt": "Find the total (add all four values):"}, {"title": "Reading a pictogram", "teach": ["A pictogram uses repeated pictures/symbols to represent data \u2014 each symbol usually stands for more than one item (check the key!).", "Example: if the key says 'each = 2 students' and a row shows 3 symbols, that's 3\u00d72=6 students.", "Always check the key first before reading any values \u2014 this is the most common mistake with pictograms."], "yt_prompt": "Work out the value from the pictogram:"}, {"title": "Half symbols in a pictogram", "teach": ["Sometimes a pictogram shows half a symbol, representing half the usual value.", "Example: if each symbol = 10 students, a half symbol represents 5 students.", "Add whole symbols first, then add on the half-symbol value at the end."], "yt_prompt": "Work out the value from the pictogram:"}, {"title": "Reading values from a line graph", "teach": ["A line graph shows how a value changes over time \u2014 read across from a point on the line to the value on the y-axis.", "Example: if the line is at height 15 when x=3 (e.g. 3pm), the value at that time is 15.", "Line graphs are especially useful for showing trends (increasing, decreasing, or staying the same)."], "yt_prompt": "Read the value from the line graph:"}, {"title": "Describing a trend on a line graph", "teach": ["A trend describes whether values are generally going up, down, or staying flat over time.", "Example: if temperature rises from 10\u00b0C to 25\u00b0C across the day, the trend is 'increasing'.", "Look at the overall direction of the line, not just individual small wiggles."], "yt_prompt": "Describe the trend \u2014 type 'increasing', 'decreasing', or 'flat':"}, {"title": "Finding the range of a data set", "teach": ["The range is the difference between the highest and lowest values in a data set.", "Example: values 4, 8, 5, 10 \u2192 range = 10\u22124 = 6.", "Always find the highest and lowest first, then subtract."], "yt_prompt": "Find the range of this data set:"}, {"title": "Mixed data-handling practice", "teach": ["You've now covered bar charts, pictograms, line graphs, totals, differences, and range.", "These data-handling skills apply across many subjects, not just maths \u2014 reading charts carefully is a key life skill.", "This final question brings a couple of these ideas together."], "yt_prompt": "Find the difference between the highest and lowest bar:"}];
-function ytGen_0() { const vals={Maths:Math.floor(Math.random()*10)+3, English:Math.floor(Math.random()*10)+3, Science:Math.floor(Math.random()*10)+3, Art:Math.floor(Math.random()*10)+3}; const subjects=Object.keys(vals); const pick=subjects[Math.floor(Math.random()*4)]; return {q:`Maths=${vals.Maths}, English=${vals.English}, Science=${vals.Science}, Art=${vals.Art}. How many chose ${pick}?`, answer:String(vals[pick])}; }
-function ytGen_1() { const vals={Maths:Math.floor(Math.random()*10)+3, English:Math.floor(Math.random()*10)+3, Science:Math.floor(Math.random()*10)+3, Art:Math.floor(Math.random()*10)+3}; const max=Math.max(...Object.values(vals)); const winner=Object.keys(vals).find(k=>vals[k]===max); return {q:`Maths=${vals.Maths}, English=${vals.English}, Science=${vals.Science}, Art=${vals.Art}. Which subject was most popular?`, answer:winner}; }
-function ytGen_2() { const vals={Maths:Math.floor(Math.random()*10)+3, Science:Math.floor(Math.random()*10)+3}; const diff=Math.abs(vals.Maths-vals.Science); return {q:`Maths=${vals.Maths}, Science=${vals.Science}. What is the difference between them?`, answer:String(diff)}; }
-function ytGen_3() { const a=Math.floor(Math.random()*10)+3; const b=Math.floor(Math.random()*10)+3; const c=Math.floor(Math.random()*10)+3; const d=Math.floor(Math.random()*10)+3; return {q:`Maths=${a}, English=${b}, Science=${c}, Art=${d}. What is the total?`, answer:String(a+b+c+d)}; }
+function ytGen_0() { const vals={Maths:Math.floor(Math.random()*10)+3, English:Math.floor(Math.random()*10)+3, Science:Math.floor(Math.random()*10)+3, Art:Math.floor(Math.random()*10)+3}; const subjects=Object.keys(vals); const pick=subjects[Math.floor(Math.random()*4)]; return {q:'', chart:{labels:subjects, values:subjects.map(s=>vals[s])}, answer:String(vals[pick]), prompt:`How many students chose ${pick}?`}; }
+function ytGen_1() { const vals={Maths:Math.floor(Math.random()*10)+3, English:Math.floor(Math.random()*10)+3, Science:Math.floor(Math.random()*10)+3, Art:Math.floor(Math.random()*10)+3}; const subjects=Object.keys(vals); const max=Math.max(...Object.values(vals)); const winner=subjects.find(k=>vals[k]===max); return {q:'', chart:{labels:subjects, values:subjects.map(s=>vals[s])}, answer:winner, prompt:'Which subject was most popular?'}; }
+function ytGen_2() { const vals={Maths:Math.floor(Math.random()*10)+3, Science:Math.floor(Math.random()*10)+3}; const diff=Math.abs(vals.Maths-vals.Science); return {q:'', chart:{labels:['Maths','Science'], values:[vals.Maths,vals.Science]}, answer:String(diff), prompt:'What is the difference between them?'}; }
+function ytGen_3() { const a=Math.floor(Math.random()*10)+3; const b=Math.floor(Math.random()*10)+3; const c=Math.floor(Math.random()*10)+3; const d=Math.floor(Math.random()*10)+3; return {q:'', chart:{labels:['Maths','English','Science','Art'], values:[a,b,c,d]}, answer:String(a+b+c+d), prompt:'What is the total across all four?'}; }
 function ytGen_4() { const perSymbol=[2,5,10][Math.floor(Math.random()*3)]; const symbols=Math.floor(Math.random()*6)+2; return {q:`Key: each symbol = ${perSymbol} students. A row shows ${symbols} symbols. How many students does this represent?`, answer:String(perSymbol*symbols)}; }
 function ytGen_5() { const perSymbol=[4,6,10][Math.floor(Math.random()*3)]; const wholeSymbols=Math.floor(Math.random()*4)+1; return {q:`Key: each symbol = ${perSymbol} students. A row shows ${wholeSymbols} whole symbols and 1 half symbol. How many students total?`, answer:String(perSymbol*wholeSymbols+perSymbol/2)}; }
 function ytGen_6() { const time=Math.floor(Math.random()*5)+1; const value=Math.floor(Math.random()*30)+10; return {q:`A line graph shows temperature over time. At hour ${time}, the line is at ${value}°C. What is the temperature at hour ${time}?`, answer:String(value)}; }
 function ytGen_7() { const trends=[['10°C at 9am, rising to 25°C by 3pm','increasing'],['30°C at 9am, falling to 18°C by 3pm','decreasing'],['20°C at 9am, staying at 20°C all day','flat']]; const p=trends[Math.floor(Math.random()*trends.length)]; return {q:p[0], answer:p[1]}; }
 function ytGen_8() { const vals=[]; for(let i=0;i<4;i++) vals.push(Math.floor(Math.random()*20)+1); const range=Math.max(...vals)-Math.min(...vals); return {q:vals.join(', '), answer:String(range)}; }
-function ytGen_9() { const a=Math.floor(Math.random()*10)+3; const b=Math.floor(Math.random()*10)+3; const c=Math.floor(Math.random()*10)+3; const vals=[a,b,c]; const range=Math.max(...vals)-Math.min(...vals); return {q:`Bars show: ${a}, ${b}, ${c}. What is the difference between the highest and lowest?`, answer:String(range)}; }
+function ytGen_9() { const a=Math.floor(Math.random()*10)+3; const b=Math.floor(Math.random()*10)+3; const c=Math.floor(Math.random()*10)+3; const vals=[a,b,c]; const range=Math.max(...vals)-Math.min(...vals); return {q:'', chart:{labels:['Bar A','Bar B','Bar C'], values:vals}, answer:String(range), prompt:'What is the difference between the highest and lowest bar?'}; }
 const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
 
 let qIdx = 0;
 let stepIdx = 0;
 const STEPS_PER_Q = 4;
 let currentYT = null;
+
+function renderBarChartSVG(labels, values) {
+  const width = 320, height = 220, padding = 36, barGap = 14;
+  const maxVal = Math.max(...values) * 1.15;
+  const chartHeight = height - padding * 2;
+  const barWidth = (width - padding * 2 - barGap * (values.length - 1)) / values.length;
+  const colours = ['#C0272D', '#8f1d22', '#e05a5f', '#f0a3a6', '#C0272D'];
+  let bars = '';
+  values.forEach((v, i) => {
+    const barHeight = (v / maxVal) * chartHeight;
+    const x = padding + i * (barWidth + barGap);
+    const y = height - padding - barHeight;
+    bars += `
+      <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${colours[i % colours.length]}" rx="3"></rect>
+      <text x="${x + barWidth/2}" y="${y - 6}" text-anchor="middle" font-size="13" font-weight="700" fill="#333">${v}</text>
+      <text x="${x + barWidth/2}" y="${height - padding + 16}" text-anchor="middle" font-size="11" fill="#555">${labels[i]}</text>
+    `;
+  });
+  return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;max-width:360px;height:auto;display:block;margin:8px auto">
+    <line x1="${padding}" y1="${height-padding}" x2="${width-padding}" y2="${height-padding}" stroke="#ccc" stroke-width="1.5"></line>
+    ${bars}
+  </svg>`;
+}
 
 function render() {
   const q = QUESTIONS[qIdx];
@@ -79,11 +102,14 @@ function render() {
     document.getElementById('nextBtn').disabled = false;
   } else {
     currentYT = YT_GENS[qIdx]();
+    const chartHtml = currentYT.chart ? renderBarChartSVG(currentYT.chart.labels, currentYT.chart.values) : '';
+    const promptText = currentYT.prompt || q.yt_prompt;
     box.innerHTML = `
       <div class="teach"><strong>${q.title}</strong></div>
       <div class="yt-box">
-        <div>${q.yt_prompt}</div>
-        <div class="worked">${currentYT.q}</div>
+        <div>${promptText}</div>
+        ${chartHtml}
+        ${currentYT.q ? `<div class="worked">${currentYT.q}</div>` : ''}
         <input type="text" id="ytAnswer" placeholder="Your answer">
         <button class="act" onclick="checkYT()">Check</button>
         <div id="ytFeedback"></div>
