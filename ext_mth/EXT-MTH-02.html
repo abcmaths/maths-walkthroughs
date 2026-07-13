@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sequences — Finding the nth Term — Extension Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Extension Maths: Sequences — Finding the nth Term</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "What is a sequence?", "teach": ["A sequence is an ordered list of numbers following a pattern, like 2, 5, 8, 11...", "Each number is called a 'term'. The difference between consecutive terms is often constant in simple sequences.", "Spotting the pattern is the first step before finding a general rule."], "yt_prompt": "What is the next term in this sequence?"}, {"title": "Finding the common difference", "teach": ["The common difference is how much each term increases (or decreases) by.", "Example: in 3, 7, 11, 15... the common difference is 4 (each term is 4 more than the last).", "Finding this difference is the key first step to writing the nth term formula."], "yt_prompt": "What is the common difference in this sequence?"}, {"title": "Writing the nth term formula \u2014 basic", "teach": ["The nth term formula is written as dn + (a\u2212d), where d is the common difference and a is the first term.", "Example: for 3, 7, 11, 15... the difference is 4, and 3\u22124=\u22121, so the formula is 4n \u2212 1.", "Check the formula by substituting n=1, which should give the first term."], "yt_prompt": "What is the nth term formula for this sequence? (write as e.g. 4n-1, no spaces)"}, {"title": "Using the nth term formula to find a specific term", "teach": ["Once you have the formula, substitute any value of n to find that specific term.", "Example: for the formula 4n\u22121, the 10th term is 4(10)\u22121=39.", "This is much faster than counting through the sequence term by term."], "yt_prompt": "Using the formula shown, find the specified term:"}, {"title": "Checking if a number is in the sequence", "teach": ["To check if a number appears in a sequence, set the nth term formula equal to that number and solve for n. If n is a positive whole number, it's in the sequence.", "Example: is 45 in the sequence 4n\u22121? Solve 4n\u22121=45 \u2192 4n=46 \u2192 n=11.5, not a whole number, so 45 is NOT in the sequence.", "This algebraic check is more reliable than just guessing or listing terms."], "yt_prompt": "Is this number in the sequence? Type 'yes' or 'no':"}, {"title": "Quadratic sequences \u2014 spotting the pattern", "teach": ["Some sequences have a changing (not constant) difference \u2014 often these are quadratic sequences, related to n\u00b2.", "Example: 1, 4, 9, 16... \u2014 the differences are 3, 5, 7 (increasing by 2 each time) \u2014 this is the sequence of square numbers, n\u00b2.", "Look at the second differences (the differences between the differences) to check if a sequence is quadratic."], "yt_prompt": "What is the next term in this sequence of square numbers?"}, {"title": "Sequences in real-life contexts", "teach": ["Sequences often model real situations, like a growing pattern of tiles or seats in a theatre.", "Example: if row 1 has 3 seats, row 2 has 5, row 3 has 7... the nth term (2n+1) predicts seats in any row.", "Setting up the nth term formula lets you answer questions about much later terms without counting through every one."], "yt_prompt": "Using the pattern shown (row 1=3 seats, row 2=5, row 3=7...), how many seats are in row 20?"}, {"title": "Working backwards from the nth term", "teach": ["If you know the nth term formula and a specific term value, you can find which position (n) that term is in.", "Example: if nth term = 3n+2, and a term equals 32, then 3n+2=32 \u2192 n=10 \u2192 it's the 10th term.", "This uses the same equation-solving skills from your algebra topics."], "yt_prompt": "Using the formula shown, which term number equals the value given?"}, {"title": "Decreasing sequences", "teach": ["Sequences can also decrease \u2014 the common difference is negative.", "Example: 20, 17, 14, 11... has a common difference of \u22123.", "The nth term formula still works the same way, just with a negative value for d."], "yt_prompt": "What is the next term in this decreasing sequence?"}, {"title": "Mixed practice \u2014 sequences and nth term", "teach": ["You've now covered finding patterns, writing nth term formulas, using them to find terms, and checking if a number belongs to a sequence.", "These skills are tested regularly in exams, often combined with algebraic manipulation.", "This final question brings a couple of these ideas together."], "yt_prompt": "What is the nth term formula for this sequence? (write as e.g. 5n+2, no spaces)"}];
+function ytGen_0() { const start=Math.floor(Math.random()*5)+1; const diff=Math.floor(Math.random()*5)+2; const terms=[start,start+diff,start+2*diff,start+3*diff]; return {q:terms.join(', ')+', ?', answer:String(start+4*diff)}; }
+function ytGen_1() { const start=Math.floor(Math.random()*5)+1; const diff=Math.floor(Math.random()*6)+2; const terms=[start,start+diff,start+2*diff,start+3*diff]; return {q:terms.join(', '), answer:String(diff)}; }
+function ytGen_2() { const d=Math.floor(Math.random()*5)+2; const a=Math.floor(Math.random()*5)+1; const c=a-d; const sign=c<0?'-':'+'; const cAbs=Math.abs(c); const terms=[a,a+d,a+2*d,a+3*d]; return {q:terms.join(', '), answer:`${d}n${sign}${cAbs}`}; }
+function ytGen_3() { const d=Math.floor(Math.random()*5)+2; const c=Math.floor(Math.random()*8)-4; const n=Math.floor(Math.random()*15)+8; const sign=c<0?'-':'+'; const cAbs=Math.abs(c); const term=d*n+c; return {q:`nth term = ${d}n${sign}${cAbs}. Find the ${n}th term.`, answer:String(term)}; }
+function ytGen_4() { const d=Math.floor(Math.random()*5)+2; const c=Math.floor(Math.random()*5)-2; const n=Math.floor(Math.random()*10)+3; const target=d*n+c; const isIn=Math.random()<0.5; const testNum = isIn ? target : target+1; const sign=c<0?'-':'+'; const cAbs=Math.abs(c); return {q:`nth term = ${d}n${sign}${cAbs}. Is ${testNum} in the sequence?`, answer: isIn?'yes':'no'}; }
+function ytGen_5() { const terms=[1,4,9,16,25]; const idx=Math.floor(Math.random()*3); const shown=terms.slice(idx,idx+4); const next=Math.pow(Math.sqrt(shown[3])+1,2); return {q:shown.join(', ')+', ?', answer:String(next)}; }
+function ytGen_6() { const n=20; const term=2*n+1; return {q:'Row 1 = 3 seats, Row 2 = 5, Row 3 = 7 (pattern: 2n+1). How many seats in row 20?', answer:String(term)}; }
+function ytGen_7() { const d=Math.floor(Math.random()*5)+2; const c=Math.floor(Math.random()*5)+1; const n=Math.floor(Math.random()*10)+3; const term=d*n+c; return {q:`nth term = ${d}n+${c}. Which term number equals ${term}?`, answer:String(n)}; }
+function ytGen_8() { const start=Math.floor(Math.random()*20)+30; const diff=Math.floor(Math.random()*5)+2; const terms=[start,start-diff,start-2*diff,start-3*diff]; return {q:terms.join(', ')+', ?', answer:String(start-4*diff)}; }
+function ytGen_9() { const d=Math.floor(Math.random()*4)+3; const a=Math.floor(Math.random()*5)+2; const c=a-d; const sign=c<0?'-':'+'; const cAbs=Math.abs(c); const terms=[a,a+d,a+2*d]; return {q:terms.join(', ')+'...', answer:`${d}n${sign}${cAbs}`}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'EXT-MTH-02';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

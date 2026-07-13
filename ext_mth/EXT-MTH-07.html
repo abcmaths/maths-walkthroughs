@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Probability — Combined Events — Extension Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Extension Maths: Probability — Combined Events</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Recap \u2014 basic probability", "teach": ["Probability = number of favourable outcomes \u00f7 total number of possible outcomes.", "Example: rolling a die and wanting a 6 \u2192 probability = 1/6.", "Probabilities always range between 0 (impossible) and 1 (certain)."], "yt_prompt": "Find the probability (as a fraction, e.g. 1/6):"}, {"title": "Combined events \u2014 independent events (AND)", "teach": ["When two independent events both need to happen, multiply their individual probabilities together.", "Example: probability of flipping heads AND rolling a 6 = 1/2 \u00d7 1/6 = 1/12.", "Independent means one event doesn't affect the probability of the other."], "yt_prompt": "Find the combined probability (as a fraction):"}, {"title": "Combined events \u2014 either/or (OR) for mutually exclusive events", "teach": ["When events can't happen at the same time (mutually exclusive), add their probabilities for 'either... or'.", "Example: probability of rolling a 1 OR a 2 on a die = 1/6 + 1/6 = 2/6 = 1/3.", "This only works when the two events cannot both happen at once."], "yt_prompt": "Find the probability of either event happening (simplified fraction):"}, {"title": "Using a sample space diagram \u2014 two dice", "teach": ["A sample space diagram (grid) lists every possible outcome when combining two events, like rolling two dice.", "Example: rolling two dice gives 36 total outcomes (6\u00d76), and you can count how many give a specific sum.", "Drawing out the grid, even roughly, helps avoid missing or double-counting outcomes."], "yt_prompt": "Rolling two fair dice, how many total outcomes are possible?"}, {"title": "Using a sample space diagram \u2014 finding a specific probability", "teach": ["Once you know the total outcomes, count how many match your desired result to find the probability.", "Example: the probability both dice show the same number is 6 outcomes out of 36 = 1/6.", "Carefully listing pairs (1,1), (2,2)... helps avoid errors when counting matching outcomes."], "yt_prompt": "Rolling two dice, what is the probability both show the same number? (as a simplified fraction)"}, {"title": "Probability tree diagrams \u2014 introduction", "teach": ["A tree diagram shows all possible outcomes of combined events as branching paths, with probabilities on each branch.", "Example: flipping a coin twice has 4 possible outcomes: HH, HT, TH, TT, each with probability 1/4.", "Multiply along each branch path to find the probability of that specific outcome sequence."], "yt_prompt": "Flipping a coin twice, what is the probability of getting heads both times?"}, {"title": "Tree diagrams \u2014 at least one event happening", "teach": ["To find the probability of 'at least one' success, it's often easier to find the probability of NO success, then subtract from 1.", "Example: probability of at least one head in two coin flips = 1 \u2212 probability(no heads) = 1 \u2212 1/4 = 3/4.", "This 'complement' method avoids adding up several different successful outcomes separately."], "yt_prompt": "Flipping a coin twice, what is the probability of getting at least one head? (as a fraction)"}, {"title": "Dependent events \u2014 without replacement", "teach": ["When items are removed and not replaced, the probability for the second event changes based on the first.", "Example: a bag has 3 red and 2 blue balls. After removing one red ball (without replacing it), the probabilities for the next pick change.", "Always recalculate the total and favourable outcomes after the first event when items aren't replaced."], "yt_prompt": "A bag has 3 red and 2 blue balls. One red ball is removed and not replaced. What is the probability the next ball is also red? (as a fraction)"}, {"title": "Combining AND and OR in one problem", "teach": ["Harder problems combine both rules \u2014 some parts need multiplying (AND), others need adding (OR).", "Example: probability of rolling an even number on one die AND flipping heads = 1/2 \u00d7 1/2 = 1/4.", "Break the problem into its separate parts, decide AND or OR for each, then combine using the correct rule."], "yt_prompt": "Find the combined probability (as a fraction):"}, {"title": "Mixed practice \u2014 combined probability", "teach": ["You've now covered independent events, mutually exclusive events, sample space diagrams, tree diagrams, and dependent events.", "These combined probability skills are tested regularly, especially using tree diagrams and sample space grids.", "This final question brings a couple of these ideas together."], "yt_prompt": "Rolling two dice, what is the probability the sum of both dice equals 7? (as a simplified fraction, e.g. 1/6)"}];
+function ytGen_0() { const total=[6,8,10][Math.floor(Math.random()*3)]; const fav=Math.floor(Math.random()*3)+1; const g=(x,y)=>y?g(y,x%y):x; const gcd=g(fav,total); return {q:`A bag has ${total} balls, ${fav} of which are red. What is the probability of picking red?`, answer:`${fav/gcd}/${total/gcd}`}; }
+function ytGen_1() { const p1=[2,3,4][Math.floor(Math.random()*3)]; const p2=[2,5,6][Math.floor(Math.random()*3)]; return {q:`Event A has probability 1/${p1}. Event B has probability 1/${p2}. What is the probability both happen?`, answer:`1/${p1*p2}`}; }
+function ytGen_2() { const total=6; const a=1; const b=1; const combined=a+b; const g=(x,y)=>y?g(y,x%y):x; const gcd=g(combined,total); return {q:`Rolling a die, what is the probability of getting a 1 OR a 2?`, answer:`${combined/gcd}/${total/gcd}`}; }
+function ytGen_3() { return {q:'Rolling two fair dice, how many total outcomes are possible?', answer:'36'}; }
+function ytGen_4() { return {q:'Rolling two fair dice, what is the probability both show the same number?', answer:'1/6'}; }
+function ytGen_5() { return {q:'Flipping a fair coin twice, what is the probability of getting heads both times?', answer:'1/4'}; }
+function ytGen_6() { return {q:'Flipping a fair coin twice, what is the probability of getting at least one head?', answer:'3/4'}; }
+function ytGen_7() { return {q:'A bag has 3 red and 2 blue balls. One red ball is removed (not replaced). What is the probability the next ball is red?', answer:'1/2'}; }
+function ytGen_8() { return {q:'What is the probability of rolling an even number on a fair die AND flipping heads on a fair coin?', answer:'1/4'}; }
+function ytGen_9() { return {q:'Rolling two fair dice, what is the probability the sum equals 7?', answer:'1/6'}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'EXT-MTH-07';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

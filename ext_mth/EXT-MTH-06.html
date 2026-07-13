@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introduction to Indices & Standard Form — Extension Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Extension Maths: Introduction to Indices & Standard Form</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "What is an index (power)?", "teach": ["An index (or power/exponent) shows how many times a number is multiplied by itself.", "Example: 2^4 means 2\u00d72\u00d72\u00d72 = 16. The small '4' is the index.", "Indices are a quick way of writing repeated multiplication."], "yt_prompt": "Work out the answer:"}, {"title": "Multiplying powers with the same base", "teach": ["When multiplying powers with the same base, add the indices: a^m \u00d7 a^n = a^(m+n).", "Example: 2^3 \u00d7 2^4 = 2^7 = 128.", "This rule only works when the base numbers are exactly the same."], "yt_prompt": "Simplify and evaluate:"}, {"title": "Dividing powers with the same base", "teach": ["When dividing powers with the same base, subtract the indices: a^m \u00f7 a^n = a^(m\u2212n).", "Example: 2^7 \u00f7 2^3 = 2^4 = 16.", "Make sure the larger power is on top to avoid a negative index for now."], "yt_prompt": "Simplify and evaluate:"}, {"title": "The power of zero", "teach": ["Any non-zero number raised to the power of 0 equals 1.", "Example: 5^0 = 1, and 100^0 = 1.", "This might seem surprising, but it follows logically from the division rule: a^n \u00f7 a^n = a^0 = 1."], "yt_prompt": "Work out the answer:"}, {"title": "Negative indices", "teach": ["A negative index means 'one over' that power: a^(\u2212n) = 1/(a^n).", "Example: 2^(\u22123) = 1/(2^3) = 1/8.", "Negative indices don't make the value negative \u2014 they make it a fraction."], "yt_prompt": "Work out the answer as a fraction (e.g. 1/8):"}, {"title": "What is standard form?", "teach": ["Standard form writes very large or very small numbers as a number between 1 and 10, multiplied by a power of 10.", "Example: 45,000 in standard form is 4.5 \u00d7 10^4.", "This makes extremely large or small numbers much easier to read and compare."], "yt_prompt": "Write this number in standard form (as e.g. 4.5x10^4, use 'x' for multiply):"}, {"title": "Converting standard form to an ordinary number", "teach": ["To convert from standard form back to an ordinary number, move the decimal point according to the power of 10.", "Example: 3.2 \u00d7 10^4 = 32,000 (move the decimal point 4 places right).", "A negative power would mean moving the decimal point left instead, for very small numbers."], "yt_prompt": "Convert to an ordinary number:"}, {"title": "Standard form for small numbers", "teach": ["Very small numbers use a negative power of 10 in standard form.", "Example: 0.00045 = 4.5 \u00d7 10^(\u22124).", "The negative power tells you how many places the decimal point moved to the right to get the leading digit."], "yt_prompt": "Write this small number in standard form (as e.g. 4.5x10^-4):"}, {"title": "Comparing numbers in standard form", "teach": ["To compare numbers in standard form, compare the powers of 10 first \u2014 a bigger power means a bigger number.", "Example: 3\u00d710^5 is bigger than 8\u00d710^4, because 10^5 is ten times bigger than 10^4, easily outweighing the difference in the first digit.", "Only compare the leading digits directly if the powers of 10 are equal."], "yt_prompt": "Which is bigger? Type 'A' or 'B':"}, {"title": "Mixed practice \u2014 indices and standard form", "teach": ["You've now covered index laws (multiplying, dividing, zero and negative powers), plus converting to and from standard form.", "These skills are essential in both algebra and science contexts, especially when dealing with very large or small measurements.", "This final question brings a couple of these ideas together."], "yt_prompt": "Simplify and evaluate:"}];
+function ytGen_0() { const base=Math.floor(Math.random()*4)+2; const power=Math.floor(Math.random()*3)+2; return {q:`${base}^${power}`, answer:String(Math.pow(base,power))}; }
+function ytGen_1() { const base=Math.floor(Math.random()*3)+2; const m=Math.floor(Math.random()*3)+1; const n=Math.floor(Math.random()*3)+1; return {q:`${base}^${m} × ${base}^${n}`, answer:String(Math.pow(base,m+n))}; }
+function ytGen_2() { const base=Math.floor(Math.random()*3)+2; const n=Math.floor(Math.random()*2)+1; const m=n+Math.floor(Math.random()*3)+1; return {q:`${base}^${m} ÷ ${base}^${n}`, answer:String(Math.pow(base,m-n))}; }
+function ytGen_3() { const base=Math.floor(Math.random()*20)+2; return {q:`${base}^0`, answer:'1'}; }
+function ytGen_4() { const base=Math.floor(Math.random()*3)+2; const power=Math.floor(Math.random()*3)+2; return {q:`${base}^(-${power})`, answer:`1/${Math.pow(base,power)}`}; }
+function ytGen_5() { const digit=Math.floor(Math.random()*8)+1; const power=Math.floor(Math.random()*4)+3; const num=digit*Math.pow(10,power); return {q:String(num), answer:`${digit}x10^${power}`}; }
+function ytGen_6() { const digit=Math.floor(Math.random()*8)+1; const power=Math.floor(Math.random()*4)+2; const num=digit*Math.pow(10,power); return {q:`${digit}x10^${power}`, answer:String(num)}; }
+function ytGen_7() { const digit=Math.floor(Math.random()*8)+1; const power=Math.floor(Math.random()*4)+2; const num=digit/Math.pow(10,power); return {q:String(num), answer:`${digit}x10^-${power}`}; }
+function ytGen_8() { const digitA=Math.floor(Math.random()*8)+1; const powerA=Math.floor(Math.random()*4)+3; const digitB=Math.floor(Math.random()*8)+1; const powerB=powerA-1; const bigger = powerA>powerB?'A':(powerB>powerA?'B':(digitA>digitB?'A':'B')); return {q:`A: ${digitA}x10^${powerA}, B: ${digitB}x10^${powerB}. Which is bigger?`, answer:bigger}; }
+function ytGen_9() { const base=2; const m=5; const n=2; return {q:`${base}^${m} ÷ ${base}^${n}`, answer:String(Math.pow(base,m-n))}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'EXT-MTH-06';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

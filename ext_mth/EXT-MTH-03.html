@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geometry Reasoning — Angle Proofs — Extension Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Extension Maths: Geometry Reasoning — Angle Proofs</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Angles on parallel lines \u2014 corresponding angles", "teach": ["When a line crosses two parallel lines, corresponding angles (in matching positions) are equal.", "Example: if one corresponding angle is 70\u00b0, the matching angle at the other intersection is also 70\u00b0.", "Corresponding angles form an 'F' shape in diagrams \u2014 look for this pattern."], "yt_prompt": "Find the corresponding angle:"}, {"title": "Angles on parallel lines \u2014 alternate angles", "teach": ["Alternate angles (on opposite sides of the crossing line, between the parallel lines) are equal.", "Example: if one alternate angle is 65\u00b0, the other is also 65\u00b0.", "Alternate angles form a 'Z' shape in diagrams \u2014 look for this pattern."], "yt_prompt": "Find the alternate angle:"}, {"title": "Angles on parallel lines \u2014 co-interior angles", "teach": ["Co-interior angles (on the same side of the crossing line, between the parallel lines) add up to 180\u00b0.", "Example: if one co-interior angle is 110\u00b0, the other is 180\u2212110=70\u00b0.", "Co-interior angles form a 'C' or 'U' shape in diagrams."], "yt_prompt": "Find the co-interior angle:"}, {"title": "Combining parallel line angle facts", "teach": ["Some problems require using more than one angle fact together \u2014 e.g. corresponding angles, then angles on a straight line.", "Example: find angle x using a corresponding angle first, then subtract from 180\u00b0 for a straight line.", "Work through the diagram logically, one angle fact at a time, labelling each angle as you go."], "yt_prompt": "Find angle x \u2014 first find the corresponding angle, then use angles on a straight line:"}, {"title": "Angle proof \u2014 isosceles triangle", "teach": ["In an isosceles triangle, the two base angles (opposite the equal sides) are equal.", "Example: if the apex angle is 40\u00b0, the two base angles are equal, and together with the apex they total 180\u00b0. So each base angle = (180\u221240)\u00f72 = 70\u00b0.", "Always identify which angles are equal before setting up your calculation."], "yt_prompt": "Find a base angle of this isosceles triangle:"}, {"title": "Angle proof \u2014 exterior angle of a triangle", "teach": ["The exterior angle of a triangle equals the sum of the two opposite interior angles.", "Example: if the two opposite interior angles are 50\u00b0 and 60\u00b0, the exterior angle is 50+60=110\u00b0.", "This is a useful shortcut instead of working out the third interior angle first and then subtracting from 180\u00b0."], "yt_prompt": "Find the exterior angle:"}, {"title": "Angle proof \u2014 combining triangle and parallel line facts", "teach": ["More complex problems combine triangle angle facts with parallel line facts in a single diagram.", "Example: use alternate angles to find one angle in a triangle, then use the triangle sum rule to find another.", "Work step-by-step, writing down each angle fact you use as you go \u2014 this makes multi-step proofs much easier to follow."], "yt_prompt": "A triangle has one angle equal to an alternate angle of 55\u00b0, and another angle of 60\u00b0. Find the third angle."}, {"title": "Angle proof \u2014 quadrilateral with parallel sides", "teach": ["A trapezium (with one pair of parallel sides) uses co-interior angle facts on those parallel sides.", "Example: if one angle is 70\u00b0, the co-interior angle on the same parallel side is 180\u221270=110\u00b0.", "Combine this with the fact that all four angles of any quadrilateral sum to 360\u00b0 for more complex problems."], "yt_prompt": "A trapezium has parallel sides. One angle is given; find its co-interior pair:"}, {"title": "Writing an angle reasoning explanation", "teach": ["In exams, angle proof questions often ask you to state the reason for each step (e.g. 'alternate angles are equal').", "Example: 'Angle x = 65\u00b0 (alternate angles are equal, parallel lines)' \u2014 the reason justifies the calculation.", "Practice stating not just the answer but the correct angle fact/reason behind each step."], "yt_prompt": "Which reason justifies finding a co-interior angle? Type it exactly: 'co-interior angles sum to 180'"}, {"title": "Mixed practice \u2014 angle proofs", "teach": ["You've now covered corresponding, alternate, and co-interior angles, isosceles triangles, exterior angles, and combined multi-step proofs.", "These angle facts appear together frequently in harder exam questions, so being flexible with all of them is valuable.", "This final question brings a couple of these ideas together."], "yt_prompt": "A triangle's exterior angle is 130\u00b0, and one of the opposite interior angles is 70\u00b0. Find the other opposite interior angle."}];
+function ytGen_0() { const a=Math.floor(Math.random()*130)+20; return {q:`Two parallel lines are crossed by a line. One angle is ${a}°. What is its corresponding angle?`, answer:String(a)}; }
+function ytGen_1() { const a=Math.floor(Math.random()*130)+20; return {q:`Two parallel lines are crossed by a line. One angle is ${a}°. What is its alternate angle?`, answer:String(a)}; }
+function ytGen_2() { const a=Math.floor(Math.random()*130)+20; const b=180-a; return {q:`Two parallel lines are crossed by a line. One angle is ${a}°. What is its co-interior angle?`, answer:String(b)}; }
+function ytGen_3() { const known=Math.floor(Math.random()*100)+40; const x=180-known; return {q:`A corresponding angle is ${known}°. Angle x is on a straight line with this corresponding angle. Find x.`, answer:String(x)}; }
+function ytGen_4() { const apex=Math.floor(Math.random()*60)+20; const base=(180-apex)/2; return {q:`An isosceles triangle has an apex angle of ${apex}°. Find each base angle.`, answer:String(base)}; }
+function ytGen_5() { const a=Math.floor(Math.random()*50)+30; const b=Math.floor(Math.random()*50)+30; const ext=a+b; return {q:`A triangle has two interior angles of ${a}° and ${b}°, not adjacent to the exterior angle. Find the exterior angle.`, answer:String(ext)}; }
+function ytGen_6() { const alt=Math.floor(Math.random()*40)+30; const other=Math.floor(Math.random()*40)+30; const third=180-alt-other; return {q:`A triangle has one angle equal to an alternate angle of ${alt}°, and another angle of ${other}°. Find the third angle.`, answer:String(third)}; }
+function ytGen_7() { const a=Math.floor(Math.random()*100)+40; const b=180-a; return {q:`A trapezium has one angle of ${a}° on a parallel side. Find its co-interior angle.`, answer:String(b)}; }
+function ytGen_8() { return {q:'What is the correct reason for co-interior angle calculations?', answer:'co-interior angles sum to 180'}; }
+function ytGen_9() { const ext=Math.floor(Math.random()*60)+90; const a=Math.floor(Math.random()*(ext-30))+20; const b=ext-a; return {q:`A triangle's exterior angle is ${ext}°, and one opposite interior angle is ${a}°. Find the other opposite interior angle.`, answer:String(b)}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'EXT-MTH-03';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

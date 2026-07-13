@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Handling — Mean/Median/Mode/Range with Grouped Data — Extension Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Extension Maths: Data Handling — Mean/Median/Mode/Range with Grouped Data</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Recap \u2014 mean, median, mode, range", "teach": ["Mean = total \u00f7 number of values. Median = middle value when ordered. Mode = most frequent value. Range = highest \u2212 lowest.", "Example: for 3, 5, 5, 7, 10 \u2192 mean=6, median=5, mode=5, range=7.", "Each measure tells you something slightly different about a data set \u2014 no single one is 'best' in every situation."], "yt_prompt": "Find the mean of this data set:"}, {"title": "Finding the median with an even number of values", "teach": ["When there's an even number of values, the median is the average of the two middle numbers.", "Example: for 2, 4, 6, 8 \u2192 the two middle values are 4 and 6, so median = (4+6)\u00f72 = 5.", "Always order the data first before finding the middle position(s)."], "yt_prompt": "Find the median of this data set:"}, {"title": "What is a grouped frequency table?", "teach": ["A grouped frequency table organises data into class intervals (ranges) rather than listing every individual value.", "Example: ages grouped as 0-9, 10-19, 20-29, each with a frequency (count) of how many fall in that range.", "Grouping is useful when there's too much raw data to list individually, but it means you lose some precision."], "yt_prompt": "In a grouped table with intervals 0-9 (freq 5), 10-19 (freq 8), 20-29 (freq 3), how many data values are there in total?"}, {"title": "Finding the modal class", "teach": ["The modal class is the interval with the highest frequency in a grouped table.", "Example: if 10-19 has the highest frequency, that's the modal class \u2014 not a single value, but the whole interval.", "Unlike ungrouped data, grouped data can't give you one exact mode value, just the modal class."], "yt_prompt": "Which is the modal class? Type the interval exactly, e.g. '10-19':"}, {"title": "Estimating the mean from grouped data \u2014 midpoints", "teach": ["To estimate the mean from grouped data, use the midpoint of each interval, multiplied by its frequency.", "Example: for interval 10-19, the midpoint is (10+19)\u00f72=14.5.", "This gives an estimate, not the exact mean, since the raw individual values aren't known."], "yt_prompt": "Find the midpoint of this interval:"}, {"title": "Estimating the mean from grouped data \u2014 full calculation", "teach": ["Multiply each midpoint by its frequency, add these together, then divide by the total frequency.", "Example: interval 0-9 (midpoint 4.5, freq 3) and 10-19 (midpoint 14.5, freq 5) \u2192 estimated mean = (4.5\u00d73 + 14.5\u00d75) \u00f7 8 = 11.31 (approx).", "This estimate is used because we don't know the exact individual values inside each interval."], "yt_prompt": "Estimate the mean using midpoints: interval 0-9 (freq shown) and 10-19 (freq shown)"}, {"title": "Range from grouped data", "teach": ["From grouped data, the range can only be estimated using the highest possible value minus the lowest possible value.", "Example: if intervals run from 0-9 up to 20-29, the estimated range is 29\u22120=29.", "This is an estimate because we don't know the true minimum and maximum individual values within the outer intervals."], "yt_prompt": "Estimate the range, given the lowest and highest intervals:"}, {"title": "Comparing two data sets using averages", "teach": ["Comparing two data sets often involves comparing their means (or medians) AND their ranges (spread).", "Example: Class A has a higher mean than Class B, but Class B has a smaller range, meaning more consistent results.", "A full comparison should always look at both an average AND a measure of spread, not just one alone."], "yt_prompt": "Class A: mean=65, range=20. Class B: mean=60, range=8. Which class has more consistent results?"}, {"title": "Interpreting a grouped frequency table in context", "teach": ["Real-life grouped data (like exam scores or ages) requires interpreting what the modal class or estimated mean actually tells you.", "Example: if the modal class for exam scores is 60-69, this tells you most students scored in that range, even without exact figures.", "Always connect your numerical answer back to what it means in the real-world context of the question."], "yt_prompt": "If the modal class for exam scores is 70-79, what does this tell you about most students' scores?"}, {"title": "Mixed practice \u2014 grouped data handling", "teach": ["You've now covered grouped frequency tables, modal class, estimating the mean using midpoints, and comparing data sets.", "These skills are commonly tested together in exam questions involving real-world grouped data, like surveys or exam results.", "This final question brings a couple of these ideas together."], "yt_prompt": "Find the midpoint of this interval, to use in an estimated mean calculation:"}];
+function ytGen_0() { const vals=[]; for(let i=0;i<5;i++) vals.push(Math.floor(Math.random()*20)+1); const sum=vals.reduce((a,b)=>a+b,0); const mean=sum/vals.length; return {q:vals.join(', '), answer:String(mean)}; }
+function ytGen_1() { const vals=[]; for(let i=0;i<4;i++) vals.push(Math.floor(Math.random()*20)+1); vals.sort((a,b)=>a-b); const median=(vals[1]+vals[2])/2; return {q:vals.join(', '), answer:String(median)}; }
+function ytGen_2() { const f1=Math.floor(Math.random()*8)+3; const f2=Math.floor(Math.random()*8)+3; const f3=Math.floor(Math.random()*8)+3; return {q:`Intervals: 0-9 (freq ${f1}), 10-19 (freq ${f2}), 20-29 (freq ${f3}). What is the total frequency?`, answer:String(f1+f2+f3)}; }
+function ytGen_3() { const options=['0-9','10-19','20-29']; const freqs=[Math.floor(Math.random()*5)+2, Math.floor(Math.random()*5)+8, Math.floor(Math.random()*5)+2]; const maxIdx=freqs.indexOf(Math.max(...freqs)); return {q:`0-9 (freq ${freqs[0]}), 10-19 (freq ${freqs[1]}), 20-29 (freq ${freqs[2]}). Which is the modal class?`, answer:options[maxIdx]}; }
+function ytGen_4() { const low=Math.floor(Math.random()*30)+10; const high=low+9; const mid=(low+high)/2; return {q:`Interval: ${low}-${high}. What is the midpoint?`, answer:String(mid)}; }
+function ytGen_5() { const f1=Math.floor(Math.random()*5)+2; const f2=Math.floor(Math.random()*5)+2; const mid1=4.5; const mid2=14.5; const total=f1+f2; const estMean=((mid1*f1)+(mid2*f2))/total; return {q:`0-9 (midpoint 4.5, freq ${f1}), 10-19 (midpoint 14.5, freq ${f2}). Estimate the mean (to 1 decimal place).`, answer:estMean.toFixed(1)}; }
+function ytGen_6() { const low=0; const high=Math.floor(Math.random()*30)+20; return {q:`Data ranges from the interval 0-9 up to ${high-9}-${high}. Estimate the range.`, answer:String(high)}; }
+function ytGen_7() { return {q:'Class A: mean=65, range=20. Class B: mean=60, range=8. Which class has more consistent (less spread out) results?', answer:'Class B'}; }
+function ytGen_8() { return {q:'If the modal class for exam scores is 70-79, what does this tell you about most students\' scores?', answer:'most students scored in that range'}; }
+function ytGen_9() { const low=Math.floor(Math.random()*40)+20; const high=low+9; const mid=(low+high)/2; return {q:`Interval: ${low}-${high}`, answer:String(mid)}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'EXT-MTH-08';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>
