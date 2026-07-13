@@ -949,6 +949,32 @@
       const extBt2 = document.getElementById('toggle-extension');
       if (extBt2) extBt2.style.display = profile.extension ? '' : 'none';
 
+      // Summer intake: incoming Year 7 students on summer_only accounts get a
+      // restricted dashboard until term starts — diagnostic first, then only
+      // Bridge/Phonics/Extension support content, no full curriculum access.
+      if (profile.summer_only) {
+        if (!profile.diagnostic_completed) {
+          window.location.href = 'diagnostic.html';
+          return;
+        }
+        // Hide all standard curriculum tabs
+        ['toggle-maths','toggle-english','toggle-science','toggle-crs','toggle-gov','toggle-digitaltech']
+          .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+
+        // Show a summer-specific welcome message
+        const welcomeSub = document.getElementById('welcome-sub');
+        if (welcomeSub) welcomeSub.textContent += ' · Summer access — full dashboard unlocks in September';
+
+        // Default straight to whichever support tab the student actually has
+        if (needsBridgeMaths) window.switchSubject('bridge_maths');
+        else if (needsBridgeEnglish) window.switchSubject('bridge_english');
+        else if (profile.phonics_support) window.switchSubject('phonics');
+        else if (profile.extension) window.switchSubject('ext_maths');
+        // If a student has no flags at all yet (diagnostic just completed, no
+        // support needed), they'll see an empty dashboard until September —
+        // this is expected; consider showing a friendly holding message here later.
+      }
+
       document.getElementById('header-name').textContent = profile.full_name;
       document.getElementById('welcome-name').textContent = 'Hello, ' + profile.full_name.split(' ')[0] + '!';
       document.getElementById('welcome-sub').textContent = 'Year ' + myYearGroup + (profile.form_class ? ' · ' + profile.form_class : '');
