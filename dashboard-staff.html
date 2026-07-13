@@ -451,6 +451,7 @@
                 <th>Bridge English</th>
                 <th>Extension</th>
                 <th>Summer Only</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="diag-tbody"></tbody>
@@ -860,6 +861,52 @@
       });
     } catch(e) { console.error('Test results error:', e); }
 
+    // Get diagnostic results for this student
+    let diagResult = null;
+    try {
+      const { data: diag } = await supabase
+        .from('diagnostic_results')
+        .select('*')
+        .eq('student_id', s.id)
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      diagResult = diag;
+    } catch(e) { console.error('Diagnostic results error:', e); }
+
+    const diagSectionHtml = s.diagnostic_completed ? `
+      <div style="font-weight:700;color:#333;margin-bottom:10px;font-size:0.9rem;border-bottom:2px solid #eee;padding-bottom:6px">📋 Diagnostic Results</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+        <div style="flex:1;min-width:110px;background:#f9f9f9;border-radius:6px;padding:12px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${diagResult ? diagResult.maths_score + '/15' : '—'}</div>
+          <div style="font-size:0.72rem;color:#888;text-transform:uppercase;margin-top:3px">Maths Score</div>
+        </div>
+        <div style="flex:1;min-width:110px;background:#f9f9f9;border-radius:6px;padding:12px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${diagResult ? diagResult.comprehension_score + '/8' : '—'}</div>
+          <div style="font-size:0.72rem;color:#888;text-transform:uppercase;margin-top:3px">Comprehension</div>
+        </div>
+        ${diagResult && diagResult.phonics_triggered ? `<div style="flex:1;min-width:110px;background:#f9f9f9;border-radius:6px;padding:12px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${diagResult.phonics_score}/34</div>
+          <div style="font-size:0.72rem;color:#888;text-transform:uppercase;margin-top:3px">Phonics Screen</div>
+        </div>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+        ${s.extension ? '<span class="badge badge-green">Extension</span>' : ''}
+        ${s.phonics_support ? '<span class="badge badge-yellow">Phonics Support</span>' : ''}
+        ${s.bridge_maths_number ? '<span class="badge badge-yellow">Bridge Maths — Number</span>' : ''}
+        ${s.bridge_maths_fractions ? '<span class="badge badge-yellow">Bridge Maths — Fractions</span>' : ''}
+        ${s.bridge_maths_algebra ? '<span class="badge badge-yellow">Bridge Maths — Algebra</span>' : ''}
+        ${s.bridge_maths_geometry ? '<span class="badge badge-yellow">Bridge Maths — Geometry</span>' : ''}
+        ${s.bridge_maths_data ? '<span class="badge badge-yellow">Bridge Maths — Data</span>' : ''}
+        ${s.bridge_english_comprehension ? '<span class="badge badge-yellow">Bridge English — Comprehension</span>' : ''}
+        ${s.bridge_english_writing ? '<span class="badge badge-yellow">Bridge English — Writing</span>' : ''}
+        ${!(s.extension || s.phonics_support || s.bridge_needed) ? '<span class="badge badge-grey">No support flags</span>' : ''}
+      </div>
+      <div style="font-weight:700;color:#333;margin-bottom:10px;font-size:0.9rem;border-bottom:2px solid #eee;padding-bottom:6px">✍️ Writing Sample ${s.writing_sample_needs_review ? '<span class="badge badge-yellow" style="margin-left:8px">Needs Review</span>' : ''}</div>
+      <div style="background:#f9f9f9;border-radius:6px;padding:14px;margin-bottom:10px;font-size:0.88rem;line-height:1.6;color:#333;white-space:pre-wrap">${diagResult && diagResult.writing_sample ? diagResult.writing_sample.replace(/</g,'&lt;') : '<em style="color:#aaa">No writing sample recorded.</em>'}</div>
+      ${s.writing_sample_needs_review ? `<button class="btn-outline" style="font-size:0.82rem;padding:6px 14px;margin-bottom:20px" onclick="markWritingReviewed('${s.id}')">✓ Mark as Reviewed</button>` : ''}
+    ` : `<div style="color:#aaa;font-size:0.85rem;font-style:italic;margin-bottom:20px">Diagnostic not yet completed.</div>`;
+
     document.getElementById('modal-body').innerHTML = `
       <!-- Summary cards -->
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
@@ -873,6 +920,8 @@
         </div>
         ${Object.keys(testMap).length > 0 ? '<div style="flex:1;min-width:110px;background:#f9f9f9;border-radius:6px;padding:12px;text-align:center"><div style="font-size:1.4rem;font-weight:700;color:#1a56b0">' + Math.round((studentTests||[]).reduce((a,t)=>a+t.percentage,0)/((studentTests||[]).length||1)) + '%</div><div style="font-size:0.72rem;color:#888;text-transform:uppercase;margin-top:3px">Avg Test Score</div></div>' : ''}
       </div>
+
+      ${diagSectionHtml}
 
       <!-- Walkthrough Progress -->
       <div style="font-weight:700;color:#333;margin-bottom:10px;font-size:0.9rem;border-bottom:2px solid #eee;padding-bottom:6px">📖 Walkthrough Progress</div>
@@ -897,6 +946,16 @@
           }).join('') +
           '</div>'
       }`;
+  };
+
+  window.markWritingReviewed = async function(studentId) {
+    const { error } = await supabase.from('profiles').update({ writing_sample_needs_review: false }).eq('id', studentId);
+    if (!error) {
+      const s = allStudents.find(s => s.id === studentId);
+      if (s) s.writing_sample_needs_review = false;
+      window.openStudentModal(studentId);
+      if (document.getElementById('tab-diagnostic').classList.contains('active')) window.renderDiagnosticTab();
+    }
   };
 
   
@@ -2222,6 +2281,7 @@
         <td>${yn(bridgeEnglishAny(s))}</td>
         <td>${yn(s.extension)}</td>
         <td>${yn(s.summer_only)}</td>
+        <td><button class="btn-link" onclick="openStudentModal('${s.id}')">View</button></td>
       </tr>`).join('');
   };
 
