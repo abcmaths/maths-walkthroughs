@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consonant Digraphs (sh, ch, th, ph) — Phonics Support — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.7; font-size:1.15rem; }
+  .big-word { font-size:1.8rem; font-weight:700; text-align:center; margin:14px 0; color:var(--dark); }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; font-size:1.3rem; font-weight:600; }
+  .opt:hover { border-color:var(--red); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Phonics: Consonant Digraphs (sh, ch, th, ph)</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "The 'sh' sound", "teach": ["Two letters together, 's' and 'h', make one new sound: 'sh', like telling someone to be quiet.", "Words with this sound: ship, shop, fish.", "This is called a digraph \u2014 two letters, one sound."], "yt_prompt": "Which word has the 'sh' sound?"}, {"title": "The 'sh' sound at the end of a word", "teach": ["'sh' can appear at the end of a word too, not just the start.", "Words with this sound at the end: fish, wish, dish.", "Listen carefully for the sound anywhere in the word, not just the beginning."], "yt_prompt": "Which word ends with the 'sh' sound?"}, {"title": "The 'ch' sound", "teach": ["Two letters, 'c' and 'h', together make the 'ch' sound, like at the start of 'chip'.", "Words with this sound: chip, chat, chin.", "Feel the small puff of air on your hand when you say 'ch' \u2014 like a gentle sneeze sound."], "yt_prompt": "Which word has the 'ch' sound?"}, {"title": "The 'ch' sound at the end of a word", "teach": ["'ch' can also appear at the end of words.", "Words with this sound at the end: much, such, rich.", "Try saying these words slowly, listening for where the 'ch' sound sits."], "yt_prompt": "Which word ends with the 'ch' sound?"}, {"title": "The 'th' sound (soft)", "teach": ["Two letters, 't' and 'h', make the 'th' sound \u2014 put your tongue gently between your teeth.", "Words with this sound: thin, think, thumb.", "This is a soft, breathy sound \u2014 try holding it: 'thhhh'."], "yt_prompt": "Which word has the 'th' sound?"}, {"title": "The 'th' sound (voiced)", "teach": ["'th' can also sound slightly different, with your voice buzzing, like in 'this' or 'that'.", "Words with this sound: this, that, then.", "Feel your throat when you say 'this' \u2014 it should vibrate slightly, unlike the soft 'th' in 'thin'."], "yt_prompt": "Which word has the 'th' sound?"}, {"title": "The 'ph' sound", "teach": ["Two letters, 'p' and 'h', together make the 'f' sound \u2014 this is a less common digraph.", "Words with this sound: phone, photo, dolphin.", "This digraph often appears in words that originally came from Greek."], "yt_prompt": "Which word has the 'ph' making an 'f' sound?"}, {"title": "Spotting digraphs in the middle of words", "teach": ["Digraphs can appear in the middle of longer words too, not just at the start or end.", "Example: in 'fishing', the 'sh' sound is in the middle of the word.", "Break longer words into smaller chunks to help spot the digraph sounds hiding inside."], "yt_prompt": "Which word has the 'sh' sound in the middle?"}, {"title": "Comparing 'ch' and 'sh'", "teach": ["'ch' and 'sh' can sound a little similar, but 'ch' has a slight puff of air at the start, unlike 'sh'.", "Practice saying 'chip' and 'ship' one after another to hear the difference.", "This comparison helps train your ear to tell the two digraphs apart."], "yt_prompt": "Which word has the 'ch' sound, not 'sh'?"}, {"title": "Mixed practice \u2014 consonant digraphs", "teach": ["You've now covered 'sh', 'ch', 'th', and 'ph' \u2014 four important consonant digraphs.", "These two-letter sounds appear in hundreds of common words, so recognising them quickly is really useful.", "This final question checks you can spot a digraph confidently."], "yt_prompt": "Which word contains a consonant digraph?"}];
+function ytGen_0() { return {q:'', options:['ship','sun','cat'], answer_index:0}; }
+function ytGen_1() { return {q:'', options:['fish','fin','fit'], answer_index:0}; }
+function ytGen_2() { return {q:'', options:['chip','ship','sit'], answer_index:0}; }
+function ytGen_3() { return {q:'', options:['much','mud','mug'], answer_index:0}; }
+function ytGen_4() { return {q:'', options:['thin','tin','fin'], answer_index:0}; }
+function ytGen_5() { return {q:'', options:['this','dip','sit'], answer_index:0}; }
+function ytGen_6() { return {q:'', options:['phone','pig','dog'], answer_index:0}; }
+function ytGen_7() { return {q:'', options:['fishing','running','jumping'], answer_index:0}; }
+function ytGen_8() { return {q:'', options:['chip','ship','shop'], answer_index:0}; }
+function ytGen_9() { return {q:'', options:['shop','top','dog'], answer_index:0}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let answered = false;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+    let optsHtml = currentYT.options.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="big-word">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === currentYT.answer_index) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === currentYT.answer_index) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'PHO-02';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Common Exception Words (Set 2) — Phonics Support — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.7; font-size:1.15rem; }
+  .big-word { font-size:1.8rem; font-weight:700; text-align:center; margin:14px 0; color:var(--dark); }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; font-size:1.3rem; font-weight:600; }
+  .opt:hover { border-color:var(--red); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Phonics: Common Exception Words (Set 2)</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "The word 'once'", "teach": ["'once' has a tricky spelling \u2014 the 'o' doesn't sound the way you'd expect, and there's a silent 'e'.", "Practice recognising this word by sight.", "This word often appears at the start of stories: 'Once upon a time...'"], "yt_prompt": "Which is the correct spelling of 'once'?"}, {"title": "The word 'come'", "teach": ["'come' doesn't follow the usual silent-e rule \u2014 the 'o' makes a short 'u' sound instead of a long 'o'.", "Practice recognising this word by sight.", "This word is used constantly in everyday speech and writing."], "yt_prompt": "Which is the correct spelling of 'come'?"}, {"title": "The word 'some'", "teach": ["'some' follows the same tricky pattern as 'come' \u2014 the 'o' makes a short 'u' sound.", "Practice recognising this word by sight.", "These two words ('come' and 'some') are worth learning together since they share the same pattern."], "yt_prompt": "Which is the correct spelling of 'some'?"}, {"title": "The word 'were'", "teach": ["'were' can easily be confused with 'where' \u2014 they look similar but mean very different things.", "'were' is the past tense of 'are'; 'where' asks about location.", "Practice recognising the correct spelling for each meaning."], "yt_prompt": "Which spelling means 'in the past, they are' (e.g. 'they were happy')?"}, {"title": "The word 'there'", "teach": ["'there', 'their', and 'they're' all sound the same but mean different things \u2014 a very common mix-up.", "'there' refers to a place; 'their' shows possession; 'they're' means 'they are'.", "Practice telling these three apart based on meaning, not just sound."], "yt_prompt": "Which spelling means 'in that place'?"}, {"title": "The word 'little'", "teach": ["'little' has a double 't' and ends in '-le', a common tricky ending pattern.", "Practice recognising this word by sight.", "Many words end in '-le' making a similar sound, like 'table' and 'purple'."], "yt_prompt": "Which is the correct spelling of 'little'?"}, {"title": "The word 'people'", "teach": ["'people' has an unusual spelling \u2014 the 'eo' makes a long 'ee' sound, which isn't the usual pattern.", "Practice recognising this word by sight.", "This word is very common when writing about groups of individuals."], "yt_prompt": "Which is the correct spelling of 'people'?"}, {"title": "The word 'water'", "teach": ["'water' has a tricky vowel sound in the middle that doesn't follow simple sound-out rules.", "Practice recognising this word by sight.", "This is a very common word in both everyday speech and science topics."], "yt_prompt": "Which is the correct spelling of 'water'?"}, {"title": "The word 'again'", "teach": ["'again' has a tricky ending \u2014 the 'ain' doesn't always sound the same as it does in other words like 'rain'.", "Practice recognising this word by sight.", "This word is used constantly when talking about repeating an action."], "yt_prompt": "Which is the correct spelling of 'again'?"}, {"title": "Mixed practice \u2014 exception words set 2", "teach": ["You've now practiced 8 more exception words: once, come, some, were, there, little, people, and water.", "Combined with set 1, you now know 16 of the most common tricky words in English.", "This final question checks a few of these words together."], "yt_prompt": "Which is the correct spelling of 'people'?"}];
+function ytGen_0() { return {q:'', options:['once','wuns','onse'], answer_index:0}; }
+function ytGen_1() { return {q:'', options:['come','cum','com'], answer_index:0}; }
+function ytGen_2() { return {q:'', options:['some','sum','som'], answer_index:0}; }
+function ytGen_3() { return {q:'', options:['were','where','wear'], answer_index:0}; }
+function ytGen_4() { return {q:'', options:['there','their','they\'re'], answer_index:0}; }
+function ytGen_5() { return {q:'', options:['little','litel','littel'], answer_index:0}; }
+function ytGen_6() { return {q:'', options:['people','peple','peopel'], answer_index:0}; }
+function ytGen_7() { return {q:'', options:['water','wata','watter'], answer_index:0}; }
+function ytGen_8() { return {q:'', options:['again','agen','agan'], answer_index:0}; }
+function ytGen_9() { return {q:'', options:['people','peeple','peple'], answer_index:0}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let answered = false;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+    let optsHtml = currentYT.options.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="big-word">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === currentYT.answer_index) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === currentYT.answer_index) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'PHO-09';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

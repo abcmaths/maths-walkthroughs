@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prefixes: un-, re-, dis- — Phonics Support — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.7; font-size:1.15rem; }
+  .big-word { font-size:1.8rem; font-weight:700; text-align:center; margin:14px 0; color:var(--dark); }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; font-size:1.3rem; font-weight:600; }
+  .opt:hover { border-color:var(--red); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Phonics: Prefixes: un-, re-, dis-</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "What is a prefix?", "teach": ["A prefix is a group of letters added to the beginning of a word to change its meaning.", "Example: 'un' + 'happy' = 'unhappy' (not happy).", "Unlike suffixes, prefixes go at the start of the word, not the end."], "yt_prompt": "Which of these is a prefix?"}, {"title": "The prefix 'un-'", "teach": ["'un-' usually means 'not' or the opposite of something.", "Example: 'happy' \u2192 'unhappy' (not happy). 'Kind' \u2192 'unkind' (not kind).", "This is one of the most common prefixes in English."], "yt_prompt": "What does 'unhappy' mean?"}, {"title": "Adding 'un-' to more words", "teach": ["'un-' can be added to many different base words to reverse their meaning.", "Example: 'lock' \u2192 'unlock' (to reverse locking), 'fair' \u2192 'unfair' (not fair).", "Practice thinking of the opposite meaning whenever you see 'un-' at the start of a word."], "yt_prompt": "What does 'unlock' mean?"}, {"title": "The prefix 're-'", "teach": ["'re-' usually means 'again' or 'back'.", "Example: 'do' \u2192 'redo' (do again). 'Write' \u2192 'rewrite' (write again).", "This prefix is really useful for describing repeated actions."], "yt_prompt": "What does 'redo' mean?"}, {"title": "Adding 're-' to more words", "teach": ["'re-' can be added to many action words to show the action happens again.", "Example: 'build' \u2192 'rebuild' (build again), 'read' \u2192 'reread' (read again).", "Practice thinking about repetition whenever you see 're-' at the start of a word."], "yt_prompt": "What does 'rebuild' mean?"}, {"title": "The prefix 'dis-'", "teach": ["'dis-' usually means 'not' or the opposite, similar to 'un-' but used with different words.", "Example: 'agree' \u2192 'disagree' (not agree). 'Like' \u2192 'dislike' (not like).", "Some words use 'un-' and others use 'dis-' for the opposite \u2014 this often depends on the specific word."], "yt_prompt": "What does 'disagree' mean?"}, {"title": "Adding 'dis-' to more words", "teach": ["'dis-' can be added to several base words to create an opposite meaning.", "Example: 'appear' \u2192 'disappear' (stop being visible), 'honest' \u2192 'dishonest' (not honest).", "Practice recognising 'dis-' and thinking about what opposite meaning it creates."], "yt_prompt": "What does 'disappear' mean?"}, {"title": "Choosing between 'un-' and 'dis-'", "teach": ["Some words only work with 'un-', others only work with 'dis-' \u2014 there isn't always a simple rule, so it helps to learn common examples.", "Example: we say 'unhappy' (not 'dishappy') and 'disagree' (not 'unagree').", "Reading widely helps you build a feel for which prefix goes with which word."], "yt_prompt": "Which prefix correctly creates the opposite of 'honest'?"}, {"title": "Prefixes change meaning, not the base word's spelling", "teach": ["When you add a prefix, the base (root) word's spelling doesn't change \u2014 you just add letters to the front.", "Example: 'happy' stays exactly the same when you add 'un-' to make 'unhappy'.", "This is different from some suffixes, which can cause spelling changes (like doubling letters)."], "yt_prompt": "Does the base word change when adding a prefix? Type/select 'no':"}, {"title": "Mixed practice \u2014 prefixes", "teach": ["You've now covered 'un-', 're-', and 'dis-' \u2014 three common prefixes that change a word's meaning.", "Recognising prefixes helps you work out the meaning of unfamiliar words without needing a dictionary every time.", "This final question checks you can apply the right prefix confidently."], "yt_prompt": "Which prefix means 'again' in 'replay'?"}];
+function ytGen_0() { return {q:'', options:['un-','happy','sad'], answer_index:0}; }
+function ytGen_1() { return {q:'unhappy', options:['not happy','very happy','more happy'], answer_index:0}; }
+function ytGen_2() { return {q:'unlock', options:['to open something locked','to lock something','to break something'], answer_index:0}; }
+function ytGen_3() { return {q:'redo', options:['do again','do first','do never'], answer_index:0}; }
+function ytGen_4() { return {q:'rebuild', options:['build again','build first','stop building'], answer_index:0}; }
+function ytGen_5() { return {q:'disagree', options:['not agree','fully agree','agree twice'], answer_index:0}; }
+function ytGen_6() { return {q:'disappear', options:['to stop being visible','to appear again','to become bigger'], answer_index:0}; }
+function ytGen_7() { return {q:'___honest (opposite meaning)', options:['dis-','un-','re-'], answer_index:0}; }
+function ytGen_8() { return {q:'happy + un- = unhappy. Does "happy" change spelling?', options:['no','yes'], answer_index:0}; }
+function ytGen_9() { return {q:'replay', options:['re-','un-','dis-'], answer_index:0}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let answered = false;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+    let optsHtml = currentYT.options.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="big-word">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === currentYT.answer_index) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === currentYT.answer_index) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'PHO-11';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>
