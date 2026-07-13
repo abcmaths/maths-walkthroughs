@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Literal vs Inferential Comprehension Questions — Bridge English — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge English: Literal vs Inferential Comprehension Questions</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "What is a literal question?", "teach": ["A literal question asks for information directly stated in the text \u2014 the answer is written word-for-word or very close to it.", "Example: if the text says 'Amara wore a blue dress', a literal question would be 'What colour was Amara's dress?'", "Literal questions are usually the easiest type, since you're just finding and copying information."], "yt_prompt": "Is this a literal question? Type 'yes' or 'no': 'What time did the character arrive at school?' (text states the exact time)"}, {"title": "What is an inferential question?", "teach": ["An inferential question asks you to work out something the text doesn't say directly \u2014 using clues and your own reasoning.", "Example: if the text says 'Amara's hands were shaking as she opened the letter', an inferential question might ask 'How did Amara feel?' (nervous/scared) even though the text never says this directly.", "Inferential questions need you to 'read between the lines'."], "yt_prompt": "Is this an inferential question? Type 'yes' or 'no': 'How do you think the character felt, based on their shaking hands?'"}, {"title": "Spotting literal vs inferential \u2014 practice 1", "teach": ["Literal questions have answers written directly in the text. Inferential questions require you to work something out.", "Read carefully \u2014 if you can point to the exact sentence with the answer, it's literal. If you have to think and combine clues, it's inferential.", "This distinction is one of the most commonly tested skills in reading comprehension."], "yt_prompt": "Is this question literal or inferential? Type 'literal' or 'inferential':"}, {"title": "Spotting literal vs inferential \u2014 practice 2", "teach": ["Words like 'why do you think', 'how might', and 'what does this suggest' usually signal inferential questions.", "Words like 'what', 'where', 'when', and 'who' (asking for a direct fact) usually signal literal questions.", "Look at the question wording carefully before deciding which type it is."], "yt_prompt": "Is this question literal or inferential? Type 'literal' or 'inferential':"}, {"title": "Using evidence for literal answers", "teach": ["To answer a literal question well, quote or closely paraphrase the exact part of the text that gives the answer.", "Example: 'According to the text, the boat was tied to a rusted metal ring.'", "Always go back to the text to check your literal answers rather than relying on memory."], "yt_prompt": "Based on the text 'The rope was tied to a rusted metal ring', what was the rope tied to?"}, {"title": "Using evidence for inferential answers", "teach": ["To answer an inferential question well, mention the clue from the text AND explain what it suggests.", "Example: 'The character's hands were shaking, which suggests she was nervous or afraid.'", "A good inferential answer never just guesses \u2014 it always links back to specific evidence in the text."], "yt_prompt": "Based on 'Her hands were shaking as she opened the letter', how might the character be feeling?"}, {"title": "Making a prediction (a type of inference)", "teach": ["Predicting what happens next is a type of inferential thinking \u2014 using clues already given to guess what's likely to come.", "Example: if a story ends with someone finding a mysterious old key, a reasonable prediction is that they'll try to find out what it unlocks.", "Predictions should always be based on evidence in the text, not just random guesses."], "yt_prompt": "Based on a character finding a mysterious old key at the end of a story, what is a reasonable prediction?"}, {"title": "Combining literal details to make an inference", "teach": ["Sometimes you need to combine two or more literal facts to work out an inferential answer.", "Example: the text says it's December and there's snow \u2014 combining these facts, you can infer the season is winter.", "Look for multiple small details that, together, point toward a bigger conclusion."], "yt_prompt": "The text says it's December and there is snow outside. What season can you infer it is?"}, {"title": "Checking your inference is reasonable", "teach": ["A good inference must be supported by evidence in the text \u2014 not just anything that popped into your head.", "Example: if the text never mentions a character's age, you shouldn't infer a specific age with total certainty.", "Always ask: 'Can I point to a clue in the text that supports this idea?'"], "yt_prompt": "Is this a reasonable inference, based only on 'the room was completely silent'? Type 'yes' or 'no': 'The character was alone or everyone was being very quiet.'"}, {"title": "Mixed practice \u2014 literal and inferential questions", "teach": ["You've now covered spotting the difference between literal and inferential questions, and how to answer each using evidence.", "This is one of the most heavily tested comprehension skills across English exams.", "This final question checks you can apply both types confidently."], "yt_prompt": "Is this question literal or inferential? Type 'literal' or 'inferential': 'What does the character's silence suggest about how they feel?'"}];
+function ytGen_0() { return {q:'The text says "She arrived at 8am." Question: What time did she arrive? Is this literal?', answer:'yes'}; }
+function ytGen_1() { return {q:'The text describes shaking hands but never states the emotion. Question: How did the character feel? Is this inferential?', answer:'yes'}; }
+function ytGen_2() { const opts=[['What was the name of the boat in the story?','literal'],['Why do you think the character was crying?','inferential'],['What colour was the door?','literal'],['What might happen next in the story?','inferential']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_3() { const opts=[['Where did the family live?','literal'],['What does the author suggest about the character\'s mood?','inferential'],['Who was the main character?','literal'],['Why might the character have made that choice?','inferential']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_4() { return {q:'The text says: "The rope was tied to a rusted metal ring." What was the rope tied to?', answer:'a rusted metal ring'}; }
+function ytGen_5() { return {q:'Her hands were shaking as she opened the letter. How might she be feeling? (one word: nervous/scared/happy)', answer:'nervous'}; }
+function ytGen_6() { return {q:'A character finds a mysterious old key at the end of a story. What is a reasonable prediction? A) They will try to find what it unlocks. B) The story ends there with no more events.', answer:'A'}; }
+function ytGen_7() { return {q:'The text says it is December and there is snow outside. What season can you infer it is?', answer:'winter'}; }
+function ytGen_8() { return {q:'Text: "The room was completely silent." Inference: "The character was alone or everyone was being very quiet." Reasonable?', answer:'yes'}; }
+function ytGen_9() { return {q:'What does the character\'s silence suggest about how they feel?', answer:'inferential'}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG-ENG-07';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

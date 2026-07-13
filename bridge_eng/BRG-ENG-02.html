@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capital Letters & Full Stops — Bridge English — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge English: Capital Letters & Full Stops</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Capital letters at the start of a sentence", "teach": ["Every sentence must begin with a capital letter, no matter how short the sentence is.", "Example: 'the dog ran.' should be 'The dog ran.'", "This is one of the most common mistakes in early writing \u2014 always check the first letter of each sentence."], "yt_prompt": "Type the corrected sentence with the capital letter fixed:"}, {"title": "Capital letters for names (proper nouns)", "teach": ["Names of specific people, places, and things (proper nouns) always start with a capital letter.", "Example: 'amara lives in lagos.' should be 'Amara lives in Lagos.'", "This applies to first names, surnames, cities, countries, days of the week, and months."], "yt_prompt": "Type the corrected sentence:"}, {"title": "Capital letter 'I'", "teach": ["The word 'I' (referring to yourself) is always written as a capital letter, wherever it appears in a sentence.", "Example: 'me and my friend went to the shop, and i bought sweets.' should have a capital I.", "This rule applies even in the middle of a sentence, not just at the start."], "yt_prompt": "Type the corrected sentence:"}, {"title": "Where does a full stop go?", "teach": ["A full stop goes at the very end of a sentence, showing the sentence is complete.", "Example: 'The dog ran to the park' needs a full stop at the end: 'The dog ran to the park.'", "Never forget the full stop \u2014 without it, sentences can run into each other and become confusing."], "yt_prompt": "Add the missing full stop \u2014 type the corrected sentence:"}, {"title": "Spotting run-on sentences", "teach": ["A run-on sentence happens when two complete ideas are joined together without any punctuation.", "Example: 'The dog ran the cat hid' should be two sentences: 'The dog ran. The cat hid.'", "Look for where one complete idea ends and a new one begins \u2014 that's where the full stop should go."], "yt_prompt": "Fix this run-on sentence by adding a full stop and capital letter \u2014 type the corrected version:"}, {"title": "Capital letters for titles", "teach": ["Titles of books, films, and other works use capital letters for the main words.", "Example: 'things fall apart' should be 'Things Fall Apart'.", "Small words like 'the', 'a', 'of', and 'and' inside a title usually stay lowercase unless they're the first word."], "yt_prompt": "Type the corrected title:"}, {"title": "Days, months, and nationalities", "teach": ["Days of the week, months of the year, and nationalities all start with a capital letter.", "Example: 'we met on tuesday in march, and she is nigerian.' needs three capitals fixed.", "These are proper nouns because they refer to specific, named things."], "yt_prompt": "Type the corrected sentence:"}, {"title": "Checking a whole paragraph for capitals and full stops", "teach": ["When proofreading, check every sentence has a capital letter at the start and a full stop at the end.", "Example: 'my name is ade i live in lagos i am eleven years old' needs three fixes: capitals and full stops between each idea.", "Read slowly and mark where each complete idea ends before adding punctuation."], "yt_prompt": "Fix this passage \u2014 type the corrected version with capitals and full stops:"}, {"title": "Common capital letter mistakes", "teach": ["A common mistake is capitalising ordinary words in the middle of a sentence that aren't proper nouns.", "Example: 'I went to the School' is wrong \u2014 'school' isn't a proper noun here, so no capital needed.", "Only capitalise specific names, not general words like 'school', 'dog', or 'teacher' unless they start a sentence."], "yt_prompt": "Is this sentence correctly capitalised? Type 'yes' or 'no':"}, {"title": "Mixed practice \u2014 capitals and full stops", "teach": ["You've now covered sentence-starting capitals, proper nouns, the word 'I', and full stops for complete sentences.", "These are foundational skills that affect every piece of writing you do \u2014 worth being completely confident with.", "This final question brings a few of these rules together."], "yt_prompt": "Fix this sentence \u2014 type the corrected version:"}];
+function ytGen_0() { const sentences=[['the sun was hot.','The sun was hot.'],['she ran to the shop.','She ran to the shop.'],['we played football.','We played football.']]; const p=sentences[Math.floor(Math.random()*sentences.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_1() { const sentences=[['chidi lives in abuja.','Chidi lives in Abuja.'],['we visited nigeria in june.','We visited Nigeria in June.'],['ade met tunde on monday.','Ade met Tunde on Monday.']]; const p=sentences[Math.floor(Math.random()*sentences.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_2() { const sentences=[['my friend and i went to the park.','My friend and I went to the park.'],['i was happy when i saw her.','I was happy when I saw her.']]; const p=sentences[Math.floor(Math.random()*sentences.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_3() { const sentences=[['The cat sat on the mat','The cat sat on the mat.'],['We went to school today','We went to school today.'],['She likes to read books','She likes to read books.']]; const p=sentences[Math.floor(Math.random()*sentences.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_4() { const sentences=[['The dog ran the cat hid','The dog ran. The cat hid.'],['She was tired she went to bed','She was tired. She went to bed.'],['It started raining we went inside','It started raining. We went inside.']]; const p=sentences[Math.floor(Math.random()*sentences.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_5() { const titles=[["harry potter and the philosopher's stone","Harry Potter and the Philosopher's Stone"],["the lion king","The Lion King"]]; const p=titles[Math.floor(Math.random()*titles.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_6() { const sentences=[['we met on tuesday in march.','We met on Tuesday in March.'],['she is nigerian and he is british.','She is Nigerian and he is British.']]; const p=sentences[Math.floor(Math.random()*sentences.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_7() { return {q:'my name is ade i live in lagos', answer:'My name is Ade. I live in Lagos.'}; }
+function ytGen_8() { const opts=[['I went to the School yesterday.','no'],['I went to school yesterday.','yes'],['My Dog is friendly.','no'],['My dog is friendly.','yes']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_9() { return {q:'my friend chidi and i went to lagos on friday', answer:'My friend Chidi and I went to Lagos on Friday.'}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG-ENG-02';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

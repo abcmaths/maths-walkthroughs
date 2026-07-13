@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retrieval Skills — Finding Evidence in a Text — Bridge English — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge English: Retrieval Skills — Finding Evidence in a Text</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "What is retrieval?", "teach": ["Retrieval means finding and picking out specific information from a text, usually to answer a question.", "Example: if asked 'what was the weather like?', you scan the text to find the exact sentence describing weather.", "Retrieval is a skimming and scanning skill \u2014 you don't need to read every word again, just locate the relevant part."], "yt_prompt": "Based on 'The sky was grey and it began to rain', what was the weather like?"}, {"title": "Scanning for key words", "teach": ["When looking for an answer, scan the text for key words from the question rather than re-reading everything.", "Example: if the question asks about 'the dog', scan quickly for the word 'dog' rather than reading every sentence in full.", "This is much faster than reading the whole passage again from the start."], "yt_prompt": "Scanning for the word 'canoe', what colour was mentioned near it in 'Faded blue paint clung to the canoe'?"}, {"title": "Finding a specific fact", "teach": ["Retrieval questions often ask for one specific fact \u2014 a name, a number, a place, or a time.", "Example: 'How old was the character?' requires finding the exact number stated in the text.", "Give a precise, short answer for retrieval questions \u2014 don't add unnecessary extra detail."], "yt_prompt": "Based on 'Amara was eleven years old', how old was Amara?"}, {"title": "Finding multiple pieces of information", "teach": ["Some retrieval questions ask for more than one piece of information \u2014 make sure you find all the parts asked for.", "Example: 'What did she find inside the box?' \u2014 if the text lists two items, both need to be included in your answer.", "Check the question carefully: does it use 'and' or list multiple things you need to find?"], "yt_prompt": "Based on 'Inside the box was a coin and a folded letter', what two things were inside the box?"}, {"title": "Locating information in a specific part of a text", "teach": ["Sometimes you're told which part of the text to look in \u2014 e.g. 'in the second paragraph, find...'", "This narrows down where to search, saving time.", "Always check you're looking in the correct section before answering."], "yt_prompt": "In this short passage's SECOND sentence, find the name mentioned: 'The morning was cold. Ade woke up early. He got dressed quickly.'"}, {"title": "Retrieval using synonyms", "teach": ["Sometimes the question uses a different word than the text \u2014 you need to spot the synonym (a word with a similar meaning).", "Example: if the question asks 'what did she feel?' and the text says 'she was terrified', the answer relates to fear.", "Don't expect the exact same word every time \u2014 think about meaning, not just matching letters."], "yt_prompt": "Based on 'She was terrified when she heard the noise', how did she feel? (one word, e.g. scared/afraid)"}, {"title": "Retrieval from a list or set of instructions", "teach": ["Non-fiction texts often present information as lists or steps \u2014 retrieval questions may ask you to find a specific step or item.", "Example: 'What is the second step in the recipe?' requires you to count through the steps carefully.", "Count carefully \u2014 it's easy to miscount steps or list items if you go too quickly."], "yt_prompt": "In this list \u2014 1) Chop the onions 2) Heat the oil 3) Add the onions \u2014 what is step 2?"}, {"title": "Skimming for the general topic", "teach": ["Skimming means reading quickly to get a general sense of what a text is about, without focusing on every detail.", "This is useful before doing detailed retrieval \u2014 it helps you know roughly where different information might be.", "Skim first, then scan carefully for the specific detail you need."], "yt_prompt": "After skimming a text about 'a boy who lost his dog and searched the neighbourhood', what is this text mainly about?"}, {"title": "Answering retrieval questions in full sentences", "teach": ["In exams, retrieval answers are often expected in full sentences, not just single words.", "Example: instead of just 'blue', write 'The canoe's paint was blue.'", "Turning the question into the start of your answer is a reliable way to build a full sentence response."], "yt_prompt": "Answer in a full sentence: What colour was the canoe's paint, based on 'Faded blue paint clung to the canoe'?"}, {"title": "Mixed practice \u2014 retrieval skills", "teach": ["You've now covered scanning for key words, finding specific facts, using synonyms, and answering in full sentences.", "Retrieval is often the first skill tested in comprehension exams because it checks basic understanding before moving to harder inference questions.", "This final question brings these retrieval skills together."], "yt_prompt": "Based on 'The old fisherman had lived by the river for forty years', how long had the fisherman lived by the river?"}];
+function ytGen_0() { return {q:'The sky was grey and it began to rain. What was the weather like?', answer:'grey and rainy'}; }
+function ytGen_1() { return {q:'Faded blue paint clung to the canoe. What colour was the canoe\'s paint?', answer:'blue'}; }
+function ytGen_2() { return {q:'Amara was eleven years old. How old was Amara?', answer:'eleven'}; }
+function ytGen_3() { return {q:'Inside the box was a coin and a folded letter. What two things were inside?', answer:'a coin and a folded letter'}; }
+function ytGen_4() { return {q:'The morning was cold. Ade woke up early. He got dressed quickly. Who is named in the second sentence?', answer:'Ade'}; }
+function ytGen_5() { return {q:'She was terrified when she heard the noise. How did she feel?', answer:'terrified'}; }
+function ytGen_6() { return {q:'1) Chop the onions 2) Heat the oil 3) Add the onions. What is step 2?', answer:'Heat the oil'}; }
+function ytGen_7() { return {q:'A text describes a boy who lost his dog and searched the neighbourhood. What is the text mainly about? (a few words)', answer:'a boy searching for his lost dog'}; }
+function ytGen_8() { return {q:'Faded blue paint clung to the canoe. Answer in a full sentence: what colour was the paint?', answer:"The canoe's paint was blue."}; }
+function ytGen_9() { return {q:'The old fisherman had lived by the river for forty years. How long had he lived there?', answer:'forty years'}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG-ENG-08';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paragraphing & Topic Sentences — Bridge English — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge English: Paragraphing & Topic Sentences</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "What is a paragraph?", "teach": ["A paragraph is a group of sentences that all focus on one main idea.", "When you move to a new idea, you should start a new paragraph.", "Paragraphs help organise writing so the reader can follow your ideas clearly, one at a time."], "yt_prompt": "Should these two sentences be in the same paragraph? Type 'yes' or 'no': 'The weather was sunny. My favourite food is rice.'"}, {"title": "What is a topic sentence?", "teach": ["A topic sentence usually comes first in a paragraph and tells the reader what the whole paragraph will be about.", "Example: 'Lagos is a busy and exciting city.' \u2014 this topic sentence tells us the paragraph will describe Lagos.", "Every other sentence in the paragraph should support or explain the topic sentence."], "yt_prompt": "Which sentence would work best as a topic sentence for a paragraph about football?"}, {"title": "Identifying the topic sentence in a paragraph", "teach": ["The topic sentence is usually the first sentence, and it's more general than the sentences that follow.", "Example: in a paragraph about a beach holiday, the topic sentence might be 'Our holiday at the beach was unforgettable.'", "Later sentences give specific details that support this general opening idea."], "yt_prompt": "Which sentence is the topic sentence? Type 'first' or 'second':"}, {"title": "When to start a new paragraph \u2014 new idea", "teach": ["Start a new paragraph whenever you move to a new main idea or topic.", "Example: after finishing a paragraph about the weather, a new paragraph should start when you begin talking about food.", "If you can summarise a group of sentences in one general statement, they probably belong in the same paragraph."], "yt_prompt": "Should a new paragraph start here? Type 'yes' or 'no': moving from describing a character's appearance to describing what happened next in the story."}, {"title": "When to start a new paragraph \u2014 new speaker", "teach": ["In dialogue, start a new paragraph every time a different character starts speaking.", "Example: \"Hello,\" said Ade. (new paragraph) \"Hi,\" replied Chidi.", "This rule connects to what you learned in the speech marks topic \u2014 it's the same idea, just from a paragraphing angle."], "yt_prompt": "Should a new paragraph start when a new character begins speaking? Type 'yes' or 'no':"}, {"title": "When to start a new paragraph \u2014 change in time or place", "teach": ["A new paragraph often starts when the setting changes \u2014 a new time, place, or scene.", "Example: 'The next morning, Amara woke up early.' signals a time change and often starts a new paragraph.", "Look out for phrases like 'later that day', 'meanwhile', or 'back at home' \u2014 these usually signal a new paragraph is needed."], "yt_prompt": "Does this phrase usually signal the start of a new paragraph? Type 'yes' or 'no': 'The next morning,'"}, {"title": "Supporting sentences", "teach": ["Supporting sentences come after the topic sentence and give more detail, examples, or explanation.", "Example: topic sentence 'Lagos is a busy city.' Supporting sentence: 'The streets are full of cars, and markets are crowded every day.'", "Good supporting sentences give specific evidence or examples, not just repeat the topic sentence in different words."], "yt_prompt": "Which sentence best supports the topic sentence 'Football is an exciting sport'?"}, {"title": "Concluding a paragraph", "teach": ["A paragraph can end with a sentence that sums up the main idea or leads into the next paragraph.", "Example: 'Overall, Lagos offers something for everyone.' rounds off a descriptive paragraph well.", "Not every paragraph needs a formal conclusion, but longer or more complex paragraphs often benefit from one."], "yt_prompt": "Which sentence works best as a paragraph conclusion?"}, {"title": "Fixing a paragraph with mixed ideas", "teach": ["If a paragraph contains two unrelated ideas, it usually needs to be split into two separate paragraphs.", "Example: a paragraph about a football match that suddenly starts describing what was eaten for dinner should be split.", "Read through your own paragraphs and check: does everything here really belong together?"], "yt_prompt": "Should this paragraph be split into two? Type 'yes' or 'no': it starts describing a football match, then switches to describing a birthday party."}, {"title": "Mixed practice \u2014 paragraphing", "teach": ["You've now covered topic sentences, supporting sentences, and knowing when to start a new paragraph.", "Clear paragraphing is one of the biggest factors examiners look for when assessing organisation in writing.", "This final question brings these ideas together."], "yt_prompt": "Which sentence would work best as a topic sentence for a paragraph about a favourite holiday?"}];
+function ytGen_0() { return {q:'The weather was sunny. My favourite food is rice. Same paragraph?', answer:'no'}; }
+function ytGen_1() { return {q:'Which is the best topic sentence? A) Football is my favourite sport. B) The ball was red.', answer:'A'}; }
+function ytGen_2() { return {q:'First: The beach holiday was the best trip of my life. Second: We built sandcastles every morning. Which is the topic sentence?', answer:'first'}; }
+function ytGen_3() { return {q:'Moving from describing a character\'s appearance to describing what happens next in the story — new paragraph?', answer:'yes'}; }
+function ytGen_4() { return {q:'Should a new paragraph start when a new character begins speaking?', answer:'yes'}; }
+function ytGen_5() { return {q:'Does "The next morning," usually signal a new paragraph?', answer:'yes'}; }
+function ytGen_6() { return {q:'Topic: Football is an exciting sport. Which supports it best? A) Football involves fast action and dramatic goals. B) I do not like tennis.', answer:'A'}; }
+function ytGen_7() { return {q:'Which works best as a concluding sentence? A) In short, the trip was unforgettable. B) We arrived at 9am.', answer:'A'}; }
+function ytGen_8() { return {q:'A paragraph starts describing a football match, then switches to describing a birthday party. Should it be split?', answer:'yes'}; }
+function ytGen_9() { return {q:'Which is the best topic sentence? A) Our family holiday to the coast was the best week of my life. B) We packed our bags on Monday.', answer:'A'}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG-ENG-06';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>
