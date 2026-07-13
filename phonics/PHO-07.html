@@ -68,13 +68,32 @@ function ytGen_8() { return {q:'chat', options:['3','4','2'], answer_index:0}; }
 function ytGen_9() { return {q:'th - i - n', options:['thin','tin','thing'], answer_index:0}; }
 const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
 
+let _voicesReady = false;
+if ('speechSynthesis' in window) {
+  // Prime the voice list — on some browsers (notably iOS Safari) the first
+  // speak() call can silently fail if voices haven't loaded yet
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => { _voicesReady = true; };
+}
+
 function speak(text) {
-  if (!('speechSynthesis' in window)) { alert('Sorry, your device does not support audio playback.'); return; }
-  window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.rate = 0.85;
-  utter.lang = 'en-GB';
-  window.speechSynthesis.speak(utter);
+  if (!('speechSynthesis' in window)) {
+    alert('Sorry, this device/browser does not support reading text aloud. Try a different browser (e.g. Chrome or Safari) if this keeps happening.');
+    return;
+  }
+  try {
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 0.85;
+    utter.lang = 'en-GB';
+    utter.onerror = () => {
+      console.warn('Speech synthesis error for text:', text);
+    };
+    // Small delay helps some mobile browsers that drop the very first speak() call
+    setTimeout(() => window.speechSynthesis.speak(utter), 50);
+  } catch (e) {
+    console.error('Speech synthesis failed:', e);
+  }
 }
 
 let qIdx = 0;
@@ -105,7 +124,7 @@ function render() {
         <span class="opt-speak" onclick="event.stopPropagation(); speak('${opt.replace(/'/g, "\\'")}')">🔊</span>
       </button>`
     ).join('');
-    const listenBtn = currentYT.q ? `<button class="listen-btn" onclick="speak('${currentYT.q.replace(/'/g, "\\'").replace(/-/g,' ')}')">🔊 Listen</button>` : '';
+    const listenBtn = `<button class="listen-btn" onclick="speak('${q.yt_prompt.replace(/'/g, "\\'").replace(/[<>]/g,'')}')">🔊 Listen to the question</button>`;
     box.innerHTML = `
       <div class="teach"><strong>${q.title}</strong></div>
       <div class="yt-box">
