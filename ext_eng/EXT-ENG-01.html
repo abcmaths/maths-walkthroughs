@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inference & Analysis of a Complete Short Text — Extension English — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Extension English: Inference & Analysis of a Complete Short Text</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Moving beyond basic inference", "teach": ["At this level, inference means analysing HOW a writer creates meaning, not just WHAT can be inferred.", "Example: instead of just saying a character is 'sad', analyse how word choice, structure, or imagery build that impression.", "This is the difference between basic comprehension and literary analysis."], "yt_prompt": "Based on 'She stared at the grey, empty room, the silence pressing in on her', what technique creates the mood?"}, {"title": "Analysing word choice for connotation", "teach": ["Writers choose words carefully for their connotations (the feelings and associations they carry), not just their literal meaning.", "Example: 'the crowd swarmed' (insect connotation, suggesting chaos/threat) vs 'the crowd gathered' (neutral).", "Always ask: why THIS word, rather than a more ordinary alternative?"], "yt_prompt": "What does the word 'swarmed' suggest about the crowd, compared to 'gathered'?"}, {"title": "Analysing sentence structure for effect", "teach": ["Short sentences can create tension or urgency; long, flowing sentences can create a calm or reflective mood.", "Example: 'She ran. She stumbled. She fell.' creates urgency through short, sharp sentences.", "Look at sentence length and structure as a deliberate writing choice, not just content."], "yt_prompt": "What effect do short sentences create in: 'She ran. She stumbled. She fell.'?"}, {"title": "Identifying a writer's viewpoint", "teach": ["A writer's viewpoint is their attitude or perspective toward the subject, often shown indirectly through word choice and focus.", "Example: an article that only mentions the negative effects of a policy, without any positive points, suggests a critical viewpoint.", "Look for patterns across a whole text, not just one sentence, to identify overall viewpoint."], "yt_prompt": "If a text only mentions negative effects of a new law, what does this suggest about the writer's viewpoint?"}, {"title": "Analysing imagery", "teach": ["Imagery uses descriptive language to create a picture or sensation in the reader's mind, often appealing to the senses.", "Example: 'the acrid smoke stung her eyes' appeals to smell and touch, making the scene feel vivid and immediate.", "Identify which senses are being appealed to, and consider why the writer chose that particular sensory detail."], "yt_prompt": "Which sense does 'the acrid smoke stung her eyes' appeal to primarily?"}, {"title": "Analysing the effect of a metaphor", "teach": ["A metaphor describes one thing as if it were another, creating a vivid comparison without using 'like' or 'as'.", "Example: 'Her heart was a stone' suggests coldness or emotional numbness, without saying this directly.", "Always explain what the comparison suggests, not just identify that a metaphor is present."], "yt_prompt": "What does the metaphor 'her heart was a stone' suggest about the character?"}, {"title": "Analysing structure across a whole text", "teach": ["Structural analysis looks at how a text is organised as a whole \u2014 what's revealed first, what's withheld, how the focus shifts.", "Example: withholding a character's name until the final paragraph can create mystery or build suspense.", "Consider why the writer chose this particular order, rather than describing events chronologically."], "yt_prompt": "What effect can withholding a character's name until the end of a text create?"}, {"title": "Comparing tone across two paragraphs", "teach": ["Tone is the writer's attitude, expressed through word choice and style \u2014 it can shift across a text to reflect changing events or moods.", "Example: a calm, descriptive opening followed by short, urgent sentences signals a shift from calm to tense.", "Track how tone changes across a passage, and consider what causes each shift."], "yt_prompt": "If a text moves from calm, descriptive sentences to short, urgent ones, how has the tone shifted?"}, {"title": "Analysing an unreliable narrator", "teach": ["Sometimes a narrator's account can't be fully trusted \u2014 clues in the text suggest their perspective is biased or incomplete.", "Example: a narrator who repeatedly insists 'I am definitely not lying' may actually be signalling the opposite to an alert reader.", "Look for contradictions or repeated over-insistence as clues that a narrator might be unreliable."], "yt_prompt": "If a narrator repeatedly insists 'I am definitely not lying', what might this suggest to an alert reader?"}, {"title": "Mixed practice \u2014 inference and analysis", "teach": ["You've now covered analysing word choice, sentence structure, viewpoint, imagery, metaphor, structure, tone, and narrator reliability.", "These analytical skills are exactly what's tested in higher-level reading comprehension and literature exam questions.", "This final question brings a couple of these analytical skills together."], "yt_prompt": "What technique is being used in: 'The old house groaned under the weight of its own memories'?"}];
+function ytGen_0() { return {q:'She stared at the grey, empty room, the silence pressing in on her. What technique creates the mood?', answer:'personification'}; }
+function ytGen_1() { return {q:'"The crowd swarmed around the stage." What does "swarmed" suggest, compared to "gathered"?', answer:'chaotic and threatening'}; }
+function ytGen_2() { return {q:'She ran. She stumbled. She fell. What effect do the short sentences create?', answer:'urgency and tension'}; }
+function ytGen_3() { return {q:'A text only mentions negative effects of a new law. What does this suggest about the writer\'s viewpoint?', answer:'critical'}; }
+function ytGen_4() { return {q:'The acrid smoke stung her eyes. Which sense does this appeal to?', answer:'smell'}; }
+function ytGen_5() { return {q:'"Her heart was a stone." What does this metaphor suggest about the character?', answer:'she felt cold or emotionally numb'}; }
+function ytGen_6() { return {q:'What effect can withholding a character\'s name until the end of a text create?', answer:'mystery or suspense'}; }
+function ytGen_7() { return {q:'A text moves from calm, descriptive sentences to short, urgent ones. How has the tone shifted?', answer:'from calm to tense'}; }
+function ytGen_8() { return {q:'A narrator repeatedly insists "I am definitely not lying." What might this suggest to an alert reader?', answer:'the narrator might actually be lying'}; }
+function ytGen_9() { return {q:'The old house groaned under the weight of its own memories. What technique is being used?', answer:'personification'}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'EXT-ENG-01';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

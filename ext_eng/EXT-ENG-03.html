@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creative Writing With Stylistic Devices — Extension English — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Extension English: Creative Writing With Stylistic Devices</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Using a simile in your own writing", "teach": ["Writing your own similes lets you create vivid comparisons that make description more engaging.", "Example: instead of 'the sea was rough', try 'the sea was as wild as a stampede of horses'.", "Choose comparisons that fit the mood or tone you're trying to create."], "yt_prompt": "Complete this simile with your own comparison: 'The old man's hands were as wrinkled as ___'"}, {"title": "Using a metaphor in your own writing", "teach": ["Writing metaphors requires stating one thing IS another \u2014 a bold, direct comparison.", "Example: 'Her smile was sunshine' is more direct and powerful than 'her smile was like sunshine'.", "Metaphors work best when the comparison feels fresh, not overused or clich\u00e9d."], "yt_prompt": "Complete this metaphor: 'The city at night was a ___' (choose an evocative noun)"}, {"title": "Using personification for atmosphere", "teach": ["Giving human qualities to non-human things creates atmosphere and can subtly reflect a character's emotional state.", "Example: 'the shadows crept closer' suggests menace, reflecting fear, without stating it directly.", "Choose the human action carefully \u2014 it should match the mood you want to create."], "yt_prompt": "Complete this personification to create a menacing atmosphere: 'The shadows ___ across the empty room.'"}, {"title": "Varying sentence length for effect", "teach": ["Mixing short and long sentences creates rhythm and controls pacing \u2014 short sentences speed things up, long sentences slow things down.", "Example: 'She ran. Her heart pounded as the footsteps behind her grew louder, closer, more urgent with every second.' \u2014 short then long, building tension.", "Read your own writing aloud to check the rhythm feels intentional, not accidental."], "yt_prompt": "Which order creates a build-up of tension? Type 'A' or 'B':"}, {"title": "Using the rule of three", "teach": ["Listing three related words or phrases together creates rhythm and emphasis \u2014 a technique called the rule of three.", "Example: 'she was tired, cold, and utterly alone' \u2014 three descriptive details build a fuller picture than just one or two.", "This technique works well in both descriptive and persuasive writing."], "yt_prompt": "Complete the rule of three: 'The wind howled, the rain lashed, and the ___'"}, {"title": "Creating atmosphere through sensory description", "teach": ["Using multiple senses (sight, sound, smell, touch, taste) in description makes a scene feel more immersive.", "Example: 'the damp air smelled of rust, and the metal groaned underfoot' uses smell and sound together.", "Try to include at least two different senses when describing an important setting."], "yt_prompt": "Which two senses are used in: 'the damp air smelled of rust, and the metal groaned underfoot'?"}, {"title": "Using a flashback for structure", "teach": ["A flashback interrupts the main timeline to show an earlier event, often revealing important backstory or motivation.", "Example: a character finds an old photo, triggering a memory of a childhood event before returning to the present.", "Flashbacks should be clearly signalled (e.g. 'She remembered...') so the reader isn't confused about the timeline."], "yt_prompt": "What is the term for interrupting a story's main timeline to show an earlier event?"}, {"title": "Using foreshadowing", "teach": ["Foreshadowing hints at events that will happen later in the story, creating anticipation or unease.", "Example: a character mentions a strange feeling of dread before anything bad has actually happened yet.", "This technique rewards careful readers, who notice the connection once the later event occurs."], "yt_prompt": "What is the term for hinting at future events earlier in a story?"}, {"title": "Choosing a narrative viewpoint", "teach": ["First person ('I') creates intimacy and immediacy; third person ('she/he') allows more distance and a broader view.", "Example: 'I felt my heart race' (first person, intimate) vs 'She felt her heart race' (third person, more distant).", "Choose the viewpoint that best suits the emotional effect you want to create for your reader."], "yt_prompt": "Which viewpoint creates more intimacy and immediacy \u2014 type 'first' or 'third':"}, {"title": "Mixed practice \u2014 stylistic devices in creative writing", "teach": ["You've now practiced similes, metaphors, personification, varying sentence length, rule of three, sensory description, flashback, foreshadowing, and viewpoint.", "Combining several of these techniques deliberately (not randomly) is what separates strong creative writing from average writing.", "This final question checks you can apply one of these techniques confidently."], "yt_prompt": "Complete this sentence using personification: 'The old house ___ under the weight of years.'"}];
+function ytGen_0() { return {q:"The old man's hands were as wrinkled as ___", answer:'a raisin'}; }
+function ytGen_1() { return {q:'The city at night was a ___', answer:'jungle of light'}; }
+function ytGen_2() { return {q:'The shadows ___ across the empty room. (menacing atmosphere)', answer:'crept'}; }
+function ytGen_3() { return {q:'A) Short sentence, then long sentence. B) Long sentence, then short sentence. Which order typically builds tension before a climax?', answer:'A'}; }
+function ytGen_4() { return {q:'The wind howled, the rain lashed, and the ___ (complete the third item)', answer:'thunder roared'}; }
+function ytGen_5() { return {q:'the damp air smelled of rust, and the metal groaned underfoot. Which two senses are used?', answer:'smell and sound'}; }
+function ytGen_6() { return {q:'What is the term for interrupting a story\'s main timeline to show an earlier event?', answer:'flashback'}; }
+function ytGen_7() { return {q:'What is the term for hinting at future events earlier in a story?', answer:'foreshadowing'}; }
+function ytGen_8() { return {q:'Which viewpoint creates more intimacy and immediacy: first person or third person?', answer:'first'}; }
+function ytGen_9() { return {q:'The old house ___ under the weight of years. (personification)', answer:'groaned'}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'EXT-ENG-03';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

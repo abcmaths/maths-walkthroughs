@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparing Two Texts (Viewpoint/Purpose) — Extension English — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Extension English: Comparing Two Texts (Viewpoint/Purpose)</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Why compare two texts?", "teach": ["Comparing two texts on a similar topic reveals how different writers approach the same subject differently \u2014 through viewpoint, purpose, or technique.", "Example: two articles about climate change might differ in tone \u2014 one urgent and alarmed, the other calm and measured.", "Comparison questions test your ability to analyse two texts AND explain the relationship between them."], "yt_prompt": "What does comparing two texts on the same topic reveal?"}, {"title": "Identifying purpose \u2014 to inform vs to persuade", "teach": ["A text's purpose might be to inform (giving neutral facts) or to persuade (pushing a particular viewpoint).", "Example: a news report aims to inform; an opinion column aims to persuade.", "Look at word choice and balance of viewpoints to judge whether a text is informing or persuading."], "yt_prompt": "Does an opinion column aim to inform or persuade?"}, {"title": "Comparing tone between two texts", "teach": ["Tone (the writer's attitude, shown through word choice and style) often differs between two texts on the same topic.", "Example: one article on a new policy might have a hopeful tone, while another has a critical tone.", "Identify specific word choices in each text that reveal its particular tone."], "yt_prompt": "If one text uses words like 'exciting' and 'promising', and another uses 'concerning' and 'risky', how do their tones differ?"}, {"title": "Comparing structure between two texts", "teach": ["Two texts on the same topic might be organised very differently \u2014 one chronological, another building to a key argument at the end.", "Example: a news report often states the key fact first; a persuasive essay might build up to its main point gradually.", "Consider why each writer chose their particular structure for their purpose."], "yt_prompt": "Which structure is more typical of a news report \u2014 key fact first, or building up gradually?"}, {"title": "Comparing language techniques between two texts", "teach": ["Two texts might use very different techniques even on the same subject \u2014 one factual and measured, another emotive and persuasive.", "Example: a scientific report uses precise data; a charity appeal uses emotive personal stories.", "Identify specific techniques (like emotive language, statistics, or rhetorical questions) used in each text separately before comparing."], "yt_prompt": "Which text is more likely to use emotive language \u2014 a scientific report or a charity appeal?"}, {"title": "Identifying the intended audience", "teach": ["Different texts are often written for different audiences, which shapes their tone, vocabulary, and level of detail.", "Example: a children's information leaflet uses simple vocabulary; an academic article uses more technical, complex language.", "Consider vocabulary level and tone as clues to who the text was written for."], "yt_prompt": "Which audience would a text using simple vocabulary and short sentences most likely be written for?"}, {"title": "Comparing viewpoints on the same issue", "teach": ["Two writers can have completely opposite viewpoints on the same topic \u2014 comparing them reveals the range of perspectives available.", "Example: one writer might support a new law, while another strongly opposes it, each using different evidence to support their view.", "Summarise each writer's overall viewpoint clearly before comparing how they differ."], "yt_prompt": "If one writer supports a policy and another opposes it, what do we call this difference?"}, {"title": "Using comparative language in your own writing", "teach": ["When comparing two texts, use comparative language like 'whereas', 'in contrast', 'similarly', and 'both'.", "Example: 'Whereas Text A uses statistics, Text B relies on personal anecdotes.'", "This comparative vocabulary makes your own analysis of the two texts much clearer to follow."], "yt_prompt": "Which word signals a contrast between two texts: 'whereas' or 'and'?"}, {"title": "Structuring a comparison paragraph", "teach": ["A strong comparison paragraph makes a clear point about both texts together, not just describing each one separately.", "Example: 'Both texts address climate change, but Text A uses statistics to build a logical case, whereas Text B relies on emotive personal stories to persuade.'", "Avoid simply summarising each text one after another \u2014 actively compare them within the same sentences where possible."], "yt_prompt": "Should a comparison paragraph describe each text completely separately, or link them together? Type 'link':"}, {"title": "Mixed practice \u2014 comparing texts", "teach": ["You've now covered comparing purpose, tone, structure, language techniques, audience, and viewpoint across two texts.", "This comparative analysis skill is heavily tested in IGCSE and similar exam formats, often worth significant marks.", "This final question brings a couple of these comparison skills together."], "yt_prompt": "If Text A informs with neutral facts and Text B persuades with emotive language, what is the main difference in their purpose?"}];
+function ytGen_0() { return {q:'What does comparing two texts on the same topic typically reveal?', answer:'different viewpoints or approaches'}; }
+function ytGen_1() { return {q:'Does an opinion column aim to inform or persuade?', answer:'persuade'}; }
+function ytGen_2() { return {q:'Text A uses "exciting" and "promising". Text B uses "concerning" and "risky". How do their tones differ?', answer:'one is positive, the other is negative'}; }
+function ytGen_3() { return {q:'Which structure is more typical of a news report?', answer:'key fact first'}; }
+function ytGen_4() { return {q:'Which text is more likely to use emotive language?', answer:'a charity appeal'}; }
+function ytGen_5() { return {q:'Which audience would a text using simple vocabulary and short sentences most likely be written for?', answer:'children'}; }
+function ytGen_6() { return {q:'If one writer supports a policy and another opposes it, what do we call this difference?', answer:'a difference in viewpoint'}; }
+function ytGen_7() { return {q:'Which word signals a contrast between two texts: "whereas" or "and"?', answer:'whereas'}; }
+function ytGen_8() { return {q:'Should a comparison paragraph describe each text completely separately, or link them together?', answer:'link'}; }
+function ytGen_9() { return {q:'Text A informs with neutral facts. Text B persuades with emotive language. What is the main difference in purpose?', answer:'one aims to inform, the other to persuade'}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'EXT-ENG-06';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extended Vocabulary — Nuance & Connotation — Extension English — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
+  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
+  button.act:disabled { background:#ccc; }
+  .try-fb { margin-top:10px; font-weight:600; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+</style>
+
+</head>
+<body>
+<header><h1>Extension English: Extended Vocabulary — Nuance & Connotation</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "What is nuance?", "teach": ["Nuance refers to subtle differences in meaning between words that seem similar on the surface.", "Example: 'thin', 'slender', and 'skinny' all describe a similar body type, but each carries a different feeling.", "Recognising nuance helps you choose exactly the right word for the effect you want."], "yt_prompt": "Which word feels most positive when describing someone thin?"}, {"title": "Connotation vs denotation", "teach": ["Denotation is a word's literal dictionary meaning; connotation is the feeling or association it carries beyond that.", "Example: 'home' and 'house' both denote a place someone lives, but 'home' connotes warmth and belonging.", "Writers choose words carefully based on connotation, not just literal meaning."], "yt_prompt": "Which word has warmer connotations: 'house' or 'home'?"}, {"title": "Positive and negative connotations", "teach": ["Many words describing similar ideas carry either positive or negative connotations, shaping how the reader feels about the subject.", "Example: 'assertive' (positive) vs 'aggressive' (negative) can describe similar behaviour, but create very different impressions.", "Consider whether a writer's word choice makes you feel favourably or unfavourably toward the subject."], "yt_prompt": "Does 'assertive' have a positive or negative connotation compared to 'aggressive'?"}, {"title": "Choosing precise vocabulary over vague words", "teach": ["Precise, specific vocabulary creates a clearer, more vivid picture than vague, general words.", "Example: 'she walked' is vague; 'she trudged' or 'she sprinted' each paint a much clearer, more specific picture.", "When editing writing, replace vague verbs and adjectives with more precise, specific alternatives."], "yt_prompt": "Which is more precise: 'walked' or 'trudged'?"}, {"title": "Formal vs informal vocabulary", "teach": ["Formal vocabulary is used in academic, professional, or serious contexts; informal vocabulary is used in casual, everyday speech.", "Example: 'commence' (formal) vs 'start' (informal) \u2014 both mean the same thing, but suit different contexts.", "Match your vocabulary level to the purpose and audience of your writing."], "yt_prompt": "Which is more formal: 'commence' or 'start'?"}, {"title": "Vocabulary that reveals a writer's attitude", "teach": ["Word choice can reveal a writer's underlying attitude toward their subject, even without stating it directly.", "Example: calling a policy 'controversial' rather than simply 'new' hints that the writer expects disagreement or debate.", "Look for adjectives especially \u2014 they often carry the strongest signals of a writer's attitude."], "yt_prompt": "What does calling a policy 'controversial' (rather than just 'new') suggest about the writer's attitude?"}, {"title": "Using a thesaurus effectively", "teach": ["A thesaurus offers alternative words, but not all synonyms carry exactly the same connotation \u2014 always check the word truly fits.", "Example: 'thrifty' and 'stingy' both relate to spending little money, but 'thrifty' is positive while 'stingy' is negative.", "Never just pick the first synonym you find \u2014 check it matches the tone and meaning you actually intend."], "yt_prompt": "Which word is more positive when describing someone careful with money: 'thrifty' or 'stingy'?"}, {"title": "Connotation in political and media language", "teach": ["Political and media writing often uses carefully chosen words with strong connotations to shape public opinion.", "Example: calling a group 'protesters' vs 'rioters' creates very different impressions of the same event.", "Being aware of this helps you read news and opinion pieces more critically."], "yt_prompt": "Does 'rioters' or 'protesters' create a more negative impression of a group of people?"}, {"title": "Building your own vocabulary bank", "teach": ["Actively collecting and using new, precise vocabulary (rather than relying on the same common words) strengthens your own writing.", "Example: keeping a running list of strong verbs and adjectives you encounter while reading helps expand your active vocabulary over time.", "Regularly reviewing and trying to use new words in your own writing helps make them stick."], "yt_prompt": "What is one effective way to build your own vocabulary over time?"}, {"title": "Mixed practice \u2014 nuance and connotation", "teach": ["You've now covered nuance, connotation vs denotation, positive/negative connotations, precision, formality, and media language.", "This sensitivity to word choice is exactly what separates strong analytical writing from more basic responses.", "This final question brings a couple of these ideas together."], "yt_prompt": "Which word has a more negative connotation: 'curious' or 'nosy', both describing someone interested in others' business?"}];
+function ytGen_0() { return {q:'Which word feels most positive: thin, slender, or skinny?', answer:'slender'}; }
+function ytGen_1() { return {q:'Which word has warmer connotations: "house" or "home"?', answer:'home'}; }
+function ytGen_2() { return {q:'Does "assertive" have a positive or negative connotation compared to "aggressive"?', answer:'positive'}; }
+function ytGen_3() { return {q:'Which is more precise: "walked" or "trudged"?', answer:'trudged'}; }
+function ytGen_4() { return {q:'Which is more formal: "commence" or "start"?', answer:'commence'}; }
+function ytGen_5() { return {q:'What does calling a policy "controversial" (rather than just "new") suggest about the writer\'s attitude?', answer:'expects disagreement or debate'}; }
+function ytGen_6() { return {q:'Which word is more positive: "thrifty" or "stingy"?', answer:'thrifty'}; }
+function ytGen_7() { return {q:'Does "rioters" or "protesters" create a more negative impression?', answer:'rioters'}; }
+function ytGen_8() { return {q:'What is one effective way to build your own vocabulary over time?', answer:'keeping a vocabulary list from reading'}; }
+function ytGen_9() { return {q:'Which word has a more negative connotation: "curious" or "nosy"?', answer:'nosy'}; }
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        <div class="worked">${currentYT.q}</div>
+        <input type="text" id="ytAnswer" placeholder="Your answer">
+        <button class="act" onclick="checkYT()">Check</button>
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function checkYT() {
+  const val = document.getElementById('ytAnswer').value.trim();
+  const fb = document.getElementById('ytFeedback');
+  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+  }
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = '<div class="teach"><strong>Well done — topic complete!</strong><br>You can mark this as complete below.</div>';
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) window.markComplete();
+}
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'EXT-ENG-07';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_code: _abcTopicCode,
+    completed: true,
+    completed_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_code' });
+};
+</script>
+</body>
+</html>
