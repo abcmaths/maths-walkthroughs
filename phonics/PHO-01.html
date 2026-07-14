@@ -76,20 +76,25 @@ if ('speechSynthesis' in window) {
   window.speechSynthesis.onvoiceschanged = () => { _voicesReady = true; };
 }
 
-function speak(text) {
+function speak(text, repeat) {
   if (!('speechSynthesis' in window)) {
     alert('Sorry, this device/browser does not support reading text aloud. Try a different browser (e.g. Chrome or Safari) if this keeps happening.');
     return;
   }
   try {
     window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.85;
-    utter.lang = 'en-GB';
-    utter.onerror = () => {
-      console.warn('Speech synthesis error for text:', text);
-    };
-    window.speechSynthesis.speak(utter);
+    const utter1 = new SpeechSynthesisUtterance(text);
+    utter1.rate = 0.65;
+    utter1.pitch = 1;
+    utter1.lang = 'en-GB';
+    window.speechSynthesis.speak(utter1);
+    if (repeat) {
+      const utter2 = new SpeechSynthesisUtterance(text);
+      utter2.rate = 0.65;
+      utter2.pitch = 1;
+      utter2.lang = 'en-GB';
+      window.speechSynthesis.speak(utter2);
+    }
   } catch (e) {
     console.error('Speech synthesis failed:', e);
   }
@@ -111,7 +116,8 @@ function render() {
   document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
 
   if (stepIdx < 3) {
-    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>
+      <button class="listen-btn" style="background:#888" onclick="speak(document.querySelector('.teach').textContent, false)">🔊 Read this aloud</button>`;
     document.getElementById('nextBtn').textContent = 'Next';
     document.getElementById('nextBtn').disabled = false;
   } else {
@@ -120,10 +126,10 @@ function render() {
     let optsHtml = currentYT.options.map((opt, i) =>
       `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">
         <span class="opt-text">${opt}</span>
-        <span class="opt-speak" onclick="event.stopPropagation(); speak('${opt.replace(/'/g, "\\'")}')">🔊</span>
+        <span class="opt-speak" onclick="event.stopPropagation(); speak('${opt.replace(/'/g, "\\'")}', true)">🔊</span>
       </button>`
     ).join('');
-    const listenBtn = `<button class="listen-btn" onclick="speak('${q.yt_prompt.replace(/'/g, "\\'").replace(/[<>]/g,'')}')">🔊 Listen to the question</button>`;
+    const listenBtn = `<button class="listen-btn" onclick="speak('${q.yt_prompt.replace(/'/g, "\\'").replace(/[<>]/g,'')}', false)">🔊 Listen to the question</button>`;
     box.innerHTML = `
       <div class="teach"><strong>${q.title}</strong></div>
       <div class="yt-box">
