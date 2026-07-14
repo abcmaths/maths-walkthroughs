@@ -1004,6 +1004,20 @@ const BIOLOGY_WALKTHROUGH_FILES = {
       // baked in, so we generate matching distractors here using the same
       // approach as the walkthrough pages themselves — including building a
       // pool of every other question's answer in this topic to sample from.
+      //
+      // The instructional text for each question ("Find the range of this
+      // data set:") lives separately in the QUESTIONS array (matched by
+      // index, ytGen_0 <-> QUESTIONS[0], etc.), not in the function body
+      // itself — extract that too so the instruction isn't lost.
+      let ytPrompts = [];
+      const questionsArrMatch = html.match(/const QUESTIONS = (\[[\s\S]*?\]);/);
+      if (questionsArrMatch) {
+        try {
+          const parsed = JSON.parse(questionsArrMatch[1]);
+          ytPrompts = parsed.map(p => p.yt_prompt || '');
+        } catch(e) {}
+      }
+
       const ytGenFns = [];
       const ytGenRegex = /function (ytGen_\d+)\(\)\s*\{(.*?);\s*\}/g;
       while ((match = ytGenRegex.exec(html)) !== null) {
@@ -1013,10 +1027,11 @@ const BIOLOGY_WALKTHROUGH_FILES = {
         const ytGenPool = ytGenFns.map(fn => {
           try { const r = fn(); return r ? r.answer : null; } catch(e) { return null; }
         }).filter(a => a !== null && a !== undefined);
-        ytGenFns.forEach(fn => {
+        ytGenFns.forEach((fn, idx) => {
+          const staticPrompt = ytPrompts[idx] || '';
           generators.push({ type: 'ytgen', gen: () => {
             try { return fn(); } catch(e) { return null; }
-          }, pool: ytGenPool });
+          }, pool: ytGenPool, staticPrompt });
         });
       }
 
@@ -1230,12 +1245,23 @@ const BIOLOGY_WALKTHROUGH_FILES = {
   }
 
   // ── Normalize a generated question to a consistent shape ──
-  function normalizeQuestion(raw, type, pool) {
+  function normalizeQuestion(raw, type, pool, staticPrompt) {
     if (!raw) return null;
     if (type === 'ytgen') {
       // Bridge/Phonics/Extension pattern: {q, answer} or {q, answer, options, prompt, chart/pictogram/lineGraph}
       if (raw.answer === undefined || raw.answer === null) return null;
-      let questionText = raw.prompt || raw.q || '';
+      // Instruction text: chart/pictogram/lineGraph questions carry their own
+      // .prompt; everything else uses the static yt_prompt from the QUESTIONS
+      // array (matched by position), same as the walkthrough page shows it.
+      const instruction = raw.prompt || staticPrompt || '';
+      // Worked data (e.g. "2, 15, 19, 15") shown alongside the instruction —
+      // omit it for chart/pictogram/lineGraph questions since the visual
+      // already shows that data.
+      const hasVisual = !!(raw.chart || raw.pictogram || raw.lineGraph);
+      let questionText = instruction;
+      if (!hasVisual && raw.q) {
+        questionText += (instruction ? '<br><br><strong>' + raw.q + '</strong>' : raw.q);
+      }
       let visual = null;
       if (raw.chart) visual = { kind: 'chart', data: raw.chart };
       else if (raw.pictogram) visual = { kind: 'pictogram', data: raw.pictogram };
@@ -1297,7 +1323,7 @@ const BIOLOGY_WALKTHROUGH_FILES = {
       const g = shuffled[i % shuffled.length];
       try {
         const raw = g.gen();
-        const q = normalizeQuestion(raw, g.type, g.pool);
+        const q = normalizeQuestion(raw, g.type, g.pool, g.staticPrompt);
         if (q) questions.push(q);
       } catch(e) {}
     }
