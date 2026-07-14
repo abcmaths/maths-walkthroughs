@@ -7,20 +7,23 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
-    header { background: #C0272D; color: white; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    header { background: #C0272D; color: white; padding: 0 12px 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .header-toggles { display: flex; align-items: center; gap: 10px; overflow-x: auto; flex: 1 1 auto; min-width: 0; scrollbar-width: none; -ms-overflow-style: none; }
+    .header-toggles::-webkit-scrollbar { display: none; }
+    .header-account { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     /* Subject toggle */
-    .subject-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 6px; padding: 3px; gap: 2px; }
-    .subject-toggle button { background: none; border: none; color: rgba(255,255,255,0.75); font-size: 0.82rem; font-weight: 600; padding: 4px 14px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+    .subject-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 6px; padding: 3px; gap: 2px; flex-shrink: 0; }
+    .subject-toggle button { background: none; border: none; color: rgba(255,255,255,0.75); font-size: 0.82rem; font-weight: 600; padding: 4px 14px; border-radius: 4px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
     .subject-toggle button.active { background: white; color: #C0272D; }
     .subject-toggle button:hover:not(.active) { color: white; background: rgba(255,255,255,0.2); }
-    .header-left { display: flex; align-items: center; gap: 14px; }
+    .header-left { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
     .logo { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; }
-    .subtitle { font-size: 0.85rem; opacity: 0.85; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 14px; }
+    .subtitle { font-size: 0.85rem; opacity: 0.85; border-left: 1px solid rgba(255,255,255,0.4); padding-left: 14px; white-space: nowrap; }
     .header-right { display: flex; align-items: center; gap: 16px; }
-    .user-name { font-size: 0.9rem; opacity: 0.9; }
-    .btn-signout { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; padding: 5px 12px; font-size: 0.82rem; cursor: pointer; }
+    .user-name { font-size: 0.9rem; opacity: 0.9; white-space: nowrap; }
+    .btn-signout { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; padding: 5px 12px; font-size: 0.82rem; cursor: pointer; white-space: nowrap; }
     .btn-signout:hover { background: rgba(255,255,255,0.3); }
-    .btn-chpwd { background: none; color: white; border: none; font-size: 0.82rem; cursor: pointer; opacity: 0.8; text-decoration: underline; }
+    .btn-chpwd { background: none; color: white; border: none; font-size: 0.82rem; cursor: pointer; opacity: 0.8; text-decoration: underline; white-space: nowrap; }
     .btn-chpwd:hover { opacity: 1; }
     /* Change password modal */
     .cp-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; font-family: 'Segoe UI', Arial, sans-serif; }
@@ -122,7 +125,7 @@
     <div class="logo">ABC</div>
     <div class="subtitle" id="header-subtitle">Maths Portal</div>
   </div>
-  <div class="header-right">
+  <div class="header-toggles">
     <div class="subject-toggle">
       <button id="toggle-english">✏️ English</button>
       <button id="toggle-maths" class="active">📐 Maths</button>
@@ -148,6 +151,8 @@
       <button class="science-subtab" id="subtab-ext_maths" style="--subtab-accent:#C0272D" onclick="window.switchSubject('ext_maths')">📐 Extension Maths</button>
       <button class="science-subtab" id="subtab-ext_english" style="--subtab-accent:#C0272D" onclick="window.switchSubject('ext_english')">✏️ Extension English</button>
     </div>
+  </div>
+  <div class="header-account">
     <span class="user-name" id="header-name"></span>
     <button class="btn-chpwd" onclick="openChangePwd()">Change Password</button>
     <button class="btn-signout" onclick="signOut()">Sign out</button>
@@ -973,6 +978,16 @@
         // If a student has no flags at all yet (diagnostic just completed, no
         // support needed), they'll see an empty dashboard until September —
         // this is expected; consider showing a friendly holding message here later.
+      }
+
+      // Simplified view: for bridging/incoming students not yet fully enrolled.
+      // Unlike summer_only, this keeps standard Maths and English visible —
+      // it just hides the extra subjects (Science, Digital Tech, CRS, Government)
+      // that aren't relevant until the student is fully in school. Staff turns
+      // this off via the student's profile once they're fully enrolled.
+      if (profile.simplified_view && !profile.summer_only) {
+        ['toggle-science','toggle-crs','toggle-gov','toggle-digitaltech']
+          .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
       }
 
       document.getElementById('header-name').textContent = profile.full_name;

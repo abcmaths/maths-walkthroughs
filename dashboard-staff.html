@@ -445,6 +445,10 @@
                 <th>Email</th>
                 <th>Year</th>
                 <th>Diagnostic</th>
+                <th>Maths</th>
+                <th>Mental Maths</th>
+                <th>Comprehension</th>
+                <th>Spot Mistake</th>
                 <th>Writing Sample</th>
                 <th>Phonics</th>
                 <th>Bridge Maths</th>
@@ -2240,6 +2244,20 @@
   };
 
   // ── Diagnostic tab ──
+  let diagResultsMap = null; // student_id -> latest diagnostic_results row
+
+  async function loadDiagResults() {
+    if (diagResultsMap) return;
+    diagResultsMap = {};
+    const { data, error } = await supabase
+      .from('diagnostic_results')
+      .select('student_id, maths_score, mental_maths_score, mental_maths_accuracy, comprehension_score, spot_mistake_score, phonics_triggered, phonics_score, completed_at')
+      .order('completed_at', { ascending: false });
+    if (!error && data) {
+      data.forEach(r => { if (!diagResultsMap[r.student_id]) diagResultsMap[r.student_id] = r; });
+    }
+  }
+
   function getDiagnosticRows() {
     const emailMap = {};
     allUsersWithEmail.forEach(u => { emailMap[u.id] = u.email; });
@@ -2247,11 +2265,14 @@
       .filter(s => s.year_group === 7)
       .map(s => ({
         ...s,
-        email: emailMap[s.id] || '—'
+        email: emailMap[s.id] || '—',
+        diag: (diagResultsMap && diagResultsMap[s.id]) || null
       }));
   }
 
-  window.renderDiagnosticTab = function() {
+  window.renderDiagnosticTab = async function() {
+    await loadDiagResults();
+
     const statusFilter = document.getElementById('diag-filter-status').value;
     const flagFilter    = document.getElementById('diag-filter-flag').value;
     const searchFilter  = document.getElementById('diag-search').value.toLowerCase();
@@ -2270,13 +2291,14 @@
 
     const tbody = document.getElementById('diag-tbody');
     if (rows.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#aaa;padding:24px">No students found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;color:#aaa;padding:24px">No students found</td></tr>';
       return;
     }
 
     const yn = (v) => v ? '<span class="badge badge-green">Yes</span>' : '<span style="color:#ccc">—</span>';
     const bridgeMathsAny = (s) => s.bridge_maths_number || s.bridge_maths_fractions || s.bridge_maths_algebra || s.bridge_maths_geometry || s.bridge_maths_data;
     const bridgeEnglishAny = (s) => s.bridge_english_comprehension || s.bridge_english_writing;
+    const score = (v, out) => v == null ? '<span style="color:#ccc">—</span>' : `${v}/${out}`;
 
     tbody.innerHTML = rows.map(s => `
       <tr>
@@ -2284,6 +2306,10 @@
         <td style="font-size:0.82rem;color:#666">${s.email}</td>
         <td>${s.year_group ? 'Year ' + s.year_group : '—'}</td>
         <td>${s.diagnostic_completed ? '<span class="badge badge-green">Completed</span>' : '<span class="badge badge-grey">Not yet</span>'}</td>
+        <td>${score(s.diag && s.diag.maths_score, 15)}</td>
+        <td>${s.diag && s.diag.mental_maths_score != null ? `${s.diag.mental_maths_score}/12<div style="font-size:0.68rem;color:#aaa">${s.diag.mental_maths_accuracy}/12 correct</div>` : '<span style="color:#ccc">—</span>'}</td>
+        <td>${score(s.diag && s.diag.comprehension_score, 8)}</td>
+        <td>${score(s.diag && s.diag.spot_mistake_score, 5)}</td>
         <td>${s.writing_sample_needs_review ? '<span class="badge badge-yellow">Needs review</span>' : (s.diagnostic_completed ? '<span style="color:#ccc">Reviewed</span>' : '—')}</td>
         <td>${yn(s.phonics_support)}</td>
         <td>${yn(bridgeMathsAny(s))}</td>
@@ -2294,15 +2320,21 @@
       </tr>`).join('');
   };
 
-  window.exportDiagnostic = function() {
+  window.exportDiagnostic = async function() {
+    await loadDiagResults();
     const rows = getDiagnosticRows();
-    const csvRows = [['Full Name','Email','Year','Diagnostic Completed','Writing Sample Needs Review',
+    const csvRows = [['Full Name','Email','Year','Diagnostic Completed','Maths Score /15','Mental Maths Fluent /12','Mental Maths Accuracy /12','Comprehension /8','Spot Mistake /5','Writing Sample Needs Review',
       'Phonics Support','Bridge Maths Number','Bridge Maths Fractions','Bridge Maths Algebra','Bridge Maths Geometry','Bridge Maths Data',
       'Bridge English Comprehension','Bridge English Writing','Extension','Summer Only']];
     rows.forEach(s => {
       csvRows.push([
         s.full_name, s.email, s.year_group || '',
         s.diagnostic_completed ? 'Yes' : 'No',
+        s.diag ? s.diag.maths_score : '',
+        s.diag ? s.diag.mental_maths_score : '',
+        s.diag ? s.diag.mental_maths_accuracy : '',
+        s.diag ? s.diag.comprehension_score : '',
+        s.diag ? s.diag.spot_mistake_score : '',
         s.writing_sample_needs_review ? 'Yes' : 'No',
         s.phonics_support ? 'Yes' : 'No',
         s.bridge_maths_number ? 'Yes' : 'No',
