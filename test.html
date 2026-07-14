@@ -1005,7 +1005,7 @@ const BIOLOGY_WALKTHROUGH_FILES = {
       // approach as the walkthrough pages themselves — including building a
       // pool of every other question's answer in this topic to sample from.
       const ytGenFns = [];
-      const ytGenRegex = /function (ytGen_\d+)\(\)\s*\{([\s\S]*?)\n\}/g;
+      const ytGenRegex = /function (ytGen_\d+)\(\)\s*\{(.*?);\s*\}/g;
       while ((match = ytGenRegex.exec(html)) !== null) {
         try { ytGenFns.push(new Function(match[2])); } catch(e) {}
       }
@@ -1039,7 +1039,7 @@ const BIOLOGY_WALKTHROUGH_FILES = {
   let userStream = 'science';
   if (session) {
     const { data: prof } = await supabase
-      .from('profiles').select('stream, phonics_support, extension, bridge_maths_number, bridge_maths_fractions, bridge_maths_algebra, bridge_maths_geometry, bridge_maths_data, bridge_english_comprehension, bridge_english_writing').eq('id', session.user.id).maybeSingle();
+      .from('profiles').select('stream, phonics_support, extension, bridge_maths_number, bridge_maths_fractions, bridge_maths_algebra, bridge_maths_geometry, bridge_maths_data, bridge_english_comprehension, bridge_english_writing, simplified_view, summer_only').eq('id', session.user.id).maybeSingle();
     userStream = prof?.stream || 'science';
     const isArts = userStream === 'arts';
     const isBoth = userStream === 'both';
@@ -1064,6 +1064,20 @@ const BIOLOGY_WALKTHROUGH_FILES = {
       document.getElementById('subj-phonics').style.display        = prof.phonics_support ? '' : 'none';
       document.getElementById('subj-ext_maths').style.display      = prof.extension ? '' : 'none';
       document.getElementById('subj-ext_english').style.display    = prof.extension ? '' : 'none';
+    }
+
+    // Simplified view / summer only: hide the standard curriculum subjects
+    // entirely, same restriction applied on the student dashboard. summer_only
+    // is the stricter of the two (also hides Maths/English), simplified_view
+    // keeps Maths/English but hides the rest.
+    if (prof && (prof.simplified_view || prof.summer_only)) {
+      ['subj-science', 'subj-physics', 'subj-chemistry', 'subj-biology', 'subj-crs', 'subj-government', 'subj-digitaltech']
+        .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+      if (prof.summer_only) {
+        ['subj-maths', 'subj-english'].forEach(id => {
+          const el = document.getElementById(id); if (el) el.style.display = 'none';
+        });
+      }
     }
   }
 
@@ -1222,19 +1236,10 @@ const BIOLOGY_WALKTHROUGH_FILES = {
       // Bridge/Phonics/Extension pattern: {q, answer} or {q, answer, options, prompt, chart/pictogram/lineGraph}
       if (raw.answer === undefined || raw.answer === null) return null;
       let questionText = raw.prompt || raw.q || '';
-      // Chart/pictogram/lineGraph questions render a visual on the walkthrough
-      // page that test.html can't reproduce — fall back to a text description
-      // of the underlying data so the question is still answerable.
-      if (raw.chart) {
-        const dataText = raw.chart.labels.map((l, i) => `${l}=${raw.chart.values[i]}`).join(', ');
-        questionText = `${dataText}. ${questionText}`;
-      } else if (raw.pictogram) {
-        const p = raw.pictogram;
-        questionText = `Each symbol = ${p.perSymbol} students. Row shows ${p.wholeSymbols} whole symbol${p.wholeSymbols===1?'':'s'}${p.hasHalf ? ' and 1 half symbol' : ''}. ${questionText}`;
-      } else if (raw.lineGraph) {
-        const dataText = raw.lineGraph.labels.map((l, i) => `${l}=${raw.lineGraph.values[i]}°`).join(', ');
-        questionText = `${dataText}. ${questionText}`;
-      }
+      let visual = null;
+      if (raw.chart) visual = { kind: 'chart', data: raw.chart };
+      else if (raw.pictogram) visual = { kind: 'pictogram', data: raw.pictogram };
+      else if (raw.lineGraph) visual = { kind: 'lineGraph', data: raw.lineGraph };
       let options = raw.options ? [...new Set(raw.options)] : null;
       if (!options) {
         const distractors = makeDistractorsForTest(raw.answer, pool);
@@ -1243,7 +1248,7 @@ const BIOLOGY_WALKTHROUGH_FILES = {
       options = options.sort(() => Math.random() - 0.5);
       const correctIdx = options.findIndex(o => String(o) === String(raw.answer));
       if (correctIdx === -1) return null;
-      return { type: 'mc', question: questionText, options, correct: correctIdx, working: '', hints: [] };
+      return { type: 'mc', question: questionText, options, correct: correctIdx, working: '', hints: [], visual };
     }
     if (type === 'mc') {
       // Handle both {question,options,correct,working} and shorthand {q,opts,c,w}
@@ -1340,6 +1345,86 @@ const BIOLOGY_WALKTHROUGH_FILES = {
   }
 
   // ── Show question ──
+  // ── Visual renderers for Bridge Maths data-handling questions (bar charts,
+  // ── pictograms, line graphs) — same rendering approach used in the
+  // ── walkthrough pages themselves, so tests look consistent with them.
+  function renderBarChartSVG(labels, values) {
+    const width = 320, height = 220, padding = 36, barGap = 14;
+    const maxVal = Math.max(...values) * 1.15;
+    const chartHeight = height - padding * 2;
+    const barWidth = (width - padding * 2 - barGap * (values.length - 1)) / values.length;
+    const colours = ['#C0272D', '#8f1d22', '#e05a5f', '#f0a3a6', '#C0272D'];
+    let bars = '';
+    values.forEach((v, i) => {
+      const barHeight = (v / maxVal) * chartHeight;
+      const x = padding + i * (barWidth + barGap);
+      const y = height - padding - barHeight;
+      bars += `
+        <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${colours[i % colours.length]}" rx="3"></rect>
+        <text x="${x + barWidth/2}" y="${y - 6}" text-anchor="middle" font-size="13" font-weight="700" fill="#333">${v}</text>
+        <text x="${x + barWidth/2}" y="${height - padding + 16}" text-anchor="middle" font-size="11" fill="#555">${labels[i]}</text>
+      `;
+    });
+    return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;max-width:360px;height:auto;display:block;margin:12px auto">
+      <line x1="${padding}" y1="${height-padding}" x2="${width-padding}" y2="${height-padding}" stroke="#ccc" stroke-width="1.5"></line>
+      ${bars}
+    </svg>`;
+  }
+
+  function renderPictogramSVG(perSymbol, wholeSymbols, hasHalf) {
+    const iconSize = 34, gap = 8;
+    let icons = '';
+    for (let i = 0; i < wholeSymbols; i++) {
+      const x = 20 + i * (iconSize + gap);
+      icons += `<rect x="${x}" y="20" width="${iconSize}" height="${iconSize}" rx="6" fill="#C0272D"></rect>
+        <text x="${x+iconSize/2}" y="${20+iconSize/2+6}" text-anchor="middle" font-size="16" fill="#fff">S</text>`;
+    }
+    if (hasHalf) {
+      const x = 20 + wholeSymbols * (iconSize + gap);
+      icons += `<clipPath id="halfclip-test"><rect x="${x}" y="20" width="${iconSize/2}" height="${iconSize}"></rect></clipPath>
+        <rect x="${x}" y="20" width="${iconSize}" height="${iconSize}" rx="6" fill="#f0c9ca"></rect>
+        <rect x="${x}" y="20" width="${iconSize}" height="${iconSize}" rx="6" fill="#C0272D" clip-path="url(#halfclip-test)"></rect>`;
+    }
+    const totalWidth = 40 + (wholeSymbols + (hasHalf?1:0)) * (iconSize + gap);
+    return `<div style="text-align:center; margin:12px 0;">
+      <svg viewBox="0 0 ${Math.max(totalWidth,200)} 80" style="width:100%;max-width:340px;height:auto;display:block;margin:0 auto">
+        ${icons}
+        <text x="20" y="70" font-size="12" fill="#666">Key: each full symbol = ${perSymbol} students${hasHalf ? ' (half symbol = ' + perSymbol/2 + ')' : ''}</text>
+      </svg>
+    </div>`;
+  }
+
+  function renderLineGraphSVG(labels, values) {
+    const width = 320, height = 220, padding = 40;
+    const minVal = Math.min(...values) - 3, maxVal = Math.max(...values) + 3;
+    const range = maxVal - minVal;
+    const stepX = (width - padding * 2) / (labels.length - 1);
+    const points = values.map((v, i) => {
+      const x = padding + i * stepX;
+      const y = height - padding - ((v - minVal) / range) * (height - padding * 2);
+      return { x, y, v };
+    });
+    const pathD = points.map((p, i) => (i === 0 ? 'M' : 'L') + p.x + ' ' + p.y).join(' ');
+    let dots = points.map((p, i) => `
+      <circle cx="${p.x}" cy="${p.y}" r="4" fill="#C0272D"></circle>
+      <text x="${p.x}" y="${p.y - 10}" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${p.v}°</text>
+      <text x="${p.x}" y="${height - padding + 18}" text-anchor="middle" font-size="11" fill="#555">${labels[i]}</text>
+    `).join('');
+    return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;max-width:360px;height:auto;display:block;margin:12px auto">
+      <line x1="${padding}" y1="${height-padding}" x2="${width-padding}" y2="${height-padding}" stroke="#ccc" stroke-width="1.5"></line>
+      <path d="${pathD}" fill="none" stroke="#8f1d22" stroke-width="2.5"></path>
+      ${dots}
+    </svg>`;
+  }
+
+  function renderVisual(visual) {
+    if (!visual) return '';
+    if (visual.kind === 'chart') return renderBarChartSVG(visual.data.labels, visual.data.values);
+    if (visual.kind === 'pictogram') return renderPictogramSVG(visual.data.perSymbol, visual.data.wholeSymbols, visual.data.hasHalf);
+    if (visual.kind === 'lineGraph') return renderLineGraphSVG(visual.data.labels, visual.data.values);
+    return '';
+  }
+
   function showQuestion() {
     const q = questions[currentQ];
     const pct = (currentQ / questions.length) * 100;
@@ -1347,6 +1432,15 @@ const BIOLOGY_WALKTHROUGH_FILES = {
     document.getElementById('progress-fill').style.width = pct + '%';
     document.getElementById('q-counter').textContent = 'Question ' + (currentQ + 1) + ' of ' + questions.length;
     document.getElementById('q-text').innerHTML = q.question;
+
+    let visualEl = document.getElementById('q-visual');
+    if (!visualEl) {
+      visualEl = document.createElement('div');
+      visualEl.id = 'q-visual';
+      document.getElementById('q-text').insertAdjacentElement('afterend', visualEl);
+    }
+    visualEl.innerHTML = renderVisual(q.visual);
+
     document.getElementById('feedback-row').style.display = 'none';
     document.getElementById('next-btn').style.display = 'none';
 
