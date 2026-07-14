@@ -128,6 +128,11 @@
         <div class="subject-btn" id="subj-crs" onclick="selectSubject('crs')" style="display:none">✝️ CRS</div>
         <div class="subject-btn" id="subj-government" onclick="selectSubject('government')" style="display:none">🏛️ Government</div>
         <div class="subject-btn" id="subj-digitaltech" onclick="selectSubject('digitaltech')">💻 Digital Tech</div>
+        <div class="subject-btn" id="subj-bridge_maths" onclick="selectSubject('bridge_maths')" style="display:none">🌉📐 Bridge Maths</div>
+        <div class="subject-btn" id="subj-bridge_english" onclick="selectSubject('bridge_english')" style="display:none">🌉✏️ Bridge English</div>
+        <div class="subject-btn" id="subj-phonics" onclick="selectSubject('phonics')" style="display:none">🔤 Phonics</div>
+        <div class="subject-btn" id="subj-ext_maths" onclick="selectSubject('ext_maths')" style="display:none">⭐📐 Extension Maths</div>
+        <div class="subject-btn" id="subj-ext_english" onclick="selectSubject('ext_english')" style="display:none">⭐✏️ Extension English</div>
       </div>
     </div>
 
@@ -805,6 +810,126 @@ const BIOLOGY_WALKTHROUGH_FILES = {
     'Y12-REP-01': 'bio12/reproduction-extended-y12.html',
   };
 
+  const BRIDGE_MTH_WALKTHROUGH_FILES = {
+    'BRG-MTH-01': 'bridge_mth/BRG-MTH-01.html',
+    'BRG-MTH-02': 'bridge_mth/BRG-MTH-02.html',
+    'BRG-MTH-03': 'bridge_mth/BRG-MTH-03.html',
+    'BRG-MTH-04': 'bridge_mth/BRG-MTH-04.html',
+    'BRG-MTH-05': 'bridge_mth/BRG-MTH-05.html',
+    'BRG-MTH-06': 'bridge_mth/BRG-MTH-06.html',
+    'BRG-MTH-07': 'bridge_mth/BRG-MTH-07.html',
+    'BRG-MTH-08': 'bridge_mth/BRG-MTH-08.html',
+    'BRG-MTH-09': 'bridge_mth/BRG-MTH-09.html',
+    'BRG-MTH-10': 'bridge_mth/BRG-MTH-10.html',
+  };
+
+  const BRIDGE_ENG_WALKTHROUGH_FILES = {
+    'BRG-ENG-01': 'bridge_eng/BRG-ENG-01.html',
+    'BRG-ENG-02': 'bridge_eng/BRG-ENG-02.html',
+    'BRG-ENG-03': 'bridge_eng/BRG-ENG-03.html',
+    'BRG-ENG-04': 'bridge_eng/BRG-ENG-04.html',
+    'BRG-ENG-05': 'bridge_eng/BRG-ENG-05.html',
+    'BRG-ENG-06': 'bridge_eng/BRG-ENG-06.html',
+    'BRG-ENG-07': 'bridge_eng/BRG-ENG-07.html',
+    'BRG-ENG-08': 'bridge_eng/BRG-ENG-08.html',
+    'BRG-ENG-09': 'bridge_eng/BRG-ENG-09.html',
+    'BRG-ENG-10': 'bridge_eng/BRG-ENG-10.html',
+  };
+
+  const PHONICS_WALKTHROUGH_FILES = {
+    'PHO-01': 'phonics/PHO-01.html',
+    'PHO-02': 'phonics/PHO-02.html',
+    'PHO-03': 'phonics/PHO-03.html',
+    'PHO-04': 'phonics/PHO-04.html',
+    'PHO-05': 'phonics/PHO-05.html',
+    'PHO-06': 'phonics/PHO-06.html',
+    'PHO-07': 'phonics/PHO-07.html',
+    'PHO-08': 'phonics/PHO-08.html',
+    'PHO-09': 'phonics/PHO-09.html',
+    'PHO-10': 'phonics/PHO-10.html',
+    'PHO-11': 'phonics/PHO-11.html',
+    'PHO-12': 'phonics/PHO-12.html',
+  };
+
+  const EXT_MTH_WALKTHROUGH_FILES = {
+    'EXT-MTH-01': 'ext_mth/EXT-MTH-01.html',
+    'EXT-MTH-02': 'ext_mth/EXT-MTH-02.html',
+    'EXT-MTH-03': 'ext_mth/EXT-MTH-03.html',
+    'EXT-MTH-04': 'ext_mth/EXT-MTH-04.html',
+    'EXT-MTH-05': 'ext_mth/EXT-MTH-05.html',
+    'EXT-MTH-06': 'ext_mth/EXT-MTH-06.html',
+    'EXT-MTH-07': 'ext_mth/EXT-MTH-07.html',
+    'EXT-MTH-08': 'ext_mth/EXT-MTH-08.html',
+  };
+
+  const EXT_ENG_WALKTHROUGH_FILES = {
+    'EXT-ENG-01': 'ext_eng/EXT-ENG-01.html',
+    'EXT-ENG-02': 'ext_eng/EXT-ENG-02.html',
+    'EXT-ENG-03': 'ext_eng/EXT-ENG-03.html',
+    'EXT-ENG-04': 'ext_eng/EXT-ENG-04.html',
+    'EXT-ENG-05': 'ext_eng/EXT-ENG-05.html',
+    'EXT-ENG-06': 'ext_eng/EXT-ENG-06.html',
+    'EXT-ENG-07': 'ext_eng/EXT-ENG-07.html',
+    'EXT-ENG-08': 'ext_eng/EXT-ENG-08.html',
+  };
+
+  // ── Generate plausible wrong answers for a bare {q, answer} pair, matching
+  // ── the same logic used inside the Bridge/Phonics/Extension walkthrough
+  // ── pages themselves, so tests feel consistent with the walkthroughs.
+  function makeDistractorsForTest(correctAnswer, pool) {
+    const ans = String(correctAnswer);
+    let candidates = [];
+    if (/^-?\d+$/.test(ans)) {
+      const num = parseInt(ans, 10);
+      const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
+      for (const d of deltas) {
+        const c = String(num + d);
+        if (c !== ans && !candidates.includes(c) && Number(c) >= 0) candidates.push(c);
+        if (candidates.length >= 3) break;
+      }
+    } else if (/^\d+\/\d+$/.test(ans)) {
+      const [numer, denom] = ans.split('/').map(Number);
+      const perturbs = [[numer+1,denom],[numer>1?numer-1:numer+2,denom],[numer,denom+1],[numer,denom>1?denom-1:denom+2],[numer+1,denom+1]].sort(() => Math.random()-0.5);
+      for (const [a,b] of perturbs) {
+        if (a>0 && b>0) {
+          const c = `${a}/${b}`;
+          if (c !== ans && !candidates.includes(c)) candidates.push(c);
+        }
+        if (candidates.length >= 3) break;
+      }
+    } else if (/^\d+:\d+$/.test(ans)) {
+      const [a1, b1] = ans.split(':').map(Number);
+      const perturbs = [[a1+1,b1],[a1>1?a1-1:a1+2,b1],[a1,b1+1],[a1,b1>1?b1-1:b1+2]].sort(() => Math.random()-0.5);
+      for (const [a,b] of perturbs) {
+        if (a>0 && b>0) {
+          const c = `${a}:${b}`;
+          if (c !== ans && !candidates.includes(c)) candidates.push(c);
+        }
+        if (candidates.length >= 3) break;
+      }
+    }
+    // Fall back to sampling other correct answers from this topic (mirrors
+    // how the walkthrough pages generate distractors for word/phrase answers)
+    if (candidates.length < 3 && pool && pool.length) {
+      const seen = new Set([ans, ...candidates]);
+      const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
+      others.sort(() => Math.random()-0.5);
+      for (const o of others) {
+        if (candidates.includes(o)) continue;
+        candidates.push(o);
+        if (candidates.length >= 3) break;
+      }
+    }
+    // Last-resort generic filler if still short (very small topics)
+    const fillers = ['not enough information', 'none of these', 'cannot be determined'];
+    let i = 0;
+    while (candidates.length < 3 && i < fillers.length) {
+      if (!candidates.includes(fillers[i])) candidates.push(fillers[i]);
+      i++;
+    }
+    return candidates.slice(0, 3);
+  }
+
   // ── Extract tryIt/tryItMC generators from a walkthrough HTML file ──
   async function extractGenerators(topicCode, subject) {
     let file;
@@ -816,6 +941,11 @@ const BIOLOGY_WALKTHROUGH_FILES = {
     else if (subject === 'crs')         file = CRS_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'government')  file = GOV_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'digitaltech') file = DIGITALTECH_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'bridge_maths')  file = BRIDGE_MTH_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'bridge_english') file = BRIDGE_ENG_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'phonics')       file = PHONICS_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'ext_maths')     file = EXT_MTH_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'ext_english')   file = EXT_ENG_WALKTHROUGH_FILES[topicCode];
     else                                 file = WALKTHROUGH_FILES[topicCode];
     if (!file) return [];
 
@@ -868,6 +998,28 @@ const BIOLOGY_WALKTHROUGH_FILES = {
         } catch(e) {}
       }
 
+      // Also extract ytGen_N() functions — the newer Bridge/Phonics/Extension
+      // pattern, where each function returns {q, answer} or {q, answer, options}.
+      // Unlike tryIt()/tryItMC(), these don't have a fixed set of MC options
+      // baked in, so we generate matching distractors here using the same
+      // approach as the walkthrough pages themselves — including building a
+      // pool of every other question's answer in this topic to sample from.
+      const ytGenFns = [];
+      const ytGenRegex = /function (ytGen_\d+)\(\)\s*\{([\s\S]*?)\n\}/g;
+      while ((match = ytGenRegex.exec(html)) !== null) {
+        try { ytGenFns.push(new Function(match[2])); } catch(e) {}
+      }
+      if (ytGenFns.length) {
+        const ytGenPool = ytGenFns.map(fn => {
+          try { const r = fn(); return r ? r.answer : null; } catch(e) { return null; }
+        }).filter(a => a !== null && a !== undefined);
+        ytGenFns.forEach(fn => {
+          generators.push({ type: 'ytgen', gen: () => {
+            try { return fn(); } catch(e) { return null; }
+          }, pool: ytGenPool });
+        });
+      }
+
       return generators.filter(g => g.gen !== null);
     } catch(e) {
       console.error('Failed to load generators:', e);
@@ -887,7 +1039,7 @@ const BIOLOGY_WALKTHROUGH_FILES = {
   let userStream = 'science';
   if (session) {
     const { data: prof } = await supabase
-      .from('profiles').select('stream').eq('id', session.user.id).maybeSingle();
+      .from('profiles').select('stream, phonics_support, extension, bridge_maths_number, bridge_maths_fractions, bridge_maths_algebra, bridge_maths_geometry, bridge_maths_data, bridge_english_comprehension, bridge_english_writing').eq('id', session.user.id).maybeSingle();
     userStream = prof?.stream || 'science';
     const isArts = userStream === 'arts';
     const isBoth = userStream === 'both';
@@ -901,11 +1053,23 @@ const BIOLOGY_WALKTHROUGH_FILES = {
     // CRS / Government buttons: show for arts or both
     document.getElementById('subj-crs').style.display        = (isArts || isBoth) ? '' : 'none';
     document.getElementById('subj-government').style.display = (isArts || isBoth) ? '' : 'none';
+
+    // Bridge/Phonics/Extension buttons: only shown to students actually flagged
+    // for that support, mirroring the same logic used on the student dashboard
+    if (prof) {
+      const needsBridgeMaths = prof.bridge_maths_number || prof.bridge_maths_fractions || prof.bridge_maths_algebra || prof.bridge_maths_geometry || prof.bridge_maths_data;
+      const needsBridgeEnglish = prof.bridge_english_comprehension || prof.bridge_english_writing;
+      document.getElementById('subj-bridge_maths').style.display   = needsBridgeMaths ? '' : 'none';
+      document.getElementById('subj-bridge_english').style.display = needsBridgeEnglish ? '' : 'none';
+      document.getElementById('subj-phonics').style.display        = prof.phonics_support ? '' : 'none';
+      document.getElementById('subj-ext_maths').style.display      = prof.extension ? '' : 'none';
+      document.getElementById('subj-ext_english').style.display    = prof.extension ? '' : 'none';
+    }
   }
 
   // ── Load topics by year group + subject ──
   window.loadTopics = async function() {
-    const ARTS_SUBJECTS = ['crs', 'government'];
+    const ARTS_SUBJECTS = ['crs', 'government', 'bridge_maths', 'bridge_english', 'phonics', 'ext_maths', 'ext_english'];
     const isArtsSubject = ARTS_SUBJECTS.includes(selectedSubject);
     const ENGLISH_AGNOSTIC_RE = /^ENG-(GRAM|VOC)-\d+$/;
 
@@ -950,11 +1114,11 @@ const BIOLOGY_WALKTHROUGH_FILES = {
   // ── Subject selection ──
   window.selectSubject = function(subject) {
     selectedSubject = subject;
-    const ARTS_SUBJECTS = ['crs', 'government'];
+    const ARTS_SUBJECTS = ['crs', 'government', 'bridge_maths', 'bridge_english', 'phonics', 'ext_maths', 'ext_english'];
     const isArtsSubject = ARTS_SUBJECTS.includes(subject);
 
     // Toggle button active states
-    ['english','maths','science','physics','chemistry','biology','crs','government','digitaltech'].forEach(s => {
+    ['english','maths','science','physics','chemistry','biology','crs','government','digitaltech','bridge_maths','bridge_english','phonics','ext_maths','ext_english'].forEach(s => {
       const el = document.getElementById('subj-' + s);
       if (el) el.classList.toggle('on', s === subject);
     });
@@ -963,7 +1127,7 @@ const BIOLOGY_WALKTHROUGH_FILES = {
     document.body.classList.toggle('subject-science', subject === 'science');
 
     // Header subtitle
-    const subtitles = { maths: 'Topic Test — Maths', english: 'Topic Test — English', science: 'Topic Test — Science', physics: 'Topic Test — Physics', chemistry: 'Topic Test — Chemistry', biology: 'Topic Test — Biology', crs: 'Topic Test — CRS', government: 'Topic Test — Government', digitaltech: 'Topic Test — Digital Technologies' };
+    const subtitles = { maths: 'Topic Test — Maths', english: 'Topic Test — English', science: 'Topic Test — Science', physics: 'Topic Test — Physics', chemistry: 'Topic Test — Chemistry', biology: 'Topic Test — Biology', crs: 'Topic Test — CRS', government: 'Topic Test — Government', digitaltech: 'Topic Test — Digital Technologies', bridge_maths: 'Topic Test — Bridge Maths', bridge_english: 'Topic Test — Bridge English', phonics: 'Topic Test — Phonics', ext_maths: 'Topic Test — Extension Maths', ext_english: 'Topic Test — Extension English' };
     document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Topic Test';
 
     // Year select visibility — hide entire row for arts subjects
@@ -1052,8 +1216,35 @@ const BIOLOGY_WALKTHROUGH_FILES = {
   }
 
   // ── Normalize a generated question to a consistent shape ──
-  function normalizeQuestion(raw, type) {
+  function normalizeQuestion(raw, type, pool) {
     if (!raw) return null;
+    if (type === 'ytgen') {
+      // Bridge/Phonics/Extension pattern: {q, answer} or {q, answer, options, prompt, chart/pictogram/lineGraph}
+      if (raw.answer === undefined || raw.answer === null) return null;
+      let questionText = raw.prompt || raw.q || '';
+      // Chart/pictogram/lineGraph questions render a visual on the walkthrough
+      // page that test.html can't reproduce — fall back to a text description
+      // of the underlying data so the question is still answerable.
+      if (raw.chart) {
+        const dataText = raw.chart.labels.map((l, i) => `${l}=${raw.chart.values[i]}`).join(', ');
+        questionText = `${dataText}. ${questionText}`;
+      } else if (raw.pictogram) {
+        const p = raw.pictogram;
+        questionText = `Each symbol = ${p.perSymbol} students. Row shows ${p.wholeSymbols} whole symbol${p.wholeSymbols===1?'':'s'}${p.hasHalf ? ' and 1 half symbol' : ''}. ${questionText}`;
+      } else if (raw.lineGraph) {
+        const dataText = raw.lineGraph.labels.map((l, i) => `${l}=${raw.lineGraph.values[i]}°`).join(', ');
+        questionText = `${dataText}. ${questionText}`;
+      }
+      let options = raw.options ? [...new Set(raw.options)] : null;
+      if (!options) {
+        const distractors = makeDistractorsForTest(raw.answer, pool);
+        options = [...new Set([String(raw.answer), ...distractors])];
+      }
+      options = options.sort(() => Math.random() - 0.5);
+      const correctIdx = options.findIndex(o => String(o) === String(raw.answer));
+      if (correctIdx === -1) return null;
+      return { type: 'mc', question: questionText, options, correct: correctIdx, working: '', hints: [] };
+    }
     if (type === 'mc') {
       // Handle both {question,options,correct,working} and shorthand {q,opts,c,w}
       const question = raw.question !== undefined ? raw.question : raw.q;
@@ -1101,7 +1292,7 @@ const BIOLOGY_WALKTHROUGH_FILES = {
       const g = shuffled[i % shuffled.length];
       try {
         const raw = g.gen();
-        const q = normalizeQuestion(raw, g.type);
+        const q = normalizeQuestion(raw, g.type, g.pool);
         if (q) questions.push(q);
       } catch(e) {}
     }
