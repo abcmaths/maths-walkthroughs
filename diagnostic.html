@@ -92,11 +92,13 @@
   <div id="screen-quiz" class="card" style="display:none;">
     <div class="progress"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
     <div id="sectionTitle" class="section-title"></div>
+    <div id="sectionHint" class="hint" style="margin-bottom:14px;"></div>
     <div id="timerChipWrap"></div>
     <div id="passageBox" class="passage" style="display:none;"></div>
     <div id="mistakeBox" class="mistake-box" style="display:none;"></div>
     <div id="qNum" class="q-num"></div>
     <div id="qText" class="q-text"></div>
+    <div id="readQBtnWrap"></div>
     <div id="qBody"></div>
     <div class="nav">
       <button class="btn-save" onclick="saveAndPause()">💾 Save &amp; Continue Later</button>
@@ -299,17 +301,27 @@ function renderBarChartSVG(labels, values) {
 if ('speechSynthesis' in window) {
   window.speechSynthesis.getVoices();
 }
-window.speak = function(text) {
+window.speak = function(text, repeat) {
   if (!('speechSynthesis' in window)) {
     alert('Sorry, this device/browser cannot play sound. Try a different browser if this keeps happening.');
     return;
   }
   try {
     window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.8;
-    utter.lang = 'en-GB';
-    window.speechSynthesis.speak(utter);
+    const utter1 = new SpeechSynthesisUtterance(text);
+    utter1.rate = 0.65;
+    utter1.pitch = 1;
+    utter1.lang = 'en-GB';
+    window.speechSynthesis.speak(utter1);
+    // For short sounds/nonsense words, say it twice so students have a second
+    // chance to catch it — queued utterances play back to back automatically
+    if (repeat) {
+      const utter2 = new SpeechSynthesisUtterance(text);
+      utter2.rate = 0.65;
+      utter2.pitch = 1;
+      utter2.lang = 'en-GB';
+      window.speechSynthesis.speak(utter2);
+    }
   } catch (e) { console.error('Speech synthesis failed:', e); }
 };
 
@@ -346,9 +358,38 @@ function renderQuestion() {
   const isMental = inMentalSection && mentalQs.some(m => m.id === q.id);
 
   document.getElementById('progressBar').style.width = `${Math.round((idx/(queue.length+8))*100)}%`;
-  document.getElementById('sectionTitle').textContent = isMental ? 'Mental Arithmetic' : (q.section || (q.mistakeIndex !== undefined ? 'Spot the Mistake' : ''));
+  const hintKey = isMental ? 'Mental Arithmetic' : (q.section || (q.mistakeIndex !== undefined ? 'Spot the Mistake' : 'Comprehension'));
+  document.getElementById('sectionTitle').textContent = hintKey;
+
+  const SECTION_HINTS = {
+    'Mental Arithmetic': 'Work these out in your head — no calculator, no working out on paper.',
+    'Maths — Number': 'No calculator. Work each answer out yourself.',
+    'Maths — Fractions': 'No calculator. Work each answer out yourself.',
+    'Maths — Algebra': 'No calculator. Work each answer out yourself.',
+    'Maths — Geometry': 'No calculator. Work each answer out yourself.',
+    'Maths — Data': 'No calculator. Use the chart to help you answer.',
+    'Maths — Reasoning': 'No calculator. Take your time with these — they need a bit more thinking.',
+    'English': 'Tap the 🔊 Listen button to hear the sound, then choose the answer that matches.',
+    'Phonics': 'Tap the 🔊 Listen button to hear the sound, then choose the spelling that matches.',
+    'Spot the Mistake': 'One of these three sentences has a small mistake in it. Tap the sentence that is wrong.',
+    'Comprehension': 'Read the passage carefully, then answer the questions about it. You can scroll back up to re-read it at any time.',
+  };
+  document.getElementById('sectionHint').textContent = SECTION_HINTS[hintKey] || '';
   document.getElementById('qNum').textContent = isMental ? `Question ${idx+1} of ${mentalQs.length}` : `Question ${idx+1}`;
   document.getElementById('qText').textContent = q.text;
+
+  // Read this question aloud — available on every question, not just the
+  // sound-matching ones, since some students may find the diagnostic itself
+  // easier to follow if it's read to them
+  const readQWrap = document.getElementById('readQBtnWrap');
+  readQWrap.innerHTML = '';
+  const readQBtn = document.createElement('button');
+  readQBtn.type = 'button';
+  readQBtn.textContent = '🔊 Read this question aloud';
+  readQBtn.style.cssText = 'display:inline-flex;align-items:center;gap:6px;background:none;border:1.5px solid #ccc;color:#666;padding:8px 16px;border-radius:20px;font-size:0.9rem;cursor:pointer;margin-bottom:14px';
+  readQBtn.onclick = () => window.speak(q.text, false);
+  readQWrap.appendChild(readQBtn);
+
   currentSelection = null;
 
   const timerWrap = document.getElementById('timerChipWrap');
@@ -403,7 +444,7 @@ function renderQuestion() {
     listenBtn.type = 'button';
     listenBtn.textContent = '🔊 Listen';
     listenBtn.style.cssText = 'display:inline-flex;align-items:center;gap:6px;background:var(--abc-red-dark);color:#fff;border:none;padding:10px 20px;border-radius:20px;font-size:1rem;cursor:pointer;margin-bottom:14px';
-    listenBtn.onclick = () => window.speak(q.sound);
+    listenBtn.onclick = () => window.speak(q.sound, true);
     body.appendChild(listenBtn);
   }
 
