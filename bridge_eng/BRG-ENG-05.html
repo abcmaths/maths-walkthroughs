@@ -134,9 +134,11 @@ function makeDistractors(correctAnswer, pool) {
 
   // Fill any remaining slots from the pool of other correct answers this topic
   if (candidates.length < 3 && pool && pool.length) {
-    const others = pool.map(String).filter(a => a !== ans && !candidates.includes(a));
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
     others.sort(() => Math.random()-0.5);
     for (const o of others) {
+      if (candidates.includes(o)) continue;
       candidates.push(o);
       if (candidates.length >= 3) break;
     }
@@ -166,11 +168,11 @@ function render() {
     // answers like increasing/decreasing/flat, where auto-generated distractors
     // from unrelated numeric answers elsewhere in the topic wouldn't make sense)
     if (currentYT.options) {
-      currentOptions = [...currentYT.options].sort(() => Math.random()-0.5);
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
     } else {
       const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
       const distractors = makeDistractors(currentYT.answer, pool);
-      currentOptions = [String(currentYT.answer), ...distractors].sort(() => Math.random()-0.5);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
     }
 
     let optsHtml = currentOptions.map((opt, i) =>
