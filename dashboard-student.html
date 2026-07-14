@@ -10,6 +10,8 @@
     header { background: #C0272D; color: white; padding: 0 12px 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .header-toggles { display: flex; align-items: center; gap: 10px; overflow-x: auto; flex: 1 1 auto; min-width: 0; scrollbar-width: none; -ms-overflow-style: none; }
     .header-toggles::-webkit-scrollbar { display: none; }
+    .subtabs-row { background: #fff; border-bottom: 1px solid #eee; padding: 8px 20px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+    .subtabs-row::-webkit-scrollbar { display: none; }
     .header-account { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     /* Subject toggle */
     .subject-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 6px; padding: 3px; gap: 2px; flex-shrink: 0; }
@@ -137,20 +139,6 @@
       <button id="toggle-phonics" style="display:none">🔤 Phonics</button>
       <button id="toggle-extension" style="display:none">⭐ Extension</button>
     </div>
-    <div class="science-subtabs" id="science-subtabs">
-      <button class="science-subtab" id="subtab-science" style="--subtab-accent:#1565C0" onclick="window.switchSubject('science')">🔬 Combined Sci</button>
-      <button class="science-subtab" id="subtab-physics" style="--subtab-accent:#1565C0" onclick="window.switchSubject('physics')">⚡ Physics</button>
-      <button class="science-subtab" id="subtab-chemistry" style="--subtab-accent:#6A1B9A" onclick="window.switchSubject('chemistry')">⚗️ Chemistry</button>
-      <button class="science-subtab" id="subtab-biology" style="--subtab-accent:#2E7D32" onclick="window.switchSubject('biology')">🌿 Biology</button>
-    </div>
-    <div class="science-subtabs" id="bridge-subtabs">
-      <button class="science-subtab" id="subtab-bridge_maths" style="--subtab-accent:#C0272D" onclick="window.switchSubject('bridge_maths')">📐 Bridge Maths</button>
-      <button class="science-subtab" id="subtab-bridge_english" style="--subtab-accent:#C0272D; display:none" onclick="window.switchSubject('bridge_english')">✏️ Bridge English</button>
-    </div>
-    <div class="science-subtabs" id="extension-subtabs">
-      <button class="science-subtab" id="subtab-ext_maths" style="--subtab-accent:#C0272D" onclick="window.switchSubject('ext_maths')">📐 Extension Maths</button>
-      <button class="science-subtab" id="subtab-ext_english" style="--subtab-accent:#C0272D" onclick="window.switchSubject('ext_english')">✏️ Extension English</button>
-    </div>
   </div>
   <div class="header-account">
     <span class="user-name" id="header-name"></span>
@@ -158,6 +146,23 @@
     <button class="btn-signout" onclick="signOut()">Sign out</button>
   </div>
 </header>
+
+<div class="subtabs-row" style="display:none">
+  <div class="science-subtabs" id="science-subtabs">
+    <button class="science-subtab" id="subtab-science" style="--subtab-accent:#1565C0" onclick="window.switchSubject('science')">🔬 Combined Sci</button>
+    <button class="science-subtab" id="subtab-physics" style="--subtab-accent:#1565C0" onclick="window.switchSubject('physics')">⚡ Physics</button>
+    <button class="science-subtab" id="subtab-chemistry" style="--subtab-accent:#6A1B9A" onclick="window.switchSubject('chemistry')">⚗️ Chemistry</button>
+    <button class="science-subtab" id="subtab-biology" style="--subtab-accent:#2E7D32" onclick="window.switchSubject('biology')">🌿 Biology</button>
+  </div>
+  <div class="science-subtabs" id="bridge-subtabs">
+    <button class="science-subtab" id="subtab-bridge_maths" style="--subtab-accent:#C0272D" onclick="window.switchSubject('bridge_maths')">📐 Bridge Maths</button>
+    <button class="science-subtab" id="subtab-bridge_english" style="--subtab-accent:#C0272D; display:none" onclick="window.switchSubject('bridge_english')">✏️ Bridge English</button>
+  </div>
+  <div class="science-subtabs" id="extension-subtabs">
+    <button class="science-subtab" id="subtab-ext_maths" style="--subtab-accent:#C0272D" onclick="window.switchSubject('ext_maths')">📐 Extension Maths</button>
+    <button class="science-subtab" id="subtab-ext_english" style="--subtab-accent:#C0272D" onclick="window.switchSubject('ext_english')">✏️ Extension English</button>
+  </div>
+</div>
 
 <!-- Change Password Modal -->
 <div class="cp-overlay" id="cp-overlay">
@@ -183,6 +188,12 @@
     <div class="welcome">
       <h1 id="welcome-name"></h1>
       <p id="welcome-sub"></p>
+    </div>
+
+    <div id="diag-results-card" style="display:none; background:#fff; border-radius:10px; padding:20px; margin-bottom:20px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
+      <div style="font-weight:700; color:#333; margin-bottom:14px; font-size:1rem;">📋 Your Diagnostic Results</div>
+      <div id="diag-results-scores" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;"></div>
+      <div id="diag-results-note" style="font-size:0.88rem; color:#666; line-height:1.5;"></div>
     </div>
 
     <div class="subject-progress-row" id="subject-progress-row">
@@ -994,6 +1005,42 @@
       document.getElementById('welcome-name').textContent = 'Hello, ' + profile.full_name.split(' ')[0] + '!';
       document.getElementById('welcome-sub').textContent = 'Year ' + myYearGroup + (profile.form_class ? ' · ' + profile.form_class : '');
 
+      // Show the student their own diagnostic results, if completed
+      if (profile.diagnostic_completed) {
+        const { data: diag } = await supabase
+          .from('diagnostic_results')
+          .select('*')
+          .eq('student_id', userId)
+          .order('completed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (diag) {
+          const card = document.getElementById('diag-results-card');
+          card.style.display = 'block';
+          const scoreCard = (label, val, out) => `
+            <div style="flex:1; min-width:100px; background:#f9f9f9; border-radius:6px; padding:10px; text-align:center;">
+              <div style="font-size:1.2rem; font-weight:700; color:#C0272D">${val != null ? val + '/' + out : '—'}</div>
+              <div style="font-size:0.68rem; color:#888; text-transform:uppercase; margin-top:2px">${label}</div>
+            </div>`;
+          let scoresHtml = scoreCard('Maths', diag.maths_score, 15);
+          if (diag.mental_maths_score != null) scoresHtml += scoreCard('Mental Maths', diag.mental_maths_score, 12);
+          scoresHtml += scoreCard('Comprehension', diag.comprehension_score, 8);
+          if (diag.spot_mistake_score != null) scoresHtml += scoreCard('Spot the Mistake', diag.spot_mistake_score, 5);
+          if (diag.phonics_triggered) scoresHtml += scoreCard('Phonics', diag.phonics_score, 34);
+          document.getElementById('diag-results-scores').innerHTML = scoresHtml;
+
+          const notes = [];
+          if (profile.extension) notes.push('You\'ve been given access to <strong>Extension</strong> topics — a bit of an extra challenge!');
+          if (profile.phonics_support) notes.push('You have some <strong>Phonics</strong> topics to work through — check the Phonics tab.');
+          if (profile.bridge_maths_number || profile.bridge_maths_fractions || profile.bridge_maths_algebra || profile.bridge_maths_geometry || profile.bridge_maths_data) notes.push('You have some <strong>Bridge Maths</strong> topics to work through.');
+          if (profile.bridge_english_comprehension || profile.bridge_english_writing) notes.push('You have some <strong>Bridge English</strong> topics to work through.');
+          document.getElementById('diag-results-note').innerHTML = notes.length
+            ? notes.join('<br>')
+            : 'No extra support topics needed right now — well done!';
+        }
+      }
+
       // Load all topics
       const { data: topics } = await supabase
         .from('topics').select('*').order('year_group').order('topic_code');
@@ -1170,6 +1217,8 @@
     document.getElementById('science-subtabs').classList.toggle('visible', isSciGrp);
     document.getElementById('bridge-subtabs').classList.toggle('visible', isBridgeGrp);
     document.getElementById('extension-subtabs').classList.toggle('visible', isExtGrp);
+    const subtabsRow = document.querySelector('.subtabs-row');
+    if (subtabsRow) subtabsRow.style.display = (isSciGrp || isBridgeGrp || isExtGrp) ? '' : 'none';
 
     // Sub-tab active state (only applies if in science group)
     ['science', 'physics', 'chemistry', 'biology'].forEach(s => {
