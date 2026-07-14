@@ -85,7 +85,12 @@ function makeDistractors(correctAnswer, pool) {
     const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
     for (const d of deltas) {
       const c = String(num + d);
-      if (c !== ans && !candidates.includes(c) && Number(c) >= 0) candidates.push(c);
+      // Distractors should stay the same sign as the correct answer — a
+      // negative answer shouldn't get a positive distractor (or vice versa),
+      // since that would be an unrelated, easy-to-spot wrong option rather
+      // than a genuinely plausible mistake.
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
       if (candidates.length >= 3) break;
     }
   } else if (/^\d+\/\d+$/.test(ans)) {
@@ -134,9 +139,11 @@ function makeDistractors(correctAnswer, pool) {
 
   // Fill any remaining slots from the pool of other correct answers this topic
   if (candidates.length < 3 && pool && pool.length) {
-    const others = pool.map(String).filter(a => a !== ans && !candidates.includes(a));
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
     others.sort(() => Math.random()-0.5);
     for (const o of others) {
+      if (candidates.includes(o)) continue;
       candidates.push(o);
       if (candidates.length >= 3) break;
     }
@@ -166,11 +173,11 @@ function render() {
     // answers like increasing/decreasing/flat, where auto-generated distractors
     // from unrelated numeric answers elsewhere in the topic wouldn't make sense)
     if (currentYT.options) {
-      currentOptions = [...currentYT.options].sort(() => Math.random()-0.5);
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
     } else {
       const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
       const distractors = makeDistractors(currentYT.answer, pool);
-      currentOptions = [String(currentYT.answer), ...distractors].sort(() => Math.random()-0.5);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
     }
 
     let optsHtml = currentOptions.map((opt, i) =>

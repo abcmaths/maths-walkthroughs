@@ -57,7 +57,7 @@ function ytGen_0() { const posOptions=[{name:'thousands',idx:2,mult:1000},{name:
 function ytGen_1() { const m=Math.floor(Math.random()*5)+1; const t=Math.floor(Math.random()*900)+100; return {q:`${m} million, ${t} thousand`, answer: String(m*1000000+t*1000)}; }
 function ytGen_2() { const base=Math.floor(Math.random()*900)*1000 + Math.floor(Math.random()*1000); const rounded = Math.round(base/1000)*1000; return {q:String(base), answer:String(rounded)}; }
 function ytGen_3() { const base=Math.floor(Math.random()*90)*10000 + Math.floor(Math.random()*10000); const rounded = Math.round(base/10000)*10000; return {q:String(base), answer:String(rounded)}; }
-function ytGen_4() { const a=Math.floor(Math.random()*9000000)+100000; const b=a+Math.floor(Math.random()*20000)-10000; const bigger = a>b?a:b; return {q:`${a.toLocaleString()} or ${b.toLocaleString()}?`, answer:String(bigger)}; }
+function ytGen_4() { const a=Math.floor(Math.random()*9000000)+100000; let offset=Math.floor(Math.random()*20000)-10000; while(offset===0) offset=Math.floor(Math.random()*20000)-10000; const b=a+offset; const bigger = a>b?a:b; return {q:`${a.toLocaleString()} or ${b.toLocaleString()}?`, answer:String(bigger)}; }
 function ytGen_5() { const nums=[-8,-5,0,2,3].sort(()=>Math.random()-0.5); return {q:nums.join(', '), answer:String(Math.min(...nums))}; }
 function ytGen_6() { const a=Math.floor(Math.random()*10)-2; const b=Math.floor(Math.random()*8)+1; return {q:`${a} + (−${b})`, answer:String(a-b)}; }
 function ytGen_7() { const a=Math.floor(Math.random()*10); const b=Math.floor(Math.random()*8)+1; return {q:`${a} − (−${b})`, answer:String(a+b)}; }
@@ -85,7 +85,12 @@ function makeDistractors(correctAnswer, pool) {
     const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
     for (const d of deltas) {
       const c = String(num + d);
-      if (c !== ans && !candidates.includes(c) && Number(c) >= 0) candidates.push(c);
+      // Distractors should stay the same sign as the correct answer — a
+      // negative answer shouldn't get a positive distractor (or vice versa),
+      // since that would be an unrelated, easy-to-spot wrong option rather
+      // than a genuinely plausible mistake.
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
       if (candidates.length >= 3) break;
     }
   } else if (/^\d+\/\d+$/.test(ans)) {
@@ -134,9 +139,11 @@ function makeDistractors(correctAnswer, pool) {
 
   // Fill any remaining slots from the pool of other correct answers this topic
   if (candidates.length < 3 && pool && pool.length) {
-    const others = pool.map(String).filter(a => a !== ans && !candidates.includes(a));
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
     others.sort(() => Math.random()-0.5);
     for (const o of others) {
+      if (candidates.includes(o)) continue;
       candidates.push(o);
       if (candidates.length >= 3) break;
     }
@@ -166,11 +173,11 @@ function render() {
     // answers like increasing/decreasing/flat, where auto-generated distractors
     // from unrelated numeric answers elsewhere in the topic wouldn't make sense)
     if (currentYT.options) {
-      currentOptions = [...currentYT.options].sort(() => Math.random()-0.5);
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
     } else {
       const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
       const distractors = makeDistractors(currentYT.answer, pool);
-      currentOptions = [String(currentYT.answer), ...distractors].sort(() => Math.random()-0.5);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
     }
 
     let optsHtml = currentOptions.map((opt, i) =>
