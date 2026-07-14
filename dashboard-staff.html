@@ -655,6 +655,17 @@
           <option value="both">Both</option>
         </select>
       </div>
+      <div id="edit-access-row" style="grid-column:1/-1">
+        <label style="display:block;font-size:0.8rem;font-weight:600;color:#555;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px">Dashboard Access</label>
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.9rem;cursor:pointer">
+          <input type="checkbox" id="edit-simplified-view" style="width:16px;height:16px;cursor:pointer">
+          Simplified view (Maths + English only — hides Science, Digital Tech, CRS, Government until fully enrolled)
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;cursor:pointer">
+          <input type="checkbox" id="edit-summer-only" style="width:16px;height:16px;cursor:pointer">
+          Summer only (locked to diagnostic + support content until term starts)
+        </label>
+      </div>
     </div>
     <div style="display:flex;gap:10px;align-items:center">
       <button class="btn" id="edit-save-btn" onclick="saveEditUser()" style="width:auto;padding:9px 24px">Save Changes</button>
@@ -2207,7 +2218,7 @@
         <td style="font-size:0.82rem;color:#888">${lastSignIn}</td>
         <td>
           ${u.role === 'student' ? `<button class="btn-link" onclick="openStudentModal('${u.id}')">View</button>` : ''}
-          <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}','${u.role}','${u.year_group||''}','${u.form_class||''}','${u.stream||'science'}')">Edit</button>
+          <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}','${u.role}','${u.year_group||''}','${u.form_class||''}','${u.stream||'science'}',${(allStudents.find(s=>s.id===u.id)||{}).simplified_view===true},${(allStudents.find(s=>s.id===u.id)||{}).summer_only===true})">Edit</button>
         </td>
       </tr>`;
     }).join('');
@@ -2357,13 +2368,16 @@
 
   let _editUserId = null;
 
-  window.openEditUser = function(id, name, role, year, form, stream) {
+  window.openEditUser = function(id, name, role, year, form, stream, simplifiedView, summerOnly) {
     _editUserId = id;
     document.getElementById('edit-name').value   = name;
     document.getElementById('edit-role').value   = role;
     document.getElementById('edit-year').value   = year;
     document.getElementById('edit-form').value   = form;
     document.getElementById('edit-stream').value = stream || 'science';
+    document.getElementById('edit-simplified-view').checked = !!simplifiedView;
+    document.getElementById('edit-summer-only').checked = !!summerOnly;
+    document.getElementById('edit-access-row').style.display = role === 'student' ? '' : 'none';
     document.getElementById('edit-msg').textContent = '';
     toggleEditYear();
     document.getElementById('edit-modal').classList.add('open');
@@ -2378,6 +2392,7 @@
     const show = role === 'student';
     document.getElementById('edit-year-row').style.display = show ? 'block' : 'none';
     document.getElementById('edit-form-row').style.display = show ? 'block' : 'none';
+    document.getElementById('edit-access-row').style.display = show ? '' : 'none';
   };
 
   window.saveEditUser = async function() {
@@ -2401,6 +2416,10 @@
       form_class: form || null,
       stream:     stream
     };
+    if (role === 'student') {
+      update.simplified_view = document.getElementById('edit-simplified-view').checked;
+      update.summer_only = document.getElementById('edit-summer-only').checked;
+    }
 
     const { error } = await supabase.from('profiles').update(update).eq('id', _editUserId);
 
@@ -2428,6 +2447,10 @@
       student.year_group = year ? parseInt(year) : null;
       student.form_class = form || null;
       student.stream     = stream;
+      if (role === 'student') {
+        student.simplified_view = update.simplified_view;
+        student.summer_only = update.summer_only;
+      }
     }
 
     msg.style.color = '#2e7d32';
