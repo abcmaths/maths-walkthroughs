@@ -108,6 +108,28 @@ function makeDistractors(correctAnswer, pool) {
       }
       if (candidates.length >= 3) break;
     }
+  } else if (/^\d+r\d+$/.test(ans)) {
+    const [whole, rem] = ans.split('r').map(Number);
+    const perturbs = [[whole+1,rem],[whole>1?whole-1:whole+2,rem],[whole,rem+1],[whole,rem>1?rem-1:rem+2]].sort(() => Math.random()-0.5);
+    for (const [w,r] of perturbs) {
+      if (w>0 && r>=0) {
+        const c = `${w}r${r}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+ \d+\/\d+$/.test(ans)) {
+    const [wholePart, fracPart] = ans.split(' ');
+    const whole = Number(wholePart);
+    const [numer, denom] = fracPart.split('/').map(Number);
+    const perturbs = [[whole+1,numer,denom],[whole>1?whole-1:whole+2,numer,denom],[whole,numer+1,denom],[whole,numer>1?numer-1:numer+2,denom]].sort(() => Math.random()-0.5);
+    for (const [w,n,d] of perturbs) {
+      if (w>0 && n>0 && d>0 && n<d) {
+        const c = `${w} ${n}/${d}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
   }
 
   // Fill any remaining slots from the pool of other correct answers this topic
@@ -140,11 +162,16 @@ function render() {
     currentYT = YT_GENS[qIdx]();
     answered = false;
 
-    // Build the distractor pool from every other question's answer (computed fresh
-    // each time since answers are randomised per attempt)
-    const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
-    const distractors = makeDistractors(currentYT.answer, pool);
-    currentOptions = [String(currentYT.answer), ...distractors].sort(() => Math.random()-0.5);
+    // Some questions supply their own explicit options (e.g. category-style
+    // answers like increasing/decreasing/flat, where auto-generated distractors
+    // from unrelated numeric answers elsewhere in the topic wouldn't make sense)
+    if (currentYT.options) {
+      currentOptions = [...currentYT.options].sort(() => Math.random()-0.5);
+    } else {
+      const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
+      const distractors = makeDistractors(currentYT.answer, pool);
+      currentOptions = [String(currentYT.answer), ...distractors].sort(() => Math.random()-0.5);
+    }
 
     let optsHtml = currentOptions.map((opt, i) =>
       `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
