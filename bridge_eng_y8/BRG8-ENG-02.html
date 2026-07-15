@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Literal vs Inferential Comprehension Questions — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; font-size:16px; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.65; font-size:1.05rem; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:12px; border-radius:6px; margin:10px 0; font-size:1.1rem; text-align:center; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:16px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-size:1.15rem; font-weight:600;
+         min-height:52px; -webkit-tap-highlight-color:transparent; }
+  .opt:active { transform:scale(0.98); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  .try-fb { margin-top:12px; font-weight:600; font-size:1.05rem; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; gap:10px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:14px 22px; border-radius:10px; cursor:pointer;
+         font-size:1.05rem; min-height:48px; flex:1; -webkit-tap-highlight-color:transparent; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+  button.nav-btn:disabled { opacity:0.5; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge English (Y8): Literal vs Inferential Questions</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "What is a literal question?", "teach": ["A literal question asks for information stated DIRECTLY in the text \u2014 the answer is written word-for-word or very close to it.", "Example passage: 'Amara ran to the market.' Literal question: 'Where did Amara run to?' Answer: the market \u2014 stated directly.", "Literal questions are usually the easiest type, since you just need to find and copy the relevant part of the text."], "yt_prompt": "Is this a literal question (answer stated directly in the text)?"}, {"title": "What is an inferential question?", "teach": ["An inferential question asks you to work out something the text implies but doesn't say directly \u2014 you use clues plus your own reasoning.", "Example: 'Amara's hands were shaking as she opened the letter.' Inferential question: 'How did Amara feel?' Answer: nervous/anxious \u2014 not stated directly, but implied.", "Inferential questions require you to 'read between the lines' using evidence from the text."], "yt_prompt": "Is this an inferential question (requires reading between the lines)?"}, {"title": "Finding evidence for literal answers", "teach": ["For a literal question, scan the text for the exact keywords from the question \u2014 the answer is usually very close by.", "Example: if asked 'What colour was the car?', look for the word 'car' in the text, then check nearby for a colour word.", "Always quote or closely paraphrase the exact wording from the text for literal answers."], "yt_prompt": "Given the clue text, what is the literal answer?"}, {"title": "Finding evidence for inferential answers", "teach": ["For inferential questions, you can't just copy text \u2014 you need to combine clues with your own reasoning.", "Example: 'The empty plates were stacked by the sink, and the smell of fried plantain still hung in the air.' Inference: someone had just eaten a meal.", "Always be ready to explain WHY you inferred something, pointing to the specific clues in the text."], "yt_prompt": "Given the clue text, what can you infer?"}, {"title": "Distinguishing the two question types", "teach": ["Look at the question wording: literal questions often use 'what', 'where', 'who', 'when' about facts directly stated.", "Inferential questions often use 'why', 'how do you think', 'what does this suggest' about things not directly stated.", "If you can point to one exact sentence that answers it, it's literal. If you need to combine clues, it's inferential."], "yt_prompt": "Is this question literal or inferential?"}, {"title": "Avoiding over-guessing on inferential questions", "teach": ["An inference must be supported by evidence in the text \u2014 it's not just any guess.", "Example: if the text never mentions the weather, you can't infer it was raining just because a character is sad.", "Always be ready to point to the specific words or details in the text that led you to your inference."], "yt_prompt": "Is this a reasonable inference from the given clue?"}, {"title": "Answering literal questions in full sentences", "teach": ["When answering, write in a full sentence rather than just a single word \u2014 this shows you understand the question fully.", "Example: instead of just 'the market', write 'Amara ran to the market.'", "Full-sentence answers are especially important in exam-style comprehension questions."], "yt_prompt": "Which is the better full-sentence answer?"}, {"title": "Combining literal and inferential skills", "teach": ["Longer comprehension passages often mix both question types \u2014 some parts test what you read, others test what you understood.", "Read the passage carefully once, then re-read the specific section relevant to each question before answering.", "Don't rush \u2014 literal questions reward careful reading, and inferential questions reward careful thinking."], "yt_prompt": "Is this question literal or inferential?"}, {"title": "Practising with short passages", "teach": ["The best way to get comfortable with both question types is regular short-passage practice.", "Always ask yourself: 'Is the answer written here directly, or do I need to work it out?' before answering.", "This one skill \u2014 correctly identifying the question type \u2014 makes answering both types much faster and more accurate."], "yt_prompt": "Given the clue, is the answer literal or does it require inference?"}, {"title": "Mixed practice", "teach": ["You've now covered the difference between literal and inferential comprehension questions, and how to find evidence for each.", "This is one of the most useful reading skills for IGCSE and WAEC-style comprehension papers.", "This final question checks you can apply everything you've learned."], "yt_prompt": "Is this question literal or inferential?"}];
+function ytGen_0() { const opts=[['"Where did Amara run to?" (text says: Amara ran to the market)','Yes'],['"How did Amara feel?" (text says: her hands were shaking)','No']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:['Yes','No'], answer:p[1]}; }
+function ytGen_1() { const opts=[['"How did Amara feel?" (text says: her hands were shaking)','Yes'],['"Where did Amara run to?" (text says: Amara ran to the market)','No']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:['Yes','No'], answer:p[1]}; }
+function ytGen_2() { const opts=[['"The car was bright red and parked outside." What colour was the car?','Red'],['"Tunde wore his blue school shirt." What colour was the shirt?','Blue']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:['Red','Blue','Green'], answer:p[1]}; }
+function ytGen_3() { const opts=[['"The empty plates were stacked by the sink, and the smell of fried plantain hung in the air." What can you infer?','Someone had just eaten'],['"Books lay scattered across the desk, and the lamp was still on at midnight." What can you infer?','Someone had been studying late']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:[p[1],'Nothing can be inferred'], answer:p[1]}; }
+function ytGen_4() { const opts=[['What was the boy\'s name?','Literal'],['Why do you think the boy was upset?','Inferential']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:['Literal','Inferential'], answer:p[1]}; }
+function ytGen_5() { const opts=[['Text never mentions weather. Character is sad. Can you infer it was raining?','No'],['Text says clouds gathered and thunder rumbled. Can you infer a storm was coming?','Yes']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:['Yes','No'], answer:p[1]}; }
+function ytGen_6() { const opts=['Amara ran to the market.','the market']; return {q:'Question: Where did Amara run to?', options:opts, answer:opts[0]}; }
+function ytGen_7() { const opts=[['What time did the shop close?','Literal'],['What does this suggest about the shopkeeper\'s mood?','Inferential']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:['Literal','Inferential'], answer:p[1]}; }
+function ytGen_8() { const opts=[['"The dog barked loudly at every stranger who passed." Is the dog protective?','Inference'],['"The sign said the shop opens at 9am." What time does the shop open?','Literal']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:['Literal','Inference'], answer:p[1]}; }
+function ytGen_9() { const opts=[['What colour was the door?','Literal'],['Why did she slam the door?','Inferential']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:['Literal','Inferential'], answer:p[1]}; }
+
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let ANSWER_POOL = [];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let currentOptions = null;
+let answered = false;
+
+function makeDistractors(correctAnswer, pool) {
+  const ans = String(correctAnswer);
+  let candidates = [];
+
+  if (/^-?\d+$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d);
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+\/\d+$/.test(ans)) {
+    const [numer, denom] = ans.split('/').map(Number);
+    const perturbs = [[numer+1,denom],[numer>1?numer-1:numer+2,denom],[numer,denom+1],[numer,denom>1?denom-1:denom+2],[numer+1,denom+1]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}/${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+:\d+$/.test(ans)) {
+    const [a1, b1] = ans.split(':').map(Number);
+    const perturbs = [[a1+1,b1],[a1>1?a1-1:a1+2,b1],[a1,b1+1],[a1,b1>1?b1-1:b1+2]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}:${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^-?\d+\.\d+$/.test(ans)) {
+    const num = parseFloat(ans);
+    const decimals = (ans.split('.')[1]||'').length;
+    const deltas = [0.1,-0.1,0.01,-0.01,1,-1,0.5,-0.5].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = (num + d).toFixed(decimals);
+      if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+%$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [5,-5,10,-10,2,-2,1,-1].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d) + '%';
+      if (c !== ans && !candidates.includes(c) && (num+d) >= 0) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  if (candidates.length < 3 && pool && pool.length) {
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
+    others.sort(() => Math.random()-0.5);
+    for (const o of others) {
+      if (candidates.includes(o)) continue;
+      candidates.push(o);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  return candidates.slice(0,3);
+}
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+
+    if (currentYT.options) {
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
+    } else {
+      const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
+      const distractors = makeDistractors(currentYT.answer, pool);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
+    }
+
+    let optsHtml = currentOptions.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="worked">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  const correctIdx = currentOptions.indexOf(String(currentYT.answer));
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === correctIdx) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === correctIdx) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = `
+    <div class="teach"><strong>Well done — topic complete!</strong><br>Great work finishing all 10 questions.</div>
+    <div id="completeStatus" style="text-align:center; margin-top:16px;">
+      <div id="completeSpinner" style="color:#888; font-size:0.95rem;">Saving your progress…</div>
+    </div>`;
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) {
+    window.markComplete().then(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:#1b7d3a; font-weight:700; font-size:1.05rem;">✓ Marked as complete!</div><a href="../dashboard-student.html" style="display:inline-block; margin-top:12px; background:var(--red); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Back to dashboard</a>';
+    }).catch(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:var(--red); font-size:0.9rem;">Could not save automatically.</div><button class="nav-btn primary" style="margin-top:10px;" onclick="window.markComplete().then(()=>location.reload())">Try again</button>';
+    });
+  }
+}
+
+ANSWER_POOL = YT_GENS.map(fn => fn().answer);
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG8-ENG-02';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not logged in');
+
+  const { data: topicRow, error: topicErr } = await supabase
+    .from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
+  if (topicErr || !topicRow) throw new Error('Could not find topic: ' + _abcTopicCode);
+
+  const { error } = await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_id: topicRow.id,
+    status: 'completed',
+    last_visited_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_id' });
+  if (error) throw error;
+};
+</script>
+</body>
+</html>
