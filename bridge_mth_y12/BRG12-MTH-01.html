@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Number & Numeration — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; font-size:16px; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.65; font-size:1.05rem; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:12px; border-radius:6px; margin:10px 0; font-size:1.1rem; text-align:center; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:16px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-size:1.15rem; font-weight:600;
+         min-height:52px; -webkit-tap-highlight-color:transparent; }
+  .opt:active { transform:scale(0.98); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  .try-fb { margin-top:12px; font-weight:600; font-size:1.05rem; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; gap:10px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:14px 22px; border-radius:10px; cursor:pointer;
+         font-size:1.05rem; min-height:48px; flex:1; -webkit-tap-highlight-color:transparent; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+  button.nav-btn:disabled { opacity:0.5; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths (Y12 WAEC): Number & Numeration</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Number bases \u2014 converting to base 10", "teach": ["To convert a number from another base to base 10, multiply each digit by its place value (a power of the base), then add them up.", "Example: 1101 (base 2) = 1\u00d72\u00b3 + 1\u00d72\u00b2 + 0\u00d72\u00b9 + 1\u00d72\u2070 = 8+4+0+1 = 13.", "The rightmost digit is always the base to the power 0."], "yt_prompt": "Convert to base 10:"}, {"title": "Converting base 10 to another base", "teach": ["To convert a base-10 number to another base, repeatedly divide by the new base and record the remainders.", "Example: convert 13 to base 2 \u2192 13\u00f72=6 r1, 6\u00f72=3 r0, 3\u00f72=1 r1, 1\u00f72=0 r1 \u2192 reading remainders bottom-to-top: 1101.", "Always read the remainders from the LAST division to the FIRST."], "yt_prompt": "Convert 10 to base 2:"}, {"title": "Standard form", "teach": ["Standard form writes numbers as A \u00d7 10\u207f, where 1 \u2264 A < 10.", "Example: 45,000 = 4.5 \u00d7 10\u2074, and 0.0032 = 3.2 \u00d7 10\u207b\u00b3.", "WAEC frequently tests standard form in the context of measurement and scientific data."], "yt_prompt": "Write in standard form:"}, {"title": "LCM (Lowest Common Multiple)", "teach": ["The LCM of two numbers is the smallest number that both divide into exactly.", "Method: list multiples of each number until you find the smallest one they share, or use prime factorisation.", "Example: LCM of 4 and 6 \u2192 multiples of 4: 4,8,12,16... multiples of 6: 6,12,18... \u2192 LCM = 12."], "yt_prompt": "Find the LCM:"}, {"title": "HCF (Highest Common Factor)", "teach": ["The HCF of two numbers is the largest number that divides exactly into both.", "Method: list the factors of each number and find the largest one they share.", "Example: HCF of 12 and 18 \u2192 factors of 12: 1,2,3,4,6,12. Factors of 18: 1,2,3,6,9,18 \u2192 HCF = 6."], "yt_prompt": "Find the HCF:"}, {"title": "Approximation and rounding", "teach": ["Approximation means rounding a number to a given accuracy \u2014 decimal places, significant figures, or the nearest ten/hundred.", "Example: 4,827 to the nearest hundred = 4,800 (look at the tens digit to decide whether to round up or down).", "Always identify exactly what level of accuracy is being asked for before rounding."], "yt_prompt": "Round to the nearest hundred:"}, {"title": "Ratio in numeration", "teach": ["Ratios compare quantities and can be simplified in the same way as fractions.", "Example: simplify 24:36 \u2192 both divide by 12 \u2192 2:3.", "Always divide both parts by their highest common factor to fully simplify."], "yt_prompt": "Simplify the ratio fully:"}, {"title": "Percentage calculations", "teach": ["To find a percentage of an amount, convert the percentage to a decimal, then multiply.", "Example: 15% of \u20a68,000 = 0.15 \u00d7 8,000 = \u20a61,200.", "This is a frequently tested WAEC skill, often embedded in word problems about money."], "yt_prompt": "Work out the answer (in \u20a6):"}, {"title": "Word problems involving numeration", "teach": ["WAEC often presents number topics as word problems requiring you to identify which operation is needed.", "Read carefully to identify: is this asking for LCM, HCF, a percentage, or a straightforward calculation?", "Always re-read the question after solving to check your answer actually answers what was asked."], "yt_prompt": "Work out the answer:"}, {"title": "Mixed practice", "teach": ["You've now covered number bases, standard form, LCM/HCF, approximation, ratio, and percentages.", "These 'Number and Numeration' skills form the foundation of the WAEC Mathematics syllabus and appear in nearly every paper.", "Take care to identify exactly which number skill a question needs before starting your calculation."], "yt_prompt": "Find the LCM:"}];
+function ytGen_0() { const pairs=[['1101',13],['1010',10],['1111',15],['10011',19],['11001',25]]; const [bin,dec]=pairs[Math.floor(Math.random()*pairs.length)]; return {q:`${bin} (base 2)`, answer:String(dec)}; }
+function ytGen_1() { const pairs=[[10,'1010'],[13,'1101'],[7,'111'],[20,'10100'],[15,'1111']]; const [dec,bin]=pairs[Math.floor(Math.random()*pairs.length)]; return {q:`${dec} to base 2`, answer:bin}; }
+function ytGen_2() { const pairs=[[45000,'4.5 × 10^4'],[3200,'3.2 × 10^3'],[67000,'6.7 × 10^4'],[890,'8.9 × 10^2']]; const [n,a]=pairs[Math.floor(Math.random()*pairs.length)]; return {q:String(n), answer:a}; }
+function ytGen_3() { const pairs=[[4,6,12],[3,5,15],[6,8,24],[4,10,20],[9,12,36]]; const [a,b,l]=pairs[Math.floor(Math.random()*pairs.length)]; return {q:`${a} and ${b}`, answer:String(l)}; }
+function ytGen_4() { const pairs=[[12,18,6],[24,36,12],[8,12,4],[15,20,5],[16,24,8]]; const [a,b,h]=pairs[Math.floor(Math.random()*pairs.length)]; return {q:`${a} and ${b}`, answer:String(h)}; }
+function ytGen_5() { const n=Math.floor(Math.random()*9000)+1000; const rounded=Math.round(n/100)*100; return {q:String(n), answer:String(rounded)}; }
+function ytGen_6() { const mults=[2,3,4,6]; const m=mults[Math.floor(Math.random()*mults.length)]; const a=Math.floor(Math.random()*4)+1; const b=Math.floor(Math.random()*4)+2; return {q:`${a*m}:${b*m}`, answer:`${a}:${b}`}; }
+function ytGen_7() { const pct=[10,15,20,25,30][Math.floor(Math.random()*5)]; const amt=(Math.floor(Math.random()*40)+10)*100; return {q:`${pct}% of ₦${amt.toLocaleString()}`, answer:String(Math.round(amt*pct/100))}; }
+function ytGen_8() { const a=Math.floor(Math.random()*10)+5; const b=Math.floor(Math.random()*10)+5; return {q:`Find the sum of ${a} and ${b}, then double it`, answer:String((a+b)*2)}; }
+function ytGen_9() { const pairs=[[4,6,12],[3,5,15],[6,8,24],[4,10,20],[9,12,36]]; const [a,b,l]=pairs[Math.floor(Math.random()*pairs.length)]; return {q:`${a} and ${b}`, answer:String(l)}; }
+
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let ANSWER_POOL = [];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let currentOptions = null;
+let answered = false;
+
+function makeDistractors(correctAnswer, pool) {
+  const ans = String(correctAnswer);
+  let candidates = [];
+
+  if (/^-?\d+$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d);
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+\/\d+$/.test(ans)) {
+    const [numer, denom] = ans.split('/').map(Number);
+    const perturbs = [[numer+1,denom],[numer>1?numer-1:numer+2,denom],[numer,denom+1],[numer,denom>1?denom-1:denom+2],[numer+1,denom+1]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}/${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+:\d+$/.test(ans)) {
+    const [a1, b1] = ans.split(':').map(Number);
+    const perturbs = [[a1+1,b1],[a1>1?a1-1:a1+2,b1],[a1,b1+1],[a1,b1>1?b1-1:b1+2]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}:${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^-?\d+\.\d+$/.test(ans)) {
+    const num = parseFloat(ans);
+    const decimals = (ans.split('.')[1]||'').length;
+    const deltas = [0.1,-0.1,0.01,-0.01,1,-1,0.5,-0.5].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = (num + d).toFixed(decimals);
+      if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+%$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [5,-5,10,-10,2,-2,1,-1].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d) + '%';
+      if (c !== ans && !candidates.includes(c) && (num+d) >= 0) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  if (candidates.length < 3 && pool && pool.length) {
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
+    others.sort(() => Math.random()-0.5);
+    for (const o of others) {
+      if (candidates.includes(o)) continue;
+      candidates.push(o);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  return candidates.slice(0,3);
+}
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+
+    if (currentYT.options) {
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
+    } else {
+      const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
+      const distractors = makeDistractors(currentYT.answer, pool);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
+    }
+
+    let optsHtml = currentOptions.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="worked">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  const correctIdx = currentOptions.indexOf(String(currentYT.answer));
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === correctIdx) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === correctIdx) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = `
+    <div class="teach"><strong>Well done — topic complete!</strong><br>Great work finishing all 10 questions.</div>
+    <div id="completeStatus" style="text-align:center; margin-top:16px;">
+      <div id="completeSpinner" style="color:#888; font-size:0.95rem;">Saving your progress…</div>
+    </div>`;
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) {
+    window.markComplete().then(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:#1b7d3a; font-weight:700; font-size:1.05rem;">✓ Marked as complete!</div><a href="../dashboard-student.html" style="display:inline-block; margin-top:12px; background:var(--red); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Back to dashboard</a>';
+    }).catch(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:var(--red); font-size:0.9rem;">Could not save automatically.</div><button class="nav-btn primary" style="margin-top:10px;" onclick="window.markComplete().then(()=>location.reload())">Try again</button>';
+    });
+  }
+}
+
+ANSWER_POOL = YT_GENS.map(fn => fn().answer);
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG12-MTH-01';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not logged in');
+
+  const { data: topicRow, error: topicErr } = await supabase
+    .from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
+  if (topicErr || !topicRow) throw new Error('Could not find topic: ' + _abcTopicCode);
+
+  const { error } = await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_id: topicRow.id,
+    status: 'completed',
+    last_visited_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_id' });
+  if (error) throw error;
+};
+</script>
+</body>
+</html>

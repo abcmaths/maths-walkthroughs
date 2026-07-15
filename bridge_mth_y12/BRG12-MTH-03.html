@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Mensuration — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; font-size:16px; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.65; font-size:1.05rem; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:12px; border-radius:6px; margin:10px 0; font-size:1.1rem; text-align:center; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:16px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-size:1.15rem; font-weight:600;
+         min-height:52px; -webkit-tap-highlight-color:transparent; }
+  .opt:active { transform:scale(0.98); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  .try-fb { margin-top:12px; font-weight:600; font-size:1.05rem; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; gap:10px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:14px 22px; border-radius:10px; cursor:pointer;
+         font-size:1.05rem; min-height:48px; flex:1; -webkit-tap-highlight-color:transparent; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+  button.nav-btn:disabled { opacity:0.5; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths (Y12 WAEC): Mensuration</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Perimeter of simple shapes", "teach": ["Perimeter is the total distance around the outside of a shape \u2014 add up all the side lengths.", "Example: a rectangle with length 8cm and width 5cm has perimeter = 2(8+5) = 26cm.", "For irregular shapes, simply add every individual side length together."], "yt_prompt": "Find the perimeter (in cm):"}, {"title": "Area of a rectangle and triangle", "teach": ["Area of a rectangle = length \u00d7 width. Area of a triangle = \u00bd \u00d7 base \u00d7 height.", "Example: rectangle 6cm \u00d7 4cm = 24cm\u00b2. Triangle with base 8cm, height 5cm = \u00bd\u00d78\u00d75 = 20cm\u00b2.", "Always use the PERPENDICULAR height for a triangle, not a slanted side."], "yt_prompt": "Find the area (in cm\u00b2):"}, {"title": "Area of a trapezium", "teach": ["Area of a trapezium = \u00bd \u00d7 (sum of parallel sides) \u00d7 height.", "Example: parallel sides 6cm and 10cm, height 4cm \u2192 \u00bd \u00d7 (6+10) \u00d7 4 = \u00bd \u00d7 16 \u00d7 4 = 32cm\u00b2.", "Make sure you identify the two PARALLEL sides correctly before applying the formula."], "yt_prompt": "Find the area (in cm\u00b2):"}, {"title": "Circumference and area of a circle", "teach": ["Circumference = 2\u03c0r (or \u03c0d). Area = \u03c0r\u00b2. Use \u03c0 = 22/7 unless told otherwise.", "Example: radius 7cm \u2192 circumference = 2\u00d7(22/7)\u00d77 = 44cm. Area = (22/7)\u00d77\u00b2 = 154cm\u00b2.", "Radius 7 (or a multiple of 7) is common in WAEC questions, since it simplifies nicely with 22/7."], "yt_prompt": "Find the circumference (in cm, use \u03c0=22/7):"}, {"title": "Volume of a cuboid", "teach": ["Volume of a cuboid = length \u00d7 width \u00d7 height.", "Example: 6cm \u00d7 4cm \u00d7 3cm = 72cm\u00b3.", "Volume is always measured in CUBIC units (cm\u00b3, m\u00b3) \u2014 make sure to include the correct unit."], "yt_prompt": "Find the volume (in cm\u00b3):"}, {"title": "Volume of a cylinder", "teach": ["Volume of a cylinder = \u03c0r\u00b2h, where r is the radius and h is the height.", "Example: radius 7cm, height 10cm \u2192 (22/7) \u00d7 7\u00b2 \u00d7 10 = 1,540cm\u00b3.", "Always square the radius BEFORE multiplying by \u03c0 and the height."], "yt_prompt": "Find the volume (in cm\u00b3, use \u03c0=22/7):"}, {"title": "Surface area of a cuboid", "teach": ["Surface area of a cuboid = 2(lw + lh + wh), summing the area of all six faces.", "Example: 5cm \u00d7 4cm \u00d7 3cm \u2192 2(20+15+12) = 2\u00d747 = 94cm\u00b2.", "Remember there are three PAIRS of matching faces, not six different calculations."], "yt_prompt": "Find the total surface area (in cm\u00b2):"}, {"title": "Volume of a cone", "teach": ["Volume of a cone = \u2153\u03c0r\u00b2h, exactly one-third the volume of a cylinder with the same base and height.", "Example: radius 6cm, height 7cm \u2192 \u2153 \u00d7 (22/7) \u00d7 6\u00b2 \u00d7 7 = \u2153 \u00d7 792 = 264cm\u00b3.", "Always divide by 3 as the final step, after calculating the cylinder-equivalent volume."], "yt_prompt": "Find the volume (in cm\u00b3, use \u03c0=22/7):"}, {"title": "Mensuration word problems", "teach": ["WAEC often presents mensuration as real-world problems: tanks, fields, rooms, containers.", "Identify which shape and which formula (perimeter, area, or volume) the question actually needs.", "Draw a quick sketch if the shape isn't given \u2014 it helps avoid using the wrong formula."], "yt_prompt": "Find the volume (in cm\u00b3):"}, {"title": "Mixed practice", "teach": ["You've now covered perimeter, area (rectangles, triangles, trapeziums, circles), and volume (cuboids, cylinders, cones).", "Mensuration is one of the most reliably tested topics in WAEC Mathematics \u2014 formulas MUST be memorised.", "Always double-check whether a question wants area (2D, squared units) or volume (3D, cubed units)."], "yt_prompt": "Find the area (in cm\u00b2):"}];
+function ytGen_0() { const l=Math.floor(Math.random()*10)+4; const w=Math.floor(Math.random()*8)+3; return {q:`Rectangle: length ${l}cm, width ${w}cm`, answer:String(2*(l+w))}; }
+function ytGen_1() { const b=Math.floor(Math.random()*10)+4; const h=Math.floor(Math.random()*8)+2; return {q:`Triangle: base ${b}cm, height ${h}cm`, answer:String(0.5*b*h)}; }
+function ytGen_2() { const a=Math.floor(Math.random()*8)+4; const b=Math.floor(Math.random()*8)+6; const h=Math.floor(Math.random()*6)+2; return {q:`Trapezium: parallel sides ${a}cm and ${b}cm, height ${h}cm`, answer:String(0.5*(a+b)*h)}; }
+function ytGen_3() { const radii=[7,14,21]; const r=radii[Math.floor(Math.random()*radii.length)]; return {q:`Circle: radius ${r}cm`, answer:String(Math.round(2*(22/7)*r))}; }
+function ytGen_4() { const l=Math.floor(Math.random()*8)+3; const w=Math.floor(Math.random()*6)+2; const h=Math.floor(Math.random()*6)+2; return {q:`Cuboid: ${l}cm × ${w}cm × ${h}cm`, answer:String(l*w*h)}; }
+function ytGen_5() { const radii=[7,14]; const r=radii[Math.floor(Math.random()*radii.length)]; const h=Math.floor(Math.random()*10)+5; return {q:`Cylinder: radius ${r}cm, height ${h}cm`, answer:String(Math.round((22/7)*r*r*h))}; }
+function ytGen_6() { const l=Math.floor(Math.random()*6)+3; const w=Math.floor(Math.random()*5)+2; const h=Math.floor(Math.random()*5)+2; return {q:`Cuboid: ${l}cm × ${w}cm × ${h}cm`, answer:String(2*(l*w+l*h+w*h))}; }
+function ytGen_7() { const radii=[6,7,14]; const r=radii[Math.floor(Math.random()*radii.length)]; const h=Math.floor(Math.random()*8)+4; return {q:`Cone: radius ${r}cm, height ${h}cm`, answer:String(Math.round((1/3)*(22/7)*r*r*h))}; }
+function ytGen_8() { const l=Math.floor(Math.random()*8)+3; const w=Math.floor(Math.random()*6)+2; const h=Math.floor(Math.random()*6)+2; return {q:`A tank measures ${l}m × ${w}m × ${h}m. Find its volume (m³)`, answer:String(l*w*h)}; }
+function ytGen_9() { const a=Math.floor(Math.random()*8)+4; const b=Math.floor(Math.random()*8)+6; const h=Math.floor(Math.random()*6)+2; return {q:`Trapezium: parallel sides ${a}cm and ${b}cm, height ${h}cm`, answer:String(0.5*(a+b)*h)}; }
+
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let ANSWER_POOL = [];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let currentOptions = null;
+let answered = false;
+
+function makeDistractors(correctAnswer, pool) {
+  const ans = String(correctAnswer);
+  let candidates = [];
+
+  if (/^-?\d+$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d);
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+\/\d+$/.test(ans)) {
+    const [numer, denom] = ans.split('/').map(Number);
+    const perturbs = [[numer+1,denom],[numer>1?numer-1:numer+2,denom],[numer,denom+1],[numer,denom>1?denom-1:denom+2],[numer+1,denom+1]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}/${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+:\d+$/.test(ans)) {
+    const [a1, b1] = ans.split(':').map(Number);
+    const perturbs = [[a1+1,b1],[a1>1?a1-1:a1+2,b1],[a1,b1+1],[a1,b1>1?b1-1:b1+2]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}:${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^-?\d+\.\d+$/.test(ans)) {
+    const num = parseFloat(ans);
+    const decimals = (ans.split('.')[1]||'').length;
+    const deltas = [0.1,-0.1,0.01,-0.01,1,-1,0.5,-0.5].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = (num + d).toFixed(decimals);
+      if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+%$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [5,-5,10,-10,2,-2,1,-1].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d) + '%';
+      if (c !== ans && !candidates.includes(c) && (num+d) >= 0) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  if (candidates.length < 3 && pool && pool.length) {
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
+    others.sort(() => Math.random()-0.5);
+    for (const o of others) {
+      if (candidates.includes(o)) continue;
+      candidates.push(o);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  return candidates.slice(0,3);
+}
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+
+    if (currentYT.options) {
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
+    } else {
+      const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
+      const distractors = makeDistractors(currentYT.answer, pool);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
+    }
+
+    let optsHtml = currentOptions.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="worked">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  const correctIdx = currentOptions.indexOf(String(currentYT.answer));
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === correctIdx) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === correctIdx) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = `
+    <div class="teach"><strong>Well done — topic complete!</strong><br>Great work finishing all 10 questions.</div>
+    <div id="completeStatus" style="text-align:center; margin-top:16px;">
+      <div id="completeSpinner" style="color:#888; font-size:0.95rem;">Saving your progress…</div>
+    </div>`;
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) {
+    window.markComplete().then(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:#1b7d3a; font-weight:700; font-size:1.05rem;">✓ Marked as complete!</div><a href="../dashboard-student.html" style="display:inline-block; margin-top:12px; background:var(--red); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Back to dashboard</a>';
+    }).catch(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:var(--red); font-size:0.9rem;">Could not save automatically.</div><button class="nav-btn primary" style="margin-top:10px;" onclick="window.markComplete().then(()=>location.reload())">Try again</button>';
+    });
+  }
+}
+
+ANSWER_POOL = YT_GENS.map(fn => fn().answer);
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG12-MTH-03';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not logged in');
+
+  const { data: topicRow, error: topicErr } = await supabase
+    .from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
+  if (topicErr || !topicRow) throw new Error('Could not find topic: ' + _abcTopicCode);
+
+  const { error } = await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_id: topicRow.id,
+    status: 'completed',
+    last_visited_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_id' });
+  if (error) throw error;
+};
+</script>
+</body>
+</html>
