@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Introduction to Ratio & the Unitary Method — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; font-size:16px; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.65; font-size:1.05rem; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:12px; border-radius:6px; margin:10px 0; font-size:1.1rem; text-align:center; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:16px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-size:1.15rem; font-weight:600;
+         min-height:52px; -webkit-tap-highlight-color:transparent; }
+  .opt:active { transform:scale(0.98); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  .try-fb { margin-top:12px; font-weight:600; font-size:1.05rem; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; gap:10px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:14px 22px; border-radius:10px; cursor:pointer;
+         font-size:1.05rem; min-height:48px; flex:1; -webkit-tap-highlight-color:transparent; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+  button.nav-btn:disabled { opacity:0.5; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths (Y8): Ratio & the Unitary Method</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "What is a ratio?", "teach": ["A ratio compares two or more quantities. Writing 2:3 means for every 2 of one thing, there are 3 of another.", "Ratios can be simplified just like fractions \u2014 divide both sides by their highest common factor.", "Example: 10:15 simplifies to 2:3, since both sides divide by 5."], "yt_prompt": "Simplify this ratio fully:"}, {"title": "Sharing in a ratio (two parts)", "teach": ["To share an amount in a ratio, first add the parts together to find the total number of shares.", "Then divide the amount by the total shares to find the value of one share, and multiply up for each part.", "Example: share \u20a6200 in the ratio 2:3 \u2192 2+3=5 shares \u2192 \u20a6200\u00f75=\u20a640 per share \u2192 parts are \u20a680 and \u20a6120."], "yt_prompt": "What is the larger share (in \u20a6)?"}, {"title": "Sharing in a ratio (three parts)", "teach": ["The same method works with three (or more) parts \u2014 just add all the parts together first.", "Example: share \u20a6600 in the ratio 1:2:3 \u2192 1+2+3=6 shares \u2192 \u20a6600\u00f76=\u20a6100 per share \u2192 parts are \u20a6100, \u20a6200, \u20a6300.", "Always double-check your parts add back up to the original total amount."], "yt_prompt": "What is the largest share (in \u20a6)?"}, {"title": "Ratio to fraction", "teach": ["A ratio can be converted to fractions of the total by putting each part over the total number of shares.", "Example: in the ratio 2:3, the total is 5 shares, so the first part is 2/5 of the whole and the second is 3/5.", "This is useful when a question asks 'what fraction of the total' rather than 'how much'."], "yt_prompt": "What fraction of the total is the first part?"}, {"title": "Unitary method \u2014 finding one unit", "teach": ["The unitary method means finding the value of ONE unit first, then scaling to whatever you need.", "Example: if 5 pens cost \u20a6250, one pen costs \u20a6250\u00f75 = \u20a650.", "Once you know the value of one unit, you can find the value of any number of units by multiplying."], "yt_prompt": "What is the cost of ONE item (in \u20a6)?"}, {"title": "Unitary method \u2014 scaling up", "teach": ["Once you've found the value of one unit, multiply by however many units the question asks for.", "Example: if one pen costs \u20a650, then 8 pens cost 8 \u00d7 \u20a650 = \u20a6400.", "This two-step process \u2014 find one, then scale \u2014 works for almost any proportion question."], "yt_prompt": "Work out the answer (in \u20a6):"}, {"title": "Best buy comparisons", "teach": ["To compare which product is better value, use the unitary method to find the price per single unit (e.g. price per gram).", "Example: 400g for \u20a6800 is \u20a62/g; 600g for \u20a61,500 is \u20a62.50/g \u2014 the first is better value.", "Always compare using the SAME unit (e.g. both per gram, not one per gram and one per kg)."], "yt_prompt": "Which pack is better value?"}, {"title": "Ratio in recipes", "teach": ["Recipes often need scaling up or down \u2014 the ratio of ingredients must stay the same even as the total changes.", "Example: a recipe for 4 people uses 200g rice. For 10 people, first find rice per person (200\u00f74=50g), then scale up (50\u00d710=500g).", "This is the unitary method applied directly to a real-world context."], "yt_prompt": "Work out the answer (in g):"}, {"title": "Combining ratios", "teach": ["Sometimes two ratios share a common quantity and need to be combined into one three-part ratio.", "Example: A:B = 2:3 and B:C = 3:4 already share B=3, so A:B:C = 2:3:4 directly.", "If the shared quantity has different values in each ratio, scale one ratio so both match before combining."], "yt_prompt": "If A:B = 2:3 and B:C = 3:5, what is A:B:C?"}, {"title": "Mixed ratio problems", "teach": ["You've now covered simplifying ratios, sharing amounts, ratio-to-fraction conversion, and the unitary method.", "Real exam questions often combine these \u2014 for example, sharing an amount and then asking for a fraction of one part.", "Work through each stage separately: find the shares first, then answer whatever the question actually asks."], "yt_prompt": "Work out the answer (in \u20a6):"}];
+function ytGen_0() { const mults=[2,3,4,5]; const m=mults[Math.floor(Math.random()*mults.length)]; const a=(Math.floor(Math.random()*4)+1); const b=(Math.floor(Math.random()*4)+2); return {q:`${a*m}:${b*m}`, answer:`${a}:${b}`}; }
+function ytGen_1() { const a=Math.floor(Math.random()*4)+1; const b=Math.floor(Math.random()*4)+2; const perShare=(Math.floor(Math.random()*8)+2)*10; const total=(a+b)*perShare; return {q:`Share ₦${total} in the ratio ${a}:${b}`, answer:String(Math.max(a,b)*perShare)}; }
+function ytGen_2() { const a=1,b=2,c=3; const perShare=(Math.floor(Math.random()*8)+2)*10; const total=(a+b+c)*perShare; return {q:`Share ₦${total} in the ratio 1:2:3`, answer:String(c*perShare)}; }
+function ytGen_3() { const a=Math.floor(Math.random()*4)+1; const b=Math.floor(Math.random()*4)+2; return {q:`Ratio ${a}:${b}`, answer:`${a}/${a+b}`}; }
+function ytGen_4() { const n=Math.floor(Math.random()*6)+2; const unit=(Math.floor(Math.random()*15)+5)*10; const total=n*unit; return {q:`${n} items cost ₦${total.toLocaleString()}`, answer:String(unit)}; }
+function ytGen_5() { const unit=(Math.floor(Math.random()*15)+5)*10; const n=Math.floor(Math.random()*6)+3; return {q:`1 item costs ₦${unit}. Find the cost of ${n} items.`, answer:String(unit*n)}; }
+function ytGen_6() { const options=['Pack A (400g for ₦800)','Pack B (600g for ₦1,500)']; return {q:'Pack A: 400g for ₦800 · Pack B: 600g for ₦1,500', options:options, answer:'Pack A (400g for ₦800)'}; }
+function ytGen_7() { const people=Math.floor(Math.random()*6)+3; const grams=(Math.floor(Math.random()*8)+2)*25; const perPerson=grams/people; const newPeople=Math.floor(Math.random()*10)+6; return {q:`A recipe for ${people} people uses ${grams}g. How much for ${newPeople} people?`, answer:String(Math.round(perPerson*newPeople))}; }
+function ytGen_8() { return {q:'A:B = 2:3 and B:C = 3:5', answer:'2:3:5'}; }
+function ytGen_9() { const a=1,b=3; const perShare=(Math.floor(Math.random()*8)+2)*10; const total=(a+b)*perShare; return {q:`Share ₦${total} in the ratio 1:3, then find the smaller share`, answer:String(a*perShare)}; }
+
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let ANSWER_POOL = [];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let currentOptions = null;
+let answered = false;
+
+function makeDistractors(correctAnswer, pool) {
+  const ans = String(correctAnswer);
+  let candidates = [];
+
+  if (/^-?\d+$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d);
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+\/\d+$/.test(ans)) {
+    const [numer, denom] = ans.split('/').map(Number);
+    const perturbs = [[numer+1,denom],[numer>1?numer-1:numer+2,denom],[numer,denom+1],[numer,denom>1?denom-1:denom+2],[numer+1,denom+1]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}/${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+:\d+$/.test(ans)) {
+    const [a1, b1] = ans.split(':').map(Number);
+    const perturbs = [[a1+1,b1],[a1>1?a1-1:a1+2,b1],[a1,b1+1],[a1,b1>1?b1-1:b1+2]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}:${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^-?\d+\.\d+$/.test(ans)) {
+    const num = parseFloat(ans);
+    const decimals = (ans.split('.')[1]||'').length;
+    const deltas = [0.1,-0.1,0.01,-0.01,1,-1,0.5,-0.5].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = (num + d).toFixed(decimals);
+      if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+%$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [5,-5,10,-10,2,-2,1,-1].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d) + '%';
+      if (c !== ans && !candidates.includes(c) && (num+d) >= 0) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  if (candidates.length < 3 && pool && pool.length) {
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
+    others.sort(() => Math.random()-0.5);
+    for (const o of others) {
+      if (candidates.includes(o)) continue;
+      candidates.push(o);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  return candidates.slice(0,3);
+}
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+
+    if (currentYT.options) {
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
+    } else {
+      const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
+      const distractors = makeDistractors(currentYT.answer, pool);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
+    }
+
+    let optsHtml = currentOptions.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="worked">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  const correctIdx = currentOptions.indexOf(String(currentYT.answer));
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === correctIdx) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === correctIdx) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = `
+    <div class="teach"><strong>Well done — topic complete!</strong><br>Great work finishing all 10 questions.</div>
+    <div id="completeStatus" style="text-align:center; margin-top:16px;">
+      <div id="completeSpinner" style="color:#888; font-size:0.95rem;">Saving your progress…</div>
+    </div>`;
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) {
+    window.markComplete().then(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:#1b7d3a; font-weight:700; font-size:1.05rem;">✓ Marked as complete!</div><a href="../dashboard-student.html" style="display:inline-block; margin-top:12px; background:var(--red); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Back to dashboard</a>';
+    }).catch(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:var(--red); font-size:0.9rem;">Could not save automatically.</div><button class="nav-btn primary" style="margin-top:10px;" onclick="window.markComplete().then(()=>location.reload())">Try again</button>';
+    });
+  }
+}
+
+ANSWER_POOL = YT_GENS.map(fn => fn().answer);
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG8-MTH-03';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not logged in');
+
+  const { data: topicRow, error: topicErr } = await supabase
+    .from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
+  if (topicErr || !topicRow) throw new Error('Could not find topic: ' + _abcTopicCode);
+
+  const { error } = await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_id: topicRow.id,
+    status: 'completed',
+    last_visited_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_id' });
+  if (error) throw error;
+};
+</script>
+</body>
+</html>
