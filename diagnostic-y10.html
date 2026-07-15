@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Year 10 Diagnostic — ABC</title>
+<style>
+  :root { --abc-red:#C0272D; --abc-red-dark:#8f1d22; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--abc-red); color:#fff; padding:18px 20px; text-align:center; }
+  header h1 { margin:0; font-size:1.3rem; }
+  .wrap { max-width:700px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .progress { height:8px; background:#eee; border-radius:4px; overflow:hidden; margin-bottom:20px; }
+  .progress-bar { height:100%; background:var(--abc-red); transition:width .3s; }
+  .q-num { font-size:.85rem; color:#888; margin-bottom:6px; }
+  .q-text { font-size:1.05rem; margin-bottom:16px; line-height:1.5; }
+  .opt { display:block; width:100%; text-align:left; padding:12px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; font-size:1rem; }
+  .opt:hover { border-color:var(--abc-red); }
+  .opt.selected { border-color:var(--abc-red); background:#fdeceb; }
+  input[type=text], input[type=number] { width:100%; padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; }
+  textarea { width:100%; min-height:180px; padding:12px; font-size:1rem; border:2px solid #ddd; border-radius:8px; font-family:inherit; }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; align-items:center; }
+  button.nav-btn { background:var(--abc-red); color:#fff; border:none; padding:12px 24px; border-radius:8px;
+         font-size:1rem; cursor:pointer; }
+  button.nav-btn:disabled { background:#ccc; cursor:not-allowed; }
+  button.nav-btn.secondary { background:#eee; color:#333; }
+  .btn-save { background:none; border:1.5px solid #ddd; color:#666; padding:10px 16px; border-radius:8px; font-size:0.9rem; cursor:pointer; }
+  .btn-save:hover { border-color:var(--abc-red); color:var(--abc-red); }
+  .passage { background:#fafafa; border-left:4px solid var(--abc-red); padding:16px; margin-bottom:20px;
+             font-size:1rem; line-height:1.6; max-height:320px; overflow-y:auto; }
+  .section-title { color:var(--abc-red); font-size:1.1rem; margin-bottom:4px; }
+  .hint { color:#888; font-size:.85rem; margin-bottom:16px; }
+  #screen-locked { text-align:center; padding:60px 20px; }
+  #screen-done { text-align:center; padding:60px 20px; }
+  .word-count { font-size:.85rem; color:#888; margin-top:6px; }
+  .instr-list { margin:14px 0; padding-left:0; list-style:none; }
+  .instr-list li { padding:10px 0 10px 32px; position:relative; border-bottom:1px solid #f0f0f0; }
+  .instr-list li:last-child { border-bottom:none; }
+  .instr-list li:before { content:"•"; position:absolute; left:8px; color:var(--abc-red); font-weight:700; font-size:1.3rem; }
+  .no-calc-banner { background:#fdeceb; border:1.5px solid var(--abc-red); border-radius:8px; padding:12px 16px;
+      margin-bottom:16px; font-size:0.92rem; font-weight:600; color:var(--abc-red-dark); display:flex; align-items:center; gap:8px; }
+  .resume-card { text-align:center; }
+</style>
+</head>
+<body>
+<header><h1>Year 10 Diagnostic</h1></header>
+<div class="wrap">
+
+  <div id="screen-locked" class="card" style="display:none;">
+    <h2>Loading…</h2>
+  </div>
+
+  <div id="screen-wrong-year" class="card" style="display:none;">
+    <h2>Not applicable</h2>
+    <p>This diagnostic is for Year 10 students only.</p>
+    <p><a href="dashboard-student.html">Go to your dashboard</a></p>
+  </div>
+
+  <div id="screen-resume" class="card resume-card" style="display:none;">
+    <h2>Welcome back!</h2>
+    <p>It looks like you started this diagnostic before but didn't finish. Would you like to carry on where you left off, or start again from the beginning?</p>
+    <div class="nav" style="justify-content:center; gap:12px;">
+      <button class="nav-btn secondary" onclick="restartDiagnostic()">Start Over</button>
+      <button class="nav-btn" onclick="resumeDiagnostic()">Continue Where I Left Off</button>
+    </div>
+  </div>
+
+  <div id="screen-intro" class="card" style="display:none;">
+    <h2>Welcome!</h2>
+    <p>This diagnostic helps your teachers see exactly where you're strong and where you need extra support in Maths and English. There's no need to revise — just do your best, working steadily through each section.</p>
+
+    <ul class="instr-list">
+      <li><strong>Maths</strong> — types of number, HCF &amp; LCM, surds, indices, and time</li>
+      <li><strong>English</strong> — spelling and grammar</li>
+    </ul>
+
+    <div class="no-calc-banner">🚫 No calculators — we want to see what you can do on your own.</div>
+
+    <p>You don't have to finish in one sitting. Use the <strong>Save &amp; Continue Later</strong> button at any point, and when you log back in you'll be able to pick up exactly where you stopped.</p>
+    <button class="nav-btn" onclick="startDiagnostic()">Start</button>
+  </div>
+
+  <div id="screen-quiz" class="card" style="display:none;">
+    <div class="progress"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+    <div id="sectionTitle" class="section-title"></div>
+    <div id="sectionHint" class="hint" style="margin-bottom:14px;"></div>
+    <div id="passageBox" class="passage" style="display:none;"></div>
+    <div id="qNum" class="q-num"></div>
+    <div id="qText" class="q-text"></div>
+    <div id="qBody"></div>
+    <div class="nav">
+      <button class="btn-save" onclick="saveAndPause()">💾 Save &amp; Continue Later</button>
+      <button class="nav-btn" id="nextBtn" onclick="nextQuestion()" disabled>Next</button>
+    </div>
+  </div>
+
+  <div id="screen-saved" class="card resume-card" style="display:none;">
+    <h2>Progress saved</h2>
+    <p>Your answers so far have been saved. You can close this page and come back any time — just log back in and you'll be able to continue exactly where you left off.</p>
+    <p><a href="dashboard-student.html">Go to your dashboard</a></p>
+  </div>
+
+  <div id="screen-done" class="card" style="display:none;">
+    <h2>Thank you!</h2>
+    <p>Your diagnostic has been submitted. Your teachers will use this to help plan the right support and stretch for you this term.</p>
+    <p><a href="dashboard-student.html">Go to your dashboard</a></p>
+  </div>
+
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let savedProgress = null;
+
+// ---------- Session + eligibility check ----------
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = 'login.html';
+    return;
+  }
+  currentUser = session.user;
+
+  const { data: profile } = await supabase.from('profiles')
+    .select('diagnostic_y10_completed, year_group').eq('id', currentUser.id).single();
+
+  if (!profile || Number(profile.year_group) !== 10) {
+    document.getElementById('screen-wrong-year').style.display = 'block';
+    return;
+  }
+
+  if (profile.diagnostic_y10_completed) {
+    document.getElementById('screen-done').style.display = 'block';
+    document.querySelector('#screen-done p').textContent = "You've already completed this diagnostic.";
+    return;
+  }
+
+  const { data: progress } = await supabase.from('diagnostic_y10_progress').select('*').eq('student_id', currentUser.id).maybeSingle();
+  if (progress) {
+    savedProgress = progress;
+    document.getElementById('screen-resume').style.display = 'block';
+  } else {
+    document.getElementById('screen-intro').style.display = 'block';
+  }
+})();
+
+// ---------- Maths question bank (18 Qs) — Year 9 level ----------
+// ---------- Maths question bank (15 Qs) — Year 10 IGCSE intro topics ----------
+const mathsQs = [
+  { id:'m1', section:'Maths — Types of Number', type:'mc', text:'Which of these is a prime number?', options:['91','97','93','99'], answer:1 },
+  { id:'m2', section:'Maths — Types of Number', type:'mc', text:'Which of these is a square number?', options:['48','49','50','52'], answer:1 },
+  { id:'m3', section:'Maths — Types of Number', type:'mc', text:'Which of these is an irrational number?', options:['0.5','√9','√2','3/4'], answer:2 },
+  { id:'m4', section:'Maths — HCF & LCM', type:'numeric', text:'Find the HCF of 24 and 36.', answer:'12' },
+  { id:'m5', section:'Maths — HCF & LCM', type:'numeric', text:'Find the HCF of 18 and 30.', answer:'6' },
+  { id:'m6', section:'Maths — HCF & LCM', type:'numeric', text:'Find the LCM of 6 and 8.', answer:'24' },
+  { id:'m7', section:'Maths — Surds', type:'mc', text:'Simplify: √48', options:['4√3','2√12','6√2','8√6'], answer:0 },
+  { id:'m8', section:'Maths — Surds', type:'mc', text:'Simplify: √2 × √8', options:['√10','4','16','2√8'], answer:1 },
+  { id:'m9', section:'Maths — Surds', type:'numeric', text:'Simplify: 3√5 + 2√5 (give the coefficient of √5 only)', answer:'5' },
+  { id:'m10', section:'Maths — Indices', type:'numeric', text:'Work out: 2⁵', answer:'32' },
+  { id:'m11', section:'Maths — Indices', type:'mc', text:'Simplify: x³ × x⁴', options:['x⁷','x¹²','x¹','7x'], answer:0 },
+  { id:'m12', section:'Maths — Indices', type:'mc', text:'Work out: 3⁰', options:['0','1','3','undefined'], answer:1 },
+  { id:'m13', section:'Maths — Time', type:'numeric', text:'A train departs at 09:45 and arrives at 12:20. How long is the journey (in minutes)?', answer:'155' },
+  { id:'m14', section:'Maths — Time', type:'mc', text:'What is 14:30 in 12-hour clock format?', options:['2:30am','2:30pm','4:30pm','12:30pm'], answer:1 },
+  { id:'m15', section:'Maths — Time', type:'numeric', text:'A journey takes 2 hours 45 minutes and starts at 08:15. What time does it end (24-hour clock, e.g. 1100)?', answer:'1100' },
+];
+
+
+const grammarQs = [
+  { id:'g1', section:'English — Grammar', type:'mc', text:'Which sentence is correctly punctuated?', options:[
+      'Its going to rain later, so bring your umbrella.',
+      "It's going to rain later, so bring your umbrella.",
+      'Its going to rain later so bring your umbrella'
+    ], answer:1 },
+  { id:'g2', section:'English — Grammar', type:'mc', text:'Choose the correct word: "Neither of the boys ___ finished their homework."', options:['has','have','had have','haves'], answer:0 },
+  { id:'g3', section:'English — Grammar', type:'mc', text:'Which sentence uses the past tense correctly?', options:[
+      'She go to the market yesterday.',
+      'She goed to the market yesterday.',
+      'She went to the market yesterday.'
+    ], answer:2 },
+  { id:'g4', section:'English — Grammar', type:'mc', text:'Identify the sentence with a spelling mistake.', options:[
+      'The recieve of the goods was delayed.',
+      'The receipt confirmed the payment.',
+      'They received the parcel on Monday.'
+    ], answer:0 },
+  { id:'g5', section:'English — Grammar', type:'mc', text:'Which word correctly completes: "The students, along with their teacher, ___ arriving soon."', options:['is','are','was','be'], answer:0 },
+  { id:'g6', section:'English — Grammar', type:'mc', text:'Which sentence uses an apostrophe correctly?', options:[
+      "The teacher's marked all of the students' books.",
+      "The teachers' marked all of the student's books.",
+      "The teacher marked all of the students' books."
+    ], answer:2 },
+  { id:'g7', section:'English — Grammar', type:'mc', text:'Choose the correctly capitalised sentence.', options:[
+      'We visited lagos and abuja during the easter holidays.',
+      'We visited Lagos and Abuja during the Easter holidays.',
+      'we visited Lagos and Abuja during the easter Holidays.'
+    ], answer:1 },
+  { id:'g8', section:'English — Grammar', type:'mc', text:'Which sentence is a complete sentence (not a fragment)?', options:[
+      'Running quickly down the road, out of breath.',
+      'Because the exam started late.',
+      'The bus arrived ten minutes late.'
+    ], answer:2 },
+];
+
+// ---------- English: Spelling (8 Qs) ----------
+const passageText = '';
+
+const compQs = [
+  { id:'c1', section:'English — Spelling', type:'mc', text:'Which is the correctly spelled word?', options:['Recieve','Receive','Receeve','Receve'], answer:1 },
+  { id:'c2', section:'English — Spelling', type:'mc', text:'Which is the correctly spelled word?', options:['Accomodate','Acommodate','Accommodate','Acomodate'], answer:2 },
+  { id:'c3', section:'English — Spelling', type:'mc', text:'Which is the correctly spelled word?', options:['Definately','Definitely','Definitly','Definetely'], answer:1 },
+  { id:'c4', section:'English — Spelling', type:'mc', text:'Which is the correctly spelled word?', options:['Necessary','Neccessary','Necesary','Neccesary'], answer:0 },
+  { id:'c5', section:'English — Spelling', type:'mc', text:'Which is the correctly spelled word?', options:['Seperate','Separate','Seperete','Separrate'], answer:1 },
+  { id:'c6', section:'English — Spelling', type:'mc', text:'Which is the correctly spelled word?', options:['Occured','Occurred','Ocurred','Occureed'], answer:1 },
+  { id:'c7', section:'English — Spelling', type:'mc', text:'Which is the correctly spelled word?', options:['Embarass','Embarrass','Embarras','Embarrass'], answer:1 },
+  { id:'c8', section:'English — Spelling', type:'mc', text:'Which is the correctly spelled word?', options:['Rhythem','Rhythm','Rythm','Rhythym'], answer:1 },
+];
+
+// ---------- Bar chart SVG helper ----------
+function renderBarChartSVG(labels, values) {
+  const width = 320, height = 220, padding = 36, barGap = 14;
+  const maxVal = Math.max(...values) * 1.15;
+  const chartHeight = height - padding * 2;
+  const barWidth = (width - padding * 2 - barGap * (values.length - 1)) / values.length;
+  const colours = ['#C0272D', '#1565C0', '#2E7D32', '#6A1B9A', '#E67E22'];
+  let bars = '';
+  values.forEach((v, i) => {
+    const barHeight = (v / maxVal) * chartHeight;
+    const x = padding + i * (barWidth + barGap);
+    const y = height - padding - barHeight;
+    bars += `
+      <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${colours[i % colours.length]}" rx="3"></rect>
+      <text x="${x + barWidth/2}" y="${y - 6}" text-anchor="middle" font-size="13" font-weight="700" fill="#333">${v}</text>
+      <text x="${x + barWidth/2}" y="${height - padding + 16}" text-anchor="middle" font-size="11" fill="#555">${labels[i]}</text>
+    `;
+  });
+  return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;max-width:360px;height:auto;display:block;margin:0 auto">
+    <line x1="${padding}" y1="${height-padding}" x2="${width-padding}" y2="${height-padding}" stroke="#ccc" stroke-width="1.5"></line>
+    ${bars}
+  </svg>`;
+}
+
+// ---------- State ----------
+let queue = [];
+let idx = 0;
+let answers = {};
+let currentSelection = null;
+
+window.startDiagnostic = function() {
+  document.getElementById('screen-intro').style.display = 'none';
+  buildQueue();
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderQuestion();
+};
+
+function buildQueue() {
+  queue = [
+    ...mathsQs,
+    ...grammarQs,
+    ...compQs
+  ];
+  idx = 0;
+}
+
+function currentSectionLabel(q) {
+  if (q.section) return q.section;
+  if (compQs.includes(q)) return 'English — Reading Comprehension';
+  return '';
+}
+
+window.renderQuestion = function renderQuestion() {
+  const q = queue[idx];
+  document.getElementById('progressBar').style.width = `${Math.round((idx / queue.length) * 100)}%`;
+  document.getElementById('sectionTitle').textContent = currentSectionLabel(q);
+  document.getElementById('sectionHint').textContent = '';
+  document.getElementById('qNum').textContent = `Question ${idx + 1} of ${queue.length}`;
+  document.getElementById('qText').textContent = q.text;
+  currentSelection = (q.id in answers) ? answers[q.id] : null;
+
+  document.getElementById('passageBox').style.display = 'none';
+
+  const body = document.getElementById('qBody');
+  body.innerHTML = '';
+
+  if (q.chartData) {
+    const chartWrap = document.createElement('div');
+    chartWrap.innerHTML = renderBarChartSVG(q.chartData.labels, q.chartData.values);
+    body.appendChild(chartWrap);
+  }
+
+  if (q.type === 'mc' || (!q.type && q.options)) {
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt' + (currentSelection === i ? ' selected' : '');
+      btn.textContent = opt;
+      btn.onclick = () => {
+        answers[q.id] = i;
+        currentSelection = i;
+        document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('nextBtn').disabled = false;
+      };
+      body.appendChild(btn);
+    });
+    document.getElementById('nextBtn').disabled = currentSelection === null;
+  } else {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = answers[q.id] || '';
+    input.placeholder = 'Type your answer';
+    input.oninput = () => {
+      answers[q.id] = input.value.trim();
+      document.getElementById('nextBtn').disabled = input.value.trim() === '';
+    };
+    body.appendChild(input);
+    document.getElementById('nextBtn').disabled = !(q.id in answers) || answers[q.id] === '';
+  }
+};
+
+window.nextQuestion = function() {
+  idx++;
+  if (idx >= queue.length) {
+    document.getElementById('screen-quiz').style.display = 'none';
+    window.submitDiagnostic();
+    return;
+  }
+  renderQuestion();
+};
+
+// ---------- Save & resume ----------
+window.saveAndPause = async function() {
+  await supabase.from('diagnostic_y10_progress').upsert({
+    student_id: currentUser.id,
+    queue_state: queue.map(q => q.id),
+    current_index: idx,
+    answers: answers,
+    updated_at: new Date().toISOString()
+  }, { onConflict: 'student_id' });
+
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-saved').style.display = 'block';
+};
+
+window.restartDiagnostic = async function() {
+  await supabase.from('diagnostic_y10_progress').delete().eq('student_id', currentUser.id);
+  document.getElementById('screen-resume').style.display = 'none';
+  document.getElementById('screen-intro').style.display = 'block';
+};
+
+window.resumeDiagnostic = function() {
+  document.getElementById('screen-resume').style.display = 'none';
+
+  const allQById = {};
+  [...mathsQs, ...grammarQs, ...compQs].forEach(q => { allQById[q.id] = q; });
+
+  queue = savedProgress.queue_state.map(qid => allQById[qid]);
+  idx = savedProgress.current_index || 0;
+  answers = savedProgress.answers || {};
+
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderQuestion();
+};
+
+// ---------- Submit ----------
+window.submitDiagnostic = async function() {
+  function clusterScore(sectionName) {
+    const qs = mathsQs.filter(q => q.section === sectionName);
+    const correct = qs.filter(q => String(answers[q.id]) === String(q.answer)).length;
+    return { correct, total: qs.length, pct: qs.length ? correct / qs.length : 1 };
+  }
+  const numberCluster   = clusterScore('Maths — Types of Number');
+  const hcfCluster       = clusterScore('Maths — HCF & LCM');
+  const surdsCluster     = clusterScore('Maths — Surds');
+  const indicesCluster   = clusterScore('Maths — Indices');
+  const timeCluster      = clusterScore('Maths — Time');
+
+  const mathsTotal = mathsQs.length;
+  const mathsCorrect = mathsQs.filter(q => String(answers[q.id]) === String(q.answer)).length;
+
+  const grammarCorrect = grammarQs.filter(q => answers[q.id] === q.answer).length;
+  const spellingCorrect = compQs.filter(q => answers[q.id] === q.answer).length;
+
+  const bridgeMathsNumber  = numberCluster.pct   <= 0.5;
+  const bridgeMathsHcf     = hcfCluster.pct      <= 0.5;
+  const bridgeMathsSurds   = surdsCluster.pct    <= 0.5;
+  const bridgeMathsIndices = indicesCluster.pct  <= 0.5;
+  const bridgeMathsTime    = timeCluster.pct     <= 0.5;
+
+  const bridgeEnglishGrammar   = grammarCorrect < 5;
+  const bridgeEnglishSpelling  = spellingCorrect < 5;
+
+  const anyBridgeMaths   = bridgeMathsNumber || bridgeMathsHcf || bridgeMathsSurds || bridgeMathsIndices || bridgeMathsTime;
+  const anyBridgeEnglish = bridgeEnglishGrammar || bridgeEnglishSpelling;
+  const bridgeNeeded = anyBridgeMaths || anyBridgeEnglish;
+
+  const extension = mathsCorrect >= Math.round(mathsTotal * 0.85) && grammarCorrect >= 7 && spellingCorrect >= 7;
+
+  const { error: insertErr } = await supabase.from('diagnostic_y10_results').insert({
+    student_id: currentUser.id,
+    maths_score: mathsCorrect,
+    maths_total: mathsTotal,
+    grammar_score: grammarCorrect,
+    spelling_score: spellingCorrect,
+    raw_answers: answers
+  });
+
+  const { error: profileErr } = await supabase.from('profiles').update({
+    diagnostic_y10_completed: true,
+    extension: extension,
+    bridge_needed: bridgeNeeded,
+    bridge_maths_number: bridgeMathsNumber,
+    bridge_maths_hcf: bridgeMathsHcf,
+    bridge_maths_surds: bridgeMathsSurds,
+    bridge_maths_indices: bridgeMathsIndices,
+    bridge_maths_time: bridgeMathsTime,
+    bridge_english_grammar: bridgeEnglishGrammar,
+    bridge_english_spelling: bridgeEnglishSpelling
+  }).eq('id', currentUser.id);
+
+  if (insertErr || profileErr) {
+    alert('There was a problem submitting. Please try again or ask a teacher for help.');
+    console.error(insertErr, profileErr);
+    return;
+  }
+
+  await supabase.from('diagnostic_y10_progress').delete().eq('student_id', currentUser.id);
+
+  document.getElementById('screen-done').style.display = 'block';
+};
+</script>
+</body>
+</html>
