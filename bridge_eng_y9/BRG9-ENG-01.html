@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Complex Sentences & Punctuation for Effect — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; font-size:16px; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.65; font-size:1.05rem; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:12px; border-radius:6px; margin:10px 0; font-size:1.1rem; text-align:center; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:16px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-size:1.15rem; font-weight:600;
+         min-height:52px; -webkit-tap-highlight-color:transparent; }
+  .opt:active { transform:scale(0.98); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  .try-fb { margin-top:12px; font-weight:600; font-size:1.05rem; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; gap:10px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:14px 22px; border-radius:10px; cursor:pointer;
+         font-size:1.05rem; min-height:48px; flex:1; -webkit-tap-highlight-color:transparent; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+  button.nav-btn:disabled { opacity:0.5; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge English (Y9): Complex Sentences & Punctuation for Effect</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Building more sophisticated complex sentences", "teach": ["A complex sentence can include more than one subordinate clause for extra detail and sophistication.", "Example: 'Although it was raining, which made the pitch slippery, the match continued because both teams wanted the win.'", "Layering clauses like this shows examiners strong control over sentence structure \u2014 but don't overdo it in every sentence."], "yt_prompt": "Which sentence uses complex structure most effectively?"}, {"title": "Relative clauses", "teach": ["A relative clause adds extra information about a noun, usually starting with who, which, that, or whose.", "Example: 'The teacher, who had taught for twenty years, retired in July.' The relative clause adds detail about the teacher.", "Commas usually surround a relative clause if the information is 'extra' (not essential to identify the noun)."], "yt_prompt": "Which sentence correctly uses a relative clause?"}, {"title": "Using semicolons", "teach": ["A semicolon joins two closely related complete sentences without using a connective word.", "Example: 'The exam was difficult; most students found the last question impossible.'", "Both halves of a semicolon sentence must be able to stand alone as complete sentences \u2014 unlike a comma splice."], "yt_prompt": "Which sentence uses the semicolon correctly?"}, {"title": "Using colons", "teach": ["A colon introduces a list, an explanation, or an example that follows on from the main clause.", "Example: 'She had one goal: to win the scholarship.' The colon introduces exactly what the goal was.", "The part before the colon must be a complete sentence on its own \u2014 never use a colon after an incomplete phrase."], "yt_prompt": "Which sentence uses the colon correctly?"}, {"title": "Using dashes for effect", "teach": ["A single dash can introduce a dramatic afterthought or emphasis: 'She opened the door \u2014 and screamed.'", "A pair of dashes can add extra information mid-sentence, similar to brackets: 'The result \u2014 though nobody expected it \u2014 changed everything.'", "Dashes create a more informal, dramatic effect compared to commas or brackets."], "yt_prompt": "Which sentence uses dashes effectively?"}, {"title": "Short sentences for impact", "teach": ["A short, simple sentence placed after longer, complex sentences can create real dramatic impact.", "Example: 'The crowd roared as the final whistle blew, players collapsing to the ground in exhaustion and relief. They had won.'", "This is a deliberate technique writers use \u2014 varying sentence length is as important as varying sentence type."], "yt_prompt": "Which use of a short sentence creates the most impact?"}, {"title": "Fronted adverbials", "teach": ["A fronted adverbial starts a sentence by describing how, when, or where something happens, followed by a comma.", "Example: 'Slowly and carefully, she opened the ancient book.' The adverbial phrase comes before the main clause.", "This technique varies your sentence openings instead of always starting with the subject."], "yt_prompt": "Which sentence correctly uses a fronted adverbial?"}, {"title": "Combining techniques for effect", "teach": ["Skilled writers combine several of these techniques \u2014 varying sentence length, using dashes or semicolons, and fronted adverbials \u2014 for deliberate effect.", "When analysing a text, always ask: why might the writer have chosen THIS particular sentence structure here?", "The effect often matches the content \u2014 short sentences for tension, long complex ones for description or explanation."], "yt_prompt": "What effect does this sentence structure choice most likely create?"}, {"title": "Punctuation for clarity vs punctuation for effect", "teach": ["Some punctuation exists purely for grammatical clarity (like commas in lists); other punctuation is a deliberate stylistic choice (like a dramatic dash).", "When writing about a text, distinguish between 'this comma is grammatically necessary' and 'this dash creates suspense'.", "Being able to explain WHY a writer used specific punctuation, not just identify it, is a higher-level analytical skill."], "yt_prompt": "Is this punctuation choice mainly for clarity, or for stylistic effect?"}, {"title": "Mixed practice", "teach": ["You've now covered relative clauses, semicolons, colons, dashes, fronted adverbials, and sentence-length variation for effect.", "These techniques are exactly what examiners look for in both your own writing and in your analysis of other texts.", "This final question checks you can identify the technique and its likely effect together."], "yt_prompt": "Which sentence uses the technique most effectively?"}];
+function ytGen_0() { const opts=['Although it was raining, which made the pitch slippery, the match continued.','It was raining. The pitch was slippery. The match continued.']; return {q:opts.join(' / '), options:opts, answer:opts[0]}; }
+function ytGen_1() { const opts=['The teacher, who had taught for twenty years, retired in July.','The teacher who had taught for twenty years, retired in july.']; return {q:opts.join(' / '), options:opts, answer:opts[0]}; }
+function ytGen_2() { const opts=['The exam was difficult; most students found the last question impossible.','The exam was difficult; because most students found the last question impossible.']; return {q:opts.join(' / '), options:opts, answer:opts[0]}; }
+function ytGen_3() { const opts=['She had one goal: to win the scholarship.','She had one goal to win: the scholarship.']; return {q:opts.join(' / '), options:opts, answer:opts[0]}; }
+function ytGen_4() { const opts=['She opened the door — and screamed.','She — opened the door and screamed —.']; return {q:opts.join(' / '), options:opts, answer:opts[0]}; }
+function ytGen_5() { const opts=['The crowd roared as the whistle blew. They had won.','The crowd roared as the whistle blew, and they had won, which was expected.']; return {q:opts.join(' / '), options:opts, answer:opts[0]}; }
+function ytGen_6() { const opts=['Slowly and carefully, she opened the ancient book.','She opened, slowly and carefully the ancient book.']; return {q:opts.join(' / '), options:opts, answer:opts[0]}; }
+function ytGen_7() { const opts=[['A very short sentence after a long descriptive one','Creates dramatic impact / tension'],['A long, flowing sentence with several clauses','Builds detailed description or explanation']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:['Creates dramatic impact / tension','Builds detailed description or explanation'], answer:p[1]}; }
+function ytGen_8() { const opts=[['Commas separating items in a list','Clarity'],['A dash before a shocking twist','Stylistic effect']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:['Clarity','Stylistic effect'], answer:p[1]}; }
+function ytGen_9() { const opts=['Silently, she crept past the sleeping guard.','She silently crept, past the sleeping, guard.']; return {q:opts.join(' / '), options:opts, answer:opts[0]}; }
+
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let ANSWER_POOL = [];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let currentOptions = null;
+let answered = false;
+
+function makeDistractors(correctAnswer, pool) {
+  const ans = String(correctAnswer);
+  let candidates = [];
+
+  if (/^-?\d+$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d);
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+\/\d+$/.test(ans)) {
+    const [numer, denom] = ans.split('/').map(Number);
+    const perturbs = [[numer+1,denom],[numer>1?numer-1:numer+2,denom],[numer,denom+1],[numer,denom>1?denom-1:denom+2],[numer+1,denom+1]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}/${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+:\d+$/.test(ans)) {
+    const [a1, b1] = ans.split(':').map(Number);
+    const perturbs = [[a1+1,b1],[a1>1?a1-1:a1+2,b1],[a1,b1+1],[a1,b1>1?b1-1:b1+2]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}:${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^-?\d+\.\d+$/.test(ans)) {
+    const num = parseFloat(ans);
+    const decimals = (ans.split('.')[1]||'').length;
+    const deltas = [0.1,-0.1,0.01,-0.01,1,-1,0.5,-0.5].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = (num + d).toFixed(decimals);
+      if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+%$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [5,-5,10,-10,2,-2,1,-1].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d) + '%';
+      if (c !== ans && !candidates.includes(c) && (num+d) >= 0) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  if (candidates.length < 3 && pool && pool.length) {
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
+    others.sort(() => Math.random()-0.5);
+    for (const o of others) {
+      if (candidates.includes(o)) continue;
+      candidates.push(o);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  return candidates.slice(0,3);
+}
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+
+    if (currentYT.options) {
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
+    } else {
+      const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
+      const distractors = makeDistractors(currentYT.answer, pool);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
+    }
+
+    let optsHtml = currentOptions.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="worked">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  const correctIdx = currentOptions.indexOf(String(currentYT.answer));
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === correctIdx) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === correctIdx) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = `
+    <div class="teach"><strong>Well done — topic complete!</strong><br>Great work finishing all 10 questions.</div>
+    <div id="completeStatus" style="text-align:center; margin-top:16px;">
+      <div id="completeSpinner" style="color:#888; font-size:0.95rem;">Saving your progress…</div>
+    </div>`;
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) {
+    window.markComplete().then(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:#1b7d3a; font-weight:700; font-size:1.05rem;">✓ Marked as complete!</div><a href="../dashboard-student.html" style="display:inline-block; margin-top:12px; background:var(--red); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Back to dashboard</a>';
+    }).catch(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:var(--red); font-size:0.9rem;">Could not save automatically.</div><button class="nav-btn primary" style="margin-top:10px;" onclick="window.markComplete().then(()=>location.reload())">Try again</button>';
+    });
+  }
+}
+
+ANSWER_POOL = YT_GENS.map(fn => fn().answer);
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG9-ENG-01';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not logged in');
+
+  const { data: topicRow, error: topicErr } = await supabase
+    .from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
+  if (topicErr || !topicRow) throw new Error('Could not find topic: ' + _abcTopicCode);
+
+  const { error } = await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_id: topicRow.id,
+    status: 'completed',
+    last_visited_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_id' });
+  if (error) throw error;
+};
+</script>
+</body>
+</html>
