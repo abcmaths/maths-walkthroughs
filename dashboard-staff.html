@@ -112,7 +112,8 @@
   <div class="nav-tab" onclick="showTab('feedback')">Feedback</div>
   <div class="nav-tab" onclick="showTab('bugs')">Bug Reports</div>
   <div class="nav-tab" onclick="showTab('users')">Users</div>
-  <div class="nav-tab" onclick="showTab('diagnostic')">Diagnostic</div>
+  <div class="nav-tab" onclick="showTab('diagnostic')">Diagnostic (Y7)</div>
+  <div class="nav-tab" onclick="showTab('diagnosticy89')">Diagnostic (Y8/9)</div>
   <div class="nav-tab" onclick="showTab('reviews')">Review Walkthroughs</div>
   <div class="nav-tab" onclick="showTab('import')">Import Users</div>
 </div>
@@ -459,6 +460,60 @@
               </tr>
             </thead>
             <tbody id="diag-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAGNOSTIC Y8/9 -->
+    <div class="tab-panel" id="tab-diagnosticy89">
+      <div class="filter-bar">
+        <select id="diagy89-filter-status" onchange="renderDiagnosticY89Tab()">
+          <option value="">All Students</option>
+          <option value="completed">Diagnostic Completed</option>
+          <option value="not_completed">Diagnostic Not Completed</option>
+          <option value="needs_review">Writing Sample Needs Review</option>
+        </select>
+        <select id="diagy89-filter-flag" onchange="renderDiagnosticY89Tab()">
+          <option value="">All Flags</option>
+          <option value="bridge_needed">Bridge Needed</option>
+          <option value="bridge_maths_number">Bridge Maths — Number</option>
+          <option value="bridge_maths_fractions">Bridge Maths — Fractions/%</option>
+          <option value="bridge_maths_ratio">Bridge Maths — Ratio</option>
+          <option value="bridge_maths_algebra">Bridge Maths — Algebra</option>
+          <option value="bridge_maths_geometry">Bridge Maths — Geometry</option>
+          <option value="bridge_maths_data">Bridge Maths — Data</option>
+          <option value="bridge_english_grammar">Bridge English — Grammar</option>
+          <option value="bridge_english_comprehension">Bridge English — Comprehension</option>
+          <option value="bridge_english_writing">Bridge English — Writing</option>
+          <option value="extension">Extension</option>
+        </select>
+        <input type="text" id="diagy89-search" placeholder="Search by name or email…" oninput="renderDiagnosticY89Tab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.88rem;color:#333;min-width:200px">
+        <button class="btn-outline" style="font-size:0.82rem;padding:6px 14px" onclick="exportDiagnosticY89()">↓ Export CSV</button>
+      </div>
+      <div class="section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="section-title">Year 8/9 Diagnostic & Support Status <span id="diagy89-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Year</th>
+                <th>Diagnostic</th>
+                <th>Maths</th>
+                <th>Grammar</th>
+                <th>Comprehension</th>
+                <th>Writing Sample</th>
+                <th>Bridge Maths</th>
+                <th>Bridge English</th>
+                <th>Extension</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="diagy89-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -979,6 +1034,7 @@
       if (s) s.writing_sample_needs_review = false;
       window.openStudentModal(studentId);
       if (document.getElementById('tab-diagnostic').classList.contains('active')) window.renderDiagnosticTab();
+      if (document.getElementById('tab-diagnosticy89').classList.contains('active')) window.renderDiagnosticY89Tab();
     }
   };
 
@@ -1050,7 +1106,7 @@
 
   // ── Tab switching ──
   window.showTab = function(name) {
-    const names = ['overview','progress','tests','topics','feedback','bugs','users','diagnostic','reviews','import'];
+    const names = ['overview','progress','tests','topics','feedback','bugs','users','diagnostic','diagnosticy89','reviews','import'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
@@ -1060,6 +1116,7 @@
     if (name === 'users')    window.renderUsersTab();
     if (name === 'tests')    window.renderTestsTab();
     if (name === 'diagnostic') window.renderDiagnosticTab();
+    if (name === 'diagnosticy89') window.renderDiagnosticY89Tab();
     if (name === 'reviews')  window.renderReviewTab();
   };
 
@@ -2363,6 +2420,114 @@
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     a.download = 'abc_diagnostic_status_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+  };
+
+  // ── Diagnostic Y8/9 tab ──
+  let diagY89ResultsMap = null; // student_id -> latest diagnostic_y89_results row
+
+  async function loadDiagY89Results() {
+    if (diagY89ResultsMap) return;
+    diagY89ResultsMap = {};
+    const { data, error } = await supabase
+      .from('diagnostic_y89_results')
+      .select('student_id, maths_score, maths_total, grammar_score, comprehension_score, created_at')
+      .order('created_at', { ascending: false });
+    if (!error && data) {
+      data.forEach(r => { if (!diagY89ResultsMap[r.student_id]) diagY89ResultsMap[r.student_id] = r; });
+    }
+  }
+
+  function getDiagnosticY89Rows() {
+    const emailMap = {};
+    allUsersWithEmail.forEach(u => { emailMap[u.id] = u.email; });
+    return allStudents
+      .filter(s => s.year_group === 8 || s.year_group === 9)
+      .map(s => ({
+        ...s,
+        email: emailMap[s.id] || '—',
+        diag: (diagY89ResultsMap && diagY89ResultsMap[s.id]) || null
+      }));
+  }
+
+  window.renderDiagnosticY89Tab = async function() {
+    await loadDiagY89Results();
+
+    const statusFilter = document.getElementById('diagy89-filter-status').value;
+    const flagFilter    = document.getElementById('diagy89-filter-flag').value;
+    const searchFilter  = document.getElementById('diagy89-search').value.toLowerCase();
+
+    const rows = getDiagnosticY89Rows().filter(s => {
+      const matchSearch = !searchFilter || s.full_name.toLowerCase().includes(searchFilter) || (s.email||'').toLowerCase().includes(searchFilter);
+      const matchStatus = !statusFilter ||
+        (statusFilter === 'completed' && s.diagnostic_y89_completed) ||
+        (statusFilter === 'not_completed' && !s.diagnostic_y89_completed) ||
+        (statusFilter === 'needs_review' && s.writing_sample_needs_review);
+      const matchFlag = !flagFilter || s[flagFilter] === true;
+      return matchSearch && matchStatus && matchFlag;
+    });
+
+    document.getElementById('diagy89-count').textContent = `— ${rows.length} student${rows.length !== 1 ? 's' : ''}`;
+
+    const tbody = document.getElementById('diagy89-tbody');
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#aaa;padding:24px">No students found</td></tr>';
+      return;
+    }
+
+    const yn = (v) => v ? '<span class="badge badge-green">Yes</span>' : '<span style="color:#ccc">—</span>';
+    const bridgeMathsAny = (s) => s.bridge_maths_number || s.bridge_maths_fractions || s.bridge_maths_ratio || s.bridge_maths_algebra || s.bridge_maths_geometry || s.bridge_maths_data;
+    const bridgeEnglishAny = (s) => s.bridge_english_grammar || s.bridge_english_comprehension || s.bridge_english_writing;
+    const score = (v, out) => v == null ? '<span style="color:#ccc">—</span>' : `${v}/${out}`;
+
+    tbody.innerHTML = rows.map(s => `
+      <tr>
+        <td><strong>${s.full_name}</strong></td>
+        <td style="font-size:0.82rem;color:#666">${s.email}</td>
+        <td>${s.year_group ? 'Year ' + s.year_group : '—'}</td>
+        <td>${s.diagnostic_y89_completed ? '<span class="badge badge-green">Completed</span>' : '<span class="badge badge-grey">Not yet</span>'}</td>
+        <td>${score(s.diag && s.diag.maths_score, (s.diag && s.diag.maths_total) || 18)}</td>
+        <td>${score(s.diag && s.diag.grammar_score, 8)}</td>
+        <td>${score(s.diag && s.diag.comprehension_score, 8)}</td>
+        <td>${s.writing_sample_needs_review ? '<span class="badge badge-yellow">Needs review</span>' : (s.diagnostic_y89_completed ? '<span style="color:#ccc">Reviewed</span>' : '—')}</td>
+        <td>${yn(bridgeMathsAny(s))}</td>
+        <td>${yn(bridgeEnglishAny(s))}</td>
+        <td>${yn(s.extension)}</td>
+        <td><button class="btn-link" onclick="openStudentModal('${s.id}')">View</button></td>
+      </tr>`).join('');
+  };
+
+  window.exportDiagnosticY89 = async function() {
+    await loadDiagY89Results();
+    const rows = getDiagnosticY89Rows();
+    const csvRows = [['Full Name','Email','Year','Diagnostic Completed','Maths Score','Maths Total','Grammar /8','Comprehension /8','Writing Sample Needs Review',
+      'Bridge Maths Number','Bridge Maths Fractions','Bridge Maths Ratio','Bridge Maths Algebra','Bridge Maths Geometry','Bridge Maths Data',
+      'Bridge English Grammar','Bridge English Comprehension','Bridge English Writing','Extension']];
+    rows.forEach(s => {
+      csvRows.push([
+        s.full_name, s.email, s.year_group || '',
+        s.diagnostic_y89_completed ? 'Yes' : 'No',
+        s.diag ? s.diag.maths_score : '',
+        s.diag ? s.diag.maths_total : '',
+        s.diag ? s.diag.grammar_score : '',
+        s.diag ? s.diag.comprehension_score : '',
+        s.writing_sample_needs_review ? 'Yes' : 'No',
+        s.bridge_maths_number ? 'Yes' : 'No',
+        s.bridge_maths_fractions ? 'Yes' : 'No',
+        s.bridge_maths_ratio ? 'Yes' : 'No',
+        s.bridge_maths_algebra ? 'Yes' : 'No',
+        s.bridge_maths_geometry ? 'Yes' : 'No',
+        s.bridge_maths_data ? 'Yes' : 'No',
+        s.bridge_english_grammar ? 'Yes' : 'No',
+        s.bridge_english_comprehension ? 'Yes' : 'No',
+        s.bridge_english_writing ? 'Yes' : 'No',
+        s.extension ? 'Yes' : 'No'
+      ]);
+    });
+    const csv = csvRows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'abc_diagnostic_y89_status_' + new Date().toISOString().slice(0,10) + '.csv';
     a.click();
   };
 
