@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Percentage Increase, Decrease & Reverse Percentages — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; font-size:16px; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.65; font-size:1.05rem; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:12px; border-radius:6px; margin:10px 0; font-size:1.1rem; text-align:center; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:16px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-size:1.15rem; font-weight:600;
+         min-height:52px; -webkit-tap-highlight-color:transparent; }
+  .opt:active { transform:scale(0.98); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  .try-fb { margin-top:12px; font-weight:600; font-size:1.05rem; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; gap:10px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:14px 22px; border-radius:10px; cursor:pointer;
+         font-size:1.05rem; min-height:48px; flex:1; -webkit-tap-highlight-color:transparent; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+  button.nav-btn:disabled { opacity:0.5; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths (Y9): % Increase, Decrease & Reverse Percentages</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Percentage increase", "teach": ["To increase an amount by a percentage, find the percentage of the amount, then add it on.", "Example: increase \u20a64,000 by 10% \u2192 10% of 4,000 = 400 \u2192 4,000 + 400 = \u20a64,400.", "A faster method: multiply by (1 + the percentage as a decimal). 10% increase = \u00d71.10."], "yt_prompt": "Work out the answer (in \u20a6):"}, {"title": "Percentage decrease", "teach": ["To decrease an amount by a percentage, find the percentage of the amount, then subtract it.", "Example: decrease \u20a65,000 by 20% \u2192 20% of 5,000 = 1,000 \u2192 5,000 \u2212 1,000 = \u20a64,000.", "Faster method: multiply by (1 \u2212 the percentage as a decimal). 20% decrease = \u00d70.80."], "yt_prompt": "Work out the answer (in \u20a6):"}, {"title": "The multiplier method", "teach": ["Multipliers combine the increase/decrease into a single number, avoiding a two-step calculation.", "For an increase of x%, the multiplier is (100+x)/100. For a decrease of x%, it's (100\u2212x)/100.", "Example: a 15% increase has multiplier 1.15; a 15% decrease has multiplier 0.85."], "yt_prompt": "What multiplier represents this change?"}, {"title": "Reverse percentages \u2014 finding the original", "teach": ["If you know the amount AFTER a percentage change, you can work backwards to find the original amount.", "Divide the new amount by the multiplier to find the original.", "Example: after a 20% discount, an item costs \u20a64,800. Original = 4,800 \u00f7 0.80 = \u20a66,000."], "yt_prompt": "Find the ORIGINAL price (in \u20a6):"}, {"title": "Reverse percentages \u2014 after an increase", "teach": ["The same idea applies after an increase \u2014 divide by the multiplier (which will be greater than 1).", "Example: after a 12% increase, a salary is \u20a656,000. Original = 56,000 \u00f7 1.12 = \u20a650,000.", "A common mistake is subtracting the percentage from the new value instead of dividing by the multiplier \u2014 this gives the wrong answer."], "yt_prompt": "Find the ORIGINAL amount (in \u20a6):"}, {"title": "Percentage change calculations", "teach": ["To find the percentage change between two amounts, use: (change \u00f7 original) \u00d7 100.", "Example: a price rises from \u20a6200 to \u20a6250. Change = 50. Percentage change = (50\u00f7200)\u00d7100 = 25%.", "Always divide by the ORIGINAL value, not the new value."], "yt_prompt": "Find the percentage increase:"}, {"title": "Successive percentage changes", "teach": ["When a value changes by one percentage, then another, apply each multiplier one after another \u2014 don't just add the percentages.", "Example: a price increases 10%, then decreases 10%. This is NOT back to the original \u2014 multiply 1.10 \u00d7 0.90 = 0.99, a 1% decrease overall.", "Always apply the multipliers in sequence to the running total, not to the original amount each time."], "yt_prompt": "Work out the final amount (in \u20a6, starting from \u20a61,000):"}, {"title": "Percentage profit and loss", "teach": ["Profit percentage = (profit \u00f7 cost price) \u00d7 100. Loss percentage = (loss \u00f7 cost price) \u00d7 100.", "Example: bought for \u20a6800, sold for \u20a61,000 \u2192 profit = 200 \u2192 percentage profit = (200\u00f7800)\u00d7100 = 25%.", "Always divide by the ORIGINAL cost price, never the selling price."], "yt_prompt": "Find the percentage profit:"}, {"title": "Simple interest", "teach": ["Simple interest is calculated as: Interest = (Principal \u00d7 Rate \u00d7 Time) \u00f7 100, where rate is the annual percentage and time is in years.", "Example: \u20a610,000 invested at 5% per year for 3 years \u2192 interest = (10,000 \u00d7 5 \u00d7 3) \u00f7 100 = \u20a61,500.", "Simple interest is the same amount added each year \u2014 it doesn't compound."], "yt_prompt": "Work out the simple interest (in \u20a6):"}, {"title": "Mixed practice", "teach": ["You've now covered percentage increase/decrease, the multiplier method, reverse percentages, and simple interest.", "Reverse percentage questions are the ones students find trickiest \u2014 remember to DIVIDE by the multiplier, not subtract the percentage.", "Read each question carefully to check whether you're finding the new value or working backwards to the original."], "yt_prompt": "Find the ORIGINAL price (in \u20a6):"}];
+function ytGen_0() { const amt=(Math.floor(Math.random()*40)+10)*100; const pct=[5,10,15,20,25][Math.floor(Math.random()*5)]; return {q:`Increase ₦${amt.toLocaleString()} by ${pct}%`, answer:String(Math.round(amt*(1+pct/100)))}; }
+function ytGen_1() { const amt=(Math.floor(Math.random()*40)+10)*100; const pct=[5,10,15,20,25][Math.floor(Math.random()*5)]; return {q:`Decrease ₦${amt.toLocaleString()} by ${pct}%`, answer:String(Math.round(amt*(1-pct/100)))}; }
+function ytGen_2() { const pct=[8,12,15,20,25][Math.floor(Math.random()*5)]; const isInc=Math.random()<0.5; const mult=isInc?(1+pct/100).toFixed(2):(1-pct/100).toFixed(2); return {q:`A ${pct}% ${isInc?'increase':'decrease'}`, answer:mult}; }
+function ytGen_3() { const pct=[10,20,25,15][Math.floor(Math.random()*4)]; const orig=(Math.floor(Math.random()*40)+10)*100; const after=Math.round(orig*(1-pct/100)); return {q:`After a ${pct}% discount, item costs ₦${after.toLocaleString()}`, answer:String(orig)}; }
+function ytGen_4() { const pct=[8,10,12,15][Math.floor(Math.random()*4)]; const orig=(Math.floor(Math.random()*40)+10)*1000; const after=Math.round(orig*(1+pct/100)); return {q:`After a ${pct}% increase, salary is ₦${after.toLocaleString()}`, answer:String(orig)}; }
+function ytGen_5() { const orig=(Math.floor(Math.random()*20)+5)*50; const pct=[10,20,25,50][Math.floor(Math.random()*4)]; const after=Math.round(orig*(1+pct/100)); return {q:`Price rises from ₦${orig} to ₦${after}`, answer:`${pct}%`}; }
+function ytGen_6() { const p1=[10,20][Math.floor(Math.random()*2)]; const p2=[5,10][Math.floor(Math.random()*2)]; const start=1000; const mid=start*(1+p1/100); const final=Math.round(mid*(1-p2/100)); return {q:`₦1,000 increases by ${p1}%, then decreases by ${p2}%`, answer:String(final)}; }
+function ytGen_7() { const cost=(Math.floor(Math.random()*20)+5)*100; const pct=[10,20,25,50][Math.floor(Math.random()*4)]; const sell=Math.round(cost*(1+pct/100)); return {q:`Bought for ₦${cost}, sold for ₦${sell}`, answer:`${pct}%`}; }
+function ytGen_8() { const p=(Math.floor(Math.random()*20)+5)*1000; const r=[3,4,5,6][Math.floor(Math.random()*4)]; const t=[2,3,4][Math.floor(Math.random()*3)]; return {q:`₦${p.toLocaleString()} at ${r}% per year for ${t} years`, answer:String((p*r*t)/100)}; }
+function ytGen_9() { const pct=[15,20,25][Math.floor(Math.random()*3)]; const orig=(Math.floor(Math.random()*40)+10)*100; const after=Math.round(orig*(1-pct/100)); return {q:`After a ${pct}% discount, item costs ₦${after.toLocaleString()}`, answer:String(orig)}; }
+
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let ANSWER_POOL = [];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let currentOptions = null;
+let answered = false;
+
+function makeDistractors(correctAnswer, pool) {
+  const ans = String(correctAnswer);
+  let candidates = [];
+
+  if (/^-?\d+$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d);
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+\/\d+$/.test(ans)) {
+    const [numer, denom] = ans.split('/').map(Number);
+    const perturbs = [[numer+1,denom],[numer>1?numer-1:numer+2,denom],[numer,denom+1],[numer,denom>1?denom-1:denom+2],[numer+1,denom+1]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}/${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+:\d+$/.test(ans)) {
+    const [a1, b1] = ans.split(':').map(Number);
+    const perturbs = [[a1+1,b1],[a1>1?a1-1:a1+2,b1],[a1,b1+1],[a1,b1>1?b1-1:b1+2]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}:${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^-?\d+\.\d+$/.test(ans)) {
+    const num = parseFloat(ans);
+    const decimals = (ans.split('.')[1]||'').length;
+    const deltas = [0.1,-0.1,0.01,-0.01,1,-1,0.5,-0.5].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = (num + d).toFixed(decimals);
+      if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+%$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [5,-5,10,-10,2,-2,1,-1].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d) + '%';
+      if (c !== ans && !candidates.includes(c) && (num+d) >= 0) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  if (candidates.length < 3 && pool && pool.length) {
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
+    others.sort(() => Math.random()-0.5);
+    for (const o of others) {
+      if (candidates.includes(o)) continue;
+      candidates.push(o);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  return candidates.slice(0,3);
+}
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+
+    if (currentYT.options) {
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
+    } else {
+      const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
+      const distractors = makeDistractors(currentYT.answer, pool);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
+    }
+
+    let optsHtml = currentOptions.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="worked">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  const correctIdx = currentOptions.indexOf(String(currentYT.answer));
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === correctIdx) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === correctIdx) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = `
+    <div class="teach"><strong>Well done — topic complete!</strong><br>Great work finishing all 10 questions.</div>
+    <div id="completeStatus" style="text-align:center; margin-top:16px;">
+      <div id="completeSpinner" style="color:#888; font-size:0.95rem;">Saving your progress…</div>
+    </div>`;
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) {
+    window.markComplete().then(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:#1b7d3a; font-weight:700; font-size:1.05rem;">✓ Marked as complete!</div><a href="../dashboard-student.html" style="display:inline-block; margin-top:12px; background:var(--red); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Back to dashboard</a>';
+    }).catch(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:var(--red); font-size:0.9rem;">Could not save automatically.</div><button class="nav-btn primary" style="margin-top:10px;" onclick="window.markComplete().then(()=>location.reload())">Try again</button>';
+    });
+  }
+}
+
+ANSWER_POOL = YT_GENS.map(fn => fn().answer);
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG9-MTH-02';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not logged in');
+
+  const { data: topicRow, error: topicErr } = await supabase
+    .from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
+  if (topicErr || !topicRow) throw new Error('Could not find topic: ' + _abcTopicCode);
+
+  const { error } = await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_id: topicRow.id,
+    status: 'completed',
+    last_visited_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_id' });
+  if (error) throw error;
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Standard Form & Significant Figures — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; font-size:16px; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.65; font-size:1.05rem; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:12px; border-radius:6px; margin:10px 0; font-size:1.1rem; text-align:center; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:16px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-size:1.15rem; font-weight:600;
+         min-height:52px; -webkit-tap-highlight-color:transparent; }
+  .opt:active { transform:scale(0.98); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  .try-fb { margin-top:12px; font-weight:600; font-size:1.05rem; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; gap:10px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:14px 22px; border-radius:10px; cursor:pointer;
+         font-size:1.05rem; min-height:48px; flex:1; -webkit-tap-highlight-color:transparent; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+  button.nav-btn:disabled { opacity:0.5; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths (Y9): Standard Form & Significant Figures</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "What is standard form?", "teach": ["Standard form writes very large or very small numbers as A \u00d7 10\u207f, where 1 \u2264 A < 10 and n is an integer.", "Example: 4,600,000 = 4.6 \u00d7 10\u2076 \u2014 move the decimal point until only one non-zero digit is before it, and count how many places it moved.", "Standard form makes huge or tiny numbers much easier to read and compare."], "yt_prompt": "Write in standard form:"}, {"title": "Converting standard form back to ordinary numbers", "teach": ["To convert back, move the decimal point the number of places shown by the power of 10.", "Example: 3.2 \u00d7 10\u2074 \u2192 move the decimal 4 places right \u2192 32,000.", "A positive power moves the point right (bigger number); a negative power moves it left (smaller number)."], "yt_prompt": "Write as an ordinary number:"}, {"title": "Standard form for small numbers", "teach": ["Very small numbers use a negative power of 10. Example: 0.00035 = 3.5 \u00d7 10\u207b\u2074.", "Count how many places the decimal point moves to get exactly one non-zero digit before the point \u2014 that count becomes the negative power.", "The smaller the original number, the more negative the power will be."], "yt_prompt": "Write in standard form:"}, {"title": "Rounding to a given number of significant figures", "teach": ["The first significant figure is the first non-zero digit, counting from the left. Round from there just like normal rounding.", "Example: 3,842 to 2 significant figures \u2192 look at the 3rd digit (4) to decide \u2192 3,800.", "Leading zeros (like in 0.0042) don't count as significant figures \u2014 the first sig fig is the 4."], "yt_prompt": "Round to the number of significant figures shown:"}, {"title": "Significant figures with decimals", "teach": ["For decimals less than 1, skip the leading zeros to find the first significant figure.", "Example: 0.048392 to 2 significant figures \u2192 first two sig figs are 4 and 8 \u2192 0.048.", "Trailing zeros after the decimal point that were part of the original number DO count as significant."], "yt_prompt": "Round to the number of significant figures shown:"}, {"title": "Comparing numbers in standard form", "teach": ["To compare numbers in standard form, compare the powers of 10 first \u2014 a bigger power means a bigger number.", "If the powers are equal, compare the leading number (A) instead.", "Example: 3.2 \u00d7 10\u2075 is smaller than 1.5 \u00d7 10\u2076, because 10\u2076 is ten times bigger than 10\u2075."], "yt_prompt": "Which is larger?"}, {"title": "Multiplying numbers in standard form", "teach": ["To multiply two standard form numbers, multiply the leading numbers together and add the powers of 10.", "Example: (2 \u00d7 10\u00b3) \u00d7 (3 \u00d7 10\u2074) = (2\u00d73) \u00d7 10^(3+4) = 6 \u00d7 10\u2077.", "If the leading number ends up 10 or more, convert it back into proper standard form."], "yt_prompt": "Work out the answer, in standard form:"}, {"title": "Dividing numbers in standard form", "teach": ["To divide two standard form numbers, divide the leading numbers and subtract the powers of 10.", "Example: (8 \u00d7 10\u2076) \u00f7 (2 \u00d7 10\u00b2) = (8\u00f72) \u00d7 10^(6\u22122) = 4 \u00d7 10\u2074.", "Always check the leading number is still between 1 and 10 after dividing."], "yt_prompt": "Work out the answer, in standard form:"}, {"title": "Real-world standard form contexts", "teach": ["Standard form is used for very large numbers (distances in space, populations) and very small numbers (sizes of cells, atoms).", "Example: the population of Nigeria is roughly 2.2 \u00d7 10\u2078 \u2014 much easier to write than 220,000,000.", "Being comfortable converting between forms helps you interpret real scientific and statistical data."], "yt_prompt": "Write in standard form:"}, {"title": "Mixed practice", "teach": ["You've now covered converting to and from standard form, rounding to significant figures, and multiplying/dividing in standard form.", "These skills come up constantly in science and in WAEC/IGCSE-style questions involving large data sets.", "Take care with the sign of the power \u2014 a common mistake is mixing up positive and negative powers."], "yt_prompt": "Write in standard form:"}];
+function ytGen_0() { const lead=(Math.floor(Math.random()*89)+11)/10; const power=Math.floor(Math.random()*4)+4; const num=Math.round(lead*Math.pow(10,power)); return {q:num.toLocaleString(), answer:`${lead.toFixed(1)} × 10^${power}`}; }
+function ytGen_1() { const lead=(Math.floor(Math.random()*89)+11)/10; const power=Math.floor(Math.random()*4)+3; const num=Math.round(lead*Math.pow(10,power)); return {q:`${lead.toFixed(1)} × 10^${power}`, answer:num.toLocaleString()}; }
+function ytGen_2() { const lead=(Math.floor(Math.random()*89)+11)/10; const power=Math.floor(Math.random()*4)+2; const num=lead/Math.pow(10,power); return {q:num.toFixed(power+1), answer:`${lead.toFixed(1)} × 10^-${power}`}; }
+function ytGen_3() { const base=Math.floor(Math.random()*9000)+1000; return {q:`Round ${base} to 2 s.f.`, answer:String(Math.round(base/Math.pow(10,String(base).length-2))*Math.pow(10,String(base).length-2))}; }
+function ytGen_4() { const dp=Math.floor(Math.random()*90000)+10000; const decStr='0.0' + String(dp); const rounded=(parseFloat(decStr)).toPrecision(2); return {q:`Round ${decStr} to 2 s.f.`, answer:String(Number(rounded))}; }
+function ytGen_5() { const p1=Math.floor(Math.random()*3)+3; const p2=p1+Math.floor(Math.random()*2)+1; const l1=(Math.floor(Math.random()*89)+11)/10; const l2=(Math.floor(Math.random()*89)+11)/10; return {q:`${l1.toFixed(1)} × 10^${p1} or ${l2.toFixed(1)} × 10^${p2}?`, options:[`${l1.toFixed(1)} × 10^${p1}`,`${l2.toFixed(1)} × 10^${p2}`], answer:`${l2.toFixed(1)} × 10^${p2}`}; }
+function ytGen_6() { const l1=Math.floor(Math.random()*4)+2; const l2=Math.floor(Math.random()*4)+2; const p1=Math.floor(Math.random()*3)+2; const p2=Math.floor(Math.random()*3)+2; const prod=l1*l2; const totalPower=p1+p2; let leadOut=prod, powerOut=totalPower; if(prod>=10){leadOut=prod/10; powerOut=totalPower+1;} return {q:`(${l1} × 10^${p1}) × (${l2} × 10^${p2})`, answer:`${leadOut} × 10^${powerOut}`}; }
+function ytGen_7() { const pairs=[[2,2],[3,2],[4,2],[2,3],[2,4],[3,3]]; const [result,l2]=pairs[Math.floor(Math.random()*pairs.length)]; const l1=l2*result; const p2=Math.floor(Math.random()*3)+2; const p1=p2+Math.floor(Math.random()*3)+1; return {q:`(${l1} × 10^${p1}) ÷ (${l2} × 10^${p2})`, answer:`${result} × 10^${p1-p2}`}; }
+function ytGen_8() { const lead=(Math.floor(Math.random()*89)+11)/10; const power=Math.floor(Math.random()*3)+6; const num=Math.round(lead*Math.pow(10,power)); return {q:`Population: ${num.toLocaleString()}`, answer:`${lead.toFixed(1)} × 10^${power}`}; }
+function ytGen_9() { const lead=(Math.floor(Math.random()*89)+11)/10; const power=Math.floor(Math.random()*5)+3; const num=Math.round(lead*Math.pow(10,power)); return {q:num.toLocaleString(), answer:`${lead.toFixed(1)} × 10^${power}`}; }
+
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let ANSWER_POOL = [];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let currentOptions = null;
+let answered = false;
+
+function makeDistractors(correctAnswer, pool) {
+  const ans = String(correctAnswer);
+  let candidates = [];
+
+  if (/^-?\d+$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d);
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+\/\d+$/.test(ans)) {
+    const [numer, denom] = ans.split('/').map(Number);
+    const perturbs = [[numer+1,denom],[numer>1?numer-1:numer+2,denom],[numer,denom+1],[numer,denom>1?denom-1:denom+2],[numer+1,denom+1]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}/${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+:\d+$/.test(ans)) {
+    const [a1, b1] = ans.split(':').map(Number);
+    const perturbs = [[a1+1,b1],[a1>1?a1-1:a1+2,b1],[a1,b1+1],[a1,b1>1?b1-1:b1+2]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}:${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^-?\d+\.\d+$/.test(ans)) {
+    const num = parseFloat(ans);
+    const decimals = (ans.split('.')[1]||'').length;
+    const deltas = [0.1,-0.1,0.01,-0.01,1,-1,0.5,-0.5].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = (num + d).toFixed(decimals);
+      if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+%$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [5,-5,10,-10,2,-2,1,-1].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d) + '%';
+      if (c !== ans && !candidates.includes(c) && (num+d) >= 0) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  if (candidates.length < 3 && pool && pool.length) {
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
+    others.sort(() => Math.random()-0.5);
+    for (const o of others) {
+      if (candidates.includes(o)) continue;
+      candidates.push(o);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  return candidates.slice(0,3);
+}
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+
+    if (currentYT.options) {
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
+    } else {
+      const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
+      const distractors = makeDistractors(currentYT.answer, pool);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
+    }
+
+    let optsHtml = currentOptions.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="worked">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  const correctIdx = currentOptions.indexOf(String(currentYT.answer));
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === correctIdx) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === correctIdx) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = `
+    <div class="teach"><strong>Well done — topic complete!</strong><br>Great work finishing all 10 questions.</div>
+    <div id="completeStatus" style="text-align:center; margin-top:16px;">
+      <div id="completeSpinner" style="color:#888; font-size:0.95rem;">Saving your progress…</div>
+    </div>`;
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) {
+    window.markComplete().then(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:#1b7d3a; font-weight:700; font-size:1.05rem;">✓ Marked as complete!</div><a href="../dashboard-student.html" style="display:inline-block; margin-top:12px; background:var(--red); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Back to dashboard</a>';
+    }).catch(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:var(--red); font-size:0.9rem;">Could not save automatically.</div><button class="nav-btn primary" style="margin-top:10px;" onclick="window.markComplete().then(()=>location.reload())">Try again</button>';
+    });
+  }
+}
+
+ANSWER_POOL = YT_GENS.map(fn => fn().answer);
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG9-MTH-01';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not logged in');
+
+  const { data: topicRow, error: topicErr } = await supabase
+    .from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
+  if (topicErr || !topicRow) throw new Error('Could not find topic: ' + _abcTopicCode);
+
+  const { error } = await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_id: topicRow.id,
+    status: 'completed',
+    last_visited_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_id' });
+  if (error) throw error;
+};
+</script>
+</body>
+</html>
