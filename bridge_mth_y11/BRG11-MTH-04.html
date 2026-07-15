@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Combined Events & Frequency Tables — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; font-size:16px; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.65; font-size:1.05rem; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:12px; border-radius:6px; margin:10px 0; font-size:1.1rem; text-align:center; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:16px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-size:1.15rem; font-weight:600;
+         min-height:52px; -webkit-tap-highlight-color:transparent; }
+  .opt:active { transform:scale(0.98); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  .try-fb { margin-top:12px; font-weight:600; font-size:1.05rem; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; gap:10px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:14px 22px; border-radius:10px; cursor:pointer;
+         font-size:1.05rem; min-height:48px; flex:1; -webkit-tap-highlight-color:transparent; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+  button.nav-btn:disabled { opacity:0.5; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths (Y11): Combined Events & Frequency Tables</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Combined probability \u2014 independent events", "teach": ["For two INDEPENDENT events (one doesn't affect the other), multiply their individual probabilities to find the combined probability.", "Example: probability of two coin flips both being heads = 1/2 \u00d7 1/2 = 1/4.", "Independence means the outcome of one event has no effect on the other."], "yt_prompt": "Work out the combined probability (as a fraction):"}, {"title": "Using probability tree diagrams", "teach": ["A tree diagram shows all possible outcomes of combined events, with probabilities written on each branch.", "To find the probability of a specific path, multiply the probabilities ALONG that path.", "To find the probability of several different paths giving the same result, ADD those path probabilities together."], "yt_prompt": "Using the described tree, find this combined probability:"}, {"title": "Probability without replacement", "teach": ["When items are removed and not replaced, the probabilities for the second pick change based on what happened first.", "Example: bag has 3 red, 2 blue. P(red then red, no replacement) = 3/5 \u00d7 2/4 = 6/20 = 3/10.", "Always recalculate the denominator (total remaining) for each subsequent pick."], "yt_prompt": "Work out the probability (as a fraction, simplified):"}, {"title": "Mutually exclusive events", "teach": ["Mutually exclusive events cannot happen at the same time \u2014 if one happens, the other can't.", "For mutually exclusive events, ADD the individual probabilities to find the probability of either happening.", "Example: P(rolling a 2 OR a 5 on a die) = 1/6 + 1/6 = 2/6 = 1/3."], "yt_prompt": "Work out the probability (as a fraction):"}, {"title": "Complement of an event", "teach": ["The complement of an event is 'it NOT happening' \u2014 the probability of an event and its complement always add to 1.", "Example: if P(rain) = 0.3, then P(no rain) = 1 \u2212 0.3 = 0.7.", "This is a quick way to find a probability when it's easier to calculate the opposite event first."], "yt_prompt": "Find the probability of the complement:"}, {"title": "Reading a grouped frequency table", "teach": ["A grouped frequency table shows data in ranges (classes) rather than exact values, e.g. '10-19', '20-29'.", "The frequency shows how many data points fall within each class range.", "You can't identify exact individual values from grouped data \u2014 only which range they fall into."], "yt_prompt": "How many data points fall in the range shown?"}, {"title": "Estimating the mean from grouped data", "teach": ["To estimate the mean from grouped data, use the MIDPOINT of each class, multiply by frequency, sum these, then divide by total frequency.", "Example: class '10-19' has midpoint 14.5. Multiply this by the frequency for that class.", "This gives an ESTIMATE only, since we don't know the exact values within each group."], "yt_prompt": "Find the midpoint of this class:"}, {"title": "Modal class", "teach": ["The modal class is simply the class (range) with the highest frequency \u2014 you don't need exact values, just the range with the most data points.", "Example: if '20-29' has frequency 12, higher than any other class, then '20-29' is the modal class.", "This is different from finding a single mode value, since grouped data doesn't give exact individual values."], "yt_prompt": "Which is the modal class?"}, {"title": "Cumulative frequency", "teach": ["Cumulative frequency is a running total of frequencies up to and including each class.", "Example: frequencies 5, 8, 4, 3 give cumulative frequencies 5, 13, 17, 20.", "Cumulative frequency graphs are used to estimate the median and quartiles of grouped data."], "yt_prompt": "Find the cumulative frequency up to and including this class:"}, {"title": "Mixed practice", "teach": ["You've now covered combined/independent probability, tree diagrams, probability without replacement, and grouped frequency tables.", "These topics are heavily tested in IGCSE and WAEC statistics and probability questions.", "Always double-check whether events are independent or dependent (without replacement) before choosing your method."], "yt_prompt": "Work out the combined probability (as a fraction):"}];
+function ytGen_0() { const pairs=[[1,2,1,2,'1/4'],[1,3,1,3,'1/9'],[1,2,1,3,'1/6'],[2,5,1,2,'1/5']]; const [n1,d1,n2,d2,ans]=pairs[Math.floor(Math.random()*pairs.length)]; return {q:`P(A)=${n1}/${d1}, P(B)=${n2}/${d2}, independent`, answer:ans}; }
+function ytGen_1() { const opts=[['P(heads then heads), fair coin','1/4'],['P(6 then 6), fair die','1/36']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_2() { const pairs=[[3,2,'3/10'],[4,3,'4/9']]; const [red,blue,ans]=pairs[Math.floor(Math.random()*pairs.length)]; return {q:`Bag: ${red} red, ${blue} blue. P(red then red, no replacement)`, answer:ans}; }
+function ytGen_3() { const a=Math.floor(Math.random()*3)+1; const b=Math.floor(Math.random()*3)+1; return {q:`P(rolling a ${a} or ${b}) on a die`, answer:`${a===b?1:2}/6`}; }
+function ytGen_4() { const p=(Math.floor(Math.random()*8)+1)/10; return {q:`P(event) = ${p}`, answer:String(Math.round((1-p)*10)/10)}; }
+function ytGen_5() { const f=Math.floor(Math.random()*10)+3; return {q:`Class '20-29' has frequency ${f}`, answer:String(f)}; }
+function ytGen_6() { const ranges=[[10,19,'14.5'],[20,29,'24.5'],[30,39,'34.5'],[0,9,'4.5']]; const [lo,hi,mid]=ranges[Math.floor(Math.random()*ranges.length)]; return {q:`Class '${lo}-${hi}'`, answer:mid}; }
+function ytGen_7() { const classes=['10-19','20-29','30-39','40-49']; const freqs=[5,12,8,3]; const maxIdx=freqs.indexOf(Math.max(...freqs)); return {q:classes.map((c,i)=>`${c}→${freqs[i]}`).join(', '), options:classes, answer:classes[maxIdx]}; }
+function ytGen_8() { const freqs=[5,8,4,3]; const upTo=Math.floor(Math.random()*4); const cum=freqs.slice(0,upTo+1).reduce((a,b)=>a+b,0); return {q:`Frequencies: ${freqs.join(', ')}. Cumulative up to class ${upTo+1}`, answer:String(cum)}; }
+function ytGen_9() { const pairs=[[1,2,1,2,'1/4'],[1,3,1,3,'1/9'],[1,2,1,3,'1/6']]; const [n1,d1,n2,d2,ans]=pairs[Math.floor(Math.random()*pairs.length)]; return {q:`P(A)=${n1}/${d1}, P(B)=${n2}/${d2}, independent`, answer:ans}; }
+
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let ANSWER_POOL = [];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let currentOptions = null;
+let answered = false;
+
+function makeDistractors(correctAnswer, pool) {
+  const ans = String(correctAnswer);
+  let candidates = [];
+
+  if (/^-?\d+$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d);
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+\/\d+$/.test(ans)) {
+    const [numer, denom] = ans.split('/').map(Number);
+    const perturbs = [[numer+1,denom],[numer>1?numer-1:numer+2,denom],[numer,denom+1],[numer,denom>1?denom-1:denom+2],[numer+1,denom+1]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}/${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+:\d+$/.test(ans)) {
+    const [a1, b1] = ans.split(':').map(Number);
+    const perturbs = [[a1+1,b1],[a1>1?a1-1:a1+2,b1],[a1,b1+1],[a1,b1>1?b1-1:b1+2]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}:${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^-?\d+\.\d+$/.test(ans)) {
+    const num = parseFloat(ans);
+    const decimals = (ans.split('.')[1]||'').length;
+    const deltas = [0.1,-0.1,0.01,-0.01,1,-1,0.5,-0.5].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = (num + d).toFixed(decimals);
+      if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+%$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [5,-5,10,-10,2,-2,1,-1].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d) + '%';
+      if (c !== ans && !candidates.includes(c) && (num+d) >= 0) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  if (candidates.length < 3 && pool && pool.length) {
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
+    others.sort(() => Math.random()-0.5);
+    for (const o of others) {
+      if (candidates.includes(o)) continue;
+      candidates.push(o);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  return candidates.slice(0,3);
+}
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+
+    if (currentYT.options) {
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
+    } else {
+      const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
+      const distractors = makeDistractors(currentYT.answer, pool);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
+    }
+
+    let optsHtml = currentOptions.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="worked">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  const correctIdx = currentOptions.indexOf(String(currentYT.answer));
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === correctIdx) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === correctIdx) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = `
+    <div class="teach"><strong>Well done — topic complete!</strong><br>Great work finishing all 10 questions.</div>
+    <div id="completeStatus" style="text-align:center; margin-top:16px;">
+      <div id="completeSpinner" style="color:#888; font-size:0.95rem;">Saving your progress…</div>
+    </div>`;
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) {
+    window.markComplete().then(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:#1b7d3a; font-weight:700; font-size:1.05rem;">✓ Marked as complete!</div><a href="../dashboard-student.html" style="display:inline-block; margin-top:12px; background:var(--red); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Back to dashboard</a>';
+    }).catch(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:var(--red); font-size:0.9rem;">Could not save automatically.</div><button class="nav-btn primary" style="margin-top:10px;" onclick="window.markComplete().then(()=>location.reload())">Try again</button>';
+    });
+  }
+}
+
+ANSWER_POOL = YT_GENS.map(fn => fn().answer);
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG11-MTH-04';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not logged in');
+
+  const { data: topicRow, error: topicErr } = await supabase
+    .from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
+  if (topicErr || !topicRow) throw new Error('Could not find topic: ' + _abcTopicCode);
+
+  const { error } = await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_id: topicRow.id,
+    status: 'completed',
+    last_visited_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_id' });
+  if (error) throw error;
+};
+</script>
+</body>
+</html>
