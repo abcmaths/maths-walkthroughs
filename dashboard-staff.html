@@ -414,6 +414,7 @@
           <option value="7">Year 7 Diagnostic</option>
           <option value="8">Year 8 Diagnostic</option>
           <option value="9">Year 9 Diagnostic</option>
+          <option value="10">Year 10 Diagnostic</option>
           <option value="11">Year 11 Diagnostic</option>
           <option value="12">Year 12 WAEC Diagnostic</option>
         </select>
@@ -573,6 +574,56 @@
                 </tr>
               </thead>
               <tbody id="diagy9-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- YEAR 10 -->
+      <div id="diag-sub-10" class="diag-sub" style="display:none">
+        <div class="filter-bar">
+          <select id="diagy10-filter-status" onchange="renderDiagnosticY10Tab()">
+            <option value="">All Students</option>
+            <option value="completed">Diagnostic Completed</option>
+            <option value="not_completed">Diagnostic Not Completed</option>
+          </select>
+          <select id="diagy10-filter-flag" onchange="renderDiagnosticY10Tab()">
+            <option value="">All Flags</option>
+            <option value="bridge_needed">Bridge Needed</option>
+            <option value="bridge_maths_number">Bridge Maths — Types of Number</option>
+            <option value="bridge_maths_hcf">Bridge Maths — HCF & LCM</option>
+            <option value="bridge_maths_surds">Bridge Maths — Surds</option>
+            <option value="bridge_maths_indices">Bridge Maths — Indices</option>
+            <option value="bridge_maths_time">Bridge Maths — Time</option>
+            <option value="bridge_english_grammar">Bridge English — Grammar</option>
+            <option value="bridge_english_spelling">Bridge English — Spelling</option>
+            <option value="extension">Extension</option>
+          </select>
+          <input type="text" id="diagy10-search" placeholder="Search by name or email…" oninput="renderDiagnosticY10Tab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.88rem;color:#333;min-width:200px">
+          <button class="btn-outline" style="font-size:0.82rem;padding:6px 14px" onclick="exportDiagnosticY10()">↓ Export CSV</button>
+        </div>
+        <div class="section">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div class="section-title">Year 10 Diagnostic & Support Status <span id="diagy10-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Full Name</th>
+                  <th>Email</th>
+                  <th>Year</th>
+                  <th>Diagnostic</th>
+                  <th>Maths</th>
+                  <th>Grammar</th>
+                  <th>Spelling</th>
+                  <th>Bridge Maths</th>
+                  <th>Bridge English</th>
+                  <th>Extension</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="diagy10-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -1290,6 +1341,7 @@
     if (yr === '7') window.renderDiagnosticTab();
     if (yr === '8') window.renderDiagnosticY8Tab();
     if (yr === '9') window.renderDiagnosticY9Tab();
+    if (yr === '10') window.renderDiagnosticY10Tab();
     if (yr === '11') window.renderDiagnosticY11Tab();
     if (yr === '12') window.renderDiagnosticY12Tab();
   };
@@ -2930,6 +2982,110 @@
   window.exportDiagnosticY8   = diagY8Tab.exportCsv;
   window.renderDiagnosticY9Tab = diagY9Tab.render;
   window.exportDiagnosticY9   = diagY9Tab.exportCsv;
+
+  // ── Diagnostic Y10 tab (dedicated — Maths clusters: Types of Number, HCF & LCM,
+  //    Surds, Indices, Time; English: Grammar + Spelling, no comprehension) ──
+  let diagY10ResultsMap = null;
+
+  async function loadDiagY10Results() {
+    if (diagY10ResultsMap) return;
+    diagY10ResultsMap = {};
+    const { data, error } = await supabase
+      .from('diagnostic_y10_results')
+      .select('student_id, maths_score, maths_total, grammar_score, spelling_score, created_at')
+      .order('created_at', { ascending: false });
+    if (!error && data) {
+      data.forEach(r => { if (!diagY10ResultsMap[r.student_id]) diagY10ResultsMap[r.student_id] = r; });
+    }
+  }
+
+  function getDiagnosticY10Rows() {
+    const emailMap = {};
+    allUsersWithEmail.forEach(u => { emailMap[u.id] = u.email; });
+    return allStudents
+      .filter(s => s.year_group === 10)
+      .map(s => ({
+        ...s,
+        email: emailMap[s.id] || '—',
+        diag: (diagY10ResultsMap && diagY10ResultsMap[s.id]) || null
+      }));
+  }
+
+  window.renderDiagnosticY10Tab = async function() {
+    await loadDiagY10Results();
+
+    const statusFilter = document.getElementById('diagy10-filter-status').value;
+    const flagFilter    = document.getElementById('diagy10-filter-flag').value;
+    const searchFilter  = document.getElementById('diagy10-search').value.toLowerCase();
+
+    const rows = getDiagnosticY10Rows().filter(s => {
+      const matchSearch = !searchFilter || s.full_name.toLowerCase().includes(searchFilter) || (s.email||'').toLowerCase().includes(searchFilter);
+      const matchStatus = !statusFilter ||
+        (statusFilter === 'completed' && s.diagnostic_y10_completed) ||
+        (statusFilter === 'not_completed' && !s.diagnostic_y10_completed);
+      const matchFlag = !flagFilter || s[flagFilter] === true;
+      return matchSearch && matchStatus && matchFlag;
+    });
+
+    document.getElementById('diagy10-count').textContent = `— ${rows.length} student${rows.length !== 1 ? 's' : ''}`;
+
+    const tbody = document.getElementById('diagy10-tbody');
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#aaa;padding:24px">No students found</td></tr>';
+      return;
+    }
+
+    const yn = (v) => v ? '<span class="badge badge-green">Yes</span>' : '<span style="color:#ccc">—</span>';
+    const bridgeMathsAny = (s) => s.bridge_maths_number || s.bridge_maths_hcf || s.bridge_maths_surds || s.bridge_maths_indices || s.bridge_maths_time;
+    const bridgeEnglishAny = (s) => s.bridge_english_grammar || s.bridge_english_spelling;
+    const score = (v, out) => v == null ? '<span style="color:#ccc">—</span>' : `${v}/${out}`;
+
+    tbody.innerHTML = rows.map(s => `
+      <tr>
+        <td><strong>${s.full_name}</strong></td>
+        <td style="font-size:0.82rem;color:#666">${s.email}</td>
+        <td>${s.year_group ? 'Year ' + s.year_group : '—'}</td>
+        <td>${s.diagnostic_y10_completed ? '<span class="badge badge-green">Completed</span>' : '<span class="badge badge-grey">Not yet</span>'}</td>
+        <td>${score(s.diag && s.diag.maths_score, (s.diag && s.diag.maths_total) || 15)}</td>
+        <td>${score(s.diag && s.diag.grammar_score, 8)}</td>
+        <td>${score(s.diag && s.diag.spelling_score, 8)}</td>
+        <td>${yn(bridgeMathsAny(s))}</td>
+        <td>${yn(bridgeEnglishAny(s))}</td>
+        <td>${yn(s.extension)}</td>
+        <td><button class="btn-link" onclick="openStudentModal('${s.id}')">View</button></td>
+      </tr>`).join('');
+  };
+
+  window.exportDiagnosticY10 = async function() {
+    await loadDiagY10Results();
+    const rows = getDiagnosticY10Rows();
+    const csvRows = [['Full Name','Email','Year','Diagnostic Completed','Maths Score','Maths Total','Grammar /8','Spelling /8',
+      'Bridge Maths Number','Bridge Maths HCF','Bridge Maths Surds','Bridge Maths Indices','Bridge Maths Time',
+      'Bridge English Grammar','Bridge English Spelling','Extension']];
+    rows.forEach(s => {
+      csvRows.push([
+        s.full_name, s.email, s.year_group || '',
+        s.diagnostic_y10_completed ? 'Yes' : 'No',
+        s.diag ? s.diag.maths_score : '',
+        s.diag ? s.diag.maths_total : '',
+        s.diag ? s.diag.grammar_score : '',
+        s.diag ? s.diag.spelling_score : '',
+        s.bridge_maths_number ? 'Yes' : 'No',
+        s.bridge_maths_hcf ? 'Yes' : 'No',
+        s.bridge_maths_surds ? 'Yes' : 'No',
+        s.bridge_maths_indices ? 'Yes' : 'No',
+        s.bridge_maths_time ? 'Yes' : 'No',
+        s.bridge_english_grammar ? 'Yes' : 'No',
+        s.bridge_english_spelling ? 'Yes' : 'No',
+        s.extension ? 'Yes' : 'No'
+      ]);
+    });
+    const csv = csvRows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'abc_diagnostic_y10_status_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+  };
 
   let _editUserId = null;
 

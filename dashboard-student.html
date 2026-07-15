@@ -215,6 +215,12 @@
       <div id="diag-results-y11-note" style="font-size:0.88rem; color:#666; line-height:1.5;"></div>
     </div>
 
+    <div id="diag-results-y12-card" style="display:none; background:#fff; border-radius:10px; padding:20px; margin-bottom:20px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
+      <div style="font-weight:700; color:#333; margin-bottom:14px; font-size:1rem;">📋 Your Diagnostic Results</div>
+      <div id="diag-results-y12-scores" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;"></div>
+      <div id="diag-results-y12-note" style="font-size:0.88rem; color:#666; line-height:1.5;"></div>
+    </div>
+
     <div class="subject-progress-row" id="subject-progress-row">
       <div class="subject-panel maths-panel" id="maths-panel">
         <div class="subject-panel-title">📐 Maths Progress<span class="subject-panel-soon-badge" id="maths-soon-badge" style="display:none">Coming Soon</span></div>
@@ -843,6 +849,11 @@
     'BRG11-MTH-02': 'bridge_mth_y11/BRG11-MTH-02.html',
     'BRG11-MTH-03': 'bridge_mth_y11/BRG11-MTH-03.html',
     'BRG11-MTH-04': 'bridge_mth_y11/BRG11-MTH-04.html',
+    'BRG12-MTH-01': 'bridge_mth_y12/BRG12-MTH-01.html',
+    'BRG12-MTH-02': 'bridge_mth_y12/BRG12-MTH-02.html',
+    'BRG12-MTH-03': 'bridge_mth_y12/BRG12-MTH-03.html',
+    'BRG12-MTH-04': 'bridge_mth_y12/BRG12-MTH-04.html',
+    'BRG12-MTH-05': 'bridge_mth_y12/BRG12-MTH-05.html',
   };
 
   // Bridge English files
@@ -863,6 +874,8 @@
     'BRG9-ENG-02': 'bridge_eng_y9/BRG9-ENG-02.html',
     'BRG11-ENG-01': 'bridge_eng_y11/BRG11-ENG-01.html',
     'BRG11-ENG-02': 'bridge_eng_y11/BRG11-ENG-02.html',
+    'BRG12-ENG-01': 'bridge_eng_y12/BRG12-ENG-01.html',
+    'BRG12-ENG-02': 'bridge_eng_y12/BRG12-ENG-02.html',
   };
 
   // Bridge Science files (Year 11)
@@ -969,9 +982,9 @@
 
       myYearGroup = profile.year_group || 7;
 
-      // Year 8 / Year 9 / Year 11 Diagnostics — compulsory, locks the dashboard
-      // until complete, mirrors the Year 7 diagnostic.html pattern. Separate
-      // diagnostics per year (see diagnostic-y8.html / diagnostic-y9.html / diagnostic-y11.html).
+      // Year 8 / Year 9 / Year 11 / Year 12 Diagnostics — compulsory, locks the
+      // dashboard until complete, mirrors the Year 7 diagnostic.html pattern.
+      // Separate diagnostics per year.
       if (Number(myYearGroup) === 8 && !profile.diagnostic_y8_completed) {
         window.location.href = 'diagnostic-y8.html';
         return;
@@ -982,6 +995,10 @@
       }
       if (Number(myYearGroup) === 11 && !profile.diagnostic_y11_completed) {
         window.location.href = 'diagnostic-y11.html';
+        return;
+      }
+      if (Number(myYearGroup) === 12 && !profile.diagnostic_y12_completed) {
+        window.location.href = 'diagnostic-y12.html';
         return;
       }
 
@@ -1014,9 +1031,10 @@
       // Show Bridge tab if the student has been flagged as needing bridge support
       const needsBridgeMaths = profile.bridge_maths_number || profile.bridge_maths_fractions ||
                                 profile.bridge_maths_algebra || profile.bridge_maths_geometry ||
-                                profile.bridge_maths_data || profile.bridge_needed;
+                                profile.bridge_maths_data || profile.bridge_maths_mensuration ||
+                                profile.bridge_needed;
       const needsBridgeScience = isScienceTrack && (profile.bridge_science_physics || profile.bridge_science_chemistry || profile.bridge_science_biology);
-      const needsBridgeEnglish = profile.bridge_english_comprehension || profile.bridge_english_writing;
+      const needsBridgeEnglish = profile.bridge_english_comprehension || profile.bridge_english_writing || profile.bridge_english_grammar;
       const bridgeBt2 = document.getElementById('toggle-bridge');
       if (bridgeBt2) bridgeBt2.style.display = (needsBridgeMaths || needsBridgeScience || needsBridgeEnglish) ? '' : 'none';
       const subtabBridgeMaths = document.getElementById('subtab-bridge_maths');
@@ -1155,7 +1173,7 @@
 
         const notes = [];
         if (profile.extension) notes.push('You\'ve been given access to <strong>Extension</strong> topics — a bit of an extra challenge!');
-        if (profile.bridge_maths_number || profile.bridge_maths_fractions || profile.bridge_maths_ratio || profile.bridge_maths_algebra || profile.bridge_maths_geometry || profile.bridge_maths_data) notes.push('You have some <strong>Bridge Maths</strong> topics to work through.');
+        if (profile.bridge_maths_number || profile.bridge_maths_fractions || profile.bridge_maths_ratio || profile.bridge_maths_algebra || profile.bridge_maths_geometry || profile.bridge_maths_data || profile.bridge_maths_mensuration) notes.push('You have some <strong>Bridge Maths</strong> topics to work through.');
         if (profile.bridge_science_physics || profile.bridge_science_chemistry || profile.bridge_science_biology) notes.push('You have some <strong>Bridge Science</strong> topics to work through.');
         if (profile.bridge_english_grammar || profile.bridge_english_comprehension) notes.push('You have some <strong>Bridge English</strong> topics to work through.');
         document.getElementById(`diag-results-y${yr}-note`).innerHTML = notes.length
@@ -1165,6 +1183,7 @@
       await showYearDiagResults(8);
       await showYearDiagResults(9);
       await showYearDiagResults(11);
+      await showYearDiagResults(12);
 
       // Load all topics
       const { data: topics } = await supabase
