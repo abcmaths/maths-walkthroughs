@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Types of Number — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; font-size:16px; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.65; font-size:1.05rem; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:12px; border-radius:6px; margin:10px 0; font-size:1.1rem; text-align:center; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:16px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-size:1.15rem; font-weight:600;
+         min-height:52px; -webkit-tap-highlight-color:transparent; }
+  .opt:active { transform:scale(0.98); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  .try-fb { margin-top:12px; font-weight:600; font-size:1.05rem; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; gap:10px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:14px 22px; border-radius:10px; cursor:pointer;
+         font-size:1.05rem; min-height:48px; flex:1; -webkit-tap-highlight-color:transparent; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+  button.nav-btn:disabled { opacity:0.5; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths (Y10): Types of Number</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Prime numbers", "teach": ["A prime number has exactly two factors: 1 and itself. It cannot be divided evenly by any other number.", "Example: 7 is prime (only divides by 1 and 7), but 8 is not prime (also divides by 2 and 4).", "1 is NOT a prime number \u2014 it only has one factor, itself."], "yt_prompt": "Is this number prime?"}, {"title": "Square numbers", "teach": ["A square number is the result of multiplying a whole number by itself: 1, 4, 9, 16, 25, 36...", "Example: 36 is a square number because 6 \u00d7 6 = 36.", "Recognising the first 12 square numbers (up to 144) by heart saves valuable time."], "yt_prompt": "Is this a square number?"}, {"title": "Cube numbers", "teach": ["A cube number is the result of multiplying a whole number by itself three times: 1, 8, 27, 64, 125...", "Example: 27 is a cube number because 3 \u00d7 3 \u00d7 3 = 27.", "Cube numbers grow much faster than square numbers as the base increases."], "yt_prompt": "Is this a cube number?"}, {"title": "Factors", "teach": ["A factor of a number divides into it exactly, with no remainder.", "Example: the factors of 12 are 1, 2, 3, 4, 6, and 12.", "Every number has at least two factors: 1 and itself."], "yt_prompt": "Is this a factor of the number given?"}, {"title": "Multiples", "teach": ["A multiple of a number is what you get when you multiply it by a whole number.", "Example: the first five multiples of 6 are 6, 12, 18, 24, 30.", "Every number is a multiple of itself (multiplying by 1)."], "yt_prompt": "Is this a multiple of the number given?"}, {"title": "Rational numbers", "teach": ["A rational number can be written as a fraction a/b, where a and b are integers (b isn't 0).", "This includes whole numbers, fractions, and terminating or repeating decimals.", "Example: 0.75 is rational (=3/4), and so is 5 (=5/1)."], "yt_prompt": "Is this a rational number?"}, {"title": "Irrational numbers", "teach": ["An irrational number CANNOT be written as a simple fraction \u2014 its decimal goes on forever without repeating.", "Example: \u221a2 is irrational (\u22481.41421356... forever), and so is \u03c0.", "The square root of any number that isn't a perfect square is irrational."], "yt_prompt": "Is this an irrational number?"}, {"title": "Integers", "teach": ["An integer is any whole number, positive, negative, or zero \u2014 no fractions or decimals.", "Example: \u22125, 0, and 12 are all integers, but 2.5 and 1/3 are not.", "Integers are used constantly in everyday contexts like temperature and money."], "yt_prompt": "Is this an integer?"}, {"title": "Classifying numbers", "teach": ["Many numbers belong to several categories at once \u2014 for example, 4 is a square number, an integer, AND a rational number.", "Being able to correctly classify a number is a key foundational IGCSE skill.", "Always check ALL the categories that could apply, not just the first one you notice."], "yt_prompt": "Which category does NOT apply to this number?"}, {"title": "Mixed practice", "teach": ["You've now covered primes, squares, cubes, factors, multiples, rational and irrational numbers, and integers.", "These types of number form the foundation for nearly every other area of GCSE/IGCSE mathematics.", "Take your time identifying exactly which category a question is asking about."], "yt_prompt": "Is this number prime?"}];
+function ytGen_0() { const primes=[2,3,5,7,11,13,17,19,23,29,31,37]; const notPrimes=[4,6,8,9,10,12,14,15,16,21,25,27]; const isPrime=Math.random()<0.5; const n=isPrime?primes[Math.floor(Math.random()*primes.length)]:notPrimes[Math.floor(Math.random()*notPrimes.length)]; return {q:String(n), options:['Yes','No'], answer:isPrime?'Yes':'No'}; }
+function ytGen_1() { const squares=[1,4,9,16,25,36,49,64,81,100,121,144]; const notSquares=[2,5,10,15,20,30,40,50,60,70,90]; const isSq=Math.random()<0.5; const n=isSq?squares[Math.floor(Math.random()*squares.length)]:notSquares[Math.floor(Math.random()*notSquares.length)]; return {q:String(n), options:['Yes','No'], answer:isSq?'Yes':'No'}; }
+function ytGen_2() { const cubes=[1,8,27,64,125,216]; const notCubes=[4,9,16,20,50,100,150]; const isCube=Math.random()<0.5; const n=isCube?cubes[Math.floor(Math.random()*cubes.length)]:notCubes[Math.floor(Math.random()*notCubes.length)]; return {q:String(n), options:['Yes','No'], answer:isCube?'Yes':'No'}; }
+function ytGen_3() { const nums=[12,18,24,20,36]; const n=nums[Math.floor(Math.random()*nums.length)]; const factorsOf = k => { const f=[]; for(let i=1;i<=k;i++) if(k%i===0) f.push(i); return f; }; const facs=factorsOf(n); const isFactor=Math.random()<0.5; const cand=isFactor?facs[Math.floor(Math.random()*facs.length)]:n+Math.floor(Math.random()*5)+1; const actuallyIsFactor = n%cand===0; return {q:`Is ${cand} a factor of ${n}?`, options:['Yes','No'], answer:actuallyIsFactor?'Yes':'No'}; }
+function ytGen_4() { const n=[4,6,7,8,9][Math.floor(Math.random()*5)]; const isMult=Math.random()<0.5; const cand=isMult? n*(Math.floor(Math.random()*8)+2) : n*(Math.floor(Math.random()*8)+2)+1; const actuallyIsMult = cand%n===0; return {q:`Is ${cand} a multiple of ${n}?`, options:['Yes','No'], answer:actuallyIsMult?'Yes':'No'}; }
+function ytGen_5() { const rationals=['0.5','3/4','5','0.75','2']; const irrationals=['√2','√3','π','√5']; const isRat=Math.random()<0.5; const n=isRat?rationals[Math.floor(Math.random()*rationals.length)]:irrationals[Math.floor(Math.random()*irrationals.length)]; return {q:n, options:['Yes','No'], answer:isRat?'Yes':'No'}; }
+function ytGen_6() { const irrationals=['√2','√3','π','√5','√7']; const rationals=['0.5','3/4','5','√4','√9']; const isIrr=Math.random()<0.5; const n=isIrr?irrationals[Math.floor(Math.random()*irrationals.length)]:rationals[Math.floor(Math.random()*rationals.length)]; return {q:n, options:['Yes','No'], answer:isIrr?'Yes':'No'}; }
+function ytGen_7() { const integers=['-5','0','12','100','-1']; const nonIntegers=['2.5','1/3','0.75','-3.5']; const isInt=Math.random()<0.5; const n=isInt?integers[Math.floor(Math.random()*integers.length)]:nonIntegers[Math.floor(Math.random()*nonIntegers.length)]; return {q:n, options:['Yes','No'], answer:isInt?'Yes':'No'}; }
+function ytGen_8() { return {q:'The number 4', options:['Square number','Prime number','Integer'], answer:'Prime number'}; }
+function ytGen_9() { const primes=[2,3,5,7,11,13,17,19,23,29]; const notPrimes=[4,6,8,9,10,12,14,15,16,21]; const isPrime=Math.random()<0.5; const n=isPrime?primes[Math.floor(Math.random()*primes.length)]:notPrimes[Math.floor(Math.random()*notPrimes.length)]; return {q:String(n), options:['Yes','No'], answer:isPrime?'Yes':'No'}; }
+
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let ANSWER_POOL = [];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let currentOptions = null;
+let answered = false;
+
+function makeDistractors(correctAnswer, pool) {
+  const ans = String(correctAnswer);
+  let candidates = [];
+
+  if (/^-?\d+$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d);
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+\/\d+$/.test(ans)) {
+    const [numer, denom] = ans.split('/').map(Number);
+    const perturbs = [[numer+1,denom],[numer>1?numer-1:numer+2,denom],[numer,denom+1],[numer,denom>1?denom-1:denom+2],[numer+1,denom+1]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}/${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+:\d+$/.test(ans)) {
+    const [a1, b1] = ans.split(':').map(Number);
+    const perturbs = [[a1+1,b1],[a1>1?a1-1:a1+2,b1],[a1,b1+1],[a1,b1>1?b1-1:b1+2]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}:${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^-?\d+\.\d+$/.test(ans)) {
+    const num = parseFloat(ans);
+    const decimals = (ans.split('.')[1]||'').length;
+    const deltas = [0.1,-0.1,0.01,-0.01,1,-1,0.5,-0.5].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = (num + d).toFixed(decimals);
+      if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+%$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [5,-5,10,-10,2,-2,1,-1].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d) + '%';
+      if (c !== ans && !candidates.includes(c) && (num+d) >= 0) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  if (candidates.length < 3 && pool && pool.length) {
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
+    others.sort(() => Math.random()-0.5);
+    for (const o of others) {
+      if (candidates.includes(o)) continue;
+      candidates.push(o);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  return candidates.slice(0,3);
+}
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+
+    if (currentYT.options) {
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
+    } else {
+      const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
+      const distractors = makeDistractors(currentYT.answer, pool);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
+    }
+
+    let optsHtml = currentOptions.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="worked">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  const correctIdx = currentOptions.indexOf(String(currentYT.answer));
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === correctIdx) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === correctIdx) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = `
+    <div class="teach"><strong>Well done — topic complete!</strong><br>Great work finishing all 10 questions.</div>
+    <div id="completeStatus" style="text-align:center; margin-top:16px;">
+      <div id="completeSpinner" style="color:#888; font-size:0.95rem;">Saving your progress…</div>
+    </div>`;
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) {
+    window.markComplete().then(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:#1b7d3a; font-weight:700; font-size:1.05rem;">✓ Marked as complete!</div><a href="../dashboard-student.html" style="display:inline-block; margin-top:12px; background:var(--red); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Back to dashboard</a>';
+    }).catch(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:var(--red); font-size:0.9rem;">Could not save automatically.</div><button class="nav-btn primary" style="margin-top:10px;" onclick="window.markComplete().then(()=>location.reload())">Try again</button>';
+    });
+  }
+}
+
+ANSWER_POOL = YT_GENS.map(fn => fn().answer);
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG10-MTH-01';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not logged in');
+
+  const { data: topicRow, error: topicErr } = await supabase
+    .from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
+  if (topicErr || !topicRow) throw new Error('Could not find topic: ' + _abcTopicCode);
+
+  const { error } = await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_id: topicRow.id,
+    status: 'completed',
+    last_visited_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_id' });
+  if (error) throw error;
+};
+</script>
+</body>
+</html>

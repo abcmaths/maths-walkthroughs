@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Time — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; font-size:16px; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.65; font-size:1.05rem; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:12px; border-radius:6px; margin:10px 0; font-size:1.1rem; text-align:center; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:16px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-size:1.15rem; font-weight:600;
+         min-height:52px; -webkit-tap-highlight-color:transparent; }
+  .opt:active { transform:scale(0.98); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  .try-fb { margin-top:12px; font-weight:600; font-size:1.05rem; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; gap:10px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:14px 22px; border-radius:10px; cursor:pointer;
+         font-size:1.05rem; min-height:48px; flex:1; -webkit-tap-highlight-color:transparent; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+  button.nav-btn:disabled { opacity:0.5; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge Maths (Y10): Time</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "24-hour clock", "teach": ["The 24-hour clock runs from 00:00 (midnight) to 23:59, avoiding the need for am/pm.", "Example: 3:00pm in 12-hour format is 15:00 in 24-hour format (add 12 to pm hours after 12).", "Always write 24-hour times with 4 digits: 09:05, not 9:5."], "yt_prompt": "Convert to 24-hour format:"}, {"title": "Converting 24-hour to 12-hour", "teach": ["For times after 12:00, subtract 12 and add 'pm'. For times before 12:00, keep the number and add 'am'.", "Example: 18:30 \u2192 subtract 12 \u2192 6:30pm.", "12:00 is 'noon' (12pm) and 00:00 is 'midnight' (12am) \u2014 these are special cases worth remembering."], "yt_prompt": "Convert to 12-hour format:"}, {"title": "Calculating time durations", "teach": ["To find the duration between two times, count the hours and minutes separately, or convert both to minutes past midnight and subtract.", "Example: 09:45 to 12:20 \u2192 from 09:45 to 12:00 is 2hrs 15min, then +20min = 2hrs 35min.", "Break the calculation into clear stages to avoid errors, especially crossing the hour mark."], "yt_prompt": "Find the duration (in minutes):"}, {"title": "Adding time", "teach": ["To add a duration to a start time, add hours and minutes separately, then adjust if minutes exceed 60.", "Example: 08:50 + 25 minutes \u2192 08:50+10min=09:00, +15min more = 09:15.", "Always carry over any extra 60 minutes into the next hour."], "yt_prompt": "Find the end time (24-hour format, e.g. 0915):"}, {"title": "Timetables", "teach": ["Reading a timetable means finding the correct row/column for a specific journey, train, or bus.", "Always double check you're reading the correct destination AND correct day/direction.", "Timetable questions often combine duration and 12/24-hour conversion in one question."], "yt_prompt": "Using the timetable info, find the journey duration (in minutes):"}, {"title": "Speed, distance, and time", "teach": ["Speed = distance \u00f7 time. This links time calculations to real-world travel problems.", "Example: a journey of 150km at 50km/h takes 150\u00f750 = 3 hours.", "Always make sure your time units match (hours vs minutes) before dividing or multiplying."], "yt_prompt": "Find the time taken (in hours):"}, {"title": "Time zones (introduction)", "teach": ["Different time zones mean the same moment is a different clock time in different places.", "Example: if London is 5 hours ahead of a location, and it's 14:00 in London, it's 09:00 there.", "Always identify whether you're moving forward or backward across time zones before calculating."], "yt_prompt": "Find the local time:"}, {"title": "Calendar and date calculations", "teach": ["Calculating days between dates requires knowing how many days are in each month, and accounting for leap years.", "Example: from 25th March to 5th April \u2192 6 days left in March + 5 days in April = 11 days.", "Remember: 30 days has September, April, June and November; all the rest have 31, except February."], "yt_prompt": "How many days between the two given dates?"}, {"title": "Subtracting time", "teach": ["To find an earlier start time, subtract the duration from the end time, adjusting if minutes go below zero.", "Example: end time 10:10, duration 25 minutes \u2192 10:10 \u2212 10min = 10:00, \u2212 15min more = 09:45.", "If subtracting minutes takes you below zero, borrow 60 minutes from the hour."], "yt_prompt": "Find the start time (24-hour format, e.g. 0915):"}, {"title": "Mixed practice", "teach": ["You've now covered 24-hour clock conversion, time durations, timetables, and speed/distance/time.", "Time calculations appear throughout IGCSE Number and are common in real-world word problems.", "Always double-check whether you're crossing an hour boundary (like 9:45 to 10:15) \u2014 this is where most mistakes happen."], "yt_prompt": "Find the duration (in minutes):"}];
+function ytGen_0() { const h=Math.floor(Math.random()*11)+1; const m=[0,15,30,45][Math.floor(Math.random()*4)]; const isPM=Math.random()<0.5; const h24=isPM?(h===12?12:h+12):(h===12?0:h); return {q:`${h}:${String(m).padStart(2,'0')}${isPM?'pm':'am'}`, answer:`${String(h24).padStart(2,'0')}:${String(m).padStart(2,'0')}`}; }
+function ytGen_1() { const h=Math.floor(Math.random()*23)+1; const m=[0,15,30,45][Math.floor(Math.random()*4)]; let h12, suffix; if(h===0){h12=12;suffix='am';} else if(h<12){h12=h;suffix='am';} else if(h===12){h12=12;suffix='pm';} else {h12=h-12;suffix='pm';} return {q:`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`, answer:`${h12}:${String(m).padStart(2,'0')}${suffix}`}; }
+function ytGen_2() { const startH=Math.floor(Math.random()*10)+7; const startM=[0,15,30,45][Math.floor(Math.random()*4)]; const durMin=Math.floor(Math.random()*120)+30; const totalStart=startH*60+startM; const totalEnd=totalStart+durMin; const endH=Math.floor(totalEnd/60)%24; const endM=totalEnd%60; return {q:`${String(startH).padStart(2,'0')}:${String(startM).padStart(2,'0')} to ${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`, answer:String(durMin)}; }
+function ytGen_3() { const startH=Math.floor(Math.random()*10)+7; const startM=[0,10,20,30,40,50][Math.floor(Math.random()*6)]; const addMin=[15,25,35,45,55][Math.floor(Math.random()*5)]; const total=startH*60+startM+addMin; const endH=Math.floor(total/60)%24; const endM=total%60; return {q:`${String(startH).padStart(2,'0')}:${String(startM).padStart(2,'0')} + ${addMin} minutes`, answer:`${String(endH).padStart(2,'0')}${String(endM).padStart(2,'0')}`}; }
+function ytGen_4() { const dep=Math.floor(Math.random()*8)+8; const arr=dep+Math.floor(Math.random()*3)+1; const mins=(arr-dep)*60; return {q:`Departs ${dep}:00, arrives ${arr}:00`, answer:String(mins)}; }
+function ytGen_5() { const speeds=[40,50,60,80]; const speed=speeds[Math.floor(Math.random()*speeds.length)]; const time=Math.floor(Math.random()*4)+1; const dist=speed*time; return {q:`Distance ${dist}km, speed ${speed}km/h`, answer:String(time)}; }
+function ytGen_6() { const h=Math.floor(Math.random()*10)+8; const diff=Math.floor(Math.random()*6)+1; const local=(h-diff+24)%24; return {q:`It is ${h}:00 in London. Local time is ${diff} hours behind. What is the local time?`, answer:`${String(local).padStart(2,'0')}:00`}; }
+function ytGen_7() { const cases=[['25 March','5 April',11],['20 June','2 July',12],['15 Jan','1 Feb',17]]; const [d1,d2,days]=cases[Math.floor(Math.random()*cases.length)]; return {q:`${d1} to ${d2}`, answer:String(days)}; }
+function ytGen_8() { const endH=Math.floor(Math.random()*10)+9; const endM=[0,10,20,30,40,50][Math.floor(Math.random()*6)]; const subMin=[15,25,35,45,55][Math.floor(Math.random()*5)]; const total=endH*60+endM-subMin; const startH=Math.floor(total/60)%24; const startM=((total%60)+60)%60; return {q:`End time ${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}, duration ${subMin} minutes`, answer:`${String(startH).padStart(2,'0')}${String(startM).padStart(2,'0')}`}; }
+function ytGen_9() { const startH=Math.floor(Math.random()*10)+7; const startM=[0,15,30,45][Math.floor(Math.random()*4)]; const durMin=Math.floor(Math.random()*120)+30; const totalStart=startH*60+startM; const totalEnd=totalStart+durMin; const endH=Math.floor(totalEnd/60)%24; const endM=totalEnd%60; return {q:`${String(startH).padStart(2,'0')}:${String(startM).padStart(2,'0')} to ${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`, answer:String(durMin)}; }
+
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let ANSWER_POOL = [];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let currentOptions = null;
+let answered = false;
+
+function makeDistractors(correctAnswer, pool) {
+  const ans = String(correctAnswer);
+  let candidates = [];
+
+  if (/^-?\d+$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d);
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+\/\d+$/.test(ans)) {
+    const [numer, denom] = ans.split('/').map(Number);
+    const perturbs = [[numer+1,denom],[numer>1?numer-1:numer+2,denom],[numer,denom+1],[numer,denom>1?denom-1:denom+2],[numer+1,denom+1]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}/${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+:\d+$/.test(ans)) {
+    const [a1, b1] = ans.split(':').map(Number);
+    const perturbs = [[a1+1,b1],[a1>1?a1-1:a1+2,b1],[a1,b1+1],[a1,b1>1?b1-1:b1+2]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}:${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^-?\d+\.\d+$/.test(ans)) {
+    const num = parseFloat(ans);
+    const decimals = (ans.split('.')[1]||'').length;
+    const deltas = [0.1,-0.1,0.01,-0.01,1,-1,0.5,-0.5].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = (num + d).toFixed(decimals);
+      if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+%$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [5,-5,10,-10,2,-2,1,-1].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d) + '%';
+      if (c !== ans && !candidates.includes(c) && (num+d) >= 0) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  if (candidates.length < 3 && pool && pool.length) {
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
+    others.sort(() => Math.random()-0.5);
+    for (const o of others) {
+      if (candidates.includes(o)) continue;
+      candidates.push(o);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  return candidates.slice(0,3);
+}
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+
+    if (currentYT.options) {
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
+    } else {
+      const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
+      const distractors = makeDistractors(currentYT.answer, pool);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
+    }
+
+    let optsHtml = currentOptions.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="worked">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  const correctIdx = currentOptions.indexOf(String(currentYT.answer));
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === correctIdx) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === correctIdx) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = `
+    <div class="teach"><strong>Well done — topic complete!</strong><br>Great work finishing all 10 questions.</div>
+    <div id="completeStatus" style="text-align:center; margin-top:16px;">
+      <div id="completeSpinner" style="color:#888; font-size:0.95rem;">Saving your progress…</div>
+    </div>`;
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) {
+    window.markComplete().then(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:#1b7d3a; font-weight:700; font-size:1.05rem;">✓ Marked as complete!</div><a href="../dashboard-student.html" style="display:inline-block; margin-top:12px; background:var(--red); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Back to dashboard</a>';
+    }).catch(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:var(--red); font-size:0.9rem;">Could not save automatically.</div><button class="nav-btn primary" style="margin-top:10px;" onclick="window.markComplete().then(()=>location.reload())">Try again</button>';
+    });
+  }
+}
+
+ANSWER_POOL = YT_GENS.map(fn => fn().answer);
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG10-MTH-05';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not logged in');
+
+  const { data: topicRow, error: topicErr } = await supabase
+    .from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
+  if (topicErr || !topicRow) throw new Error('Could not find topic: ' + _abcTopicCode);
+
+  const { error } = await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_id: topicRow.id,
+    status: 'completed',
+    last_visited_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_id' });
+  if (error) throw error;
+};
+</script>
+</body>
+</html>
