@@ -196,10 +196,16 @@
       <div id="diag-results-note" style="font-size:0.88rem; color:#666; line-height:1.5;"></div>
     </div>
 
-    <div id="diag-results-y89-card" style="display:none; background:#fff; border-radius:10px; padding:20px; margin-bottom:20px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
+    <div id="diag-results-y8-card" style="display:none; background:#fff; border-radius:10px; padding:20px; margin-bottom:20px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
       <div style="font-weight:700; color:#333; margin-bottom:14px; font-size:1rem;">📋 Your Diagnostic Results</div>
-      <div id="diag-results-y89-scores" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;"></div>
-      <div id="diag-results-y89-note" style="font-size:0.88rem; color:#666; line-height:1.5;"></div>
+      <div id="diag-results-y8-scores" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;"></div>
+      <div id="diag-results-y8-note" style="font-size:0.88rem; color:#666; line-height:1.5;"></div>
+    </div>
+
+    <div id="diag-results-y9-card" style="display:none; background:#fff; border-radius:10px; padding:20px; margin-bottom:20px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
+      <div style="font-weight:700; color:#333; margin-bottom:14px; font-size:1rem;">📋 Your Diagnostic Results</div>
+      <div id="diag-results-y9-scores" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;"></div>
+      <div id="diag-results-y9-note" style="font-size:0.88rem; color:#666; line-height:1.5;"></div>
     </div>
 
     <div class="subject-progress-row" id="subject-progress-row">
@@ -926,10 +932,15 @@
 
       myYearGroup = profile.year_group || 7;
 
-      // Year 8/9 Diagnostic — compulsory, locks the dashboard until complete,
-      // mirrors the Year 7 diagnostic.html pattern (see diagnostic-y89.html)
-      if ([8, 9].includes(Number(myYearGroup)) && !profile.diagnostic_y89_completed) {
-        window.location.href = 'diagnostic-y89.html';
+      // Year 8 / Year 9 Diagnostics — compulsory, locks the dashboard until
+      // complete, mirrors the Year 7 diagnostic.html pattern. Separate
+      // diagnostics per year (see diagnostic-y8.html / diagnostic-y9.html).
+      if (Number(myYearGroup) === 8 && !profile.diagnostic_y8_completed) {
+        window.location.href = 'diagnostic-y8.html';
+        return;
+      }
+      if (Number(myYearGroup) === 9 && !profile.diagnostic_y9_completed) {
+        window.location.href = 'diagnostic-y9.html';
         return;
       }
 
@@ -1061,38 +1072,42 @@
         }
       }
 
-      // Show the student their own Year 8/9 diagnostic results, if completed
-      if (profile.diagnostic_y89_completed) {
-        const { data: diagY89 } = await supabase
-          .from('diagnostic_y89_results')
+      // Show the student their own Year 8 or Year 9 diagnostic results, if completed
+      async function showYearDiagResults(yr) {
+        const completedField = `diagnostic_y${yr}_completed`;
+        if (!profile[completedField]) return;
+
+        const { data: diag } = await supabase
+          .from(`diagnostic_y${yr}_results`)
           .select('*')
           .eq('student_id', userId)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
 
-        if (diagY89) {
-          const card = document.getElementById('diag-results-y89-card');
-          card.style.display = 'block';
-          const scoreCard = (label, val, out) => `
-            <div style="flex:1; min-width:100px; background:#f9f9f9; border-radius:6px; padding:10px; text-align:center;">
-              <div style="font-size:1.2rem; font-weight:700; color:#C0272D">${val != null ? val + '/' + out : '—'}</div>
-              <div style="font-size:0.68rem; color:#888; text-transform:uppercase; margin-top:2px">${label}</div>
-            </div>`;
-          let scoresHtml = scoreCard('Maths', diagY89.maths_score, diagY89.maths_total || 18);
-          scoresHtml += scoreCard('Grammar', diagY89.grammar_score, 8);
-          scoresHtml += scoreCard('Comprehension', diagY89.comprehension_score, 8);
-          document.getElementById('diag-results-y89-scores').innerHTML = scoresHtml;
+        if (!diag) return;
+        const card = document.getElementById(`diag-results-y${yr}-card`);
+        card.style.display = 'block';
+        const scoreCard = (label, val, out) => `
+          <div style="flex:1; min-width:100px; background:#f9f9f9; border-radius:6px; padding:10px; text-align:center;">
+            <div style="font-size:1.2rem; font-weight:700; color:#C0272D">${val != null ? val + '/' + out : '—'}</div>
+            <div style="font-size:0.68rem; color:#888; text-transform:uppercase; margin-top:2px">${label}</div>
+          </div>`;
+        let scoresHtml = scoreCard('Maths', diag.maths_score, diag.maths_total || 18);
+        scoresHtml += scoreCard('Grammar', diag.grammar_score, 8);
+        scoresHtml += scoreCard('Comprehension', diag.comprehension_score, 8);
+        document.getElementById(`diag-results-y${yr}-scores`).innerHTML = scoresHtml;
 
-          const notesY89 = [];
-          if (profile.extension) notesY89.push('You\'ve been given access to <strong>Extension</strong> topics — a bit of an extra challenge!');
-          if (profile.bridge_maths_number || profile.bridge_maths_fractions || profile.bridge_maths_ratio || profile.bridge_maths_algebra || profile.bridge_maths_geometry || profile.bridge_maths_data) notesY89.push('You have some <strong>Bridge Maths</strong> topics to work through.');
-          if (profile.bridge_english_grammar || profile.bridge_english_comprehension) notesY89.push('You have some <strong>Bridge English</strong> topics to work through.');
-          document.getElementById('diag-results-y89-note').innerHTML = notesY89.length
-            ? notesY89.join('<br>')
-            : 'No extra support topics needed right now — well done!';
-        }
+        const notes = [];
+        if (profile.extension) notes.push('You\'ve been given access to <strong>Extension</strong> topics — a bit of an extra challenge!');
+        if (profile.bridge_maths_number || profile.bridge_maths_fractions || profile.bridge_maths_ratio || profile.bridge_maths_algebra || profile.bridge_maths_geometry || profile.bridge_maths_data) notes.push('You have some <strong>Bridge Maths</strong> topics to work through.');
+        if (profile.bridge_english_grammar || profile.bridge_english_comprehension) notes.push('You have some <strong>Bridge English</strong> topics to work through.');
+        document.getElementById(`diag-results-y${yr}-note`).innerHTML = notes.length
+          ? notes.join('<br>')
+          : 'No extra support topics needed right now — well done!';
       }
+      await showYearDiagResults(8);
+      await showYearDiagResults(9);
 
       // Load all topics
       const { data: topics } = await supabase
