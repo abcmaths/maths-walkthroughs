@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Year 11 Diagnostic — ABC</title>
+<style>
+  :root { --abc-red:#C0272D; --abc-red-dark:#8f1d22; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
+  header { background:var(--abc-red); color:#fff; padding:18px 20px; text-align:center; }
+  header h1 { margin:0; font-size:1.3rem; }
+  .wrap { max-width:700px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .progress { height:8px; background:#eee; border-radius:4px; overflow:hidden; margin-bottom:20px; }
+  .progress-bar { height:100%; background:var(--abc-red); transition:width .3s; }
+  .q-num { font-size:.85rem; color:#888; margin-bottom:6px; }
+  .q-text { font-size:1.05rem; margin-bottom:16px; line-height:1.5; }
+  .opt { display:block; width:100%; text-align:left; padding:12px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:8px; background:#fff; cursor:pointer; font-size:1rem; }
+  .opt:hover { border-color:var(--abc-red); }
+  .opt.selected { border-color:var(--abc-red); background:#fdeceb; }
+  input[type=text], input[type=number] { width:100%; padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; }
+  textarea { width:100%; min-height:180px; padding:12px; font-size:1rem; border:2px solid #ddd; border-radius:8px; font-family:inherit; }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; align-items:center; }
+  button.nav-btn { background:var(--abc-red); color:#fff; border:none; padding:12px 24px; border-radius:8px;
+         font-size:1rem; cursor:pointer; }
+  button.nav-btn:disabled { background:#ccc; cursor:not-allowed; }
+  button.nav-btn.secondary { background:#eee; color:#333; }
+  .btn-save { background:none; border:1.5px solid #ddd; color:#666; padding:10px 16px; border-radius:8px; font-size:0.9rem; cursor:pointer; }
+  .btn-save:hover { border-color:var(--abc-red); color:var(--abc-red); }
+  .passage { background:#fafafa; border-left:4px solid var(--abc-red); padding:16px; margin-bottom:20px;
+             font-size:1rem; line-height:1.6; max-height:320px; overflow-y:auto; }
+  .section-title { color:var(--abc-red); font-size:1.1rem; margin-bottom:4px; }
+  .hint { color:#888; font-size:.85rem; margin-bottom:16px; }
+  #screen-locked { text-align:center; padding:60px 20px; }
+  #screen-done { text-align:center; padding:60px 20px; }
+  .word-count { font-size:.85rem; color:#888; margin-top:6px; }
+  .instr-list { margin:14px 0; padding-left:0; list-style:none; }
+  .instr-list li { padding:10px 0 10px 32px; position:relative; border-bottom:1px solid #f0f0f0; }
+  .instr-list li:last-child { border-bottom:none; }
+  .instr-list li:before { content:"•"; position:absolute; left:8px; color:var(--abc-red); font-weight:700; font-size:1.3rem; }
+  .no-calc-banner { background:#fdeceb; border:1.5px solid var(--abc-red); border-radius:8px; padding:12px 16px;
+      margin-bottom:16px; font-size:0.92rem; font-weight:600; color:var(--abc-red-dark); display:flex; align-items:center; gap:8px; }
+  .resume-card { text-align:center; }
+</style>
+</head>
+<body>
+<header><h1>Year 11 Diagnostic</h1></header>
+<div class="wrap">
+
+  <div id="screen-locked" class="card" style="display:none;">
+    <h2>Loading…</h2>
+  </div>
+
+  <div id="screen-wrong-year" class="card" style="display:none;">
+    <h2>Not applicable</h2>
+    <p>This diagnostic is for Year 11 students only.</p>
+    <p><a href="dashboard-student.html">Go to your dashboard</a></p>
+  </div>
+
+  <div id="screen-resume" class="card resume-card" style="display:none;">
+    <h2>Welcome back!</h2>
+    <p>It looks like you started this diagnostic before but didn't finish. Would you like to carry on where you left off, or start again from the beginning?</p>
+    <div class="nav" style="justify-content:center; gap:12px;">
+      <button class="nav-btn secondary" onclick="restartDiagnostic()">Start Over</button>
+      <button class="nav-btn" onclick="resumeDiagnostic()">Continue Where I Left Off</button>
+    </div>
+  </div>
+
+  <div id="screen-intro" class="card" style="display:none;">
+    <h2>Welcome!</h2>
+    <p>This diagnostic helps your teachers see exactly where you're strong and where you need extra support in Maths and English. There's no need to revise — just do your best, working steadily through each section.</p>
+
+    <ul class="instr-list">
+      <li><strong>Maths</strong> — number, algebra, geometry & trigonometry, data & probability</li>
+      <li><strong>Science</strong> — a mix of Physics, Chemistry and Biology questions</li>
+      <li><strong>English</strong> — reading comprehension and grammar &amp; proofreading</li>
+    </ul>
+
+    <div class="no-calc-banner">🚫 No calculators — we want to see what you can do on your own.</div>
+
+    <p>You don't have to finish in one sitting. Use the <strong>Save &amp; Continue Later</strong> button at any point, and when you log back in you'll be able to pick up exactly where you stopped.</p>
+    <button class="nav-btn" onclick="startDiagnostic()">Start</button>
+  </div>
+
+  <div id="screen-quiz" class="card" style="display:none;">
+    <div class="progress"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+    <div id="sectionTitle" class="section-title"></div>
+    <div id="sectionHint" class="hint" style="margin-bottom:14px;"></div>
+    <div id="passageBox" class="passage" style="display:none;"></div>
+    <div id="qNum" class="q-num"></div>
+    <div id="qText" class="q-text"></div>
+    <div id="qBody"></div>
+    <div class="nav">
+      <button class="btn-save" onclick="saveAndPause()">💾 Save &amp; Continue Later</button>
+      <button class="nav-btn" id="nextBtn" onclick="nextQuestion()" disabled>Next</button>
+    </div>
+  </div>
+
+  <div id="screen-saved" class="card resume-card" style="display:none;">
+    <h2>Progress saved</h2>
+    <p>Your answers so far have been saved. You can close this page and come back any time — just log back in and you'll be able to continue exactly where you left off.</p>
+    <p><a href="dashboard-student.html">Go to your dashboard</a></p>
+  </div>
+
+  <div id="screen-done" class="card" style="display:none;">
+    <h2>Thank you!</h2>
+    <p>Your diagnostic has been submitted. Your teachers will use this to help plan the right support and stretch for you this term.</p>
+    <p><a href="dashboard-student.html">Go to your dashboard</a></p>
+  </div>
+
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let savedProgress = null;
+
+// ---------- Session + eligibility check ----------
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    window.location.href = 'login.html';
+    return;
+  }
+  currentUser = session.user;
+
+  const { data: profile } = await supabase.from('profiles')
+    .select('diagnostic_y11_completed, year_group').eq('id', currentUser.id).single();
+
+  if (!profile || Number(profile.year_group) !== 11) {
+    document.getElementById('screen-wrong-year').style.display = 'block';
+    return;
+  }
+
+  if (profile.diagnostic_y11_completed) {
+    document.getElementById('screen-done').style.display = 'block';
+    document.querySelector('#screen-done p').textContent = "You've already completed this diagnostic.";
+    return;
+  }
+
+  const { data: progress } = await supabase.from('diagnostic_y11_progress').select('*').eq('student_id', currentUser.id).maybeSingle();
+  if (progress) {
+    savedProgress = progress;
+    document.getElementById('screen-resume').style.display = 'block';
+  } else {
+    document.getElementById('screen-intro').style.display = 'block';
+  }
+})();
+
+// ---------- Maths question bank (12 Qs) — Year 11 / IGCSE level ----------
+const mathsQs = [
+  { id:'m1', section:'Maths — Number', type:'mc', text:'Simplify: √50', options:['5√2','2√5','10√5','25√2'], answer:0 },
+  { id:'m2', section:'Maths — Number', type:'numeric', text:'Work out: 2⁻³ (give as a fraction, e.g. 1/8)', answer:'1/8' },
+  { id:'m3', section:'Maths — Algebra', type:'mc', text:'Solve: x² − 5x + 6 = 0. What are the solutions?', options:['x=2, x=3','x=1, x=6','x=−2, x=−3','x=2, x=−3'], answer:0 },
+  { id:'m4', section:'Maths — Algebra', type:'mc', text:'Solve the simultaneous equations: x + y = 7, x − y = 3. What is x?', options:['3','4','5','2'], answer:1 },
+  { id:'m5', section:'Maths — Algebra', type:'numeric', text:'Make x the subject: y = 3x + 4. If y = 19, what is x?', answer:'5' },
+  { id:'m6', section:'Maths — Algebra', type:'mc', text:'Expand: (x + 3)(x − 2)', options:['x² + x − 6','x² − x − 6','x² + 5x − 6','x² − 6'], answer:0 },
+  { id:'m7', section:'Maths — Geometry & Trig', type:'numeric', text:'A right-angled triangle has a 30° angle and hypotenuse 10cm. What is the length of the side opposite 30° (nearest whole cm)?', answer:'5' },
+  { id:'m8', section:'Maths — Geometry & Trig', type:'mc', text:'What is the angle in a semicircle (angle at the circumference subtended by the diameter)?', options:['45°','60°','90°','180°'], answer:2 },
+  { id:'m9', section:'Maths — Geometry & Trig', type:'numeric', text:'Find the circumference of a circle with radius 7cm (use π = 22/7, give as a whole number).', answer:'44' },
+  { id:'m10', section:'Maths — Data & Probability', type:'numeric', text:'A bag has 4 red and 6 blue balls. What is the probability of picking a red ball (as a fraction in simplest form)?', answer:'2/5' },
+  { id:'m11', section:'Maths — Data & Probability', type:'mc', text:'Two dice are rolled. What is the probability both show a 6?', options:['1/6','1/12','1/36','2/6'], answer:2 },
+  { id:'m12', section:'Maths — Reasoning', type:'numeric', text:'The nth term of a sequence is n² + 2. What is the 5th term?', answer:'27' },
+];
+
+// ---------- Science question bank (12 Qs) — Physics, Chemistry, Biology ----------
+const scienceQs = [
+  { id:'s1', section:'Science — Physics', type:'mc', text:'What is the unit of force?', options:['Joule','Newton','Watt','Pascal'], answer:1 },
+  { id:'s2', section:'Science — Physics', type:'numeric', text:'A force of 20N acts on a 4kg object. Using F=ma, what is the acceleration in m/s²?', answer:'5' },
+  { id:'s3', section:'Science — Physics', type:'mc', text:'Which type of energy does a moving object have?', options:['Kinetic','Potential','Chemical','Thermal'], answer:0 },
+  { id:'s4', section:'Science — Physics', type:'mc', text:'What happens to current in a series circuit?', options:['It is the same everywhere','It increases after each component','It decreases after each component','It splits equally'], answer:0 },
+  { id:'s5', section:'Science — Chemistry', type:'mc', text:'What is the chemical symbol for sodium?', options:['S','So','Na','Sd'], answer:2 },
+  { id:'s6', section:'Science — Chemistry', type:'mc', text:'Which particle has a negative charge?', options:['Proton','Neutron','Electron','Nucleus'], answer:2 },
+  { id:'s7', section:'Science — Chemistry', type:'mc', text:'What type of reaction releases heat to the surroundings?', options:['Endothermic','Exothermic','Neutral','Catalytic'], answer:1 },
+  { id:'s8', section:'Science — Chemistry', type:'numeric', text:'Balance this equation and give the coefficient of O₂: CH₄ + __O₂ → CO₂ + 2H₂O', answer:'2' },
+  { id:'s9', section:'Science — Biology', type:'mc', text:'Which organelle is the site of photosynthesis in plant cells?', options:['Mitochondria','Nucleus','Chloroplast','Ribosome'], answer:2 },
+  { id:'s10', section:'Science — Biology', type:'mc', text:'What is the main function of red blood cells?', options:['Fight infection','Carry oxygen','Clot blood','Digest food'], answer:1 },
+  { id:'s11', section:'Science — Biology', type:'mc', text:'Which process do plants use to release energy from glucose?', options:['Photosynthesis','Respiration','Transpiration','Osmosis'], answer:1 },
+  { id:'s12', section:'Science — Biology', type:'mc', text:'What is the basic unit of inheritance called?', options:['Cell','Gene','Chromosome (whole)','Enzyme'], answer:1 },
+];
+
+// ---------- English: Grammar / proofreading (8 Qs) ----------
+const grammarQs = [
+  { id:'g1', section:'English — Grammar', type:'mc', text:'Which sentence is correctly punctuated?', options:[
+      'Its going to rain later, so bring your umbrella.',
+      "It's going to rain later, so bring your umbrella.",
+      'Its going to rain later so bring your umbrella'
+    ], answer:1 },
+  { id:'g2', section:'English — Grammar', type:'mc', text:'Choose the correct word: "Neither of the boys ___ finished their homework."', options:['has','have','had have','haves'], answer:0 },
+  { id:'g3', section:'English — Grammar', type:'mc', text:'Which sentence uses the past tense correctly?', options:[
+      'She go to the market yesterday.',
+      'She goed to the market yesterday.',
+      'She went to the market yesterday.'
+    ], answer:2 },
+  { id:'g4', section:'English — Grammar', type:'mc', text:'Identify the sentence with a spelling mistake.', options:[
+      'The recieve of the goods was delayed.',
+      'The receipt confirmed the payment.',
+      'They received the parcel on Monday.'
+    ], answer:0 },
+  { id:'g5', section:'English — Grammar', type:'mc', text:'Which word correctly completes: "The students, along with their teacher, ___ arriving soon."', options:['is','are','was','be'], answer:0 },
+  { id:'g6', section:'English — Grammar', type:'mc', text:'Which sentence uses an apostrophe correctly?', options:[
+      "The teacher's marked all of the students' books.",
+      "The teachers' marked all of the student's books.",
+      "The teacher marked all of the students' books."
+    ], answer:2 },
+  { id:'g7', section:'English — Grammar', type:'mc', text:'Choose the correctly capitalised sentence.', options:[
+      'We visited lagos and abuja during the easter holidays.',
+      'We visited Lagos and Abuja during the Easter holidays.',
+      'we visited Lagos and Abuja during the easter Holidays.'
+    ], answer:1 },
+  { id:'g8', section:'English — Grammar', type:'mc', text:'Which sentence is a complete sentence (not a fragment)?', options:[
+      'Running quickly down the road, out of breath.',
+      'Because the exam started late.',
+      'The bus arrived ten minutes late.'
+    ], answer:2 },
+];
+
+// ---------- English: reading comprehension (8 Qs) ----------
+const passageText = `The market at Oja-Oba had always opened before sunrise, but this Saturday it opened later than usual. Tunde noticed it first — the usual clatter of stalls being set up was missing when he passed on his way to fetch water. By the time he returned, a small crowd had gathered near the yam sellers' corner, murmuring about something.
+
+His aunt Bisi ran one of the busiest stalls, selling pepper and tomatoes she grew on her small farm outside town. She told Tunde that the market union had called an emergency meeting. A new toll was being proposed on traders bringing goods in from outside the district, and many of the smaller sellers — like her — were worried it would eat into their already thin profits.
+
+Tunde had never paid much attention to how the market actually worked. He had always assumed the stalls simply appeared each morning, the prices simply were what they were. Listening to his aunt describe the meetings, the negotiations with the local council, and the careful accounting she did each night by lamplight, he began to see the market differently — not as something fixed, but as something people built and rebuilt every single day.
+
+By midday, the union had reached a compromise: a smaller toll, phased in gradually, with an exemption for traders selling only what they grew themselves. Bisi returned to her stall relieved, though she warned Tunde that this would not be the last such meeting. "The market," she said, "is always being decided."`;
+
+const compQs = [
+  { id:'c1', type:'mc', text:'Why was the market late to open?', options:['Bisi\'s stall was closed','An emergency union meeting was called','It was a public holiday','The council shut it down'], answer:1 },
+  { id:'c2', type:'mc', text:'What does Bisi sell at her stall?', options:['Yams','Pepper and tomatoes','Fish','Cloth'], answer:1 },
+  { id:'c3', type:'mc', text:'What was the market union proposing?', options:['Lower prices','A new toll on outside traders','Closing the market on Saturdays','A new location'], answer:1 },
+  { id:'c4', type:'mc', text:'Why were smaller sellers worried?', options:['They disliked the new location','The toll could reduce their already thin profits','They wanted the market to close','They didn\'t like Bisi'], answer:1 },
+  { id:'c5', type:'mc', text:'What does "eat into their profits" mean in this context?', options:['Increase their profits','Have no effect on their profits','Reduce their profits','Double their profits'], answer:2 },
+  { id:'c6', type:'mc', text:'How did Tunde\'s view of the market change by the end of the passage?', options:[
+      'He decided never to visit again',
+      'He realised it was something people actively built and negotiated, not fixed',
+      'He became angry at his aunt',
+      'He stopped believing prices could ever change'
+    ], answer:1 },
+  { id:'c7', type:'mc', text:'What was the outcome of the union meeting?', options:[
+      'The toll was cancelled completely',
+      'A smaller, phased-in toll with an exemption for growers',
+      'All traders were banned from the market',
+      'Prices were frozen for a year'
+    ], answer:1 },
+  { id:'c8', type:'mc', text:'What does Bisi mean by "The market is always being decided"?', options:[
+      'The market has no rules at all',
+      'Decisions about how the market works are ongoing, not one-off',
+      'Only the council decides everything',
+      'Nothing about the market ever changes'
+    ], answer:1 },
+];
+
+// ---------- Bar chart SVG helper ----------
+function renderBarChartSVG(labels, values) {
+  const width = 320, height = 220, padding = 36, barGap = 14;
+  const maxVal = Math.max(...values) * 1.15;
+  const chartHeight = height - padding * 2;
+  const barWidth = (width - padding * 2 - barGap * (values.length - 1)) / values.length;
+  const colours = ['#C0272D', '#1565C0', '#2E7D32', '#6A1B9A', '#E67E22'];
+  let bars = '';
+  values.forEach((v, i) => {
+    const barHeight = (v / maxVal) * chartHeight;
+    const x = padding + i * (barWidth + barGap);
+    const y = height - padding - barHeight;
+    bars += `
+      <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${colours[i % colours.length]}" rx="3"></rect>
+      <text x="${x + barWidth/2}" y="${y - 6}" text-anchor="middle" font-size="13" font-weight="700" fill="#333">${v}</text>
+      <text x="${x + barWidth/2}" y="${height - padding + 16}" text-anchor="middle" font-size="11" fill="#555">${labels[i]}</text>
+    `;
+  });
+  return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;max-width:360px;height:auto;display:block;margin:0 auto">
+    <line x1="${padding}" y1="${height-padding}" x2="${width-padding}" y2="${height-padding}" stroke="#ccc" stroke-width="1.5"></line>
+    ${bars}
+  </svg>`;
+}
+
+// ---------- State ----------
+let queue = [];
+let idx = 0;
+let answers = {};
+let currentSelection = null;
+
+window.startDiagnostic = function() {
+  document.getElementById('screen-intro').style.display = 'none';
+  buildQueue();
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderQuestion();
+};
+
+function buildQueue() {
+  queue = [
+    ...mathsQs,
+    ...scienceQs,
+    ...grammarQs,
+    ...compQs.map((q, i) => i === 0 ? { ...q, showPassage: true } : q)
+  ];
+  idx = 0;
+}
+
+function currentSectionLabel(q) {
+  if (q.section) return q.section;
+  if (compQs.includes(q)) return 'English — Reading Comprehension';
+  return '';
+}
+
+window.renderQuestion = function renderQuestion() {
+  const q = queue[idx];
+  document.getElementById('progressBar').style.width = `${Math.round((idx / queue.length) * 100)}%`;
+  document.getElementById('sectionTitle').textContent = currentSectionLabel(q);
+  document.getElementById('sectionHint').textContent = '';
+  document.getElementById('qNum').textContent = `Question ${idx + 1} of ${queue.length}`;
+  document.getElementById('qText').textContent = q.text;
+  currentSelection = (q.id in answers) ? answers[q.id] : null;
+
+  const passageBox = document.getElementById('passageBox');
+  if (q.showPassage) {
+    passageBox.style.display = 'block';
+    passageBox.textContent = passageText;
+  } else if (compQs.includes(q)) {
+    passageBox.style.display = 'block';
+    passageBox.textContent = passageText;
+  } else {
+    passageBox.style.display = 'none';
+  }
+
+  const body = document.getElementById('qBody');
+  body.innerHTML = '';
+
+  if (q.chartData) {
+    const chartWrap = document.createElement('div');
+    chartWrap.innerHTML = renderBarChartSVG(q.chartData.labels, q.chartData.values);
+    body.appendChild(chartWrap);
+  }
+
+  if (q.type === 'mc' || (!q.type && q.options)) {
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt' + (currentSelection === i ? ' selected' : '');
+      btn.textContent = opt;
+      btn.onclick = () => {
+        answers[q.id] = i;
+        currentSelection = i;
+        document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('nextBtn').disabled = false;
+      };
+      body.appendChild(btn);
+    });
+    document.getElementById('nextBtn').disabled = currentSelection === null;
+  } else {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = answers[q.id] || '';
+    input.placeholder = 'Type your answer';
+    input.oninput = () => {
+      answers[q.id] = input.value.trim();
+      document.getElementById('nextBtn').disabled = input.value.trim() === '';
+    };
+    body.appendChild(input);
+    document.getElementById('nextBtn').disabled = !(q.id in answers) || answers[q.id] === '';
+  }
+};
+
+window.nextQuestion = function() {
+  idx++;
+  if (idx >= queue.length) {
+    document.getElementById('screen-quiz').style.display = 'none';
+    window.submitDiagnostic();
+    return;
+  }
+  renderQuestion();
+};
+
+// ---------- Save & resume ----------
+window.saveAndPause = async function() {
+  await supabase.from('diagnostic_y11_progress').upsert({
+    student_id: currentUser.id,
+    queue_state: queue.map(q => q.id),
+    current_index: idx,
+    answers: answers,
+    updated_at: new Date().toISOString()
+  }, { onConflict: 'student_id' });
+
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-saved').style.display = 'block';
+};
+
+window.restartDiagnostic = async function() {
+  await supabase.from('diagnostic_y11_progress').delete().eq('student_id', currentUser.id);
+  document.getElementById('screen-resume').style.display = 'none';
+  document.getElementById('screen-intro').style.display = 'block';
+};
+
+window.resumeDiagnostic = function() {
+  document.getElementById('screen-resume').style.display = 'none';
+
+  const allQById = {};
+  [...mathsQs, ...scienceQs, ...grammarQs, ...compQs].forEach(q => { allQById[q.id] = q; });
+
+  queue = savedProgress.queue_state.map(qid => {
+    if (qid === 'c1') return { ...allQById[qid], showPassage: true };
+    return allQById[qid];
+  });
+  idx = savedProgress.current_index || 0;
+  answers = savedProgress.answers || {};
+
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderQuestion();
+};
+
+// ---------- Submit ----------
+window.submitDiagnostic = async function() {
+  function clusterScore(bank, sectionName) {
+    const qs = bank.filter(q => q.section === sectionName);
+    const correct = qs.filter(q => String(answers[q.id]) === String(q.answer)).length;
+    return { correct, total: qs.length, pct: qs.length ? correct / qs.length : 1 };
+  }
+  const numberCluster    = clusterScore(mathsQs, 'Maths — Number');
+  const algebraCluster   = clusterScore(mathsQs, 'Maths — Algebra');
+  const geometryCluster  = clusterScore(mathsQs, 'Maths — Geometry & Trig');
+  const dataCluster      = clusterScore(mathsQs, 'Maths — Data & Probability');
+
+  const physicsCluster   = clusterScore(scienceQs, 'Science — Physics');
+  const chemistryCluster = clusterScore(scienceQs, 'Science — Chemistry');
+  const biologyCluster   = clusterScore(scienceQs, 'Science — Biology');
+
+  const mathsTotal = mathsQs.length;
+  const mathsCorrect = mathsQs.filter(q => String(answers[q.id]) === String(q.answer)).length;
+  const scienceTotal = scienceQs.length;
+  const scienceCorrect = scienceQs.filter(q => String(answers[q.id]) === String(q.answer)).length;
+
+  const grammarCorrect = grammarQs.filter(q => answers[q.id] === q.answer).length;
+  const compCorrect = compQs.filter(q => answers[q.id] === q.answer).length;
+
+  const bridgeMathsNumber    = numberCluster.pct    <= 0.5;
+  const bridgeMathsAlgebra   = algebraCluster.pct   <= 0.5;
+  const bridgeMathsGeometry  = geometryCluster.pct  <= 0.5;
+  const bridgeMathsData      = dataCluster.pct      <= 0.5;
+
+  const bridgeSciencePhysics   = physicsCluster.pct   <= 0.5;
+  const bridgeScienceChemistry = chemistryCluster.pct <= 0.5;
+  const bridgeScienceBiology   = biologyCluster.pct   <= 0.5;
+
+  const bridgeEnglishGrammar        = grammarCorrect < 5;
+  const bridgeEnglishComprehension  = compCorrect < 5;
+
+  const anyBridgeMaths   = bridgeMathsNumber || bridgeMathsAlgebra || bridgeMathsGeometry || bridgeMathsData;
+  const anyBridgeScience = bridgeSciencePhysics || bridgeScienceChemistry || bridgeScienceBiology;
+  const anyBridgeEnglish = bridgeEnglishGrammar || bridgeEnglishComprehension;
+  const bridgeNeeded = anyBridgeMaths || anyBridgeScience || anyBridgeEnglish;
+
+  const extension = mathsCorrect >= Math.round(mathsTotal * 0.85) && scienceCorrect >= Math.round(scienceTotal * 0.85) && grammarCorrect >= 7 && compCorrect >= 7;
+
+  const { error: insertErr } = await supabase.from('diagnostic_y11_results').insert({
+    student_id: currentUser.id,
+    maths_score: mathsCorrect,
+    maths_total: mathsTotal,
+    science_score: scienceCorrect,
+    science_total: scienceTotal,
+    grammar_score: grammarCorrect,
+    comprehension_score: compCorrect,
+    raw_answers: answers
+  });
+
+  const { error: profileErr } = await supabase.from('profiles').update({
+    diagnostic_y11_completed: true,
+    extension: extension,
+    bridge_needed: bridgeNeeded,
+    bridge_maths_number: bridgeMathsNumber,
+    bridge_maths_algebra: bridgeMathsAlgebra,
+    bridge_maths_geometry: bridgeMathsGeometry,
+    bridge_maths_data: bridgeMathsData,
+    bridge_science_physics: bridgeSciencePhysics,
+    bridge_science_chemistry: bridgeScienceChemistry,
+    bridge_science_biology: bridgeScienceBiology,
+    bridge_english_grammar: bridgeEnglishGrammar,
+    bridge_english_comprehension: bridgeEnglishComprehension
+  }).eq('id', currentUser.id);
+
+  if (insertErr || profileErr) {
+    alert('There was a problem submitting. Please try again or ask a teacher for help.');
+    console.error(insertErr, profileErr);
+    return;
+  }
+
+  await supabase.from('diagnostic_y11_progress').delete().eq('student_id', currentUser.id);
+
+  document.getElementById('screen-done').style.display = 'block';
+};
+</script>
+</body>
+</html>
