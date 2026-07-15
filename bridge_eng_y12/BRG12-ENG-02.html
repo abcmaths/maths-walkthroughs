@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Comprehension & Summary Skills — Bridge Maths — ABC</title>
+
+<style>
+  :root { --red:#C0272D; --dark:#8f1d22; --cream:#FDECEC; --line:#F3C6C6; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; font-size:16px; }
+  header { background:var(--red); color:#fff; padding:16px 20px; }
+  header h1 { margin:0; font-size:1.2rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
+  .q-progress { font-size:.85rem; color:#888; margin-bottom:8px; }
+  .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
+  .step-bar { height:100%; background:var(--red); transition:width .3s; }
+  .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.65; font-size:1.05rem; }
+  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:12px; border-radius:6px; margin:10px 0; font-size:1.1rem; text-align:center; }
+  .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
+  .opt { display:block; width:100%; text-align:center; padding:16px 14px; margin-bottom:10px;
+         border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-size:1.15rem; font-weight:600;
+         min-height:52px; -webkit-tap-highlight-color:transparent; }
+  .opt:active { transform:scale(0.98); }
+  .opt.selected { border-color:var(--red); background:#fdeceb; }
+  .opt.correct { border-color:#1b7d3a; background:#e8f5e9; }
+  .opt.wrong { border-color:var(--red); background:#fdeceb; }
+  .try-fb { margin-top:12px; font-weight:600; font-size:1.05rem; }
+  .try-fb.ok { color:#1b7d3a; }
+  .try-fb.er { color:var(--red); }
+  .nav { display:flex; justify-content:space-between; margin-top:20px; gap:10px; }
+  button.nav-btn { background:#eee; color:#333; border:none; padding:14px 22px; border-radius:10px; cursor:pointer;
+         font-size:1.05rem; min-height:48px; flex:1; -webkit-tap-highlight-color:transparent; }
+  button.nav-btn.primary { background:var(--red); color:#fff; }
+  button.nav-btn:disabled { opacity:0.5; }
+</style>
+
+</head>
+<body>
+<header><h1>Bridge English (Y12 WAEC): Comprehension & Summary Skills</h1></header>
+<div class="wrap">
+  <div class="card">
+    <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
+    <div class="q-progress" id="qProgress"></div>
+    <div id="stepContent"></div>
+    <div class="nav">
+      <button class="nav-btn" id="backBtn" onclick="prevStep()">Back</button>
+      <button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [{"title": "Retrieval questions", "teach": ["Retrieval questions ask for facts stated directly in the passage \u2014 locate and state them precisely.", "Scan for keywords from the question, then find the exact relevant detail nearby.", "These should be quick, accurate marks if you read the passage carefully first."], "yt_prompt": "Given the clue, what is the retrieved fact?"}, {"title": "Inference questions", "teach": ["Inference questions ask you to work out something implied but not directly stated, using evidence from the text.", "Always be ready to point to the specific words that led to your inference.", "A strong inference feels like the obvious conclusion once you see the supporting evidence."], "yt_prompt": "Given the clue, what is the strongest inference?"}, {"title": "Vocabulary in context", "teach": ["WAEC comprehension often asks for the meaning of a word AS USED in the passage \u2014 this may differ from its usual dictionary meaning.", "Read the surrounding sentence carefully to work out how the word is being used here specifically.", "Never assume the most common meaning of a word is automatically correct \u2014 always check the context."], "yt_prompt": "What does this word mean, as used in the given context?"}, {"title": "Identifying the main idea", "teach": ["The main idea is the central point a paragraph or passage is making \u2014 not just any detail mentioned within it.", "Ask: 'What is this paragraph MOSTLY about?' rather than focusing on one small example.", "Supporting details exist to strengthen the main idea, not replace it."], "yt_prompt": "Which best captures the main idea?"}, {"title": "Summary \u2014 selecting relevant points", "teach": ["A good summary answer selects ONLY the points relevant to the specific question asked \u2014 irrelevant detail loses marks.", "Re-read the question to check exactly what you're being asked to summarise before selecting points.", "WAEC summary questions often specify an exact number of points required \u2014 check the mark allocation."], "yt_prompt": "Which point is MOST relevant to include in the summary?"}, {"title": "Summary \u2014 expressing ideas concisely", "teach": ["A summary should be written in your OWN words, not copied directly from the passage.", "Cut out examples, repeated ideas, and descriptive detail \u2014 keep only the essential point.", "Aim for one clear, complete sentence per point, rather than a long, wordy answer."], "yt_prompt": "Which is the better summary sentence?"}, {"title": "Author's tone and attitude", "teach": ["Tone reveals the writer's attitude towards their subject \u2014 critical, admiring, humorous, concerned, and so on.", "Look at specific word choices (adjectives, verbs) rather than guessing generally.", "The same facts can be presented with very different tones depending on word choice."], "yt_prompt": "What tone does this passage extract create?"}, {"title": "Purpose of a passage", "teach": ["Identify WHY a passage was written: to inform, persuade, entertain, describe, or instruct.", "This affects how you should interpret the writer's choices of language and structure.", "A persuasive passage should be read more critically than a purely informative one."], "yt_prompt": "What is the main purpose of this type of passage?"}, {"title": "Combining information across a passage", "teach": ["Some questions require combining details from different parts of a passage to form a complete answer.", "Don't assume all relevant information is in one place \u2014 scan the whole passage for connected details.", "This is especially important in longer WAEC comprehension passages with multiple paragraphs."], "yt_prompt": "Given clues from two different parts of a passage, what combined conclusion can you draw?"}, {"title": "Mixed practice", "teach": ["You've now covered retrieval, inference, vocabulary in context, main ideas, and summary skills.", "These are exactly the skills tested in the WAEC Comprehension and Summary papers.", "Always check the mark allocation for each question \u2014 it tells you how many distinct points are expected."], "yt_prompt": "Given the clue, what is the retrieved fact?"}];
+function ytGen_0() { const opts=[['"The factory employs 250 workers." How many workers?','250'],['"The journey took six hours." How long was the journey?','Six hours']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_1() { const opts=[['"He counted his money three times before leaving the house." What can you infer?','He was anxious or careful about the money'],['"She kept glancing at the clock throughout the meeting." What can you infer?','She was impatient or in a hurry']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_2() { const opts=[['"The negotiations reached a stalemate." What does "stalemate" mean here?','A situation where no progress can be made'],['"His argument was rather shallow." What does "shallow" mean here?','Lacking depth or substance']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_3() { const opts=['A paragraph describing various farming techniques, mostly focused on how irrigation transformed crop yields.','A paragraph describing various farming techniques.']; return {q:'Which better captures a specific main idea?', options:opts, answer:opts[0]}; }
+function ytGen_4() { const opts=['"The policy reduced costs by 15% within a year."','"The meeting was held on a Tuesday afternoon."']; return {q:'For a summary about policy effectiveness, which is more relevant?', options:opts, answer:opts[0]}; }
+function ytGen_5() { const opts=['The policy cut costs significantly within its first year.','The policy, which was introduced by the management team after several months of careful and detailed deliberation, managed to cut costs.']; return {q:'Which is the better (more concise) summary sentence?', options:opts, answer:opts[0]}; }
+function ytGen_6() { const opts=[['"The so-called reforms achieved nothing of real substance."','Critical/sceptical'],['"The achievement was nothing short of remarkable."','Admiring']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:['Critical/sceptical','Admiring'], answer:p[1]}; }
+function ytGen_7() { const opts=[['A newspaper article reporting on a recent election result','Inform'],['An advertisement for a new product','Persuade']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], options:['Inform','Persuade'], answer:p[1]}; }
+function ytGen_8() { const opts=[['Para 1: "Sales fell sharply." Para 3: "The company later closed two factories." → ','The falling sales likely led to the factory closures'],['Para 1: "Rain fell for days." Para 4: "The river overflowed." → ','The heavy rain likely caused the flooding']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], answer:p[1]}; }
+function ytGen_9() { const opts=[['"The bridge was completed in 1998." When was it completed?','1998'],['"The team scored 3 goals." How many goals?','3']]; const p=opts[Math.floor(Math.random()*opts.length)]; return {q:p[0], answer:p[1]}; }
+
+const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
+
+let ANSWER_POOL = [];
+
+let qIdx = 0;
+let stepIdx = 0;
+const STEPS_PER_Q = 4;
+let currentYT = null;
+let currentOptions = null;
+let answered = false;
+
+function makeDistractors(correctAnswer, pool) {
+  const ans = String(correctAnswer);
+  let candidates = [];
+
+  if (/^-?\d+$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [1,-1,2,-2,5,-5,10,-10,3,-3].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d);
+      const validSign = num >= 0 ? Number(c) >= 0 : Number(c) < 0;
+      if (c !== ans && !candidates.includes(c) && validSign) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+\/\d+$/.test(ans)) {
+    const [numer, denom] = ans.split('/').map(Number);
+    const perturbs = [[numer+1,denom],[numer>1?numer-1:numer+2,denom],[numer,denom+1],[numer,denom>1?denom-1:denom+2],[numer+1,denom+1]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}/${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+:\d+$/.test(ans)) {
+    const [a1, b1] = ans.split(':').map(Number);
+    const perturbs = [[a1+1,b1],[a1>1?a1-1:a1+2,b1],[a1,b1+1],[a1,b1>1?b1-1:b1+2]].sort(() => Math.random()-0.5);
+    for (const [a,b] of perturbs) {
+      if (a>0 && b>0) {
+        const c = `${a}:${b}`;
+        if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      }
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^-?\d+\.\d+$/.test(ans)) {
+    const num = parseFloat(ans);
+    const decimals = (ans.split('.')[1]||'').length;
+    const deltas = [0.1,-0.1,0.01,-0.01,1,-1,0.5,-0.5].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = (num + d).toFixed(decimals);
+      if (c !== ans && !candidates.includes(c)) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  } else if (/^\d+%$/.test(ans)) {
+    const num = parseInt(ans, 10);
+    const deltas = [5,-5,10,-10,2,-2,1,-1].sort(() => Math.random()-0.5);
+    for (const d of deltas) {
+      const c = String(num + d) + '%';
+      if (c !== ans && !candidates.includes(c) && (num+d) >= 0) candidates.push(c);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  if (candidates.length < 3 && pool && pool.length) {
+    const seen = new Set([ans, ...candidates]);
+    const others = [...new Set(pool.map(String))].filter(a => !seen.has(a));
+    others.sort(() => Math.random()-0.5);
+    for (const o of others) {
+      if (candidates.includes(o)) continue;
+      candidates.push(o);
+      if (candidates.length >= 3) break;
+    }
+  }
+
+  return candidates.slice(0,3);
+}
+
+function render() {
+  const q = QUESTIONS[qIdx];
+  document.getElementById('qProgress').textContent = `Question ${qIdx+1} of 10 — Step ${stepIdx+1} of ${STEPS_PER_Q}`;
+  const pct = Math.round(((qIdx*STEPS_PER_Q)+stepIdx+1) / (10*STEPS_PER_Q) * 100);
+  document.getElementById('stepBar').style.width = pct + '%';
+
+  const box = document.getElementById('stepContent');
+  document.getElementById('backBtn').disabled = (qIdx===0 && stepIdx===0);
+
+  if (stepIdx < 3) {
+    box.innerHTML = `<div class="teach"><strong>${q.title}</strong><br><br>${q.teach[stepIdx]}</div>`;
+    document.getElementById('nextBtn').textContent = 'Next';
+    document.getElementById('nextBtn').disabled = false;
+  } else {
+    currentYT = YT_GENS[qIdx]();
+    answered = false;
+
+    if (currentYT.options) {
+      currentOptions = [...new Set(currentYT.options)].sort(() => Math.random()-0.5);
+    } else {
+      const pool = ANSWER_POOL.filter((_, i) => i !== qIdx);
+      const distractors = makeDistractors(currentYT.answer, pool);
+      currentOptions = [...new Set([String(currentYT.answer), ...distractors])].sort(() => Math.random()-0.5);
+    }
+
+    let optsHtml = currentOptions.map((opt, i) =>
+      `<button class="opt" data-idx="${i}" onclick="selectOpt(${i})">${opt}</button>`
+    ).join('');
+
+    box.innerHTML = `
+      <div class="teach"><strong>${q.title}</strong></div>
+      <div class="yt-box">
+        <div>${q.yt_prompt}</div>
+        ${currentYT.q ? `<div class="worked">${currentYT.q}</div>` : ''}
+        ${optsHtml}
+        <div id="ytFeedback"></div>
+      </div>`;
+    const isLast = (qIdx === 9);
+    document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
+    document.getElementById('nextBtn').disabled = true;
+  }
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const btns = document.querySelectorAll('.opt');
+  const correctIdx = currentOptions.indexOf(String(currentYT.answer));
+  btns.forEach((b, idx) => {
+    b.onclick = null;
+    if (idx === correctIdx) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('ytFeedback');
+  if (i === correctIdx) {
+    fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
+  } else {
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted in green.</div>';
+  }
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  if (stepIdx < 3) {
+    stepIdx++;
+  } else {
+    if (qIdx < 9) {
+      qIdx++; stepIdx = 0;
+    } else {
+      finishWalkthrough();
+      return;
+    }
+  }
+  render();
+}
+
+function prevStep() {
+  if (stepIdx > 0) { stepIdx--; }
+  else if (qIdx > 0) { qIdx--; stepIdx = 3; }
+  render();
+}
+
+function finishWalkthrough() {
+  document.getElementById('stepContent').innerHTML = `
+    <div class="teach"><strong>Well done — topic complete!</strong><br>Great work finishing all 10 questions.</div>
+    <div id="completeStatus" style="text-align:center; margin-top:16px;">
+      <div id="completeSpinner" style="color:#888; font-size:0.95rem;">Saving your progress…</div>
+    </div>`;
+  document.querySelector('.nav').style.display = 'none';
+  if (window.markComplete) {
+    window.markComplete().then(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:#1b7d3a; font-weight:700; font-size:1.05rem;">✓ Marked as complete!</div><a href="../dashboard-student.html" style="display:inline-block; margin-top:12px; background:var(--red); color:#fff; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600;">Back to dashboard</a>';
+    }).catch(() => {
+      document.getElementById('completeStatus').innerHTML = '<div style="color:var(--red); font-size:0.9rem;">Could not save automatically.</div><button class="nav-btn primary" style="margin-top:10px;" onclick="window.markComplete().then(()=>location.reload())">Try again</button>';
+    });
+  }
+}
+
+ANSWER_POOL = YT_GENS.map(fn => fn().answer);
+
+render();
+</script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _abcTopicCode = 'BRG12-ENG-02';
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+})();
+
+window.markComplete = async function() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not logged in');
+
+  const { data: topicRow, error: topicErr } = await supabase
+    .from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
+  if (topicErr || !topicRow) throw new Error('Could not find topic: ' + _abcTopicCode);
+
+  const { error } = await supabase.from('walkthrough_progress').upsert({
+    student_id: session.user.id,
+    topic_id: topicRow.id,
+    status: 'completed',
+    last_visited_at: new Date().toISOString()
+  }, { onConflict: 'student_id,topic_id' });
+  if (error) throw error;
+};
+</script>
+</body>
+</html>
