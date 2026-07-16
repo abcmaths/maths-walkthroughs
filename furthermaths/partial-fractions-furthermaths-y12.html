@@ -113,6 +113,12 @@ function g(){return document.getElementById('dg');}
 function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Georgia,serif" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
 function L(x1,y1,x2,y2,c,w){c=c||'#C0272D';w=w||2;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"/>';}
+function Fr(cx,cy,num,den,color,sz){
+  sz=sz||13;color=color||'#241A17';
+  var stripped=function(s){return String(s).replace(/<[^>]*>/g,'');};
+  var halfw=Math.max(stripped(num).length,stripped(den).length)*sz*0.29+4;
+  return T(cx,cy-sz*0.35,num,color,sz,'middle')+L(cx-halfw,cy+sz*0.22,cx+halfw,cy+sz*0.22,color,1.3)+T(cx,cy+sz*1.15,den,color,sz,'middle');
+}
 
 // Session values
 
@@ -125,77 +131,89 @@ var V={};
 })();
 
 function dQ1(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
-  o.push(R(14,8,452,36));
-  o.push(T(240,30,'Split ('+(V.a1+V.b1)+'x + '+(V.a1*V.c1)+') / [(x+'+V.a1+')(x+'+V.b1+')]','#C0272D',12,'middle',true));
+  var s=g();s.setAttribute('viewBox','0 0 480 320');var o=[];
+  o.push(R(14,8,452,66));
+  o.push(T(240,24,'Split the fraction:','#C0272D',11,'middle',true));
+  o.push(Fr(240,52,'('+(V.a1+V.b1)+'x + '+(V.a1*V.c1)+')','(x+'+V.a1+')(x+'+V.b1+')','#C0272D',12));
   if(p>=1){
-    o.push(R(30,52,420,42,'#f8f8f8','#ccc',1));
-    o.push(T(240,78,'Write as: A/(x+'+V.a1+')  +  B/(x+'+V.b1+')','#241A17',13,'middle',true));
+    o.push(R(30,82,420,66,'#f8f8f8','#ccc',1));
+    o.push(T(240,98,'Write as:','#241A17',11,'middle',true));
+    o.push(Fr(160,126,'A','(x+'+V.a1+')','#241A17',13));
+    o.push(T(240,126,'+','#241A17',15,'middle',true));
+    o.push(Fr(320,126,'B','(x+'+V.b1+')','#241A17',13));
   }
   if(p>=2){
-    o.push(R(14,102,452,70,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,120,'Multiply both sides by (x+'+V.a1+')(x+'+V.b1+'):','#241A17',11,'middle',true));
-    o.push(T(240,140,'numerator = A(x+'+V.b1+') + B(x+'+V.a1+')','#241A17',12,'middle',true));
-    o.push(T(240,160,'Substitute x=\u2212'+V.a1+' to eliminate B, then x=\u2212'+V.b1+' to eliminate A','#888',9,'middle'));
+    o.push(R(14,156,452,72,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,174,'Multiply both sides by (x+'+V.a1+')(x+'+V.b1+'):','#241A17',11,'middle',true));
+    o.push(T(240,194,'numerator = A(x+'+V.b1+') + B(x+'+V.a1+')','#241A17',12,'middle',true));
+    o.push(T(240,214,'Substitute x=\u2212'+V.a1+' to eliminate B, then x=\u2212'+V.b1+' to eliminate A','#888',9,'middle'));
   }
   if(p>=3){
-    o.push(R(14,180,452,72,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,200,'x = \u2212'+V.a1+':  numerator = A('+V.b1+'\u2212'+V.a1+')','#1a7a3a',11,'middle',true));
-    o.push(T(240,220,'x = \u2212'+V.b1+':  numerator = B('+V.a1+'\u2212'+V.b1+')','#1a7a3a',11,'middle',true));
-    o.push(T(240,240,'Solve each equation to find A and B','#888',9,'middle'));
+    o.push(R(14,236,452,74,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,256,'x = \u2212'+V.a1+':  numerator = A('+V.b1+'\u2212'+V.a1+')','#1a7a3a',11,'middle',true));
+    o.push(T(240,276,'x = \u2212'+V.b1+':  numerator = B('+V.a1+'\u2212'+V.b1+')','#1a7a3a',11,'middle',true));
+    o.push(T(240,296,'Solve each equation to find A and B','#888',9,'middle'));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ2(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
-  o.push(R(14,8,452,36));
-  o.push(T(240,30,'Repeated factor: split 1/(x\u2212'+V.p2+')\u00b2 style expressions','#C0272D',12,'middle',true));
+  var s=g();s.setAttribute('viewBox','0 0 480 320');var o=[];
+  o.push(R(14,8,452,50));
+  o.push(T(240,24,'Repeated factor:','#C0272D',12,'middle',true));
+  o.push(Fr(240,46,'1','(x\u2212'+V.p2+')<tspan baseline-shift="super" font-size="9">2</tspan>','#C0272D',12));
   if(p>=1){
-    o.push(R(30,52,420,55,'#f8f8f8','#ccc',1));
-    o.push(T(240,74,'For a REPEATED linear factor (x\u2212'+V.p2+')\u00b2, you need','#241A17',11,'middle',true));
-    o.push(T(240,94,'TWO separate terms: A/(x\u2212'+V.p2+')  +  B/(x\u2212'+V.p2+')\u00b2','#C0272D',12,'middle',true));
+    o.push(R(30,66,420,74,'#f8f8f8','#ccc',1));
+    o.push(T(240,84,'For a REPEATED linear factor (x\u2212'+V.p2+')\u00b2, you need TWO separate terms:','#241A17',11,'middle',true));
+    o.push(Fr(160,116,'A','(x\u2212'+V.p2+')','#C0272D',13));
+    o.push(T(240,116,'+','#C0272D',15,'middle',true));
+    o.push(Fr(320,116,'B','(x\u2212'+V.p2+')<tspan baseline-shift="super" font-size="9">2</tspan>','#C0272D',13));
   }
   if(p>=2){
-    o.push(R(14,116,452,60,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,136,'Common mistake: using only one term A/(x\u2212'+V.p2+')\u00b2','#241A17',11,'middle',true));
-    o.push(T(240,156,'This misses a whole family of possible numerators!','#888',9,'middle'));
-    o.push(T(240,172,'Always use one term per POWER of the repeated factor','#C0272D',10,'middle',true));
+    o.push(R(14,148,452,66,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,166,'Common mistake: using only one term','#241A17',11,'middle',true));
+    o.push(Fr(240,192,'A','(x\u2212'+V.p2+')<tspan baseline-shift="super" font-size="9">2</tspan>','#241A17',12));
+    o.push(T(240,210,'This misses a whole family of possible numerators!','#888',9,'middle'));
   }
   if(p>=3){
-    o.push(R(14,184,452,68,'#e8f4ff','#1a5a8a',1.5));
-    o.push(T(240,204,'Multiply through by (x\u2212'+V.p2+')\u00b2 and compare','#1a5a8a',11,'middle',true));
-    o.push(T(240,224,'coefficients of x, and the constant term,','#1a5a8a',11,'middle',true));
-    o.push(T(240,242,'to set up simultaneous equations for A and B','#1a5a8a',11,'middle',true));
+    o.push(R(14,222,452,68,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(240,242,'Multiply through by (x\u2212'+V.p2+')\u00b2 and compare','#1a5a8a',11,'middle',true));
+    o.push(T(240,262,'coefficients of x, and the constant term,','#1a5a8a',11,'middle',true));
+    o.push(T(240,280,'to set up simultaneous equations for A and B','#1a5a8a',11,'middle',true));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ3(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
-  o.push(R(14,8,452,36));
-  o.push(T(240,30,'Irreducible quadratic factor: 1/[(x+'+V.d3+')(x\u00b2+1)]','#C0272D',12,'middle',true));
+  var s=g();s.setAttribute('viewBox','0 0 480 320');var o=[];
+  o.push(R(14,8,452,50));
+  o.push(T(240,24,'Irreducible quadratic factor:','#C0272D',12,'middle',true));
+  o.push(Fr(240,46,'1','(x+'+V.d3+')(x<tspan baseline-shift="super" font-size="9">2</tspan>+1)','#C0272D',12));
   if(p>=1){
-    o.push(R(30,52,420,55,'#f8f8f8','#ccc',1));
-    o.push(T(240,74,'When a factor cannot be split into real linear factors','#241A17',11,'middle',true));
-    o.push(T(240,94,'(like x\u00b2+1), use a LINEAR numerator: (Bx+C)/(x\u00b2+1)','#C0272D',12,'middle',true));
+    o.push(R(30,66,420,66,'#f8f8f8','#ccc',1));
+    o.push(T(240,84,'When a factor cannot be split into real linear factors','#241A17',11,'middle',true));
+    o.push(T(240,100,'(like x\u00b2+1), use a LINEAR numerator:','#241A17',11,'middle',true));
+    o.push(Fr(240,124,'Bx+C','x<tspan baseline-shift="super" font-size="9">2</tspan>+1','#C0272D',12));
   }
   if(p>=2){
-    o.push(R(14,116,452,55,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,136,'Full split: A/(x+'+V.d3+')  +  (Bx+C)/(x\u00b2+1)','#241A17',12,'middle',true));
-    o.push(T(240,156,'Note: the numerator over a quadratic needs 2 unknowns (B,C)','#888',9,'middle'));
+    o.push(R(14,140,452,80,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,158,'Full split:','#241A17',12,'middle',true));
+    o.push(Fr(150,182,'A','(x+'+V.d3+')','#241A17',12));
+    o.push(T(220,182,'+','#241A17',15,'middle',true));
+    o.push(Fr(320,182,'Bx+C','x<tspan baseline-shift="super" font-size="9">2</tspan>+1','#241A17',12));
+    o.push(T(240,208,'Note: the numerator over a quadratic needs 2 unknowns (B,C)','#888',9,'middle'));
   }
   if(p>=3){
-    o.push(R(14,178,452,66,'#e8f4ff','#1a5a8a',1.5));
-    o.push(T(240,198,'Multiply through, expand, then compare','#1a5a8a',11,'middle',true));
-    o.push(T(240,216,'coefficients of x\u00b2, x\u00b9 and x\u2070 (constants)','#1a5a8a',11,'middle',true));
-    o.push(T(240,236,'to form simultaneous equations for A, B, C','#1a5a8a',11,'middle',true));
+    o.push(R(14,228,452,66,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(240,248,'Multiply through, expand, then compare','#1a5a8a',11,'middle',true));
+    o.push(T(240,266,'coefficients of x\u00b2, x\u00b9 and x\u2070 (constants)','#1a5a8a',11,'middle',true));
+    o.push(T(240,284,'to form simultaneous equations for A, B, C','#1a5a8a',11,'middle',true));
   }
   s.innerHTML=o.join('');
 }
 
 function dQ4(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 270');var o=[];
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
   o.push(R(14,8,452,36));
   o.push(T(240,30,'Improper fraction: degree of top \u2265 degree of bottom','#C0272D',13,'middle',true));
   if(p>=1){
@@ -210,10 +228,12 @@ function dQ4(p){
     o.push(T(240,168,'Then split the remaining proper fraction as normal','#888',9,'middle'));
   }
   if(p>=3){
-    o.push(R(14,182,452,68,'#e8f8ee','#1a7a3a',1.5));
-    o.push(T(240,202,'e.g. (x\u00b3)/(x\u00b2\u22121) has degree 3 on top, degree 2 below','#1a7a3a',11,'middle',true));
-    o.push(T(240,222,'\u2192 divide to get: x  +  x/(x\u00b2\u22121)','#1a7a3a',12,'middle',true));
-    o.push(T(240,240,'Only the remaining fraction gets split into partial fractions','#888',9,'middle'));
+    o.push(R(14,182,452,100,'#e8f8ee','#1a7a3a',1.5));
+    o.push(T(240,200,'e.g.','#1a7a3a',11,'middle',true));
+    o.push(Fr(240,222,'x<tspan baseline-shift="super" font-size="9">3</tspan>','x<tspan baseline-shift="super" font-size="9">2</tspan>\u22121','#1a7a3a',12));
+    o.push(T(240,246,'has degree 3 on top, degree 2 below \u2014 divide to get:','#1a7a3a',10,'middle',true));
+    o.push(T(190,268,'x  +','#1a7a3a',12,'middle',true));
+    o.push(Fr(300,268,'x','x<tspan baseline-shift="super" font-size="9">2</tspan>\u22121','#1a7a3a',12));
   }
   s.innerHTML=o.join('');
 }
@@ -222,12 +242,12 @@ var QS=[
   {ey:'Q1 \u00b7 Partial Fractions \u00b7 Further Maths',ti:'Distinct Linear Factors',
    su:'Splitting a fraction with two different linear factors on the bottom.',
    steps:[
-    {lb:'Set up the split',dr:dQ1,ht:'<p>For distinct linear factors (x+a)(x+b), write the fraction as A/(x+a) + B/(x+b), where A and B are constants to find.</p>'},
+    {lb:'Set up the split',dr:dQ1,ht:'<p>For distinct linear factors (x+a)(x+b), write the fraction as <span class="frac"><span class="n">A</span><span class="d">(x+a)</span></span> + <span class="frac"><span class="n">B</span><span class="d">(x+b)</span></span>, where A and B are constants to find.</p>'},
     {lb:'Clear the fractions',dr:dQ1,ht:'<p>Multiply every term by the full denominator (x+a)(x+b) to remove all fractions, leaving an equation in the numerators only.</p>'},
     {lb:'Substitute clever values of x',dr:dQ1,ht:'<p>Substitute x = \u2212a to make the B-term vanish (solving for A), then x = \u2212b to make the A-term vanish (solving for B).</p>'},
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
       var a=rnd(1,4),b=rnd(a+1,a+5);
-      return {question:'For 1/[(x+'+a+')(x+'+b+')] = A/(x+'+a+') + B/(x+'+b+'), find A by substituting x = \u2212'+a+'. (Answer as a decimal, A = 1/('+b+'\u2212'+a+'))',
+      return {question:'For <span class="frac"><span class="n">1</span><span class="d">(x+'+a+')(x+'+b+')</span></span> = <span class="frac"><span class="n">A</span><span class="d">(x+'+a+')</span></span> + <span class="frac"><span class="n">B</span><span class="d">(x+'+b+')</span></span>, find A by substituting x = \u2212'+a+'. (Answer as a decimal, to 3 d.p.)',
         hints:['Substituting x=\u2212'+a+' gives: 1 = A('+b+'\u2212'+a+')'],
         ans:Math.round((1/(b-a))*1000)/1000,tol:0.01,unit:'',working:'1 = A('+b+'\u2212'+a+') \u21d2 A = 1/'+(b-a)+' = '+(1/(b-a)).toFixed(3)};
     })}
@@ -236,12 +256,12 @@ var QS=[
   {ey:'Q2 \u00b7 Partial Fractions \u00b7 Further Maths',ti:'Repeated Linear Factors',
    su:'Handling a denominator with a squared linear factor.',
    steps:[
-    {lb:'Why one term isn\u2019t enough',dr:dQ2,ht:'<p>For a repeated factor (x\u2212p)\u00b2, a single term A/(x\u2212p)\u00b2 cannot represent every possible numerator that could arise \u2014 you need two separate terms.</p>'},
-    {lb:'The correct split',dr:dQ2,ht:'<p>Use A/(x\u2212p) + B/(x\u2212p)\u00b2 \u2014 one term for each power of the repeated factor, from power 1 up to the highest power present.</p>'},
+    {lb:'Why one term isn\u2019t enough',dr:dQ2,ht:'<p>For a repeated factor (x\u2212p)\u00b2, a single term <span class="frac"><span class="n">A</span><span class="d">(x\u2212p)<sup>2</sup></span></span> cannot represent every possible numerator that could arise \u2014 you need two separate terms.</p>'},
+    {lb:'The correct split',dr:dQ2,ht:'<p>Use <span class="frac"><span class="n">A</span><span class="d">(x\u2212p)</span></span> + <span class="frac"><span class="n">B</span><span class="d">(x\u2212p)<sup>2</sup></span></span> \u2014 one term for each power of the repeated factor, from power 1 up to the highest power present.</p>'},
     {lb:'Solving for A and B',dr:dQ2,ht:'<p>Multiply through by (x\u2212p)\u00b2 and either substitute x=p (isolates B) or compare coefficients of x to find A.</p>'},
     {lb:'Your turn',dr:dQ2,ht:tryIt(function(){
       var p=rnd(2,5);
-      return {question:'For 3/(x\u2212'+p+')\u00b2, when split as A/(x\u2212'+p+') + B/(x\u2212'+p+')\u00b2, substituting x='+p+' directly into "3 = A(x\u2212'+p+') + B" gives B = ?',
+      return {question:'For <span class="frac"><span class="n">3</span><span class="d">(x\u2212'+p+')<sup>2</sup></span></span>, when split as <span class="frac"><span class="n">A</span><span class="d">(x\u2212'+p+')</span></span> + <span class="frac"><span class="n">B</span><span class="d">(x\u2212'+p+')<sup>2</sup></span></span>, substituting x='+p+' directly into "3 = A(x\u2212'+p+') + B" gives B = ?',
         hints:['At x='+p+', the A(x\u2212'+p+') term becomes zero, leaving just B'],
         ans:3,tol:0,unit:'',working:'At x='+p+': 3 = A\u00d70 + B \u21d2 B = 3'};
     })}
@@ -252,10 +272,10 @@ var QS=[
    steps:[
     {lb:'Recognising irreducible quadratics',dr:dQ3,ht:'<p>A quadratic like x\u00b2+1 has no real roots (it cannot be factorised into real linear factors) \u2014 this changes the form of numerator needed above it.</p>'},
     {lb:'Using a linear numerator',dr:dQ3,ht:'<p>Over an irreducible quadratic factor, use a numerator of the form (Bx+C), not just a single constant \u2014 since the numerator could contain an x term.</p>'},
-    {lb:'Setting up the full split',dr:dQ3,ht:'<p>Combine with any linear factors present: e.g. A/(x+d) + (Bx+C)/(x\u00b2+1), then clear fractions and compare coefficients.</p>'},
+    {lb:'Setting up the full split',dr:dQ3,ht:'<p>Combine with any linear factors present: e.g. <span class="frac"><span class="n">A</span><span class="d">(x+d)</span></span> + <span class="frac"><span class="n">Bx+C</span><span class="d">x<sup>2</sup>+1</span></span>, then clear fractions and compare coefficients.</p>'},
     {lb:'Your turn',dr:dQ3,ht:tryIt(function(){
       var d=rnd(1,4);
-      return {question:'When splitting 1/[(x+'+d+')(x\u00b2+1)] as A/(x+'+d+') + (Bx+C)/(x\u00b2+1), how many unknown constants must be found in total?',
+      return {question:'When splitting <span class="frac"><span class="n">1</span><span class="d">(x+'+d+')(x<sup>2</sup>+1)</span></span> as <span class="frac"><span class="n">A</span><span class="d">(x+'+d+')</span></span> + <span class="frac"><span class="n">Bx+C</span><span class="d">x<sup>2</sup>+1</span></span>, how many unknown constants must be found in total?',
         hints:['Count: A, B and C'],
         ans:3,tol:0,unit:'',working:'There are 3 unknowns to find: A (linear factor), and B, C (quadratic factor numerator)'};
     })}
