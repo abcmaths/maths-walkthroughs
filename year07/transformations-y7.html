@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transformations &amp; Symmetry &middot; Year 7 &middot; Maths Walkthroughs</title>
+<style>
+
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#6b5750;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"\203a";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.newq-btn{float:right;font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.newq-btn:hover{background:var(--gold);color:#fff;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
+.try-q{font-size:15px;margin:8px 0 10px;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+
+</style>
+
+
+
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const supabase = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    console.log('Logged in as:', session.user.email);
+  } else {
+    console.log('Not logged in');
+  }
+
+  window._supabase = supabase;
+</script>
+
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Transformations &amp; Symmetry &mdash; Year 7</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+
+var ST={};
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rPick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function tryIt(genFn){
+  if(typeof genFn==='object'){var _o=genFn;genFn=function(){return _o;};}
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn();ST[id]={o:o,genFn:genFn};
+  return buildTry(id,o);
+}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  var ex=o.extraHTML||'';var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn <button class="newq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-q">'+o.question+'</div>'+ex
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'</div>';
+}
+function newQ(id){
+  var e=ST[id];if(!e||!e.genFn)return;
+  var o=e.genFn();e.o=o;
+  var box=document.querySelector('.try[data-tryid="'+id+'"]');if(!box)return;
+  var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
+  box.parentNode.replaceChild(tmp.firstChild,box);ST[id]={o:o,genFn:e.genFn};
+}
+function ckById(id){
+  var e=ST[id];if(!e)return;var o=e.o;
+  var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+  var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+  if(!inp||!fb)return;var v=parseFloat(inp.value);
+  if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
+  else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+}
+document.addEventListener('click',function(e){
+  var btn=e.target;
+  if(btn.classList.contains('newq-btn')){newQ(btn.getAttribute('data-tryid'));}
+  else if(btn.classList.contains('try-ck')){ckById(btn.getAttribute('data-tryid'));}
+});
+
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial,sans-serif" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
+function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#C0272D')+'" stroke-width="'+(w||2)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'#fce8d8')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'"/>';}
+
+function tri(cx,cy,s,col){return '<polygon points="'+cx+','+(cy-s)+' '+(cx-s)+','+(cy+s*0.6)+' '+(cx+s)+','+(cy+s*0.6)+'" fill="'+col+'" fill-opacity="0.25" stroke="'+col+'" stroke-width="2"/>';}
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,24,'Translate the triangle by vector (4, \u22122)','#C0272D',14,'middle',true));
+  o.push(tri(120,90,30,'#C0272D'));o.push(T(120,60,'Original','#C0272D',11,'middle'));
+  if(p>=1){o.push('<line x1="120" y1="90" x2="240" y2="150" stroke="#C8922A" stroke-width="2" marker-end="url(#arr)"/>');o.push(T(180,110,'(4,\u22122)','#C8922A',12,'middle',true));}
+  if(p>=2){o.push(tri(240,150,30,'#1a7a3a'));o.push(T(240,190,'Image','#1a7a3a',11,'middle'));}
+  if(p>=3)o.push(T(240,225,'Move every point 4 right, 2 down \u2014 shape unchanged','#888',12,'middle'));
+  s.innerHTML=o.join('')+'<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#C8922A"/></marker></defs>';
+}
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,24,'Describe the translation','#C0272D',16,'middle',true));
+  o.push(tri(100,80,28,'#C0272D'));o.push(T(100,50,'Shape A','#C0272D',11,'middle'));
+  o.push(tri(340,190,28,'#1a5a8a'));o.push(T(340,225,'Shape B','#1a5a8a',11,'middle'));
+  if(p>=1){o.push(L(100,80,340,80,'#888',1,'3,2'));o.push(T(220,72,'right: 240','#888',10,'middle'));}
+  if(p>=2){o.push(L(340,80,340,190,'#888',1,'3,2'));o.push(T(360,135,'down: 110','#888',10,'start'));}
+  if(p>=3)o.push(T(240,235,'Vector: right, down (both positive means right/down)','#1a7a3a',12,'middle'));
+  s.innerHTML=o.join('');
+}
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Rotate 90\u00b0 clockwise about O','#C0272D',15,'middle',true));
+  o.push(C(240,150,3,'#888','#888',1));o.push(T(255,150,'O','#888',11,'start'));
+  o.push('<polygon points="200,100 200,140 260,140" fill="#C0272D" fill-opacity="0.25" stroke="#C0272D" stroke-width="2"/>');
+  if(p>=1){o.push('<path d="M 200 90 A 70 70 0 0 1 290 150" fill="none" stroke="#C8922A" stroke-width="1.5" stroke-dasharray="4,3"/>');o.push(T(300,110,'90\u00b0','#C8922A',12,'middle'));}
+  if(p>=2){o.push('<polygon points="290,110 330,110 330,170" fill="#1a7a3a" fill-opacity="0.25" stroke="#1a7a3a" stroke-width="2"/>');}
+  if(p>=3)o.push(T(240,230,'Each vertex turns 90\u00b0 clockwise around O, same distance from O','#888',12,'middle'));
+  s.innerHTML=o.join('');
+}
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Describe the rotation','#C0272D',16,'middle',true));
+  o.push(C(240,150,3,'#888','#888',1));o.push(T(255,150,'Centre','#888',10,'start'));
+  o.push(tri(160,110,26,'#C0272D'));
+  if(p>=1)o.push(tri(320,190,26,'#1a5a8a'));
+  if(p>=2)o.push(T(240,225,'Angle turned: 180\u00b0 (half turn)','#1a7a3a',13,'middle',true));
+  if(p>=3)o.push(T(240,240,'A 180\u00b0 rotation looks the same clockwise or anticlockwise','#888',11,'middle'));
+  s.innerHTML=o.join('');
+}
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(L(240,20,240,240,'#888',1.5,'4,3'));o.push(T(240,14,'mirror line','#888',10,'middle'));
+  o.push(tri(160,120,28,'#C0272D'));
+  if(p>=1)o.push(tri(320,120,28,'#1a5a8a'));
+  if(p>=2){o.push(L(120,90,120,90,'#C8922A',0));o.push(L(160,120,320,120,'#C8922A',1,'3,2'));}
+  if(p>=3){o.push(T(240,90,'Reflect first','#C0272D',12,'middle'));o.push(tri(200,200,20,'#1a7a3a'));o.push('<line x1="200" y1="200" x2="230" y2="200" stroke="#C8922A" stroke-width="2"/>');o.push(T(240,205,'then translate','#1a7a3a',11,'start'));}
+  s.innerHTML=o.join('');
+}
+function dQ6(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,24,'Line Symmetry \u2014 how many lines?','#C0272D',15,'middle',true));
+  var cx=240,cy=150,r=80;
+  o.push('<polygon points="'+cx+','+(cy-r)+' '+(cx+r*0.95)+','+(cy-r*0.31)+' '+(cx+r*0.59)+','+(cy+r*0.81)+' '+(cx-r*0.59)+','+(cy+r*0.81)+' '+(cx-r*0.95)+','+(cy-r*0.31)+'" fill="#fce8d8" stroke="#C0272D" stroke-width="2"/>');
+  if(p>=1){for(var i=0;i<5;i++){var ang=Math.PI/2-i*2*Math.PI/5;o.push(L(cx,cy,cx+r*1.15*Math.cos(ang),cy-r*1.15*Math.sin(ang),'#C8922A',1,'3,2'));}}
+  if(p>=2)o.push(T(240,240,'A regular pentagon has 5 lines of symmetry','#1a7a3a',13,'middle',true));
+  s.innerHTML=o.join('');
+}
+function dQ7(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Rotational Symmetry \u2014 Order','#C0272D',16,'middle',true));
+  var cx=240,cy=140,r=70;
+  o.push('<polygon points="'+cx+','+(cy-r)+' '+(cx+r*0.81)+','+(cy-r*0.59)+' '+(cx+r*0.95)+','+(cy+r*0.31)+' '+cx+','+(cy+r)+' '+(cx-r*0.95)+','+(cy+r*0.31)+' '+(cx-r*0.81)+','+(cy-r*0.59)+'" fill="#e8f4ff" stroke="#1a5a8a" stroke-width="2"/>');
+  if(p>=1)o.push(T(cx,cy-r-14,'\u2191 marker vertex','#888',10,'middle'));
+  if(p>=2)o.push(T(240,225,'It fits onto itself 6 times in a full turn','#1a7a3a',13,'middle'));
+  if(p>=3)o.push(T(240,245,'Order of rotational symmetry = 6','#C0272D',15,'middle',true));
+  s.innerHTML=o.join('');
+}
+function dQ8(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Interior Angle Sum of a Polygon','#C0272D',15,'middle',true));
+  o.push('<polygon points="180,60 320,60 380,150 240,220 100,150" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
+  if(p>=1){o.push(L(180,60,380,150,'#C8922A',1.5,'4,3'));o.push(L(180,60,240,220,'#C8922A',1.5,'4,3'));o.push(T(240,40,'Split into triangles from one vertex','#888',11,'middle'));}
+  if(p>=2)o.push(T(240,240,'5 sides \u2192 3 triangles \u2192 3 \u00d7 180\u00b0','#1a5a8a',13,'middle'));
+  if(p>=3)o.push(T(240,255,'= 540\u00b0 total','#1a7a3a',15,'middle',true));
+  s.innerHTML=o.join('');
+}
+function dQ9(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Interior Angle of a Regular Polygon','#C0272D',15,'middle',true));
+  o.push('<polygon points="240,50 340,90 340,190 240,230 140,190 140,90" fill="#e8f4ff" stroke="#1a5a8a" stroke-width="2"/>');
+  if(p>=1)o.push(T(240,246,'Regular hexagon: 6 equal sides & angles','#888',12,'middle'));
+  if(p>=2)o.push(T(240,262,'Sum = (6\u22122)\u00d7180 = 720\u00b0','#1a5a8a',13,'middle'));
+  s.innerHTML=o.join('');
+}
+function dQ10(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Mixed Transformation Problem','#C0272D',16,'middle',true));
+  o.push(tri(120,90,26,'#C0272D'));o.push(T(120,60,'Start','#C0272D',11,'middle'));
+  if(p>=1){o.push('<line x1="120" y1="90" x2="240" y2="90" stroke="#C8922A" stroke-width="2"/>');o.push(tri(240,90,26,'#1a5a8a'));o.push(T(240,60,'after translation','#1a5a8a',10,'middle'));}
+  if(p>=2){o.push(L(240,20,240,240,'#888',1,'4,3'));o.push(tri(360,90,26,'#1a7a3a'));o.push(T(360,60,'after reflection','#1a7a3a',10,'middle'));}
+  if(p>=3)o.push(T(240,230,'Transformations can be combined in sequence','#888',12,'middle'));
+  s.innerHTML=o.join('');
+}
+
+
+var QS=[
+  {ey:'Q1 \u00b7 Year 7 \u00b7 Transformations & Symmetry',ti:'Translating a Shape Using a Vector',su:'Translate a triangle by the vector (4, \u22122).',steps:[
+    {lb:'What is a translation?',dr:dQ1,ht:'<p>A <b>translation</b> slides a shape without turning or flipping it \u2014 every point moves the same distance.</p>'},
+    {lb:'Read the vector',dr:dQ1,ht:'<p>(4, \u22122) means <b>4 right</b>, <b>2 down</b> (negative y = down).</p>'},
+    {lb:'Move every vertex',dr:dQ1,ht:'<p>Apply the same movement to each vertex of the shape.</p>'},
+    {lb:'Result',dr:dQ1,ht:'<p>The image is congruent (identical) to the original, just in a new position.</p>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var x=rInt(-6,6),y=rInt(-6,6);while(x===0)x=rInt(-6,6);var px=rInt(-3,3),py=rInt(-3,3);return{question:'A point at ('+px+', '+py+') is translated by the vector ('+x+', '+y+'). What is the new x-coordinate?',hints:['New x = original x + '+x],ans:px+x,tol:0,unit:'',working:px+' + '+x+' = '+(px+x)};})},
+  ]},
+  {ey:'Q2 \u00b7 Year 7 \u00b7 Transformations & Symmetry',ti:'Describing a Translation',su:'Describe the translation that maps Shape A onto Shape B.',steps:[
+    {lb:'Measure horizontal movement',dr:dQ2,ht:'<p>Count how many squares right (or left) the shape has moved.</p>'},
+    {lb:'Measure vertical movement',dr:dQ2,ht:'<p>Count how many squares up (or down).</p>'},
+    {lb:'Write as a vector',dr:dQ2,ht:'<p>Write the movement as (right/left, up/down), using negative numbers for left/down.</p>'},
+    {lb:'Check a point',dr:dQ2,ht:'<p>Pick one clear vertex and check it matches on both shapes after applying the vector.</p>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var x=rInt(2,8),y=rInt(1,7);return{question:'A shape moves '+x+' squares right and '+y+' squares down. What is the y-value of the translation vector (using the convention that down is negative)?',hints:['Down movements are written as negative numbers'],ans:-y,tol:0,unit:'',working:'Down '+y+' \u2192 y-value = \u2212'+y};})},
+  ]},
+  {ey:'Q3 \u00b7 Year 7 \u00b7 Transformations & Symmetry',ti:'Rotating a Shape About a Point (90\u00b0/180\u00b0)',su:'Rotate a shape 90\u00b0 clockwise about O.',steps:[
+    {lb:'Find the centre',dr:dQ3,ht:'<p>Locate the centre of rotation, O \u2014 every point turns around this fixed point.</p>'},
+    {lb:'Choose the angle and direction',dr:dQ3,ht:'<p>90\u00b0 clockwise means each point sweeps a quarter-turn in the clockwise direction.</p>'},
+    {lb:'Rotate each vertex',dr:dQ3,ht:'<p>Each vertex stays the same distance from O, but turns through 90\u00b0.</p>'},
+    {lb:'Result',dr:dQ3,ht:'<p>The image is congruent to the original \u2014 same size and shape, just rotated.</p>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var n=rPick([90,180,270]);return{question:'A shape is rotated '+n+'\u00b0 clockwise about a point. How many quarter turns (of 90\u00b0 each) is this?',hints:['Divide the total angle by 90'],ans:n/90,tol:0,unit:'quarter turns',working:n+' \u00f7 90 = '+(n/90)+' quarter turns'};})},
+  ]},
+  {ey:'Q4 \u00b7 Year 7 \u00b7 Transformations & Symmetry',ti:'Describing a Rotation',su:'Describe the rotation that maps one triangle onto another.',steps:[
+    {lb:'Find the centre of rotation',dr:dQ4,ht:'<p>Look for the fixed point that both shapes are the same distance from.</p>'},
+    {lb:'Find the angle turned',dr:dQ4,ht:'<p>Compare the orientation of corresponding sides to estimate the angle turned.</p>'},
+    {lb:'State the amount',dr:dQ4,ht:'<div class="fm">180\u00b0 (half turn)</div>'},
+    {lb:'Note on direction',dr:dQ4,ht:'<p>A 180\u00b0 turn looks identical whether described as clockwise or anticlockwise.</p>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var n=rPick([90,180,270]);return{question:'A shape needs a '+n+'\u00b0 clockwise rotation to map onto its image. What anticlockwise angle gives the SAME result?',hints:['Anticlockwise angle = 360 \u2212 clockwise angle'],ans:360-n,tol:0,unit:'\u00b0',working:'360 \u2212 '+n+' = '+(360-n)+'\u00b0 anticlockwise gives the same image'};})},
+  ]},
+  {ey:'Q5 \u00b7 Year 7 \u00b7 Transformations & Symmetry',ti:'Combining Reflection and Translation',su:'Apply a reflection, then a translation, to a shape.',steps:[
+    {lb:'Do transformations in order',dr:dQ5,ht:'<p>When a question asks for two transformations, always apply them in the order given.</p>'},
+    {lb:'Step 1: reflect',dr:dQ5,ht:'<p>Reflect the shape in the mirror line first.</p>'},
+    {lb:'Step 2: translate',dr:dQ5,ht:'<p>Then slide the reflected shape according to the given vector.</p>'},
+    {lb:'Final image',dr:dQ5,ht:'<p>The final position depends on doing both steps, in order \u2014 reversing the order can give a different result.</p>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var px=rInt(1,6),vx=rInt(1,5),vy=rInt(1,5);return{question:'A point at x = '+px+' is reflected in the y-axis (x becomes negative), then translated by ('+vx+', '+vy+'). What is the final x-coordinate?',hints:['After reflection, x = \u2212'+px,'Then add '+vx],ans:-px+vx,tol:0,unit:'',working:'\u2212'+px+' + '+vx+' = '+(-px+vx)};})},
+  ]},
+  {ey:'Q6 \u00b7 Year 7 \u00b7 Transformations & Symmetry',ti:'Line Symmetry Recap and Extension',su:'How many lines of symmetry does a regular pentagon have?',steps:[
+    {lb:'Recap: line symmetry',dr:dQ6,ht:'<p>A shape has <b>line symmetry</b> if folding along a line makes both halves match exactly.</p>'},
+    {lb:'Regular shapes',dr:dQ6,ht:'<p>A <b>regular</b> polygon has the same number of lines of symmetry as it has sides.</p>'},
+    {lb:'Count for a pentagon',dr:dQ6,ht:'<p>A regular pentagon has 5 sides, so it has 5 lines of symmetry.</p>'},
+    {lb:'Result',dr:dQ6,ht:'<div class="fm">5 lines of symmetry</div>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var sides=rPick([3,4,5,6,7,8]);return{question:'How many lines of symmetry does a regular polygon with '+sides+' sides have?',hints:['A regular polygon has one line of symmetry per side'],ans:sides,tol:0,unit:'',working:'Regular '+sides+'-sided polygon \u2192 '+sides+' lines of symmetry'};})},
+  ]},
+  {ey:'Q7 \u00b7 Year 7 \u00b7 Transformations & Symmetry',ti:'Rotational Symmetry \u2014 Order of Rotation',su:'Find the order of rotational symmetry of a regular hexagon.',steps:[
+    {lb:'What is rotational symmetry?',dr:dQ7,ht:'<p>A shape has <b>rotational symmetry</b> if it looks the same after being rotated (less than a full turn) about its centre.</p>'},
+    {lb:'Mark a vertex',dr:dQ7,ht:'<p>Track one marked vertex as the shape rotates through a full 360\u00b0 turn.</p>'},
+    {lb:'Count matches',dr:dQ7,ht:'<p>Count how many times the shape looks exactly the same during one full turn.</p>'},
+    {lb:'Result',dr:dQ7,ht:'<div class="fm">Order of rotational symmetry = 6</div>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var sides=rPick([3,4,5,6,8,10]);return{question:'What is the order of rotational symmetry of a regular polygon with '+sides+' sides?',hints:['A regular polygon\'s order of rotational symmetry equals its number of sides'],ans:sides,tol:0,unit:'',working:'Regular '+sides+'-sided shape \u2192 order '+sides};})},
+  ]},
+  {ey:'Q8 \u00b7 Year 7 \u00b7 Transformations & Symmetry',ti:'Interior Angle Sum of a Polygon',su:'Find the sum of interior angles of a pentagon.',steps:[
+    {lb:'Split into triangles',dr:dQ8,ht:'<p>From one vertex, draw diagonals to split the polygon into triangles.</p>'},
+    {lb:'Count the triangles',dr:dQ8,ht:'<p>A pentagon (5 sides) splits into 3 triangles.</p>'},
+    {lb:'Multiply by 180\u00b0',dr:dQ8,ht:'<div class="fm">3 \u00d7 180\u00b0 = 540\u00b0</div>'},
+    {lb:'General rule',dr:dQ8,ht:'<p>An n-sided polygon splits into (n \u2212 2) triangles, so the angle sum is (n \u2212 2) \u00d7 180\u00b0.</p>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var n=rInt(4,10);return{question:'What is the sum of interior angles of a polygon with '+n+' sides?',hints:['Number of triangles = '+n+' \u2212 2 = '+(n-2),'Sum = '+(n-2)+' \u00d7 180'],ans:(n-2)*180,tol:0,unit:'\u00b0',working:'('+n+'\u22122) \u00d7 180 = '+((n-2)*180)+'\u00b0'};})},
+  ]},
+  {ey:'Q9 \u00b7 Year 7 \u00b7 Transformations & Symmetry',ti:'Interior Angles of Regular Polygons',su:'Find each interior angle of a regular hexagon.',steps:[
+    {lb:'Find the total sum',dr:dQ9,ht:'<div class="fm">(6 \u2212 2) \u00d7 180\u00b0 = 720\u00b0</div>'},
+    {lb:'All angles equal',dr:dQ9,ht:'<p>In a <b>regular</b> polygon, all interior angles are equal.</p>'},
+    {lb:'Divide by the number of sides',dr:dQ9,ht:'<div class="fm">720\u00b0 \u00f7 6 = 120\u00b0</div>'},
+    {lb:'Result',dr:dQ9,ht:'<div class="fm">Each interior angle = 120\u00b0</div>'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var n=rPick([3,4,5,6,8,9,10]);return{question:'What is each interior angle of a regular polygon with '+n+' sides?',hints:['Total sum = ('+n+'\u22122) \u00d7 180 = '+((n-2)*180),'Divide by '+n],ans:Math.round((n-2)*180/n*100)/100,tol:0.1,unit:'\u00b0',working:'('+n+'\u22122)\u00d7180 \u00f7 '+n+' = '+(Math.round((n-2)*180/n*100)/100)+'\u00b0'};})},
+  ]},
+  {ey:'Q10 \u00b7 Year 7 \u00b7 Transformations & Symmetry',ti:'Mixed Transformation Problems',su:'Apply a translation, then a reflection, to a shape.',steps:[
+    {lb:'Start position',dr:dQ10,ht:'<p>Note the shape\'s original position and orientation.</p>'},
+    {lb:'Apply the translation',dr:dQ10,ht:'<p>Slide the shape according to the given vector \u2014 orientation stays the same.</p>'},
+    {lb:'Apply the reflection',dr:dQ10,ht:'<p>Reflect the translated shape in the given mirror line \u2014 orientation flips.</p>'},
+    {lb:'Compare to original',dr:dQ10,ht:'<p>The final shape is congruent to the original but has moved and flipped.</p>'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var px=rInt(1,5),vx=rInt(1,4);return{question:'A point at x = '+px+' is translated '+vx+' units right, then reflected in the y-axis. What is the final x-coordinate?',hints:['After translation: x = '+px+' + '+vx+' = '+(px+vx),'Reflection in y-axis negates x'],ans:-(px+vx),tol:0,unit:'',working:'('+px+'+'+vx+') = '+(px+vx)+', reflected \u2192 '+(-(px+vx))};})},
+  ]},
+
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=(si===0);document.getElementById('nb').textContent=(si===q.steps.length-1)?'Restart':'Next \u2192';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=(si===q.steps.length-1)?0:si+1;render();});
+render();
+
+</script>
+
+
+<!-- ABC Supabase Progress Tracking -->
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase = _sb;
+window._abcTopicCode = 'Y7-GEO-03';
+window.markComplete = async function() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) return;
+  const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', window._abcTopicCode).maybeSingle();
+  if (!topic) return;
+  window._abcTopicId = topic.id;
+  await _sb.from('walkthrough_progress').upsert({
+    student_id: session.user.id, topic_id: topic.id,
+    status: 'completed', completed_at: new Date().toISOString(),
+    last_visited_at: new Date().toISOString(),
+  }, { onConflict: 'student_id,topic_id' });
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>

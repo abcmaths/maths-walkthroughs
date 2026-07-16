@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coordinates &amp; Graphs &middot; Year 7 &middot; Maths Walkthroughs</title>
+<style>
+
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#6b5750;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"\203a";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.newq-btn{float:right;font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.newq-btn:hover{background:var(--gold);color:#fff;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
+.try-q{font-size:15px;margin:8px 0 10px;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+
+</style>
+
+
+
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const supabase = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    console.log('Logged in as:', session.user.email);
+  } else {
+    console.log('Not logged in');
+  }
+
+  window._supabase = supabase;
+</script>
+
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Coordinates &amp; Graphs &mdash; Year 7</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+
+var ST={};
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rPick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function tryIt(genFn){
+  if(typeof genFn==='object'){var _o=genFn;genFn=function(){return _o;};}
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn();ST[id]={o:o,genFn:genFn};
+  return buildTry(id,o);
+}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  var ex=o.extraHTML||'';var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn <button class="newq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-q">'+o.question+'</div>'+ex
+    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'</div>';
+}
+function newQ(id){
+  var e=ST[id];if(!e||!e.genFn)return;
+  var o=e.genFn();e.o=o;
+  var box=document.querySelector('.try[data-tryid="'+id+'"]');if(!box)return;
+  var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
+  box.parentNode.replaceChild(tmp.firstChild,box);ST[id]={o:o,genFn:e.genFn};
+}
+function ckById(id){
+  var e=ST[id];if(!e)return;var o=e.o;
+  var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+  var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+  if(!inp||!fb)return;var v=parseFloat(inp.value);
+  if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
+  else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+}
+document.addEventListener('click',function(e){
+  var btn=e.target;
+  if(btn.classList.contains('newq-btn')){newQ(btn.getAttribute('data-tryid'));}
+  else if(btn.classList.contains('try-ck')){ckById(btn.getAttribute('data-tryid'));}
+});
+
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial,sans-serif" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
+function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#C0272D')+'" stroke-width="'+(w||2)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'#fce8d8')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'"/>';}
+
+function grid(originX,originY,unit,n){
+  var o=[];
+  for(var i=-n;i<=n;i++){
+    o.push(L(originX-n*unit,originY-i*unit,originX+n*unit,originY-i*unit,'#eee',1));
+    o.push(L(originX+i*unit,originY-n*unit,originX+i*unit,originY+n*unit,'#eee',1));
+  }
+  o.push(L(originX-n*unit,originY,originX+n*unit,originY,'#888',2));
+  o.push(L(originX,originY-n*unit,originX,originY+n*unit,'#888',2));
+  for(var i=-n;i<=n;i+=2){ if(i!==0){o.push(T(originX+i*unit,originY+16,i,'#888',10));o.push(T(originX-16,originY-i*unit+4,i,'#888',10));} }
+  o.push(T(originX+n*unit+14,originY+4,'x','#888',12));
+  o.push(T(originX-6,originY-n*unit-8,'y','#888',12));
+  return o;
+}
+function plot(originX,originY,unit,x,y,col,lbl){
+  var o=[];var px=originX+x*unit,py=originY-y*unit;
+  o.push(C(px,py,5,col,col,1));
+  if(lbl)o.push(T(px+10,py-8,lbl,col,12,'start',true));
+  return o;
+}
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push.apply(o,grid(240,190,26,6));
+  if(p>=1)o.push.apply(o,plot(240,190,26,3,2,'#C0272D','A(3, 2)'));
+  if(p>=2)o.push.apply(o,plot(240,190,26,-2,4,'#1a5a8a','B(\u22122, 4)'));
+  if(p>=3)o.push.apply(o,plot(240,190,26,-4,-3,'#1a7a3a','C(\u22124, \u22123)'));
+  o.push(T(240,20,'(x, y) \u2014 x first, then y','#888',13,'middle'));
+  s.innerHTML=o.join('');
+}
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push.apply(o,grid(240,190,26,6));
+  o.push.apply(o,plot(240,190,26,4,3,'#C0272D'));
+  if(p>=1){o.push(L(240,190,240+4*26,190,'#C8922A',1.5,'3,2'));o.push(T(240+2*26,208,'x = 4','#C8922A',12,'middle'));}
+  if(p>=2){o.push(L(240+4*26,190,240+4*26,190-3*26,'#C8922A',1.5,'3,2'));o.push(T(240+4*26+16,190-1.5*26,'y = 3','#C8922A',12,'start'));}
+  if(p>=3)o.push(T(240,232,'Point = (4, 3)','#1a7a3a',15,'middle',true));
+  s.innerHTML=o.join('');
+}
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var boxes=[{x:70,l:'Input',v:'x',col:'#1a5a8a',fill:'#e8f4ff'},{x:200,l:'\u00d7 2',v:'',col:'#C0272D',fill:'#fff5f0'},{x:330,l:'+ 1',v:'',col:'#C0272D',fill:'#fff5f0'},{x:440,l:'Output',v:'?',col:'#1a7a3a',fill:'#e8f8ee'}];
+  boxes.forEach(function(b,i){
+    o.push(R(b.x-48,90,96,60,b.fill,b.col,2));o.push(T(b.x,113,b.l,b.col,13));
+    if(b.v)o.push(T(b.x,132,b.v,b.col,14));
+    if(i<3){o.push(L(b.x+48,120,b.x+86,120,'#C8922A',2));o.push('<polygon points="'+(b.x+96)+',120 '+(b.x+87)+',115 '+(b.x+87)+',125"fill="#C8922A"/>');}
+  });
+  o.push(T(240,40,'Rule: multiply by 2, then add 1','#888',13,'middle'));
+  if(p>=1){o.push(T(200,166,'Try x = 5','#241A17',13,'middle'));}
+  if(p>=2){o.push(T(240,190,'5 \u00d7 2 = 10','#C0272D',14,'middle'));o.push(T(240,212,'10 + 1 = 11','#1a7a3a',14,'middle',true));}
+  s.innerHTML=o.join('');
+}
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,26,'Find the rule','#C0272D',16,'middle',true));
+  var pts=[[1,4],[2,6],[3,8]];
+  o.push(R(60,44,140,120,'#e8f4ff','#1a5a8a',1.5));o.push(T(130,64,'Input (x)','#1a5a8a',13,'middle',true));
+  o.push(R(280,44,140,120,'#e8f8ee','#1a7a3a',1.5));o.push(T(350,64,'Output','#1a7a3a',13,'middle',true));
+  pts.forEach(function(pt,i){o.push(T(130,90+i*24,pt[0],'#1a5a8a',15,'middle'));o.push(T(350,90+i*24,pt[1],'#1a7a3a',15,'middle'));});
+  if(p>=1)o.push(T(240,90,'\u00d7 2','#C8922A',14,'middle'));
+  if(p>=2)o.push(T(240,114,'+2','#C8922A',14,'middle'));
+  if(p>=3){o.push(R(120,180,240,34,'#fff5f0','#C0272D',2));o.push(T(240,202,'Rule: y = 2x + 2','#C0272D',16,'middle',true));}
+  s.innerHTML=o.join('');
+}
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push.apply(o,grid(240,220,26,5));
+  if(p>=1){var pts=[[-2,-1],[-1,0],[0,1],[1,2],[2,3]];pts.forEach(function(pt){o.push.apply(o,plot(240,220,26,pt[0],pt[1],'#C0272D'));});}
+  if(p>=2)o.push(L(240-2*26,220-(-1)*26,240+2*26,220-3*26,'#C0272D',2));
+  o.push(T(240,20,'y = x + 1','#C0272D',15,'middle',true));
+  s.innerHTML=o.join('');
+}
+function dQ6(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push.apply(o,grid(240,220,26,5));
+  if(p>=1){var pts=[[-2,-4],[-1,-2],[0,0],[1,2],[2,4]];pts.forEach(function(pt){o.push.apply(o,plot(240,220,26,pt[0],pt[1],'#1a5a8a'));});}
+  if(p>=2)o.push(L(240-2*26,220+4*26,240+2*26,220-4*26,'#1a5a8a',2));
+  o.push(T(240,20,'y = 2x  (passes through the origin)','#1a5a8a',14,'middle'));
+  s.innerHTML=o.join('');
+}
+function dQ7(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,24,'y = 3x \u2212 1','#C0272D',16,'middle',true));
+  var xs=[0,1,2,3];
+  o.push(R(60,44,360,36,'#fff5f0','#C0272D',1.5));o.push(T(90,68,'x','#C0272D',14,'middle',true));
+  xs.forEach(function(x,i){o.push(T(180+i*70,68,x,'#241A17',14,'middle'));});
+  if(p>=1){o.push(R(60,86,360,36,'#e8f4ff','#1a5a8a',1.5));o.push(T(90,110,'3x','#1a5a8a',14,'middle',true));
+    xs.forEach(function(x,i){o.push(T(180+i*70,110,3*x,'#241A17',14,'middle'));});}
+  if(p>=2){o.push(R(60,128,360,36,'#e8f8ee','#1a7a3a',1.5));o.push(T(90,152,'y','#1a7a3a',14,'middle',true));
+    xs.forEach(function(x,i){o.push(T(180+i*70,152,3*x-1,'#1a7a3a',14,'middle',true));});}
+  if(p>=3)o.push(T(240,190,'Table: (0,\u22121) (1,2) (2,5) (3,8)','#888',12,'middle'));
+  s.innerHTML=o.join('');
+}
+function dQ8(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push.apply(o,grid(240,190,26,6));
+  o.push.apply(o,plot(240,190,26,2,3,'#C0272D','A'));
+  o.push.apply(o,plot(240,190,26,6,3,'#1a5a8a','B'));
+  if(p>=1){o.push(L(240+2*26,190-3*26,240+6*26,190-3*26,'#C8922A',2,'4,3'));}
+  if(p>=2){o.push(C(240+4*26,190-3*26,5,'#1a7a3a','#1a7a3a',1));o.push(T(240+4*26,190-3*26-12,'Midpoint','#1a7a3a',12,'middle',true));}
+  if(p>=3)o.push(T(240,232,'Midpoint = (4, 3)  \u2014 average the x\'s, average the y\'s','#1a7a3a',13,'middle'));
+  s.innerHTML=o.join('');
+}
+function dQ9(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push.apply(o,grid(240,200,30,4));
+  var sq=[[-2,-1],[2,-1],[2,3],[-2,3]];
+  if(p>=1){for(var i=0;i<4;i++){var a=sq[i],b=sq[(i+1)%4];o.push(L(240+a[0]*30,200-a[1]*30,240+b[0]*30,200-b[1]*30,'#C0272D',2));}}
+  if(p>=2){['A(\u22122,\u22121)','B(2,\u22121)','C(2,3)','D(\u22122,3)'].forEach(function(lbl,i){o.push(T(240+sq[i][0]*30+(i%2?14:-14),200-sq[i][1]*30-(i<2?-16:6),lbl,'#C0272D',11,'middle',true));});}
+  if(p>=3)o.push(T(240,232,'Square ABCD plotted from its corner coordinates','#888',12,'middle'));
+  s.innerHTML=o.join('');
+}
+function dQ10(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(R(40,30,400,180,'#fff8f4','#C0272D',2));
+  o.push(T(240,20,'Simple street map (grid = 1 block)','#888',12,'middle'));
+  for(var i=0;i<=8;i++){o.push(L(40+i*50,30,40+i*50,210,'#f0d8cc',1));}
+  for(var j=0;j<=4;j++){o.push(L(40,30+j*45,440,30+j*45,'#f0d8cc',1));}
+  o.push(C(90,210-2*45+30,6,'#C0272D','#C0272D',1));o.push(T(90,210-2*45+10,'Home (1,2)','#C0272D',11,'middle',true));
+  if(p>=1){o.push(C(340,210-3*45+30,6,'#1a5a8a','#1a5a8a',1));o.push(T(340,210-3*45+10,'School (6,3)','#1a5a8a',11,'middle',true));}
+  if(p>=2){o.push(L(90,210-2*45+30,340,210-2*45+30,'#C8922A',2,'4,3'));o.push(L(340,210-2*45+30,340,210-3*45+30,'#C8922A',2,'4,3'));}
+  if(p>=3)o.push(T(240,240,'Move 5 blocks right, then 1 block up','#1a7a3a',13,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+
+var QS=[
+  {ey:'Q1 \u00b7 Year 7 \u00b7 Coordinates & Graphs',ti:'Plotting Points in All Four Quadrants',su:'Plot A(3, 2), B(\u22122, 4) and C(\u22124, \u22123).',steps:[
+    {lb:'The rule',dr:dQ1,ht:'<p>A coordinate is written <b>(x, y)</b>. The <b>x</b> value tells you how far <b>left/right</b>, the <b>y</b> value tells you how far <b>up/down</b> from the origin (0,0).</p>'},
+    {lb:'Plot A(3, 2)',dr:dQ1,ht:'<div class="fm">A(3, 2): 3 right, 2 up</div>'},
+    {lb:'Plot B(\u22122, 4)',dr:dQ1,ht:'<div class="fm">B(\u22122, 4): 2 left, 4 up</div>'},
+    {lb:'Plot C(\u22124, \u22123)',dr:dQ1,ht:'<div class="fm">C(\u22124, \u22123): 4 left, 3 down</div><p>Negative x = left, negative y = down.</p>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var x=rInt(-5,5),y=rInt(-5,5);while(x===0)x=rInt(-5,5);return{question:'A point is at (<b>'+x+', '+y+'</b>). Is the point '+(x>0?'to the right of':'to the left of')+' the y-axis? Enter 1 for yes, 0 for no.',hints:['x = '+x,'Positive x = right of the y-axis; negative x = left'],ans:(x>0?1:0),tol:0,unit:'',working:'x = '+x+' is '+(x>0?'positive, so right of the y-axis (1)':'negative, so left of the y-axis (0)')};})},
+  ]},
+  {ey:'Q2 \u00b7 Year 7 \u00b7 Coordinates & Graphs',ti:'Reading Coordinates from a Grid',su:'Read off the coordinates of a plotted point.',steps:[
+    {lb:'Find x first',dr:dQ2,ht:'<p>Trace <b>down</b> (or up) from the point to the x-axis to read the x-value.</p>'},
+    {lb:'x = 4',dr:dQ2,ht:'<div class="fm">x = 4</div>'},
+    {lb:'Find y',dr:dQ2,ht:'<div class="fm">y = 3</div><p>Trace across to the y-axis to read the y-value.</p>'},
+    {lb:'Write the coordinate',dr:dQ2,ht:'<div class="fm">Point = (4, 3)</div>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var x=rInt(-6,6),y=rInt(-6,6);return{question:'A point is plotted at '+x+' across and '+y+' up from the origin. What is its <b>y</b>-coordinate?',hints:['The coordinate is written (x, y)','x = '+x+', y = ?'],ans:y,tol:0,unit:'',working:'Coordinate = ('+x+', '+y+'). The y-coordinate is '+y};})},
+  ]},
+  {ey:'Q3 \u00b7 Year 7 \u00b7 Coordinates & Graphs',ti:'Function Machines (Input \u2192 Output)',su:'Put x = 5 through the rule "\u00d7 2, then + 1".',steps:[
+    {lb:'What is a function machine?',dr:dQ3,ht:'<p>A <b>function machine</b> applies steps to an input, in order, to give an output.</p>'},
+    {lb:'Step 1',dr:dQ3,ht:'<div class="fm">5 \u00d7 2 = 10</div>'},
+    {lb:'Step 2',dr:dQ3,ht:'<div class="fm">10 + 1 = 11</div>'},
+    {lb:'Output',dr:dQ3,ht:'<div class="fm">Output = 11</div>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var m=rInt(2,5),a=rInt(1,8),x=rInt(2,9),ans=m*x+a;return{question:'A function machine does "\u00d7 '+m+', then + '+a+'". What is the output when the input is <b>'+x+'</b>?',hints:['Step 1: '+x+' \u00d7 '+m+' = '+(m*x),'Step 2: add '+a],ans:ans,tol:0,unit:'',working:x+' \u00d7 '+m+' = '+(m*x)+', then + '+a+' = '+ans};})},
+  ]},
+  {ey:'Q4 \u00b7 Year 7 \u00b7 Coordinates & Graphs',ti:'Finding the Rule from a Function Machine',su:'Input 1,2,3 give output 4,6,8 \u2014 find the rule.',steps:[
+    {lb:'Look at the pattern',dr:dQ4,ht:'<p>Compare inputs and outputs to spot what operation links them.</p>'},
+    {lb:'Check \u00d7 2',dr:dQ4,ht:'<div class="fm">1\u00d72=2, 2\u00d72=4, 3\u00d72=6</div><p>Outputs are 4,6,8 \u2014 always 2 more than \u00d72.</p>'},
+    {lb:'Add the adjustment',dr:dQ4,ht:'<div class="fm">y = 2x + 2</div>'},
+    {lb:'Check it',dr:dQ4,ht:'<p>x=1: 2(1)+2=4 \u2713 &nbsp; x=2: 2(2)+2=6 \u2713 &nbsp; x=3: 2(3)+2=8 \u2713</p>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var m=rPick([2,3,4]),c=rInt(1,5),x=rInt(4,8),ans=m*x+c;return{question:'A rule gives: x=1\u2192'+(m+c)+', x=2\u2192'+(2*m+c)+', x=3\u2192'+(3*m+c)+'. Using the rule y = '+m+'x + '+c+', what is y when x = '+x+'?',hints:['Multiply x by '+m,'Then add '+c],ans:ans,tol:0,unit:'',working:m+'('+x+') + '+c+' = '+(m*x)+' + '+c+' = '+ans};})},
+  ]},
+  {ey:'Q5 \u00b7 Year 7 \u00b7 Coordinates & Graphs',ti:'Plotting a Simple Linear Function (y = x + c)',su:'Plot y = x + 1 for x from \u22122 to 2.',steps:[
+    {lb:'Make a table',dr:dQ5,ht:'<p>Choose x-values, then calculate y = x + 1 for each.</p>'},
+    {lb:'Plot the points',dr:dQ5,ht:'<div class="fm">(\u22122,\u22121) (\u22121,0) (0,1) (1,2) (2,3)</div>'},
+    {lb:'Join with a straight line',dr:dQ5,ht:'<p>All points from y = x + 1 lie on a straight line.</p>'},
+    {lb:'Read the pattern',dr:dQ5,ht:'<p>The line crosses the y-axis at <b>(0, 1)</b> \u2014 this matches the "+1" in the rule.</p>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var c=rInt(-4,4),x=rInt(-3,3);return{question:'For the line y = x + '+c+', what is y when x = '+x+'?',hints:['Substitute x = '+x,'y = '+x+' + '+c],ans:x+c,tol:0,unit:'',working:'y = '+x+' + '+c+' = '+(x+c)};})},
+  ]},
+  {ey:'Q6 \u00b7 Year 7 \u00b7 Coordinates & Graphs',ti:'Plotting y = mx (through the origin)',su:'Plot y = 2x.',steps:[
+    {lb:'Notice no constant term',dr:dQ6,ht:'<p>y = 2x has no "+ number", so the line always passes through the <b>origin (0,0)</b>.</p>'},
+    {lb:'Make a table',dr:dQ6,ht:'<div class="fm">x: \u22122,\u22121,0,1,2 \u2192 y: \u22124,\u22122,0,2,4</div>'},
+    {lb:'Plot and join',dr:dQ6,ht:'<p>Every point doubles its x-value to get y.</p>'},
+    {lb:'Steepness',dr:dQ6,ht:'<p>The 2 in y = 2x controls how <b>steep</b> the line is \u2014 larger numbers make steeper lines.</p>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var m=rPick([2,3,4,5]),x=rInt(-4,4);return{question:'For the line y = '+m+'x, what is y when x = '+x+'?',hints:['y = '+m+' \u00d7 x','Substitute x = '+x],ans:m*x,tol:0,unit:'',working:'y = '+m+' \u00d7 '+x+' = '+(m*x)};})},
+  ]},
+  {ey:'Q7 \u00b7 Year 7 \u00b7 Coordinates & Graphs',ti:'Tables of Values for a Linear Function',su:'Complete a table of values for y = 3x \u2212 1.',steps:[
+    {lb:'Set up the table',dr:dQ7,ht:'<p>List x-values across the top row, then work out 3x for each.</p>'},
+    {lb:'Calculate 3x',dr:dQ7,ht:'<div class="fm">x=0\u21920, x=1\u21923, x=2\u21926, x=3\u21929</div>'},
+    {lb:'Subtract 1',dr:dQ7,ht:'<div class="fm">y = 3x \u2212 1: \u22121, 2, 5, 8</div>'},
+    {lb:'Check with substitution',dr:dQ7,ht:'<p>x=2: 3(2)\u22121 = 5 \u2713</p>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var m=rInt(2,5),c=rInt(1,6),x=rInt(2,6);return{question:'For y = '+m+'x \u2212 '+c+', complete the table: what is y when x = '+x+'?',hints:['Calculate '+m+' \u00d7 '+x,'Then subtract '+c],ans:m*x-c,tol:0,unit:'',working:m+'('+x+') \u2212 '+c+' = '+(m*x)+' \u2212 '+c+' = '+(m*x-c)};})},
+  ]},
+  {ey:'Q8 \u00b7 Year 7 \u00b7 Coordinates & Graphs',ti:'Midpoint of a Line Segment (visual)',su:'Find the midpoint of A(2,3) and B(6,3).',steps:[
+    {lb:'What is a midpoint?',dr:dQ8,ht:'<p>The <b>midpoint</b> is exactly halfway between two points.</p>'},
+    {lb:'Look along the line',dr:dQ8,ht:'<p>A and B have the same y-value (3), so the midpoint sits on the same horizontal line.</p>'},
+    {lb:'Average the x-values',dr:dQ8,ht:'<div class="fm">(2 + 6) \u00f7 2 = 4</div>'},
+    {lb:'Midpoint',dr:dQ8,ht:'<div class="fm">Midpoint = (4, 3)</div>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var y=rInt(-3,3),x1=rInt(-5,3),x2=x1+rInt(2,8);return{question:'Find the midpoint x-coordinate of A('+x1+', '+y+') and B('+x2+', '+y+').',hints:['Average the x-values: ('+x1+' + '+x2+') \u00f7 2'],ans:(x1+x2)/2,tol:0.01,unit:'',working:'('+x1+' + '+x2+') \u00f7 2 = '+((x1+x2)/2)};})},
+  ]},
+  {ey:'Q9 \u00b7 Year 7 \u00b7 Coordinates & Graphs',ti:'Naming Points on Shapes Using Coordinates',su:'Plot square ABCD from its corner coordinates.',steps:[
+    {lb:'List the corners',dr:dQ9,ht:'<div class="fm">A(\u22122,\u22121) B(2,\u22121) C(2,3) D(\u22122,3)</div>'},
+    {lb:'Plot each corner',dr:dQ9,ht:'<p>Plot all four points on the grid first, before joining.</p>'},
+    {lb:'Join in order',dr:dQ9,ht:'<p>Join A\u2192B\u2192C\u2192D\u2192A to complete the shape.</p>'},
+    {lb:'Check it is a square',dr:dQ9,ht:'<p>All sides should be equal length and all angles 90\u00b0.</p>'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var s=rInt(2,5),x0=rInt(-4,2);return{question:'A square has corners ('+x0+',0), ('+(x0+s)+',0), ('+(x0+s)+','+s+'), ('+x0+','+s+'). What is the side length of the square?',hints:['Compare the x-values of the first two corners'],ans:s,tol:0,unit:'',working:'Side length = '+(x0+s)+' \u2212 '+x0+' = '+s};})},
+  ]},
+  {ey:'Q10 \u00b7 Year 7 \u00b7 Coordinates & Graphs',ti:'Real-Life Coordinate Problems (maps/grids)',su:'Home is at (1,2), School is at (6,3) on a street grid.',steps:[
+    {lb:'Read the grid',dr:dQ10,ht:'<p>Each grid line represents one street block.</p>'},
+    {lb:'Locate School',dr:dQ10,ht:'<div class="fm">School = (6, 3)</div>'},
+    {lb:'Work out the journey',dr:dQ10,ht:'<div class="fm">Right: 6 \u2212 1 = 5 blocks</div><div class="fm">Up: 3 \u2212 2 = 1 block</div>'},
+    {lb:'Describe the route',dr:dQ10,ht:'<p>Move 5 blocks right, then 1 block up, to get from Home to School.</p>'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var hx=rInt(0,3),hy=rInt(0,3),sx=hx+rInt(3,7),sy=hy+rInt(1,4);return{question:'Home is at ('+hx+', '+hy+'). School is at ('+sx+', '+sy+'). How many blocks right must you travel?',hints:['Right distance = school x \u2212 home x'],ans:sx-hx,tol:0,unit:'blocks',working:sx+' \u2212 '+hx+' = '+(sx-hx)+' blocks right'};})},
+  ]},
+
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=(si===0);document.getElementById('nb').textContent=(si===q.steps.length-1)?'Restart':'Next \u2192';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=(si===q.steps.length-1)?0:si+1;render();});
+render();
+
+</script>
+
+
+<!-- ABC Supabase Progress Tracking -->
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase = _sb;
+window._abcTopicCode = 'Y7-ALG-02';
+window.markComplete = async function() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) return;
+  const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', window._abcTopicCode).maybeSingle();
+  if (!topic) return;
+  window._abcTopicId = topic.id;
+  await _sb.from('walkthrough_progress').upsert({
+    student_id: session.user.id, topic_id: topic.id,
+    status: 'completed', completed_at: new Date().toISOString(),
+    last_visited_at: new Date().toISOString(),
+  }, { onConflict: 'student_id,topic_id' });
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>
