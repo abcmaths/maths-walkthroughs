@@ -131,6 +131,7 @@
     <div class="subject-toggle">
       <button id="toggle-english">✏️ English</button>
       <button id="toggle-maths" class="active">📐 Maths</button>
+      <button id="toggle-addmaths" style="display:none">➕ Add Maths</button>
       <button id="toggle-science">🔬 Science</button>
       <button id="toggle-crs" style="display:none">✝️ CRS</button>
       <button id="toggle-gov" style="display:none">🏛️ Government</button>
@@ -1027,6 +1028,20 @@
 
       const stream = profile.stream || 'science';
 
+      // Show Add Maths (Y10/11) or Further Maths (Y12) tab if the student is opted in.
+      // One flag follows the student through the annual rollover automatically.
+      const addMathsBt = document.getElementById('toggle-addmaths');
+      if (addMathsBt) {
+        const yrNum = Number(myYearGroup);
+        const eligibleYear = yrNum === 10 || yrNum === 11 || yrNum === 12;
+        if (profile.takes_extended_maths && eligibleYear) {
+          addMathsBt.style.display = '';
+          addMathsBt.textContent = yrNum === 12 ? '\u2795 Further Maths' : '\u2795 Add Maths';
+        } else {
+          addMathsBt.style.display = 'none';
+        }
+      }
+
       // Show/hide tabs based on stream
       const isArtsTrack    = stream === 'arts';
       const isScienceTrack = stream === 'science' || stream === 'both';
@@ -1093,7 +1108,7 @@
           return;
         }
         // Hide all standard curriculum tabs
-        ['toggle-maths','toggle-english','toggle-science','toggle-crs','toggle-gov','toggle-digitaltech']
+        ['toggle-maths','toggle-english','toggle-science','toggle-crs','toggle-gov','toggle-digitaltech','toggle-addmaths']
           .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
         // Also hide the subject progress overview panels — these are a separate
         // section from the tab bar and weren't covered by the toggle-hiding above
@@ -1121,7 +1136,7 @@
       // that aren't relevant until the student is fully in school. Staff turns
       // this off via the student's profile once they're fully enrolled.
       if (profile.simplified_view && !profile.summer_only) {
-        ['toggle-science','toggle-crs','toggle-gov','toggle-digitaltech']
+        ['toggle-science','toggle-crs','toggle-gov','toggle-digitaltech','toggle-addmaths']
           .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
         ['science-panel','physics-panel','chemistry-panel','biology-panel','crs-panel','gov-panel','digitaltech-panel']
           .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
@@ -1586,6 +1601,12 @@
   };
 
   document.getElementById('toggle-maths').addEventListener('click', () => window.switchSubject('maths'));
+  if (document.getElementById('toggle-addmaths'))
+    document.getElementById('toggle-addmaths').addEventListener('click', () => {
+      window.switchSubject('maths');
+      const yrSel = document.getElementById('year-select');
+      if (yrSel) { yrSel.value = Number(myYearGroup) === 12 ? '14' : '13'; window.renderTopics && window.renderTopics(); }
+    });
   if (document.getElementById('toggle-english'))
     document.getElementById('toggle-english').addEventListener('click', () => window.switchSubject('english'));
   if (document.getElementById('toggle-crs'))
