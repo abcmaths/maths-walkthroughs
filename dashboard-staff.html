@@ -175,6 +175,7 @@
           <option value="11">Year 11</option>
           <option value="12">Year 12</option>
           <option value="13">Add Maths</option>
+          <option value="14">Further Maths</option>
         </select>
         <select id="test-filter-level" onchange="renderTestsTab()">
           <option value="">All Levels</option>
@@ -239,6 +240,7 @@
           <option value="11">Year 11</option>
           <option value="12">Year 12</option>
           <option value="13">Add Maths</option>
+          <option value="14">Further Maths</option>
         </select>
       </div>
       <div id="topics-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;"></div>
@@ -260,6 +262,7 @@
           <option value="11">Year 11</option>
           <option value="12">Year 12</option>
           <option value="13">Add Maths</option>
+          <option value="14">Further Maths</option>
         </select>
         <select id="fb-filter-status" onchange="renderFeedbackTab()">
           <option value="">All statuses</option>
@@ -320,6 +323,7 @@
           <option value="11">Year 11</option>
           <option value="12">Year 12</option>
           <option value="13">Add Maths</option>
+          <option value="14">Further Maths</option>
         </select>
       </div>
 
@@ -767,6 +771,7 @@
             <option value="11" id="review-opt-y11">Year 11</option>
             <option value="12" id="review-opt-y12">Year 12</option>
             <option value="13" id="review-opt-y13">Add Maths</option>
+          <option value="14">Further Maths</option>
           </select>
           <select id="review-filter-status" onchange="renderReviewTab()">
             <option value="">All statuses</option>
@@ -1481,7 +1486,7 @@
 
     tbody.innerHTML = filtered.map(r => {
       const gradeBadge = r.grade === 'A*' ? 'badge-green' : r.grade === 'A' ? 'badge-green' : r.grade === 'B' ? 'badge-yellow' : 'badge-red';
-      const yearLabel  = r.topics?.year_group === 13 ? 'Add Maths' : 'Year ' + (r.topics?.year_group || '—');
+      const yearLabel  = r.topics?.year_group === 13 ? 'Add Maths' : r.topics?.year_group === 14 ? 'Further Maths' : 'Year ' + (r.topics?.year_group || '—');
       const mins = Math.floor((r.time_taken_secs || 0) / 60);
       const secs = (r.time_taken_secs || 0) % 60;
       const date = new Date(r.completed_at).toLocaleDateString('en-GB');
@@ -1502,7 +1507,7 @@
   window.exportTests = function() {
     const rows = [['Student', 'Year', 'Topic', 'Level', 'Score', 'Max', 'Percentage', 'Grade', 'Time (secs)', 'Date']];
     allTestResults.forEach(r => {
-      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : 'Year ' + (r.topics?.year_group || '');
+      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : r.topics?.year_group === 14 ? 'Further Maths' : 'Year ' + (r.topics?.year_group || '');
       rows.push([
         r.profiles?.full_name || '',
         yearLabel,
@@ -1565,7 +1570,7 @@
       : sorted.map(t => {
           const total  = t.ups + t.downs;
           const downPct = Math.round((t.downs / total) * 100);
-          const yearLabel = t.topic?.year_group === 13 ? 'Add Maths' : `Year ${t.topic?.year_group}`;
+          const yearLabel = t.topic?.year_group === 13 ? 'Add Maths' : t.topic?.year_group === 14 ? 'Further Maths' : `Year ${t.topic?.year_group}`;
           return `
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
               <div style="width:180px;font-size:0.85rem;font-weight:600;color:#333">${t.topic?.topic_name || '—'}</div>
@@ -1586,7 +1591,7 @@
     }
 
     tbody.innerHTML = filtered.map(f => {
-      const yearLabel = f.topics?.year_group === 13 ? 'Add Maths' : `Year ${f.topics?.year_group}`;
+      const yearLabel = f.topics?.year_group === 13 ? 'Add Maths' : f.topics?.year_group === 14 ? 'Further Maths' : `Year ${f.topics?.year_group}`;
       const statusBadge = f.status === 'approved' ? 'badge-green' : f.status === 'rejected' ? 'badge-red' : 'badge-grey';
       return `<tr>
         <td><strong>${f.topics?.topic_name || '—'}</strong></td>
@@ -1648,7 +1653,7 @@
     document.getElementById('bug-topic-list').innerHTML = sorted.length === 0
       ? '<div style="color:#aaa;font-style:italic;font-size:0.88rem">No bug reports yet.</div>'
       : sorted.map(t => {
-          const yearLabel = t.topic?.year_group === 13 ? 'Add Maths' : `Year ${t.topic?.year_group}`;
+          const yearLabel = t.topic?.year_group === 13 ? 'Add Maths' : t.topic?.year_group === 14 ? 'Further Maths' : `Year ${t.topic?.year_group}`;
           return `
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
               <div style="width:180px;font-size:0.85rem;font-weight:600;color:#333">${t.topic?.topic_name || '—'}</div>
@@ -1666,7 +1671,7 @@
     }
 
     tbody.innerHTML = filtered.map(r => {
-      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : `Year ${r.topics?.year_group || '—'}`;
+      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : r.topics?.year_group === 14 ? 'Further Maths' : `Year ${r.topics?.year_group || '—'}`;
       const statusBadge = r.status === 'fixed' ? 'badge-green' : r.status === 'wontfix' ? 'badge-grey' : 'badge-red';
       const date = new Date(r.reported_at).toLocaleDateString('en-GB');
       return `<tr>
@@ -1694,7 +1699,7 @@
   window.exportBugs = function() {
     const rows = [['Topic', 'Year', 'Question', 'Description', 'JS Error', 'Student', 'Date', 'Status']];
     allBugReports.forEach(r => {
-      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : `Year ${r.topics?.year_group || '—'}`;
+      const yearLabel = r.topics?.year_group === 13 ? 'Add Maths' : r.topics?.year_group === 14 ? 'Further Maths' : `Year ${r.topics?.year_group || '—'}`;
       const qLabel = r.question_number ? 'Q' + r.question_number + (r.question_title ? ' - ' + r.question_title : '') : '—';
       rows.push([
         r.topics?.topic_name || '—',
@@ -1773,7 +1778,19 @@
     'AM-TRI-02': 'addmaths/trig-identities-addmaths.html', 'AM-TRI-03': 'addmaths/circular-measure-addmaths.html',
     'AM-ALG-03': 'addmaths/simultaneous-advanced-addmaths.html', 'AM-ALG-04': 'addmaths/quadratics-advanced-addmaths.html',
     'AM-ALG-05': 'addmaths/polynomials-addmaths.html', 'AM-ALG-06': 'addmaths/binomial-addmaths.html',
-    'AM-ALG-07': 'addmaths/progressions-addmaths.html', 'AM-ALG-08': 'addmaths/indices-surds-addmaths.html'
+    'AM-ALG-07': 'addmaths/progressions-addmaths.html', 'AM-ALG-08': 'addmaths/indices-surds-addmaths.html',
+    'Y12FM-SET-01': 'furthermaths/sets-furthermaths-y12.html',
+    'Y12FM-SUR-01': 'furthermaths/surds-furthermaths-y12.html',
+    'Y12FM-LOG-01': 'furthermaths/logic-furthermaths-y12.html',
+    'Y12FM-FUN-01': 'furthermaths/functions-furthermaths-y12.html',
+    'Y12FM-ALG-01': 'furthermaths/partial-fractions-furthermaths-y12.html',
+    'Y12FM-ALG-02': 'furthermaths/indices-log-furthermaths-y12.html',
+    'Y12FM-ALG-03': 'furthermaths/binomial-furthermaths-y12.html',
+    'Y12FM-ALG-04': 'furthermaths/sequences-series-furthermaths-y12.html',
+    'Y12FM-STA-01': 'furthermaths/permcomb-furthermaths-y12.html',
+    'Y12FM-TRI-01': 'furthermaths/trigonometry-furthermaths-y12.html',
+    'Y12FM-STA-02': 'furthermaths/statistics-furthermaths-y12.html',
+    'Y12FM-STA-03': 'furthermaths/probability-furthermaths-y12.html'
   };
 
   // Science walkthrough files — add entries here only when the file is built and deployed
@@ -2283,7 +2300,7 @@
 
     listEl.innerHTML = filtered.map(t => {
       const rm = reviewMap[t.id];
-      const yearLabel = t.year_group === 13 ? 'Add Maths' : 'Year ' + t.year_group;
+      const yearLabel = t.year_group === 13 ? 'Add Maths' : t.year_group === 14 ? 'Further Maths' : 'Year ' + t.year_group;
       const subj = t.subject || 'maths';
       const colourLookup = ALL_STRAND_COLOURS[subj] || null;
       const strandColour = colourLookup ? (colourLookup[t.strand] || '#1565C0') : '#888';
@@ -3258,14 +3275,14 @@
     const filtered = allTopics.filter(t => t.year_group === yr && (t.subject || 'maths') === subject);
     const grid = document.getElementById('topics-grid');
 
-    // Hide Add Maths when any non-Maths subject is selected
+    // Hide Add Maths / Further Maths when any non-Maths subject is selected
     const addMathsOpt = document.querySelector('#topics-filter-year option[value="13"]');
-    if (addMathsOpt) {
-      addMathsOpt.style.display = subject === 'maths' ? '' : 'none';
-      if (subject !== 'maths' && yr === 13) {
-        document.getElementById('topics-filter-year').value = '10';
-        window.renderTopicsTab(); return;
-      }
+    const furtherMathsOpt = document.querySelector('#topics-filter-year option[value="14"]');
+    if (addMathsOpt) addMathsOpt.style.display = subject === 'maths' ? '' : 'none';
+    if (furtherMathsOpt) furtherMathsOpt.style.display = subject === 'maths' ? '' : 'none';
+    if (subject !== 'maths' && (yr === 13 || yr === 14)) {
+      document.getElementById('topics-filter-year').value = '10';
+      window.renderTopicsTab(); return;
     }
 
     if (filtered.length === 0) {
