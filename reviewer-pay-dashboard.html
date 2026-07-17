@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reviewer Pay & Flagged Reviews - ABC</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f4f4f2;
+    margin: 0;
+    padding: 24px;
+    color: #1a1a1a;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #C0272D;
+    margin: 0 0 4px;
+  }
+  .sub { color: #666; font-size: 14px; margin: 0 0 24px; }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid #e5e3dd;
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .card p.label { font-size: 13px; color: #666; margin: 0 0 6px; }
+  .card p.value { font-size: 26px; font-weight: 600; margin: 0; color: #1a1a1a; }
+  .card p.value.danger { color: #C0272D; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #e5e3dd; }
+  thead tr { background: #C0272D; }
+  th { text-align: left; padding: 10px 12px; color: #fff; font-size: 13px; font-weight: 600; }
+  th.num, td.num { text-align: right; }
+  td { padding: 10px 12px; font-size: 14px; border-bottom: 1px solid #eee; }
+  tr:last-child td { border-bottom: none; }
+  td.flagged { color: #C0272D; font-weight: 600; }
+  .status { font-size: 13px; color: #888; margin-top: 16px; }
+  .error { color: #C0272D; font-size: 14px; background: #fdecec; border: 1px solid #f5c2c2; border-radius: 8px; padding: 12px; }
+  .controls { margin-bottom: 16px; font-size: 13px; color: #666; }
+  .controls label { margin-right: 16px; }
+  .controls input { width: 60px; margin-left: 6px; }
+  button#refresh {
+    background: #C0272D; color: #fff; border: none; border-radius: 6px;
+    padding: 8px 14px; font-size: 13px; cursor: pointer;
+  }
+  button#refresh:hover { background: #a01f24; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Reviewer pay & flagged reviews</h1>
+  <p class="sub">Live from Supabase - walkthrough_reviews / user_emails</p>
+
+  <div class="controls">
+    <label>Short comment threshold (chars)<input type="number" id="commentThreshold" value="10" min="0"></label>
+    <label>Rapid-fire threshold (seconds)<input type="number" id="rapidThreshold" value="5" min="0"></label>
+    <button id="refresh">Recalculate</button>
+  </div>
+
+  <div id="app"><p style="font-size:13px;color:#888;">Loading review data...</p></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://lnwinoghbefmjpvmixzo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const app = document.getElementById('app');
+
+let rawReviews = [];
+let nameMap = {};
+
+async function loadData() {
+  app.innerHTML = '<p style="font-size:13px;color:#888;">Loading review data...</p>';
+  try {
+    const { data: reviews, error: e1 } = await sb
+      .from('walkthrough_reviews')
+      .select('id,topic_id,question_number,reviewer_id,rating,comment,reviewed_at');
+    if (e1) throw e1;
+
+    const { data: users, error: e2 } = await sb
+      .from('user_emails')
+      .select('id,full_name');
+    if (e2) throw e2;
+
+    rawReviews = reviews;
+    nameMap = {};
+    users.forEach(u => nameMap[u.id] = u.full_name || 'Unknown');
+
+    render();
+  } catch (err) {
+    app.innerHTML = '<div class="error">Could not load data: ' + (err.message || err) + '<br><br>If this persists, check that Row-Level Security policies on walkthrough_reviews and user_emails allow read access for the anon key.</div>';
+  }
+}
+
+function render() {
+  const commentThreshold = parseInt(document.getElementById('commentThreshold').value, 10) || 0;
+  const rapidThreshold = parseInt(document.getElementById('rapidThreshold').value, 10) || 0;
+
+  const byReviewer = {};
+  rawReviews.forEach(r => {
+    const rid = r.reviewer_id;
+    if (!byReviewer[rid]) byReviewer[rid] = { rows: [], topics: new Set() };
+    byReviewer[rid].rows.push(r);
+    byReviewer[rid].topics.add(r.topic_id);
+  });
+
+  const results = Object.entries(byReviewer).map(([rid, d]) => {
+    const rows = d.rows.slice().sort((a, b) => new Date(a.reviewed_at) - new Date(b.reviewed_at));
+    let flagged = 0;
+    rows.forEach((r, i) => {
+      const shortComment = !r.comment || r.comment.trim().length < commentThreshold;
+      let rapid = false;
+      if (i > 0) {
+        const dt = (new Date(rows[i].reviewed_at) - new Date(rows[i - 1].reviewed_at)) / 1000;
+        if (dt >= 0 && dt < rapidThreshold) rapid = true;
+      }
+      if (shortComment || rapid) flagged++;
+    });
+    return {
+      name: nameMap[rid] || 'Unknown',
+      walkthroughs: d.topics.size,
+      questions: rows.length,
+      flagged,
+      pay: d.topics.size * 1000
+    };
+  }).sort((a, b) => b.walkthroughs - a.walkthroughs);
+
+  const totalPay = results.reduce((s, r) => s + r.pay, 0);
+  const totalFlagged = results.reduce((s, r) => s + r.flagged, 0);
+
+  let html = '<div class="cards">';
+  html += '<div class="card"><p class="label">Total reviewers</p><p class="value">' + results.length + '</p></div>';
+  html += '<div class="card"><p class="label">Flagged reviews</p><p class="value danger">' + totalFlagged + '</p></div>';
+  html += '<div class="card"><p class="label">Total to pay</p><p class="value">\u20a6' + totalPay.toLocaleString() + '</p></div>';
+  html += '</div>';
+
+  html += '<table><thead><tr>';
+  html += '<th>Reviewer</th><th class="num">Walkthroughs</th><th class="num">Questions</th><th class="num">Flagged</th><th class="num">Pay</th>';
+  html += '</tr></thead><tbody>';
+  results.forEach(r => {
+    html += '<tr>';
+    html += '<td>' + r.name + '</td>';
+    html += '<td class="num">' + r.walkthroughs + '</td>';
+    html += '<td class="num">' + r.questions + '</td>';
+    html += '<td class="num' + (r.flagged > 0 ? ' flagged' : '') + '">' + r.flagged + '</td>';
+    html += '<td class="num">\u20a6' + r.pay.toLocaleString() + '</td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  html += '<p class="status">Last loaded: ' + new Date().toLocaleString() + '</p>';
+
+  app.innerHTML = html;
+}
+
+document.getElementById('refresh').addEventListener('click', render);
+loadData();
+</script>
+</body>
+</html>
