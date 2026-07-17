@@ -1018,7 +1018,7 @@
     ] = await Promise.all([
       supabase.from('profiles').select('*').eq('role', 'student').eq('active', true).order('full_name'),
       supabase.from('profiles').select('*').in('role', ['teacher', 'admin']),
-      supabase.from('topics').select('*').order('year_group').order('sort_order'),
+      supabase.from('topics').select('*').order('year_group').order('topic_code'),
       supabase.from('walkthrough_progress').select('*')
     ]);
 
@@ -2320,11 +2320,20 @@
       const reviewerCount = rm ? rm.reviewers.size : 0;
       const qCount = rm ? rm.questions.size : 0;
       const dominant = rm ? getDominantRating(rm.ratings) : null;
-      const statusBadge = dominant
-        ? (dominant === 'good' ? '<span class="badge badge-green">✓ Good</span>' :
-           dominant === 'needs_improvement' ? '<span class="badge badge-yellow">⚠ Needs work</span>' :
-           '<span class="badge badge-red">✗ Not good</span>')
-        : '<span class="badge badge-grey">Not reviewed</span>';
+      const isLocked = !!t.locked;
+      const statusBadge = isLocked
+        ? '<span class="badge badge-grey">🔒 Locked</span>'
+        : (dominant
+          ? (dominant === 'good' ? '<span class="badge badge-green">✓ Good</span>' :
+             dominant === 'needs_improvement' ? '<span class="badge badge-yellow">⚠ Needs work</span>' :
+             '<span class="badge badge-red">✗ Not good</span>')
+          : '<span class="badge badge-grey">Not reviewed</span>');
+      const actionButtons = isLocked
+        ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="exportReviewComments(${t.id},'${escAttr(t.topic_name)}')">📋 Export Comments</button>
+           <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;color:#888;border-color:#ccc" onclick="unlockTopicReview(${t.id})">🔓 Unlock</button>`
+        : `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}','${subj}')">
+             ${rm ? 'Add/Edit Review' : 'Review'}
+           </button>`;
       return `<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap">
         <div style="flex:1;min-width:200px">
           <div style="font-weight:600;font-size:0.88rem;color:#333">${t.topic_name}</div>
@@ -2334,12 +2343,14 @@
           ${statusBadge}
           ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} · ${qCount} Qs</span>` : ''}
         </div>
-        <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}','${subj}')">
-          ${rm ? 'Add/Edit Review' : 'Review'}
-        </button>
+        ${actionButtons}
       </div>`;
     }).join('');
   };
+
+  function escAttr(s) {
+    return String(s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
 
   function getDominantRating(ratings) {
     if (!ratings || ratings.length === 0) return null;
@@ -2355,6 +2366,7 @@
     document.getElementById('review-modal-body').innerHTML = '<div class="loading">Loading questions…</div>';
     document.getElementById('review-modal').classList.add('open');
     document.getElementById('review-submit-msg').textContent = '';
+    document.getElementById('review-submit-btn').style.display = '';
 
     // Load questions from walkthrough file
     const questions = await getQuestions(topicCode, subject);
@@ -2477,6 +2489,15 @@
 
     // Reload reviews
     await loadReviews();
+
+    // Auto-lock: once 2+ distinct staff have reviewed this topic, lock it for further review
+    const reviewerIds = new Set(allReviews.filter(r => r.topic_id === currentReviewTopicId).map(r => r.reviewer_id));
+    if (reviewerIds.size >= 2) {
+      await supabase.from('topics').update({ locked: true }).eq('id', currentReviewTopicId);
+      const t = allTopics.find(t => t.id === currentReviewTopicId);
+      if (t) t.locked = true;
+    }
+
     window.renderReviewTab();
 
     msg.style.color = '#2e7d32';
@@ -2484,6 +2505,57 @@
     btn.disabled = false;
     btn.textContent = 'Submit Review';
     setTimeout(closeReviewModal, 1500);
+  };
+
+  // ── Export Comments (plain text) & Unlock ──
+  window.exportReviewComments = function(topicId, topicName) {
+    const reviews = allReviews.filter(r => r.topic_id === topicId);
+    if (reviews.length === 0) {
+      alert('No reviews found for this walkthrough.');
+      return;
+    }
+    // Group by question number, then list each reviewer's rating + comment
+    const byQuestion = {};
+    reviews.forEach(r => {
+      if (!byQuestion[r.question_number]) byQuestion[r.question_number] = [];
+      byQuestion[r.question_number].push(r);
+    });
+    const ratingLabel = { good: 'Good', needs_improvement: 'Needs work', not_good: 'Not good' };
+    let out = `WALKTHROUGH REVIEW: ${topicName}\n`;
+    out += `Reviewed by ${new Set(reviews.map(r => r.reviewer_id)).size} staff · exported ${new Date().toLocaleDateString('en-GB')}\n`;
+    out += `${'='.repeat(50)}\n\n`;
+    Object.keys(byQuestion).sort((a,b) => Number(a)-Number(b)).forEach(qNum => {
+      out += `Q${qNum}\n`;
+      byQuestion[qNum].forEach(r => {
+        const reviewer = r.profiles?.full_name || 'Reviewer';
+        out += `  [${reviewer}] ${ratingLabel[r.rating] || r.rating}: ${r.comment || '(no comment)'}\n`;
+      });
+      out += `\n`;
+    });
+
+    document.getElementById('review-modal-title').textContent = 'Export: ' + topicName;
+    document.getElementById('review-modal-body').innerHTML = `
+      <p style="font-size:0.85rem;color:#666;margin-bottom:10px">Copy this and paste it to Claude to run the improvement pass.</p>
+      <textarea id="export-text-area" readonly style="width:100%;min-height:320px;padding:10px;border:1.5px solid #ddd;border-radius:6px;font-family:monospace;font-size:0.8rem;box-sizing:border-box">${out}</textarea>
+    `;
+    document.getElementById('review-submit-btn').style.display = 'none';
+    document.getElementById('review-submit-msg').innerHTML = `<button class="btn-outline" style="font-size:0.8rem;padding:6px 16px" onclick="copyExportText()">📋 Copy to clipboard</button>`;
+    document.getElementById('review-modal').classList.add('open');
+  };
+
+  window.copyExportText = function() {
+    const ta = document.getElementById('export-text-area');
+    ta.select();
+    document.execCommand('copy');
+    if (navigator.clipboard) navigator.clipboard.writeText(ta.value).catch(()=>{});
+  };
+
+  window.unlockTopicReview = async function(topicId) {
+    if (!confirm('Unlock this walkthrough for further staff review?')) return;
+    await supabase.from('topics').update({ locked: false }).eq('id', topicId);
+    const t = allTopics.find(t => t.id === topicId);
+    if (t) t.locked = false;
+    window.renderReviewTab();
   };
 
   // ── Users tab ──
