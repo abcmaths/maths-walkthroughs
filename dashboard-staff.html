@@ -2488,7 +2488,7 @@
           <span>Walkthrough (scrolls independently — questions below)</span>
           <button type="button" onclick="resizeReviewFrame()" id="review-frame-resize-btn" style="border:none;background:none;color:#C0272D;font-weight:600;font-size:0.75rem;cursor:pointer">⤢ Taller</button>
         </div>
-        <iframe id="review-walkthrough-frame" src="" style="width:100%;height:38vh;border:none;display:block;transition:height 0.15s"></iframe>
+        <iframe id="review-walkthrough-frame" style="width:100%;height:38vh;border:none;display:block;transition:height 0.15s"></iframe>
       </div>
       ${questions.map(q => {
         const existing = myReviewMap[q.num];
@@ -2556,10 +2556,14 @@
     const isOpen = wrap.style.display !== 'none';
     if (isOpen) {
       wrap.style.display = 'none';
-      frame.src = '';
+      frame.removeAttribute('src');
+      frame.removeAttribute('data-loaded');
       btn.textContent = '📱 Show walkthrough here';
     } else {
-      if (!frame.src || frame.src === 'about:blank') frame.src = walkthroughFile;
+      if (!frame.getAttribute('data-loaded')) {
+        frame.src = walkthroughFile;
+        frame.setAttribute('data-loaded', '1');
+      }
       wrap.style.display = 'block';
       btn.textContent = '📱 Hide walkthrough';
     }
@@ -2573,7 +2577,7 @@
   window.closeReviewModal = function() {
     document.getElementById('review-modal').classList.remove('open');
     const frame = document.getElementById('review-walkthrough-frame');
-    if (frame) frame.src = '';
+    if (frame) { frame.removeAttribute('src'); frame.removeAttribute('data-loaded'); }
   };
 
   window.submitReview = async function() {
