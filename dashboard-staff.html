@@ -2321,7 +2321,8 @@
       const qCount = rm ? rm.questions.size : 0;
       const dominant = rm ? getDominantRating(rm.ratings) : null;
       const isLocked = !!t.locked;
-      const filePath = getWalkthroughFile(subj, t.topic_code) || '(file path unknown)';
+      const filePathRaw = getWalkthroughFile(subj, t.topic_code);
+      const filePath = (filePathRaw && filePathRaw !== '#') ? filePathRaw : `(no file mapped for code ${t.topic_code})`;
       const statusBadge = isLocked
         ? '<span class="badge badge-grey">🔒 Locked</span>'
         : (dominant
@@ -2339,7 +2340,7 @@
         <div style="flex:1;min-width:200px">
           <div style="font-weight:600;font-size:0.88rem;color:#333">${t.topic_name}</div>
           <div style="font-size:0.75rem;color:#888">${yearLabel} · ${subjectLabel}</div>
-          ${isLocked ? `<div style="font-size:0.72rem;color:#aaa;font-family:monospace;margin-top:2px">${filePath}</div>` : ''}
+          <div style="font-size:0.72rem;color:#aaa;font-family:monospace;margin-top:2px">${filePath}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           ${statusBadge}
@@ -2522,7 +2523,8 @@
       if (!byQuestion[r.question_number]) byQuestion[r.question_number] = [];
       byQuestion[r.question_number].push(r);
     });
-    const filePath = getWalkthroughFile(subject || 'maths', topicCode) || '(file path unknown — check WALKTHROUGH_FILES map)';
+    const filePathRaw = getWalkthroughFile(subject || 'maths', topicCode);
+    const filePath = (filePathRaw && filePathRaw !== '#') ? filePathRaw : `(no file mapped for code ${topicCode} — check WALKTHROUGH_FILES map)`;
     const ratingLabel = { good: 'Good', needs_improvement: 'Needs work', not_good: 'Not good' };
     let out = `WALKTHROUGH REVIEW: ${topicName}\n`;
     out += `FILE: ${filePath}\n`;
