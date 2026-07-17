@@ -186,13 +186,27 @@ function svgFrac(x,y,num,den,col,sz){
 }
 
 function fracBar(total,num,den,result){
-  var bx=70,bw=340,bh=32,pw=bw/den,out='';
+  var bx=40,bw=300,bh=32,pw=bw/den,out='';
   for(var i=0;i<den;i++){
     var fill=(i<num)?'#C0272D':'#f5e6e6';
     out+='<rect x="'+(bx+i*pw)+'" y="0" width="'+(pw-2)+'" height="'+bh+'" fill="'+fill+'" stroke="#C0272D" stroke-width="1.5" rx="2"/>';
     out+='<text x="'+(bx+i*pw+pw/2)+'" y="'+(bh/2+5)+'" font-size="12" font-family="Arial" fill="'+(i<num?'#fff':'#C0272D')+'" text-anchor="middle">'+Math.round(total/den)+'</text>';
   }
-  out+='<text x="'+(bx+num*pw+8)+'" y="'+(bh/2+5)+'" font-size="13" font-family="Arial" fill="#1a7a3a" font-weight="700">= '+result+'</text>';
+  // summary label placed clear of the bar itself (to the right), so it never overlaps a box's own number
+  out+='<text x="'+(bx+bw+18)+'" y="'+(bh/2+5)+'" font-size="14" font-family="Arial" fill="#1a7a3a" font-weight="700">= '+result+'</text>';
+  return out;
+}
+
+function pieSlices(cx,cy,r,den,filled){
+  var out='',ang=-90,step=360/den;
+  for(var i=0;i<den;i++){
+    var a0=(ang+i*step)*Math.PI/180,a1=(ang+(i+1)*step)*Math.PI/180;
+    var x0=(cx+r*Math.cos(a0)).toFixed(1),y0=(cy+r*Math.sin(a0)).toFixed(1);
+    var x1=(cx+r*Math.cos(a1)).toFixed(1),y1=(cy+r*Math.sin(a1)).toFixed(1);
+    var large=step>180?1:0;
+    var fill=(i<filled)?'#C0272D':'#fdf1ea';
+    out+='<path d="M '+cx+' '+cy+' L '+x0+' '+y0+' A '+r+' '+r+' 0 '+large+' 1 '+x1+' '+y1+' Z" fill="'+fill+'" stroke="#fff" stroke-width="2"/>';
+  }
   return out;
 }
 
@@ -201,7 +215,7 @@ function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text 
 function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" rx="3"/>';}
 function L(x1,y1,x2,y2,c,w){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'"/>';}
 
-function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];var ox=60,oy=150,sc=70;o.push(L(ox-20,oy,ox+5*sc+20,oy,'#333',2));for(var i=-1;i<=5;i++){o.push(L(ox+i*sc,oy-6,ox+i*sc,oy+6,'#555',1.5));o.push(T(ox+i*sc,oy+20,i-2,'#555',12));}o.push(T(ox+5*sc+28,oy+4,'→','#333',14,'start'));if(p>=1){[[-5,'#C0272D'],[-1.8,'#1a5a8a'],[0,'#888'],[3.2,'#1a7a3a']].forEach(function(n){var x=ox+(n[0]+2)*sc;o.push('<circle cx="'+x+'" cy="'+oy+'" r="8" fill="'+n[1]+'" stroke="#fff" stroke-width="2"/>');o.push(T(x,oy-18,n[0],n[1],12,'middle',true));});}if(p>=2){o.push(T(240,50,'Ordered:','#241A17',13));o.push(T(240,74,'−5 < −1.8 < 0 < 3.2','#C0272D',16,'middle',true));}s.innerHTML=o.join('');}
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];var ox=40,oy=150,sc=38;function X(v){return ox+(v+6)*sc;}o.push(L(ox-10,oy,X(4)+16,oy,'#333',2));for(var i=-6;i<=4;i++){o.push(L(X(i),oy-6,X(i),oy+6,'#555',1.5));o.push(T(X(i),oy+20,i,'#555',11));}o.push(T(X(4)+24,oy+4,'→','#333',14,'start'));if(p>=1){[[-5,'#C0272D'],[-1.8,'#1a5a8a'],[0,'#888'],[3.2,'#1a7a3a']].forEach(function(n){var x=X(n[0]);o.push('<circle cx="'+x+'" cy="'+oy+'" r="8" fill="'+n[1]+'" stroke="#fff" stroke-width="2"/>');o.push(T(x,oy-18,n[0],n[1],12,'middle',true));});}if(p>=2){o.push(T(240,50,'Ordered:','#241A17',13));o.push(T(240,74,'−5 < −1.8 < 0 < 3.2','#C0272D',16,'middle',true));}if(p>=3){o.push(R(60,88,360,60,'#fff5f0','#C0272D',1.5));o.push(T(240,108,'Rule: the MORE negative a number, the SMALLER it is','#C0272D',13,'middle',true));o.push(T(240,128,'e.g. −5 is smaller than −1.8, even though 5 > 1.8','#888',11,'middle',false));o.push(T(240,142,'(the digits-only trick can mislead you — always picture the line!)','#888',10,'middle',false));}s.innerHTML=o.join('');}
 function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];o.push(T(240,30,'Round 37.486','#C0272D',20,'middle',true));var rows=[{l:'to 1 d.p.',v:'37.5',n:'2nd decimal 8≥5'},{l:'to 2 d.p.',v:'37.49',n:'3rd decimal 6≥5'},{l:'nearest whole',v:'37',n:'1st decimal 4<5'},{l:'nearest 10',v:'40',n:'units digit 7≥5'}];rows.forEach(function(r,i){if(p>=i+1){o.push(R(40,50+i*48,200,38,'#fff5f0','#C0272D',1.5));o.push(T(140,74+i*48,r.l,'#241A17',13));o.push(R(250,50+i*48,180,38,'#e8f8ee','#1a7a3a',1.5));o.push(T(340,74+i*48,r.v,'#1a7a3a',15,'middle',true));o.push(T(240,84+i*48,r.n,'#888',10));}});s.innerHTML=o.join('');}
 function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var ox=40,oy=100,sc=28;
@@ -237,67 +251,92 @@ function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   if(p>=4){
     o.push(T(240,196,'Adding positive → move RIGHT','#C8922A',11,'middle',false));
     o.push(T(240,212,'Subtracting → move LEFT','#1a5a8a',11,'middle',false));
-    o.push(T(240,228,'E.g. −3 − 5: start at −3, go 5 LEFT = −8','#1a5a8a',11,'middle',false));
   }
+  if(p>=5){
+    o.push(T(240,232,'Now try subtracting: −3 − 5','#1a5a8a',12,'middle',true));
+    // second number line beneath, dedicated to the subtraction example
+    var oy2=280,sc2=28,ox2=ox;
+    o.push(L(ox2-8,oy2,ox2+18*sc2+8,oy2,'#333',2));
+    for(var j=-9;j<=9;j++){o.push(L(ox2+(j+9)*sc2,oy2-5,ox2+(j+9)*sc2,oy2+5,'#555',1));if(j%3===0)o.push(T(ox2+(j+9)*sc2,oy2+16,j,'#555',10));}
+    var sx2=ox2+((-3)+9)*sc2, ex2=ox2+((-8)+9)*sc2;
+    o.push('<circle cx="'+sx2+'" cy="'+oy2+'" r="7" fill="#1a5a8a" stroke="#fff" stroke-width="2"/>');
+    o.push(T(sx2,oy2-16,'start: −3','#1a5a8a',10,'middle',true));
+    o.push('<path d="M '+sx2+' '+(oy2-10)+' Q '+((sx2+ex2)/2)+' '+(oy2-44)+' '+ex2+' '+(oy2-10)+'" fill="none" stroke="#C0272D" stroke-width="2.5" marker-end="url(#arr)"/>');
+    o.push(T((sx2+ex2)/2,oy2-50,'− 5 (move left)','#C0272D',12,'middle',true));
+    o.push('<circle cx="'+ex2+'" cy="'+oy2+'" r="7" fill="#C0272D" stroke="#fff" stroke-width="2"/>');
+    o.push(T(ex2,oy2+34,'answer: −8','#C0272D',11,'middle',true));
+  }
+  s.setAttribute('viewBox','0 0 480 '+(p>=5?330:260));
   s.innerHTML=o.join('');
 }
 function dQ4(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,18,'HCF and LCM of 12 and 18','#C0272D',15,'middle',true));
   o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,29,'HCF and LCM of 12 and 18','#C0272D',15,'middle',true));
   if(p>=1){
-    // Factor lists with common factors highlighted
-    o.push(T(14,52,'Factors of 12:','#241A17',11,'start',false));
+    // Factors of 12 only
+    o.push(T(14,58,'Factors of 12:','#241A17',11,'start',false));
     [1,2,3,4,6,12].forEach(function(f,i){
       var common=[1,2,3,6].indexOf(f)>=0;
-      o.push(R(14+i*38,58,34,26,common?'#fce8d8':'#fff','#C0272D',common?2:1));
-      o.push(T(31+i*38,75,f,common?'#C0272D':'#888',12,'middle',common));
+      o.push(R(14+i*38,64,34,26,common?'#fce8d8':'#fff','#C0272D',common?2:1));
+      o.push(T(31+i*38,81,f,common?'#C0272D':'#888',12,'middle',common));
     });
-    o.push(T(14,96,'Factors of 18:','#241A17',11,'start',false));
-    [1,2,3,6,9,18].forEach(function(f,i){
-      var common=[1,2,3,6].indexOf(f)>=0;
-      o.push(R(14+i*38,102,34,26,common?'#fce8d8':'#fff','#C0272D',common?2:1));
-      o.push(T(31+i*38,119,f,common?'#C0272D':'#888',12,'middle',common));
-    });
-    o.push(T(240,90,'(common factors highlighted)','#C8922A',9,'middle',false));
   }
   if(p>=2){
-    o.push(R(14,134,200,28,'#e8f4ff','#1a5a8a',2));
-    o.push(T(114,152,'HCF = 6  (largest common)','#1a5a8a',12,'middle',true));
+    o.push(T(14,108,'Factors of 18:','#241A17',11,'start',false));
+    [1,2,3,6,9,18].forEach(function(f,i){
+      var common=[1,2,3,6].indexOf(f)>=0;
+      o.push(R(14+i*38,114,34,26,common?'#fce8d8':'#fff','#C0272D',common?2:1));
+      o.push(T(31+i*38,131,f,common?'#C0272D':'#888',12,'middle',common));
+    });
+    o.push(T(240,152,'(common factors highlighted)','#C8922A',9,'middle',false));
   }
   if(p>=3){
-    // Show multiples to find LCM
-    o.push(T(14,176,'Multiples of 12:','#241A17',11,'start',false));
+    o.push(R(140,164,200,30,'#e8f4ff','#1a5a8a',2));
+    o.push(T(240,184,'HCF = 6  (largest common)','#1a5a8a',13,'middle',true));
+  }
+  if(p>=4){
+    o.push(T(14,214,'Multiples of 12:','#241A17',11,'start',false));
     [12,24,36].forEach(function(m,i){
       var hit=(m===36);
-      o.push(R(14+i*52,182,48,26,hit?'#e8f8ee':'#fff',hit?'#1a7a3a':'#888',hit?2:1));
-      o.push(T(38+i*52,199,m,hit?'#1a7a3a':'#888',12,'middle',hit));
+      o.push(R(14+i*52,220,48,26,hit?'#e8f8ee':'#fff',hit?'#1a7a3a':'#888',hit?2:1));
+      o.push(T(38+i*52,237,m,hit?'#1a7a3a':'#888',12,'middle',hit));
     });
-    o.push(T(14,220,'Multiples of 18:','#241A17',11,'start',false));
+  }
+  if(p>=5){
+    o.push(T(230,214,'Multiples of 18:','#241A17',11,'start',false));
     [18,36].forEach(function(m,i){
       var hit=(m===36);
-      o.push(R(14+i*52,226,48,26,hit?'#e8f8ee':'#fff',hit?'#1a7a3a':'#888',hit?2:1));
-      o.push(T(38+i*52,243,m,hit?'#1a7a3a':'#888',12,'middle',hit));
+      o.push(R(230+i*52,220,48,26,hit?'#e8f8ee':'#fff',hit?'#1a7a3a':'#888',hit?2:1));
+      o.push(T(254+i*52,237,m,hit?'#1a7a3a':'#888',12,'middle',hit));
     });
-    o.push(R(230,134,236,120,'#e8f8ee','#1a7a3a',2));
-    o.push(T(348,166,'LCM = 36','#1a7a3a',15,'middle',true));
-    o.push(T(348,190,'First multiple','#888',10,'middle',false));
-    o.push(T(348,204,'that appears','#888',10,'middle',false));
-    o.push(T(348,218,'in BOTH lists','#888',10,'middle',false));
+  }
+  if(p>=6){
+    o.push(R(360,206,110,48,'#e8f8ee','#1a7a3a',2));
+    o.push(T(415,226,'LCM = 36','#1a7a3a',14,'middle',true));
+    o.push(T(415,244,'first shared multiple','#888',9,'middle',false));
   }
   s.innerHTML=o.join('');
 }
 function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];var items=[{q:'6²',a:'36',n:'6×6'},{q:'√144',a:'12',n:'12×12=144'},{q:'4³',a:'64',n:'4×4×4'},{q:'∛216',a:'6',n:'6×6×6=216'}];items.forEach(function(item,i){o.push(R(40,20+i*56,160,44,(p>=i+1)?'#fff5f0':'#f8f8f8','#C0272D',(p>=i+1)?2:1));o.push(T(120,48+i*56,item.q,'#C0272D',18,'middle',p>=i+1));if(p>=i+1){o.push(R(220,20+i*56,130,44,'#e8f8ee','#1a7a3a',2));o.push(T(285,48+i*56,'= '+item.a,'#1a7a3a',18,'middle',true));o.push(T(380,48+i*56,item.n,'#888',11));}});s.innerHTML=o.join('');}
-function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];o.push(T(120,32,'Simplify','#241A17',16,'middle',true));o.push(svgFrac(240,20,18,24,'#C0272D',22));if(p>=1){
-    // label numerator/denominator on the fraction
-    o.push(T(240,28,'numerator','#888',10,'middle',false));
-    o.push(L(180,34,228,42,'#aaa',1));
-    o.push(T(240,70,'denominator','#888',10,'middle',false));
-    o.push(L(180,64,228,56,'#aaa',1));
-    o.push(T(240,92,'HCF(18, 24) = 6','#241A17',13));
-    o.push(R(50,100,170,36,'#fff5f0','#C0272D',1.5));o.push(T(135,122,'18 ÷ 6 = 3','#C0272D',13));
-    o.push(R(260,100,170,36,'#fff5f0','#C0272D',1.5));o.push(T(345,122,'24 ÷ 6 = 4','#C0272D',13));
-  }if(p>=2){o.push(svgFrac(200,152,18,24,'#888',16));o.push(T(240,158,'=','#241A17',18));o.push(svgFrac(290,152,3,4,'#1a7a3a',20));}if(p>=3){[[3,4],[6,8],[9,12],[12,16]].forEach(function(fr,i){o.push(svgFrac(60+i*100,240,fr[0],fr[1],'#1a5a8a',13));if(i<3)o.push(T(105+i*100,244,'=','#888',13));});}s.innerHTML=o.join('');}
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 280');var o=[];o.push(T(120,32,'Simplify','#241A17',16,'middle',true));o.push(svgFrac(240,44,18,24,'#C0272D',26));
+  if(p>=1){
+    // label numerator/denominator on the fraction, clearly pointing at each part
+    o.push(T(130,32,'numerator','#888',11,'end',false));
+    o.push(L(160,30,222,38,'#aaa',1));
+    o.push(T(130,80,'denominator','#888',11,'end',false));
+    o.push(L(160,78,222,58,'#aaa',1));
+  }
+  if(p>=2){
+    o.push(T(240,110,'HCF(18, 24) = 6','#241A17',13,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(50,124,170,36,'#fff5f0','#C0272D',1.5));o.push(T(135,146,'18 ÷ 6 = 3','#C0272D',13,'middle',true));
+    o.push(R(260,124,170,36,'#fff5f0','#C0272D',1.5));o.push(T(345,146,'24 ÷ 6 = 4','#C0272D',13,'middle',true));
+  }
+  if(p>=4){o.push(svgFrac(190,182,18,24,'#888',16));o.push(T(230,188,'=','#241A17',18));o.push(svgFrac(280,182,3,4,'#1a7a3a',20));}
+  if(p>=5){[[3,4],[6,8],[9,12],[12,16]].forEach(function(fr,i){o.push(svgFrac(60+i*100,240,fr[0],fr[1],'#1a5a8a',13));if(i<3)o.push(T(105+i*100,244,'=','#888',13));});}
+  s.innerHTML=o.join('');}
 function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];o.push(svgFrac(160,24,2,5,'#C0272D',22));o.push(T(200,30,'+','#241A17',22));o.push(svgFrac(235,24,1,10,'#C0272D',22));if(p>=1){o.push(T(240,76,'LCD(5,10) = 10','#241A17',13));}if(p>=2){
     o.push(R(44,82,200,52,'#fff5f0','#C0272D',1.5));
     o.push(svgFrac(100,96,2,5,'#888',14));
@@ -317,15 +356,24 @@ function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];o.pus
     o.push(svgFrac(390,162,1,2,'#1a7a3a',15));
   }if(p>=4){o.push(R(130,208,220,40,'#e8f8ee','#1a7a3a',2));o.push(T(240,232,'Simplify: 5/10 = 1/2','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
 function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];o.push(svgFrac(140,24,3,4,'#C0272D',22));o.push(T(185,32,'of 80','#C0272D',20,'start',true));if(p>=1){
-    o.push(T(240,74,'The denominator (4) tells us how many <b>equal parts</b> to make','#241A17',12,'middle',false));
-    o.push(T(240,90,'80 ÷ 4 = 20  →  each part is worth 20','#C0272D',13,'middle',true));
-    o.push('<g transform="translate(0,100)">'+fracBar(80,0,4,20)+'</g>');
+    o.push(T(150,58,'Share 80 into 4 equal slices','#241A17',12,'middle',false));
+    o.push(T(150,72,'(like sharing a pizza!)','#888',10,'middle',false));
+    o.push(pieSlices(150,150,58,4,0));
+    o.push(T(150,222,'80 ÷ 4 = 20 per slice','#C0272D',13,'middle',true));
   }if(p>=2){
-    o.push(T(240,158,'The numerator (3) tells us how many parts we want','#1a5a8a',12,'middle',false));
-    o.push(T(240,174,'20 × 3 = 60  →  three parts','#1a5a8a',13,'middle',true));
-    o.push('<g transform="translate(0,180)">'+fracBar(80,3,4,60)+'</g>');
-  }if(p>=3){o.push(R(140,210,200,40,'#e8f8ee','#1a7a3a',2));o.push(T(240,235,'¾ of 80 = 60','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
-function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];o.push(T(240,28,'15% of ₦800   and   ₦120 + 10%','#C0272D',15,'middle',true));if(p>=1){o.push(T(120,60,'15% of 800','#241A17',13,'middle',true));o.push(T(120,80,'10% = 80','#888',12));o.push(T(120,96,'5% = 40','#888',12));o.push(R(40,104,160,36,'#fff5f0','#C0272D',1.5));o.push(T(120,126,'15% = ₦120','#C0272D',15,'middle',true));}if(p>=2){o.push(T(360,60,'+10% on ₦120','#241A17',13,'middle',true));o.push(T(360,80,'10% = 12','#888',12));o.push(R(280,104,160,36,'#e8f8ee','#1a7a3a',1.5));o.push(T(360,126,'₦132','#1a7a3a',15,'middle',true));}if(p>=3){o.push(T(240,200,'Multiplier: ×0.15 for 15%,  ×1.10 for +10%','#888',11));}s.innerHTML=o.join('');}
+    o.push(T(345,58,'Take 3 of those slices','#1a5a8a',12,'middle',false));
+    o.push(pieSlices(345,150,58,4,3));
+    o.push(T(345,222,'3 × 20 = 60','#1a5a8a',13,'middle',true));
+  }if(p>=3){o.push(R(140,232,200,26,'#e8f8ee','#1a7a3a',2));o.push(T(240,250,'¾ of 80 = 60','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];o.push(T(240,20,'15% of ₦800','#C0272D',15,'middle',true));
+  if(p>=1){o.push(R(50,32,140,28,'#fff5f0','#C0272D',1.5));o.push(T(120,51,'10% = ₦80','#C0272D',13,'middle',true));}
+  if(p>=2){o.push(T(200,50,'+','#888',14));o.push(R(220,32,140,28,'#fff5f0','#C0272D',1.5));o.push(T(290,51,'5% = ₦40','#C0272D',13,'middle',true));o.push(T(200,72,'(5% is half of 10%)','#888',9,'middle',false));}
+  if(p>=3){o.push(T(390,50,'=','#888',14));o.push(R(410,26,60,40,'#e8f8ee','#1a7a3a',2));o.push(T(440,50,'₦120','#1a7a3a',13,'middle',true));}
+  if(p>=4){o.push(T(120,100,'Bonus: 2.5% is half of 5% = ₦20','#888',10,'middle',false));}
+  if(p>=5){o.push(T(240,132,'Increase ₦120 by 10%','#241A17',13,'middle',true));o.push(R(60,144,160,32,'#fff5f0','#C0272D',1.5));o.push(T(140,165,'10% of 120 = ₦12','#C0272D',13,'middle',true));}
+  if(p>=6){o.push(T(300,160,'=','#888',14));o.push(R(320,144,140,32,'#e8f8ee','#1a7a3a',1.5));o.push(T(390,165,'₦120+12=₦132','#1a7a3a',13,'middle',true));}
+  if(p>=7){o.push(T(240,210,'Multiplier method: ×0.15 for 15%,  ×1.10 for +10%','#888',11,'middle',false));}
+  s.innerHTML=o.join('');}
 function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];o.push(T(240,28,'Divide ₦84 in ratio 3:4','#C0272D',18,'middle',true));if(p>=1){
     // Show ratio segments as coloured blocks
     var bx=40,by=60,bw=280,bh=36,pw=bw/7;
@@ -340,19 +388,22 @@ function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];o.pu
     o.push(T(240,108,'3 + 4 = 7 parts in total','#241A17',13,'middle',true));
     o.push(R(120,116,240,32,'#fff5f0','#C0272D',1.5));
     o.push(T(240,136,'1 part = ₦84 ÷ 7 = ₦12','#C0272D',15,'middle',true));
-  }if(p>=2){o.push(R(40,118,180,36,'#e8f4ff','#1a5a8a',1.5));o.push(T(130,140,'3×12 = 36','#1a5a8a',15,'middle',true));o.push(R(260,118,180,36,'#e8f8ee','#1a7a3a',1.5));o.push(T(350,140,'4×12 = 48','#1a7a3a',15,'middle',true));}if(p>=3){o.push(T(240,180,'Check: 36+48 = 84 ✓','#888',12));}s.innerHTML=o.join('');}
+  }if(p>=2){o.push(R(40,164,180,36,'#e8f4ff','#1a5a8a',1.5));o.push(T(130,186,'3×12 = 36','#1a5a8a',15,'middle',true));o.push(R(260,164,180,36,'#e8f8ee','#1a7a3a',1.5));o.push(T(350,186,'4×12 = 48','#1a7a3a',15,'middle',true));}if(p>=3){o.push(T(240,224,'Check: 36+48 = 84 ✓','#888',12,'middle',false));}s.innerHTML=o.join('');}
 
 var QS=[
   {ey:'Q1 · Year 7 · Number',ti:'Ordering Integers and Decimals',su:'Put −5, 0, 3.2, −1.8 in order from smallest to largest.',steps:[
     {lb:'Number line',dr:dQ1,ht:'<p>Use a <b>number line</b>. Numbers increase left to right. Negatives are always less than zero.</p>'},
     {lb:'Place each number',dr:dQ1,ht:'<p>Place each: −5 furthest left, then −1.8, then 0, then 3.2.</p>'},
     {lb:'Write in order',dr:dQ1,ht:'<div class="fm">−5 &lt; −1.8 &lt; 0 &lt; 3.2</div>'},
+    {lb:'Comparing negatives',dr:dQ1,ht:'<p>Negative numbers can be tricky to compare — it helps to always picture the number line rather than just the digits.</p>'},
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var a=rInt(-9,-4),b=rInt(-3,-1),sm=Math.min(a,b);return{question:'Which is smaller: <b>'+a+'</b> or <b>'+b+'</b>? Enter the smaller value.',hints:['Both are negative','More negative = smaller on the number line'],ans:sm,tol:0.05,unit:'',working:a+' vs '+b+' → '+sm};})},
   ]},
   {ey:'Q2 · Year 7 · Number',ti:'Rounding',su:'Round 37.486 to various degrees of accuracy.',steps:[
     {lb:'The rule',dr:dQ2,ht:'<p>Look at the digit <b>after</b> the rounding position. If ≥5 round up; if &lt;5 keep the same.</p>'},
-    {lb:'1 and 2 d.p.',dr:dQ2,ht:'<div class="fm">37.486 → 37.5 (1 d.p.)</div><div class="fm">37.486 → 37.49 (2 d.p.)</div>'},
-    {lb:'Nearest whole and 10',dr:dQ2,ht:'<div class="fm">37.486 → 37 (nearest whole)</div><div class="fm">37.486 → 40 (nearest 10)</div>'},
+    {lb:'Round to 1 d.p.',dr:dQ2,ht:'<div class="fm">37.486 → 37.5 (1 d.p.)</div><p style="font-size:13px;color:#6b5750;">Look at the 2nd decimal digit (8) — it\'s ≥5, so round up.</p>'},
+    {lb:'Round to 2 d.p.',dr:dQ2,ht:'<div class="fm">37.486 → 37.49 (2 d.p.)</div><p style="font-size:13px;color:#6b5750;">Look at the 3rd decimal digit (6) — it\'s ≥5, so round up.</p>'},
+    {lb:'Round to nearest whole',dr:dQ2,ht:'<div class="fm">37.486 → 37 (nearest whole)</div><p style="font-size:13px;color:#6b5750;">Look at the 1st decimal digit (4) — it\'s &lt;5, so keep the same.</p>'},
+    {lb:'Round to nearest 10',dr:dQ2,ht:'<div class="fm">37.486 → 40 (nearest 10)</div><p style="font-size:13px;color:#6b5750;">Look at the units digit (7) — it\'s ≥5, so round up to the next 10.</p>'},
     {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var w=rInt(10,90),d1=rInt(1,9),d2=rInt(0,9),d3=rInt(0,9);var num=w+'.'+d1+d2+d3;var ans=parseFloat(parseFloat(num).toFixed(1));return{question:'Round <b>'+num+'</b> to 1 decimal place.',hints:['2nd decimal digit is '+d2,(d2>=5?'≥5: round up':'<5: keep same')],ans:ans,tol:0.05,unit:'',working:num+' → '+ans};})},
   ]},
   {ey:'Q3 · Year 7 · Number',ti:'Negative Numbers',su:'Calculate −7 + 12 on a number line.',steps:[
@@ -370,25 +421,30 @@ var QS=[
       return{question:q,hints:[h1,h2,'Use the number line'],ans:ans,tol:0.05,unit:'',working:q.replace(/<b>|<\/b>/g,'')+' = '+ans};
     })},
   ]},
-  {ey:'Q4 · Year 7 · Number',ti:'HCF and LCM',su:'Find the HCF and LCM of 18 and 24.',steps:[
+  {ey:'Q4 · Year 7 · Number',ti:'HCF and LCM',su:'Find the HCF and LCM of 12 and 18.',steps:[
     {lb:'Definitions',dr:dQ4,ht:'<p><b>HCF</b>: largest number dividing both exactly.<br><b>LCM</b>: smallest number both divide into exactly.</p>'},
-    {lb:'List factors',dr:dQ4,ht:'<p>Factors of 18: 1,2,3,6,9,18<br>Factors of 24: 1,2,3,4,6,8,12,24</p>'},
-    {lb:'HCF = 6  (example: 12 & 18)',dr:dQ4,ht:'<div class="fm">HCF(18,24) = 6</div>'},
-    {lb:'Find LCM — list multiples',dr:dQ4,ht:'<p>List multiples of each number until you find the <b>first one they share</b>:</p><div class="fm">Multiples of 12: 12, 24, <b>36</b>, 48…<br>Multiples of 18: 18, <b>36</b>, 54…</div><div class="fm">LCM(12, 18) = 36</div>'},
+    {lb:'List factors of 12',dr:dQ4,ht:'<p>Write out every factor of 12: 1, 2, 3, 4, 6, 12.</p>'},
+    {lb:'List factors of 18',dr:dQ4,ht:'<p>Now every factor of 18: 1, 2, 3, 6, 9, 18. The <b>common</b> factors are highlighted.</p>'},
+    {lb:'Find the HCF',dr:dQ4,ht:'<p>The <b>largest</b> number appearing in both lists is the HCF.</p><div class="fm">HCF(12, 18) = 6</div>'},
+    {lb:'List multiples of 12',dr:dQ4,ht:'<p>Now list multiples of 12: 12, 24, 36…</p>'},
+    {lb:'List multiples of 18',dr:dQ4,ht:'<p>List multiples of 18: 18, 36… Stop once you find one both lists share.</p>'},
+    {lb:'Find the LCM',dr:dQ4,ht:'<p>The <b>first</b> multiple appearing in both lists is the LCM.</p><div class="fm">LCM(12, 18) = 36</div>'},
     {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var pairs=[[12,18,6],[10,15,5],[8,12,4],[9,21,3],[20,30,10],[14,21,7]];var p=rPick(pairs);return{question:'Find the HCF of <b>'+p[0]+' and '+p[1]+'</b>.',hints:['List all factors of '+p[0],'List all factors of '+p[1],'Find the largest factor in both lists'],ans:p[2],tol:0,unit:'',working:'HCF('+p[0]+','+p[1]+') = '+p[2]};})},
   ]},
   {ey:'Q5 · Year 7 · Number',ti:'Squares, Cubes and Roots',su:'Find 6², √144, 4³ and ∛216.',steps:[
     {lb:'Powers and roots',dr:dQ5,ht:'<p><b>Square</b>: n×n. <b>Cube</b>: n×n×n.<br><b>Square root</b>: reverse of squaring. <b>Cube root</b>: reverse of cubing.</p>'},
     {lb:'Squares',dr:dQ5,ht:'<div class="fm">6² = 36</div><div class="fm">√144 = 12</div>'},
     {lb:'Cubes',dr:dQ5,ht:'<div class="fm">4³ = 64</div><div class="fm">∛216 = 6</div>'},
+    {lb:'Know your squares',dr:dQ5,ht:'<p>It pays to <b>memorise</b> the square numbers up to 25² — this makes square roots much faster to spot.</p><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">'+[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25].map(function(n){return '<span style="background:#fff5f0;border:1px solid #C0272D;border-radius:3px;padding:4px 7px;font-size:12px;color:#C0272D;font-weight:600;">'+n+'² = '+(n*n)+'</span>';}).join('')+'</div>'},
     {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var sq=[4,9,16,25,36,49,64,81,100,121,144,169,196,225];var n=rPick(sq),r=Math.round(Math.sqrt(n));return{question:'Find <b>√'+n+'</b>.',hints:['What number times itself equals '+n+'?'],ans:r,tol:0,unit:'',working:r+' × '+r+' = '+n};})},
   ]},
   {ey:'Q6 · Year 7 · Number',ti:'Equivalent Fractions and Simplifying',su:'Simplify 18/24.',steps:[
     {lb:'Equivalent fractions',dr:dQ6,ht:'<p><b>Equivalent fractions</b> have the same value. Divide numerator (top) and denominator (bottom) by the HCF to simplify.</p><div style="display:flex;align-items:center;gap:6px;margin-top:10px;">'+htmlFrac(3,4,'#C0272D',true)+' <span>=</span> '+htmlFrac(6,8,'#1a5a8a',false)+' <span>=</span> '+htmlFrac(9,12,'#1a5a8a',false)+'</div>'},
+    {lb:'Label the parts',dr:dQ6,ht:'<p>The <b>numerator</b> is the top number, the <b>denominator</b> is the bottom number.</p>'},
     {lb:'Find HCF',dr:dQ6,ht:'<div class="fm">HCF(18, 24) = 6</div>'},
-    {lb:'Divide both by 6',dr:dQ6,ht:'<p>Divide <b>numerator</b> and <b>denominator</b> by 6:</p><div style="display:flex;align-items:center;gap:8px;margin:10px 0;font-size:16px;">'+htmlFrac(18,24,'#888',false)+' <span>=</span> '+htmlFrac(3,4,'#1a7a3a',false)+'</div>'},
+    {lb:'Divide both by 6',dr:dQ6,ht:'<p>Divide <b>numerator</b> and <b>denominator</b> by 6:</p>'},
     {lb:'Result',dr:dQ6,ht:'<div class="fm">18/24 simplifies to 3/4</div>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var data=[[20,35,5,4,7],[12,18,6,2,3],[15,25,5,3,5],[8,20,4,2,5],[9,27,9,1,3],[14,21,7,2,3]];var d=rPick(data);return{question:'Simplify '+htmlFrac(d[0],d[1],'#C0272D',false)+'. Enter the <b>denominator</b> of the simplified fraction.',hints:['HCF of '+d[0]+' and '+d[1]+' = '+d[2],'Divide both by '+d[2]],ans:d[4],tol:0,unit:'(denominator)',working:''+d[0]+'÷'+d[2]+'='+d[3]+', '+d[1]+'÷'+d[2]+'='+d[4]+'. Answer: '+htmlFrac(d[3],d[4],'#1a7a3a',false)};})},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var data=[[20,35,5,4,7],[12,18,6,2,3],[15,25,5,3,5],[8,20,4,2,5],[9,27,9,1,3],[14,21,7,2,3]];var d=rPick(data);return{question:'Simplify '+htmlFrac(d[0],d[1],'#C0272D',false)+' fully. Type only the <b>bottom number (denominator)</b> of your simplified fraction into the box below.',hints:['HCF of '+d[0]+' and '+d[1]+' = '+d[2],'Divide both by '+d[2]],ans:d[4],tol:0,unit:'denominator only',working:''+d[0]+'÷'+d[2]+'='+d[3]+', '+d[1]+'÷'+d[2]+'='+d[4]+'. Answer: '+htmlFrac(d[3],d[4],'#1a7a3a',false)};})},
   ]},
   {ey:'Q7 · Year 7 · Number',ti:'Adding and Subtracting Fractions',su:'Calculate 2/5 + 1/10.',steps:[
     {lb:'Common denominator',dr:dQ7,ht:'<p>Make denominators the same first (find the LCD).</p>'},
@@ -402,12 +458,16 @@ var QS=[
     {lb:'Divide by 4',dr:dQ8,ht:'<div class="fm">80 ÷ 4 = 20 (one quarter)</div>'},
     {lb:'Multiply by 3',dr:dQ8,ht:'<div class="fm">20 × 3 = 60 (three quarters)</div>'},
     {lb:'Answer',dr:dQ8,ht:'<div class="fm">3/4 of 80 = 60</div>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var fracs=[[1,2],[1,4],[3,4],[2,5],[3,5],[1,3],[2,3]];var fr=rPick(fracs),nu=fr[0],de=fr[1],base=rInt(2,8)*de,ans=base/de*nu;var bar='<svg viewBox="0 0 480 48" style="width:100%;max-width:480px;display:block;margin:8px 0;"><g transform="translate(0,8)">'+fracBar(base,nu,de,ans)+'</g></svg>';return{question:'Find '+htmlFrac(nu,de,'#C0272D',false)+' of <b>'+base+'</b>.',hints:['Divide '+base+' by '+de+' = '+(base/de),'Then multiply by '+nu],ans:ans,tol:0.05,unit:'',extraHTML:bar,working:base+'÷'+de+'='+(base/de)+'. ×'+nu+'='+ans};})},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var fracs=[[1,2],[1,4],[3,4],[2,5],[3,5],[1,3],[2,3]];var fr=rPick(fracs),nu=fr[0],de=fr[1],base=rInt(2,8)*de,ans=base/de*nu;var bar='<svg viewBox="0 0 200 190" style="width:170px;display:block;margin:8px auto;">'+pieSlices(100,85,72,de,nu)+'<text x="100" y="178" font-size="12" font-family="Arial" fill="#888" text-anchor="middle">'+(base/de)+' per slice</text></svg>';return{question:'Find '+htmlFrac(nu,de,'#C0272D',false)+' of <b>'+base+'</b>.',hints:['Divide '+base+' by '+de+' = '+(base/de),'Then multiply by '+nu],ans:ans,tol:0.05,unit:'',extraHTML:bar,working:base+'÷'+de+'='+(base/de)+'. ×'+nu+'='+ans};})},
   ]},
   {ey:'Q9 · Year 7 · Number',ti:'Percentages of Quantities',su:'Find 15% of ₦800 and increase ₦120 by 10%.',steps:[
-    {lb:'Finding a percentage',dr:dQ9,ht:'<p>Find <b>10%</b> first (divide by 10), then build up.</p>'},
-    {lb:'15% of ₦800',dr:dQ9,ht:'<div class="fm">10% = 80, 5% = 40, 15% = ₦120</div>'},
-    {lb:'Increase by 10%',dr:dQ9,ht:'<div class="fm">10% of 120 = 12. 120 + 12 = ₦132</div>'},
+    {lb:'Finding a percentage',dr:dQ9,ht:'<p>Find <b>10%</b> first (divide by 10), then build up other percentages from that.</p>'},
+    {lb:'Step 1: find 10%',dr:dQ9,ht:'<div class="fm">10% of 800 = 80</div>'},
+    {lb:'Step 2: find 5%',dr:dQ9,ht:'<p>5% is <b>half</b> of 10% — always halve the previous amount to go down a level.</p><div class="fm">5% of 800 = 40</div>'},
+    {lb:'Step 3: add together',dr:dQ9,ht:'<p>10% + 5% = 15%, so add the amounts:</p><div class="fm">80 + 40 = ₦120</div>'},
+    {lb:'Going further: 2.5%',dr:dQ9,ht:'<p>This halving trick keeps going — 2.5% is half of 5% again. Useful for tricky percentages like 12.5% or 17.5%.</p>'},
+    {lb:'Increase ₦120 by 10%',dr:dQ9,ht:'<p>Find 10% of the new amount first.</p>'},
+    {lb:'Add the increase',dr:dQ9,ht:'<div class="fm">120 + 12 = ₦132</div>'},
     {lb:'Multiplier method',dr:dQ9,ht:'<div class="fm">800 × 0.15 = 120 &nbsp;&nbsp; 120 × 1.10 = 132</div>'},
     {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var pcts=[10,20,25,50,5,15],amts=[100,200,300,400,500,600,800,1000];var pct=rPick(pcts),amt=rPick(amts),ans=amt*pct/100;return{question:'Find <b>'+pct+'%</b> of <b>₦'+amt+'</b>.',hints:['10% of '+amt+' = '+(amt/10),'Build up to '+pct+'% from there'],ans:ans,tol:0.5,unit:'₦',working:''+pct+'% of '+amt+' = ₦'+ans};})},
   ]},
