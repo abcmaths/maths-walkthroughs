@@ -2476,7 +2476,20 @@
     const walkthroughFile = getWalkthroughFile(subject, topicCode) || '#';
     document.getElementById('review-modal-body').innerHTML = `
       <p style="font-size:0.85rem;color:#666;margin-bottom:8px">Rate each question and leave a comment. All fields are required.</p>
-      <p style="margin-bottom:16px"><a href="#" onclick="window.open('${walkthroughFile}','walkthrough_review','width=1200,height=800,scrollbars=yes,resizable=yes');return false;" style="font-size:0.85rem;color:#C0272D;font-weight:600;text-decoration:none">↗ Open walkthrough in new window</a> <span style="font-size:0.78rem;color:#aaa">(review each question as you go)</span></p>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+        <button type="button" onclick="toggleReviewFrame('${walkthroughFile}')" id="review-frame-toggle-btn"
+          style="font-size:0.82rem;font-weight:600;color:#fff;background:#C0272D;border:none;border-radius:5px;padding:8px 14px;cursor:pointer">
+          📱 Show walkthrough here
+        </button>
+        <a href="#" onclick="window.open('${walkthroughFile}','walkthrough_review','width=1200,height=800,scrollbars=yes,resizable=yes');return false;" style="font-size:0.8rem;color:#C0272D;font-weight:600;text-decoration:none">↗ Open in new window instead</a>
+      </div>
+      <div id="review-frame-wrap" style="display:none;position:sticky;top:0;z-index:5;background:#fff;border:1.5px solid #ddd;border-radius:6px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-bottom:1px solid #eee;font-size:0.75rem;color:#888">
+          <span>Walkthrough (scrolls independently — questions below)</span>
+          <button type="button" onclick="resizeReviewFrame()" id="review-frame-resize-btn" style="border:none;background:none;color:#C0272D;font-weight:600;font-size:0.75rem;cursor:pointer">⤢ Taller</button>
+        </div>
+        <iframe id="review-walkthrough-frame" src="" style="width:100%;height:38vh;border:none;display:block;transition:height 0.15s"></iframe>
+      </div>
       ${questions.map(q => {
         const existing = myReviewMap[q.num];
         return `<div style="border:1.5px solid #eee;border-radius:6px;padding:14px;margin-bottom:12px">
@@ -2533,8 +2546,34 @@
     else if (rating === 'not_good')    { btn.style.borderColor = '#C0272D'; btn.style.background = '#fde8e8'; btn.style.color = '#C0272D'; }
   }
 
+  window._reviewFrameHeights = ['38vh', '55vh', '72vh'];
+  window._reviewFrameHeightIdx = 0;
+
+  window.toggleReviewFrame = function(walkthroughFile) {
+    const wrap = document.getElementById('review-frame-wrap');
+    const frame = document.getElementById('review-walkthrough-frame');
+    const btn = document.getElementById('review-frame-toggle-btn');
+    const isOpen = wrap.style.display !== 'none';
+    if (isOpen) {
+      wrap.style.display = 'none';
+      frame.src = '';
+      btn.textContent = '📱 Show walkthrough here';
+    } else {
+      if (!frame.src || frame.src === 'about:blank') frame.src = walkthroughFile;
+      wrap.style.display = 'block';
+      btn.textContent = '📱 Hide walkthrough';
+    }
+  };
+
+  window.resizeReviewFrame = function() {
+    window._reviewFrameHeightIdx = (window._reviewFrameHeightIdx + 1) % window._reviewFrameHeights.length;
+    document.getElementById('review-walkthrough-frame').style.height = window._reviewFrameHeights[window._reviewFrameHeightIdx];
+  };
+
   window.closeReviewModal = function() {
     document.getElementById('review-modal').classList.remove('open');
+    const frame = document.getElementById('review-walkthrough-frame');
+    if (frame) frame.src = '';
   };
 
   window.submitReview = async function() {
