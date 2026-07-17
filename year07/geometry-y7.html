@@ -319,31 +319,35 @@ function dQ4(p){
 }
 
 /* Q5 Perimeter compound */
+var Q5_LAST=null;
 function dQ5(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var ox=80,oy=230,sc=16;
-  // L-shape: 10x8 with 4x3 cut from top right
-  var W=10*sc,H=8*sc,cw=4*sc,ch=3*sc;
+  var s=g();s.setAttribute('viewBox','0 0 480 320');var o=[];
+  var isYT = (p>=4 && Q5_LAST);
+  var Wv = isYT?Q5_LAST.W:10, Hv=isYT?Q5_LAST.H:8, cwv=isYT?Q5_LAST.cw:4, chv=isYT?Q5_LAST.ch:3;
+  var mw = Wv-cwv, mh = Hv-chv;
+  var sc = Math.max(6,Math.min(13,Math.floor(140/Wv),Math.floor(110/Hv)));
+  var ox=90,oy=190;
+  var W=Wv*sc,H=Hv*sc,cw=cwv*sc,ch=chv*sc;
   var pts=ox+','+oy+' '+(ox+W)+','+oy+' '+(ox+W)+','+(oy-H+ch)+' '+(ox+W-cw)+','+(oy-H+ch)+' '+(ox+W-cw)+','+(oy-H)+' '+ox+','+(oy-H);
   o.push('<polygon points="'+pts+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2"/>');
-  o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,30,'L-shape: outer 10\u00d78 cm — find the perimeter.','#C0272D',12,'middle',true));
-  if(p>=1){
-    o.push(T(ox+W/2,oy+14,'10 cm','#C0272D',11,'middle',true));
-    o.push(T(ox-18,oy-H/2,'8 cm','#C0272D',11,'middle',true));
-    o.push(T(ox+W-cw/2,oy-H-10,'4 cm','#888',10,'middle',false));
-    o.push(T(ox+W+12,oy-H+ch/2,'3 cm','#888',10,'start',false));
+  o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));
+  o.push(T(240,29, isYT ? ('L-shape: outer '+Wv+'\u00d7'+Hv+' cm \u2014 find the perimeter.') : 'L-shape: outer 10\u00d78 cm \u2014 find the perimeter.','#C0272D',12,'middle',true));
+  if(p>=1||isYT){
+    o.push(T(ox+W/2,oy+16,Wv+' cm','#C0272D',11,'middle',true));
+    o.push(T(ox-18,oy-H/2,Hv+' cm','#C0272D',11,'middle',true));
+    o.push(T(ox+W-cw/2,oy-H-10,cwv+' cm','#888',10,'middle',false));
+    o.push(T(ox+W+14,oy-H+ch/2,chv+' cm','#888',10,'start',false));
   }
-  if(p>=2){
-    // Missing sides — positioned well below the title banner
-    o.push(T(ox+W-cw,oy-H+ch/2,'5 cm','#1a5a8a',11,'end',true));
-    o.push(T(ox+(W-cw)/2,oy-H-10,'6 cm','#1a5a8a',11,'middle',true));
-    o.push(R(14,50,452,34,'#eef4ff','#1a5a8a',1.5));
-    o.push(T(240,71,'Missing sides: 8\u22123=5 cm  and  10\u22124=6 cm','#1a5a8a',12,'middle',false));
+  if(!isYT && p>=2){
+    o.push(T(ox+W-cw,oy-H+ch/2,mh+' cm','#1a5a8a',11,'end',true));
+    o.push(T(ox+(W-cw)/2,oy-H-10,mw+' cm','#1a5a8a',11,'middle',true));
+    o.push(R(14,222,452,34,'#eef4ff','#1a5a8a',1.5));
+    o.push(T(240,243,'Missing sides: '+Hv+'\u2212'+chv+'='+mh+' cm  and  '+Wv+'\u2212'+cwv+'='+mw+' cm','#1a5a8a',12,'middle',false));
   }
-  if(p>=3){
-    o.push(R(14,88,452,34,'#fff5f0','#C0272D',1.5));
-    o.push(T(240,109,'P = 10+8+4+3+6+5 = 36 cm','#C0272D',13,'middle',true));
+  if(!isYT && p>=3){
+    var per=Wv+Hv+cwv+chv+mw+mh;
+    o.push(R(14,262,452,34,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,283,'P = '+Wv+'+'+Hv+'+'+cwv+'+'+chv+'+'+mw+'+'+mh+' = '+per+' cm','#C0272D',13,'middle',true));
   }
   s.innerHTML=o.join('');
 }
@@ -486,31 +490,29 @@ function dQ8(p){
   s.innerHTML=o.join('');
 }
 
-/* Q9 Reflection */
+/* Q9 Angles in a quadrilateral */
 function dQ9(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 290');var o=[];
-  var cx=240,cy=145,sc=30;
-  o.push(L(40,cy,440,cy,'#ddd',1.5));o.push(L(cx,20,cx,240,'#ddd',1.5));
-  for(var i=-4;i<=4;i++){if(i!==0){o.push(T(cx+i*sc,cy+14,i,'#aaa',9));o.push(T(cx-10,cy-i*sc+4,i,'#aaa',9,'end'));}}
-  // Triangle A in Q1
-  var A=[[cx+sc,cy-2*sc],[cx+3*sc,cy-2*sc],[cx+2*sc,cy-4*sc]];
-  o.push('<polygon points="'+A.map(function(p){return p[0]+','+p[1];}).join(' ')+'" fill="#fce8d8" stroke="#C0272D" stroke-width="2"/>');
-  o.push(T(cx+2*sc,cy-2*sc-10,'A','#C0272D',11,'middle',true));
-  if(p>=1){
-    // Reflect in y-axis: x -> -x
-    var B=A.map(function(pt){return [cx-(pt[0]-cx),pt[1]];});
-    o.push('<polygon points="'+B.map(function(p){return p[0]+','+p[1];}).join(' ')+'" fill="#e8f4ff" stroke="#1a5a8a" stroke-width="2"/>');
-    o.push(T(cx-2*sc,cy-2*sc-10,"A'","#1a5a8a",11,'middle',true));
-    o.push(T(cx,cy-4*sc-14,'y-axis mirror','#888',10,'middle',false));
-  }
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var pts=[[110,70],[370,55],[400,195],[95,205]];
+  o.push('<polygon points="'+pts.map(function(pt){return pt[0]+','+pt[1];}).join(' ')+'" fill="#fff5f0" stroke="#C0272D" stroke-width="2.5"/>');
+  var labels=['80\u00b0','95\u00b0','110\u00b0','x'];
+  var cols=['#C8922A','#1a5a8a','#1a7a3a','#C0272D'];
+  var labelPos=[[95,52],[388,38],[404,220],[70,228]];
+  var arcAngles=[[0,60],[130,190],[210,270],[300,360]];
+  labels.forEach(function(l,i){
+    if(i<3||p>=1){
+      o.push(arc(pts[i][0],pts[i][1],22,arcAngles[i][0],arcAngles[i][1],cols[i],2));
+      o.push(T(labelPos[i][0],labelPos[i][1],l,cols[i],14,'middle',true));
+    }
+  });
   if(p>=2){
-    // Reflect in x-axis: y -> -y
-    var C=A.map(function(pt){return [pt[0],cy-(pt[1]-cy)];});
-    o.push('<polygon points="'+C.map(function(p){return p[0]+','+p[1];}).join(' ')+'" fill="#e8ffe8" stroke="#1a7a3a" stroke-width="2"/>');
-    o.push(T(cx+2*sc,cy+2*sc+10,'A"','#1a7a3a',11,'middle',true));
-    o.push(T(320,cy+14,'x-axis mirror','#888',10,'start',false));
+    o.push(R(90,4,300,32,'#fff8f0','#C0272D',1.5));
+    o.push(T(240,25,'80 + 95 + 110 + x = 360\u00b0','#C0272D',13,'middle',true));
   }
-  if(p>=3){o.push(T(240,248,'Each point is the same distance from the mirror line on the other side','#888',10,'middle',false));}
+  if(p>=3){
+    o.push(R(90,224,300,32,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,245,'x = 360 \u2212 80 \u2212 95 \u2212 110 = 75\u00b0','#C0272D',13,'middle',true));
+  }
   s.innerHTML=o.join('');
 }
 
@@ -631,6 +633,7 @@ var QS=[
   while(ch >= H - 2) ch = pick([2,3,4]);
   var mw = W - cw;
   var mh = H - ch;
+  Q5_LAST = {W:W,H:H,cw:cw,ch:ch};
   // Perimeter of L-shape: all 6 sides
   // W, H, cw, ch, mw, mh
   var ans = W + H + cw + ch + mw + mh;
@@ -709,22 +712,24 @@ var QS=[
   };
 })}
   ]},
-  {ey:'Q9 \u00b7 Year 7 \u00b7 Geometry',ti:'Reflections',su:'Reflect triangle A in the y-axis. Then reflect it in the x-axis.',steps:[
-    {lb:'Reflection',dr:dQ9,ht:'<p>A <b>reflection</b> creates a mirror image. Every point moves to the same distance on the other side of the mirror line.</p>'},
-    {lb:'Reflect in the y-axis',dr:dQ9,ht:'<p>Reflection in the y-axis: the x-coordinate changes sign, y stays the same.</p><div class="fm">(x, y) \u2192 (\u2212x, y)</div>'},
-    {lb:'Reflect in the x-axis',dr:dQ9,ht:'<p>Reflection in the x-axis: the y-coordinate changes sign, x stays the same.</p><div class="fm">(x, y) \u2192 (x, \u2212y)</div>'},
+  {ey:'Q9 \u00b7 Year 7 \u00b7 Geometry',ti:'Angles in a Quadrilateral',su:'A quadrilateral has angles 80\u00b0, 95\u00b0, 110\u00b0 and x. Find x.',steps:[
+    {lb:'The rule',dr:dQ9,ht:'<p>The angles inside <b>any quadrilateral</b> always add up to <b>360\u00b0</b>. That\u2019s double the 180\u00b0 you saw for a triangle \u2014 you can always split a quadrilateral into two triangles.</p>'},
+    {lb:'Mark the known angles',dr:dQ9,ht:'<div class="fm">80\u00b0, 95\u00b0, 110\u00b0 and x</div>'},
+    {lb:'Set up',dr:dQ9,ht:'<div class="fm">80 + 95 + 110 + x = 360</div>'},
+    {lb:'Solve',dr:dQ9,ht:'<div class="fm">x = 360 \u2212 80 \u2212 95 \u2212 110 = 75\u00b0</div>'},
     {lb:'Your turn',dr:dQ9,ht:tryIt(function(){
-  var x = rnd(-8, 8);
-  var y = rnd(-8, 8);
-  while (y === 0) { y = rnd(-8, 8); }
-  var ans = -y;
+  var a = rnd(50, 110);
+  var b = rnd(50, 110);
+  var c = rnd(50, 110);
+  while (a + b + c >= 350) { c = rnd(50, 110); }
+  var ans = 360 - a - b - c;
   return {
-    question: 'Point (' + x + ', ' + y + ') is reflected in the x-axis. What is the new y-coordinate?',
-    hints: ['x-axis reflection: (x,y) → (x,−y)', 'Negate the y-coordinate: −(' + y + ') = ' + ans],
+    question: 'A quadrilateral has three angles of <b>' + a + '\u00b0</b>, <b>' + b + '\u00b0</b> and <b>' + c + '\u00b0</b>. Find the fourth angle.',
+    hints: ['All four angles add to 360\u00b0', '360 \u2212 ' + a + ' \u2212 ' + b + ' \u2212 ' + c],
     ans: ans,
-    tol: 0,
-    unit: '',
-    working: '(' + x + ', ' + y + ') → (' + x + ', ' + ans + '). New y = ' + ans + '.'
+    tol: 0.5,
+    unit: '\u00b0',
+    working: '360 \u2212 ' + a + ' \u2212 ' + b + ' \u2212 ' + c + ' = ' + ans + '\u00b0'
   };
 })}
   ]},
