@@ -2321,6 +2321,7 @@
       const qCount = rm ? rm.questions.size : 0;
       const dominant = rm ? getDominantRating(rm.ratings) : null;
       const isLocked = !!t.locked;
+      const filePath = getWalkthroughFile(subj, t.topic_code) || '(file path unknown)';
       const statusBadge = isLocked
         ? '<span class="badge badge-grey">🔒 Locked</span>'
         : (dominant
@@ -2329,7 +2330,7 @@
              '<span class="badge badge-red">✗ Not good</span>')
           : '<span class="badge badge-grey">Not reviewed</span>');
       const actionButtons = isLocked
-        ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="exportReviewComments(${t.id},'${escAttr(t.topic_name)}')">📋 Export Comments</button>
+        ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="exportReviewComments(${t.id},'${escAttr(t.topic_name)}','${t.topic_code}','${subj}')">📋 Export Comments</button>
            <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;color:#888;border-color:#ccc" onclick="unlockTopicReview(${t.id})">🔓 Unlock</button>`
         : `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}','${subj}')">
              ${rm ? 'Add/Edit Review' : 'Review'}
@@ -2338,6 +2339,7 @@
         <div style="flex:1;min-width:200px">
           <div style="font-weight:600;font-size:0.88rem;color:#333">${t.topic_name}</div>
           <div style="font-size:0.75rem;color:#888">${yearLabel} · ${subjectLabel}</div>
+          ${isLocked ? `<div style="font-size:0.72rem;color:#aaa;font-family:monospace;margin-top:2px">${filePath}</div>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           ${statusBadge}
@@ -2508,7 +2510,7 @@
   };
 
   // ── Export Comments (plain text) & Unlock ──
-  window.exportReviewComments = function(topicId, topicName) {
+  window.exportReviewComments = function(topicId, topicName, topicCode, subject) {
     const reviews = allReviews.filter(r => r.topic_id === topicId);
     if (reviews.length === 0) {
       alert('No reviews found for this walkthrough.');
@@ -2520,8 +2522,10 @@
       if (!byQuestion[r.question_number]) byQuestion[r.question_number] = [];
       byQuestion[r.question_number].push(r);
     });
+    const filePath = getWalkthroughFile(subject || 'maths', topicCode) || '(file path unknown — check WALKTHROUGH_FILES map)';
     const ratingLabel = { good: 'Good', needs_improvement: 'Needs work', not_good: 'Not good' };
     let out = `WALKTHROUGH REVIEW: ${topicName}\n`;
+    out += `FILE: ${filePath}\n`;
     out += `Reviewed by ${new Set(reviews.map(r => r.reviewer_id)).size} staff · exported ${new Date().toLocaleDateString('en-GB')}\n`;
     out += `${'='.repeat(50)}\n\n`;
     Object.keys(byQuestion).sort((a,b) => Number(a)-Number(b)).forEach(qNum => {
