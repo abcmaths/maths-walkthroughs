@@ -11,7 +11,20 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
   );
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) window.location.href = 'login.html';
+  if (!session) {
+    window.location.href = 'login.html';
+  } else {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    if (profile && (profile.role === 'admin' || profile.role === 'teacher')) {
+      window.location.href = 'dashboard-staff.html';
+    } else {
+      window.location.href = 'dashboard-student.html';
+    }
+  }
 </script>
 <style>
 :root{
