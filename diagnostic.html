@@ -298,8 +298,28 @@ function renderBarChartSVG(labels, values) {
 
 // ---------- Audio (used for the English gate and phonics proxy sections,
 // since these ask about sounds and need to be heard, not just read) ----------
+// Setting utter.lang = 'en-GB' alone does NOT guarantee a British voice —
+// most browsers still default to whatever en-US voice is installed unless
+// we explicitly pick a British one from the voice list.
+let _britishVoice = null;
+function _pickBritishVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices || !voices.length) return null;
+  // Preference order: known high-quality GB voices first, then any en-GB voice
+  const preferredNames = ['Google UK English Female', 'Google UK English Male', 'Daniel', 'Kate', 'Serena', 'Arthur'];
+  for (const name of preferredNames) {
+    const v = voices.find(v => v.name === name);
+    if (v) return v;
+  }
+  const gb = voices.find(v => v.lang === 'en-GB') || voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en-gb'));
+  return gb || null;
+}
 if ('speechSynthesis' in window) {
-  window.speechSynthesis.getVoices();
+  _britishVoice = _pickBritishVoice();
+  // Voice list loads asynchronously in some browsers (esp. Chrome) — re-pick once ready
+  window.speechSynthesis.onvoiceschanged = function() {
+    _britishVoice = _pickBritishVoice();
+  };
 }
 window.speak = function(text, repeat) {
   if (!('speechSynthesis' in window)) {
@@ -312,6 +332,7 @@ window.speak = function(text, repeat) {
     utter1.rate = 0.65;
     utter1.pitch = 1;
     utter1.lang = 'en-GB';
+    if (_britishVoice) utter1.voice = _britishVoice;
     window.speechSynthesis.speak(utter1);
     // For short sounds/nonsense words, say it twice so students have a second
     // chance to catch it — queued utterances play back to back automatically
@@ -320,6 +341,7 @@ window.speak = function(text, repeat) {
       utter2.rate = 0.65;
       utter2.pitch = 1;
       utter2.lang = 'en-GB';
+      if (_britishVoice) utter2.voice = _britishVoice;
       window.speechSynthesis.speak(utter2);
     }
   } catch (e) { console.error('Speech synthesis failed:', e); }
