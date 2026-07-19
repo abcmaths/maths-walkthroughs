@@ -270,8 +270,6 @@
           <option value="10">Year 10</option>
           <option value="11">Year 11</option>
           <option value="12">Year 12</option>
-          <option value="13">Add Maths</option>
-          <option value="14">Further Maths</option>
         </select>
       </div>
       <div id="topics-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;"></div>
@@ -3582,20 +3580,16 @@
 
   // ── Render topics tab ──
   window.renderTopicsTab = function() {
-    const yr      = parseInt(document.getElementById('topics-filter-year').value) || 13;
+    const yr      = parseInt(document.getElementById('topics-filter-year').value) || 7;
     const subject = document.getElementById('topics-filter-subject').value;
-    const filtered = allTopics.filter(t => t.year_group === yr && (t.subject || 'maths') === subject);
+    // Add Maths topics (AM-*) are stored at year_group=10 but taught across both
+    // Y10 and Y11, so they should appear when browsing either year.
+    const filtered = allTopics.filter(t => {
+      if ((t.subject || 'maths') !== subject) return false;
+      if (subject === 'maths' && /^AM-/.test(t.topic_code || '')) return yr === 10 || yr === 11;
+      return t.year_group === yr;
+    });
     const grid = document.getElementById('topics-grid');
-
-    // Hide Add Maths / Further Maths when any non-Maths subject is selected
-    const addMathsOpt = document.querySelector('#topics-filter-year option[value="13"]');
-    const furtherMathsOpt = document.querySelector('#topics-filter-year option[value="14"]');
-    if (addMathsOpt) addMathsOpt.style.display = subject === 'maths' ? '' : 'none';
-    if (furtherMathsOpt) furtherMathsOpt.style.display = subject === 'maths' ? '' : 'none';
-    if (subject !== 'maths' && (yr === 13 || yr === 14)) {
-      document.getElementById('topics-filter-year').value = '10';
-      window.renderTopicsTab(); return;
-    }
 
     if (filtered.length === 0) {
       grid.innerHTML = '<div style="color:#aaa;padding:32px;font-style:italic">No topics found for this year group.</div>';
