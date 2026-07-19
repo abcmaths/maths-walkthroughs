@@ -1391,6 +1391,7 @@
 
   const SCIENCE_SUBJECTS = ['science', 'physics', 'chemistry', 'biology'];
   const ARTS_SUBJECTS   = ['crs', 'government'];
+  const EXTENDED_MATHS_SUBJECTS = ['addmaths', 'furthermaths'];
   const BRIDGE_SUBJECTS = ['bridge_maths', 'bridge_science', 'bridge_english'];
   const PHONICS_SUBJECTS = ['phonics'];
   const EXTENSION_SUBJECTS = ['ext_maths', 'ext_english'];
@@ -1412,9 +1413,6 @@
   function topicMatchesYear(t, subject, yearGroup) {
     if (ARTS_SUBJECTS.includes(subject)) return true;
     if (subject === 'english' && yearGroup >= 10 && /^ENG-(GRAM|VOC)-\d+$/.test(t.topic_code)) return true;
-    // Add Maths topics (AM-*) are stored at year_group=10 but taught across
-    // both Y10 and Y11, so they should appear when browsing either year.
-    if (subject === 'maths' && (yearGroup === 10 || yearGroup === 11) && /^AM-/.test(t.topic_code)) return true;
     return t.year_group === yearGroup;
   }
 
@@ -1423,12 +1421,15 @@
     const isMaths   = subject === 'maths';
     const isSciGrp  = SCIENCE_SUBJECTS.includes(subject);
     const isArtsGrp = ARTS_SUBJECTS.includes(subject);
+    const isExtMathsGrp = EXTENDED_MATHS_SUBJECTS.includes(subject);
     const isBridgeGrp = BRIDGE_SUBJECTS.includes(subject);
     const isPhonicsGrp = PHONICS_SUBJECTS.includes(subject);
     const isExtGrp = EXTENSION_SUBJECTS.includes(subject);
 
     // Main toggle active state
     document.getElementById('toggle-maths').classList.toggle('active', isMaths);
+    const addMathsBtnActive = document.getElementById('toggle-addmaths');
+    if (addMathsBtnActive) addMathsBtnActive.classList.toggle('active', isExtMathsGrp);
     const engBt = document.getElementById('toggle-english');
     if (engBt) engBt.classList.toggle('active', subject === 'english');
     document.getElementById('toggle-science').classList.toggle('active', isSciGrp);
@@ -1467,12 +1468,12 @@
     });
 
     // Header subtitle
-    const subtitles = { maths: 'ABC Learning Portal', english: 'English Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal', digitaltech: 'Digital Technologies Portal', bridge_maths: 'Bridge Maths', bridge_science: 'Bridge Science', bridge_english: 'Bridge English', phonics: 'Phonics Support', ext_maths: 'Extension Maths', ext_english: 'Extension English' };
+    const subtitles = { maths: 'ABC Learning Portal', addmaths: 'Add Maths', furthermaths: 'Further Maths', english: 'English Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal', digitaltech: 'Digital Technologies Portal', bridge_maths: 'Bridge Maths', bridge_science: 'Bridge Science', bridge_english: 'Bridge English', phonics: 'Phonics Support', ext_maths: 'Extension Maths', ext_english: 'Extension English' };
     document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Portal';
 
-    // Year selector: hide entirely for arts/bridge/phonics/extension
+    // Year selector: hide entirely for arts/bridge/phonics/extension/extended-maths
     const yearSelector = document.querySelector('.year-selector') || document.getElementById('year-selector');
-    if (yearSelector) yearSelector.style.display = (isArtsGrp || isBridgeGrp || isPhonicsGrp || isExtGrp) ? 'none' : '';
+    if (yearSelector) yearSelector.style.display = (isArtsGrp || isBridgeGrp || isPhonicsGrp || isExtGrp || isExtMathsGrp) ? 'none' : '';
 
     renderSummaryCards();
     renderStrandBars();
@@ -1483,11 +1484,12 @@
     const value = document.getElementById('year-select').value;
     let filtered, label;
 
-    const isArtsSubj = ARTS_SUBJECTS.includes(currentSubject) || BRIDGE_SUBJECTS.includes(currentSubject) || PHONICS_SUBJECTS.includes(currentSubject) || EXTENSION_SUBJECTS.includes(currentSubject);
+    const isArtsSubj = ARTS_SUBJECTS.includes(currentSubject) || BRIDGE_SUBJECTS.includes(currentSubject) || PHONICS_SUBJECTS.includes(currentSubject) || EXTENSION_SUBJECTS.includes(currentSubject) || EXTENDED_MATHS_SUBJECTS.includes(currentSubject);
     if (isArtsSubj) {
-      // CRS, Government, Bridge, Phonics, and Extension span a fixed set of topics regardless of year — show all
+      // CRS, Government, Bridge, Phonics, Extension, Add Maths and Further Maths
+      // span a fixed set of topics regardless of year — show all
       filtered = allTopics.filter(t => (t.subject || 'maths') === currentSubject);
-      label    = BRIDGE_SUBJECTS.includes(currentSubject) ? 'Your Bridge topics' : (PHONICS_SUBJECTS.includes(currentSubject) ? 'Your Phonics topics' : (EXTENSION_SUBJECTS.includes(currentSubject) ? 'Your Extension topics' : ('Showing all ' + (currentSubject === 'crs' ? 'CRS' : 'Government') + ' topics')));
+      label    = BRIDGE_SUBJECTS.includes(currentSubject) ? 'Your Bridge topics' : (PHONICS_SUBJECTS.includes(currentSubject) ? 'Your Phonics topics' : (EXTENSION_SUBJECTS.includes(currentSubject) ? 'Your Extension topics' : (EXTENDED_MATHS_SUBJECTS.includes(currentSubject) ? ('Showing all ' + (currentSubject === 'addmaths' ? 'Add Maths' : 'Further Maths') + ' topics') : ('Showing all ' + (currentSubject === 'crs' ? 'CRS' : 'Government') + ' topics'))));
     } else if (value === 'own') {
       filtered = allTopics.filter(t => topicMatchesYear(t, currentSubject, myYearGroup) && (t.subject || 'maths') === currentSubject);
       label    = 'Showing your Year ' + myYearGroup + ' topics';
@@ -1640,9 +1642,7 @@
   document.getElementById('toggle-maths').addEventListener('click', () => window.switchSubject('maths'));
   if (document.getElementById('toggle-addmaths'))
     document.getElementById('toggle-addmaths').addEventListener('click', () => {
-      window.switchSubject('maths');
-      const yrSel = document.getElementById('year-select');
-      if (yrSel) { yrSel.value = Number(myYearGroup) === 12 ? '14' : '13'; window.renderTopics && window.renderTopics(); }
+      window.switchSubject(Number(myYearGroup) === 12 ? 'furthermaths' : 'addmaths');
     });
   if (document.getElementById('toggle-english'))
     document.getElementById('toggle-english').addEventListener('click', () => window.switchSubject('english'));

@@ -255,6 +255,8 @@
         <select id="topics-filter-subject" onchange="renderTopicsTab()">
           <option value="english">✏️ English</option>
           <option value="maths">📐 Maths</option>
+          <option value="addmaths">➕ Add Maths</option>
+          <option value="furthermaths">➕ Further Maths</option>
           <option value="science">🔬 Science</option>
           <option value="physics">⚡ Physics</option>
           <option value="chemistry">⚗️ Chemistry</option>
@@ -3582,13 +3584,16 @@
   window.renderTopicsTab = function() {
     const yr      = parseInt(document.getElementById('topics-filter-year').value) || 7;
     const subject = document.getElementById('topics-filter-subject').value;
-    // Add Maths topics (AM-*) are stored at year_group=10 but taught across both
-    // Y10 and Y11, so they should appear when browsing either year.
+    const isYearless = subject === 'addmaths' || subject === 'furthermaths';
+    // Add Maths / Further Maths are their own subjects and span multiple years
+    // (Add Maths: Y10/11, Further Maths: Y12), so ignore the Year filter for them.
     const filtered = allTopics.filter(t => {
       if ((t.subject || 'maths') !== subject) return false;
-      if (subject === 'maths' && /^AM-/.test(t.topic_code || '')) return yr === 10 || yr === 11;
+      if (isYearless) return true;
       return t.year_group === yr;
     });
+    const yearSelect = document.getElementById('topics-filter-year');
+    if (yearSelect) yearSelect.style.display = isYearless ? 'none' : '';
     const grid = document.getElementById('topics-grid');
 
     if (filtered.length === 0) {
@@ -3597,7 +3602,7 @@
     }
 
     const colourLookup = ALL_STRAND_COLOURS[subject] || null;
-    const isMaths = subject === 'maths';
+    const isMaths = subject === 'maths' || subject === 'addmaths' || subject === 'furthermaths';
 
     // Group by strand
     const strands = {};
