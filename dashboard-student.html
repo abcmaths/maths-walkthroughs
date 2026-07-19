@@ -50,6 +50,11 @@
     .summary-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); text-align: center; }
     .summary-card .big { font-size: 2rem; font-weight: 700; color: #C0272D; line-height: 1; }
     .summary-card .label { font-size: 0.8rem; color: #777; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .summary-card.streak-card { background: linear-gradient(135deg, #C0272D, #8f1c21); color: white; position: relative; overflow: hidden; }
+    .summary-card.streak-card .big { color: white; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .summary-card.streak-card .big .flame { font-size: 1.5rem; }
+    .summary-card.streak-card .label { color: rgba(255,255,255,0.85); }
+    .summary-card.streak-card .streak-sub { font-size: 0.7rem; color: rgba(255,255,255,0.7); margin-top: 2px; }
     .subject-progress-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 28px; }
     .subject-panel { background: white; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); padding: 18px 20px; border-top: 3px solid var(--accent); }
     .subject-panel.maths-panel    { --accent: #C0272D; }
@@ -347,6 +352,11 @@
     </div>
 
     <div class="summary-row" id="summary-row">
+      <div class="summary-card streak-card">
+        <div class="big"><span class="flame" id="streak-flame">🔥</span><span id="stat-streak">—</span></div>
+        <div class="label">Day Streak</div>
+        <div class="streak-sub" id="streak-sub"></div>
+      </div>
       <div class="summary-card"><div class="big" id="stat-total">—</div><div class="label">My Topics</div></div>
       <div class="summary-card"><div class="big" id="stat-completed">—</div><div class="label">Completed</div></div>
       <div class="summary-card"><div class="big" id="stat-started">—</div><div class="label">In Progress</div></div>
@@ -1295,6 +1305,9 @@
         .from('eoy_aoc_results').select('*').eq('student_id', userId)
         .order('academic_year', { ascending: false }).limit(1).maybeSingle();
 
+      // Streak (day-in-a-row activity counter)
+      await updateStreak(profile);
+
       // Summary cards
       renderSummaryCards();
 
@@ -1355,6 +1368,58 @@
           </div>`;
         }).join('')
       : '<div class="no-topics">No topics added for your year group yet.</div>';
+  }
+
+  async function updateStreak(profile) {
+    // Local (device) date as YYYY-MM-DD, so the "day" boundary matches when the student is actually using the app
+    const todayStr = new Date().toLocaleDateString('en-CA');
+    const lastActive = profile.last_active_date || null;
+    let current = profile.current_streak || 0;
+    let longest = profile.longest_streak || 0;
+
+    if (lastActive === todayStr) {
+      // Already logged today — nothing to update, just render current values
+      renderStreak(current, longest, todayStr);
+      return;
+    }
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toLocaleDateString('en-CA');
+
+    current = (lastActive === yesterdayStr) ? current + 1 : 1;
+    longest = Math.max(longest, current);
+
+    const { error } = await supabase.from('profiles').update({
+      current_streak: current,
+      longest_streak: longest,
+      last_active_date: todayStr,
+    }).eq('id', userId);
+
+    if (error) {
+      console.error('Streak update error:', error);
+      // Fall back to showing last-known values rather than breaking the dashboard
+      renderStreak(profile.current_streak || 0, profile.longest_streak || 0, lastActive);
+      return;
+    }
+
+    renderStreak(current, longest, todayStr, true);
+  }
+
+  function renderStreak(current, longest, dateStr, justIncreased) {
+    const streakEl = document.getElementById('stat-streak');
+    const subEl    = document.getElementById('streak-sub');
+    const flameEl  = document.getElementById('streak-flame');
+    if (!streakEl) return;
+    streakEl.textContent = current;
+    flameEl.style.opacity = current > 0 ? '1' : '0.35';
+    if (longest > current) {
+      subEl.textContent = `Best: ${longest} days`;
+    } else if (current > 0) {
+      subEl.textContent = justIncreased ? 'Keep it going!' : 'Personal best!';
+    } else {
+      subEl.textContent = 'Visit today to start a streak';
+    }
   }
 
   function renderSummaryCards() {
