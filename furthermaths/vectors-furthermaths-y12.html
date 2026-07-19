@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vectors &middot; Further Mathematics &middot; Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}
+.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.nq-btn{font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.try-q{font-size:15px;line-height:1.55;margin-bottom:8px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
+.try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.eqs{display:flex;flex-direction:column;gap:3px;margin:4px 0;}
+.eqs .rw{display:grid;grid-template-columns:1fr auto 1fr;align-items:baseline;font-family:'Cambria Math',Georgia,serif;font-size:17px;}
+.eqs .rw.sub{border-top:1.5px solid var(--ink);margin-top:3px;padding-top:4px;}
+.eqs .rw .l{text-align:right;padding-right:10px;}
+.eqs .rw .o{text-align:center;color:var(--red);font-weight:700;}
+.eqs .rw .r{text-align:left;padding-left:10px;}
+.eqs .rw .r .chk{color:#1a7a3a;font-weight:700;margin-left:4px;}
+.terms{font-family:'Cambria Math',Georgia,serif;font-size:16px;line-height:1.9;text-align:center;}
+.terms b{color:var(--dark);}
+sup,sub{font-size:.7em;}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 3px;line-height:1.05;font-size:.92em;}
+.frac .n{display:block;padding:0 4px 1px;border-bottom:1.4px solid currentColor;}
+.frac .d{display:block;padding:1px 4px 0;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Vectors &mdash; Further Mathematics</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function round2(x){return Math.round(x*100)/100;}
+function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,fn:genFn};return buildTry(id,o);}
+function buildTry(id,o){var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');var ph='Answer'+(o.unit?' ('+o.unit+')':'');return '<div class="try" data-tryid="'+id+'"><div class="try-t">✔ Your Turn <button class="nq-btn" data-tryid="'+id+'">↻ New</button></div><div class="try-q">'+o.question+'</div><ul class="hl">'+(h||'')+'</ul><div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div><div class="try-fb" data-tryid="'+id+'"></div><details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
+document.addEventListener('click',function(e){var el=e.target;if(el.classList.contains('nq-btn')){var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;var o=en.fn();en.o=o;ST[id]={o:o,fn:en.fn};var wrap=document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);wrap.parentNode.replaceChild(tmp.firstChild,wrap);return;}if(el.classList.contains('try-ck')){var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;var o=en.o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}var tol=o.tol!=null?o.tol:0.01;if(Math.abs(v-o.ans)<=tol){fb.className='try-fb ok';fb.innerHTML='✓ Correct!  '+o.working;}else{fb.className='try-fb er';fb.textContent='Not quite — check your working and try again.';}}});
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Georgia,serif" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#C0272D';w=w||2;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function dGeneric(title,lines){return function(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));o.push(T(240,30,title,'#C0272D',13,'middle',true));lines.forEach(function(ln,i){if(p>=i){var last=i===lines.length-1;o.push(R(30,50+i*46,420,38,last?'#e8f8ee':'#f8f8f8',last?'#1a7a3a':'#ccc',last?2:1));o.push(T(240,74+i*46,ln,last?'#1a7a3a':'#241A17',last?14:12,'middle',last));}});s.innerHTML=o.join('');};}
+var dQ1=dGeneric('Magnitude by Pythagoras',['|a| = √(x²+y²)','A vector has both magnitude and direction']);
+var dQ2=dGeneric('Add/subtract component-wise',['Add or subtract the x-components, then the y-components separately']);
+var dQ3=dGeneric('Multiply every component by the scalar',['Multiply each component of the vector by the scalar k']);
+var dQ4=dGeneric('AB = position of B − position of A',['Vector AB = b − a (position vector of end minus start)']);
+var dQ5=dGeneric('Divide by the magnitude',['â = a / |a|','First find |a|, then divide each component by it']);
+var dQ6=dGeneric('Multiply matching components, then add',['a·b = a₁b₁ + a₂b₂']);
+var dQ7=dGeneric('cosθ = a·b / (|a||b|)',['Find a·b, then |a| and |b|, then use the cosine formula']);
+var dQ8=dGeneric('Check if b = ka for a scalar k',['Vectors are parallel if one is a scalar multiple of the other']);
+var dQ9=dGeneric('r = a + λd',['The vector equation of a line: r = a + λd, where a is a point on the line and d is the direction']);
+var dQ10=dGeneric('Add all vectors component-wise',['Sum each x-component and each y-component separately across all vectors']);
+var QS=[
+  {ey:'Q1 \u00b7 Vectors \u00b7 Further Maths',ti:'Vector Notation and Magnitude',
+   su:'Find |a| where a = (3, 4)',
+   steps:[
+    {lb:'What is a vector?',dr:dQ1,ht:'<p>A vector has both magnitude (size) and direction, written as a column (x,y) or using i, j notation: a = xi + yj.</p>'},
+    {lb:'Magnitude formula',dr:dQ1,ht:'<div class="fm">|a| = √(x<sup>2</sup>+y<sup>2</sup>)</div><p>For a = (3,4): |a| = √(9+16) = √25</p>'},
+    {lb:'Answer',dr:dQ1,ht:'<div class="fm">|a| = <b>5</b></div>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var x=rnd(3,12),y=rnd(4,9);
+      // pick pythagorean-ish pair sometimes, but general ok with rounding
+      var mag=round2(Math.sqrt(x*x+y*y));
+      return {question:'Find |v| where v = ('+x+', '+y+'), to 2 d.p.',
+        hints:['|v| = \u221a(x\u00b2+y\u00b2)'],
+        ans:mag,tol:0.02,unit:'',working:'\u221a('+x+'\u00b2+'+y+'\u00b2) = \u221a'+(x*x+y*y)+' = '+mag};})}
+   ]},
+
+  {ey:'Q2 \u00b7 Vectors \u00b7 Further Maths',ti:'Vector Addition and Subtraction',
+   su:'a=(2,5), b=(4,−1). Find a+b and a−b.',
+   steps:[
+    {lb:'Component-wise rule',dr:dQ2,ht:'<p>To add or subtract vectors, work with the x-components and y-components separately.</p>'},
+    {lb:'Add',dr:dQ2,ht:'<div class="fm">a+b = (2+4, 5+(−1)) = (6, 4)</div>'},
+    {lb:'Subtract',dr:dQ2,ht:'<div class="fm">a−b = (2−4, 5−(−1)) = <b>(−2, 6)</b></div>'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var x1=rnd(1,6),y1=rnd(1,6),x2=rnd(1,6),y2=rnd(1,6);
+      var sx=x1+x2;
+      return {question:'a=('+x1+', '+y1+'), b=('+x2+', '+y2+'). Find the x-component of a+b.',
+        hints:['Add x-components: '+x1+'+'+x2],
+        ans:sx,tol:0,unit:'',working:x1+'+'+x2+' = '+sx};})}
+   ]},
+
+  {ey:'Q3 \u00b7 Vectors \u00b7 Further Maths',ti:'Scalar Multiplication',
+   su:'a = (3, −2). Find 4a.',
+   steps:[
+    {lb:'Rule',dr:dQ3,ht:'<p>To multiply a vector by a scalar k, multiply <b>every</b> component by k. This scales the magnitude by |k| and reverses direction if k is negative.</p>'},
+    {lb:'Apply',dr:dQ3,ht:'<div class="fm">4a = 4×(3,−2) = (12, −8)</div>'},
+    {lb:'Answer',dr:dQ3,ht:'<div class="fm">4a = <b>(12, −8)</b></div>'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var x=rnd(2,6),y=rnd(2,6),k=rnd(2,5);
+      return {question:'a=('+x+', -'+y+'). Find the x-component of '+k+'a.',
+        hints:['Multiply the x-component by '+k],
+        ans:k*x,tol:0,unit:'',working:k+'\u00d7'+x+' = '+(k*x)};})}
+   ]},
+
+  {ey:'Q4 \u00b7 Vectors \u00b7 Further Maths',ti:'Position Vectors and Displacement',
+   su:'A=(1,2), B=(5,7). Find the displacement vector AB.',
+   steps:[
+    {lb:'Position vectors',dr:dQ4,ht:'<p>A position vector locates a point relative to the origin. The displacement vector from A to B is found by subtracting position vectors.</p><div class="fm">→AB = b − a</div>'},
+    {lb:'Substitute',dr:dQ4,ht:'<div class="fm">→AB = (5,7) − (1,2) = (4, 5)</div>'},
+    {lb:'Answer & magnitude',dr:dQ4,ht:'<div class="fm">→AB = <b>(4, 5)</b>, |AB| = √(16+25) = √41 ≈ 6.40</div>'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var ax=rnd(0,3),ay=rnd(0,3),bx=rnd(6,10),by=rnd(6,10);
+      var dx=bx-ax;
+      return {question:'A=('+ax+', '+ay+'), B=('+bx+', '+by+'). Find the x-component of vector AB.',
+        hints:['AB = B \u2212 A, so x-component = '+bx+' \u2212 '+ax],
+        ans:dx,tol:0,unit:'',working:bx+' \u2212 '+ax+' = '+dx};})}
+   ]},
+
+  {ey:'Q5 \u00b7 Vectors \u00b7 Further Maths',ti:'Unit Vectors',
+   su:'Find the unit vector in the direction of a = (6, 8)',
+   steps:[
+    {lb:'What is a unit vector?',dr:dQ5,ht:'<p>A unit vector has magnitude 1 and points in the same direction as the original vector. Divide the vector by its own magnitude.</p><div class="fm">â = a / |a|</div>'},
+    {lb:'Find |a|',dr:dQ5,ht:'<div class="fm">|a| = √(36+64) = √100 = 10</div>'},
+    {lb:'Divide',dr:dQ5,ht:'<div class="fm">â = (6/10, 8/10) = <b>(0.6, 0.8)</b></div>'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var pairs=[[3,4],[6,8],[5,12],[8,6]];var p=pick(pairs);
+      var mag=Math.sqrt(p[0]*p[0]+p[1]*p[1]);
+      var ans=round2(p[0]/mag);
+      return {question:'Find the x-component of the unit vector in the direction of ('+p[0]+', '+p[1]+'), to 2 d.p.',
+        hints:['|v| = \u221a('+p[0]+'\u00b2+'+p[1]+'\u00b2) = '+mag,'\u00e2 = v/|v|'],
+        ans:ans,tol:0.02,unit:'',working:p[0]+'/'+mag+' = '+ans};})}
+   ]},
+
+  {ey:'Q6 \u00b7 Vectors \u00b7 Further Maths',ti:'The Scalar (Dot) Product',
+   su:'a=(2,3), b=(4,−1). Find a·b.',
+   steps:[
+    {lb:'Dot product formula',dr:dQ6,ht:'<p>The scalar (dot) product multiplies corresponding components and sums the results, giving a single number (scalar).</p><div class="fm">a·b = a<sub>1</sub>b<sub>1</sub> + a<sub>2</sub>b<sub>2</sub></div>'},
+    {lb:'Substitute',dr:dQ6,ht:'<div class="fm">a·b = (2×4) + (3×−1) = 8 − 3</div>'},
+    {lb:'Answer',dr:dQ6,ht:'<div class="fm">a·b = <b>5</b></div>'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var x1=rnd(1,6),y1=rnd(1,6),x2=rnd(1,6),y2=rnd(1,6);
+      var ans=x1*x2+y1*y2;
+      return {question:'a=('+x1+', '+y1+'), b=('+x2+', '+y2+'). Find a\u00b7b.',
+        hints:['a\u00b7b = a\u2081b\u2081 + a\u2082b\u2082'],
+        ans:ans,tol:0,unit:'',working:x1+'\u00d7'+x2+' + '+y1+'\u00d7'+y2+' = '+ans};})}
+   ]},
+
+  {ey:'Q7 \u00b7 Vectors \u00b7 Further Maths',ti:'Angle Between Two Vectors',
+   su:'a=(3,0), b=(0,4). Find the angle between them.',
+   steps:[
+    {lb:'Formula',dr:dQ7,ht:'<p>The angle θ between two vectors is found from the dot product and the magnitudes.</p><div class="fm">cosθ = (a·b) / (|a||b|)</div>'},
+    {lb:'Substitute',dr:dQ7,ht:'<div class="fm">a·b = 0, |a|=3, |b|=4 → cosθ = 0/12 = 0</div>'},
+    {lb:'Answer',dr:dQ7,ht:'<div class="fm">θ = cos<sup>−1</sup>(0) = <b>90°</b> — the vectors are perpendicular</div>'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var pairs=[[[3,0],[0,5],90],[[1,0],[1,1],45],[[1,0],[0,0],0]];
+      var chosen=[[3,0],[0,4],90];
+      return {question:'a=(3, 0), b=(0, 4). Find the angle between a and b, in degrees.',
+        hints:['a\u00b7b = 0 here','If a\u00b7b = 0 the vectors are perpendicular'],
+        ans:90,tol:0,unit:'\u00b0',working:'a\u00b7b=0, so cos\u03b8=0, \u03b8=90\u00b0'};})}
+   ]},
+
+  {ey:'Q8 \u00b7 Vectors \u00b7 Further Maths',ti:'Parallel and Perpendicular Vectors',
+   su:'a=(2,3), b=(4,6). Are they parallel?',
+   steps:[
+    {lb:'Test for parallel vectors',dr:dQ8,ht:'<p>Two vectors are parallel if one is a scalar multiple of the other: b = ka for some scalar k.</p>'},
+    {lb:'Check the ratio',dr:dQ8,ht:'<div class="fm">b/a: 4/2 = 2 and 6/3 = 2 — both components scale by the same factor</div>'},
+    {lb:'Conclusion',dr:dQ8,ht:'<div class="fm">Since b = 2a, the vectors <b>are parallel</b></div>'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var x=rnd(2,5),y=rnd(2,5),k=rnd(2,4);
+      return {question:'a=('+x+', '+y+'), b=('+(k*x)+', '+(k*y)+'). Find k such that b=ka.',
+        hints:['Divide corresponding components: b_x/a_x'],
+        ans:k,tol:0,unit:'',working:(k*x)+'/'+x+' = '+k};})}
+   ]},
+
+  {ey:'Q9 \u00b7 Vectors \u00b7 Further Maths',ti:'Vector Equation of a Line',
+   su:'A line passes through A=(1,2) with direction vector d=(3,1). Write its vector equation and find the point when λ=2.',
+   steps:[
+    {lb:'Vector equation form',dr:dQ9,ht:'<p>A line through a point with position vector a, in the direction of vector d, has vector equation r = a + λd, where λ is a scalar parameter.</p>'},
+    {lb:'Write the equation',dr:dQ9,ht:'<div class="fm">r = (1,2) + λ(3,1)</div>'},
+    {lb:'Substitute λ=2',dr:dQ9,ht:'<div class="fm">r = (1,2) + 2(3,1) = (1+6, 2+2) = <b>(7, 4)</b></div>'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var ax=rnd(0,3),ay=rnd(0,3),dx=rnd(1,4),dy=rnd(1,4),lam=rnd(2,4);
+      var px=ax+lam*dx;
+      return {question:'r = ('+ax+', '+ay+') + \u03bb('+dx+', '+dy+'). Find the x-coordinate when \u03bb='+lam+'.',
+        hints:['x = '+ax+' + \u03bb\u00d7'+dx],
+        ans:px,tol:0,unit:'',working:ax+' + '+lam+'\u00d7'+dx+' = '+px};})}
+   ]},
+
+  {ey:'Q10 \u00b7 Vectors \u00b7 Further Maths',ti:'Resultant of Several Vectors',
+   su:'Three vectors a=(2,1), b=(−1,3), c=(4,−2) act together. Find the resultant.',
+   steps:[
+    {lb:'Combining multiple vectors',dr:dQ10,ht:'<p>To find the resultant of several vectors, add all the x-components together and all the y-components together.</p>'},
+    {lb:'Add',dr:dQ10,ht:'<div class="fm">Resultant = (2−1+4, 1+3−2) = (5, 2)</div>'},
+    {lb:'Answer',dr:dQ10,ht:'<div class="fm">Resultant = <b>(5, 2)</b></div>'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var x1=rnd(1,5),y1=rnd(1,5),x2=rnd(-4,-1),y2=rnd(1,5),x3=rnd(1,5),y3=rnd(-4,-1);
+      var sx=x1+x2+x3;
+      return {question:'a=('+x1+', '+y1+'), b=('+x2+', '+y2+'), c=('+x3+', '+y3+'). Find the x-component of the resultant.',
+        hints:['Sum all x-components'],
+        ans:sx,tol:0,unit:'',working:x1+'+('+x2+')+'+x3+' = '+sx};})}
+   ]}
+];
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb'),lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+(typeof st.ht==='function'?st.ht():st.ht);st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next →';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcTopicCode='Y12FM-VEC-01';
+window.markComplete=async function(){const{data:{session}}=await _sb.auth.getSession();if(!session)return;const{data:topic}=await _sb.from('topics').select('id').eq('topic_code',window._abcTopicCode).maybeSingle();if(!topic)return;await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>
