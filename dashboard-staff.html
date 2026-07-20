@@ -2802,6 +2802,14 @@
       .select('*')
       .order('full_name');
     allUsersWithEmail = data || [];
+
+    // user_emails view doesn't expose `active` — merge it in from profiles
+    const { data: activeRows } = await supabase
+      .from('profiles')
+      .select('id, active');
+    const activeMap = {};
+    (activeRows || []).forEach(r => { activeMap[r.id] = r.active; });
+    allUsersWithEmail.forEach(u => { u.active = activeMap[u.id] !== false; });
   }
 
   window.renderUsersTab = function() {
