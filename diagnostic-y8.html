@@ -8,8 +8,12 @@
   :root { --abc-red:#C0272D; --abc-red-dark:#8f1d22; }
   * { box-sizing:border-box; }
   body { font-family:-apple-system,Segoe UI,Roboto,sans-serif; margin:0; background:#f7f7f8; color:#222; }
-  header { background:var(--abc-red); color:#fff; padding:18px 20px; text-align:center; }
+  header { background:var(--abc-red); color:#fff; padding:18px 20px; text-align:center; position:relative; }
   header h1 { margin:0; font-size:1.3rem; }
+  .btn-signout { position:absolute; right:16px; top:50%; transform:translateY(-50%);
+      background:rgba(255,255,255,0.2); color:#fff; border:1px solid rgba(255,255,255,0.4);
+      border-radius:4px; padding:6px 14px; font-size:0.82rem; cursor:pointer; white-space:nowrap; }
+  .btn-signout:hover { background:rgba(255,255,255,0.3); }
   .wrap { max-width:700px; margin:0 auto; padding:20px; }
   .card { background:#fff; border-radius:10px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:16px; }
   .progress { height:8px; background:#eee; border-radius:4px; overflow:hidden; margin-bottom:20px; }
@@ -46,7 +50,7 @@
 </style>
 </head>
 <body>
-<header><h1>Year 8 Diagnostic</h1></header>
+<header><h1>Year 8 Diagnostic</h1><button class="btn-signout" onclick="signOut()">Sign out</button></header>
 <div class="wrap">
 
   <div id="screen-locked" class="card" style="display:none;">
@@ -119,6 +123,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
+
+window.signOut = async function() {
+  await supabase.auth.signOut();
+  window.location.href = 'login.html';
+};
 let savedProgress = null;
 
 // ---------- Session + eligibility check ----------
