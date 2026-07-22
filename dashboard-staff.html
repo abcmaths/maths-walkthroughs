@@ -2797,11 +2797,11 @@
   let allUsersWithEmail = [];
 
   async function loadUsersWithEmail() {
-    const { data } = await supabase
-      .from('user_emails')
-      .select('*')
-      .order('full_name');
-    allUsersWithEmail = data || [];
+    const { data, error } = await supabase.rpc('get_user_emails');
+    if (error) console.error('get_user_emails RPC error:', error);
+    allUsersWithEmail = (data || []).sort((a, b) =>
+      (a.full_name || '').localeCompare(b.full_name || '')
+    );
 
     // user_emails view doesn't expose `active` — merge it in from profiles
     const { data: activeRows } = await supabase
