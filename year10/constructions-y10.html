@@ -64,6 +64,11 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.click-stage{display:flex;justify-content:center;margin:10px 0 4px;}
+.click-svg{width:100%;max-width:480px;height:auto;background:#fff;border:1px solid var(--line);border-radius:6px;touch-action:manipulation;}
+.tphit{transition:opacity .1s;}
+.tphit:hover{fill:rgba(200,146,42,.18);}
+.click-hint{font-size:13px;color:#6b5750;margin-top:2px;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
@@ -122,6 +127,26 @@ function buildTry(id,o){
 }
 document.addEventListener('click',function(e){
   var el=e.target;
+  if(el.classList.contains('tphit')){
+    var id=el.getAttribute('data-tpid'),lbl=el.getAttribute('data-lbl');
+    var e2=TPS[id];if(!e2||e2.answered)return;
+    var o=e2.o;var pt=null;for(var i=0;i<o.points.length;i++){if(o.points[i].label===lbl){pt=o.points[i];break;}}
+    if(!pt)return;
+    var fb=document.querySelector('.try-fb[data-tpid="'+id+'"]');if(!fb)return;
+    e2.answered=true;
+    var svg=el.closest('svg');
+    var circles=svg.querySelectorAll('circle[r="7"]');
+    circles.forEach(function(c){
+      if(c.getAttribute('cx')===el.getAttribute('cx')&&c.getAttribute('cy')===el.getAttribute('cy')){
+        c.setAttribute('fill',pt.correct?'#1a7a3a':'#a01820');
+        c.setAttribute('stroke',pt.correct?'#0d4a20':'#6b1010');
+      }
+    });
+    if(pt.correct){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+(pt.explain||'');}
+    else{fb.className='try-fb fb er';fb.innerHTML='Not quite \u2014 '+(pt.explain||'')+' '+(o.correctExplain?'The correct point '+o.correctExplain:'');}
+    return;
+  }
+  if(el.classList.contains('tap-new')){newTapPoints(el.getAttribute('data-tpid'));return;}
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');
     var entry=ST[id]; if(!entry)return;
@@ -163,6 +188,43 @@ function Arc(cx,cy,r,a1deg,a2deg,col,sw,dash){
   var diff=((a2deg-a1deg)+360)%360;
   var laf=diff>180?1:0;
   return '<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' A'+r+','+r+' 0 '+laf+',1 '+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" '+(dash?'stroke-dasharray="'+dash+'"':'')+'/>';
+}
+
+// ---- Reusable "tap the labelled point" locus widget ----
+var TPS={};
+function findPoint(pred,xr,yr){
+  for(var i=0;i<400;i++){
+    var x=rnd(xr[0],xr[1]),y=rnd(yr[0],yr[1]);
+    if(pred(x,y))return{x:x,y:y};
+  }
+  return{x:(xr[0]+xr[1])/2,y:(yr[0]+yr[1])/2};
+}
+function buildTapPoints(id,o){
+  var ctx=typeof o.svgExtra==='function'?o.svgExtra():(o.svgExtra||'');
+  var ptsSvg=o.points.map(function(pt){
+    return Ci(pt.x,pt.y,7,'#C8922A','#7a5a10',1.5)+Txt(pt.x,pt.y-13,pt.label,'#7a5a10',12,'middle',true)
+      +'<circle class="tphit" data-tpid="'+id+'" data-lbl="'+pt.label+'" cx="'+pt.x+'" cy="'+pt.y+'" r="16" fill="transparent"/>';
+  }).join('');
+  return '<div class="try" data-tpid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn</div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +'<div class="click-stage"><svg class="click-svg" viewBox="0 0 480 300">'+ctx+ptsSvg+'</svg></div>'
+    +'<div class="click-hint">Tap the point on the diagram.</div>'
+    +'<div class="try-fb" data-tpid="'+id+'"></div>'
+    +'<div style="margin-top:10px;"><button class="ck tap-new" data-tpid="'+id+'" style="background:#888;">New question</button></div>'
+    +'</div>';
+}
+function tryItTapPoints(genFn){
+  if(typeof genFn==='object'){var _o=genFn;genFn=function(){return _o;};}
+  var id='p'+Math.random().toString(36).slice(2);
+  var o=genFn();TPS[id]={o:o,genFn:genFn,answered:false};
+  return buildTapPoints(id,o);
+}
+function newTapPoints(id){
+  var e=TPS[id];if(!e)return;
+  var o=e.genFn();var box=document.querySelector('.try[data-tpid="'+id+'"]');if(!box)return;
+  var tmp=document.createElement('div');tmp.innerHTML=buildTapPoints(id,o);
+  box.parentNode.replaceChild(tmp.firstChild,box);TPS[id]={o:o,genFn:e.genFn,answered:false};
 }
 
 
@@ -586,27 +648,114 @@ var QS=[
     {lb:'Step 1 - Arc from A',dr:dQ5,ht:'<p>Open compass to a radius <b>greater than half AB</b>. Draw an arc from A above and below the line.</p>'},
     {lb:'Step 2 - Same arc from B, mark crossings',dr:dQ5,ht:'<p>Keep the same radius. Draw arcs from B so they cross the arcs from A above and below. Mark both crossing points.</p>'},
     {lb:'Step 3 - The locus',dr:dQ5,ht:'<div class="fm">Locus = perpendicular bisector of AB</div><p>Every point on this line is exactly the same distance from A as from B.</p>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var a=rnd(5,9),b=rnd(4,8);return{question:'Two sides of a triangle are '+a+' cm and '+b+' cm. What is their sum?',hints:['Add the two known sides'],ans:a+b,tol:0,unit:'cm',working:a+' + '+b+' = '+(a+b)+' cm'};})}
+    {lb:'Your turn',dr:dQ5,ht:tryItTapPoints(function(){
+      var ax=120,ay=150,bx=360,by=150,mx=(ax+bx)/2;
+      var correctY=rnd(70,230);
+      var used=[0];var distX=[];
+      while(distX.length<3){var d=pick([-140,-100,-60,60,100,140]);if(used.indexOf(d)===-1&&distX.indexOf(d)===-1)distX.push(d);}
+      var labels=['C','D','E','F'];labels=labels.sort(function(){return Math.random()-0.5;});
+      var pts=[{x:mx,y:correctY,label:labels[0],correct:true,explain:'It sits exactly on the perpendicular bisector of AB, so it is the same distance from A and B.'}];
+      distX.forEach(function(dx,i){
+        var y=rnd(70,230);
+        pts.push({x:mx+dx,y:y,label:labels[i+1],correct:false,explain:'This point is closer to '+(dx<0?'A':'B')+' than to '+(dx<0?'B':'A')+'.'});
+      });
+      return{
+        question:'A and B are shown below. Tap the labelled point that is the <b>same distance from A as from B</b>.',
+        points:pts,
+        svgExtra:function(){return Ci(ax,ay,5,'#C0272D','#C0272D',0)+Txt(ax-14,ay+16,'A','#C0272D',13,'end',true)
+          +Ci(bx,by,5,'#1a5a8a','#1a5a8a',0)+Txt(bx+14,by+16,'B','#1a5a8a',13,'start',true)
+          +Ln(ax,ay,bx,by,'#888',1,'4,3');}
+      };
+    })}
   ]},
   {ey:'Q6 - Loci',ti:'Locus: Equidistant from Two Lines',su:'Describe the locus of points equidistant from two intersecting lines.',steps:[
     {lb:'The condition',dr:dQ6,ht:'<p>We want all points equally far (perpendicular distance) from two straight lines that meet at a vertex V.</p>'},
     {lb:'Step 1 - Think about it',dr:dQ6,ht:'<p>Such a point lies in the middle of the angle — the same distance from each ray. This is exactly what an angle bisector does.</p>'},
     {lb:'Step 2 - Construct the bisector',dr:dQ6,ht:'<p>Use the angle bisector construction: arc from V, then equal arcs from the two crossing points, then draw the line through V and the intersection.</p>'},
     {lb:'Step 3 - The answer',dr:dQ6,ht:'<div class="fm">Locus = angle bisector of the angle between the two lines</div><p>There are actually two bisectors (for the two pairs of angles), perpendicular to each other.</p>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var d=rnd(4,10);return{question:'A and B are '+2*d+' cm apart. How far is every point on the perpendicular bisector of AB from each point?',hints:['Every point on perpendicular bisector is equidistant from A and B'],ans:d,tol:0,unit:'cm',working:'Equidistant = '+d+' cm from both'};})}
+    {lb:'Your turn',dr:dQ6,ht:tryItTapPoints(function(){
+      var vx=80,vy=260,ang1=0,ang2=-55,angBis=(ang1+ang2)/2;
+      var D=Math.PI/180;
+      function polar(ang,r){return{x:vx+r*Math.cos(ang*D),y:vy+r*Math.sin(ang*D)};}
+      var correctR=pick([150,180,210]);
+      var offAngles=[-8,-15,-40,-48];offAngles=offAngles.sort(function(){return Math.random()-0.5;}).slice(0,3);
+      var radii=[140,175,210];
+      var labels=['C','D','E','F'];labels=labels.sort(function(){return Math.random()-0.5;});
+      var cp=polar(angBis,correctR);
+      var pts=[{x:cp.x,y:cp.y,label:labels[0],correct:true,explain:'It lies exactly on the angle bisector, so it is the same perpendicular distance from both rays.'}];
+      offAngles.forEach(function(ang,i){
+        var p=polar(ang,radii[i]);
+        pts.push({x:p.x,y:p.y,label:labels[i+1],correct:false,explain:'This point is closer to one ray than the other \u2014 it is not on the bisector.'});
+      });
+      return{
+        question:'Two rays meet at V. Tap the labelled point that is the <b>same distance from both rays</b>.',
+        points:pts,
+        svgExtra:function(){
+          var rayLen=340;
+          return Ln(vx,vy,vx+rayLen,vy,'#241A17',2.5)
+            +Ln(vx,vy,vx+rayLen*Math.cos(ang2*D),vy+rayLen*Math.sin(ang2*D),'#241A17',2.5)
+            +Txt(vx-14,vy+4,'V','#241A17',13,'end',true);
+        }
+      };
+    })}
   ]},
   {ey:'Q7 - Loci',ti:'Locus: Fixed Distance from a Point',su:'Describe the locus of all points exactly r cm from a fixed point P.',steps:[
     {lb:'The condition',dr:dQ7,ht:'<p>We want every point at exactly distance r from P — in any direction. Think about what shape that makes.</p>'},
     {lb:'Step 1 - Consider all directions',dr:dQ7,ht:'<p>A point r away to the north qualifies. So does one r to the east, south, west, or any direction. Together they form a shape.</p>'},
     {lb:'Step 2 - The locus',dr:dQ7,ht:'<div class="fm">Locus = a circle, centre P, radius r</div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var ang=pick([60,70,80,90]);return{question:'Two lines meet at '+2*ang+'°. The angle bisector divides this into two angles. Size of each?',hints:['Bisector divides equally'],ans:ang,tol:0,unit:'°',working:2*ang+' ÷ 2 = '+ang+'°'};})}
+    {lb:'Your turn',dr:dQ7,ht:tryItTapPoints(function(){
+      var cx=240,cy=148,rCm=rnd(3,6),pxPerCm=12,r=rCm*pxPerCm;
+      var mults=[0.5,0.65,1.4,1.55];mults=mults.sort(function(){return Math.random()-0.5;}).slice(0,3);
+      var angles=[0,90,180,270].map(function(a){return a+rnd(-15,15);});
+      angles=angles.sort(function(){return Math.random()-0.5;});
+      var labels=['C','D','E','F'];labels=labels.sort(function(){return Math.random()-0.5;});
+      var cAng=angles[0]*Math.PI/180;
+      var pts=[{x:cx+r*Math.cos(cAng),y:cy+r*Math.sin(cAng),label:labels[0],correct:true,explain:'It is exactly '+rCm+' cm from P, so it lies on the circle.'}];
+      mults.forEach(function(m,i){
+        var a=angles[i+1]*Math.PI/180,rr=r*m;
+        pts.push({x:cx+rr*Math.cos(a),y:cy+rr*Math.sin(a),label:labels[i+1],correct:false,
+          explain:'This point is '+(m<1?'closer to':'further from')+' P than '+rCm+' cm.'});
+      });
+      return{
+        question:'The locus of points exactly '+rCm+' cm from P is a circle. Tap the labelled point that lies <b>exactly '+rCm+' cm from P</b>.',
+        points:pts,
+        svgExtra:function(){return Ci(cx,cy,5,'#C0272D','#C0272D',0)+Txt(cx+10,cy-10,'P','#C0272D',13,'start',true);}
+      };
+    })}
   ]},
   {ey:'Q8 - Loci',ti:'Combined Loci',su:'Shade the region within r of A AND closer to A than B.',steps:[
     {lb:'Two conditions',dr:dQ8,ht:'<p>When two conditions must both be satisfied, find each locus separately, then shade the <b>overlap</b> (intersection) of both regions.</p>'},
     {lb:'Condition 1 - Circle around A',dr:dQ8,ht:'<div class="fm">Region 1: inside the circle, centre A, radius r</div><p>The dashed circle shows the boundary. The region is everything inside it.</p>'},
     {lb:'Condition 2 - Closer to A than B',dr:dQ8,ht:'<div class="fm">Region 2: the A-side of the perpendicular bisector of AB</div><p>The dashed vertical line is the bisector. Points left of it are closer to A.</p>'},
     {lb:'Combined region',dr:dQ8,ht:'<p>The shaded region satisfies BOTH: it is inside the circle around A AND on A\'s side of the perpendicular bisector of AB. Note the circle crosses the bisector at two points.</p>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var r=rnd(3,8);return{question:'Locus of all points exactly '+r+' cm from point P is a circle. What is its radius?',hints:['The distance = radius'],ans:r,tol:0,unit:'cm',working:'Radius = '+r+' cm'};})}
+    {lb:'Your turn',dr:dQ8,ht:tryItTapPoints(function(){
+      var ax=180,ay=160,bx=400,by=160,mx=(ax+bx)/2,r=132,rCm=3;
+      function polarA(angDeg,radius){var a=angDeg*Math.PI/180;return{x:ax+radius*Math.cos(a),y:ay+radius*Math.sin(a)};}
+      // correct: inside circle AND left of bisector — moderate radius, wide leftward angle range
+      var correct=polarA(rnd(100,260),rnd(20,r-10));
+      // d1: outside circle AND left of bisector — bigger radius, narrower leftward angle range (stays on-canvas)
+      var d1=polarA(rnd(140,220),rnd(r+10,r+40));
+      // d2: inside circle AND right of bisector — small dx just past mx, dy bounded so distance stays under r
+      var dx2=rnd(115,125);
+      var maxDy2=Math.floor(Math.sqrt(Math.max(4,(r-5)*(r-5)-dx2*dx2)));
+      var d2={x:ax+dx2,y:ay+rnd(-maxDy2+2,maxDy2-2)};
+      // d3: outside circle AND right of bisector — far enough right that it's automatically beyond the circle
+      var d3={x:rnd(mx+40,440),y:rnd(30,280)};
+      var labels=['C','D','E','F'];labels=labels.sort(function(){return Math.random()-0.5;});
+      var pts=[
+        {x:correct.x,y:correct.y,label:labels[0],correct:true,explain:'It is within '+rCm+' cm of A AND closer to A than B \u2014 both conditions are met.'},
+        {x:d1.x,y:d1.y,label:labels[1],correct:false,explain:'This point is closer to A than to B, but it is too far from A (outside the circle).'},
+        {x:d2.x,y:d2.y,label:labels[2],correct:false,explain:'This point is within range of A, but it is actually closer to B than to A.'},
+        {x:d3.x,y:d3.y,label:labels[3],correct:false,explain:'This point fails both conditions \u2014 it is far from A and closer to B.'}
+      ];
+      return{
+        question:'The rule is: within '+rCm+' cm of A, AND closer to A than to B. Tap the labelled point that satisfies <b>both</b> conditions.',
+        points:pts,
+        svgExtra:function(){return Ci(ax,ay,r,'none','#C0272D',2,'5,3')+Ln(mx,20,mx,280,'#1a5a8a',2,'5,3')
+          +Ci(ax,ay,5,'#C0272D','#C0272D',0)+Txt(ax-14,ay+16,'A','#C0272D',13,'end',true)
+          +Ci(bx,by,5,'#1a5a8a','#1a5a8a',0)+Txt(bx+14,by+16,'B','#1a5a8a',13,'start',true);}
+      };
+    })}
   ]}
 ];
 
