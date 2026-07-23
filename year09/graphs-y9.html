@@ -63,6 +63,12 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.click-stage{display:flex;justify-content:center;margin:10px 0 4px;}
+.click-svg{width:100%;max-width:420px;height:auto;background:#fff;border:1px solid var(--line);border-radius:6px;touch-action:manipulation;}
+.hit{transition:fill .1s;}
+.hit:hover{fill:rgba(200,146,42,.18);}
+.hit:active{fill:rgba(192,39,45,.25);}
+.click-hint{font-size:13px;color:#6b5750;margin-top:2px;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 </style>
 </head>
@@ -116,6 +122,19 @@ function buildTry(id,o){
 }
 document.addEventListener('click',function(e){
   var el=e.target;
+  if(el.classList.contains('hit')){
+    var id=el.getAttribute('data-clickid'),gx=+el.getAttribute('data-gx'),gy=+el.getAttribute('data-gy');
+    var svg=el.closest('svg');
+    var old=svg.querySelector('.picked-dot');if(old)old.parentNode.removeChild(old);
+    var dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('class','picked-dot');dot.setAttribute('cx',el.getAttribute('cx'));dot.setAttribute('cy',el.getAttribute('cy'));
+    dot.setAttribute('r',7);dot.setAttribute('fill','#C0272D');dot.setAttribute('stroke','#7A1418');dot.setAttribute('stroke-width',2);
+    svg.appendChild(dot);
+    if(CST[id])CST[id].picked={x:gx,y:gy};
+    return;
+  }
+  if(el.classList.contains('click-ck')){ckClickGrid(el.getAttribute('data-clickid'));return;}
+  if(el.classList.contains('nq-btn')&&el.hasAttribute('data-clickid')){newClickGridQ(el.getAttribute('data-clickid'));return;}
   if(el.classList.contains('nq-btn')){
     var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;
     var o=en.fn();en.o=o;ST[id]={o:o,fn:en.fn};
@@ -141,6 +160,61 @@ function T(x,y,txt,c,sz,a,bold){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
+
+// ---- Reusable click/tap-to-plot grid widget ----
+var CST={};
+function ccGeom(o){
+  var xmin=o.xmin!=null?o.xmin:-6,xmax=o.xmax!=null?o.xmax:6;
+  var ymin=o.ymin!=null?o.ymin:-6,ymax=o.ymax!=null?o.ymax:6;
+  var W=420,H=300,padL=40,padR=20,padT=20,padB=34;
+  var plotW=W-padL-padR,plotH=H-padT-padB;
+  var unit=Math.max(10,Math.min(plotW/(xmax-xmin),plotH/(ymax-ymin)));
+  var ox=padL-xmin*unit,oy=(H-padB)+ymin*unit;
+  return{xmin:xmin,xmax:xmax,ymin:ymin,ymax:ymax,unit:unit,ox:ox,oy:oy,W:W,H:H};
+}
+function clickGridSVG(o,id){
+  var gm=ccGeom(o),ox=gm.ox,oy=gm.oy,unit=gm.unit,s=[];
+  for(var gx=gm.xmin;gx<=gm.xmax;gx++)s.push(L(ox+gx*unit,oy-gm.ymin*unit,ox+gx*unit,oy-gm.ymax*unit,'#eee',1));
+  for(var gy=gm.ymin;gy<=gm.ymax;gy++)s.push(L(ox+gm.xmin*unit,oy-gy*unit,ox+gm.xmax*unit,oy-gy*unit,'#eee',1));
+  s.push(L(ox+gm.xmin*unit,oy,ox+gm.xmax*unit,oy,'#888',2));
+  s.push(L(ox,oy-gm.ymin*unit,ox,oy-gm.ymax*unit,'#888',2));
+  if(o.extraSVG)s.push(o.extraSVG(ox,oy,unit));
+  var r=Math.max(6,Math.min(11,unit*0.4));
+  function hit(gx,gy){var px=ox+gx*unit,py=oy-gy*unit;s.push('<circle class="hit" data-clickid="'+id+'" data-gx="'+gx+'" data-gy="'+gy+'" cx="'+px+'" cy="'+py+'" r="'+r+'" fill="transparent"/>');}
+  if(o.hitMode==='col'){for(var gy=gm.ymin;gy<=gm.ymax;gy++)hit(o.tx,gy);}
+  else if(o.hitMode==='row'){for(var gx=gm.xmin;gx<=gm.xmax;gx++)hit(gx,o.ty);}
+  else{for(var gx=gm.xmin;gx<=gm.xmax;gx++)for(var gy=gm.ymin;gy<=gm.ymax;gy++)hit(gx,gy);}
+  return s.join('');
+}
+function buildClickGrid(id,o){
+  return '<div class="try" data-clickid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn <button class="nq-btn" data-clickid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +'<div class="click-stage"><svg class="click-svg" viewBox="0 0 420 300">'+clickGridSVG(o,id)+'</svg></div>'
+    +'<div class="click-hint">Tap the correct point on the grid, then press Check.</div>'
+    +'<div class="ar" style="justify-content:flex-end;"><button class="ck click-ck" data-clickid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-clickid="'+id+'"></div>'
+    +'</div>';
+}
+function tryItClickGrid(genFn){
+  if(typeof genFn==='object'){var _o=genFn;genFn=function(){return _o;};}
+  var id='c'+Math.random().toString(36).slice(2);
+  var o=genFn();CST[id]={o:o,genFn:genFn,picked:null};
+  return buildClickGrid(id,o);
+}
+function newClickGridQ(id){
+  var e=CST[id];if(!e)return;
+  var o=e.genFn();var box=document.querySelector('.try[data-clickid="'+id+'"]');if(!box)return;
+  var tmp=document.createElement('div');tmp.innerHTML=buildClickGrid(id,o);
+  box.parentNode.replaceChild(tmp.firstChild,box);CST[id]={o:o,genFn:e.genFn,picked:null};
+}
+function ckClickGrid(id){
+  var e=CST[id];if(!e)return;var o=e.o;
+  var fb=document.querySelector('.try-fb[data-clickid="'+id+'"]');if(!fb)return;
+  if(!e.picked){fb.className='try-fb er';fb.textContent='Tap a point on the grid first.';return;}
+  if(e.picked.x===o.tx&&e.picked.y===o.ty){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! ('+o.tx+', '+o.ty+')'+(o.working?' \u2014 '+o.working:'');}
+  else{fb.className='try-fb er';fb.innerHTML='Not quite \u2014 you tapped ('+e.picked.x+', '+e.picked.y+'). Correct point: ('+o.tx+', '+o.ty+').'+(o.working?' '+o.working:'');}
+}
 
 function drawAxes(o,ox,oy,sx,sy,xmax,ymax){
   o.push(L(ox,oy+sy,ox,oy-ymax*sy,'#888',1.5));
@@ -277,13 +351,19 @@ var QS=[
     {lb:'Table of values',dr:dQ1,ht:'<div class="fm">x: 0, 1, 2, 3, 4<br>y: \u22121, 1, 3, 5, 7</div>'},
     {lb:'Plot and draw',dr:dQ1,ht:'<p>Plot each (x, y) pair as a cross. Join with a straight line extending beyond the points.</p>'},
     {lb:'Read off m and c',dr:dQ1,ht:'<div class="fm">y = 2x \u2212 1 \u2192 gradient m = 2,  y-intercept c = \u22121</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var m=pick([2,3,-2,-1]);var c=pick([-3,-2,-1,0,1,2,3]);var x=rnd(1,4);var ans=m*x+c;return{question:'y = '+m+'x + '+c+'. Find y when x = '+x+'.',hints:['Substitute x = '+x],ans:ans,tol:0,unit:'',working:'y = '+m*x+' + '+c+' = '+ans};})}
+    {lb:'Your turn',dr:dQ1,ht:tryItClickGrid(function(){
+      var m=pick([1,2,-1,-2]),c=rnd(-2,2),x=rnd(1,3),y=m*x+c;
+      return{question:'For the line y = '+m+'x + ('+c+'), tap the point where x = '+x+'.',tx:x,ty:y,hitMode:'col',xmin:-1,xmax:4,ymin:-9,ymax:9,working:'y = '+m+'('+x+') + ('+c+') = '+y};
+    })}
   ]},
   {ey:'Q2 \u00b7 Year 9 \u00b7 Graphs',ti:'Plotting Quadratic Graphs',su:'Plot y = x\u00b2 \u2212 3x + 2 for \u22121 \u2264 x \u2264 4.',steps:[
     {lb:'Table of values',dr:dQ2,ht:'<div class="fm">x: 0,1,2,3,4<br>y: 2,0,0,2,6</div>'},
     {lb:'Smooth curve',dr:dQ2,ht:'<p>Join the points with a smooth U-shaped curve (parabola). Never use a ruler for a quadratic!</p>'},
     {lb:'Reading the roots',dr:dQ2,ht:'<p>The <b>roots</b> (solutions) are where the graph crosses the x-axis: x=1 and x=2.</p>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var r1=rnd(0,3),r2=r1+rnd(1,3),x=rnd(0,r2+1);var ans=( x-r1)*(x-r2);return{question:'y = (x\u2212'+r1+')(x\u2212'+r2+'). Find y when x = '+x+'.',hints:['Substitute x = '+x,'('+x+'\u2212'+r1+') = '+(x-r1),'\u00d7('+(x-r2)+') = '+ans],ans:ans,tol:0,unit:'',working:'('+x+'\u2212'+r1+')('+x+'\u2212'+r2+') = '+(x-r1)+'\u00d7'+(x-r2)+' = '+ans};})}
+    {lb:'Your turn',dr:dQ2,ht:tryItClickGrid(function(){
+      var r1=rnd(0,3),r2=r1+rnd(1,3),x=rnd(0,r2+1),y=(x-r1)*(x-r2);
+      return{question:'y = (x\u2212'+r1+')(x\u2212'+r2+'). Tap the point on the curve where x = '+x+'.',tx:x,ty:y,hitMode:'col',xmin:-1,xmax:8,ymin:-5,ymax:19,working:'('+x+'\u2212'+r1+')('+x+'\u2212'+r2+') = '+(x-r1)+'\u00d7'+(x-r2)+' = '+y};
+    })}
   ]},
   {ey:'Q3 \u00b7 Year 9 \u00b7 Graphs',ti:'Distance\u2013Time and Speed\u2013Time Graphs',su:'Interpret a distance\u2013time graph: gradient = speed, flat section = stopped.',steps:[
     {lb:'Distance\u2013time graph',dr:dQ3,ht:'<p>The <b>gradient</b> of a distance\u2013time graph gives the <b>speed</b>. A horizontal section means the object is stationary.</p>'},
@@ -319,7 +399,12 @@ var QS=[
     {lb:'Plot both lines',dr:dQ8,ht:'<p>Draw both linear equations on the same axes.</p>'},
     {lb:'Find the intersection',dr:dQ8,ht:'<p>The point where the lines cross is the solution to BOTH equations at once.</p>'},
     {lb:'Read the coordinates',dr:dQ8,ht:'<p>Read off the x and y values at the crossing point \u2014 this is the simultaneous solution.</p>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var x=rnd(1,6),m1=rnd(1,4),m2=pick([-1,-2,-3]);var c1=rnd(-3,3),c2=(m1-m2)*x+c1;return{question:'Two lines y = '+m1+'x + '+c1+' and y = '+m2+'x + '+c2+' cross at x = '+x+'. What is the y-value at that point?',hints:['Substitute x = '+x+' into either equation'],ans:m1*x+c1,tol:0,unit:'',working:m1+'('+x+')+'+c1+' = '+(m1*x+c1)};})}
+    {lb:'Your turn',dr:dQ8,ht:tryItClickGrid(function(){
+      var m1=rnd(1,2),c1=rnd(0,2),m2=pick([-1,-2]),x=rnd(1,3),c2=(m1-m2)*x+c1,y=m1*x+c1;
+      return{question:'The lines y = '+m1+'x + '+c1+' and y = '+m2+'x + '+c2+' are drawn below. Tap the point where they cross.',tx:x,ty:y,hitMode:'full',xmin:-1,xmax:5,ymin:-1,ymax:10,
+        extraSVG:function(ox,oy,unit){return L(ox+(-1)*unit,oy-(m1*-1+c1)*unit,ox+5*unit,oy-(m1*5+c1)*unit,'#C0272D',2)+L(ox+(-1)*unit,oy-(m2*-1+c2)*unit,ox+5*unit,oy-(m2*5+c2)*unit,'#1a5a8a',2);},
+        working:'Substitute x = '+x+' into either line: y = '+y};
+    })}
   ]},
   {ey:'Q9 \u00b7 Year 9 \u00b7 Graphs',ti:'Real-Life Graphs \u2014 Interpreting Context',su:'Interpret a graph showing a journey: moving, stopped, moving faster.',steps:[
     {lb:'Sloped sections',dr:dQ9,ht:'<p>A sloped section means the quantity is <b>changing</b> \u2014 e.g. moving.</p>'},
