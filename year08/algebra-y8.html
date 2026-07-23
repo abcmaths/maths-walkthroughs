@@ -109,8 +109,26 @@ sup,sub{font-size:.7em;}
 var ST={};
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function tryIt(o){if(typeof o==='function')o=o();var id='t'+Math.random().toString(36).slice(2);ST[id]=o;var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');return '<div class="try"><div class="try-t">&#10002; Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="Answer ('+o.unit+')" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
-function ck(id){var o=ST[id],v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}if(Math.abs(v-o.ans)<=(o.exact||0.05)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}else{f.className='fb er';f.textContent='Not quite \u2014 check your working and try again.';}}
+function tryIt(o){
+  var genFn=typeof o==='function'?o:null;
+  if(genFn)o=genFn();
+  var id='t'+Math.random().toString(36).slice(2);
+  ST[id]={o:o,genFn:genFn};
+  return buildTry(id,o);
+}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  return '<div class="try" id="'+id+'_box"><div class="try-t">&#10002; Your Turn</div><p>'+o.question+'</p><ul class="hl">'+h+'</ul><div class="ar"><input type="number" step="any" placeholder="'+ph+'" id="'+id+'_i"/><button class="ck" onclick="ck(\''+id+'\')">Check</button></div><div class="fb" id="'+id+'_f"></div><details class="wk"><summary>Show full working</summary><div class="wk-b">'+o.working+'</div></details><div style="margin-top:10px;"><button class="ck" style="background:#888;" onclick="newTry(\''+id+'\')">New question</button></div></div>';
+}
+function newTry(id){
+  var e=ST[id];if(!e||!e.genFn)return;
+  var o=e.genFn();e.o=o;
+  var box=document.getElementById(id+'_box');if(!box)return;
+  var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
+  box.parentNode.replaceChild(tmp.firstChild,box);
+}
+function ck(id){var o=ST[id].o,v=parseFloat(document.getElementById(id+'_i').value),f=document.getElementById(id+'_f');if(isNaN(v)){f.className='fb er';f.textContent='Please enter a number.';return;}if(Math.abs(v-o.ans)<=(o.exact||0.05)){f.className='fb ok';f.textContent='Correct! Answer: '+o.ans+' '+o.unit;}else{f.className='fb er';f.textContent='Not quite \u2014 check your working and try again.';}}
 function g(){return document.getElementById('dg');}
 function T(x,y,txt,c,sz,a,bold){c=c||'#6b5750';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
