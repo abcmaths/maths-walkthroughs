@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Basic Concepts: Power, Authority, Legitimacy, Sovereignty — Government</title>
+<style>
+:root{--red:#1565C0;--dark:#0d47a1;--cream:#E3F2FD;--ink:#0d1b2a;--line:#BBDEFB;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#555;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#E3F2FD);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:180px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:15px;line-height:1.6;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:16px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;margin-bottom:8px;line-height:1.5;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.mc-opt{text-align:left;padding:10px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold);background:#fffaf0;}
+.mc-opt:disabled{cursor:default;opacity:.9;}
+.mc-opt.mc-correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600;}
+.mc-opt.mc-wrong{border-color:#c62828;background:#fde8e8;color:#a01820;}
+.hl{font-size:14px;color:#1a2a3a;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e3f2fd;color:#0d47a1;border:1px solid #90caf9;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#1a2a3a;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <div class="ht">Basic Concepts in Government</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr"><div class="eyebrow" id="ey"></div><h1 id="ti"></h1><div class="sub" id="su"></div></div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ACC='#1A5276',DARK='#0d47a1',CRM='#E3F2FD',LINE='#BBDEFB';
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+var ST={};
+function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn};return buildTry(id,o);}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="ar"><input type="number" step="any" placeholder="Answer'+(o.unit?' ('+o.unit+')':'')+'" class="try-inp" data-tryid="'+id+'"/>'
+    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=entry.genFn();entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');
+    tmp.innerHTML=entry.mc?buildTryMC(id,o):buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:entry.mc};return;
+  }
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');
+    allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){
+      el.classList.add('mc-correct');
+      fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;
+    }else{
+      el.classList.add('mc-wrong');
+      allBtns[o.correct].classList.add('mc-correct');
+      fb.className='try-fb er';fb.textContent='Not quite \u2014 the correct answer is highlighted above.';
+    }
+    return;
+  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;
+    var v=parseFloat(inp.value);
+    if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
+    if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.05*Math.abs(o.ans)||0.05)){fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
+  }
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#0d1b2a';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||CRM;stroke=stroke||ACC;sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="3"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+'/>';}
+function arw(x1,y1,x2,y2,c,w){var id='m'+Math.round(x1*7+y2*3);return '<defs><marker id="'+id+'" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="'+(c||ACC)+'"/></marker></defs><line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||ACC)+'" stroke-width="'+(w||2)+'" marker-end="url(#'+id+')"/>';}
+function circ(cx,cy,r,fill,stroke){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||CRM)+'" stroke="'+(stroke||ACC)+'" stroke-width="1.5"/>';}
+
+function dQ1(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Power, Authority, Legitimacy, Sovereignty',ACC,12,'middle',true));
+if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'Power: the ability to influence or control behaviour',DARK,10,'middle',false));o.push(T(240,74,'With or without consent of those affected','#555',9,'middle',false));}
+if(p>=2){o.push(R(10,92,460,40,CRM,ACC,1.5));o.push(T(240,110,'Coercive \u2022 Economic \u2022 Political forms of power','#333',10,'middle',false));}
+if(p>=3){o.push(R(10,142,460,40,CRM,ACC,1.5));o.push(T(240,160,'Power \u2260 Authority: authority is power seen as rightful','#333',10,'middle',false));}
+if(p>=4){o.push(R(10,192,460,60,LINE,ACC,1));o.push(T(240,212,'Government needs power to enforce law and maintain order','#333',9,'middle',false));o.push(T(240,232,'But needs authority + legitimacy for stable, willing compliance','#555',9,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ2(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Types of Authority (Max Weber)',ACC,12,'middle',true));
+if(p>=1){o.push(R(20,40,130,150,CRM,ACC,1.5));o.push(T(85,60,'Traditional',DARK,11,'middle',true));o.push(T(85,80,'Based on','#555',9,'middle',false));o.push(T(85,94,'custom, lineage','#555',9,'middle',false));o.push(T(85,120,'e.g. monarchy','#333',9,'middle',false));}
+if(p>=2){o.push(R(175,40,130,150,CRM,ACC,1.5));o.push(T(240,60,'Charismatic',DARK,11,'middle',true));o.push(T(240,80,'Based on','#555',9,'middle',false));o.push(T(240,94,'personal appeal','#555',9,'middle',false));o.push(T(240,120,'e.g. iconic leader','#333',9,'middle',false));}
+if(p>=3){o.push(R(330,40,130,150,CRM,ACC,1.5));o.push(T(395,60,'Legal-rational',DARK,10,'middle',true));o.push(T(395,80,'Based on','#555',9,'middle',false));o.push(T(395,94,'laws, constitution','#555',9,'middle',false));o.push(T(395,120,'e.g. elected president','#333',9,'middle',false));}
+if(p>=4){o.push(T(240,220,'Modern states like Nigeria rely mainly on legal-rational authority','#333',10,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ3(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Weber\'s Three Types of Authority',ACC,12,'middle',true));
+if(p>=1){o.push(R(20,40,130,150,CRM,ACC,1.5));o.push(T(85,60,'Traditional',DARK,11,'middle',true));o.push(T(85,90,'Sultan, Oba, Ooni','#555',9,'middle',false));}
+if(p>=2){o.push(R(175,40,130,150,CRM,ACC,1.5));o.push(T(240,60,'Charismatic',DARK,11,'middle',true));o.push(T(240,90,'Personal magnetism','#555',9,'middle',false));}
+if(p>=3){o.push(R(330,40,130,150,CRM,ACC,1.5));o.push(T(395,60,'Legal-Rational',DARK,10,'middle',true));o.push(T(395,90,'President, Governor','#555',9,'middle',false));}
+if(p>=4){o.push(T(240,220,'Legal-rational authority is most stable: tied to institutions not individuals','#333',10,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ4(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'What is Legitimacy?',ACC,12,'middle',true));
+if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'Legitimacy: popular acceptance of a right to rule',DARK,10,'middle',false));}
+if(p>=2){o.push(R(10,92,460,40,CRM,ACC,1.5));o.push(T(240,110,'Legitimacy \u2260 Legality \u2014 a government can be legal but not accepted','#333',10,'middle',false));}
+if(p>=3){o.push(R(10,142,460,40,CRM,ACC,1.5));o.push(T(240,160,'Legitimate governments need less force to secure obedience','#333',10,'middle',false));}
+if(p>=4){o.push(R(10,192,460,60,LINE,ACC,1));o.push(T(240,212,'Legitimacy crisis: citizens reject government\'s right to rule','#333',9,'middle',false));o.push(T(240,232,'Often follows disputed elections, corruption, repression','#555',9,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ5(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Sources of Legitimacy',ACC,12,'middle',true));
+if(p>=1){o.push(R(20,40,105,150,CRM,ACC,1.5));o.push(T(72,60,'Traditional',DARK,10,'middle',true));o.push(T(72,90,'Custom /','#555',9,'middle',false));o.push(T(72,104,'lineage','#555',9,'middle',false));}
+if(p>=2){o.push(R(135,40,105,150,CRM,ACC,1.5));o.push(T(187,60,'Legal-',DARK,10,'middle',true));o.push(T(187,74,'Constitutional',DARK,9,'middle',true));o.push(T(187,104,'Free & fair','#555',9,'middle',false));o.push(T(187,118,'elections','#555',9,'middle',false));}
+if(p>=3){o.push(R(250,40,105,150,CRM,ACC,1.5));o.push(T(302,60,'Performance',DARK,10,'middle',true));o.push(T(302,90,'Delivers','#555',9,'middle',false));o.push(T(302,104,'growth/welfare','#555',9,'middle',false));}
+if(p>=4){o.push(R(365,40,95,150,CRM,ACC,1.5));o.push(T(412,60,'Charismatic',DARK,10,'middle',true));o.push(T(412,90,'Founding','#555',9,'middle',false));o.push(T(412,104,'leader/ideology','#555',9,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ6(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'What is Sovereignty?',ACC,12,'middle',true));
+if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'Sovereignty: supreme, final authority within a state',DARK,10,'middle',false));}
+if(p>=2){o.push(R(10,92,460,40,CRM,ACC,1.5));o.push(T(240,110,'One of 4 elements of statehood (Montevideo Convention, 1933)','#333',10,'middle',false));}
+if(p>=3){o.push(R(10,142,460,40,CRM,ACC,1.5));o.push(T(240,160,'A colony lacks sovereignty \u2014 ruled by a foreign power','#333',10,'middle',false));}
+if(p>=4){o.push(R(10,192,460,60,LINE,ACC,1));o.push(T(240,212,'In a democracy, sovereignty ultimately rests with the people','#333',9,'middle',false));o.push(T(240,232,'Nigeria: sovereignty in the state, powers shared under federalism','#555',9,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ7(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Internal vs External Sovereignty',ACC,12,'middle',true));
+if(p>=1){o.push(R(20,40,210,150,CRM,ACC,1.5));o.push(T(125,60,'Internal Sovereignty',DARK,11,'middle',true));o.push(T(125,90,'Supreme authority over','#555',9,'middle',false));o.push(T(125,104,'all persons/groups inside','#555',9,'middle',false));o.push(T(125,118,'the state\'s own territory','#555',9,'middle',false));}
+if(p>=2){o.push(R(250,40,210,150,CRM,ACC,1.5));o.push(T(355,60,'External Sovereignty',DARK,11,'middle',true));o.push(T(355,90,'Independence from','#555',9,'middle',false));o.push(T(355,104,'control by other states;','#555',9,'middle',false));o.push(T(355,118,'own foreign policy','#555',9,'middle',false));}
+if(p>=3){o.push(T(240,205,'Challenges: insurgency (internal) \u2022 globalisation, treaties (external)','#333',9,'middle',false));}
+if(p>=4){o.push(T(240,225,'Sovereignty does not legally need recognition, but it helps in practice','#555',9,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ8(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Power, Authority, Legitimacy Together',ACC,12,'middle',true));
+if(p>=1){o.push(arw(60,140,180,140,ACC,2));o.push(circ(40,140,20,CRM,ACC));o.push(T(40,144,'Power',DARK,10,'middle',true));}
+if(p>=2){o.push(circ(200,140,20,CRM,ACC));o.push(T(200,144,'Authority',DARK,9,'middle',true));o.push(arw(220,140,340,140,ACC,2));}
+if(p>=3){o.push(circ(360,140,25,CRM,ACC));o.push(T(360,140,'Legitimacy',DARK,9,'middle',true));o.push(T(360,155,'(stable rule)','#555',8,'middle',false));}
+if(p>=4){o.push(T(240,210,'Aligned: stable governance. Misaligned: reliance on coercion or weak enforcement','#333',9,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ9(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'WAEC Focus: Define, Distinguish, Example',ACC,12,'middle',true));
+if(p>=1){o.push(R(10,38,460,44,CRM,ACC,2));o.push(T(240,56,'1. Define the term precisely',DARK,10,'middle',false));}
+if(p>=2){o.push(R(10,92,460,40,CRM,ACC,1.5));o.push(T(240,110,'2. Distinguish from related terms (power vs authority)','#333',10,'middle',false));}
+if(p>=3){o.push(R(10,142,460,40,CRM,ACC,1.5));o.push(T(240,160,'3. Give types/sources (Weber for authority)','#333',10,'middle',false));}
+if(p>=4){o.push(R(10,192,460,60,LINE,ACC,1));o.push(T(240,212,'4. Use Nigerian examples \u2022 5. Conclude on significance','#333',9,'middle',false));}
+s.innerHTML=o.join('');}
+function dQ10(p){var s=g(),o=[];s.setAttribute('viewBox','0 0 480 260');
+o.push(T(240,20,'Mixed Revision Summary',ACC,12,'middle',true));
+if(p>=1){o.push(R(10,38,460,40,CRM,ACC,2));o.push(T(240,56,'Power \u2192 Authority (recognised) \u2192 Legitimacy (sustained)',DARK,10,'middle',false));}
+if(p>=2){o.push(R(10,90,460,40,CRM,ACC,1.5));o.push(T(240,108,'Sovereignty: the overarching supreme authority of the state','#333',10,'middle',false));}
+if(p>=3){o.push(R(10,142,460,40,CRM,ACC,1.5));o.push(T(240,160,'Montevideo Convention: population, territory, government, sovereignty','#333',9,'middle',false));}
+if(p>=4){o.push(R(10,192,460,60,LINE,ACC,1));o.push(T(240,212,'Nigeria: legal-rational authority, sovereignty in state/people','#333',9,'middle',false));o.push(T(240,232,'Give Nigerian example for every concept in WAEC essays','#555',9,'middle',false));}
+s.innerHTML=o.join('');}
+
+var QS=[
+{ey:'Q1 \u2022 Government • Y10',ti:'Meaning of Power',su:'Understand what power means in political science.',steps:[
+  {lb:'What is power?',dr:dQ1,ht:'<p>Power is the ability to influence, control or direct the behaviour of others, with or without their consent. It is the capacity to make people act in a way they would not otherwise choose to act.</p>'},
+  {lb:'Forms of power',dr:dQ1,ht:'<p>Power can take several forms: physical/coercive power (force, threat of violence), economic power (control of resources and wealth), and political power (control of government machinery). A government exercises political power over its citizens.</p>'},
+  {lb:'Power vs influence',dr:dQ1,ht:'<p>Power is backed by the ability to compel obedience — through law, force, or sanction. Influence is softer: it persuades without compulsion. A popular preacher may have influence; a government has power because it can enforce compliance.</p>'},
+  {lb:'Power in Nigeria\'s government',dr:dQ1,ht:'<p>In Nigeria, political power is constitutionally distributed among the Executive, Legislature and Judiciary. Each arm exercises power within its own sphere, and the 1999 Constitution sets limits to prevent any one arm becoming all-powerful.</p>'},
+  {lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var qs=[{q:'Power in political science is best defined as:',o:["The ability to influence or control the behaviour of others", "A type of election", "A law passed by parliament", "A form of taxation"],a:1,w:'Power is the capacity to influence, control or direct the behaviour of others, with or without their consent.'},{q:'Which of these is an example of coercive power?',o:["A teacher persuading a student to study", "A government using the police to enforce a curfew", "A celebrity endorsing a product", "A friend giving advice"],a:2,w:'Coercive power relies on force or the threat of force — as when police enforce a curfew.'},{q:'What distinguishes power from mere influence?',o:["Power always involves money", "Power can compel obedience; influence only persuades", "Influence is always illegal", "Power requires an election"],a:2,w:'Power carries the capacity to compel compliance (through law or force), while influence only persuades without compulsion.'},{q:'In Nigeria, political power is distributed among which arms of government?',o:["Only the Executive", "Executive, Legislature and Judiciary", "Only the military", "Only traditional rulers"],a:2,w:'Nigeria\'s 1999 Constitution distributes political power among the Executive, Legislature and Judiciary.'},{q:'Economic power refers to:',o:["Control over resources and wealth used to influence others", "The power to declare war only", "A type of constitution", "The power held only by judges"],a:1,w:'Economic power is the capacity to influence others through control of wealth and resources.'},{q:'Why does government need power to function?',o:["To decorate public buildings", "To enforce laws and maintain order in society", "To reduce population size", "To abolish elections"],a:2,w:'Government needs power to enforce laws, maintain order and ensure its decisions are carried out.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a-1,working:q.w};})},
+]},
+{ey:'Q2 \u2022 Government • Y10',ti:'Meaning of Authority',su:'Understand authority as the rightful exercise of power.',steps:[
+  {lb:'What is authority?',dr:dQ2,ht:'<p>Authority is legitimate power — power that is recognised as rightful by those over whom it is exercised. Unlike raw power, authority is accepted as proper and is usually backed by law, tradition or custom.</p>'},
+  {lb:'Authority requires recognition',dr:dQ2,ht:'<p>A person or institution has authority when others accept their right to give commands. A newly appointed Local Government Chairman has authority the moment the people recognise his office, even before he uses any power.</p>'},
+  {lb:'Authority vs power distinguished',dr:dQ2,ht:'<p>Power is \'can\'; authority is \'may\'. A robber may have the power to force you to hand over money, but has no authority to do so. A police officer has both the power and the authority to arrest a suspect.</p>'},
+  {lb:'Sources of authority (Max Weber)',dr:dQ2,ht:'<p>Sociologist Max Weber identified three types: traditional authority (based on custom, e.g. a monarch), charismatic authority (based on personal qualities of a leader), and legal-rational authority (based on laws and formal rules, e.g. an elected president).</p>'},
+  {lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var qs=[{q:'Authority differs from power in that authority is:',o:["Always violent", "Power recognised as rightful/legitimate by those it affects", "Only held by the military", "Never backed by law"],a:2,w:'Authority is power that is accepted as rightful or legitimate by the people it governs.'},{q:'Which of these best illustrates authority (not mere power)?',o:["An armed robber forcing a victim to comply", "A duly elected governor issuing an executive order", "A bully threatening a classmate", "A mob attacking a market"],a:2,w:'A duly elected governor\'s orders are backed by legitimate authority recognised under the constitution.'},{q:'According to Max Weber, authority based on custom and long-established practice is called:',o:["Charismatic authority", "Traditional authority", "Legal-rational authority", "Coercive authority"],a:2,w:'Traditional authority rests on established customs and traditions, such as hereditary monarchy.'},{q:'Charismatic authority, in Weber\'s classification, is based on:',o:["Written laws only", "The personal qualities and appeal of a leader", "Age of the ruler only", "Military strength only"],a:2,w:'Charismatic authority derives from a leader\'s exceptional personal qualities that inspire devotion and loyalty.'},{q:'A president elected under a written constitution exercises which type of authority?',o:["Traditional authority", "Charismatic authority only", "Legal-rational authority", "No authority at all"],a:3,w:'Legal-rational authority is based on formal laws and rules — as with a constitutionally elected president.'},{q:'Why is authority important for effective governance?',o:["It guarantees a leader will never be criticised", "It ensures citizens obey because they accept the ruler's right to rule, reducing the need for force", "It removes the need for a constitution", "It replaces the need for elections"],a:2,w:'Authority secures voluntary obedience because citizens accept the ruler\'s right to rule, reducing reliance on coercion.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a-1,working:q.w};})},
+]},
+{ey:'Q3 \u2022 Government • Y10',ti:'Types and Sources of Authority',su:'Explore Weber\'s three types of authority in more depth, with Nigerian examples.',steps:[
+  {lb:'Traditional authority in Nigeria',dr:dQ3,ht:'<p>Nigeria\'s traditional rulers — the Sultan of Sokoto, the Oba of Benin, the Ooni of Ife — hold traditional authority passed down through custom and lineage. Though they have no formal constitutional powers today, their moral authority remains strong.</p>'},
+  {lb:'Charismatic authority examples',dr:dQ3,ht:'<p>Charismatic authority depends on personal magnetism rather than office or tradition. Historical examples include independence-era nationalist leaders whose personal appeal mobilised mass followings beyond what their formal office alone would provide.</p>'},
+  {lb:'Legal-rational authority in modern states',dr:dQ3,ht:'<p>Legal-rational authority is the dominant form in modern states like Nigeria: the President, Governors and National Assembly members derive authority from the 1999 Constitution and electoral laws, not from birth or personal charisma.</p>'},
+  {lb:'Why the distinction matters',dr:dQ3,ht:'<p>Understanding these types helps explain political stability and change. A leader who is only charismatic may lose authority once personal appeal fades; legal-rational authority tends to be more stable because it is tied to institutions, not individuals.</p>'},
+  {lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var qs=[{q:'The Sultan of Sokoto\'s authority is best classified as:',o:["Legal-rational authority", "Traditional authority", "Charismatic authority", "Military authority"],a:2,w:'Traditional rulers derive their authority from custom and hereditary succession — traditional authority.'},{q:'Which type of authority is MOST tied to formal written laws and elected office?',o:["Traditional authority", "Charismatic authority", "Legal-rational authority", "Religious authority"],a:3,w:'Legal-rational authority rests on formal laws, rules and constitutionally defined offices.'},{q:'A key weakness of charismatic authority is that it:',o:["Cannot be inherited or easily transferred to a successor", "Is always backed by written law", "Never depends on a leader's personality", "Is the most stable form of authority"],a:1,w:'Charismatic authority is tied to an individual\'s personal qualities, making succession and stability difficult once that leader is gone.'},{q:'Why is legal-rational authority generally more stable in modern states?',o:["Because it depends only on one person's popularity", "Because it is tied to institutions and laws rather than individuals", "Because it cannot be challenged in court", "Because it never changes"],a:2,w:'Legal-rational authority is anchored in institutions and laws, so it survives beyond any single office-holder.'},{q:'Nigeria\'s President derives authority mainly from:',o:["Hereditary succession", "The 1999 Constitution and electoral process", "Personal charisma alone", "Traditional custom"],a:2,w:'The President\'s authority is legal-rational, based on the Constitution and the electoral process.'},{q:'Which best describes the continuing role of traditional rulers in Nigeria today?',o:["They hold formal constitutional executive power", "They retain moral and customary authority despite lacking formal constitutional power", "They control the National Assembly", "They appoint the President"],a:2,w:'Traditional rulers today mostly retain moral/customary authority and influence, without formal constitutional executive power.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a-1,working:q.w};})},
+]},
+{ey:'Q4 \u2022 Government • Y10',ti:'Meaning of Legitimacy',su:'Understand legitimacy as the acceptance of a government\'s right to rule.',steps:[
+  {lb:'What is legitimacy?',dr:dQ4,ht:'<p>Legitimacy is the popular acceptance of a government\'s right to exercise power. A legitimate government is one the citizens genuinely regard as entitled to rule, not merely one that has seized power.</p>'},
+  {lb:'Legitimacy vs legality',dr:dQ4,ht:'<p>Legitimacy is not the same as legality. A government can be legal (following constitutional procedure) yet lack legitimacy if citizens reject it; conversely, a government that came to power illegally (e.g. by coup) can sometimes gain legitimacy over time through performance.</p>'},
+  {lb:'Why legitimacy matters',dr:dQ4,ht:'<p>A legitimate government enjoys voluntary compliance, reducing the need for constant coercion. Legitimacy makes governance easier, cheaper and more stable, since citizens obey because they believe it is right to do so, not only because they fear punishment.</p>'},
+  {lb:'Legitimacy crisis',dr:dQ4,ht:'<p>A \'legitimacy crisis\' occurs when a significant part of the population no longer accepts a government\'s right to rule — often following disputed elections, corruption, or repression. This can lead to protests, instability, or even the government\'s collapse.</p>'},
+  {lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var qs=[{q:'Legitimacy in government refers to:',o:["The size of the army", "Popular acceptance of a government's right to rule", "The number of political parties", "A country's population size"],a:2,w:'Legitimacy is the general acceptance by the people that a government has the right to govern.'},{q:'How does legitimacy differ from legality?',o:["They mean exactly the same thing", "Legality is following legal procedure; legitimacy is popular acceptance of the right to rule \u2014 they can differ", "Legitimacy always requires an election", "Legality is decided only by foreign governments"],a:2,w:'A government can be legal but not legitimate (if rejected by the people), or gain legitimacy over time despite an illegal start.'},{q:'Why is legitimacy valuable to a government?',o:["It reduces need for constant force because citizens obey willingly", "It guarantees unlimited presidential terms", "It replaces the need for a budget", "It removes the judiciary's powers"],a:1,w:'Legitimate governments secure voluntary obedience, making governance more stable and less dependent on coercion.'},{q:'A \'legitimacy crisis\' typically arises after:',o:["A well-conducted, widely accepted election", "Disputed elections, corruption or repression that erode public trust", "A national holiday", "A new road is built"],a:2,w:'Legitimacy crises often follow disputed elections, corruption or repression that cause citizens to reject the government\'s right to rule.'},{q:'Which scenario shows a legal but potentially illegitimate government?',o:["A government that followed constitutional procedure but is rejected by the majority of citizens", "A government elected in a free and fair vote accepted by all", "A government with strong public support and fair elections", "A traditional ruler with customary legitimacy"],a:1,w:'A government can technically follow legal procedure yet still be seen as illegitimate if citizens broadly reject its right to rule.'},{q:'Military governments that seize power by coup often seek legitimacy by:',o:["Ignoring the population entirely", "Promising quick return to civilian rule and delivering development/stability", "Cancelling all future elections permanently", "Refusing to communicate with citizens"],a:2,w:'Military governments often try to build legitimacy by promising a transition to civilian rule and demonstrating governance performance.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a-1,working:q.w};})},
+]},
+{ey:'Q5 \u2022 Government • Y10',ti:'Sources of Legitimacy',su:'Explore the different bases on which governments claim legitimacy.',steps:[
+  {lb:'Traditional source',dr:dQ5,ht:'<p>Some governments claim legitimacy through tradition and custom — as with hereditary monarchies where succession follows established lineage and is accepted because \'it has always been so\'.</p>'},
+  {lb:'Legal-constitutional source',dr:dQ5,ht:'<p>Modern democratic legitimacy is usually based on free and fair elections conducted under a constitution. Citizens accept the outcome because the process was seen as open, competitive and transparent.</p>'},
+  {lb:'Performance-based legitimacy',dr:dQ5,ht:'<p>A government can also earn legitimacy through performance — delivering security, economic growth, infrastructure and welfare. Citizens may accept a government\'s rule because it \'delivers\', even if its original path to power was contested.</p>'},
+  {lb:'Charismatic/ideological source',dr:dQ5,ht:'<p>Some governments derive legitimacy from a compelling ideology or a charismatic founding leader associated with independence or liberation — legitimacy tied to the ideas or personality that first brought the government to power.</p>'},
+  {lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var qs=[{q:'Which is an example of legitimacy based on tradition?',o:["A president winning a competitive election", "A hereditary monarch succeeding by custom", "A military ruler seizing power by coup", "A government delivering strong economic growth"],a:2,w:'Traditional legitimacy rests on custom and established succession, as with hereditary monarchy.'},{q:'Legal-constitutional legitimacy is MOST closely associated with:',o:["Free and fair elections under a constitution", "Military coups", "Hereditary succession", "Personal charisma alone"],a:1,w:'Legal-constitutional legitimacy comes from citizens accepting outcomes of free, fair, constitutionally-governed elections.'},{q:'\'Performance-based\' legitimacy means a government is accepted because it:',o:["Has the largest army", "Delivers development, security and welfare to citizens", "Is the oldest government in the region", "Has a hereditary ruler"],a:2,w:'Performance-based legitimacy is earned when a government delivers tangible benefits like security, growth and welfare.'},{q:'A military government that initially seized power illegally might gain legitimacy over time mainly through:',o:["Ignoring citizens' needs", "Strong governance performance and eventual credible transition promises", "Cancelling the constitution permanently", "Banning all political activity forever"],a:2,w:'Even a government born of an unconstitutional takeover can gain legitimacy over time via performance and credible plans to restore civilian rule.'},{q:'Which source of legitimacy is generally considered most compatible with modern democracy?',o:["Traditional/hereditary legitimacy", "Legal-constitutional legitimacy via free elections", "Coup-based legitimacy", "Charismatic legitimacy alone"],a:2,w:'Legal-constitutional legitimacy through free and fair elections is the form most consistent with modern democratic government.'},{q:'Why might citizens continue to obey a government even after questioning how it came to power?',o:["Because they never think about legitimacy", "Because performance-based legitimacy can develop even where the initial path to power was contested", "Because obedience is always forced", "Because legitimacy never changes over time"],a:2,w:'Legitimacy can be built over time through good governance performance, even when the original path to power was contested.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a-1,working:q.w};})},
+]},
+{ey:'Q6 \u2022 Government • Y10',ti:'Meaning of Sovereignty',su:'Understand sovereignty as the supreme authority of the state.',steps:[
+  {lb:'What is sovereignty?',dr:dQ6,ht:'<p>Sovereignty is the supreme, final authority within a state — the power that is not subject to any higher authority. It is one of the defining features that makes an entity a fully independent state.</p>'},
+  {lb:'Two dimensions of sovereignty',dr:dQ6,ht:'<p>Sovereignty has both an internal dimension (supreme authority over all persons and institutions within the state\'s territory) and an external dimension (independence from control by other states or foreign powers).</p>'},
+  {lb:'Sovereignty and statehood',dr:dQ6,ht:'<p>Sovereignty is one of the four elements of statehood under the Montevideo Convention (1933), alongside population, territory and government. A colony, by contrast, lacks sovereignty because it remains under the authority of a foreign power.</p>'},
+  {lb:'Sovereignty in a federal system',dr:dQ6,ht:'<p>In a federation like Nigeria, sovereignty ultimately resides in the state as a whole (and, in a democracy, in the people), even though governmental powers are shared between federal and state governments through the constitution.</p>'},
+  {lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'Sovereignty is best defined as:',o:["The supreme, final authority within a state, not subject to any higher power", "A type of tax", "The number of ministries in government", "A form of election"],a:1,w:'Sovereignty is the supreme and final authority within a state, unbound by any higher power.'},{q:'Which is an example of EXTERNAL sovereignty?',o:["A state's independence from control by other countries", "A state's control over its own courts", "A state collecting taxes domestically", "A state's national anthem"],a:1,w:'External sovereignty refers to a state\'s independence from control by other states or foreign powers.'},{q:'According to the Montevideo Convention (1933), sovereignty is one of how many essential elements of a state?',o:["Two", "Three", "Four", "Six"],a:3,w:'The Montevideo Convention lists four elements: population, territory, government, and sovereignty.'},{q:'Why does a colony lack full sovereignty?',o:["It has no population", "It remains under the ultimate authority of a foreign colonial power", "It has no defined territory", "It has too many citizens"],a:2,w:'A colony lacks sovereignty because ultimate authority over it rests with a foreign colonial power, not itself.'},{q:'In a democratic state, where does sovereignty ultimately reside, according to popular sovereignty theory?',o:["In the military", "In the people", "In the president alone", "In foreign governments"],a:2,w:'Popular sovereignty holds that ultimate political authority belongs to the people, not any single ruler.'},{q:'In Nigeria\'s federal system, sovereignty ultimately belongs to:',o:["Only the 36 state governors", "The Nigerian state/people as a whole, even though power is shared between federal and state governments", "Only the federal government exclusively", "Foreign development partners"],a:2,w:'Sovereignty resides in the Nigerian state and its people, even though the constitution distributes governmental powers between federal and state tiers.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a-1,working:q.w};})},
+]},
+{ey:'Q7 \u2022 Government • Y10',ti:'Internal and External Sovereignty',su:'Distinguish internal sovereignty from external sovereignty with examples.',steps:[
+  {lb:'Internal sovereignty defined',dr:dQ7,ht:'<p>Internal sovereignty is the state\'s supreme authority over all individuals, groups and institutions within its own territory. It means no person or group within the state is above the state\'s law.</p>'},
+  {lb:'External sovereignty defined',dr:dQ7,ht:'<p>External sovereignty is a state\'s independence and equality in relation to other states — free from foreign control, and able to conduct its own foreign policy, sign treaties, and defend its own interests internationally.</p>'},
+  {lb:'Limits and challenges to sovereignty',dr:dQ7,ht:'<p>In practice, sovereignty can be constrained: internally by federalism, strong regional/ethnic groups, or insurgencies; externally by international law, treaty obligations, globalisation, and dependence on foreign aid or trade.</p>'},
+  {lb:'Sovereignty and international recognition',dr:dQ7,ht:'<p>While sovereignty does not legally depend on recognition by other states, in practice international recognition (e.g. UN membership) strengthens a state\'s ability to exercise sovereignty on the world stage.</p>'},
+  {lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'Internal sovereignty means:',o:["A state's supreme authority over all persons/groups within its territory", "A state's relationship with the United Nations", "The number of neighbouring countries a state has", "A state's population growth rate"],a:1,w:'Internal sovereignty is the state\'s supreme authority over everyone and everything within its own borders.'},{q:'External sovereignty is best illustrated by a state\'s ability to:',o:["Collect local taxes only", "Independently conduct foreign policy and sign treaties, free from foreign control", "Build local roads", "Print its own currency only"],a:2,w:'External sovereignty is a state\'s independence to act internationally — conducting foreign policy and signing treaties without foreign control.'},{q:'Which of these could weaken a state\'s internal sovereignty?',o:["A strong, unified national government", "Widespread insurgency or armed separatist groups challenging state control", "A well-functioning judiciary", "Free and fair elections"],a:2,w:'Insurgencies and separatist movements can challenge the state\'s supreme authority within its own territory, weakening internal sovereignty.'},{q:'Membership of international organisations like the UN can:',o:["Automatically remove a state's sovereignty", "Strengthen a state's practical ability to exercise external sovereignty through recognition", "Make a state's laws invalid", "Abolish its government"],a:2,w:'International recognition, such as UN membership, strengthens a state\'s ability to exercise sovereignty on the world stage, even though sovereignty itself does not legally depend on it.'},{q:'Globalisation can be seen as a challenge to sovereignty because it:',o:["Increases a state's total land area", "Creates economic and political interdependence that can limit a state's independent decision-making", "Removes the need for a government entirely", "Guarantees full independence from all other states"],a:2,w:'Globalisation creates interdependence — through trade, finance and international agreements — that can constrain a state\'s fully independent decision-making.'},{q:'Which best describes the relationship between sovereignty and federalism in Nigeria?',o:["Federalism abolishes sovereignty entirely", "Sovereignty belongs to the Nigerian state as a whole, while governmental powers are shared under federalism", "States within the federation are each fully sovereign nations", "Only the federal capital territory holds sovereignty"],a:2,w:'Sovereignty resides in Nigeria as a single state, while federalism distributes governmental powers between federal and state tiers under the constitution.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a-1,working:q.w};})},
+]},
+{ey:'Q8 \u2022 Government • Y10',ti:'How Power, Authority and Legitimacy Relate',su:'See how these three concepts work together in practice.',steps:[
+  {lb:'The three-way relationship',dr:dQ8,ht:'<p>Power is the raw capacity to compel; authority is power recognised as rightful; legitimacy is the broader popular acceptance that sustains that authority over time. Effective government usually needs all three working together.</p>'},
+  {lb:'When they align',dr:dQ8,ht:'<p>When a government has power, exercises it through recognised authority, and is broadly accepted as legitimate, governance tends to be stable, with high voluntary compliance and low need for force.</p>'},
+  {lb:'When they diverge',dr:dQ8,ht:'<p>A government may have power (e.g. a military junta) without full authority or legitimacy, relying heavily on coercion. Conversely, a government with legitimacy but weak enforcement power may struggle to implement policy effectively.</p>'},
+  {lb:'Nigerian illustration',dr:dQ8,ht:'<p>Nigeria\'s democratic government since 1999 draws authority from the Constitution and legitimacy from elections; where elections are disputed or governance underperforms, legitimacy — and public compliance — can weaken even though formal power/authority remain.</p>'},
+  {lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var qs=[{q:'Which best describes the relationship between power, authority and legitimacy?',o:["They are identical concepts with no difference", "Power is raw capacity to compel; authority is recognised power; legitimacy is the wider acceptance sustaining authority", "Legitimacy always precedes power", "Authority requires no acceptance from citizens"],a:2,w:'Power is the raw capacity to compel, authority is power seen as rightful, and legitimacy is the broader popular acceptance that sustains authority.'},{q:'A government that relies mainly on coercion, with little popular acceptance, is best described as having:',o:["Power without full authority or legitimacy", "Full legitimacy but no power", "Complete traditional authority", "No power at all"],a:1,w:'Such a government exercises raw power but lacks the recognised authority and broad legitimacy that would secure voluntary compliance.'},{q:'When power, authority and legitimacy are all present and aligned, governance tends to be:',o:["Highly unstable and chaotic", "More stable, with citizens complying voluntarily", "Impossible to achieve", "Only possible under military rule"],a:2,w:'Alignment of power, authority and legitimacy tends to produce stable governance with voluntary citizen compliance.'},{q:'In Nigeria\'s current democratic system, authority is mainly derived from:',o:["Military strength", "The 1999 Constitution and electoral process", "Hereditary succession", "Foreign appointment"],a:2,w:'Nigeria\'s democratic authority derives from the 1999 Constitution and the electoral process that selects office-holders.'},{q:'What can happen to a government\'s legitimacy if elections are widely seen as rigged?',o:["Legitimacy automatically increases", "Legitimacy can weaken even though the government retains formal power and legal authority", "Legitimacy is unaffected by elections", "The government automatically loses all power"],a:2,w:'Disputed elections can erode legitimacy — the popular acceptance of the right to rule — even while the government retains formal legal power and authority.'},{q:'Why do political scientists study power, authority and legitimacy together?',o:["Because they are unrelated topics", "Because understanding how they interact explains why some governments are stable and others face unrest", "Because only power matters in practice", "Because legitimacy is not a real political concept"],a:2,w:'Studying how power, authority and legitimacy interact helps explain political stability, unrest and the durability of governments.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a-1,working:q.w};})},
+]},
+{ey:'Q9 \u2022 Government • Y10',ti:'WAEC Exam Preparation — Basic Concepts',su:'Practise WAEC-style questions on power, authority, legitimacy and sovereignty.',steps:[
+  {lb:'WAEC essay structure',dr:dQ9,ht:'<p>For WAEC questions on these concepts: (1) Define the term clearly. (2) Distinguish it from related terms (e.g. power vs authority). (3) Give sources/types where relevant (e.g. Weber\'s three types of authority). (4) Use Nigerian or general examples. (5) Conclude with significance for governance.</p>'},
+  {lb:'Common WAEC question patterns',dr:dQ9,ht:'<p>Typical WAEC questions include: \'Distinguish between power and authority\', \'Explain the sources of legitimacy of a government\', \'What is sovereignty? Discuss its two dimensions\', and \'Account for the importance of legitimacy in governance\'.</p>'},
+  {lb:'Key terms to memorise precisely',dr:dQ9,ht:'<p>Power = capacity to compel. Authority = legitimate power. Legitimacy = popular acceptance of the right to rule. Sovereignty = supreme, final authority within a state (internal + external). Precision in definitions earns full marks.</p>'},
+  {lb:'Common mistakes to avoid',dr:dQ9,ht:'<p>Avoid: confusing power with authority (power does not require acceptance; authority does); forgetting Weber\'s three types when asked for sources of authority; describing sovereignty as only \'independence\' without mentioning both internal and external dimensions.</p>'},
+  {lb:'Your turn',dr:dQ9,ht:tryItMC(function(){var qs=[{q:'For WAEC essays distinguishing power and authority, the key point to state first is:',o:["Power always involves elections", "Power is the raw capacity to compel; authority is power recognised as legitimate", "They are exactly the same", "Authority is always inherited"],a:2,w:'WAEC markers look for the core distinction: power compels regardless of acceptance; authority is power accepted as rightful.'},{q:'When asked for the sources/types of authority, WAEC expects reference to which scholar\'s classification?',o:["Aristotle", "Max Weber (traditional, charismatic, legal-rational)", "Karl Marx", "John Locke"],a:2,w:'Max Weber\'s three types — traditional, charismatic, legal-rational — is the standard classification expected in WAEC answers.'},{q:'A precise WAEC definition of sovereignty should mention:',o:["Only the size of the army", "Both internal supremacy within the state and external independence from other states", "Only the number of political parties", "Only the name of the head of state"],a:2,w:'A full WAEC-standard definition of sovereignty covers both its internal dimension (supreme authority) and external dimension (independence).'},{q:'A common WAEC exam mistake to avoid is:',o:["Defining terms precisely", "Confusing power with authority, treating them as identical", "Giving Nigerian examples", "Structuring the essay with an introduction and conclusion"],a:2,w:'A frequent error is treating power and authority as the same thing, when WAEC expects a clear distinction.'},{q:'Legitimacy, for WAEC purposes, should be defined as:',o:["A type of tax", "The popular acceptance of a government's right to rule", "A military rank", "A form of currency"],a:2,w:'WAEC expects legitimacy to be defined as the popular acceptance of a government\'s right to exercise power.'},{q:'A well-structured WAEC essay on these concepts should:',o:["Give only a one-line answer", "Define terms, distinguish related concepts, give sources/types, use examples, and conclude on significance", "Avoid using any examples", "Only list definitions with no explanation"],a:2,w:'A strong WAEC essay defines terms, draws distinctions, covers sources/types, gives examples, and concludes with significance.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a-1,working:q.w};})},
+]},
+{ey:'Q10 \u2022 Government • Y10',ti:'Mixed Questions — Basic Concepts',su:'Integrated revision across power, authority, legitimacy and sovereignty.',steps:[
+  {lb:'Full summary',dr:dQ10,ht:'<p>Power = capacity to compel (coercive, economic, political). Authority = power recognised as rightful (Weber: traditional, charismatic, legal-rational). Legitimacy = popular acceptance sustaining authority (traditional, legal-constitutional, performance-based, charismatic sources). Sovereignty = supreme, final authority (internal + external).</p>'},
+  {lb:'Connecting the concepts',dr:dQ10,ht:'<p>Chain of reasoning: Power alone can force compliance, but authority makes compliance willing, and legitimacy sustains authority over time. Sovereignty is the ultimate legal/political condition that allows a state\'s government to exercise all of the above without external interference.</p>'},
+  {lb:'Nigeria-specific facts to remember',dr:dQ10,ht:'<p>Nigeria: federal republic; sovereignty resides in the state/people; the President\'s authority is legal-rational, from the 1999 Constitution; traditional rulers retain customary authority without constitutional executive power; legitimacy has been tested by election disputes and insurgencies.</p>'},
+  {lb:'Final revision tips',dr:dQ10,ht:'<p>Always define each term precisely before explaining it. Use Weber for authority types. Use Montevideo Convention for sovereignty as an element of statehood. Distinguish legitimacy from legality with a clear example. Give at least one Nigerian example per concept for WAEC marks.</p>'},
+  {lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[{q:'Which sequence correctly shows how these concepts build on each other?',o:["Legitimacy \u2192 power \u2192 sovereignty \u2192 authority", "Power \u2192 authority (recognised power) \u2192 legitimacy (sustained acceptance) \u2192 stable sovereignty exercised smoothly", "Sovereignty \u2192 legitimacy \u2192 power \u2192 authority, in that fixed order always", "None of these concepts are related"],a:2,w:'Power becomes authority when recognised as rightful; legitimacy sustains that authority over time; sovereignty is the overarching supreme authority within which all this operates.'},{q:'Which of these is one of the four elements of statehood under the Montevideo Convention?',o:["Sovereignty", "National anthem", "Currency", "Political party system"],a:1,w:'The Montevideo Convention (1933) lists population, territory, government and sovereignty as the four elements of statehood.'},{q:'Which type of authority, per Weber, is Nigeria\'s presidency based on?',o:["Traditional authority", "Charismatic authority only", "Legal-rational authority", "Religious authority"],a:3,w:'Nigeria\'s presidency, being based on the Constitution and elections, exercises legal-rational authority.'},{q:'A government facing widespread rejection of its right to rule, despite holding formal power, is experiencing a:',o:["Legitimacy crisis", "Sovereignty crisis only", "Traditional authority crisis", "Currency crisis"],a:1,w:'When a government\'s right to rule is widely rejected despite holding formal power, this is described as a legitimacy crisis.'},{q:'Internal sovereignty is challenged when:',o:["A state signs a beneficial trade treaty", "Armed groups or insurgencies successfully defy state authority within its own territory", "A state joins the United Nations", "A state holds a free and fair election"],a:2,w:'Internal sovereignty is challenged when the state\'s supreme authority within its own territory is successfully defied, e.g. by insurgent groups.'},{q:'What is the clearest distinguishing feature between power and authority in a WAEC-standard answer?',o:["Power always requires an election; authority never does", "Authority is power accepted by those governed as rightful, while power alone need not be accepted", "They are simply synonyms", "Only authority can be exercised by a government"],a:2,w:'The key distinguishing feature: authority is power accepted as legitimate/rightful, whereas raw power does not require such acceptance.'}];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a-1,working:q.w};})},
+]},
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase=_sb;window._abcTopicCode='GOV10-BAS-01';
+window.markComplete=async function(){
+  const{data:{session}}=await _sb.auth.getSession();if(!session)return;
+  const{data:topic}=await _sb.from('topics').select('id').eq('topic_code','GOV10-BAS-01').maybeSingle();if(!topic)return;
+  window._abcTopicId=topic.id;
+  await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body></html>
