@@ -69,6 +69,12 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .newq-btn:hover{background:var(--gold);color:#fff;}
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
 .try-q{font-size:15px;margin:8px 0 10px;}
+.click-stage{display:flex;justify-content:center;margin:10px 0 4px;}
+.click-svg{width:100%;max-width:420px;height:auto;background:#fff;border:1px solid var(--line);border-radius:6px;touch-action:manipulation;}
+.hit,.mchit{transition:fill .1s;}
+.hit:hover,.mchit:hover{fill:rgba(200,146,42,.18);}
+.hit:active,.mchit:active{fill:rgba(192,39,45,.25);}
+.click-hint{font-size:13px;color:#6b5750;margin-top:2px;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
 
 </style>
@@ -160,10 +166,108 @@ function ckById(id){
   if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
   else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
 }
+var CST={},MST={};
+
+// ---- Click-to-plot widget ----
+function tryItClick(genFn){
+  if(typeof genFn==='object'){var _o=genFn;genFn=function(){return _o;};}
+  var id='c'+Math.random().toString(36).slice(2);
+  var o=genFn();CST[id]={o:o,genFn:genFn,picked:null};
+  return buildClick(id,o);
+}
+function clickGridSVG(ox,oy,unit,n,id){
+  var o=[];o.push.apply(o,grid(ox,oy,unit,n));
+  for(var gx=-n;gx<=n;gx++){for(var gy=-n;gy<=n;gy++){
+    var px=ox+gx*unit,py=oy-gy*unit;
+    o.push('<circle class="hit" data-clickid="'+id+'" data-gx="'+gx+'" data-gy="'+gy+'" cx="'+px+'" cy="'+py+'" r="12" fill="transparent"/>');
+  }}
+  return o.join('');
+}
+function buildClick(id,o){
+  var n=o.n||6,unit=o.unit||28,ox=210,oy=130;
+  return '<div class="try" data-clickid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn <button class="newq-btn" data-clickid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +'<div class="click-stage"><svg class="click-svg" viewBox="0 0 420 260">'+clickGridSVG(ox,oy,unit,n,id)+'</svg></div>'
+    +'<div class="click-hint">Tap a grid point to plot it, then press Check.</div>'
+    +'<div class="ar" style="justify-content:flex-end;"><button class="ck click-ck" data-clickid="'+id+'">Check</button></div>'
+    +'<div class="try-fb" data-clickid="'+id+'"></div>'
+    +'</div>';
+}
+function newClickQ(id){
+  var e=CST[id];if(!e||!e.genFn)return;
+  var o=e.genFn();var box=document.querySelector('.try[data-clickid="'+id+'"]');if(!box)return;
+  var tmp=document.createElement('div');tmp.innerHTML=buildClick(id,o);
+  box.parentNode.replaceChild(tmp.firstChild,box);CST[id]={o:o,genFn:e.genFn,picked:null};
+}
+function ckClick(id){
+  var e=CST[id];if(!e)return;var o=e.o;
+  var fb=document.querySelector('.try-fb[data-clickid="'+id+'"]');if(!fb)return;
+  if(!e.picked){fb.className='try-fb fb er';fb.textContent='Tap a point on the grid first.';return;}
+  if(e.picked.x===o.tx&&e.picked.y===o.ty){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! ('+o.tx+', '+o.ty+') is plotted correctly.';}
+  else{fb.className='try-fb fb er';fb.innerHTML='Not quite \u2014 you plotted ('+e.picked.x+', '+e.picked.y+'). The correct point is ('+o.tx+', '+o.ty+'). Try again.';}
+}
+
+// ---- Tap-the-point multiple choice widget ----
+function tryItTapMC(genFn){
+  if(typeof genFn==='object'){var _o=genFn;genFn=function(){return _o;};}
+  var id='m'+Math.random().toString(36).slice(2);
+  var o=genFn();MST[id]={o:o,genFn:genFn};
+  return buildTapMC(id,o);
+}
+function buildTapMC(id,o){
+  var n=o.n||6,unit=o.unit||28,ox=210,oy=130;
+  var s=[];s.push.apply(s,grid(ox,oy,unit,n));
+  o.points.forEach(function(pt){
+    var px=ox+pt.x*unit,py=oy-pt.y*unit;
+    s.push(C(px,py,6,pt.col,pt.col,1));
+    s.push(T(px+12,py-8,pt.lbl,pt.col,13,'start',true));
+    s.push('<circle class="mchit" data-mcid="'+id+'" data-lbl="'+pt.lbl+'" cx="'+px+'" cy="'+py+'" r="14" fill="transparent"/>');
+  });
+  return '<div class="try" data-mcid="'+id+'">'
+    +'<div class="try-t">\u2714 Your Turn <button class="newq-btn" data-mcid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +'<div class="click-stage"><svg class="click-svg" viewBox="0 0 420 260">'+s.join('')+'</svg></div>'
+    +'<div class="click-hint">Tap the correct point on the grid.</div>'
+    +'<div class="try-fb" data-mcid="'+id+'"></div>'
+    +'</div>';
+}
+function newTapMC(id){
+  var e=MST[id];if(!e||!e.genFn)return;
+  var o=e.genFn();var box=document.querySelector('.try[data-mcid="'+id+'"]');if(!box)return;
+  var tmp=document.createElement('div');tmp.innerHTML=buildTapMC(id,o);
+  box.parentNode.replaceChild(tmp.firstChild,box);MST[id]={o:o,genFn:e.genFn};
+}
+
 document.addEventListener('click',function(e){
   var btn=e.target;
-  if(btn.classList.contains('newq-btn')){newQ(btn.getAttribute('data-tryid'));}
-  else if(btn.classList.contains('try-ck')){ckById(btn.getAttribute('data-tryid'));}
+  if(btn.classList.contains('hit')){
+    var id=btn.getAttribute('data-clickid'),gx=+btn.getAttribute('data-gx'),gy=+btn.getAttribute('data-gy');
+    var svg=btn.closest('svg');
+    var old=svg.querySelector('.picked-dot');if(old)old.parentNode.removeChild(old);
+    var oldl=svg.querySelector('.picked-lbl');if(oldl)oldl.parentNode.removeChild(oldl);
+    var dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('class','picked-dot');dot.setAttribute('cx',btn.getAttribute('cx'));dot.setAttribute('cy',btn.getAttribute('cy'));
+    dot.setAttribute('r',7);dot.setAttribute('fill','#C0272D');dot.setAttribute('stroke','#7A1418');dot.setAttribute('stroke-width',2);
+    svg.appendChild(dot);
+    if(CST[id])CST[id].picked={x:gx,y:gy};
+    return;
+  }
+  if(btn.classList.contains('mchit')){
+    var mid=btn.getAttribute('data-mcid'),lbl=btn.getAttribute('data-lbl');
+    var e2=MST[mid];if(!e2)return;var o2=e2.o;
+    var fb2=document.querySelector('.try-fb[data-mcid="'+mid+'"]');if(!fb2)return;
+    if(lbl===o2.correctLbl){fb2.className='try-fb fb ok';fb2.innerHTML='\u2713 Correct! Point '+lbl+' is at ('+o2.correctCoord+').';}
+    else{fb2.className='try-fb fb er';fb2.innerHTML='Not quite \u2014 that\u2019s point '+lbl+'. Look for the point at ('+o2.correctCoord+').';}
+    return;
+  }
+  if(btn.classList.contains('click-ck')){ckClick(btn.getAttribute('data-clickid'));return;}
+  if(btn.classList.contains('newq-btn')){
+    if(btn.hasAttribute('data-clickid')){newClickQ(btn.getAttribute('data-clickid'));return;}
+    if(btn.hasAttribute('data-mcid')){newTapMC(btn.getAttribute('data-mcid'));return;}
+    newQ(btn.getAttribute('data-tryid'));return;
+  }
+  if(btn.classList.contains('try-ck')){ckById(btn.getAttribute('data-tryid'));return;}
 });
 
 function g(){return document.getElementById('dg');}
@@ -302,14 +406,27 @@ var QS=[
     {lb:'Plot A(3, 2)',dr:dQ1,ht:'<div class="fm">A(3, 2): 3 right, 2 up</div>'},
     {lb:'Plot B(\u22122, 4)',dr:dQ1,ht:'<div class="fm">B(\u22122, 4): 2 left, 4 up</div>'},
     {lb:'Plot C(\u22124, \u22123)',dr:dQ1,ht:'<div class="fm">C(\u22124, \u22123): 4 left, 3 down</div><p>Negative x = left, negative y = down.</p>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var x=rInt(-5,5),y=rInt(-5,5);while(x===0)x=rInt(-5,5);return{question:'A point is at (<b>'+x+', '+y+'</b>). Is the point '+(x>0?'to the right of':'to the left of')+' the y-axis? Enter 1 for yes, 0 for no.',hints:['x = '+x,'Positive x = right of the y-axis; negative x = left'],ans:(x>0?1:0),tol:0,unit:'',working:'x = '+x+' is '+(x>0?'positive, so right of the y-axis (1)':'negative, so left of the y-axis (0)')};})},
+    {lb:'Your turn',dr:dQ1,ht:tryItClick(function(){
+      var x=rInt(-5,5),y=rInt(-5,5);
+      while(x===0||y===0){x=rInt(-5,5);y=rInt(-5,5);}
+      return{question:'Plot the point ('+x+', '+y+') on the grid below.',tx:x,ty:y,n:6,unit:28};
+    })},
   ]},
   {ey:'Q2 \u00b7 Year 7 \u00b7 Coordinates & Graphs',ti:'Reading Coordinates from a Grid',su:'Read off the coordinates of a plotted point.',steps:[
     {lb:'Find x first',dr:dQ2,ht:'<p>Trace <b>down</b> (or up) from the point to the x-axis to read the x-value.</p>'},
     {lb:'x = 4',dr:dQ2,ht:'<div class="fm">x = 4</div>'},
     {lb:'Find y',dr:dQ2,ht:'<div class="fm">y = 3</div><p>Trace across to the y-axis to read the y-value.</p>'},
     {lb:'Write the coordinate',dr:dQ2,ht:'<div class="fm">Point = (4, 3)</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var x=rInt(-6,6),y=rInt(-6,6);return{question:'A point is plotted at '+x+' across and '+y+' up from the origin. What is its <b>y</b>-coordinate?',hints:['The coordinate is written (x, y)','x = '+x+', y = ?'],ans:y,tol:0,unit:'',working:'Coordinate = ('+x+', '+y+'). The y-coordinate is '+y};})},
+    {lb:'Your turn',dr:dQ2,ht:tryItTapMC(function(){
+      var labels=['A','B','C','D'],cols=['#C0272D','#1a5a8a','#1a7a3a','#8a4fbf'],used={},pts=[];
+      labels.forEach(function(lbl,i){
+        var x,y,key;
+        do{x=rInt(-5,5);y=rInt(-5,5);key=x+','+y;}while(used[key]);
+        used[key]=true;pts.push({x:x,y:y,lbl:lbl,col:cols[i]});
+      });
+      var target=rPick(pts);
+      return{question:'Which point is at ('+target.x+', '+target.y+')?',points:pts,correctLbl:target.lbl,correctCoord:target.x+', '+target.y,n:6,unit:28};
+    })},
   ]},
   {ey:'Q3 \u00b7 Year 7 \u00b7 Coordinates & Graphs',ti:'Function Machines (Input \u2192 Output)',su:'Put x = 5 through the rule "\u00d7 2, then + 1".',steps:[
     {lb:'What is a function machine?',dr:dQ3,ht:'<p>A <b>function machine</b> applies steps to an input, in order, to give an output.</p>'},
