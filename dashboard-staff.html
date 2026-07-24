@@ -419,6 +419,11 @@
           <option value="">All Students</option>
           <option value="yes">➕ Add/Further Maths only</option>
         </select>
+        <select id="users-filter-status" onchange="renderUsersTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.85rem">
+          <option value="active">Active only</option>
+          <option value="archived">Archived only</option>
+          <option value="all">All</option>
+        </select>
         <input type="text" id="users-search" placeholder="Search by name or email…" oninput="renderUsersTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.88rem;color:#333;min-width:200px">
         <button class="btn-outline" style="font-size:0.82rem;padding:6px 14px" onclick="exportUsers()">↓ Export CSV</button>
       </div>
@@ -2798,11 +2803,16 @@
   let allUsersWithEmail = [];
 
   async function loadUsersWithEmail() {
-    const { data } = await supabase
-      .from('user_emails')
-      .select('*')
-      .order('full_name');
-    allUsersWithEmail = data || [];
+    const [{ data }, { data: activeRows }] = await Promise.all([
+      supabase.from('user_emails').select('*').order('full_name'),
+      supabase.from('profiles').select('id, active')
+    ]);
+    const activeMap = {};
+    (activeRows || []).forEach(r => { activeMap[r.id] = r.active; });
+    allUsersWithEmail = (data || []).map(u => ({
+      ...u,
+      active: activeMap[u.id] !== undefined ? activeMap[u.id] : true
+    }));
   }
 
   window.renderUsersTab = function() {
@@ -2812,13 +2822,15 @@
 
     const streamFilter = document.getElementById('users-filter-stream') ? document.getElementById('users-filter-stream').value : '';
     const extMathsFilter = document.getElementById('users-filter-extmaths') ? document.getElementById('users-filter-extmaths').value : '';
+    const statusFilter = document.getElementById('users-filter-status') ? document.getElementById('users-filter-status').value : 'active';
     const filtered = allUsersWithEmail.filter(u => {
       const matchRole   = !roleFilter   || u.role === roleFilter;
       const matchYear   = !yearFilter   || String(u.year_group) === yearFilter;
       const matchSearch = !searchFilter || u.full_name.toLowerCase().includes(searchFilter);
       const matchStream = !streamFilter || (u.stream || 'science') === streamFilter;
       const matchExtMaths = !extMathsFilter || (allStudents.find(s=>s.id===u.id)||{}).takes_extended_maths === true;
-      return matchRole && matchYear && matchSearch && matchStream && matchExtMaths;
+      const matchStatus = statusFilter === 'all' ? true : statusFilter === 'archived' ? u.active === false : u.active !== false;
+      return matchRole && matchYear && matchSearch && matchStream && matchExtMaths && matchStatus;
     });
 
     document.getElementById('users-count').textContent = `— ${filtered.length} user${filtered.length !== 1 ? 's' : ''}`;
@@ -2841,13 +2853,38 @@
         <td>${u.year_group ? 'Year ' + u.year_group : '—'}${extMaths ? `<br><span style="font-size:0.72rem;padding:1px 6px;border-radius:8px;font-weight:600;background:#FFF3E0;color:#C8922A">➕ ${extMathsLabel}</span>` : ''}</td>
         <td>${u.form_class || '—'}</td>
         <td><span style="font-size:0.78rem;padding:2px 8px;border-radius:10px;font-weight:600;background:${u.stream==='arts'?'#F3E5F5':u.stream==='both'?'#E8F5E9':'#E3F2FD'};color:${u.stream==='arts'?'#6B1F1F':u.stream==='both'?'#2E7D32':'#1565C0'}">${u.stream||'science'}</span></td>
-        <td style="font-size:0.82rem;color:#888">${lastSignIn}</td>
+        <td style="font-size:0.82rem;color:#888">${lastSignIn}${u.active === false ? '<br><span style="font-size:0.72rem;padding:1px 6px;border-radius:8px;font-weight:600;background:#f0f0f0;color:#888">Archived</span>' : ''}</td>
         <td>
           ${u.role === 'student' ? `<button class="btn-link" onclick="openStudentModal('${u.id}')">View</button>` : ''}
           <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}','${u.role}','${u.year_group||''}','${u.form_class||''}','${u.stream||'science'}',${(allStudents.find(s=>s.id===u.id)||{}).simplified_view===true},${(allStudents.find(s=>s.id===u.id)||{}).summer_only===true},${extMaths===true})">Edit</button>
+          ${u.active === false
+            ? `<button class="btn-link" style="color:#2e7d32" onclick="restoreUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}')">Restore</button>`
+            : `<button class="btn-link" style="color:#C0272D" onclick="archiveUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}')">Archive</button>`}
         </td>
       </tr>`;
     }).join('');
+  };
+
+  window.archiveUser = async function(id, name) {
+    if (!confirm(`Archive ${name}? They will be hidden from active views but their history is preserved. This can be undone.`)) return;
+    const { error } = await supabase.from('profiles').update({ active: false }).eq('id', id);
+    if (error) { alert('Archive failed: ' + error.message); return; }
+    const u = allUsersWithEmail.find(u => u.id === id);
+    if (u) u.active = false;
+    const s = allStudents.find(s => s.id === id);
+    if (s) s.active = false;
+    window.renderUsersTab();
+  };
+
+  window.restoreUser = async function(id, name) {
+    if (!confirm(`Restore ${name} to active status?`)) return;
+    const { error } = await supabase.from('profiles').update({ active: true }).eq('id', id);
+    if (error) { alert('Restore failed: ' + error.message); return; }
+    const u = allUsersWithEmail.find(u => u.id === id);
+    if (u) u.active = true;
+    const s = allStudents.find(s => s.id === id);
+    if (s) s.active = true;
+    window.renderUsersTab();
   };
 
   window.exportUsers = function() {
