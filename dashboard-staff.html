@@ -2730,9 +2730,15 @@
     // Auto-lock: once 2+ distinct staff have reviewed this topic, lock it for further review
     const reviewerIds = new Set(allReviews.filter(r => r.topic_id === currentReviewTopicId).map(r => r.reviewer_id));
     if (reviewerIds.size >= 2) {
-      await supabase.from('topics').update({ locked: true }).eq('id', currentReviewTopicId);
-      const t = allTopics.find(t => t.id === currentReviewTopicId);
-      if (t) t.locked = true;
+      const { error: lockError } = await supabase.from('topics').update({ locked: true }).eq('id', currentReviewTopicId);
+      if (lockError) {
+        console.error('Failed to lock topic:', lockError);
+        msg.style.color = '#C0272D';
+        msg.textContent = `Review saved, but locking failed: ${lockError.message}. Ask an admin to lock this topic.`;
+      } else {
+        const t = allTopics.find(t => t.id === currentReviewTopicId);
+        if (t) t.locked = true;
+      }
     }
 
     window.renderReviewTab();
