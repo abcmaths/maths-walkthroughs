@@ -419,11 +419,6 @@
           <option value="">All Students</option>
           <option value="yes">➕ Add/Further Maths only</option>
         </select>
-        <select id="users-filter-status" onchange="renderUsersTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.85rem">
-          <option value="active">Active only</option>
-          <option value="archived">Archived only</option>
-          <option value="all">All</option>
-        </select>
         <input type="text" id="users-search" placeholder="Search by name or email…" oninput="renderUsersTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.88rem;color:#333;min-width:200px">
         <button class="btn-outline" style="font-size:0.82rem;padding:6px 14px" onclick="exportUsers()">↓ Export CSV</button>
       </div>
@@ -1381,7 +1376,7 @@
     if (name === 'users')    window.renderUsersTab();
     if (name === 'tests')    window.renderTestsTab();
     if (name === 'diagnostic') window.switchDiagYear();
-    if (name === 'reviews')  window.renderReviewTab();
+    if (name === 'reviews')  { loadReviews().then(window.renderReviewTab); }
 
     // Subject toggle only applies to Browse Topics — hide it on every other tab
     const subjToggle = document.querySelector('.subject-toggle');
@@ -2096,44 +2091,34 @@
 
   const GOV_WALKTHROUGH_FILES = {
     // Section A: Elements of Government
-    'GOV-ELE-01': 'gov10/meaning-and-scope-of-government.html',
-    'GOV-ELE-02': 'gov10/the-state-and-nation.html',
-    'GOV-ELE-03': 'gov10/constitution.html',
-    'GOV-ELE-04': 'gov10/rule-of-law-and-democracy.html',
-    'GOV-ELE-05': 'gov10/forms-of-government.html',
-    'GOV-ELE-06': 'gov10/arms-of-government.html',
-    'GOV-ELE-07': 'gov10/citizenship-parties-pressure-groups.html',
-    'GOV-ELE-08': 'gov10/public-opinion-and-media.html',
-    'GOV-ELE-09': 'gov11/electoral-systems.html',
-    'GOV-ELE-10': 'gov12/federalism.html',
+    'GOV-ELE-01': 'gov/meaning-and-scope-of-government.html',
+    'GOV-ELE-02': 'gov/the-state-and-nation.html',
+    'GOV-ELE-03': 'gov/constitution.html',
+    'GOV-ELE-04': 'gov/rule-of-law-and-democracy.html',
+    'GOV-ELE-05': 'gov/forms-of-government.html',
+    'GOV-ELE-06': 'gov/arms-of-government.html',
+    'GOV-ELE-07': 'gov/citizenship-parties-pressure-groups.html',
+    'GOV-ELE-08': 'gov/public-opinion-and-media.html',
+    'GOV-ELE-09': 'gov/electoral-systems.html',
+    'GOV-ELE-10': 'gov/federalism.html',
     // Section B: Political & Constitutional Development
-    'GOV-POL-01': 'gov11/pre-colonial-political-systems.html',
-    'GOV-POL-02': 'gov11/colonial-administration.html',
-    'GOV-POL-03': 'gov11/nationalism-and-decolonisation.html',
-    'GOV-POL-04': 'gov11/constitutional-development-nigeria.html',
-    'GOV-POL-05': 'gov12/military-rule-in-nigeria.html',
-    'GOV-POL-06': 'gov11/west-african-political-development.html',
-    'GOV-POL-07': 'gov12/nigeria-since-1999.html',
+    'GOV-POL-01': 'gov/pre-colonial-political-systems.html',
+    'GOV-POL-02': 'gov/colonial-administration.html',
+    'GOV-POL-03': 'gov/nationalism-and-decolonisation.html',
+    'GOV-POL-04': 'gov/constitutional-development-nigeria.html',
+    'GOV-POL-05': 'gov/military-rule-in-nigeria.html',
+    'GOV-POL-06': 'gov/west-african-political-development.html',
+    'GOV-POL-07': 'gov/nigeria-since-1999.html',
     // Section C: International Relations
-    'GOV-INT-01': 'gov12/meaning-and-scope-of-ir.html',
-    'GOV-INT-02': 'gov12/national-interest-and-foreign-policy.html',
-    'GOV-INT-03': 'gov12/diplomacy.html',
-    'GOV-INT-04': 'gov12/united-nations.html',
-    'GOV-INT-05': 'gov12/african-union-and-ecowas.html',
-    'GOV-INT-06': 'gov12/commonwealth-and-opec.html',
-    'GOV-INT-07': 'gov12/nigeria-in-international-relations.html',
-    'GOV-INT-08': 'gov12/conflict-resolution-and-peacekeeping.html',
-    'GOV-INT-09': 'gov12/globalisation.html',
-    // Gap-fill additions (Y10 Basic Concepts, Y11 Public Administration, Y12 Political Development)
-    'GOV10-BAS-01': 'gov10/basic-concepts-power-authority-legitimacy-sovereignty-y10.html',
-    'GOV10-BAS-02': 'gov10/political-concepts-ideologies-y10.html',
-    'GOV10-BAS-03': 'gov10/society-state-relationship-y10.html',
-    'GOV11-ADM-01': 'gov11/public-administration-civil-service-y11.html',
-    'GOV11-ADM-02': 'gov11/public-corporations-y11.html',
-    'GOV11-ADM-03': 'gov11/local-government-administration-y11.html',
-    'GOV12-POL-08': 'gov12/minority-issues-state-creation-y12.html',
-    'GOV12-POL-09': 'gov12/development-of-political-parties-nigeria-y12.html',
-    'GOV12-POL-10': 'gov12/leadership-and-followership-y12.html',
+    'GOV-INT-01': 'gov/meaning-and-scope-of-ir.html',
+    'GOV-INT-02': 'gov/national-interest-and-foreign-policy.html',
+    'GOV-INT-03': 'gov/diplomacy.html',
+    'GOV-INT-04': 'gov/united-nations.html',
+    'GOV-INT-05': 'gov/african-union-and-ecowas.html',
+    'GOV-INT-06': 'gov/commonwealth-and-opec.html',
+    'GOV-INT-07': 'gov/nigeria-in-international-relations.html',
+    'GOV-INT-08': 'gov/conflict-resolution-and-peacekeeping.html',
+    'GOV-INT-09': 'gov/globalisation.html',
   };
 
   const DIGITALTECH_WALKTHROUGH_FILES = {
@@ -2730,15 +2715,9 @@
     // Auto-lock: once 2+ distinct staff have reviewed this topic, lock it for further review
     const reviewerIds = new Set(allReviews.filter(r => r.topic_id === currentReviewTopicId).map(r => r.reviewer_id));
     if (reviewerIds.size >= 2) {
-      const { error: lockError } = await supabase.from('topics').update({ locked: true }).eq('id', currentReviewTopicId);
-      if (lockError) {
-        console.error('Failed to lock topic:', lockError);
-        msg.style.color = '#C0272D';
-        msg.textContent = `Review saved, but locking failed: ${lockError.message}. Ask an admin to lock this topic.`;
-      } else {
-        const t = allTopics.find(t => t.id === currentReviewTopicId);
-        if (t) t.locked = true;
-      }
+      await supabase.from('topics').update({ locked: true }).eq('id', currentReviewTopicId);
+      const t = allTopics.find(t => t.id === currentReviewTopicId);
+      if (t) t.locked = true;
     }
 
     window.renderReviewTab();
@@ -2809,16 +2788,11 @@
   let allUsersWithEmail = [];
 
   async function loadUsersWithEmail() {
-    const [{ data }, { data: activeRows }] = await Promise.all([
-      supabase.from('user_emails').select('*').order('full_name'),
-      supabase.from('profiles').select('id, active')
-    ]);
-    const activeMap = {};
-    (activeRows || []).forEach(r => { activeMap[r.id] = r.active; });
-    allUsersWithEmail = (data || []).map(u => ({
-      ...u,
-      active: activeMap[u.id] !== undefined ? activeMap[u.id] : true
-    }));
+    const { data } = await supabase
+      .from('user_emails')
+      .select('*')
+      .order('full_name');
+    allUsersWithEmail = data || [];
   }
 
   window.renderUsersTab = function() {
@@ -2828,15 +2802,13 @@
 
     const streamFilter = document.getElementById('users-filter-stream') ? document.getElementById('users-filter-stream').value : '';
     const extMathsFilter = document.getElementById('users-filter-extmaths') ? document.getElementById('users-filter-extmaths').value : '';
-    const statusFilter = document.getElementById('users-filter-status') ? document.getElementById('users-filter-status').value : 'active';
     const filtered = allUsersWithEmail.filter(u => {
       const matchRole   = !roleFilter   || u.role === roleFilter;
       const matchYear   = !yearFilter   || String(u.year_group) === yearFilter;
       const matchSearch = !searchFilter || u.full_name.toLowerCase().includes(searchFilter);
       const matchStream = !streamFilter || (u.stream || 'science') === streamFilter;
       const matchExtMaths = !extMathsFilter || (allStudents.find(s=>s.id===u.id)||{}).takes_extended_maths === true;
-      const matchStatus = statusFilter === 'all' ? true : statusFilter === 'archived' ? u.active === false : u.active !== false;
-      return matchRole && matchYear && matchSearch && matchStream && matchExtMaths && matchStatus;
+      return matchRole && matchYear && matchSearch && matchStream && matchExtMaths;
     });
 
     document.getElementById('users-count').textContent = `— ${filtered.length} user${filtered.length !== 1 ? 's' : ''}`;
@@ -2859,38 +2831,13 @@
         <td>${u.year_group ? 'Year ' + u.year_group : '—'}${extMaths ? `<br><span style="font-size:0.72rem;padding:1px 6px;border-radius:8px;font-weight:600;background:#FFF3E0;color:#C8922A">➕ ${extMathsLabel}</span>` : ''}</td>
         <td>${u.form_class || '—'}</td>
         <td><span style="font-size:0.78rem;padding:2px 8px;border-radius:10px;font-weight:600;background:${u.stream==='arts'?'#F3E5F5':u.stream==='both'?'#E8F5E9':'#E3F2FD'};color:${u.stream==='arts'?'#6B1F1F':u.stream==='both'?'#2E7D32':'#1565C0'}">${u.stream||'science'}</span></td>
-        <td style="font-size:0.82rem;color:#888">${lastSignIn}${u.active === false ? '<br><span style="font-size:0.72rem;padding:1px 6px;border-radius:8px;font-weight:600;background:#f0f0f0;color:#888">Archived</span>' : ''}</td>
+        <td style="font-size:0.82rem;color:#888">${lastSignIn}</td>
         <td>
           ${u.role === 'student' ? `<button class="btn-link" onclick="openStudentModal('${u.id}')">View</button>` : ''}
           <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}','${u.role}','${u.year_group||''}','${u.form_class||''}','${u.stream||'science'}',${(allStudents.find(s=>s.id===u.id)||{}).simplified_view===true},${(allStudents.find(s=>s.id===u.id)||{}).summer_only===true},${extMaths===true})">Edit</button>
-          ${u.active === false
-            ? `<button class="btn-link" style="color:#2e7d32" onclick="restoreUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}')">Restore</button>`
-            : `<button class="btn-link" style="color:#C0272D" onclick="archiveUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}')">Archive</button>`}
         </td>
       </tr>`;
     }).join('');
-  };
-
-  window.archiveUser = async function(id, name) {
-    if (!confirm(`Archive ${name}? They will be hidden from active views but their history is preserved. This can be undone.`)) return;
-    const { error } = await supabase.from('profiles').update({ active: false }).eq('id', id);
-    if (error) { alert('Archive failed: ' + error.message); return; }
-    const u = allUsersWithEmail.find(u => u.id === id);
-    if (u) u.active = false;
-    const s = allStudents.find(s => s.id === id);
-    if (s) s.active = false;
-    window.renderUsersTab();
-  };
-
-  window.restoreUser = async function(id, name) {
-    if (!confirm(`Restore ${name} to active status?`)) return;
-    const { error } = await supabase.from('profiles').update({ active: true }).eq('id', id);
-    if (error) { alert('Restore failed: ' + error.message); return; }
-    const u = allUsersWithEmail.find(u => u.id === id);
-    if (u) u.active = true;
-    const s = allStudents.find(s => s.id === id);
-    if (s) s.active = true;
-    window.renderUsersTab();
   };
 
   window.exportUsers = function() {
