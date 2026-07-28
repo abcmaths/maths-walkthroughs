@@ -2306,10 +2306,23 @@
   let staffSubject = 'maths';
 
   async function loadReviews() {
-    const { data } = await supabase
-      .from('walkthrough_reviews')
-      .select('*, profiles(full_name)');
-    allReviews = data || [];
+    // Supabase/PostgREST caps a plain select() at 1000 rows by default.
+    // walkthrough_reviews has passed that threshold, so we must page through
+    // all rows explicitly or the newest reviews silently disappear.
+    const PAGE_SIZE = 1000;
+    let all = [];
+    let from = 0;
+    while (true) {
+      const { data, error } = await supabase
+        .from('walkthrough_reviews')
+        .select('*, profiles(full_name)')
+        .range(from, from + PAGE_SIZE - 1);
+      if (error) { console.error('loadReviews error:', error); break; }
+      all = all.concat(data || []);
+      if (!data || data.length < PAGE_SIZE) break;
+      from += PAGE_SIZE;
+    }
+    allReviews = all;
   }
 
   // Extract question titles from a walkthrough file
@@ -2375,8 +2388,9 @@
     // Build review map: topicId -> { reviewerIds, ratings }
     const reviewMap = {};
     allReviews.forEach(r => {
-      if (!reviewMap[r.topic_id]) reviewMap[r.topic_id] = { reviewers: new Set(), ratings: [], questions: new Set() };
+      if (!reviewMap[r.topic_id]) reviewMap[r.topic_id] = { reviewers: new Set(), reviewerNames: new Set(), ratings: [], questions: new Set() };
       reviewMap[r.topic_id].reviewers.add(r.reviewer_id);
+      reviewMap[r.topic_id].reviewerNames.add(r.profiles?.full_name || '—');
       reviewMap[r.topic_id].ratings.push(r.rating);
       reviewMap[r.topic_id].questions.add(r.question_number);
     });
@@ -2517,7 +2531,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           ${statusBadge}
-          ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} · ${qCount} Qs</span>` : ''}
+          ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} (${[...rm.reviewerNames].join(', ')}) · ${qCount} Qs</span>` : ''}
         </div>
         ${actionButtons}
       </div>`;
