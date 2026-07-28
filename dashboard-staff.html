@@ -140,7 +140,7 @@
   <div class="nav-tab" onclick="showTab('progress')">Student Progress</div>
   <div class="nav-tab" onclick="showTab('tests')">Test Results</div>
   <div class="nav-tab" onclick="showTab('topics')">Browse Topics</div>
-  <div class="nav-tab" onclick="showTab('feedback')" style="display:none">Feedback</div><!-- TEMP: hidden while feedback feature is off; remove style to restore -->
+  <div class="nav-tab" onclick="showTab('feedback')">Feedback</div>
   <div class="nav-tab" onclick="showTab('bugs')">Bug Reports</div>
   <div class="nav-tab" onclick="showTab('users')">Users</div>
   <div class="nav-tab" onclick="showTab('diagnostic')">Diagnostic</div>
@@ -819,7 +819,10 @@
             <option value="locked">🔒 Locked (2+ reviews)</option>
           </select>
         </div>
-        <div class="section-title" style="margin-bottom:16px">Walkthroughs <span id="review-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></div>
+        <div class="section-title" style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+          <span>Walkthroughs <span id="review-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></span>
+          <button id="btn-export-locked-reviews" class="btn-outline" style="display:none;font-size:0.82rem;padding:6px 14px" onclick="exportLockedReviews()">↓ Export All (2+ Reviewers)</button>
+        </div>
         <div id="review-list"></div>
       </div>
     </div>
@@ -1041,6 +1044,11 @@
     }
 
     document.getElementById('header-name').textContent = profile.full_name;
+
+    if (profile.role === 'admin') {
+      const exportReviewsBtn = document.getElementById('btn-export-locked-reviews');
+      if (exportReviewsBtn) exportReviewsBtn.style.display = '';
+    }
 
     // ── Fetch all data in parallel ──
     const [
@@ -1376,7 +1384,7 @@
     if (name === 'users')    window.renderUsersTab();
     if (name === 'tests')    window.renderTestsTab();
     if (name === 'diagnostic') window.switchDiagYear();
-    if (name === 'reviews')  { loadReviews().then(window.renderReviewTab); }
+    if (name === 'reviews')  window.renderReviewTab();
 
     // Subject toggle only applies to Browse Topics — hide it on every other tab
     const subjToggle = document.querySelector('.subject-toggle');
@@ -2306,23 +2314,10 @@
   let staffSubject = 'maths';
 
   async function loadReviews() {
-    // Supabase/PostgREST caps a plain select() at 1000 rows by default.
-    // walkthrough_reviews has passed that threshold, so we must page through
-    // all rows explicitly or the newest reviews silently disappear.
-    const PAGE_SIZE = 1000;
-    let all = [];
-    let from = 0;
-    while (true) {
-      const { data, error } = await supabase
-        .from('walkthrough_reviews')
-        .select('*, profiles(full_name)')
-        .range(from, from + PAGE_SIZE - 1);
-      if (error) { console.error('loadReviews error:', error); break; }
-      all = all.concat(data || []);
-      if (!data || data.length < PAGE_SIZE) break;
-      from += PAGE_SIZE;
-    }
-    allReviews = all;
+    const { data } = await supabase
+      .from('walkthrough_reviews')
+      .select('*, profiles(full_name)');
+    allReviews = data || [];
   }
 
   // Extract question titles from a walkthrough file
@@ -2388,9 +2383,8 @@
     // Build review map: topicId -> { reviewerIds, ratings }
     const reviewMap = {};
     allReviews.forEach(r => {
-      if (!reviewMap[r.topic_id]) reviewMap[r.topic_id] = { reviewers: new Set(), reviewerNames: new Set(), ratings: [], questions: new Set() };
+      if (!reviewMap[r.topic_id]) reviewMap[r.topic_id] = { reviewers: new Set(), ratings: [], questions: new Set() };
       reviewMap[r.topic_id].reviewers.add(r.reviewer_id);
-      reviewMap[r.topic_id].reviewerNames.add(r.profiles?.full_name || '—');
       reviewMap[r.topic_id].ratings.push(r.rating);
       reviewMap[r.topic_id].questions.add(r.question_number);
     });
@@ -2531,7 +2525,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           ${statusBadge}
-          ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} (${[...rm.reviewerNames].join(', ')}) · ${qCount} Qs</span>` : ''}
+          ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} · ${qCount} Qs</span>` : ''}
         </div>
         ${actionButtons}
       </div>`;
@@ -2796,6 +2790,56 @@
     if (t) t.locked = false;
     allReviews = allReviews.filter(r => r.topic_id !== topicId);
     window.renderReviewTab();
+  };
+
+  // ── Export all reviews for topics with 2+ reviewers (admin only) ──
+  window.exportLockedReviews = function() {
+    const lockedTopics = allTopics.filter(t => t.locked === true);
+    if (lockedTopics.length === 0) {
+      alert('No walkthroughs currently have 2+ reviewers.');
+      return;
+    }
+
+    const rows = [['Topic Code', 'Topic Name', 'Subject', 'Year Group', 'File Reference', 'Question', 'Reviewer', 'Rating', 'Comment', 'Reviewed At']];
+
+    lockedTopics.forEach(t => {
+      const subj = t.subject || 'maths';
+      const filePath = getWalkthroughFile(subj, t.topic_code) || '(unknown)';
+      const yearLabel = t.year_group === 13 ? 'Add Maths' : t.year_group === 14 ? 'Further Maths' : 'Year ' + t.year_group;
+      const topicReviews = allReviews
+        .filter(r => r.topic_id === t.id)
+        .sort((a, b) => a.question_number - b.question_number);
+
+      topicReviews.forEach(r => {
+        rows.push([
+          t.topic_code || '',
+          t.topic_name || '',
+          subj,
+          yearLabel,
+          filePath,
+          r.question_number,
+          r.profiles?.full_name || r.reviewer_id,
+          r.rating,
+          r.comment || '',
+          r.reviewed_at || ''
+        ]);
+      });
+    });
+
+    const csv = rows.map(row =>
+      row.map(v => {
+        const s = String(v ?? '');
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      }).join(',')
+    ).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `walkthrough-reviews-2plus-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   // ── Users tab ──
