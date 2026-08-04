@@ -17,11 +17,14 @@
   .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
   .step-bar { height:100%; background:var(--red); transition:width .3s; }
   .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
-  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
   .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
-  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
-  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
-  button.act:disabled { background:#ccc; }
+  .yt-q { font-weight:600; margin-bottom:14px; line-height:1.5; }
+  .opt-list { display:flex; flex-direction:column; gap:10px; }
+  .opt-btn { text-align:left; background:#fff; border:2px solid #ddd; padding:12px 14px; border-radius:8px; font-size:1rem; cursor:pointer; }
+  .opt-btn:hover { border-color:var(--red); }
+  .opt-btn.correct { background:#e8f7ee; border-color:#1b7d3a; color:#1b7d3a; font-weight:600; }
+  .opt-btn.wrong { background:#fdecec; border-color:var(--red); color:var(--red); }
+  .opt-btn:disabled { cursor:default; }
   .try-fb { margin-top:10px; font-weight:600; }
   .try-fb.ok { color:#1b7d3a; }
   .try-fb.er { color:var(--red); }
@@ -46,23 +49,53 @@
 </div>
 
 <script>
-const QUESTIONS = [{"title": "Using a simile in your own writing", "teach": ["Writing your own similes lets you create vivid comparisons that make description more engaging.", "Example: instead of 'the sea was rough', try 'the sea was as wild as a stampede of horses'.", "Choose comparisons that fit the mood or tone you're trying to create."], "yt_prompt": "Complete this simile with your own comparison: 'The old man's hands were as wrinkled as ___'"}, {"title": "Using a metaphor in your own writing", "teach": ["Writing metaphors requires stating one thing IS another \u2014 a bold, direct comparison.", "Example: 'Her smile was sunshine' is more direct and powerful than 'her smile was like sunshine'.", "Metaphors work best when the comparison feels fresh, not overused or clich\u00e9d."], "yt_prompt": "Complete this metaphor: 'The city at night was a ___' (choose an evocative noun)"}, {"title": "Using personification for atmosphere", "teach": ["Giving human qualities to non-human things creates atmosphere and can subtly reflect a character's emotional state.", "Example: 'the shadows crept closer' suggests menace, reflecting fear, without stating it directly.", "Choose the human action carefully \u2014 it should match the mood you want to create."], "yt_prompt": "Complete this personification to create a menacing atmosphere: 'The shadows ___ across the empty room.'"}, {"title": "Varying sentence length for effect", "teach": ["Mixing short and long sentences creates rhythm and controls pacing \u2014 short sentences speed things up, long sentences slow things down.", "Example: 'She ran. Her heart pounded as the footsteps behind her grew louder, closer, more urgent with every second.' \u2014 short then long, building tension.", "Read your own writing aloud to check the rhythm feels intentional, not accidental."], "yt_prompt": "Which order creates a build-up of tension? Type 'A' or 'B':"}, {"title": "Using the rule of three", "teach": ["Listing three related words or phrases together creates rhythm and emphasis \u2014 a technique called the rule of three.", "Example: 'she was tired, cold, and utterly alone' \u2014 three descriptive details build a fuller picture than just one or two.", "This technique works well in both descriptive and persuasive writing."], "yt_prompt": "Complete the rule of three: 'The wind howled, the rain lashed, and the ___'"}, {"title": "Creating atmosphere through sensory description", "teach": ["Using multiple senses (sight, sound, smell, touch, taste) in description makes a scene feel more immersive.", "Example: 'the damp air smelled of rust, and the metal groaned underfoot' uses smell and sound together.", "Try to include at least two different senses when describing an important setting."], "yt_prompt": "Which two senses are used in: 'the damp air smelled of rust, and the metal groaned underfoot'?"}, {"title": "Using a flashback for structure", "teach": ["A flashback interrupts the main timeline to show an earlier event, often revealing important backstory or motivation.", "Example: a character finds an old photo, triggering a memory of a childhood event before returning to the present.", "Flashbacks should be clearly signalled (e.g. 'She remembered...') so the reader isn't confused about the timeline."], "yt_prompt": "What is the term for interrupting a story's main timeline to show an earlier event?"}, {"title": "Using foreshadowing", "teach": ["Foreshadowing hints at events that will happen later in the story, creating anticipation or unease.", "Example: a character mentions a strange feeling of dread before anything bad has actually happened yet.", "This technique rewards careful readers, who notice the connection once the later event occurs."], "yt_prompt": "What is the term for hinting at future events earlier in a story?"}, {"title": "Choosing a narrative viewpoint", "teach": ["First person ('I') creates intimacy and immediacy; third person ('she/he') allows more distance and a broader view.", "Example: 'I felt my heart race' (first person, intimate) vs 'She felt her heart race' (third person, more distant).", "Choose the viewpoint that best suits the emotional effect you want to create for your reader."], "yt_prompt": "Which viewpoint creates more intimacy and immediacy \u2014 type 'first' or 'third':"}, {"title": "Mixed practice \u2014 stylistic devices in creative writing", "teach": ["You've now practiced similes, metaphors, personification, varying sentence length, rule of three, sensory description, flashback, foreshadowing, and viewpoint.", "Combining several of these techniques deliberately (not randomly) is what separates strong creative writing from average writing.", "This final question checks you can apply one of these techniques confidently."], "yt_prompt": "Complete this sentence using personification: 'The old house ___ under the weight of years.'"}];
-function ytGen_0() { return {q:"The old man's hands were as wrinkled as ___", answer:'a raisin'}; }
-function ytGen_1() { return {q:'The city at night was a ___', answer:'jungle of light'}; }
-function ytGen_2() { return {q:'The shadows ___ across the empty room. (menacing atmosphere)', answer:'crept'}; }
-function ytGen_3() { return {q:'A) Short sentence, then long sentence. B) Long sentence, then short sentence. Which order typically builds tension before a climax?', answer:'A'}; }
-function ytGen_4() { return {q:'The wind howled, the rain lashed, and the ___ (complete the third item)', answer:'thunder roared'}; }
-function ytGen_5() { return {q:'the damp air smelled of rust, and the metal groaned underfoot. Which two senses are used?', answer:'smell and sound'}; }
-function ytGen_6() { return {q:'What is the term for interrupting a story\'s main timeline to show an earlier event?', answer:'flashback'}; }
-function ytGen_7() { return {q:'What is the term for hinting at future events earlier in a story?', answer:'foreshadowing'}; }
-function ytGen_8() { return {q:'Which viewpoint creates more intimacy and immediacy: first person or third person?', answer:'first'}; }
-function ytGen_9() { return {q:'The old house ___ under the weight of years. (personification)', answer:'groaned'}; }
+const QUESTIONS = [{"title": "Using a simile in your own writing", "teach": ["Writing your own similes lets you create vivid comparisons that make description more engaging.", "Example: instead of 'the sea was rough', try 'the sea was as wild as a stampede of horses'.", "Choose comparisons that fit the mood or tone you're trying to create."]}, {"title": "Using a metaphor in your own writing", "teach": ["Writing metaphors requires stating one thing IS another — a bold, direct comparison.", "Example: 'Her smile was sunshine' is more direct and powerful than 'her smile was like sunshine'.", "Metaphors work best when the comparison feels fresh, not overused or clichéd."]}, {"title": "Using personification for atmosphere", "teach": ["Giving human qualities to non-human things creates atmosphere and can subtly reflect a character's emotional state.", "Example: 'the shadows crept closer' suggests menace, reflecting fear, without stating it directly.", "Choose the human action carefully — it should match the mood you want to create."]}, {"title": "Varying sentence length for effect", "teach": ["Mixing short and long sentences creates rhythm and controls pacing — short sentences speed things up, long sentences slow things down.", "Example: 'She ran. Her heart pounded as the footsteps behind her grew louder, closer, more urgent with every second.' — short then long, building tension.", "Read your own writing aloud to check the rhythm feels intentional, not accidental."]}, {"title": "Using the rule of three", "teach": ["Listing three related words or phrases together creates rhythm and emphasis — a technique called the rule of three.", "Example: 'she was tired, cold, and utterly alone' — three descriptive details build a fuller picture than just one or two.", "This technique works well in both descriptive and persuasive writing."]}, {"title": "Creating atmosphere through sensory description", "teach": ["Using multiple senses (sight, sound, smell, touch, taste) in description makes a scene feel more immersive.", "Example: 'the damp air smelled of rust, and the metal groaned underfoot' uses smell and sound together.", "Try to include at least two different senses when describing an important setting."]}, {"title": "Using a flashback for structure", "teach": ["A flashback interrupts the main timeline to show an earlier event, often revealing important backstory or motivation.", "Example: a character finds an old photo, triggering a memory of a childhood event before returning to the present.", "Flashbacks should be clearly signalled (e.g. 'She remembered...') so the reader isn't confused about the timeline."]}, {"title": "Using foreshadowing", "teach": ["Foreshadowing hints at events that will happen later in the story, creating anticipation or unease.", "Example: a character mentions a strange feeling of dread before anything bad has actually happened yet.", "This technique rewards careful readers, who notice the connection once the later event occurs."]}, {"title": "Choosing a narrative viewpoint", "teach": ["First person ('I') creates intimacy and immediacy; third person ('she/he') allows more distance and a broader view.", "Example: 'I felt my heart race' (first person, intimate) vs 'She felt her heart race' (third person, more distant).", "Choose the viewpoint that best suits the emotional effect you want to create for your reader."]}, {"title": "Mixed practice — stylistic devices in creative writing", "teach": ["You've now practiced similes, metaphors, personification, varying sentence length, rule of three, sensory description, flashback, foreshadowing, and viewpoint.", "Combining several of these techniques deliberately (not randomly) is what separates strong creative writing from average writing.", "This final question checks you can apply one of these techniques confidently."]}];
+
+function ytGen_0() {
+  return { q: "\"The old man's hands were as wrinkled as ___\" \u2014 which best completes this simile?", options: ["a raisin", "a computer", "happiness", "the ocean floor"], correct: 0 };
+}
+function ytGen_1() {
+  return { q: "\"The city at night was a ___\" \u2014 which best completes this metaphor?", options: ["a quiet library", "a jungle of light", "a single candle", "an empty page"], correct: 1 };
+}
+function ytGen_2() {
+  return { q: "\"The shadows ___ across the empty room.\" Which verb best builds a menacing atmosphere?", options: ["danced", "crept", "skipped", "floated happily"], correct: 1 };
+}
+function ytGen_3() {
+  return { q: "A) Short sentence, then long sentence. B) Long sentence, then short sentence. Which order typically builds tension before a climax?", options: ["A", "B", "Neither affects tension", "Both create identical tension"], correct: 0 };
+}
+function ytGen_4() {
+  return { q: "\"The wind howled, the rain lashed, and the ___\" \u2014 which best completes this rule-of-three list?", options: ["sun came out gently", "thunder roared", "birds sang sweetly", "clouds drifted slowly"], correct: 1 };
+}
+function ytGen_5() {
+  return { q: "\"the damp air smelled of rust, and the metal groaned underfoot.\" Which two senses are used?", options: ["Sight and taste", "Smell and sound", "Touch and sight", "Taste and touch"], correct: 1 };
+}
+function ytGen_6() {
+  return { q: "What is the term for interrupting a story's main timeline to show an earlier event?", options: ["Foreshadowing", "Flashback", "Cliffhanger", "Rule of three"], correct: 1 };
+}
+function ytGen_7() {
+  return { q: "What is the term for hinting at future events earlier in a story?", options: ["Flashback", "Personification", "Foreshadowing", "Alliteration"], correct: 2 };
+}
+function ytGen_8() {
+  return { q: "Which viewpoint creates more intimacy and immediacy: first person or third person?", options: ["First person", "Third person", "Neither differs in effect", "Third person, always"], correct: 0 };
+}
+function ytGen_9() {
+  return { q: "\"The old house ___ under the weight of years.\" Which verb creates personification?", options: ["stood", "groaned", "was built", "remained"], correct: 1 };
+}
 const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
 
 let qIdx = 0;
 let stepIdx = 0;
 const STEPS_PER_Q = 4;
 let currentYT = null;
+
+function shuffle(optionsWithCorrect) {
+  const opts = optionsWithCorrect.options.map((text, i) => ({text, isCorrect: i === optionsWithCorrect.correct}));
+  for (let i = opts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opts[i], opts[j]] = [opts[j], opts[i]];
+  }
+  return opts;
+}
 
 function render() {
   const q = QUESTIONS[qIdx];
@@ -78,14 +111,16 @@ function render() {
     document.getElementById('nextBtn').textContent = 'Next';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    currentYT = YT_GENS[qIdx]();
+    const raw = YT_GENS[qIdx]();
+    currentYT = { q: raw.q, opts: shuffle(raw) };
+    const optsHtml = currentYT.opts.map((o, i) =>
+      `<button class="opt-btn" data-idx="${i}" onclick="checkYT(${i})">${o.text}</button>`
+    ).join('');
     box.innerHTML = `
       <div class="teach"><strong>${q.title}</strong></div>
       <div class="yt-box">
-        <div>${q.yt_prompt}</div>
-        <div class="worked">${currentYT.q}</div>
-        <input type="text" id="ytAnswer" placeholder="Your answer">
-        <button class="act" onclick="checkYT()">Check</button>
+        <div class="yt-q">${currentYT.q}</div>
+        <div class="opt-list" id="optList">${optsHtml}</div>
         <div id="ytFeedback"></div>
       </div>`;
     const isLast = (qIdx === 9);
@@ -94,14 +129,21 @@ function render() {
   }
 }
 
-function checkYT() {
-  const val = document.getElementById('ytAnswer').value.trim();
+function checkYT(idx) {
   const fb = document.getElementById('ytFeedback');
-  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+  const buttons = document.querySelectorAll('#optList .opt-btn');
+  buttons.forEach(b => b.disabled = true);
+  const chosen = currentYT.opts[idx];
+  if (chosen.isCorrect) {
+    buttons[idx].classList.add('correct');
     fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+    buttons[idx].classList.add('wrong');
+    const correctIdx = currentYT.opts.findIndex(o => o.isCorrect);
+    buttons[correctIdx].classList.add('correct');
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted.</div>';
+    document.getElementById('nextBtn').disabled = false;
   }
 }
 

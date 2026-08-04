@@ -17,11 +17,14 @@
   .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
   .step-bar { height:100%; background:var(--red); transition:width .3s; }
   .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
-  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
   .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
-  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
-  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
-  button.act:disabled { background:#ccc; }
+  .yt-q { font-weight:600; margin-bottom:14px; line-height:1.5; }
+  .opt-list { display:flex; flex-direction:column; gap:10px; }
+  .opt-btn { text-align:left; background:#fff; border:2px solid #ddd; padding:12px 14px; border-radius:8px; font-size:1rem; cursor:pointer; }
+  .opt-btn:hover { border-color:var(--red); }
+  .opt-btn.correct { background:#e8f7ee; border-color:#1b7d3a; color:#1b7d3a; font-weight:600; }
+  .opt-btn.wrong { background:#fdecec; border-color:var(--red); color:var(--red); }
+  .opt-btn:disabled { cursor:default; }
   .try-fb { margin-top:10px; font-weight:600; }
   .try-fb.ok { color:#1b7d3a; }
   .try-fb.er { color:var(--red); }
@@ -32,7 +35,7 @@
 
 </head>
 <body>
-<header><h1>Extension English: Comparing Two Texts (Viewpoint/Purpose)</h1></header>
+<header><h1>Extension English: Comparing Two Texts</h1></header>
 <div class="wrap">
   <div class="card">
     <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
@@ -46,23 +49,53 @@
 </div>
 
 <script>
-const QUESTIONS = [{"title": "Why compare two texts?", "teach": ["Comparing two texts on a similar topic reveals how different writers approach the same subject differently \u2014 through viewpoint, purpose, or technique.", "Example: two articles about climate change might differ in tone \u2014 one urgent and alarmed, the other calm and measured.", "Comparison questions test your ability to analyse two texts AND explain the relationship between them."], "yt_prompt": "What does comparing two texts on the same topic reveal?"}, {"title": "Identifying purpose \u2014 to inform vs to persuade", "teach": ["A text's purpose might be to inform (giving neutral facts) or to persuade (pushing a particular viewpoint).", "Example: a news report aims to inform; an opinion column aims to persuade.", "Look at word choice and balance of viewpoints to judge whether a text is informing or persuading."], "yt_prompt": "Does an opinion column aim to inform or persuade?"}, {"title": "Comparing tone between two texts", "teach": ["Tone (the writer's attitude, shown through word choice and style) often differs between two texts on the same topic.", "Example: one article on a new policy might have a hopeful tone, while another has a critical tone.", "Identify specific word choices in each text that reveal its particular tone."], "yt_prompt": "If one text uses words like 'exciting' and 'promising', and another uses 'concerning' and 'risky', how do their tones differ?"}, {"title": "Comparing structure between two texts", "teach": ["Two texts on the same topic might be organised very differently \u2014 one chronological, another building to a key argument at the end.", "Example: a news report often states the key fact first; a persuasive essay might build up to its main point gradually.", "Consider why each writer chose their particular structure for their purpose."], "yt_prompt": "Which structure is more typical of a news report \u2014 key fact first, or building up gradually?"}, {"title": "Comparing language techniques between two texts", "teach": ["Two texts might use very different techniques even on the same subject \u2014 one factual and measured, another emotive and persuasive.", "Example: a scientific report uses precise data; a charity appeal uses emotive personal stories.", "Identify specific techniques (like emotive language, statistics, or rhetorical questions) used in each text separately before comparing."], "yt_prompt": "Which text is more likely to use emotive language \u2014 a scientific report or a charity appeal?"}, {"title": "Identifying the intended audience", "teach": ["Different texts are often written for different audiences, which shapes their tone, vocabulary, and level of detail.", "Example: a children's information leaflet uses simple vocabulary; an academic article uses more technical, complex language.", "Consider vocabulary level and tone as clues to who the text was written for."], "yt_prompt": "Which audience would a text using simple vocabulary and short sentences most likely be written for?"}, {"title": "Comparing viewpoints on the same issue", "teach": ["Two writers can have completely opposite viewpoints on the same topic \u2014 comparing them reveals the range of perspectives available.", "Example: one writer might support a new law, while another strongly opposes it, each using different evidence to support their view.", "Summarise each writer's overall viewpoint clearly before comparing how they differ."], "yt_prompt": "If one writer supports a policy and another opposes it, what do we call this difference?"}, {"title": "Using comparative language in your own writing", "teach": ["When comparing two texts, use comparative language like 'whereas', 'in contrast', 'similarly', and 'both'.", "Example: 'Whereas Text A uses statistics, Text B relies on personal anecdotes.'", "This comparative vocabulary makes your own analysis of the two texts much clearer to follow."], "yt_prompt": "Which word signals a contrast between two texts: 'whereas' or 'and'?"}, {"title": "Structuring a comparison paragraph", "teach": ["A strong comparison paragraph makes a clear point about both texts together, not just describing each one separately.", "Example: 'Both texts address climate change, but Text A uses statistics to build a logical case, whereas Text B relies on emotive personal stories to persuade.'", "Avoid simply summarising each text one after another \u2014 actively compare them within the same sentences where possible."], "yt_prompt": "Should a comparison paragraph describe each text completely separately, or link them together? Type 'link':"}, {"title": "Mixed practice \u2014 comparing texts", "teach": ["You've now covered comparing purpose, tone, structure, language techniques, audience, and viewpoint across two texts.", "This comparative analysis skill is heavily tested in IGCSE and similar exam formats, often worth significant marks.", "This final question brings a couple of these comparison skills together."], "yt_prompt": "If Text A informs with neutral facts and Text B persuades with emotive language, what is the main difference in their purpose?"}];
-function ytGen_0() { return {q:'What does comparing two texts on the same topic typically reveal?', answer:'different viewpoints or approaches'}; }
-function ytGen_1() { return {q:'Does an opinion column aim to inform or persuade?', answer:'persuade'}; }
-function ytGen_2() { return {q:'Text A uses "exciting" and "promising". Text B uses "concerning" and "risky". How do their tones differ?', answer:'one is positive, the other is negative'}; }
-function ytGen_3() { return {q:'Which structure is more typical of a news report?', answer:'key fact first'}; }
-function ytGen_4() { return {q:'Which text is more likely to use emotive language?', answer:'a charity appeal'}; }
-function ytGen_5() { return {q:'Which audience would a text using simple vocabulary and short sentences most likely be written for?', answer:'children'}; }
-function ytGen_6() { return {q:'If one writer supports a policy and another opposes it, what do we call this difference?', answer:'a difference in viewpoint'}; }
-function ytGen_7() { return {q:'Which word signals a contrast between two texts: "whereas" or "and"?', answer:'whereas'}; }
-function ytGen_8() { return {q:'Should a comparison paragraph describe each text completely separately, or link them together?', answer:'link'}; }
-function ytGen_9() { return {q:'Text A informs with neutral facts. Text B persuades with emotive language. What is the main difference in purpose?', answer:'one aims to inform, the other to persuade'}; }
+const QUESTIONS = [{"title": "Why compare two texts?", "teach": ["Comparing two texts on a similar topic reveals how different writers approach the same subject differently — through viewpoint, purpose, or technique.", "Example: two articles about climate change might differ in tone — one urgent and alarmed, the other calm and measured.", "Comparison questions test your ability to analyse two texts AND explain the relationship between them."]}, {"title": "Identifying purpose — to inform vs to persuade", "teach": ["A text's purpose might be to inform (giving neutral facts) or to persuade (pushing a particular viewpoint).", "Example: a news report aims to inform; an opinion column aims to persuade.", "Look at word choice and balance of viewpoints to judge whether a text is informing or persuading."]}, {"title": "Comparing tone between two texts", "teach": ["Tone (the writer's attitude, shown through word choice and style) often differs between two texts on the same topic.", "Example: one article on a new policy might have a hopeful tone, while another has a critical tone.", "Identify specific word choices in each text that reveal its particular tone."]}, {"title": "Comparing structure between two texts", "teach": ["Two texts on the same topic might be organised very differently — one chronological, another building to a key argument at the end.", "Example: a news report often states the key fact first; a persuasive essay might build up to its main point gradually.", "Consider why each writer chose their particular structure for their purpose."]}, {"title": "Comparing language techniques between two texts", "teach": ["Two texts might use very different techniques even on the same subject — one factual and measured, another emotive and persuasive.", "Example: a scientific report uses precise data; a charity appeal uses emotive personal stories.", "Identify specific techniques (like emotive language, statistics, or rhetorical questions) used in each text separately before comparing."]}, {"title": "Identifying the intended audience", "teach": ["Different texts are often written for different audiences, which shapes their tone, vocabulary, and level of detail.", "Example: a children's information leaflet uses simple vocabulary; an academic article uses more technical, complex language.", "Consider vocabulary level and tone as clues to who the text was written for."]}, {"title": "Comparing viewpoints on the same issue", "teach": ["Two writers can have completely opposite viewpoints on the same topic — comparing them reveals the range of perspectives available.", "Example: one writer might support a new law, while another strongly opposes it, each using different evidence to support their view.", "Summarise each writer's overall viewpoint clearly before comparing how they differ."]}, {"title": "Using comparative language in your own writing", "teach": ["When comparing two texts, use comparative language like 'whereas', 'in contrast', 'similarly', and 'both'.", "Example: 'Whereas Text A uses statistics, Text B relies on personal anecdotes.'", "This comparative vocabulary makes your own analysis of the two texts much clearer to follow."]}, {"title": "Structuring a comparison paragraph", "teach": ["A strong comparison paragraph makes a clear point about both texts together, not just describing each one separately.", "Example: 'Both texts address climate change, but Text A uses statistics to build a logical case, whereas Text B relies on emotive personal stories to persuade.'", "Avoid simply summarising each text one after another — actively compare them within the same sentences where possible."]}, {"title": "Mixed practice — comparing texts", "teach": ["You've now covered comparing purpose, tone, structure, language techniques, audience, and viewpoint across two texts.", "This comparative analysis skill is heavily tested in IGCSE and similar exam formats, often worth significant marks.", "This final question brings a couple of these comparison skills together."]}];
+
+function ytGen_0() {
+  return { q: "What does comparing two texts on the same topic typically reveal?", options: ["That all texts are identical", "Different viewpoints or approaches", "Only spelling differences", "Nothing significant"], correct: 1 };
+}
+function ytGen_1() {
+  return { q: "Does an opinion column aim to inform or persuade?", options: ["Inform", "Persuade", "Neither", "Entertain only"], correct: 1 };
+}
+function ytGen_2() {
+  return { q: "Text A uses \"exciting\" and \"promising\". Text B uses \"concerning\" and \"risky\". How do their tones differ?", options: ["Both are negative", "Both are neutral", "One is positive, the other is negative", "There is no difference"], correct: 2 };
+}
+function ytGen_3() {
+  return { q: "Which structure is more typical of a news report?", options: ["Key fact first", "Key fact saved for the very end", "No clear structure", "Chronological order only"], correct: 0 };
+}
+function ytGen_4() {
+  return { q: "Which text is more likely to use emotive language?", options: ["A scientific report", "A charity appeal", "A weather forecast", "A phone directory"], correct: 1 };
+}
+function ytGen_5() {
+  return { q: "Which audience would a text using simple vocabulary and short sentences most likely be written for?", options: ["University professors", "Children", "Legal experts", "Medical researchers"], correct: 1 };
+}
+function ytGen_6() {
+  return { q: "If one writer supports a policy and another opposes it, what do we call this difference?", options: ["A difference in spelling", "A difference in viewpoint", "A difference in font", "A coincidence"], correct: 1 };
+}
+function ytGen_7() {
+  return { q: "Which word signals a contrast between two texts: \"whereas\" or \"and\"?", options: ["whereas", "and", "Both signal contrast equally", "Neither signals contrast"], correct: 0 };
+}
+function ytGen_8() {
+  return { q: "Should a comparison paragraph describe each text completely separately, or link them together?", options: ["Describe them completely separately", "Link them together", "Only describe one text", "Ignore both texts"], correct: 1 };
+}
+function ytGen_9() {
+  return { q: "Text A informs with neutral facts. Text B persuades with emotive language. What is the main difference in purpose?", options: ["One aims to inform, the other to persuade", "Both aim purely to entertain", "There is no real difference", "Both aim only to persuade"], correct: 0 };
+}
 const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
 
 let qIdx = 0;
 let stepIdx = 0;
 const STEPS_PER_Q = 4;
 let currentYT = null;
+
+function shuffle(optionsWithCorrect) {
+  const opts = optionsWithCorrect.options.map((text, i) => ({text, isCorrect: i === optionsWithCorrect.correct}));
+  for (let i = opts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opts[i], opts[j]] = [opts[j], opts[i]];
+  }
+  return opts;
+}
 
 function render() {
   const q = QUESTIONS[qIdx];
@@ -78,14 +111,16 @@ function render() {
     document.getElementById('nextBtn').textContent = 'Next';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    currentYT = YT_GENS[qIdx]();
+    const raw = YT_GENS[qIdx]();
+    currentYT = { q: raw.q, opts: shuffle(raw) };
+    const optsHtml = currentYT.opts.map((o, i) =>
+      `<button class="opt-btn" data-idx="${i}" onclick="checkYT(${i})">${o.text}</button>`
+    ).join('');
     box.innerHTML = `
       <div class="teach"><strong>${q.title}</strong></div>
       <div class="yt-box">
-        <div>${q.yt_prompt}</div>
-        <div class="worked">${currentYT.q}</div>
-        <input type="text" id="ytAnswer" placeholder="Your answer">
-        <button class="act" onclick="checkYT()">Check</button>
+        <div class="yt-q">${currentYT.q}</div>
+        <div class="opt-list" id="optList">${optsHtml}</div>
         <div id="ytFeedback"></div>
       </div>`;
     const isLast = (qIdx === 9);
@@ -94,14 +129,21 @@ function render() {
   }
 }
 
-function checkYT() {
-  const val = document.getElementById('ytAnswer').value.trim();
+function checkYT(idx) {
   const fb = document.getElementById('ytFeedback');
-  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+  const buttons = document.querySelectorAll('#optList .opt-btn');
+  buttons.forEach(b => b.disabled = true);
+  const chosen = currentYT.opts[idx];
+  if (chosen.isCorrect) {
+    buttons[idx].classList.add('correct');
     fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+    buttons[idx].classList.add('wrong');
+    const correctIdx = currentYT.opts.findIndex(o => o.isCorrect);
+    buttons[correctIdx].classList.add('correct');
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted.</div>';
+    document.getElementById('nextBtn').disabled = false;
   }
 }
 

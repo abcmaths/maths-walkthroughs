@@ -17,11 +17,14 @@
   .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
   .step-bar { height:100%; background:var(--red); transition:width .3s; }
   .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
-  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
   .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
-  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
-  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
-  button.act:disabled { background:#ccc; }
+  .yt-q { font-weight:600; margin-bottom:14px; line-height:1.5; }
+  .opt-list { display:flex; flex-direction:column; gap:10px; }
+  .opt-btn { text-align:left; background:#fff; border:2px solid #ddd; padding:12px 14px; border-radius:8px; font-size:1rem; cursor:pointer; }
+  .opt-btn:hover { border-color:var(--red); }
+  .opt-btn.correct { background:#e8f7ee; border-color:#1b7d3a; color:#1b7d3a; font-weight:600; }
+  .opt-btn.wrong { background:#fdecec; border-color:var(--red); color:var(--red); }
+  .opt-btn:disabled { cursor:default; }
   .try-fb { margin-top:10px; font-weight:600; }
   .try-fb.ok { color:#1b7d3a; }
   .try-fb.er { color:var(--red); }
@@ -32,7 +35,7 @@
 
 </head>
 <body>
-<header><h1>Extension English: Debate Skills — Constructing a Reasoned Argument</h1></header>
+<header><h1>Extension English: Debate Skills</h1></header>
 <div class="wrap">
   <div class="card">
     <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
@@ -46,23 +49,53 @@
 </div>
 
 <script>
-const QUESTIONS = [{"title": "What is a reasoned argument?", "teach": ["A reasoned argument states a clear position and supports it with logical evidence, not just opinion alone.", "Example: 'School uniforms should be compulsory because they reduce bullying based on clothing differences' gives a reason, not just an opinion.", "Always ask: have I explained WHY, not just stated WHAT I think?"], "yt_prompt": "What must a reasoned argument include, beyond just an opinion?"}, {"title": "Structuring a debate point \u2014 PEEL", "teach": ["PEEL stands for Point, Evidence, Explain, Link \u2014 a useful structure for building a clear argument.", "Example: Point (uniforms reduce bullying), Evidence (a study found X% reduction), Explain (this shows uniforms remove a visible difference), Link (this supports why uniforms should be compulsory).", "Following this structure consistently makes an argument much easier for a listener or reader to follow."], "yt_prompt": "What does the 'E' after Point stand for in the PEEL structure? (one word)"}, {"title": "Anticipating the opposing side", "teach": ["Strong debaters think ahead about what the other side will argue, so they can prepare a response in advance.", "Example: if arguing for uniforms, anticipate the counter-argument that uniforms limit self-expression, and prepare a response.", "This preparation makes a debater's argument feel much stronger and harder to challenge."], "yt_prompt": "Why is it useful to anticipate the opposing side's argument in a debate?"}, {"title": "Rebuttal \u2014 responding to the other side", "teach": ["A rebuttal directly responds to and challenges a point made by the opposing side.", "Example: if the opposition says 'uniforms are expensive', a rebuttal might point out that uniforms actually save money long-term by avoiding daily outfit costs.", "A strong rebuttal engages directly with the specific point made, rather than ignoring it."], "yt_prompt": "What is it called when you directly respond to and challenge the opposing side's point?"}, {"title": "Using evidence effectively in debate", "teach": ["Strong evidence in debate includes statistics, expert opinions, or specific real-world examples \u2014 not vague generalisations.", "Example: 'Studies show a 20% reduction in incidents' is stronger evidence than 'many people believe this helps'.", "Specific, credible evidence makes an argument much harder for the opposition to dismiss."], "yt_prompt": "Which is stronger evidence? Type 'A' or 'B':"}, {"title": "Staying on topic during a debate", "teach": ["A strong debater keeps every point clearly connected to the main motion (topic), rather than drifting into unrelated ideas.", "Example: in a debate about school uniforms, veering into an unrelated point about school lunches would be off-topic.", "Always check: does this point clearly support or relate to the main argument I'm making?"], "yt_prompt": "Why is staying on topic important during a debate?"}, {"title": "Using a confident, clear tone", "teach": ["Delivery matters in spoken debate \u2014 a confident, clear tone makes an argument feel more convincing, even before considering its content.", "Example: speaking clearly and at a steady pace helps the audience follow and trust the argument being made.", "This applies to written debate scripts too \u2014 clear, direct sentences read more confidently than vague, hesitant ones."], "yt_prompt": "What tone helps make a spoken argument feel more convincing?"}, {"title": "Concluding a debate argument", "teach": ["A strong conclusion summarises the key points and restates the main position clearly and memorably.", "Example: 'For these reasons \u2014 reduced bullying, cost savings, and equality \u2014 school uniforms should remain compulsory.'", "A weak conclusion just trails off or introduces a completely new point instead of summarising."], "yt_prompt": "What should a strong debate conclusion do?"}, {"title": "Distinguishing fact from opinion in debate", "teach": ["A fact can be proven true or false with evidence; an opinion is a personal belief that can't be proven either way.", "Example: 'Uniforms cost \u00a350 per year' is a fact (can be checked); 'Uniforms look better' is an opinion.", "Strong debate arguments rely primarily on facts, using opinion sparingly and clearly labelled as such."], "yt_prompt": "Is 'Uniforms cost \u00a350 per year' a fact or an opinion?"}, {"title": "Mixed practice \u2014 debate skills", "teach": ["You've now covered reasoned arguments, the PEEL structure, anticipating opposition, rebuttal, evidence, staying on topic, tone, conclusions, and fact vs opinion.", "These skills apply directly to formal debates, but also to persuasive essays and structured argument writing generally.", "This final question brings a couple of these skills together."], "yt_prompt": "What is it called when you directly challenge an opposing point in a debate?"}];
-function ytGen_0() { return {q:'What must a reasoned argument include, beyond just an opinion?', answer:'evidence or reasons'}; }
-function ytGen_1() { return {q:'What does the first "E" stand for in PEEL (Point, ?, Explain, Link)?', answer:'evidence'}; }
-function ytGen_2() { return {q:'Why is it useful to anticipate the opposing side\'s argument in a debate?', answer:'to prepare a response in advance'}; }
-function ytGen_3() { return {q:'What is it called when you directly respond to and challenge the opposing side\'s point?', answer:'rebuttal'}; }
-function ytGen_4() { return {q:'A) Studies show a 20% reduction in incidents. B) Many people believe this helps. Which is stronger evidence?', answer:'A'}; }
-function ytGen_5() { return {q:'Why is staying on topic important during a debate?', answer:'keeps the argument focused and convincing'}; }
-function ytGen_6() { return {q:'What tone helps make a spoken argument feel more convincing?', answer:'confident and clear'}; }
-function ytGen_7() { return {q:'What should a strong debate conclusion do?', answer:'summarise the key points and restate the position'}; }
-function ytGen_8() { return {q:'Is "Uniforms cost £50 per year" a fact or an opinion?', answer:'fact'}; }
-function ytGen_9() { return {q:'What is it called when you directly challenge an opposing point in a debate?', answer:'rebuttal'}; }
+const QUESTIONS = [{"title": "What is a reasoned argument?", "teach": ["A reasoned argument states a clear position and supports it with logical evidence, not just opinion alone.", "Example: 'School uniforms should be compulsory because they reduce bullying based on clothing differences' gives a reason, not just an opinion.", "Always ask: have I explained WHY, not just stated WHAT I think?"]}, {"title": "Structuring a debate point — PEEL", "teach": ["PEEL stands for Point, Evidence, Explain, Link — a useful structure for building a clear argument.", "Example: Point (uniforms reduce bullying), Evidence (a study found X% reduction), Explain (this shows uniforms remove a visible difference), Link (this supports why uniforms should be compulsory).", "Following this structure consistently makes an argument much easier for a listener or reader to follow."]}, {"title": "Anticipating the opposing side", "teach": ["Strong debaters think ahead about what the other side will argue, so they can prepare a response in advance.", "Example: if arguing for uniforms, anticipate the counter-argument that uniforms limit self-expression, and prepare a response.", "This preparation makes a debater's argument feel much stronger and harder to challenge."]}, {"title": "Rebuttal — responding to the other side", "teach": ["A rebuttal directly responds to and challenges a point made by the opposing side.", "Example: if the opposition says 'uniforms are expensive', a rebuttal might point out that uniforms actually save money long-term by avoiding daily outfit costs.", "A strong rebuttal engages directly with the specific point made, rather than ignoring it."]}, {"title": "Using evidence effectively in debate", "teach": ["Strong evidence in debate includes statistics, expert opinions, or specific real-world examples — not vague generalisations.", "Example: 'Studies show a 20% reduction in incidents' is stronger evidence than 'many people believe this helps'.", "Specific, credible evidence makes an argument much harder for the opposition to dismiss."]}, {"title": "Staying on topic during a debate", "teach": ["A strong debater keeps every point clearly connected to the main motion (topic), rather than drifting into unrelated ideas.", "Example: in a debate about school uniforms, veering into an unrelated point about school lunches would be off-topic.", "Always check: does this point clearly support or relate to the main argument I'm making?"]}, {"title": "Using a confident, clear tone", "teach": ["Delivery matters in spoken debate — a confident, clear tone makes an argument feel more convincing, even before considering its content.", "Example: speaking clearly and at a steady pace helps the audience follow and trust the argument being made.", "This applies to written debate scripts too — clear, direct sentences read more confidently than vague, hesitant ones."]}, {"title": "Concluding a debate argument", "teach": ["A strong conclusion summarises the key points and restates the main position clearly and memorably.", "Example: 'For these reasons — reduced bullying, cost savings, and equality — school uniforms should remain compulsory.'", "A weak conclusion just trails off or introduces a completely new point instead of summarising."]}, {"title": "Distinguishing fact from opinion in debate", "teach": ["A fact can be proven true or false with evidence; an opinion is a personal belief that can't be proven either way.", "Example: 'Uniforms cost £50 per year' is a fact (can be checked); 'Uniforms look better' is an opinion.", "Strong debate arguments rely primarily on facts, using opinion sparingly and clearly labelled as such."]}, {"title": "Mixed practice — debate skills", "teach": ["You've now covered reasoned arguments, the PEEL structure, anticipating opposition, rebuttal, evidence, staying on topic, tone, conclusions, and fact vs opinion.", "These skills apply directly to formal debates, but also to persuasive essays and structured argument writing generally.", "This final question brings a couple of these skills together."]}];
+
+function ytGen_0() {
+  return { q: "What must a reasoned argument include, beyond just an opinion?", options: ["A loud tone of voice", "Evidence or reasons", "Jokes to entertain", "Repetition of the same point"], correct: 1 };
+}
+function ytGen_1() {
+  return { q: "What does the first \"E\" stand for in PEEL (Point, ?, Explain, Link)?", options: ["Emotion", "Evidence", "Example only", "Ending"], correct: 1 };
+}
+function ytGen_2() {
+  return { q: "Why is it useful to anticipate the opposing side's argument in a debate?", options: ["To avoid preparing at all", "To prepare a response in advance", "It is never useful", "To agree with them instead"], correct: 1 };
+}
+function ytGen_3() {
+  return { q: "What is it called when you directly respond to and challenge the opposing side's point?", options: ["A rebuttal", "A call to action", "A flashback", "A rule of three"], correct: 0 };
+}
+function ytGen_4() {
+  return { q: "A) Studies show a 20% reduction in incidents. B) Many people believe this helps. Which is stronger evidence?", options: ["A", "B", "Both are equally strong", "Neither is evidence"], correct: 0 };
+}
+function ytGen_5() {
+  return { q: "Why is staying on topic important during a debate?", options: ["It isn't important", "It keeps the argument focused and convincing", "It only matters in writing, not speech", "It makes the debate longer"], correct: 1 };
+}
+function ytGen_6() {
+  return { q: "What tone helps make a spoken argument feel more convincing?", options: ["Hesitant and unsure", "Confident and clear", "Loud and aggressive", "Flat and monotone"], correct: 1 };
+}
+function ytGen_7() {
+  return { q: "What should a strong debate conclusion do?", options: ["Introduce a brand new argument", "Summarise the key points and restate the position", "Apologise for the argument", "Ask the audience a question and stop"], correct: 1 };
+}
+function ytGen_8() {
+  return { q: "Is \"Uniforms cost \u00a350 per year\" a fact or an opinion?", options: ["A fact", "An opinion", "Neither a fact nor an opinion", "Both equally"], correct: 0 };
+}
+function ytGen_9() {
+  return { q: "What is it called when you directly challenge an opposing point in a debate?", options: ["A call to action", "A flashback", "A rebuttal", "A rule of three"], correct: 2 };
+}
 const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
 
 let qIdx = 0;
 let stepIdx = 0;
 const STEPS_PER_Q = 4;
 let currentYT = null;
+
+function shuffle(optionsWithCorrect) {
+  const opts = optionsWithCorrect.options.map((text, i) => ({text, isCorrect: i === optionsWithCorrect.correct}));
+  for (let i = opts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opts[i], opts[j]] = [opts[j], opts[i]];
+  }
+  return opts;
+}
 
 function render() {
   const q = QUESTIONS[qIdx];
@@ -78,14 +111,16 @@ function render() {
     document.getElementById('nextBtn').textContent = 'Next';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    currentYT = YT_GENS[qIdx]();
+    const raw = YT_GENS[qIdx]();
+    currentYT = { q: raw.q, opts: shuffle(raw) };
+    const optsHtml = currentYT.opts.map((o, i) =>
+      `<button class="opt-btn" data-idx="${i}" onclick="checkYT(${i})">${o.text}</button>`
+    ).join('');
     box.innerHTML = `
       <div class="teach"><strong>${q.title}</strong></div>
       <div class="yt-box">
-        <div>${q.yt_prompt}</div>
-        <div class="worked">${currentYT.q}</div>
-        <input type="text" id="ytAnswer" placeholder="Your answer">
-        <button class="act" onclick="checkYT()">Check</button>
+        <div class="yt-q">${currentYT.q}</div>
+        <div class="opt-list" id="optList">${optsHtml}</div>
         <div id="ytFeedback"></div>
       </div>`;
     const isLast = (qIdx === 9);
@@ -94,14 +129,21 @@ function render() {
   }
 }
 
-function checkYT() {
-  const val = document.getElementById('ytAnswer').value.trim();
+function checkYT(idx) {
   const fb = document.getElementById('ytFeedback');
-  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+  const buttons = document.querySelectorAll('#optList .opt-btn');
+  buttons.forEach(b => b.disabled = true);
+  const chosen = currentYT.opts[idx];
+  if (chosen.isCorrect) {
+    buttons[idx].classList.add('correct');
     fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+    buttons[idx].classList.add('wrong');
+    const correctIdx = currentYT.opts.findIndex(o => o.isCorrect);
+    buttons[correctIdx].classList.add('correct');
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted.</div>';
+    document.getElementById('nextBtn').disabled = false;
   }
 }
 

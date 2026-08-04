@@ -17,11 +17,14 @@
   .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
   .step-bar { height:100%; background:var(--red); transition:width .3s; }
   .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
-  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
   .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
-  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
-  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
-  button.act:disabled { background:#ccc; }
+  .yt-q { font-weight:600; margin-bottom:14px; line-height:1.5; }
+  .opt-list { display:flex; flex-direction:column; gap:10px; }
+  .opt-btn { text-align:left; background:#fff; border:2px solid #ddd; padding:12px 14px; border-radius:8px; font-size:1rem; cursor:pointer; }
+  .opt-btn:hover { border-color:var(--red); }
+  .opt-btn.correct { background:#e8f7ee; border-color:#1b7d3a; color:#1b7d3a; font-weight:600; }
+  .opt-btn.wrong { background:#fdecec; border-color:var(--red); color:var(--red); }
+  .opt-btn:disabled { cursor:default; }
   .try-fb { margin-top:10px; font-weight:600; }
   .try-fb.ok { color:#1b7d3a; }
   .try-fb.er { color:var(--red); }
@@ -46,23 +49,53 @@
 </div>
 
 <script>
-const QUESTIONS = [{"title": "What is persuasive writing?", "teach": ["Persuasive writing aims to convince the reader to agree with a particular viewpoint or take a specific action.", "Example: an advert, a campaign speech, or an opinion article are all forms of persuasive writing.", "Effective persuasive writing uses specific techniques deliberately, not just strong opinions alone."], "yt_prompt": "What is the main goal of persuasive writing?"}, {"title": "Using rhetorical questions to persuade", "teach": ["Rhetorical questions make the reader think and often imply an obvious answer that supports the writer's argument.", "Example: 'Do we really want to leave this problem for future generations?' implies the obvious answer is no.", "This technique engages the reader more actively than a simple statement would."], "yt_prompt": "What effect does a rhetorical question have on the reader?"}, {"title": "Using the rule of three in persuasion", "teach": ["Listing three points together creates a memorable, rhythmic argument.", "Example: 'We need action, we need change, we need it now' \u2014 three short, punchy statements building urgency.", "This technique is common in speeches and campaign writing."], "yt_prompt": "What technique is being used in: 'We need action, we need change, we need it now'?"}, {"title": "Using statistics and facts to persuade", "teach": ["Including specific facts or statistics makes an argument feel more credible and evidence-based.", "Example: 'Over 60% of students reported feeling stressed' is more convincing than simply saying 'lots of students are stressed'.", "Specific numbers carry more persuasive weight than vague generalisations."], "yt_prompt": "Which is more persuasive? Type 'A' or 'B':"}, {"title": "Using emotive language", "teach": ["Emotive language deliberately triggers an emotional reaction in the reader, strengthening the persuasive effect.", "Example: 'innocent children are suffering' is more emotionally charged than 'children are affected'.", "Emotive language is powerful, but should be used carefully \u2014 overuse can feel manipulative to the reader."], "yt_prompt": "Which is more emotive? Type 'A' or 'B':"}, {"title": "Anticipating counter-arguments", "teach": ["Strong persuasive writing acknowledges the opposing viewpoint before explaining why it's less convincing.", "Example: 'Some may argue that costs are too high, but the long-term benefits far outweigh this concern.'", "This technique makes an argument feel more balanced and considered, which can increase its persuasive power."], "yt_prompt": "What is it called when a writer acknowledges an opposing view before countering it?"}, {"title": "Using a direct address to the reader", "teach": ["Speaking directly to the reader (using 'you') creates a personal connection and makes the argument feel more immediate.", "Example: 'You have the power to make a difference today' feels more direct and personal than a general statement.", "This technique is common in campaign and charity appeal writing."], "yt_prompt": "What effect does directly addressing the reader as 'you' create?"}, {"title": "Structuring a persuasive argument", "teach": ["A strong persuasive piece usually opens with a clear position, develops supporting points, and ends with a powerful conclusion or call to action.", "Example: opening line stating the issue, then evidence, then a final call for the reader to act.", "Planning this structure before writing helps keep the argument focused and building toward a clear point."], "yt_prompt": "What usually comes at the very end of a persuasive piece, encouraging the reader to act?"}, {"title": "Balancing logic and emotion", "teach": ["The strongest persuasive writing balances logical evidence (facts, statistics) with emotional appeal (emotive language, personal stories).", "Example: combining a statistic about poverty with a specific, personal story makes both the head and heart engage with the argument.", "Relying only on one or the other usually makes an argument less convincing overall."], "yt_prompt": "What are the two main elements a strong persuasive argument should balance? (two words)"}, {"title": "Mixed practice \u2014 persuasive techniques", "teach": ["You've now covered rhetorical questions, the rule of three, statistics, emotive language, counter-arguments, direct address, structure, and balancing logic with emotion.", "Combining several of these techniques deliberately makes persuasive writing far more effective than relying on just one.", "This final question checks you can identify a persuasive technique confidently."], "yt_prompt": "What technique is being used in: 'Isn't it time we finally took action?'"}];
-function ytGen_0() { return {q:'What is the main goal of persuasive writing?', answer:'to convince the reader'}; }
-function ytGen_1() { return {q:'What effect does a rhetorical question have on the reader?', answer:'makes them think and often implies an answer'}; }
-function ytGen_2() { return {q:'We need action, we need change, we need it now. What technique is being used?', answer:'rule of three'}; }
-function ytGen_3() { return {q:'A) Over 60% of students reported feeling stressed. B) Lots of students are stressed. Which is more persuasive?', answer:'A'}; }
-function ytGen_4() { return {q:'A) Innocent children are suffering. B) Children are affected. Which is more emotive?', answer:'A'}; }
-function ytGen_5() { return {q:'What is it called when a writer acknowledges an opposing view before countering it?', answer:'counter-argument'}; }
-function ytGen_6() { return {q:'What effect does directly addressing the reader as "you" create?', answer:'a personal connection'}; }
-function ytGen_7() { return {q:'What usually comes at the very end of a persuasive piece, encouraging the reader to act?', answer:'a call to action'}; }
-function ytGen_8() { return {q:'What are the two main elements a strong persuasive argument should balance?', answer:'logic and emotion'}; }
-function ytGen_9() { return {q:'Isn\'t it time we finally took action? What technique is being used?', answer:'rhetorical question'}; }
+const QUESTIONS = [{"title": "What is persuasive writing?", "teach": ["Persuasive writing aims to convince the reader to agree with a particular viewpoint or take a specific action.", "Example: an advert, a campaign speech, or an opinion article are all forms of persuasive writing.", "Effective persuasive writing uses specific techniques deliberately, not just strong opinions alone."]}, {"title": "Using rhetorical questions to persuade", "teach": ["Rhetorical questions make the reader think and often imply an obvious answer that supports the writer's argument.", "Example: 'Do we really want to leave this problem for future generations?' implies the obvious answer is no.", "This technique engages the reader more actively than a simple statement would."]}, {"title": "Using the rule of three in persuasion", "teach": ["Listing three points together creates a memorable, rhythmic argument.", "Example: 'We need action, we need change, we need it now' — three short, punchy statements building urgency.", "This technique is common in speeches and campaign writing."]}, {"title": "Using statistics and facts to persuade", "teach": ["Including specific facts or statistics makes an argument feel more credible and evidence-based.", "Example: 'Over 60% of students reported feeling stressed' is more convincing than simply saying 'lots of students are stressed'.", "Specific numbers carry more persuasive weight than vague generalisations."]}, {"title": "Using emotive language", "teach": ["Emotive language deliberately triggers an emotional reaction in the reader, strengthening the persuasive effect.", "Example: 'innocent children are suffering' is more emotionally charged than 'children are affected'.", "Emotive language is powerful, but should be used carefully — overuse can feel manipulative to the reader."]}, {"title": "Anticipating counter-arguments", "teach": ["Strong persuasive writing acknowledges the opposing viewpoint before explaining why it's less convincing.", "Example: 'Some may argue that costs are too high, but the long-term benefits far outweigh this concern.'", "This technique makes an argument feel more balanced and considered, which can increase its persuasive power."]}, {"title": "Using a direct address to the reader", "teach": ["Speaking directly to the reader (using 'you') creates a personal connection and makes the argument feel more immediate.", "Example: 'You have the power to make a difference today' feels more direct and personal than a general statement.", "This technique is common in campaign and charity appeal writing."]}, {"title": "Structuring a persuasive argument", "teach": ["A strong persuasive piece usually opens with a clear position, develops supporting points, and ends with a powerful conclusion or call to action.", "Example: opening line stating the issue, then evidence, then a final call for the reader to act.", "Planning this structure before writing helps keep the argument focused and building toward a clear point."]}, {"title": "Balancing logic and emotion", "teach": ["The strongest persuasive writing balances logical evidence (facts, statistics) with emotional appeal (emotive language, personal stories).", "Example: combining a statistic about poverty with a specific, personal story makes both the head and heart engage with the argument.", "Relying only on one or the other usually makes an argument less convincing overall."]}, {"title": "Mixed practice — persuasive techniques", "teach": ["You've now covered rhetorical questions, the rule of three, statistics, emotive language, counter-arguments, direct address, structure, and balancing logic with emotion.", "Combining several of these techniques deliberately makes persuasive writing far more effective than relying on just one.", "This final question checks you can identify a persuasive technique confidently."]}];
+
+function ytGen_0() {
+  return { q: "What is the main goal of persuasive writing?", options: ["To entertain the reader", "To convince the reader", "To simply inform the reader", "To confuse the reader"], correct: 1 };
+}
+function ytGen_1() {
+  return { q: "What effect does a rhetorical question have on the reader?", options: ["It requires no thought at all", "It makes them think and often implies an answer", "It always confuses the reader", "It has no real effect"], correct: 1 };
+}
+function ytGen_2() {
+  return { q: "\"We need action, we need change, we need it now.\" What technique is being used?", options: ["Rule of three", "Simile", "Onomatopoeia", "Flashback"], correct: 0 };
+}
+function ytGen_3() {
+  return { q: "A) Over 60% of students reported feeling stressed. B) Lots of students are stressed. Which is more persuasive?", options: ["A", "B", "Both are equally persuasive", "Neither is persuasive"], correct: 0 };
+}
+function ytGen_4() {
+  return { q: "A) Innocent children are suffering. B) Children are affected. Which is more emotive?", options: ["A", "B", "Both are equally emotive", "Neither is emotive"], correct: 0 };
+}
+function ytGen_5() {
+  return { q: "What is it called when a writer acknowledges an opposing view before countering it?", options: ["A call to action", "A counter-argument", "A rule of three", "A rhetorical question"], correct: 1 };
+}
+function ytGen_6() {
+  return { q: "What effect does directly addressing the reader as \"you\" create?", options: ["Distance from the reader", "A personal connection", "Confusion", "Formality only"], correct: 1 };
+}
+function ytGen_7() {
+  return { q: "What usually comes at the very end of a persuasive piece, encouraging the reader to act?", options: ["A rhetorical question", "A statistic", "A call to action", "A counter-argument"], correct: 2 };
+}
+function ytGen_8() {
+  return { q: "What are the two main elements a strong persuasive argument should balance?", options: ["Length and formality", "Logic and emotion", "Speed and volume", "Humour and sarcasm"], correct: 1 };
+}
+function ytGen_9() {
+  return { q: "\"Isn't it time we finally took action?\" What technique is being used?", options: ["Rhetorical question", "Rule of three", "Onomatopoeia", "Flashback"], correct: 0 };
+}
 const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
 
 let qIdx = 0;
 let stepIdx = 0;
 const STEPS_PER_Q = 4;
 let currentYT = null;
+
+function shuffle(optionsWithCorrect) {
+  const opts = optionsWithCorrect.options.map((text, i) => ({text, isCorrect: i === optionsWithCorrect.correct}));
+  for (let i = opts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opts[i], opts[j]] = [opts[j], opts[i]];
+  }
+  return opts;
+}
 
 function render() {
   const q = QUESTIONS[qIdx];
@@ -78,14 +111,16 @@ function render() {
     document.getElementById('nextBtn').textContent = 'Next';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    currentYT = YT_GENS[qIdx]();
+    const raw = YT_GENS[qIdx]();
+    currentYT = { q: raw.q, opts: shuffle(raw) };
+    const optsHtml = currentYT.opts.map((o, i) =>
+      `<button class="opt-btn" data-idx="${i}" onclick="checkYT(${i})">${o.text}</button>`
+    ).join('');
     box.innerHTML = `
       <div class="teach"><strong>${q.title}</strong></div>
       <div class="yt-box">
-        <div>${q.yt_prompt}</div>
-        <div class="worked">${currentYT.q}</div>
-        <input type="text" id="ytAnswer" placeholder="Your answer">
-        <button class="act" onclick="checkYT()">Check</button>
+        <div class="yt-q">${currentYT.q}</div>
+        <div class="opt-list" id="optList">${optsHtml}</div>
         <div id="ytFeedback"></div>
       </div>`;
     const isLast = (qIdx === 9);
@@ -94,14 +129,21 @@ function render() {
   }
 }
 
-function checkYT() {
-  const val = document.getElementById('ytAnswer').value.trim();
+function checkYT(idx) {
   const fb = document.getElementById('ytFeedback');
-  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+  const buttons = document.querySelectorAll('#optList .opt-btn');
+  buttons.forEach(b => b.disabled = true);
+  const chosen = currentYT.opts[idx];
+  if (chosen.isCorrect) {
+    buttons[idx].classList.add('correct');
     fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+    buttons[idx].classList.add('wrong');
+    const correctIdx = currentYT.opts.findIndex(o => o.isCorrect);
+    buttons[correctIdx].classList.add('correct');
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted.</div>';
+    document.getElementById('nextBtn').disabled = false;
   }
 }
 

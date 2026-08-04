@@ -17,11 +17,14 @@
   .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
   .step-bar { height:100%; background:var(--red); transition:width .3s; }
   .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
-  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
   .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
-  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
-  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
-  button.act:disabled { background:#ccc; }
+  .yt-q { font-weight:600; margin-bottom:14px; line-height:1.5; }
+  .opt-list { display:flex; flex-direction:column; gap:10px; }
+  .opt-btn { text-align:left; background:#fff; border:2px solid #ddd; padding:12px 14px; border-radius:8px; font-size:1rem; cursor:pointer; }
+  .opt-btn:hover { border-color:var(--red); }
+  .opt-btn.correct { background:#e8f7ee; border-color:#1b7d3a; color:#1b7d3a; font-weight:600; }
+  .opt-btn.wrong { background:#fdecec; border-color:var(--red); color:var(--red); }
+  .opt-btn:disabled { cursor:default; }
   .try-fb { margin-top:10px; font-weight:600; }
   .try-fb.ok { color:#1b7d3a; }
   .try-fb.er { color:var(--red); }
@@ -46,23 +49,53 @@
 </div>
 
 <script>
-const QUESTIONS = [{"title": "What is nuance?", "teach": ["Nuance refers to subtle differences in meaning between words that seem similar on the surface.", "Example: 'thin', 'slender', and 'skinny' all describe a similar body type, but each carries a different feeling.", "Recognising nuance helps you choose exactly the right word for the effect you want."], "yt_prompt": "Which word feels most positive when describing someone thin?"}, {"title": "Connotation vs denotation", "teach": ["Denotation is a word's literal dictionary meaning; connotation is the feeling or association it carries beyond that.", "Example: 'home' and 'house' both denote a place someone lives, but 'home' connotes warmth and belonging.", "Writers choose words carefully based on connotation, not just literal meaning."], "yt_prompt": "Which word has warmer connotations: 'house' or 'home'?"}, {"title": "Positive and negative connotations", "teach": ["Many words describing similar ideas carry either positive or negative connotations, shaping how the reader feels about the subject.", "Example: 'assertive' (positive) vs 'aggressive' (negative) can describe similar behaviour, but create very different impressions.", "Consider whether a writer's word choice makes you feel favourably or unfavourably toward the subject."], "yt_prompt": "Does 'assertive' have a positive or negative connotation compared to 'aggressive'?"}, {"title": "Choosing precise vocabulary over vague words", "teach": ["Precise, specific vocabulary creates a clearer, more vivid picture than vague, general words.", "Example: 'she walked' is vague; 'she trudged' or 'she sprinted' each paint a much clearer, more specific picture.", "When editing writing, replace vague verbs and adjectives with more precise, specific alternatives."], "yt_prompt": "Which is more precise: 'walked' or 'trudged'?"}, {"title": "Formal vs informal vocabulary", "teach": ["Formal vocabulary is used in academic, professional, or serious contexts; informal vocabulary is used in casual, everyday speech.", "Example: 'commence' (formal) vs 'start' (informal) \u2014 both mean the same thing, but suit different contexts.", "Match your vocabulary level to the purpose and audience of your writing."], "yt_prompt": "Which is more formal: 'commence' or 'start'?"}, {"title": "Vocabulary that reveals a writer's attitude", "teach": ["Word choice can reveal a writer's underlying attitude toward their subject, even without stating it directly.", "Example: calling a policy 'controversial' rather than simply 'new' hints that the writer expects disagreement or debate.", "Look for adjectives especially \u2014 they often carry the strongest signals of a writer's attitude."], "yt_prompt": "What does calling a policy 'controversial' (rather than just 'new') suggest about the writer's attitude?"}, {"title": "Using a thesaurus effectively", "teach": ["A thesaurus offers alternative words, but not all synonyms carry exactly the same connotation \u2014 always check the word truly fits.", "Example: 'thrifty' and 'stingy' both relate to spending little money, but 'thrifty' is positive while 'stingy' is negative.", "Never just pick the first synonym you find \u2014 check it matches the tone and meaning you actually intend."], "yt_prompt": "Which word is more positive when describing someone careful with money: 'thrifty' or 'stingy'?"}, {"title": "Connotation in political and media language", "teach": ["Political and media writing often uses carefully chosen words with strong connotations to shape public opinion.", "Example: calling a group 'protesters' vs 'rioters' creates very different impressions of the same event.", "Being aware of this helps you read news and opinion pieces more critically."], "yt_prompt": "Does 'rioters' or 'protesters' create a more negative impression of a group of people?"}, {"title": "Building your own vocabulary bank", "teach": ["Actively collecting and using new, precise vocabulary (rather than relying on the same common words) strengthens your own writing.", "Example: keeping a running list of strong verbs and adjectives you encounter while reading helps expand your active vocabulary over time.", "Regularly reviewing and trying to use new words in your own writing helps make them stick."], "yt_prompt": "What is one effective way to build your own vocabulary over time?"}, {"title": "Mixed practice \u2014 nuance and connotation", "teach": ["You've now covered nuance, connotation vs denotation, positive/negative connotations, precision, formality, and media language.", "This sensitivity to word choice is exactly what separates strong analytical writing from more basic responses.", "This final question brings a couple of these ideas together."], "yt_prompt": "Which word has a more negative connotation: 'curious' or 'nosy', both describing someone interested in others' business?"}];
-function ytGen_0() { return {q:'Which word feels most positive: thin, slender, or skinny?', answer:'slender'}; }
-function ytGen_1() { return {q:'Which word has warmer connotations: "house" or "home"?', answer:'home'}; }
-function ytGen_2() { return {q:'Does "assertive" have a positive or negative connotation compared to "aggressive"?', answer:'positive'}; }
-function ytGen_3() { return {q:'Which is more precise: "walked" or "trudged"?', answer:'trudged'}; }
-function ytGen_4() { return {q:'Which is more formal: "commence" or "start"?', answer:'commence'}; }
-function ytGen_5() { return {q:'What does calling a policy "controversial" (rather than just "new") suggest about the writer\'s attitude?', answer:'expects disagreement or debate'}; }
-function ytGen_6() { return {q:'Which word is more positive: "thrifty" or "stingy"?', answer:'thrifty'}; }
-function ytGen_7() { return {q:'Does "rioters" or "protesters" create a more negative impression?', answer:'rioters'}; }
-function ytGen_8() { return {q:'What is one effective way to build your own vocabulary over time?', answer:'keeping a vocabulary list from reading'}; }
-function ytGen_9() { return {q:'Which word has a more negative connotation: "curious" or "nosy"?', answer:'nosy'}; }
+const QUESTIONS = [{"title": "What is nuance?", "teach": ["Nuance refers to subtle differences in meaning between words that seem similar on the surface.", "Example: 'thin', 'slender', and 'skinny' all describe a similar body type, but each carries a different feeling.", "Recognising nuance helps you choose exactly the right word for the effect you want."]}, {"title": "Connotation vs denotation", "teach": ["Denotation is a word's literal dictionary meaning; connotation is the feeling or association it carries beyond that.", "Example: 'home' and 'house' both denote a place someone lives, but 'home' connotes warmth and belonging.", "Writers choose words carefully based on connotation, not just literal meaning."]}, {"title": "Positive and negative connotations", "teach": ["Many words describing similar ideas carry either positive or negative connotations, shaping how the reader feels about the subject.", "Example: 'assertive' (positive) vs 'aggressive' (negative) can describe similar behaviour, but create very different impressions.", "Consider whether a writer's word choice makes you feel favourably or unfavourably toward the subject."]}, {"title": "Choosing precise vocabulary over vague words", "teach": ["Precise, specific vocabulary creates a clearer, more vivid picture than vague, general words.", "Example: 'she walked' is vague; 'she trudged' or 'she sprinted' each paint a much clearer, more specific picture.", "When editing writing, replace vague verbs and adjectives with more precise, specific alternatives."]}, {"title": "Formal vs informal vocabulary", "teach": ["Formal vocabulary is used in academic, professional, or serious contexts; informal vocabulary is used in casual, everyday speech.", "Example: 'commence' (formal) vs 'start' (informal) — both mean the same thing, but suit different contexts.", "Match your vocabulary level to the purpose and audience of your writing."]}, {"title": "Vocabulary that reveals a writer's attitude", "teach": ["Word choice can reveal a writer's underlying attitude toward their subject, even without stating it directly.", "Example: calling a policy 'controversial' rather than simply 'new' hints that the writer expects disagreement or debate.", "Look for adjectives especially — they often carry the strongest signals of a writer's attitude."]}, {"title": "Using a thesaurus effectively", "teach": ["A thesaurus offers alternative words, but not all synonyms carry exactly the same connotation — always check the word truly fits.", "Example: 'thrifty' and 'stingy' both relate to spending little money, but 'thrifty' is positive while 'stingy' is negative.", "Never just pick the first synonym you find — check it matches the tone and meaning you actually intend."]}, {"title": "Connotation in political and media language", "teach": ["Political and media writing often uses carefully chosen words with strong connotations to shape public opinion.", "Example: calling a group 'protesters' vs 'rioters' creates very different impressions of the same event.", "Being aware of this helps you read news and opinion pieces more critically."]}, {"title": "Building your own vocabulary bank", "teach": ["Actively collecting and using new, precise vocabulary (rather than relying on the same common words) strengthens your own writing.", "Example: keeping a running list of strong verbs and adjectives you encounter while reading helps expand your active vocabulary over time.", "Regularly reviewing and trying to use new words in your own writing helps make them stick."]}, {"title": "Mixed practice — nuance and connotation", "teach": ["You've now covered nuance, connotation vs denotation, positive/negative connotations, precision, formality, and media language.", "This sensitivity to word choice is exactly what separates strong analytical writing from more basic responses.", "This final question brings a couple of these ideas together."]}];
+
+function ytGen_0() {
+  return { q: "Which word feels most positive: thin, slender, or skinny?", options: ["thin", "slender", "skinny", "All feel equally positive"], correct: 1 };
+}
+function ytGen_1() {
+  return { q: "Which word has warmer connotations: \"house\" or \"home\"?", options: ["house", "home", "Both are equally warm", "Neither has connotation"], correct: 1 };
+}
+function ytGen_2() {
+  return { q: "Does \"assertive\" have a positive or negative connotation compared to \"aggressive\"?", options: ["Positive", "Negative", "Exactly the same", "No connotation at all"], correct: 0 };
+}
+function ytGen_3() {
+  return { q: "Which is more precise: \"walked\" or \"trudged\"?", options: ["walked", "trudged", "Both are equally precise", "Neither is precise"], correct: 1 };
+}
+function ytGen_4() {
+  return { q: "Which is more formal: \"commence\" or \"start\"?", options: ["commence", "start", "Both are equally formal", "Neither is formal"], correct: 0 };
+}
+function ytGen_5() {
+  return { q: "What does calling a policy \"controversial\" (rather than just \"new\") suggest about the writer's attitude?", options: ["Complete approval", "Expects disagreement or debate", "No particular attitude", "Total indifference"], correct: 1 };
+}
+function ytGen_6() {
+  return { q: "Which word is more positive: \"thrifty\" or \"stingy\"?", options: ["thrifty", "stingy", "Both are equally positive", "Neither has connotation"], correct: 0 };
+}
+function ytGen_7() {
+  return { q: "Does \"rioters\" or \"protesters\" create a more negative impression?", options: ["rioters", "protesters", "Both are equally negative", "Neither is negative"], correct: 0 };
+}
+function ytGen_8() {
+  return { q: "What is one effective way to build your own vocabulary over time?", options: ["Avoiding new or unfamiliar words", "Keeping a vocabulary list from reading", "Only using the same ten words", "Ignoring word meanings"], correct: 1 };
+}
+function ytGen_9() {
+  return { q: "Which word has a more negative connotation: \"curious\" or \"nosy\"?", options: ["curious", "nosy", "Both are equally negative", "Neither has connotation"], correct: 1 };
+}
 const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
 
 let qIdx = 0;
 let stepIdx = 0;
 const STEPS_PER_Q = 4;
 let currentYT = null;
+
+function shuffle(optionsWithCorrect) {
+  const opts = optionsWithCorrect.options.map((text, i) => ({text, isCorrect: i === optionsWithCorrect.correct}));
+  for (let i = opts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opts[i], opts[j]] = [opts[j], opts[i]];
+  }
+  return opts;
+}
 
 function render() {
   const q = QUESTIONS[qIdx];
@@ -78,14 +111,16 @@ function render() {
     document.getElementById('nextBtn').textContent = 'Next';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    currentYT = YT_GENS[qIdx]();
+    const raw = YT_GENS[qIdx]();
+    currentYT = { q: raw.q, opts: shuffle(raw) };
+    const optsHtml = currentYT.opts.map((o, i) =>
+      `<button class="opt-btn" data-idx="${i}" onclick="checkYT(${i})">${o.text}</button>`
+    ).join('');
     box.innerHTML = `
       <div class="teach"><strong>${q.title}</strong></div>
       <div class="yt-box">
-        <div>${q.yt_prompt}</div>
-        <div class="worked">${currentYT.q}</div>
-        <input type="text" id="ytAnswer" placeholder="Your answer">
-        <button class="act" onclick="checkYT()">Check</button>
+        <div class="yt-q">${currentYT.q}</div>
+        <div class="opt-list" id="optList">${optsHtml}</div>
         <div id="ytFeedback"></div>
       </div>`;
     const isLast = (qIdx === 9);
@@ -94,14 +129,21 @@ function render() {
   }
 }
 
-function checkYT() {
-  const val = document.getElementById('ytAnswer').value.trim();
+function checkYT(idx) {
   const fb = document.getElementById('ytFeedback');
-  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+  const buttons = document.querySelectorAll('#optList .opt-btn');
+  buttons.forEach(b => b.disabled = true);
+  const chosen = currentYT.opts[idx];
+  if (chosen.isCorrect) {
+    buttons[idx].classList.add('correct');
     fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+    buttons[idx].classList.add('wrong');
+    const correctIdx = currentYT.opts.findIndex(o => o.isCorrect);
+    buttons[correctIdx].classList.add('correct');
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted.</div>';
+    document.getElementById('nextBtn').disabled = false;
   }
 }
 

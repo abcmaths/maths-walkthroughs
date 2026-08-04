@@ -17,11 +17,14 @@
   .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
   .step-bar { height:100%; background:var(--red); transition:width .3s; }
   .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
-  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
   .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
-  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
-  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
-  button.act:disabled { background:#ccc; }
+  .yt-q { font-weight:600; margin-bottom:14px; line-height:1.5; }
+  .opt-list { display:flex; flex-direction:column; gap:10px; }
+  .opt-btn { text-align:left; background:#fff; border:2px solid #ddd; padding:12px 14px; border-radius:8px; font-size:1rem; cursor:pointer; }
+  .opt-btn:hover { border-color:var(--red); }
+  .opt-btn.correct { background:#e8f7ee; border-color:#1b7d3a; color:#1b7d3a; font-weight:600; }
+  .opt-btn.wrong { background:#fdecec; border-color:var(--red); color:var(--red); }
+  .opt-btn:disabled { cursor:default; }
   .try-fb { margin-top:10px; font-weight:600; }
   .try-fb.ok { color:#1b7d3a; }
   .try-fb.er { color:var(--red); }
@@ -32,7 +35,7 @@
 
 </head>
 <body>
-<header><h1>Extension English: Writer's Use of Language — Identifying Techniques & Effect</h1></header>
+<header><h1>Extension English: Writer's Use of Language</h1></header>
 <div class="wrap">
   <div class="card">
     <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
@@ -46,23 +49,53 @@
 </div>
 
 <script>
-const QUESTIONS = [{"title": "Simile", "teach": ["A simile compares two things using 'like' or 'as', creating a vivid image for the reader.", "Example: 'The waves crashed like thunder' compares the sound of waves to thunder.", "Always explain what the comparison suggests, not just that a simile is present."], "yt_prompt": "Identify the technique (one word):"}, {"title": "Metaphor", "teach": ["A metaphor states one thing IS another, without using 'like' or 'as' \u2014 a more direct comparison than a simile.", "Example: 'The classroom was a zoo' suggests chaos and noise, without literally meaning it was a zoo.", "Metaphors often feel more intense or direct than similes."], "yt_prompt": "Identify the technique (one word):"}, {"title": "Personification", "teach": ["Personification gives human qualities or actions to non-human things or ideas.", "Example: 'The wind whispered through the trees' gives the wind a human ability (whispering).", "This technique often creates atmosphere or brings a scene to life."], "yt_prompt": "Identify the technique (one word):"}, {"title": "Alliteration", "teach": ["Alliteration repeats the same starting sound across several nearby words, creating a rhythmic or emphatic effect.", "Example: 'the silent, slithering snake' repeats the 's' sound.", "This technique draws attention to the words and can create a specific mood, like tension or playfulness."], "yt_prompt": "Identify the technique (one word):"}, {"title": "Onomatopoeia", "teach": ["Onomatopoeia uses words that imitate the actual sound they describe.", "Example: 'the bacon sizzled' \u2014 'sizzled' sounds like the noise bacon actually makes.", "This technique makes writing feel more vivid and immediate by directly representing sound."], "yt_prompt": "Identify the technique (one word):"}, {"title": "Hyperbole", "teach": ["Hyperbole is deliberate exaggeration, used for emphasis or humour, not meant to be taken literally.", "Example: 'I've told you a million times' \u2014 obviously not literally a million, but emphasises frustration.", "This technique is common in everyday speech as well as creative writing."], "yt_prompt": "Identify the technique (one word):"}, {"title": "Repetition for emphasis", "teach": ["Repeating a word or phrase deliberately emphasises its importance or creates a rhythmic effect.", "Example: 'Never, never, never give up' emphasises determination through repetition.", "Consider what specific idea or feeling the repeated word or phrase is drawing attention to."], "yt_prompt": "Identify the technique (one word):"}, {"title": "Rhetorical questions", "teach": ["A rhetorical question is asked for effect, not to get a literal answer \u2014 it makes the reader think or agree with a point.", "Example: 'How much longer must we wait?' isn't really asking for a number, but expressing frustration.", "Rhetorical questions are common in persuasive writing and speeches."], "yt_prompt": "Identify the technique (two words):"}, {"title": "Identifying the effect, not just the technique", "teach": ["In exams, naming a technique alone isn't enough \u2014 you must also explain its effect on the reader.", "Example: 'the alliteration of \"silent, slithering snake\" creates an unsettling, sinister atmosphere' \u2014 technique PLUS effect.", "Always link the technique back to how it makes the reader feel or think."], "yt_prompt": "What effect does this alliteration most likely create? (a few words)"}, {"title": "Mixed practice \u2014 identifying language techniques", "teach": ["You've now covered simile, metaphor, personification, alliteration, onomatopoeia, hyperbole, repetition, and rhetorical questions.", "Being able to spot these techniques quickly \u2014 and explain their effect \u2014 is essential for language analysis questions.", "This final question checks you can identify the correct technique confidently."], "yt_prompt": "Identify the technique (one word):"}];
-function ytGen_0() { return {q:'Her eyes were like diamonds, sharp and bright.', answer:'simile'}; }
-function ytGen_1() { return {q:'The classroom was a zoo.', answer:'metaphor'}; }
-function ytGen_2() { return {q:'The wind whispered through the trees.', answer:'personification'}; }
-function ytGen_3() { return {q:'the silent, slithering snake', answer:'alliteration'}; }
-function ytGen_4() { return {q:'the bacon sizzled in the pan', answer:'onomatopoeia'}; }
-function ytGen_5() { return {q:"I've told you a million times to tidy your room.", answer:'hyperbole'}; }
-function ytGen_6() { return {q:'Never, never, never give up.', answer:'repetition'}; }
-function ytGen_7() { return {q:'How much longer must we wait for change?', answer:'rhetorical question'}; }
-function ytGen_8() { return {q:'the silent, slithering snake — what effect does this alliteration create?', answer:'unsettling or sinister atmosphere'}; }
-function ytGen_9() { return {q:'The city never sleeps.', answer:'personification'}; }
+const QUESTIONS = [{"title": "Simile", "teach": ["A simile compares two things using 'like' or 'as', creating a vivid image for the reader.", "Example: 'The waves crashed like thunder' compares the sound of waves to thunder.", "Always explain what the comparison suggests, not just that a simile is present."]}, {"title": "Metaphor", "teach": ["A metaphor states one thing IS another, without using 'like' or 'as' — a more direct comparison than a simile.", "Example: 'The classroom was a zoo' suggests chaos and noise, without literally meaning it was a zoo.", "Metaphors often feel more intense or direct than similes."]}, {"title": "Personification", "teach": ["Personification gives human qualities or actions to non-human things or ideas.", "Example: 'The wind whispered through the trees' gives the wind a human ability (whispering).", "This technique often creates atmosphere or brings a scene to life."]}, {"title": "Alliteration", "teach": ["Alliteration repeats the same starting sound across several nearby words, creating a rhythmic or emphatic effect.", "Example: 'the silent, slithering snake' repeats the 's' sound.", "This technique draws attention to the words and can create a specific mood, like tension or playfulness."]}, {"title": "Onomatopoeia", "teach": ["Onomatopoeia uses words that imitate the actual sound they describe.", "Example: 'the bacon sizzled' — 'sizzled' sounds like the noise bacon actually makes.", "This technique makes writing feel more vivid and immediate by directly representing sound."]}, {"title": "Hyperbole", "teach": ["Hyperbole is deliberate exaggeration, used for emphasis or humour, not meant to be taken literally.", "Example: 'I've told you a million times' — obviously not literally a million, but emphasises frustration.", "This technique is common in everyday speech as well as creative writing."]}, {"title": "Repetition for emphasis", "teach": ["Repeating a word or phrase deliberately emphasises its importance or creates a rhythmic effect.", "Example: 'Never, never, never give up' emphasises determination through repetition.", "Consider what specific idea or feeling the repeated word or phrase is drawing attention to."]}, {"title": "Rhetorical questions", "teach": ["A rhetorical question is asked for effect, not to get a literal answer — it makes the reader think or agree with a point.", "Example: 'How much longer must we wait?' isn't really asking for a number, but expressing frustration.", "Rhetorical questions are common in persuasive writing and speeches."]}, {"title": "Identifying the effect, not just the technique", "teach": ["In exams, naming a technique alone isn't enough — you must also explain its effect on the reader.", "Example: 'the alliteration of \"silent, slithering snake\" creates an unsettling, sinister atmosphere' — technique PLUS effect.", "Always link the technique back to how it makes the reader feel or think."]}, {"title": "Mixed practice — identifying language techniques", "teach": ["You've now covered simile, metaphor, personification, alliteration, onomatopoeia, hyperbole, repetition, and rhetorical questions.", "Being able to spot these techniques quickly — and explain their effect — is essential for language analysis questions.", "This final question checks you can identify the correct technique confidently."]}];
+
+function ytGen_0() {
+  return { q: "\"Her eyes were like diamonds, sharp and bright.\" What technique is used here?", options: ["Simile", "Metaphor", "Onomatopoeia", "Hyperbole"], correct: 0 };
+}
+function ytGen_1() {
+  return { q: "\"The classroom was a zoo.\" What technique is used here?", options: ["Simile", "Metaphor", "Alliteration", "Rhetorical question"], correct: 1 };
+}
+function ytGen_2() {
+  return { q: "\"The wind whispered through the trees.\" What technique is used here?", options: ["Onomatopoeia", "Hyperbole", "Personification", "Repetition"], correct: 2 };
+}
+function ytGen_3() {
+  return { q: "\"the silent, slithering snake\" \u2014 what technique is used here?", options: ["Alliteration", "Simile", "Metaphor", "Rhetorical question"], correct: 0 };
+}
+function ytGen_4() {
+  return { q: "\"the bacon sizzled in the pan\" \u2014 what technique is used here?", options: ["Personification", "Onomatopoeia", "Hyperbole", "Alliteration"], correct: 1 };
+}
+function ytGen_5() {
+  return { q: "\"I've told you a million times to tidy your room.\" What technique is used here?", options: ["Hyperbole", "Simile", "Onomatopoeia", "Personification"], correct: 0 };
+}
+function ytGen_6() {
+  return { q: "\"Never, never, never give up.\" What technique is used here?", options: ["Metaphor", "Repetition", "Onomatopoeia", "Simile"], correct: 1 };
+}
+function ytGen_7() {
+  return { q: "\"How much longer must we wait for change?\" What technique is used here?", options: ["Rhetorical question", "Alliteration", "Hyperbole", "Personification"], correct: 0 };
+}
+function ytGen_8() {
+  return { q: "\"the silent, slithering snake\" \u2014 what effect does this alliteration create?", options: ["A cheerful, upbeat mood", "An unsettling or sinister atmosphere", "A sense of calm and safety", "No particular effect"], correct: 1 };
+}
+function ytGen_9() {
+  return { q: "\"The city never sleeps.\" What technique is used here?", options: ["Simile", "Onomatopoeia", "Personification", "Rule of three"], correct: 2 };
+}
 const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
 
 let qIdx = 0;
 let stepIdx = 0;
 const STEPS_PER_Q = 4;
 let currentYT = null;
+
+function shuffle(optionsWithCorrect) {
+  const opts = optionsWithCorrect.options.map((text, i) => ({text, isCorrect: i === optionsWithCorrect.correct}));
+  for (let i = opts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opts[i], opts[j]] = [opts[j], opts[i]];
+  }
+  return opts;
+}
 
 function render() {
   const q = QUESTIONS[qIdx];
@@ -78,14 +111,16 @@ function render() {
     document.getElementById('nextBtn').textContent = 'Next';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    currentYT = YT_GENS[qIdx]();
+    const raw = YT_GENS[qIdx]();
+    currentYT = { q: raw.q, opts: shuffle(raw) };
+    const optsHtml = currentYT.opts.map((o, i) =>
+      `<button class="opt-btn" data-idx="${i}" onclick="checkYT(${i})">${o.text}</button>`
+    ).join('');
     box.innerHTML = `
       <div class="teach"><strong>${q.title}</strong></div>
       <div class="yt-box">
-        <div>${q.yt_prompt}</div>
-        <div class="worked">${currentYT.q}</div>
-        <input type="text" id="ytAnswer" placeholder="Your answer">
-        <button class="act" onclick="checkYT()">Check</button>
+        <div class="yt-q">${currentYT.q}</div>
+        <div class="opt-list" id="optList">${optsHtml}</div>
         <div id="ytFeedback"></div>
       </div>`;
     const isLast = (qIdx === 9);
@@ -94,14 +129,21 @@ function render() {
   }
 }
 
-function checkYT() {
-  const val = document.getElementById('ytAnswer').value.trim();
+function checkYT(idx) {
   const fb = document.getElementById('ytFeedback');
-  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+  const buttons = document.querySelectorAll('#optList .opt-btn');
+  buttons.forEach(b => b.disabled = true);
+  const chosen = currentYT.opts[idx];
+  if (chosen.isCorrect) {
+    buttons[idx].classList.add('correct');
     fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+    buttons[idx].classList.add('wrong');
+    const correctIdx = currentYT.opts.findIndex(o => o.isCorrect);
+    buttons[correctIdx].classList.add('correct');
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted.</div>';
+    document.getElementById('nextBtn').disabled = false;
   }
 }
 

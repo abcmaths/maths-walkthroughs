@@ -17,11 +17,14 @@
   .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
   .step-bar { height:100%; background:var(--red); transition:width .3s; }
   .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
-  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
   .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
-  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:140px; }
-  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
-  button.act:disabled { background:#ccc; }
+  .yt-q { font-weight:600; margin-bottom:14px; line-height:1.5; }
+  .opt-list { display:flex; flex-direction:column; gap:10px; }
+  .opt-btn { text-align:left; background:#fff; border:2px solid #ddd; padding:12px 14px; border-radius:8px; font-size:1rem; cursor:pointer; }
+  .opt-btn:hover { border-color:var(--red); }
+  .opt-btn.correct { background:#e8f7ee; border-color:#1b7d3a; color:#1b7d3a; font-weight:600; }
+  .opt-btn.wrong { background:#fdecec; border-color:var(--red); color:var(--red); }
+  .opt-btn:disabled { cursor:default; }
   .try-fb { margin-top:10px; font-weight:600; }
   .try-fb.ok { color:#1b7d3a; }
   .try-fb.er { color:var(--red); }
@@ -32,7 +35,7 @@
 
 </head>
 <body>
-<header><h1>Extension English: Structuring an Extended Response / Essay</h1></header>
+<header><h1>Extension English: Structuring an Extended Response</h1></header>
 <div class="wrap">
   <div class="card">
     <div class="step-progress"><div class="step-bar" id="stepBar" style="width:0%"></div></div>
@@ -46,23 +49,53 @@
 </div>
 
 <script>
-const QUESTIONS = [{"title": "What is an extended response?", "teach": ["An extended response is a longer, structured piece of writing \u2014 usually an essay \u2014 that develops an argument or analysis in depth across several paragraphs.", "Unlike a short answer, it requires a clear introduction, developed body paragraphs, and a conclusion.", "Planning the structure before writing saves time and produces a much stronger final piece."], "yt_prompt": "What three main sections does an extended response usually have?"}, {"title": "Writing a strong introduction", "teach": ["A strong introduction states your overall argument or position clearly, giving the reader a preview of what's to come.", "Example: 'This essay will argue that social media has a predominantly negative effect on teenage mental health, examining three key areas of concern.'", "Avoid vague openings like 'In this essay I will talk about...' \u2014 be direct and specific instead."], "yt_prompt": "Which introduction is stronger? Type 'A' or 'B':"}, {"title": "Structuring body paragraphs \u2014 PEEL", "teach": ["Each body paragraph should make one clear point, support it with evidence, explain the significance, then link back to the main argument.", "This is the same PEEL structure (Point, Evidence, Explain, Link) used in debate \u2014 it works equally well in essay writing.", "Keeping one main idea per paragraph makes your essay much easier for the reader to follow."], "yt_prompt": "What does the 'L' in PEEL stand for?"}, {"title": "Using topic sentences to guide the reader", "teach": ["Each body paragraph should open with a topic sentence that clearly states its main point.", "Example: 'One significant concern is the impact of social media on sleep patterns.' \u2014 tells the reader immediately what this paragraph covers.", "A reader should be able to understand your whole essay's structure just by reading the topic sentences alone."], "yt_prompt": "What should a reader be able to understand just from reading all the topic sentences?"}, {"title": "Using linking words between paragraphs", "teach": ["Linking words and phrases (furthermore, however, in contrast, similarly) help connect ideas smoothly between paragraphs.", "Example: 'Furthermore, research shows...' signals you're adding another supporting point.", "Good linking words make an essay feel connected and logically organised, rather than like a list of separate points."], "yt_prompt": "Which linking word signals you're adding another similar point: 'furthermore' or 'however'?"}, {"title": "Addressing counter-arguments in an essay", "teach": ["Strong essays acknowledge opposing viewpoints before explaining why your own argument remains stronger.", "Example: 'Some may argue that social media connects people globally; however, the evidence suggests the negative effects outweigh this benefit.'", "This makes your essay feel balanced and thoroughly considered, rather than one-sided."], "yt_prompt": "What should you do with an opposing viewpoint in a strong essay?"}, {"title": "Using evidence to support each point", "teach": ["Every point in an essay should be backed up with specific evidence \u2014 statistics, examples, or expert opinion \u2014 not just left as an unsupported claim.", "Example: 'Social media use is linked to poorer sleep (Smith, 2023)' is stronger than simply 'social media affects sleep'.", "Unsupported claims are much easier for an examiner or reader to dismiss."], "yt_prompt": "Why should every point in an essay be backed up with evidence?"}, {"title": "Writing a strong conclusion", "teach": ["A strong conclusion summarises the key points made and restates the overall argument, without simply repeating the introduction word-for-word.", "Example: 'In summary, the evidence across sleep, mental health, and social comparison strongly supports the view that social media harms teenage wellbeing.'", "Avoid introducing completely new points in the conclusion \u2014 it should summarise what's already been argued."], "yt_prompt": "Should a conclusion introduce brand new points, or summarise what's already been argued? Type 'summarise':"}, {"title": "Maintaining a consistent argument throughout", "teach": ["A strong essay maintains the same overall position consistently from introduction to conclusion, rather than contradicting itself partway through.", "Example: if your introduction argues social media is harmful, your body paragraphs shouldn't suddenly argue it's mostly beneficial without explanation.", "Read back through your own essay to check every paragraph supports your stated argument."], "yt_prompt": "Why is it important to maintain a consistent argument throughout an essay?"}, {"title": "Mixed practice \u2014 essay structure", "teach": ["You've now covered introductions, PEEL body paragraphs, topic sentences, linking words, counter-arguments, evidence, conclusions, and consistency.", "Planning this structure before writing \u2014 even just a quick outline \u2014 makes a huge difference to the quality of an extended response.", "This final question brings a couple of these structural ideas together."], "yt_prompt": "What should the very first sentence of a body paragraph usually be called?"}];
-function ytGen_0() { return {q:'What three main sections does an extended response usually have?', answer:'introduction, body, conclusion'}; }
-function ytGen_1() { return {q:'A) This essay will argue that social media harms teen mental health, examining three key concerns. B) In this essay I will talk about social media. Which is stronger?', answer:'A'}; }
-function ytGen_2() { return {q:'What does the "L" in PEEL stand for?', answer:'link'}; }
-function ytGen_3() { return {q:'What should a reader be able to understand just from reading all the topic sentences in an essay?', answer:'the overall structure or argument'}; }
-function ytGen_4() { return {q:'Which linking word signals adding another similar point: "furthermore" or "however"?', answer:'furthermore'}; }
-function ytGen_5() { return {q:'What should you do with an opposing viewpoint in a strong essay?', answer:'acknowledge it and explain why your argument is stronger'}; }
-function ytGen_6() { return {q:'Why should every point in an essay be backed up with evidence?', answer:'to make the argument more convincing'}; }
-function ytGen_7() { return {q:'Should a conclusion introduce brand new points, or summarise what\'s already been argued?', answer:'summarise'}; }
-function ytGen_8() { return {q:'Why is it important to maintain a consistent argument throughout an essay?', answer:'to avoid contradicting yourself'}; }
-function ytGen_9() { return {q:'What should the very first sentence of a body paragraph usually be called?', answer:'topic sentence'}; }
+const QUESTIONS = [{"title": "What is an extended response?", "teach": ["An extended response is a longer, structured piece of writing — usually an essay — that develops an argument or analysis in depth across several paragraphs.", "Unlike a short answer, it requires a clear introduction, developed body paragraphs, and a conclusion.", "Planning the structure before writing saves time and produces a much stronger final piece."]}, {"title": "Writing a strong introduction", "teach": ["A strong introduction states your overall argument or position clearly, giving the reader a preview of what's to come.", "Example: 'This essay will argue that social media has a predominantly negative effect on teenage mental health, examining three key areas of concern.'", "Avoid vague openings like 'In this essay I will talk about...' — be direct and specific instead."]}, {"title": "Structuring body paragraphs — PEEL", "teach": ["Each body paragraph should make one clear point, support it with evidence, explain the significance, then link back to the main argument.", "This is the same PEEL structure (Point, Evidence, Explain, Link) used in debate — it works equally well in essay writing.", "Keeping one main idea per paragraph makes your essay much easier for the reader to follow."]}, {"title": "Using topic sentences to guide the reader", "teach": ["Each body paragraph should open with a topic sentence that clearly states its main point.", "Example: 'One significant concern is the impact of social media on sleep patterns.' — tells the reader immediately what this paragraph covers.", "A reader should be able to understand your whole essay's structure just by reading the topic sentences alone."]}, {"title": "Using linking words between paragraphs", "teach": ["Linking words and phrases (furthermore, however, in contrast, similarly) help connect ideas smoothly between paragraphs.", "Example: 'Furthermore, research shows...' signals you're adding another supporting point.", "Good linking words make an essay feel connected and logically organised, rather than like a list of separate points."]}, {"title": "Addressing counter-arguments in an essay", "teach": ["Strong essays acknowledge opposing viewpoints before explaining why your own argument remains stronger.", "Example: 'Some may argue that social media connects people globally; however, the evidence suggests the negative effects outweigh this benefit.'", "This makes your essay feel balanced and thoroughly considered, rather than one-sided."]}, {"title": "Using evidence to support each point", "teach": ["Every point in an essay should be backed up with specific evidence — statistics, examples, or expert opinion — not just left as an unsupported claim.", "Example: 'Social media use is linked to poorer sleep (Smith, 2023)' is stronger than simply 'social media affects sleep'.", "Unsupported claims are much easier for an examiner or reader to dismiss."]}, {"title": "Writing a strong conclusion", "teach": ["A strong conclusion summarises the key points made and restates the overall argument, without simply repeating the introduction word-for-word.", "Example: 'In summary, the evidence across sleep, mental health, and social comparison strongly supports the view that social media harms teenage wellbeing.'", "Avoid introducing completely new points in the conclusion — it should summarise what's already been argued."]}, {"title": "Maintaining a consistent argument throughout", "teach": ["A strong essay maintains the same overall position consistently from introduction to conclusion, rather than contradicting itself partway through.", "Example: if your introduction argues social media is harmful, your body paragraphs shouldn't suddenly argue it's mostly beneficial without explanation.", "Read back through your own essay to check every paragraph supports your stated argument."]}, {"title": "Mixed practice — essay structure", "teach": ["You've now covered introductions, PEEL body paragraphs, topic sentences, linking words, counter-arguments, evidence, conclusions, and consistency.", "Planning this structure before writing — even just a quick outline — makes a huge difference to the quality of an extended response.", "This final question brings a couple of these structural ideas together."]}];
+
+function ytGen_0() {
+  return { q: "What three main sections does an extended response usually have?", options: ["Title, quote, summary", "Introduction, body, conclusion", "Question, answer, footnote", "Opening joke, story, moral"], correct: 1 };
+}
+function ytGen_1() {
+  return { q: "A) This essay will argue that social media harms teen mental health, examining three key concerns. B) In this essay I will talk about social media. Which is stronger?", options: ["A", "B", "Both are equally strong", "Neither is a valid introduction"], correct: 0 };
+}
+function ytGen_2() {
+  return { q: "What does the \"L\" in PEEL stand for?", options: ["Length", "List", "Link", "Language"], correct: 2 };
+}
+function ytGen_3() {
+  return { q: "What should a reader be able to understand just from reading all the topic sentences in an essay?", options: ["The exact word count", "The overall structure or argument", "The author's age", "Nothing useful at all"], correct: 1 };
+}
+function ytGen_4() {
+  return { q: "Which linking word signals adding another similar point: \"furthermore\" or \"however\"?", options: ["furthermore", "however", "Both signal the same thing", "Neither is a linking word"], correct: 0 };
+}
+function ytGen_5() {
+  return { q: "What should you do with an opposing viewpoint in a strong essay?", options: ["Always ignore it completely", "Acknowledge it and explain why your argument is stronger", "Agree with it instead", "Never mention any other viewpoint"], correct: 1 };
+}
+function ytGen_6() {
+  return { q: "Why should every point in an essay be backed up with evidence?", options: ["It isn't necessary", "To make the argument more convincing", "Only to increase word count", "Evidence is only for science essays"], correct: 1 };
+}
+function ytGen_7() {
+  return { q: "Should a conclusion introduce brand new points, or summarise what's already been argued?", options: ["Introduce brand new points", "Summarise what's already been argued", "Repeat the introduction word for word", "Ask the reader a question and stop"], correct: 1 };
+}
+function ytGen_8() {
+  return { q: "Why is it important to maintain a consistent argument throughout an essay?", options: ["To avoid contradicting yourself", "Consistency doesn't matter in essays", "To make the essay longer", "To confuse the reader on purpose"], correct: 0 };
+}
+function ytGen_9() {
+  return { q: "What should the very first sentence of a body paragraph usually be called?", options: ["A conclusion sentence", "A topic sentence", "A rhetorical question", "A quotation only"], correct: 1 };
+}
 const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
 
 let qIdx = 0;
 let stepIdx = 0;
 const STEPS_PER_Q = 4;
 let currentYT = null;
+
+function shuffle(optionsWithCorrect) {
+  const opts = optionsWithCorrect.options.map((text, i) => ({text, isCorrect: i === optionsWithCorrect.correct}));
+  for (let i = opts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opts[i], opts[j]] = [opts[j], opts[i]];
+  }
+  return opts;
+}
 
 function render() {
   const q = QUESTIONS[qIdx];
@@ -78,14 +111,16 @@ function render() {
     document.getElementById('nextBtn').textContent = 'Next';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    currentYT = YT_GENS[qIdx]();
+    const raw = YT_GENS[qIdx]();
+    currentYT = { q: raw.q, opts: shuffle(raw) };
+    const optsHtml = currentYT.opts.map((o, i) =>
+      `<button class="opt-btn" data-idx="${i}" onclick="checkYT(${i})">${o.text}</button>`
+    ).join('');
     box.innerHTML = `
       <div class="teach"><strong>${q.title}</strong></div>
       <div class="yt-box">
-        <div>${q.yt_prompt}</div>
-        <div class="worked">${currentYT.q}</div>
-        <input type="text" id="ytAnswer" placeholder="Your answer">
-        <button class="act" onclick="checkYT()">Check</button>
+        <div class="yt-q">${currentYT.q}</div>
+        <div class="opt-list" id="optList">${optsHtml}</div>
         <div id="ytFeedback"></div>
       </div>`;
     const isLast = (qIdx === 9);
@@ -94,14 +129,21 @@ function render() {
   }
 }
 
-function checkYT() {
-  const val = document.getElementById('ytAnswer').value.trim();
+function checkYT(idx) {
   const fb = document.getElementById('ytFeedback');
-  if (val.toLowerCase() == String(currentYT.answer).toLowerCase()) {
+  const buttons = document.querySelectorAll('#optList .opt-btn');
+  buttons.forEach(b => b.disabled = true);
+  const chosen = currentYT.opts[idx];
+  if (chosen.isCorrect) {
+    buttons[idx].classList.add('correct');
     fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+    buttons[idx].classList.add('wrong');
+    const correctIdx = currentYT.opts.findIndex(o => o.isCorrect);
+    buttons[correctIdx].classList.add('correct');
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted.</div>';
+    document.getElementById('nextBtn').disabled = false;
   }
 }
 
