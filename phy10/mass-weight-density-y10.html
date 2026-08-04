@@ -60,6 +60,12 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
 .try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
 .try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.mc-opt{text-align:left;padding:10px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold);background:#fffaf0;}
+.mc-opt:disabled{cursor:default;opacity:.9;}
+.mc-opt.mc-correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600;}
+.mc-opt.mc-wrong{border-color:#c62828;background:#fde8e8;color:#a01820;}
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
@@ -99,6 +105,15 @@ function tryIt(genFn){
   var o=genFn(); ST[id]={o:o,genFn:genFn};
   return buildTry(id,o);
 }
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
 function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
@@ -120,9 +135,19 @@ document.addEventListener('click',function(e){
     var o=entry.genFn(); entry.o=o;
     var wrap=el.closest?el.closest('.try'):document.querySelector('.try[data-tryid="'+id+'"]');
     if(!wrap)return;
-    var tmp=document.createElement('div'); tmp.innerHTML=buildTry(id,o);
+    var tmp=document.createElement('div'); tmp.innerHTML=entry.mc?buildTryMC(id,o):buildTry(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);
-    ST[id]={o:o,genFn:entry.genFn}; return;
+    ST[id]={o:o,genFn:entry.genFn,mc:entry.mc}; return;
+  }
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){el.classList.add('mc-correct');fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{el.classList.add('mc-wrong');allBtns[o.correct].classList.add('mc-correct');fb.className='try-fb er';fb.textContent='Not quite — the correct answer is highlighted above.';}
+    return;
   }
   if(el.classList.contains('try-ck')){
     var id=el.getAttribute('data-tryid');
@@ -219,7 +244,7 @@ var QS=[
   ]},
   {ey:'Q5 \u2022 Y10 Physics \u2022 Mass & Density',ti:'Floating and Sinking',su:'Predict whether an object floats or sinks by comparing densities.',steps:[
     {lb:'The rule',dr:dQ5,ht:'<p>Object floats if \u03c1<sub>object</sub> &lt; \u03c1<sub>fluid</sub>. Object sinks if \u03c1<sub>object</sub> &gt; \u03c1<sub>fluid</sub>.</p><p>Ice (\u03c1 = 917 kg/m\u00b3) floats on water (\u03c1 = 1000 kg/m\u00b3). Steel sinks in water but floats on mercury.</p>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var objs=[['wood',700,1000,1],['iron',7900,1000,0],['ice',917,1000,1],['oil',850,1000,1],['rock',2700,1000,0],['lead',11300,13600,1]];var o=pick(objs);return{question:'Object density <b>'+o[1]+' kg/m\u00b3</b>, fluid density <b>'+o[2]+' kg/m\u00b3</b>. Does it float? 1=Yes, 0=No.',hints:['Compare \u03c1 object to \u03c1 fluid'],ans:o[3],tol:0,unit:'',working:o[0]+' (\u03c1='+o[1]+') '+(o[3]?'<':'\u2265')+' fluid (\u03c1='+o[2]+') \u2192 '+(o[3]?'floats':'sinks')+'. Answer: '+o[3]+'.'};})},
+    {lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var objs=[['wood',700,1000,1],['iron',7900,1000,0],['ice',917,1000,1],['oil',850,1000,1],['rock',2700,1000,0],['lead',11300,13600,1]];var o=pick(objs);return{question:'Object density <b>'+o[1]+' kg/m\u00b3</b>, fluid density <b>'+o[2]+' kg/m\u00b3</b>. Does it float?',options:['Yes, it floats','No, it sinks'],correct:o[3]?0:1,working:o[0]+' (\u03c1='+o[1]+') '+(o[3]?'<':'\u2265')+' fluid (\u03c1='+o[2]+') \u2192 '+(o[3]?'floats':'sinks')+'.'};})},
   ]},
   {ey:'Q6 \u2022 Y10 Physics \u2022 Mass & Density',ti:'Weight on Different Planets',su:'Calculate weight on different planets using W = mg.',steps:[
     {lb:'g varies by planet',dr:dQ6,ht:'<p>Mass stays the same on all planets. Weight changes because g (gravitational field strength) is different on each planet.</p><p>Earth: 9.81 N/kg. Moon: 1.6. Mars: 3.7. Jupiter: 24.8.</p>'},

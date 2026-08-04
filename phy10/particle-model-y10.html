@@ -59,6 +59,12 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
 .try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
 .try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.mc-opt{text-align:left;padding:10px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold);background:#fffaf0;}
+.mc-opt:disabled{cursor:default;opacity:.9;}
+.mc-opt.mc-correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600;}
+.mc-opt.mc-wrong{border-color:#c62828;background:#fde8e8;color:#a01820;}
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
@@ -90,6 +96,15 @@ function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
 function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn};return buildTry(id,o);}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
 function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
@@ -106,8 +121,18 @@ document.addEventListener('click',function(e){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
     var o=entry.genFn();entry.o=o;
     var wrap=el.closest?el.closest('.try'):document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;
-    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
-    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+    var tmp=document.createElement('div');tmp.innerHTML=entry.mc?buildTryMC(id,o):buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:entry.mc};return;
+  }
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){el.classList.add('mc-correct');fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{el.classList.add('mc-wrong');allBtns[o.correct].classList.add('mc-correct');fb.className='try-fb er';fb.textContent='Not quite — the correct answer is highlighted above.';}
+    return;
   }
   if(el.classList.contains('try-ck')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
@@ -181,7 +206,7 @@ var QS=[
   {lb:'The three states',dr:dQ1,ht:'<p>All matter is made of particles. The state depends on how much energy the particles have and how strong the intermolecular forces are.</p>'},
   {lb:'Solid and liquid',dr:dQ1,ht:'<p><b>Solid:</b> particles in regular lattice, vibrate at fixed positions. Fixed shape and volume, incompressible.<br><b>Liquid:</b> particles close but can flow past each other. Takes shape of container; fixed volume.</p>'},
   {lb:'Gas',dr:dQ1,ht:'<p><b>Gas:</b> particles widely spaced, moving randomly at high speed. Fills any container. Easily compressed.</p>'},
-  {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var q=pick([[1,'Fixed shape and cannot flow','solid'],[2,'Takes the shape of its container but has fixed volume','liquid'],[3,'Particles widely spaced and move freely at high speed','gas']]);return{question:'Which state? "'+q[1]+'". 1=solid, 2=liquid, 3=gas.',hints:['Think about particle arrangement'],ans:q[0],tol:0,unit:'',working:'"'+q[1]+'" = <b>'+q[2]+'</b>. Answer: '+q[0]+'.'};})},
+  {lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var q=pick([['Fixed shape and cannot flow','solid'],['Takes the shape of its container but has fixed volume','liquid'],['Particles widely spaced and move freely at high speed','gas']]);var opts=['Solid','Liquid','Gas'];var correctIdx=['solid','liquid','gas'].indexOf(q[1]);return{question:'Which state of matter? &ldquo;'+q[0]+'&rdquo;',options:opts,correct:correctIdx,working:'&ldquo;'+q[0]+'&rdquo; describes a <b>'+q[1]+'</b>.'};})},
 ]},
 {ey:'Q2 \u2022 Y10 Physics \u2022 Particle Model',ti:'Changes of State',su:'Explain heating curves and why temperature stays constant during state changes.',steps:[
   {lb:'Melting and boiling',dr:dQ2,ht:'<p>Temperature rises until the <b>melting point</b>, then stays constant while melting. Rises again in the liquid, then stays constant at the <b>boiling point</b>.</p>'},
@@ -191,12 +216,12 @@ var QS=[
 {ey:'Q3 \u2022 Y10 Physics \u2022 Particle Model',ti:'Brownian Motion',su:'Describe and explain Brownian motion as evidence for the particle model.',steps:[
   {lb:'What is Brownian motion?',dr:dQ3,ht:'<p>Brownian motion is the <b>random jerky movement</b> of small visible particles (e.g. smoke) suspended in a fluid, caused by unequal bombardment by invisible fluid molecules.</p>'},
   {lb:'Evidence for particles',dr:dQ3,ht:'<p>Brownian motion provides evidence that fluids consist of tiny invisible particles in continuous random motion with enough momentum to move visible objects.</p>'},
-  {lb:'Your turn',dr:dQ3,ht:tryIt(function(){return{question:'Smoke particles in air move with a random jerky motion. What causes this? Enter 1 = air molecules colliding unevenly, 2 = gravity, 3 = friction.',hints:['Think about what is hitting the smoke particle'],ans:1,tol:0,unit:'',working:'Air molecules (invisible) bombard the smoke particle unevenly. Answer: 1.'};})},
+  {lb:'Your turn',dr:dQ3,ht:tryItMC(function(){return{question:'Smoke particles in air move with a random jerky motion. What causes this?',options:['Air molecules colliding unevenly with the smoke particle','Gravity pulling on the smoke particle','Friction with the container walls'],correct:0,working:'Air molecules (invisible) bombard the smoke particle unevenly \u2014 this is Brownian motion.'};})},
 ]},
 {ey:'Q4 \u2022 Y10 Physics \u2022 Particle Model',ti:'Gas Pressure',su:'Explain gas pressure in terms of molecular collisions.',steps:[
   {lb:'Origin of gas pressure',dr:dQ4,ht:'<p>Gas molecules move randomly at high speed. When they collide with container walls, they exert a tiny force. Billions of collisions per second produce a steady <b>measurable pressure</b>.</p>'},
   {lb:'Temperature and pressure',dr:dQ4,ht:'<p>Higher temperature \u2192 faster molecules \u2192 harder and more frequent wall collisions \u2192 <b>higher pressure</b> (at fixed volume). Higher volume at fixed T \u2192 fewer collisions per unit area \u2192 lower pressure.</p>'},
-  {lb:'Your turn',dr:dQ4,ht:tryIt(function(){return{question:'A gas is heated at constant volume. Pressure: 1=increases, 2=decreases, 3=stays same.',hints:['Hotter \u2192 faster molecules \u2192 harder wall collisions'],ans:1,tol:0,unit:'',working:'Faster molecules \u2192 more frequent, harder collisions \u2192 pressure increases. Answer: 1.'};})},
+  {lb:'Your turn',dr:dQ4,ht:tryItMC(function(){return{question:'A gas is heated at constant volume. What happens to the pressure?',options:['It increases','It decreases','It stays the same'],correct:0,working:'Faster molecules \u2192 more frequent, harder collisions \u2192 pressure increases.'};})},
 ]},
 {ey:'Q5 \u2022 Y10 Physics \u2022 Particle Model',ti:'Absolute Zero and Kelvin Scale',su:'Convert between \u00b0C and K. Explain what absolute zero means.',steps:[
   {lb:'Absolute zero',dr:dQ5,ht:'<p><b>Absolute zero (0 K = \u2212273\u00b0C)</b> is the lowest possible temperature. At absolute zero, particles have the minimum possible kinetic energy and gas pressure would be zero.</p>'},
@@ -222,7 +247,8 @@ var QS=[
 ]},
 {ey:'Q10 \u2022 Y10 Physics \u2022 Particle Model',ti:'Particle Model Summary',su:'Review all key ideas: states, pressure, Boyle\u2019s Law and Brownian motion.',steps:[
   {lb:'Summary',dr:dQ10,ht:'<p>0 K = \u2212273\u00b0C \u2022 T(K) = \u03b8+273 \u2022 p\u2081V\u2081=p\u2082V\u2082 \u2022 Gas pressure = molecule-wall collisions \u2022 Brownian motion = evidence \u2022 Change of state: T constant.</p>'},
-  {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var type=pick(['kelvin','boyle','pressure_change']);if(type==='kelvin'){var C=rnd(0,200);return{question:'Convert <b>'+C+'\u00b0C</b> to K.',hints:['T = \u03b8 + 273'],ans:C+273,tol:0,unit:'K',working:C+' + 273 = '+(C+273)+' K'};}if(type==='boyle'){var p1=rnd(100,400),V1=rnd(2,6),V2=rnd(1,V1-1),p2=parseFloat((p1*V1/V2).toFixed(1));return{question:'p\u2081=<b>'+p1+'</b>, V\u2081=<b>'+V1+'</b>, V\u2082=<b>'+V2+'</b>. Find p\u2082.',hints:['p\u2082 = p\u2081V\u2081/V\u2082'],ans:p2,tol:0.2,unit:'kPa',working:'p\u2082 = '+p1+'\u00d7'+V1+'/'+V2+' = '+p2+' kPa'};}return{question:'Gas compressed to half its volume (constant T). Pressure: 1=doubles, 2=halves, 3=stays same.',hints:["Boyle's Law: pV = constant"],ans:1,tol:0,unit:'',working:'If V halves, p doubles. Answer: 1.'};})},
+  {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var type=pick(['kelvin','boyle']);if(type==='kelvin'){var C=rnd(0,200);return{question:'Convert <b>'+C+'\u00b0C</b> to K.',hints:['T = \u03b8 + 273'],ans:C+273,tol:0,unit:'K',working:C+' + 273 = '+(C+273)+' K'};}var p1=rnd(100,400),V1=rnd(2,6),V2=rnd(1,V1-1),p2=parseFloat((p1*V1/V2).toFixed(1));return{question:'p\u2081=<b>'+p1+'</b>, V\u2081=<b>'+V1+'</b>, V\u2082=<b>'+V2+'</b>. Find p\u2082.',hints:['p\u2082 = p\u2081V\u2081/V\u2082'],ans:p2,tol:0.2,unit:'kPa',working:'p\u2082 = '+p1+'\u00d7'+V1+'/'+V2+' = '+p2+' kPa'};})},
+  {lb:'One more', dr:dQ10, ht:tryItMC(function(){return{question:'A gas is compressed to half its volume at constant temperature. What happens to its pressure?',options:['It doubles','It halves','It stays the same'],correct:0,working:"Boyle's Law: pV = constant. If V halves, p doubles."};})},
 ]},
 ];
 

@@ -59,6 +59,12 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
 .try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
 .try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.mc-opt{text-align:left;padding:10px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold);background:#fffaf0;}
+.mc-opt:disabled{cursor:default;opacity:.9;}
+.mc-opt.mc-correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600;}
+.mc-opt.mc-wrong{border-color:#c62828;background:#fde8e8;color:#a01820;}
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
@@ -90,6 +96,15 @@ function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
 function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn};return buildTry(id,o);}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
 function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
@@ -106,8 +121,18 @@ document.addEventListener('click',function(e){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
     var o=entry.genFn();entry.o=o;
     var wrap=el.closest?el.closest('.try'):document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;
-    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
-    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+    var tmp=document.createElement('div');tmp.innerHTML=entry.mc?buildTryMC(id,o):buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:entry.mc};return;
+  }
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){el.classList.add('mc-correct');fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{el.classList.add('mc-wrong');allBtns[o.correct].classList.add('mc-correct');fb.className='try-fb er';fb.textContent='Not quite — the correct answer is highlighted above.';}
+    return;
   }
   if(el.classList.contains('try-ck')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
@@ -223,7 +248,7 @@ var QS=[
 {ey:'Q7 \u2022 Y10 Physics \u2022 Forces',ti:'Centre of Gravity',su:'Find centre of gravity experimentally. Explain stability.',steps:[
   {lb:'Centre of gravity',dr:dQ7,ht:'<p>The <b>centre of gravity (CoG)</b> is the point where the whole weight appears to act. For a uniform object it is the geometric centre.</p><p>To find CoG of a lamina: hang from three points; where plumb lines cross = CoG.</p>'},
   {lb:'Stability',dr:dQ7,ht:'<p><b>More stable</b> = lower CoG + wider base. Object topples when the line of action of weight falls outside the base.</p>'},
-  {lb:'Your turn',dr:dQ7,ht:tryIt(function(){return{question:'Racing car vs tall van (same mass). Which is more stable? Enter 1 = racing car, 2 = tall van.',hints:['Lower CoG = more stable'],ans:1,tol:0,unit:'',working:'Racing car has lower CoG \u2192 more stable. Answer: 1.'};})},
+  {lb:'Your turn',dr:dQ7,ht:tryItMC(function(){return{question:'A racing car and a tall van have the same mass. Which is more stable?',options:['The racing car','The tall van'],correct:0,working:'The racing car has a lower centre of gravity \u2192 more stable.'};})},
 ]},
 {ey:'Q8 \u2022 Y10 Physics \u2022 Forces',ti:'Friction and Newton\u2019s Laws Combined',su:'Calculate acceleration when multiple forces act.',steps:[
   {lb:'Method',dr:dQ8,ht:'<p>1. Identify all forces. 2. Find resultant (net) force. 3. Apply F = ma.</p><p>Friction always opposes motion. At constant speed: net force = 0 (drag = driving force).</p>'},

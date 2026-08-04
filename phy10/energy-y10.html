@@ -59,6 +59,12 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
 .try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
 .try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.mc-opt{text-align:left;padding:10px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold);background:#fffaf0;}
+.mc-opt:disabled{cursor:default;opacity:.9;}
+.mc-opt.mc-correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600;}
+.mc-opt.mc-wrong{border-color:#c62828;background:#fde8e8;color:#a01820;}
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
@@ -90,6 +96,15 @@ function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
 function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn};return buildTry(id,o);}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
 function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
@@ -106,8 +121,18 @@ document.addEventListener('click',function(e){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
     var o=entry.genFn();entry.o=o;
     var wrap=el.closest?el.closest('.try'):document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;
-    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
-    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+    var tmp=document.createElement('div');tmp.innerHTML=entry.mc?buildTryMC(id,o):buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:entry.mc};return;
+  }
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){el.classList.add('mc-correct');fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{el.classList.add('mc-wrong');allBtns[o.correct].classList.add('mc-correct');fb.className='try-fb er';fb.textContent='Not quite — the correct answer is highlighted above.';}
+    return;
   }
   if(el.classList.contains('try-ck')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
@@ -171,7 +196,7 @@ s.innerHTML=o.join('');}
 var QS=[
 {ey:'Q1 \u2022 Y10 Physics \u2022 Energy',ti:'Energy Stores',su:'Identify the eight energy stores and their equations.',steps:[
   {lb:'The stores',dr:dQ1,ht:'<p>Energy is stored in eight stores (all in joules). It is never created or destroyed \u2014 only transferred between stores.</p>'},
-  {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var pairs=[['moving car',1],['book on shelf',2],['stretched spring',3],['battery',4],['hot cup of tea',5],['uranium fuel rod',6]];var p=pick(pairs);return{question:'Which store? "'+p[0]+'". Enter: 1=kinetic, 2=GPE, 3=elastic PE, 4=chemical, 5=thermal, 6=nuclear.',hints:['Match description to store type'],ans:p[1],tol:0,unit:'',working:'"'+p[0]+'" = store number <b>'+p[1]+'</b>.'};})},
+  {lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var pairs=[['moving car','Kinetic'],['book on shelf','Gravitational PE'],['stretched spring','Elastic PE'],['battery','Chemical'],['hot cup of tea','Thermal'],['uranium fuel rod','Nuclear']];var opts=['Kinetic','Gravitational PE','Elastic PE','Chemical','Thermal','Nuclear'];var p=pick(pairs);var correctIdx=opts.indexOf(p[1]);return{question:'Which energy store is this? &ldquo;'+p[0]+'&rdquo;',options:opts,correct:correctIdx,working:'&ldquo;'+p[0]+'&rdquo; is the <b>'+p[1]+'</b> store.'};})},
 ]},
 {ey:'Q2 \u2022 Y10 Physics \u2022 Energy',ti:'Work Done',su:'Calculate work done using W = Fd.',steps:[
   {lb:'W = Fd',dr:dQ2,ht:'<p>Work is done when a force moves an object in the direction of the force. Work done = energy transferred.</p><div class="fm">W = F \u00d7 d</div><p>W in joules (J), F in newtons (N), d in metres (m).</p>'},
@@ -194,7 +219,7 @@ var QS=[
 {ey:'Q6 \u2022 Y10 Physics \u2022 Energy',ti:'Energy Resources',su:'Compare renewable and non-renewable energy sources.',steps:[
   {lb:'Renewable',dr:dQ6,ht:'<p><b>Renewable</b> sources will not run out: solar, wind, hydroelectric, tidal, wave, geothermal, biofuels. Most produce no CO\u2082 during generation.</p>'},
   {lb:'Non-renewable',dr:dQ6,ht:'<p><b>Non-renewable</b> sources are finite: coal, oil, natural gas (fossil fuels), nuclear. Fossil fuels release CO\u2082, contributing to climate change.</p>'},
-  {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var renew=[['Solar',1],['Wind',1],['Hydroelectric',1],['Tidal',1],['Geothermal',1],['Biofuels',1]];var nonrenew=[['Coal',0],['Oil',0],['Natural gas',0],['Nuclear',0]];var o=pick(renew.concat(nonrenew));return{question:'Is "<b>'+o[0]+'</b>" renewable? 1=Yes, 0=No.',hints:['Renewable = will not run out naturally'],ans:o[1],tol:0,unit:'',working:o[0]+' is '+(o[1]?'<b>renewable</b>':'<b>non-renewable</b>')+'. Answer: '+o[1]+'.'};})},
+  {lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var renew=[['Solar',1],['Wind',1],['Hydroelectric',1],['Tidal',1],['Geothermal',1],['Biofuels',1]];var nonrenew=[['Coal',0],['Oil',0],['Natural gas',0],['Nuclear',0]];var o=pick(renew.concat(nonrenew));return{question:'Is <b>'+o[0]+'</b> a renewable energy source?',options:['Yes — renewable','No — non-renewable'],correct:o[1]?0:1,working:o[0]+' is '+(o[1]?'<b>renewable</b>':'<b>non-renewable</b>')+'.'};})},
 ]},
 {ey:'Q7 \u2022 Y10 Physics \u2022 Energy',ti:'Energy Conservation',su:'Apply conservation of energy to solve multi-step problems.',steps:[
   {lb:'Conservation of energy',dr:dQ7,ht:'<p>Energy cannot be created or destroyed. It only transfers between stores or dissipates to the surroundings. Total energy in a closed system is always constant.</p>'},
@@ -225,10 +250,10 @@ render();
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 const _sb=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
-window._supabase=_sb;window._abcTopicCode='Y10-ENG-01';
+window._supabase=_sb;window._abcTopicCode='Y10-ENE-01';
 window.markComplete=async function(){
   const{data:{session}}=await _sb.auth.getSession();if(!session)return;
-  const{data:topic}=await _sb.from('topics').select('id').eq('topic_code','Y10-ENG-01').maybeSingle();if(!topic)return;
+  const{data:topic}=await _sb.from('topics').select('id').eq('topic_code','Y10-ENE-01').maybeSingle();if(!topic)return;
   window._abcTopicId=topic.id;
   await _sb.from('walkthrough_progress').upsert({student_id:session.user.id,topic_id:topic.id,status:'completed',completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString()},{onConflict:'student_id,topic_id'});
 };

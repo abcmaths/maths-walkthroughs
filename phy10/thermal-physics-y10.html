@@ -59,6 +59,12 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
 .try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
 .try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.mc-opt{text-align:left;padding:10px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold);background:#fffaf0;}
+.mc-opt:disabled{cursor:default;opacity:.9;}
+.mc-opt.mc-correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600;}
+.mc-opt.mc-wrong{border-color:#c62828;background:#fde8e8;color:#a01820;}
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
@@ -90,6 +96,15 @@ function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
 function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn};return buildTry(id,o);}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
 function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
@@ -106,8 +121,18 @@ document.addEventListener('click',function(e){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
     var o=entry.genFn();entry.o=o;
     var wrap=el.closest?el.closest('.try'):document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;
-    var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);
-    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+    var tmp=document.createElement('div');tmp.innerHTML=entry.mc?buildTryMC(id,o):buildTry(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn,mc:entry.mc};return;
+  }
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){el.classList.add('mc-correct');fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{el.classList.add('mc-wrong');allBtns[o.correct].classList.add('mc-correct');fb.className='try-fb er';fb.textContent='Not quite — the correct answer is highlighted above.';}
+    return;
   }
   if(el.classList.contains('try-ck')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
@@ -195,17 +220,17 @@ var QS=[
 {ey:'Q3 \u2022 Y10 Physics \u2022 Thermal',ti:'Conduction',su:'Explain conduction. Why are metals better conductors than non-metals?',steps:[
   {lb:'Mechanism',dr:dQ3,ht:'<p>Conduction is heat transfer through a material without bulk movement. Hot particles vibrate more, transferring energy to neighbours. Metals also have <b>free electrons</b> that carry energy much faster.</p>'},
   {lb:'Metals vs non-metals',dr:dQ3,ht:'<p>Metals: best conductors (free electrons).<br>Non-metals, liquids, gases: poor conductors (insulators).<br>Poor conduction \u2192 useful for insulation (double glazing, loft insulation).</p>'},
-  {lb:'Your turn',dr:dQ3,ht:tryIt(function(){return{question:'Why is copper a better thermal conductor than wood? 1=free electrons, 2=denser structure, 3=higher melting point.',hints:['What do metals have that non-metals lack?'],ans:1,tol:0,unit:'',working:'Copper has <b>free electrons</b> that carry energy rapidly. Answer: 1.'};})},
+  {lb:'Your turn',dr:dQ3,ht:tryItMC(function(){return{question:'Why is copper a better thermal conductor than wood?',options:['Copper has free electrons that carry energy rapidly','Copper has a denser structure','Copper has a higher melting point'],correct:0,working:'Copper has <b>free electrons</b> that carry energy rapidly through the lattice.'};})},
 ]},
 {ey:'Q4 \u2022 Y10 Physics \u2022 Thermal',ti:'Convection',su:'Explain convection currents in liquids and gases.',steps:[
   {lb:'Mechanism',dr:dQ4,ht:'<p>Convection is heat transfer by bulk movement of a fluid. Hot fluid expands \u2192 less dense \u2192 rises. Cool fluid sinks to replace it \u2192 a <b>convection current</b> forms.</p>'},
   {lb:'Only in fluids',dr:dQ4,ht:'<p>Convection requires particles to flow. It cannot occur in solids. Applications: central heating, sea breezes, ovens.</p>'},
-  {lb:'Your turn',dr:dQ4,ht:tryIt(function(){return{question:'In which state(s) can convection occur? 1=solids, 2=liquids only, 3=liquids and gases, 4=all states.',hints:['Convection needs bulk flow of particles'],ans:3,tol:0,unit:'',working:'Convection needs fluids (liquids and gases). Not in solids. Answer: 3.'};})},
+  {lb:'Your turn',dr:dQ4,ht:tryItMC(function(){return{question:'In which state(s) of matter can convection occur?',options:['Solids only','Liquids only','Liquids and gases','All states'],correct:2,working:'Convection needs fluids (liquids and gases) \u2014 it cannot happen in solids.'};})},
 ]},
 {ey:'Q5 \u2022 Y10 Physics \u2022 Thermal',ti:'Thermal Radiation',su:'Describe emission and absorption of infrared radiation.',steps:[
   {lb:'What is radiation?',dr:dQ5,ht:'<p>Thermal radiation is infrared (IR) electromagnetic waves emitted by all objects above absolute zero. It requires no medium and can travel through a vacuum.</p>'},
   {lb:'Good and poor emitters',dr:dQ5,ht:'<p>Dark, matt surfaces: best emitters AND best absorbers.<br>Shiny, light surfaces: poor emitters, good reflectors.</p><p>Applications: solar panels (dark), radiator colour, survival blankets (shiny).</p>'},
-  {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var type=pick(['emit','absorb']);if(type==='emit')return{question:'Which surface emits MORE radiation at same temperature? 1=dark matt, 2=shiny silver.',hints:['Dark surfaces are better emitters'],ans:1,tol:0,unit:'',working:'Dark matt emits more. Answer: 1.'};return{question:'Which surface ABSORBS more radiation? 1=dark matt, 2=shiny silver.',hints:['Good emitters are also good absorbers'],ans:1,tol:0,unit:'',working:'Dark matt absorbs more. Answer: 1.'};})},
+  {lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var type=pick(['emit','absorb']);if(type==='emit')return{question:'Which surface emits MORE radiation at the same temperature?',options:['Dark, matt surface','Shiny, silver surface'],correct:0,working:'Dark matt surfaces are better emitters of radiation.'};return{question:'Which surface ABSORBS more radiation?',options:['Dark, matt surface','Shiny, silver surface'],correct:0,working:'Dark matt surfaces are also better absorbers \u2014 good emitters are good absorbers.'};})},
 ]},
 {ey:'Q6 \u2022 Y10 Physics \u2022 Thermal',ti:'Vacuum Flask',su:'Explain how a vacuum flask reduces heat loss by all three methods.',steps:[
   {lb:'How it works',dr:dQ6,ht:'<p><b>Conduction & convection:</b> vacuum between double glass walls removes any medium. <b>Radiation:</b> silvered walls reflect IR back in and minimise emission outward. <b>Stopper:</b> reduces conduction at top.</p>'},
@@ -225,7 +250,8 @@ var QS=[
 ]},
 {ey:'Q10 \u2022 Y10 Physics \u2022 Thermal',ti:'Mixed Thermal Problems',su:'\u0394E=mc\u0394\u03b8, Q=mL, and identifying heat transfer methods.',steps:[
   {lb:'All equations',dr:dQ10,ht:'<p>\u0394E=mc\u0394\u03b8 \u2022 Q=mL \u2022 Conduction/Convection/Radiation \u2022 Vacuum flask design.</p>'},
-  {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var type=pick(['SHC','latent','method']);if(type==='SHC'){var m=rnd(1,4),c=pick([390,900,4200]),dT=rnd(15,50);return{question:'m=<b>'+m+' kg</b>, c=<b>'+c+'</b>, \u0394\u03b8=<b>'+dT+'\u00b0C</b>. Find \u0394E.',hints:['\u0394E = mc\u0394\u03b8'],ans:m*c*dT,tol:m*c*dT*0.01,unit:'J',working:'\u0394E = '+m+'\u00d7'+c+'\u00d7'+dT+' = '+(m*c*dT)+' J'};}if(type==='latent'){var m2=rnd(1,3);return{question:'Energy to melt <b>'+m2+' kg</b> of ice. (Lf = 334 000 J/kg)',hints:['Q = mL'],ans:m2*334000,tol:m2*334000*0.01,unit:'J',working:'Q = '+m2+'\u00d7334000 = '+(m2*334000)+' J'};}return{question:'Which method works in vacuum? 1=conduction, 2=convection, 3=radiation.',hints:['Vacuum has no matter'],ans:3,tol:0,unit:'',working:'Radiation travels as EM waves \u2014 no medium needed. Answer: 3.'};})},
+  {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var type=pick(['SHC','latent']);if(type==='SHC'){var m=rnd(1,4),c=pick([390,900,4200]),dT=rnd(15,50);return{question:'m=<b>'+m+' kg</b>, c=<b>'+c+'</b>, \u0394\u03b8=<b>'+dT+'\u00b0C</b>. Find \u0394E.',hints:['\u0394E = mc\u0394\u03b8'],ans:m*c*dT,tol:m*c*dT*0.01,unit:'J',working:'\u0394E = '+m+'\u00d7'+c+'\u00d7'+dT+' = '+(m*c*dT)+' J'};}var m2=rnd(1,3);return{question:'Energy to melt <b>'+m2+' kg</b> of ice. (Lf = 334 000 J/kg)',hints:['Q = mL'],ans:m2*334000,tol:m2*334000*0.01,unit:'J',working:'Q = '+m2+'\u00d7334000 = '+(m2*334000)+' J'};})},
+  {lb:'One more', dr:dQ10, ht:tryItMC(function(){return{question:'Which method of heat transfer works in a vacuum?',options:['Conduction','Convection','Radiation'],correct:2,working:'Radiation travels as EM waves \u2014 no medium is needed.'};})},
 ]},
 ];
 

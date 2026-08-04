@@ -60,6 +60,12 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
 .try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
 .try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.mc-opt{text-align:left;padding:10px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold);background:#fffaf0;}
+.mc-opt:disabled{cursor:default;opacity:.9;}
+.mc-opt.mc-correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600;}
+.mc-opt.mc-wrong{border-color:#c62828;background:#fde8e8;color:#a01820;}
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
@@ -99,6 +105,15 @@ function tryIt(genFn){
   var o=genFn(); ST[id]={o:o,genFn:genFn};
   return buildTry(id,o);
 }
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
 function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
@@ -120,9 +135,19 @@ document.addEventListener('click',function(e){
     var o=entry.genFn(); entry.o=o;
     var wrap=el.closest?el.closest('.try'):document.querySelector('.try[data-tryid="'+id+'"]');
     if(!wrap)return;
-    var tmp=document.createElement('div'); tmp.innerHTML=buildTry(id,o);
+    var tmp=document.createElement('div'); tmp.innerHTML=entry.mc?buildTryMC(id,o):buildTry(id,o);
     wrap.parentNode.replaceChild(tmp.firstChild,wrap);
-    ST[id]={o:o,genFn:entry.genFn}; return;
+    ST[id]={o:o,genFn:entry.genFn,mc:entry.mc}; return;
+  }
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){el.classList.add('mc-correct');fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{el.classList.add('mc-wrong');allBtns[o.correct].classList.add('mc-correct');fb.className='try-fb er';fb.textContent='Not quite — the correct answer is highlighted above.';}
+    return;
   }
   if(el.classList.contains('try-ck')){
     var id=el.getAttribute('data-tryid');
@@ -224,7 +249,7 @@ var QS=[
     {lb:'The base units',dr:dQ1,ht:'<p>The <b>SI system</b> is the international standard for measurement. Every physical quantity is measured in units derived from seven base units. You must know the five most common.</p>'},
     {lb:'Length and mass',dr:dQ1,ht:'<p><b>Length</b>: metre (m). <b>Mass</b>: kilogram (kg). These are fundamental \u2014 all other mechanics units are built from them.</p>'},
     {lb:'Time, current, temperature',dr:dQ1,ht:'<p><b>Time</b>: second (s). <b>Electric current</b>: ampere (A). <b>Temperature</b>: kelvin (K). Note: 0 K = \u2212273\u00b0C (absolute zero).</p>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var q=pick([['mass','kilogram',2],['length','metre',1],['time','second',3],['current','ampere',4],['temperature','kelvin',5]]);return{question:'What is the SI base unit of <b>'+q[0]+'</b>? Enter: 1=metre, 2=kilogram, 3=second, 4=ampere, 5=kelvin.',hints:['Match quantity to its SI unit'],ans:q[2],tol:0,unit:'',working:'The SI unit of '+q[0]+' is the <b>'+q[1]+'</b>. Answer: '+q[2]+'.'};})},
+    {lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var q=pick([['mass','kilogram'],['length','metre'],['time','second'],['current','ampere'],['temperature','kelvin']]);var opts=['Metre','Kilogram','Second','Ampere','Kelvin'];var correctIdx=['metre','kilogram','second','ampere','kelvin'].indexOf(q[1]);return{question:'What is the SI base unit of <b>'+q[0]+'</b>?',options:opts,correct:correctIdx,working:'The SI unit of '+q[0]+' is the <b>'+q[1]+'</b>.'};})},
   ]},
   {ey:'Q2 \u2022 Y10 Physics \u2022 Measurement',ti:'SI Prefixes',su:'Convert between units using SI prefixes: G, M, k, c, m, \u03bc, n.',steps:[
     {lb:'Prefix table',dr:dQ2,ht:'<p>Prefixes multiply the base unit by a power of 10. Most important: <b>k</b> (kilo, \u00d710\u00b3), <b>M</b> (mega, \u00d710\u2076), <b>m</b> (milli, \u00d710\u207b\u00b3), <b>\u03bc</b> (micro, \u00d710\u207b\u2076), <b>n</b> (nano, \u00d710\u207b\u2079).</p>'},
@@ -234,7 +259,7 @@ var QS=[
   {ey:'Q3 \u2022 Y10 Physics \u2022 Measurement',ti:'Scalars and Vectors',su:'Classify quantities as scalar or vector. Add two perpendicular vectors.',steps:[
     {lb:'Scalars',dr:dQ3,ht:'<p>A <b>scalar</b> has magnitude (size) only. Examples: speed, distance, mass, time, energy, temperature, pressure.</p>'},
     {lb:'Vectors',dr:dQ3,ht:'<p>A <b>vector</b> has both magnitude and direction. Examples: velocity, displacement, acceleration, force, momentum, weight.</p>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var pairs=[['Speed',0],['Velocity',1],['Mass',0],['Force',1],['Distance',0],['Displacement',1],['Temperature',0],['Momentum',1]];var p=pick(pairs);return{question:'Is <b>"'+p[0]+'"</b> a vector? Enter 1 for Yes, 0 for No.',hints:['Vectors have magnitude AND direction'],ans:p[1],tol:0,unit:'',working:p[0]+' is a <b>'+(p[1]?'vector':'scalar')+'</b>. Answer: '+p[1]+'.'};})},
+    {lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var pairs=[['Speed',0],['Velocity',1],['Mass',0],['Force',1],['Distance',0],['Displacement',1],['Temperature',0],['Momentum',1]];var p=pick(pairs);return{question:'Is &ldquo;'+p[0]+'&rdquo; a vector or a scalar quantity?',options:['Vector','Scalar'],correct:p[1]?0:1,working:p[0]+' is a <b>'+(p[1]?'vector':'scalar')+'</b>.'};})},
   ]},
   {ey:'Q4 \u2022 Y10 Physics \u2022 Measurement',ti:'Significant Figures',su:'Count significant figures and round answers correctly.',steps:[
     {lb:'Rules',dr:dQ4,ht:'<p><b>Significant figures (s.f.)</b> show the precision of a measurement. Rules: non-zero digits always count; zeros between non-zeros count; trailing zeros after a decimal point count; leading zeros do not count.</p>'},
@@ -251,11 +276,11 @@ var QS=[
     {lb:'Accuracy',dr:dQ6,ht:'<p><b>Accuracy</b>: how close a result is to the true value. Low systematic error = high accuracy.</p>'},
     {lb:'Precision',dr:dQ6,ht:'<p><b>Precision</b>: how reproducible repeated measurements are. Results clustered tightly = high precision, even if they are all wrong (systematic error).</p>'},
     {lb:'Errors',dr:dQ6,ht:'<p><b>Systematic error</b>: consistent bias in one direction (e.g. zero error, parallax). Cannot be reduced by repeating.<br><b>Random error</b>: unpredictable scatter. Reduced by repeating and averaging.</p>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var qs=[{q:'A balance always reads 5 g too high. This is which type of error?',a:1,w:'<b>Systematic error</b> \u2014 consistent bias. Answer: 1.'},{q:'Repeated measurements of the same quantity give slightly different results each time. This is which type of error?',a:2,w:'<b>Random error</b> \u2014 unpredictable scatter. Average repeated readings. Answer: 2.'}];var qq=pick(qs);return{question:qq.q+' Enter 1 = systematic, 2 = random.',hints:['Systematic: always same direction. Random: varies each time.'],ans:qq.a,tol:0,unit:'',working:qq.w};})},
+    {lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var qs=[{q:'A balance always reads 5 g too high. This is which type of error?',a:0,w:'<b>Systematic error</b> \u2014 consistent bias.'},{q:'Repeated measurements of the same quantity give slightly different results each time. This is which type of error?',a:1,w:'<b>Random error</b> \u2014 unpredictable scatter. Average repeated readings.'}];var qq=pick(qs);return{question:qq.q,options:['Systematic error','Random error'],correct:qq.a,working:qq.w};})},
   ]},
   {ey:'Q7 \u2022 Y10 Physics \u2022 Measurement',ti:'Measuring Instruments',su:'Choose the correct instrument for a measurement.',steps:[
     {lb:'Choosing instruments',dr:dQ7,ht:'<p>Match the instrument to the required precision:</p><p>Ruler (\u00b11 mm) \u2192 everyday lengths. Vernier calliper (\u00b10.1 mm) \u2192 small dimensions. Micrometer (\u00b10.01 mm) \u2192 very thin objects. Stopwatch \u2192 time. Balance \u2192 mass.</p>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var qs=[{q:'Measuring the diameter of a wire (~0.5 mm). Which instrument?',a:3,w:'A <b>micrometer</b> (0.01 mm precision) is needed for wire diameter. Answer: 3.'},{q:'Measuring the length of a textbook (~30 cm). Which instrument?',a:1,w:'A <b>ruler</b> (1 mm precision) is fine for a textbook. Answer: 1.'},{q:'Measuring the external diameter of a metal cylinder (~25 mm). Which instrument?',a:2,w:'A <b>vernier calliper</b> (0.1 mm) is ideal for cylinder diameter. Answer: 2.'}];var qq=pick(qs);return{question:qq.q+' Enter 1 = ruler, 2 = vernier calliper, 3 = micrometer.',hints:['Match precision needed to the instrument'],ans:qq.a,tol:0,unit:'',working:qq.w};})},
+    {lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var qs=[{q:'Measuring the diameter of a wire (~0.5 mm). Which instrument?',a:2,w:'A <b>micrometer</b> (0.01 mm precision) is needed for wire diameter.'},{q:'Measuring the length of a textbook (~30 cm). Which instrument?',a:0,w:'A <b>ruler</b> (1 mm precision) is fine for a textbook.'},{q:'Measuring the external diameter of a metal cylinder (~25 mm). Which instrument?',a:1,w:'A <b>vernier calliper</b> (0.1 mm) is ideal for cylinder diameter.'}];var qq=pick(qs);return{question:qq.q,options:['Ruler','Vernier calliper','Micrometer'],correct:qq.a,working:qq.w};})},
   ]},
   {ey:'Q8 \u2022 Y10 Physics \u2022 Measurement',ti:'Standard Form',su:'Express very large and very small numbers in standard form A \u00d7 10\u207f.',steps:[
     {lb:'What is standard form?',dr:dQ8,ht:'<p>Standard form: <b>A \u00d7 10\u207f</b> where 1 \u2264 A < 10. Used for very large or very small numbers to avoid ambiguous zeros and to make them easier to work with.</p>'},
