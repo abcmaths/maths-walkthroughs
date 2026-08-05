@@ -2429,8 +2429,9 @@
     // Build review map: topicId -> { reviewerIds, ratings }
     const reviewMap = {};
     allReviews.forEach(r => {
-      if (!reviewMap[r.topic_id]) reviewMap[r.topic_id] = { reviewers: new Set(), ratings: [], questions: new Set() };
+      if (!reviewMap[r.topic_id]) reviewMap[r.topic_id] = { reviewers: new Set(), reviewerNames: new Set(), ratings: [], questions: new Set() };
       reviewMap[r.topic_id].reviewers.add(r.reviewer_id);
+      reviewMap[r.topic_id].reviewerNames.add(r.profiles?.full_name || 'Unknown');
       reviewMap[r.topic_id].ratings.push(r.rating);
       reviewMap[r.topic_id].questions.add(r.question_number);
     });
@@ -2569,9 +2570,12 @@
           <div style="font-size:0.75rem;color:#888">${yearLabel} · ${subjectLabel}</div>
           ${isLocked ? `<div style="font-size:0.72rem;color:#aaa;font-family:monospace;margin-top:2px">${filePath}</div>` : ''}
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          ${statusBadge}
-          ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} · ${qCount} Qs</span>` : ''}
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+          <div style="display:flex;align-items:center;gap:8px">
+            ${statusBadge}
+            ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} · ${qCount} Qs</span>` : ''}
+          </div>
+          ${rm && rm.reviewerNames.size > 0 ? `<div style="font-size:0.7rem;color:#aaa">${[...rm.reviewerNames].join(', ')}</div>` : ''}
         </div>
         ${actionButtons}
       </div>`;
