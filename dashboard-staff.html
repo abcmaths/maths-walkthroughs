@@ -424,6 +424,11 @@
           <option value="">All Students</option>
           <option value="yes">➕ Add/Further Maths only</option>
         </select>
+        <select id="users-filter-status" onchange="renderUsersTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.85rem">
+          <option value="active">Active only</option>
+          <option value="archived">Archived only</option>
+          <option value="all">All</option>
+        </select>
         <input type="text" id="users-search" placeholder="Search by name or email…" oninput="renderUsersTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.88rem;color:#333;min-width:200px">
         <button class="btn-outline" style="font-size:0.82rem;padding:6px 14px" onclick="exportUsers()">↓ Export CSV</button>
       </div>
@@ -824,7 +829,10 @@
             <option value="locked">🔒 Locked (2+ reviews)</option>
           </select>
         </div>
-        <div class="section-title" style="margin-bottom:16px">Walkthroughs <span id="review-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="section-title">Walkthroughs <span id="review-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></div>
+          <button class="btn-outline" id="export-all-locked-btn" style="font-size:0.82rem;padding:6px 14px;display:none" onclick="exportAllLockedReviews()">↓ Export All Locked Reviews</button>
+        </div>
         <div id="review-list"></div>
       </div>
     </div>
@@ -1046,6 +1054,7 @@
     }
 
     document.getElementById('header-name').textContent = profile.full_name;
+    window.currentUserRole = profile.role;
 
     // ── Fetch all data in parallel ──
     const [
@@ -2372,6 +2381,9 @@
     const subjectFilter = document.getElementById('review-filter-subject').value;
     const statusFilter = document.getElementById('review-filter-status').value;
 
+    const exportAllBtn = document.getElementById('export-all-locked-btn');
+    if (exportAllBtn) exportAllBtn.style.display = (window.currentUserRole === 'admin') ? '' : 'none';
+
     // Show/hide year options based on which subject ranges apply:
     //   Science (combined): Y7-9 only
     //   Physics/Chemistry/Biology: Y10-12 only
@@ -2803,6 +2815,41 @@
     if (navigator.clipboard) navigator.clipboard.writeText(ta.value).catch(()=>{});
   };
 
+  window.exportAllLockedReviews = function() {
+    const lockedTopics = allTopics.filter(t => !!t.locked);
+    if (lockedTopics.length === 0) {
+      alert('No locked walkthroughs to export.');
+      return;
+    }
+    const ratingLabel = { good: 'Good', needs_improvement: 'Needs work', not_good: 'Not good' };
+    const rows = [['Topic Code', 'Topic Name', 'Subject', 'Year Group', 'File Path', 'Reviewers', 'Question', 'Reviewer Name', 'Rating', 'Comment']];
+    lockedTopics.forEach(t => {
+      const subj = t.subject || 'maths';
+      const reviews = allReviews.filter(r => r.topic_id === t.id);
+      const filePath = getWalkthroughFile(subj, t.topic_code) || '(file path unknown)';
+      const reviewerCount = new Set(reviews.map(r => r.reviewer_id)).size;
+      if (reviews.length === 0) {
+        rows.push([t.topic_code, t.topic_name, subj, t.year_group, filePath, reviewerCount, '', '', '', '']);
+        return;
+      }
+      reviews
+        .slice()
+        .sort((a, b) => Number(a.question_number) - Number(b.question_number))
+        .forEach(r => {
+          rows.push([
+            t.topic_code, t.topic_name, subj, t.year_group, filePath, reviewerCount,
+            r.question_number, r.profiles?.full_name || 'Reviewer',
+            ratingLabel[r.rating] || r.rating, r.comment || ''
+          ]);
+        });
+    });
+    const csv = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g,'""') + '"').join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'abc_locked_reviews_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+  };
+
   window.unlockTopicReview = async function(topicId) {
     if (!confirm('Unlock this walkthrough? This clears the previous reviews and resets the reviewer count to 0 — do this after uploading an improved version.')) return;
     await supabase.from('walkthrough_reviews').delete().eq('topic_id', topicId);
@@ -2822,6 +2869,14 @@
       .select('*')
       .order('full_name');
     allUsersWithEmail = data || [];
+
+    // user_emails view doesn't carry the `active` column — fetch and merge from profiles
+    const { data: activeRows } = await supabase
+      .from('profiles')
+      .select('id, active');
+    const activeMap = {};
+    (activeRows || []).forEach(r => { activeMap[r.id] = r.active !== false; }); // default true if null
+    allUsersWithEmail.forEach(u => { u.active = activeMap.hasOwnProperty(u.id) ? activeMap[u.id] : true; });
   }
 
   window.renderUsersTab = function() {
@@ -2831,13 +2886,17 @@
 
     const streamFilter = document.getElementById('users-filter-stream') ? document.getElementById('users-filter-stream').value : '';
     const extMathsFilter = document.getElementById('users-filter-extmaths') ? document.getElementById('users-filter-extmaths').value : '';
+    const statusFilterEl = document.getElementById('users-filter-status');
+    const statusFilter = statusFilterEl ? statusFilterEl.value : 'active';
     const filtered = allUsersWithEmail.filter(u => {
       const matchRole   = !roleFilter   || u.role === roleFilter;
       const matchYear   = !yearFilter   || String(u.year_group) === yearFilter;
       const matchSearch = !searchFilter || u.full_name.toLowerCase().includes(searchFilter);
       const matchStream = !streamFilter || (u.stream || 'science') === streamFilter;
       const matchExtMaths = !extMathsFilter || (allStudents.find(s=>s.id===u.id)||{}).takes_extended_maths === true;
-      return matchRole && matchYear && matchSearch && matchStream && matchExtMaths;
+      const isActive = u.active !== false;
+      const matchStatus = statusFilter === 'all' || (statusFilter === 'archived' ? !isActive : isActive);
+      return matchRole && matchYear && matchSearch && matchStream && matchExtMaths && matchStatus;
     });
 
     document.getElementById('users-count').textContent = `— ${filtered.length} user${filtered.length !== 1 ? 's' : ''}`;
@@ -2853,8 +2912,11 @@
       const lastSignIn = u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString('en-GB') : 'Never';
       const extMaths = (allStudents.find(s=>s.id===u.id)||{}).takes_extended_maths;
       const extMathsLabel = Number(u.year_group) === 12 ? 'Further Maths' : 'Add Maths';
-      return `<tr>
-        <td><strong>${u.full_name}</strong></td>
+      const isActive = u.active !== false;
+      const rowStyle = isActive ? '' : 'opacity:0.5;background:#FAFAFA';
+      const nameSafe = u.full_name.replace(/'/g,"\\'");
+      return `<tr style="${rowStyle}">
+        <td><strong>${u.full_name}</strong>${!isActive ? ' <span style="font-size:0.68rem;padding:1px 6px;border-radius:8px;font-weight:700;background:#EEEEEE;color:#888">ARCHIVED</span>' : ''}</td>
         <td style="font-size:0.82rem;color:#666">${u.email || '—'}</td>
         <td><span class="badge ${roleBadge}">${u.role}</span></td>
         <td>${u.year_group ? 'Year ' + u.year_group : '—'}${extMaths ? `<br><span style="font-size:0.72rem;padding:1px 6px;border-radius:8px;font-weight:600;background:#FFF3E0;color:#C8922A">➕ ${extMathsLabel}</span>` : ''}</td>
@@ -2863,24 +2925,47 @@
         <td style="font-size:0.82rem;color:#888">${lastSignIn}</td>
         <td>
           ${u.role === 'student' ? `<button class="btn-link" onclick="openStudentModal('${u.id}')">View</button>` : ''}
-          <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}','${u.role}','${u.year_group||''}','${u.form_class||''}','${u.stream||'science'}',${(allStudents.find(s=>s.id===u.id)||{}).simplified_view===true},${(allStudents.find(s=>s.id===u.id)||{}).summer_only===true},${extMaths===true})">Edit</button>
+          <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${nameSafe}','${u.role}','${u.year_group||''}','${u.form_class||''}','${u.stream||'science'}',${(allStudents.find(s=>s.id===u.id)||{}).simplified_view===true},${(allStudents.find(s=>s.id===u.id)||{}).summer_only===true},${extMaths===true})">Edit</button>
+          ${isActive
+            ? `<button class="btn-link" style="color:#C0272D" onclick="archiveUser('${u.id}','${nameSafe}')">Archive</button>`
+            : `<button class="btn-link" style="color:#2E7D32" onclick="restoreUser('${u.id}','${nameSafe}')">Restore</button>`}
         </td>
       </tr>`;
     }).join('');
+  };
+
+  window.archiveUser = async function(id, name) {
+    if (!confirm(`Archive ${name}? This hides them from the Active list but keeps all test/progress history. You can restore them any time.`)) return;
+    const { error } = await supabase.from('profiles').update({ active: false }).eq('id', id);
+    if (error) { alert('Archive failed: ' + error.message); return; }
+    await loadUsersWithEmail();
+    window.renderUsersTab();
+  };
+
+  window.restoreUser = async function(id, name) {
+    const { error } = await supabase.from('profiles').update({ active: true }).eq('id', id);
+    if (error) { alert('Restore failed: ' + error.message); return; }
+    await loadUsersWithEmail();
+    window.renderUsersTab();
   };
 
   window.exportUsers = function() {
     const roleFilter   = document.getElementById('users-filter-role').value;
     const yearFilter   = document.getElementById('users-filter-year').value;
     const searchFilter = document.getElementById('users-search').value.toLowerCase();
+    const statusFilterEl = document.getElementById('users-filter-status');
+    const statusFilter = statusFilterEl ? statusFilterEl.value : 'active';
 
     const filtered = allUsersWithEmail.filter(u => {
+      const isActive = u.active !== false;
+      const matchStatus = statusFilter === 'all' || (statusFilter === 'archived' ? !isActive : isActive);
       return (!roleFilter   || u.role === roleFilter) &&
              (!yearFilter   || String(u.year_group) === yearFilter) &&
-             (!searchFilter || u.full_name.toLowerCase().includes(searchFilter));
+             (!searchFilter || u.full_name.toLowerCase().includes(searchFilter)) &&
+             matchStatus;
     });
 
-    const rows = [['Full Name', 'Email', 'Role', 'Year Group', 'Form Class', 'Last Sign In']];
+    const rows = [['Full Name', 'Email', 'Role', 'Year Group', 'Form Class', 'Last Sign In', 'Status']];
     filtered.forEach(u => {
       rows.push([
         u.full_name,
@@ -2888,7 +2973,8 @@
         u.role,
         u.year_group || '',
         u.form_class || '',
-        u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString('en-GB') : 'Never'
+        u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString('en-GB') : 'Never',
+        u.active !== false ? 'Active' : 'Archived'
       ]);
     });
 
