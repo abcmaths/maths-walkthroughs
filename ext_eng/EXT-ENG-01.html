@@ -17,15 +17,17 @@
   .step-progress { height:6px; background:#eee; border-radius:3px; overflow:hidden; margin-bottom:16px; }
   .step-bar { height:100%; background:var(--red); transition:width .3s; }
   .teach { background:var(--cream); border-left:4px solid var(--red); padding:14px 16px; border-radius:6px; margin-bottom:16px; line-height:1.6; }
-  .worked { font-family:'Courier New',monospace; background:#fafafa; padding:10px 12px; border-radius:6px; margin:8px 0; }
   .yt-box { border:2px dashed var(--red); padding:16px; border-radius:8px; margin-top:10px; }
-  input[type=text] { padding:10px; font-size:1rem; border:2px solid #ddd; border-radius:8px; width:220px; }
-  button.act { background:var(--red); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:10px; }
-  button.act:disabled { background:#ccc; }
+  .yt-q { font-weight:600; margin-bottom:14px; line-height:1.5; }
+  .opt-list { display:flex; flex-direction:column; gap:10px; }
+  .opt-btn { text-align:left; background:#fff; border:2px solid #ddd; padding:12px 14px; border-radius:8px; font-size:1rem; cursor:pointer; }
+  .opt-btn:hover { border-color:var(--red); }
+  .opt-btn.correct { background:#e8f7ee; border-color:#1b7d3a; color:#1b7d3a; font-weight:600; }
+  .opt-btn.wrong { background:#fdecec; border-color:var(--red); color:var(--red); }
+  .opt-btn:disabled { cursor:default; }
   .try-fb { margin-top:10px; font-weight:600; }
   .try-fb.ok { color:#1b7d3a; }
   .try-fb.er { color:var(--red); }
-  .hint { font-size:.8rem; color:#888; margin-top:6px; }
   .nav { display:flex; justify-content:space-between; margin-top:20px; }
   button.nav-btn { background:#eee; color:#333; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
   button.nav-btn.primary { background:var(--red); color:#fff; }
@@ -47,66 +49,76 @@
 </div>
 
 <script>
-const QUESTIONS = [{"title": "Moving beyond basic inference", "teach": ["At this level, inference means analysing HOW a writer creates meaning, not just WHAT can be inferred.", "Example: instead of just saying a character is 'sad', analyse how word choice, structure, or imagery build that impression.", "This is the difference between basic comprehension and literary analysis."], "yt_prompt": "Based on 'She stared at the grey, empty room, the silence pressing in on her', what technique creates the mood?"}, {"title": "Analysing word choice for connotation", "teach": ["Writers choose words carefully for their connotations (the feelings and associations they carry), not just their literal meaning.", "Example: 'the crowd swarmed' (insect connotation, suggesting chaos/threat) vs 'the crowd gathered' (neutral).", "Always ask: why THIS word, rather than a more ordinary alternative?"], "yt_prompt": "What does the word 'swarmed' suggest about the crowd, compared to 'gathered'?"}, {"title": "Analysing sentence structure for effect", "teach": ["Short sentences can create tension or urgency; long, flowing sentences can create a calm or reflective mood.", "Example: 'She ran. She stumbled. She fell.' creates urgency through short, sharp sentences.", "Look at sentence length and structure as a deliberate writing choice, not just content."], "yt_prompt": "What effect do short sentences create in: 'She ran. She stumbled. She fell.'?"}, {"title": "Identifying a writer's viewpoint", "teach": ["A writer's viewpoint is their attitude or perspective toward the subject, often shown indirectly through word choice and focus.", "Example: an article that only mentions the negative effects of a policy, without any positive points, suggests a critical viewpoint.", "Look for patterns across a whole text, not just one sentence, to identify overall viewpoint."], "yt_prompt": "If a text only mentions negative effects of a new law, what does this suggest about the writer's viewpoint?"}, {"title": "Analysing imagery", "teach": ["Imagery uses descriptive language to create a picture or sensation in the reader's mind, often appealing to the senses.", "Example: 'the acrid smoke stung her eyes' appeals to smell and touch, making the scene feel vivid and immediate.", "Identify which senses are being appealed to, and consider why the writer chose that particular sensory detail."], "yt_prompt": "Which sense does 'the acrid smoke stung her eyes' appeal to primarily?"}, {"title": "Analysing the effect of a metaphor", "teach": ["A metaphor describes one thing as if it were another, creating a vivid comparison without using 'like' or 'as'.", "Example: 'Her heart was a stone' suggests coldness or emotional numbness, without saying this directly.", "Always explain what the comparison suggests, not just identify that a metaphor is present."], "yt_prompt": "What does the metaphor 'her heart was a stone' suggest about the character?"}, {"title": "Analysing structure across a whole text", "teach": ["Structural analysis looks at how a text is organised as a whole \u2014 what's revealed first, what's withheld, how the focus shifts.", "Example: withholding a character's name until the final paragraph can create mystery or build suspense.", "Consider why the writer chose this particular order, rather than describing events chronologically."], "yt_prompt": "What effect can withholding a character's name until the end of a text create?"}, {"title": "Comparing tone across two paragraphs", "teach": ["Tone is the writer's attitude, expressed through word choice and style \u2014 it can shift across a text to reflect changing events or moods.", "Example: a calm, descriptive opening followed by short, urgent sentences signals a shift from calm to tense.", "Track how tone changes across a passage, and consider what causes each shift."], "yt_prompt": "If a text moves from calm, descriptive sentences to short, urgent ones, how has the tone shifted?"}, {"title": "Analysing an unreliable narrator", "teach": ["Sometimes a narrator's account can't be fully trusted \u2014 clues in the text suggest their perspective is biased or incomplete.", "Example: a narrator who repeatedly insists 'I am definitely not lying' may actually be signalling the opposite to an alert reader.", "Look for contradictions or repeated over-insistence as clues that a narrator might be unreliable."], "yt_prompt": "If a narrator repeatedly insists 'I am definitely not lying', what might this suggest to an alert reader?"}, {"title": "Mixed practice \u2014 inference and analysis", "teach": ["You've now covered analysing word choice, sentence structure, viewpoint, imagery, metaphor, structure, tone, and narrator reliability.", "These analytical skills are exactly what's tested in higher-level reading comprehension and literature exam questions.", "This final question brings a couple of these analytical skills together."], "yt_prompt": "What technique is being used in: 'The old house groaned under the weight of its own memories'?"}];
+const QUESTIONS = [{"title": "Moving beyond basic inference", "teach": ["At this level, inference means analysing HOW a writer creates meaning, not just WHAT can be inferred.", "Example: instead of just saying a character is 'sad', analyse how word choice, structure, or imagery build that impression.", "This is the difference between basic comprehension and literary analysis."]}, {"title": "Analysing word choice for connotation", "teach": ["Writers choose words carefully for their connotations (the feelings and associations they carry), not just their literal meaning.", "Example: 'the crowd swarmed' (insect connotation, suggesting chaos/threat) vs 'the crowd gathered' (neutral).", "Always ask: why THIS word, rather than a more ordinary alternative?"]}, {"title": "Analysing sentence structure for effect", "teach": ["Short sentences can create tension or urgency; long, flowing sentences can create a calm or reflective mood.", "Example: 'She ran. She stumbled. She fell.' creates urgency through short, sharp sentences.", "Look at sentence length and structure as a deliberate writing choice, not just content."]}, {"title": "Identifying a writer's viewpoint", "teach": ["A writer's viewpoint is their attitude or perspective toward the subject, often shown indirectly through word choice and focus.", "Example: an article that only mentions the negative effects of a policy, without any positive points, suggests a critical viewpoint.", "Look for patterns across a whole text, not just one sentence, to identify overall viewpoint."]}, {"title": "Analysing imagery", "teach": ["Imagery uses descriptive language to create a picture or sensation in the reader's mind, often appealing to the senses.", "Example: 'the acrid smoke stung her eyes' appeals to smell and touch, making the scene feel vivid and immediate.", "Identify which senses are being appealed to, and consider why the writer chose that particular sensory detail."]}, {"title": "Analysing the effect of a metaphor", "teach": ["A metaphor describes one thing as if it were another, creating a vivid comparison without using 'like' or 'as'.", "Example: 'Her heart was a stone' suggests coldness or emotional numbness, without saying this directly.", "Always explain what the comparison suggests, not just identify that a metaphor is present."]}, {"title": "Analysing structure across a whole text", "teach": ["Structural analysis looks at how a text is organised as a whole \u2014 what's revealed first, what's withheld, how the focus shifts.", "Example: withholding a character's name until the final paragraph can create mystery or build suspense.", "Consider why the writer chose this particular order, rather than describing events chronologically."]}, {"title": "Comparing tone across two paragraphs", "teach": ["Tone is the writer's attitude, expressed through word choice and style \u2014 it can shift across a text to reflect changing events or moods.", "Example: a calm, descriptive opening followed by short, urgent sentences signals a shift from calm to tense.", "Track how tone changes across a passage, and consider what causes each shift."]}, {"title": "Analysing an unreliable narrator", "teach": ["Sometimes a narrator's account can't be fully trusted \u2014 clues in the text suggest their perspective is biased or incomplete.", "Example: a narrator who repeatedly insists 'I am definitely not lying' may actually be signalling the opposite to an alert reader.", "Look for contradictions or repeated over-insistence as clues that a narrator might be unreliable."]}, {"title": "Mixed practice \u2014 inference and analysis", "teach": ["You've now covered analysing word choice, sentence structure, viewpoint, imagery, metaphor, structure, tone, and narrator reliability.", "These analytical skills are exactly what's tested in higher-level reading comprehension and literature exam questions.", "This final question brings a couple of these analytical skills together."]}];
 
 function ytGen_0() {
   return {
-    q: 'She stared at the grey, empty room, the silence pressing in on her. What technique creates the mood?',
-    answers: ['personification','personify','personifying','giving human qualities','human qualities to silence','silence given human','description','descriptive language','imagery','word choice','sensory description']
+    q: 'Based on "She stared at the grey, empty room, the silence pressing in on her," what technique creates the mood?',
+    options: ['Personification — giving the silence a human quality of "pressing in"', 'Alliteration — repeated consonant sounds', 'Rhetorical question', 'Direct dialogue'],
+    correct: 0
   };
 }
 function ytGen_1() {
   return {
     q: '"The crowd swarmed around the stage." What does "swarmed" suggest, compared to "gathered"?',
-    answers: ['chaotic','chaos','threatening','threat','threateningly','insect','insect-like','swarm like insects','aggressive','overwhelming','out of control','uncontrolled','negative','danger','dangerous','frenzied','frenzy','disorderly']
+    options: ['A calm, orderly crowd', 'A chaotic, threatening mass, like insects', 'A small, polite audience', 'A confused, lost crowd'],
+    correct: 1
   };
 }
 function ytGen_2() {
   return {
-    q: 'She ran. She stumbled. She fell. What effect do the short sentences create?',
-    answers: ['urgency','urgent','tension','tense','pace','fast pace','quickens the pace','speed','panic','drama','dramatic','breathless','sense of danger','fast-paced','abrupt','sharp','staccato']
+    q: '"She ran. She stumbled. She fell." What effect do the short sentences create?',
+    options: ['A slow, reflective mood', 'Urgency and tension through pace', 'Humour', 'Confusion about the order of events'],
+    correct: 1
   };
 }
 function ytGen_3() {
   return {
     q: 'A text only mentions negative effects of a new law. What does this suggest about the writer\'s viewpoint?',
-    answers: ['critical','critical of the law','negative','disapproving','disapproval','against the law','opposed','opposition','biased','one-sided','unfavourable','unfavorable','hostile']
+    options: ['The writer is neutral and balanced', 'The writer is critical of the law', 'The writer strongly supports the law', 'The writer has no opinion'],
+    correct: 1
   };
 }
 function ytGen_4() {
   return {
-    q: 'The acrid smoke stung her eyes. Which sense does this appeal to?',
-    answers: ['smell','sense of smell','smell and touch','touch','sight and smell','olfactory']
+    q: '"The acrid smoke stung her eyes." Which sense does this appeal to primarily?',
+    options: ['Sound', 'Taste', 'Smell', 'Touch only'],
+    correct: 2
   };
 }
 function ytGen_5() {
   return {
     q: '"Her heart was a stone." What does this metaphor suggest about the character?',
-    answers: ['cold','coldness','emotionally numb','numb','numbness','unfeeling','hard','hard-hearted','hardened','lacking emotion','no emotion','heartless','distant','detached','unemotional','cold-hearted']
+    options: ['She is physically strong', 'She feels emotionally cold or numb', 'She is very heavy', 'She is unwell'],
+    correct: 1
   };
 }
 function ytGen_6() {
   return {
     q: 'What effect can withholding a character\'s name until the end of a text create?',
-    answers: ['mystery','suspense','intrigue','curiosity','tension','anticipation','keeps the reader guessing','builds suspense','engagement','withholding information creates suspense']
+    options: ['Boredom', 'Confusion with no purpose', 'Mystery and suspense', 'A comic effect'],
+    correct: 2
   };
 }
 function ytGen_7() {
   return {
     q: 'A text moves from calm, descriptive sentences to short, urgent ones. How has the tone shifted?',
-    answers: ['calm to tense','from calm to urgent','from relaxed to tense','peaceful to tense','calm to anxious','calm to panicked','relaxed to urgent','becomes more tense','becomes urgent','shift from calm to tension','more dramatic','increased tension']
+    options: ['From tense to calm', 'From calm to tense', 'It stays the same throughout', 'From formal to informal only'],
+    correct: 1
   };
 }
 function ytGen_8() {
   return {
     q: 'A narrator repeatedly insists "I am definitely not lying." What might this suggest to an alert reader?',
-    answers: ['lying','the narrator is lying','narrator might be lying','unreliable','unreliable narrator','not to be trusted','untrustworthy','suspicious','opposite is true','protesting too much','hiding something','deceptive','dishonest','cannot be trusted']
+    options: ['The narrator is completely trustworthy', 'The narrator might actually be lying', 'The narrator is very confident and reliable', 'Nothing significant — it is just filler dialogue'],
+    correct: 1
   };
 }
 function ytGen_9() {
   return {
-    q: 'The old house groaned under the weight of its own memories. What technique is being used?',
-    answers: ['personification','personify','personifying','giving the house human qualities','human qualities','anthropomorphism','imagery','metaphor','figurative language']
+    q: '"The old house groaned under the weight of its own memories." What technique is being used?',
+    options: ['Simile', 'Personification', 'Onomatopoeia', 'Hyperbole only'],
+    correct: 1
   };
 }
 const YT_GENS = [ytGen_0,ytGen_1,ytGen_2,ytGen_3,ytGen_4,ytGen_5,ytGen_6,ytGen_7,ytGen_8,ytGen_9];
@@ -115,6 +127,15 @@ let qIdx = 0;
 let stepIdx = 0;
 const STEPS_PER_Q = 4;
 let currentYT = null;
+
+function shuffle(optionsWithCorrect) {
+  const opts = optionsWithCorrect.options.map((text, i) => ({text, isCorrect: i === optionsWithCorrect.correct}));
+  for (let i = opts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opts[i], opts[j]] = [opts[j], opts[i]];
+  }
+  return opts;
+}
 
 function render() {
   const q = QUESTIONS[qIdx];
@@ -130,16 +151,17 @@ function render() {
     document.getElementById('nextBtn').textContent = 'Next';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    currentYT = YT_GENS[qIdx]();
+    const raw = YT_GENS[qIdx]();
+    currentYT = { q: raw.q, opts: shuffle(raw) };
+    const optsHtml = currentYT.opts.map((o, i) =>
+      `<button class="opt-btn" data-idx="${i}" onclick="checkYT(${i})">${o.text}</button>`
+    ).join('');
     box.innerHTML = `
       <div class="teach"><strong>${q.title}</strong></div>
       <div class="yt-box">
-        <div>${q.yt_prompt}</div>
-        <div class="worked">${currentYT.q}</div>
-        <input type="text" id="ytAnswer" placeholder="Your answer">
-        <button class="act" onclick="checkYT()">Check</button>
+        <div class="yt-q">${currentYT.q}</div>
+        <div class="opt-list" id="optList">${optsHtml}</div>
         <div id="ytFeedback"></div>
-        <div class="hint">A word or short phrase is fine — you don't need a full sentence.</div>
       </div>`;
     const isLast = (qIdx === 9);
     document.getElementById('nextBtn').textContent = isLast ? 'Finish' : 'Next Question';
@@ -147,16 +169,21 @@ function render() {
   }
 }
 
-function checkYT() {
-  const val = document.getElementById('ytAnswer').value.trim().toLowerCase();
+function checkYT(idx) {
   const fb = document.getElementById('ytFeedback');
-  if (!val) { fb.innerHTML = '<div class="try-fb er">Type an answer first.</div>'; return; }
-  const isCorrect = currentYT.answers.some(a => val.includes(a.toLowerCase()) || a.toLowerCase().includes(val));
-  if (isCorrect) {
+  const buttons = document.querySelectorAll('#optList .opt-btn');
+  buttons.forEach(b => b.disabled = true);
+  const chosen = currentYT.opts[idx];
+  if (chosen.isCorrect) {
+    buttons[idx].classList.add('correct');
     fb.innerHTML = '<div class="try-fb ok">Correct! Well done.</div>';
     document.getElementById('nextBtn').disabled = false;
   } else {
-    fb.innerHTML = '<div class="try-fb er">Not quite — try again.</div>';
+    buttons[idx].classList.add('wrong');
+    const correctIdx = currentYT.opts.findIndex(o => o.isCorrect);
+    buttons[correctIdx].classList.add('correct');
+    fb.innerHTML = '<div class="try-fb er">Not quite — the correct answer is highlighted.</div>';
+    document.getElementById('nextBtn').disabled = false;
   }
 }
 
