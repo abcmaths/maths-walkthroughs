@@ -2766,9 +2766,13 @@
     // Auto-lock: once 2+ distinct staff have reviewed this topic, lock it for further review
     const reviewerIds = new Set(allReviews.filter(r => r.topic_id === currentReviewTopicId).map(r => r.reviewer_id));
     if (reviewerIds.size >= 2) {
-      await supabase.from('topics').update({ locked: true }).eq('id', currentReviewTopicId);
-      const t = allTopics.find(t => t.id === currentReviewTopicId);
-      if (t) t.locked = true;
+      const { error: lockError } = await supabase.from('topics').update({ locked: true }).eq('id', currentReviewTopicId);
+      if (lockError) {
+        console.error('Auto-lock failed:', lockError);
+      } else {
+        const t = allTopics.find(t => t.id === currentReviewTopicId);
+        if (t) t.locked = true;
+      }
     }
 
     window.renderReviewTab();
