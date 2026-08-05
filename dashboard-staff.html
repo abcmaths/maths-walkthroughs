@@ -2738,9 +2738,10 @@
     const { data: { session } } = await supabase.auth.getSession();
 
     // Upsert each question review
+    let upsertError = null;
     for (const q of currentReviewQuestions) {
       const comment = document.getElementById('comment-' + q.num)?.value.trim();
-      await supabase.from('walkthrough_reviews').upsert({
+      const { error } = await supabase.from('walkthrough_reviews').upsert({
         topic_id:        currentReviewTopicId,
         question_number: q.num,
         reviewer_id:     session.user.id,
@@ -2748,6 +2749,15 @@
         comment,
         reviewed_at:     new Date().toISOString()
       }, { onConflict: 'topic_id,question_number,reviewer_id' });
+      if (error) { upsertError = error; break; }
+    }
+
+    if (upsertError) {
+      btn.disabled = false;
+      btn.textContent = 'Submit Review';
+      msg.style.color = '#C0272D';
+      msg.textContent = `Save failed: ${upsertError.message}. Nothing was recorded — please try again or tell Chris.`;
+      return;
     }
 
     // Reload reviews
