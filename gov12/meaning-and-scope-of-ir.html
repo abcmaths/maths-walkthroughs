@@ -1,3 +1,4 @@
+<!-- REVIEW STATUS: LOCKED — Reviewed & updated 2026-08-06 per staff review comments -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -97,7 +98,17 @@ function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 var ST={};
 function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn};return buildTry(id,o);}
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function shuffleMC(o){
+  if(!o||!o.options)return o;
+  var idxs=[];for(var k=0;k<o.options.length;k++){idxs.push(k);}
+  for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=idxs[i];idxs[i]=idxs[j];idxs[j]=tmp;}
+  var newOptions=[];for(var m=0;m<idxs.length;m++){newOptions.push(o.options[idxs[m]]);}
+  var newCorrect=idxs.indexOf(o.correct);
+  var o2={};for(var key in o){if(o.hasOwnProperty(key))o2[key]=o[key];}
+  o2.options=newOptions;o2.correct=newCorrect;
+  return o2;
+}
+function tryItMC(genFn){var wrapped=function(){return shuffleMC(genFn());};var id='t'+Math.random().toString(36).slice(2);var o=wrapped();ST[id]={o:o,genFn:wrapped,mc:true};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class=\"mc-opt\" data-tryid=\"'+id+'\" data-idx=\"'+i+'\">'+opt+'</button>';}).join('');
   return '<div class=\"try\" data-tryid=\"'+id+'\"><div class=\"try-t\">&#10004; Your Turn</div><div class=\"try-q\">'+o.question+'</div>'
