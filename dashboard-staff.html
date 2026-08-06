@@ -2558,8 +2558,12 @@
              dominant === 'needs_improvement' ? '<span class="badge badge-yellow">⚠ Needs work</span>' :
              '<span class="badge badge-red">✗ Not good</span>')
           : '<span class="badge badge-grey">Not reviewed</span>');
+      const updatedBadge = t.content_updated_at
+        ? `<span class="badge badge-green" title="Content updated ${new Date(t.content_updated_at).toLocaleString()}">✎ Updated ${new Date(t.content_updated_at).toLocaleDateString()}</span>`
+        : '';
       const actionButtons = isLocked
         ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="exportReviewComments(${t.id},'${escAttr(t.topic_name)}','${t.topic_code}','${subj}')">📋 Export Comments</button>
+           <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;color:#2e7d32;border-color:#a5d6a7" onclick="markTopicUpdated(${t.id})">✎ Mark Updated</button>
            <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;color:#888;border-color:#ccc" onclick="unlockTopicReview(${t.id})">🔓 Unlock</button>`
         : `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}','${subj}')">
              ${rm ? 'Add/Edit Review' : 'Review'}
@@ -2573,6 +2577,7 @@
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
           <div style="display:flex;align-items:center;gap:8px">
             ${statusBadge}
+            ${updatedBadge}
             ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} · ${qCount} Qs</span>` : ''}
           </div>
           ${rm && rm.reviewerNames.size > 0 ? `<div style="font-size:0.7rem;color:#aaa">${[...rm.reviewerNames].join(', ')}</div>` : ''}
@@ -2888,6 +2893,15 @@
     const t = allTopics.find(t => t.id === topicId);
     if (t) t.locked = false;
     allReviews = allReviews.filter(r => r.topic_id !== topicId);
+    window.renderReviewTab();
+  };
+
+  window.markTopicUpdated = async function(topicId) {
+    const now = new Date().toISOString();
+    const { error } = await supabase.from('topics').update({ content_updated_at: now }).eq('id', topicId);
+    if (error) { alert('Could not mark as updated: ' + error.message); return; }
+    const t = allTopics.find(t => t.id === topicId);
+    if (t) t.content_updated_at = now;
     window.renderReviewTab();
   };
 
