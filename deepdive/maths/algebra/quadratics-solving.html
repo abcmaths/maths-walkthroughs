@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quadratics Part B: Solving Equations — ABC Learning Portal</title>
+<style>
+  :root{
+    --red:#C0272D; --dark:#7A1418; --cream:#FBF6F1; --line:#E8D9CE; --gold:#C8922A;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;margin:0;background:var(--cream);color:#2b2b2b;}
+  header{background:var(--red);color:#fff;padding:18px 24px;}
+  header h1{margin:0;font-size:1.3rem;}
+  header p{margin:4px 0 0;opacity:.9;font-size:.9rem;}
+  .wrap{max-width:820px;margin:0 auto;padding:24px;}
+  .stage{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:22px;}
+  .stage h2{color:var(--dark);margin-top:0;border-bottom:2px solid var(--gold);padding-bottom:8px;}
+  .stage-label{display:inline-block;background:var(--gold);color:#fff;font-size:.75rem;padding:2px 10px;border-radius:12px;margin-bottom:10px;}
+  .example{background:var(--cream);border-left:4px solid var(--red);padding:12px 16px;margin:14px 0;border-radius:6px;}
+  .try-it{border:2px dashed var(--gold);border-radius:8px;padding:16px;margin-top:18px;}
+  .mc-opts{display:grid;gap:8px;margin-top:10px;}
+  .mc-opt{background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 14px;cursor:pointer;text-align:left;}
+  .mc-opt:hover{background:var(--cream);}
+  .mc-correct{background:#e6f4ea!important;border-color:#2e7d32!important;}
+  .mc-wrong{background:#fdecea!important;border-color:#c62828!important;}
+  .working{margin-top:10px;font-size:.9rem;color:#555;}
+  button.next-btn, button.reveal-btn{background:var(--red);color:#fff;border:none;padding:9px 18px;border-radius:6px;cursor:pointer;margin-top:12px;font-size:.88rem;}
+  button.reveal-btn{background:var(--gold);}
+  .progress{display:flex;gap:6px;margin-bottom:18px;}
+  .progress span{flex:1;height:6px;border-radius:3px;background:var(--line);}
+  .progress span.done{background:var(--red);}
+  .reveal-step{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+  .reveal-step.shown{display:block;}
+  .venn-wrap{display:flex;justify-content:center;margin:16px 0;}
+  .quiz-score{font-size:1.4rem;font-weight:700;color:var(--dark);text-align:center;margin:18px 0;}
+  .quiz-counter{font-size:.8rem;color:#888;margin-bottom:8px;}
+  .frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:0.95em;line-height:1.15;margin:0 3px;position:relative;top:0.15em;}
+  .frac .num{border-bottom:1.5px solid currentColor;padding:0 5px 2px;}
+  .frac .den{padding:2px 5px 0;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Deep Dive: Quadratics — Part B</h1>
+  <p>Solving quadratic equations — two answers, one answer, no answer, and why</p>
+</header>
+<div class="wrap">
+  <div class="example" style="border-left-color:#1565C0;">
+    <strong>How long will this take?</strong><br>
+    Most students: around 45–55 minutes.<br>
+    Still building confidence? Take up to 70 minutes, over more than one sitting if needed — your progress is saved as you go.<br>
+    Already confident? You might move through it in 25–30 minutes.
+  </div>
+  <div class="progress" id="progress-bar"></div>
+
+  <!-- STAGE 1: Two solutions -->
+  <section class="stage" data-stage="1">
+    <span class="stage-label">Stage 1</span>
+    <h2>x² = 16 — Two Solutions</h2>
+    <p>In Part A you learned that every positive number has <strong>two</strong> square roots. That matters a lot here.</p>
+    <button class="reveal-btn" onclick="revealNext('r1', this)">Show me — solving x² = 16</button>
+    <div class="reveal-step" id="r1-0">
+      <div class="example">x² = 16<br>x = ±√16<br>x = <strong>+4 or −4</strong></div>
+      <button class="reveal-btn" onclick="revealNext('r1', this)">Check both answers</button>
+    </div>
+    <div class="reveal-step" id="r1-1">
+      <div class="example">4² = 16 ✓ &nbsp;&nbsp; (−4)² = 16 ✓</div>
+      <p>Both values make the equation true — so <strong>both</strong> are correct solutions. Whenever you square-root to solve, always write ± unless you have a reason not to.</p>
+    </div>
+    <div class="try-it" id="try-1"></div>
+  </section>
+
+  <!-- STAGE 2: One solution -->
+  <section class="stage" data-stage="2" style="display:none;">
+    <span class="stage-label">Stage 2</span>
+    <h2>x² = 0 — Only One Solution</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(1)">← Back to Stage 1</button>
+    <p>What happens at the boundary case, when the number being square-rooted is zero?</p>
+    <button class="reveal-btn" onclick="revealNext('r2', this)">Show me — solving x² = 0</button>
+    <div class="reveal-step" id="r2-0">
+      <div class="example">x² = 0<br>x = ±√0<br>x = +0 or −0</div>
+      <button class="reveal-btn" onclick="revealNext('r2', this)">But wait...</button>
+    </div>
+    <div class="reveal-step" id="r2-1">
+      <div class="example">+0 and −0 are the <strong>same</strong> number. The two solutions collapse into just one: <strong>x = 0</strong>.</div>
+      <span style="color:#888;font-size:.85rem;">This is called a <strong>repeated root</strong> — it'll come back later when we complete the square.</span>
+    </div>
+    <div class="try-it" id="try-2"></div>
+  </section>
+
+  <!-- STAGE 3: No real solution -->
+  <section class="stage" data-stage="3" style="display:none;">
+    <span class="stage-label">Stage 3</span>
+    <h2>x² = −4 — No Real Solution</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(2)">← Back to Stage 2</button>
+    <p>Recall from Part A: squaring a positive number gives a positive result, and squaring a negative number <em>also</em> gives a positive result.</p>
+    <button class="reveal-btn" onclick="revealNext('r3', this)">Show me — what about x² = −4?</button>
+    <div class="reveal-step" id="r3-0">
+      <div class="example">No matter what real number you choose for x — positive, negative, or zero — x² can <strong>never</strong> be negative.</div>
+      <button class="reveal-btn" onclick="revealNext('r3', this)">So what's the answer?</button>
+    </div>
+    <div class="reveal-step" id="r3-1">
+      <div class="example">x² = −4 has <strong>no real solution</strong> — there's no real number you can square to get a negative answer.</div>
+    </div>
+    <div class="try-it" id="try-3"></div>
+  </section>
+
+  <!-- STAGE 4: Graphical explanation -->
+  <section class="stage" data-stage="4" style="display:none;">
+    <span class="stage-label">Stage 4</span>
+    <h2>Seeing It on a Graph</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(3)">← Back to Stage 3</button>
+    <p>The graph of y = x² is a curve called a <strong>parabola</strong>. It never dips below the x-axis — which matches exactly what you found in Stage 3.</p>
+    <button class="reveal-btn" onclick="revealNext('r4', this)">Show me the graph</button>
+    <div class="reveal-step" id="r4-0">
+      <div class="venn-wrap" id="graph-base"></div>
+      <button class="reveal-btn" onclick="revealNext('r4', this)">Now overlay y = 16 (Stage 1's case)</button>
+    </div>
+    <div class="reveal-step" id="r4-1">
+      <div class="venn-wrap" id="graph-16"></div>
+      <p>The line y = 16 crosses the curve at <strong>two</strong> points — x = −4 and x = 4. Two crossings, two solutions.</p>
+      <button class="reveal-btn" onclick="revealNext('r4', this)">Now overlay y = 0 (Stage 2's case)</button>
+    </div>
+    <div class="reveal-step" id="r4-2">
+      <div class="venn-wrap" id="graph-0"></div>
+      <p>The line y = 0 (the x-axis itself) just <strong>touches</strong> the curve once, at the very bottom. One touch, one repeated solution.</p>
+      <button class="reveal-btn" onclick="revealNext('r4', this)">Now overlay y = −4 (Stage 3's case)</button>
+    </div>
+    <div class="reveal-step" id="r4-3">
+      <div class="venn-wrap" id="graph-neg4"></div>
+      <div class="example">The line y = −4 never touches the curve at all. Zero crossings, zero real solutions — exactly what Stage 3 found algebraically.</div>
+    </div>
+    <div class="try-it" id="try-4"></div>
+  </section>
+
+  <!-- STAGE 5: Factorising -->
+  <section class="stage" data-stage="5" style="display:none;">
+    <span class="stage-label">Stage 5</span>
+    <h2>Solving by Factorising</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(4)">← Back to Stage 4</button>
+    <p>Most quadratics don't come as neatly as x² = k. For x² + 5x + 6 = 0, we factorise instead — using the same skills from the Algebra chain.</p>
+    <button class="reveal-btn" onclick="revealNext('r5', this)">Show me — solving x² + 5x + 6 = 0</button>
+    <div class="reveal-step" id="r5-0">
+      <div class="example">x² + 5x + 6 = 0<br>Factorises to: (x + 2)(x + 3) = 0</div>
+      <button class="reveal-btn" onclick="revealNext('r5', this)">Two brackets multiply to zero — what does that mean?</button>
+    </div>
+    <div class="reveal-step" id="r5-1">
+      <div class="example" style="border-left-color:var(--gold);"><strong>Key rule</strong> — if two things multiply together to make zero, at least one of them <em>must be</em> zero.</div>
+      <button class="reveal-btn" onclick="revealNext('r5', this)">Apply the rule</button>
+    </div>
+    <div class="reveal-step" id="r5-2">
+      <div class="example">Either (x + 2) = 0 &nbsp;→&nbsp; x = −2<br>or (x + 3) = 0 &nbsp;→&nbsp; x = −3<br><strong>x = −2 or x = −3</strong></div>
+    </div>
+    <div class="try-it" id="try-5"></div>
+  </section>
+
+  <!-- STAGE 6: Completing the square -->
+  <section class="stage" data-stage="6" style="display:none;">
+    <span class="stage-label">Stage 6</span>
+    <h2>Completing the Square</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(5)">← Back to Stage 5</button>
+    <p>Factorising doesn't always work nicely. Completing the square gives you a method that always does — and it brings back the ± idea from Stage 1.</p>
+    <button class="reveal-btn" onclick="revealNext('r6', this)">Show me — solving x² + 6x + 5 = 0</button>
+    <div class="reveal-step" id="r6-0">
+      <div class="example">x² + 6x can be rewritten as (x + 3)² − 9<br><span style="color:#888;font-size:.85rem;">(Check: (x+3)² = x² + 6x + 9, so we subtract 9 to balance it back out.)</span></div>
+      <button class="reveal-btn" onclick="revealNext('r6', this)">Put the whole equation together</button>
+    </div>
+    <div class="reveal-step" id="r6-1">
+      <div class="example">x² + 6x + 5 = 0<br>(x + 3)² − 9 + 5 = 0<br>(x + 3)² − 4 = 0<br>(x + 3)² = 4</div>
+      <button class="reveal-btn" onclick="revealNext('r6', this)">Now square-root both sides</button>
+    </div>
+    <div class="reveal-step" id="r6-2">
+      <div class="example">x + 3 = ±2 &nbsp;<span style="color:#888;font-size:.85rem;">(± again — same idea as Stage 1)</span><br>x = −3 + 2 = −1 &nbsp;&nbsp; or &nbsp;&nbsp; x = −3 − 2 = −5<br><strong>x = −1 or x = −5</strong></div>
+    </div>
+    <div class="try-it" id="try-6"></div>
+  </section>
+
+  <!-- STAGE 7: Full circle — vertex form and the graph -->
+  <section class="stage" data-stage="7" style="display:none;">
+    <span class="stage-label">Stage 7</span>
+    <h2>Bringing It All Together</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(6)">← Back to Stage 6</button>
+    <p>Completing the square doesn't just solve the equation — the form (x + 3)² − 4 also tells you exactly where the graph's lowest point (the <strong>vertex</strong>) is.</p>
+    <button class="reveal-btn" onclick="revealNext('r7', this)">Show me the graph of x² + 6x + 5</button>
+    <div class="reveal-step" id="r7-0">
+      <div class="venn-wrap" id="graph-full"></div>
+      <div class="example">Vertex at (−3, −4) — read directly from (x + 3)² − 4.<br>The curve crosses the x-axis at x = −1 and x = −5 — exactly the answers from Stage 6.</div>
+    </div>
+    <div class="reveal-step" id="r7-1" style="display:block;">
+      <div class="example" style="border-left-color:var(--gold);">The whole story in one sentence: how many times the parabola crosses the x-axis <strong>is</strong> how many real solutions the equation has — 2 crossings, 1 touch, or 0.</div>
+    </div>
+    <div class="try-it" id="try-7"></div>
+  </section>
+
+  <!-- STAGE 8: Final Check -->
+  <section class="stage" data-stage="8" style="display:none;">
+    <span class="stage-label">Final Check</span>
+    <h2>Show What You Know</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(7)">← Back to Stage 7</button>
+    <p>10 mixed questions covering everything in this walkthrough. Take your time.</p>
+    <div id="quiz-area"></div>
+    <p style="margin-top:16px;"><a href="../../../login.html">Return to dashboard</a></p>
+  </section>
+</div>
+
+<script type="module">
+// ---- session check (same pattern as dashboard-student.html) ----
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const SUPABASE_URL = "https://lnwinoghbefmjpvmixzo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const TOPIC_CODE = "TCH-QUAD-01"; // must match a row in `topics` (subject='deepdive_maths')
+let currentUser = null;
+let topicId = null;
+
+async function checkSession(){
+  const { data:{ session } } = await supabase.auth.getSession();
+  if(!session){
+    window.location.href = "../../../login.html";
+    return;
+  }
+  currentUser = session.user;
+  const { data: topic, error } = await supabase
+    .from('topics')
+    .select('id')
+    .eq('topic_code', TOPIC_CODE)
+    .single();
+  if(!error && topic){ topicId = topic.id; }
+}
+
+async function recordProgress(status, stageReached){
+  if(!currentUser || !topicId) return;
+  try{
+    const payload = {
+      student_id: currentUser.id,
+      topic_id: topicId,
+      status: status,
+      last_visited_at: new Date().toISOString()
+    };
+    if(stageReached !== undefined) payload.stage_reached = stageReached;
+    const { error } = await supabase
+      .from('walkthrough_progress')
+      .upsert(payload, { onConflict: 'student_id,topic_id' });
+    if(error) console.error('Progress save failed:', error);
+  }catch(e){ console.error('Progress save failed:', e); }
+}
+
+function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function fracHTML(num, den){
+  return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+}
+
+// ---- progressive "click to reveal" teaching steps ----
+const revealState = {};
+function revealNext(groupPrefix, btnEl){
+  const idx = revealState[groupPrefix] === undefined ? 0 : revealState[groupPrefix] + 1;
+  revealState[groupPrefix] = idx;
+  const el = document.getElementById(`${groupPrefix}-${idx}`);
+  if(el) el.classList.add('shown');
+  if(btnEl) btnEl.style.display = 'none';
+}
+window.revealNext = revealNext;
+
+// ---- Parabola graph renderer: y = ax² + bx + c, with optional reference line / markers ----
+function drawParabola(containerId, a, b, c, opts){
+  opts = opts || {};
+  const xMin = opts.xMin !== undefined ? opts.xMin : -8;
+  const xMax = opts.xMax !== undefined ? opts.xMax : 8;
+  const yMin = opts.yMin !== undefined ? opts.yMin : -10;
+  const yMax = opts.yMax !== undefined ? opts.yMax : 20;
+  const w = 440, h = 280, padL = 36, padR = 16, padT = 16, padB = 30;
+  const px = x => padL + (x - xMin) / (xMax - xMin) * (w - padL - padR);
+  const py = y => (h - padB) - (y - yMin) / (yMax - yMin) * (h - padT - padB);
+
+  const steps = 100;
+  const points = [];
+  for(let i=0; i<=steps; i++){
+    const x = xMin + (xMax - xMin) * i / steps;
+    let y = a*x*x + b*x + c;
+    y = Math.max(yMin - 2, Math.min(yMax + 2, y));
+    points.push(`${px(x).toFixed(1)},${py(y).toFixed(1)}`);
+  }
+
+  let parts = [];
+  // axes
+  parts.push(`<line x1="${px(xMin)}" y1="${py(0)}" x2="${px(xMax)}" y2="${py(0)}" stroke="#999" stroke-width="1"/>`);
+  parts.push(`<line x1="${px(0)}" y1="${py(yMin)}" x2="${px(0)}" y2="${py(yMax)}" stroke="#999" stroke-width="1"/>`);
+  parts.push(`<text x="${px(xMax)-4}" y="${py(0)-6}" font-size="11" fill="#888" text-anchor="end">x</text>`);
+  parts.push(`<text x="${px(0)+6}" y="${py(yMax)+12}" font-size="11" fill="#888">y</text>`);
+  // curve
+  parts.push(`<polyline points="${points.join(' ')}" fill="none" stroke="#C0272D" stroke-width="2.5"/>`);
+  // optional reference line
+  if(opts.highlightY !== undefined){
+    parts.push(`<line x1="${px(xMin)}" y1="${py(opts.highlightY)}" x2="${px(xMax)}" y2="${py(opts.highlightY)}" stroke="#1565C0" stroke-width="2" stroke-dasharray="6,4"/>`);
+    parts.push(`<text x="${px(xMax)-4}" y="${py(opts.highlightY)-6}" text-anchor="end" font-size="12" fill="#1565C0" font-weight="700">y = ${opts.highlightY}</text>`);
+  }
+  // optional root markers
+  (opts.roots || []).forEach(rx=>{
+    parts.push(`<circle cx="${px(rx)}" cy="${py(a*rx*rx+b*rx+c)}" r="5" fill="#2e7d32" stroke="#1b5e20" stroke-width="1.5"/>`);
+  });
+  // optional vertex marker
+  if(opts.vertex){
+    parts.push(`<circle cx="${px(opts.vertex[0])}" cy="${py(opts.vertex[1])}" r="5" fill="#C8922A" stroke="#7A1418" stroke-width="1.5"/>`);
+    parts.push(`<text x="${px(opts.vertex[0])}" y="${py(opts.vertex[1])-10}" text-anchor="middle" font-size="11" fill="#7A1418" font-weight="700">vertex</text>`);
+  }
+  document.getElementById(containerId).innerHTML =
+    `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
+}
+
+// Stage 4 graphs
+drawParabola('graph-base', 1, 0, 0, {yMax:20});
+drawParabola('graph-16', 1, 0, 0, {yMax:20, highlightY:16, roots:[-4,4]});
+drawParabola('graph-0', 1, 0, 0, {yMax:20, highlightY:0, roots:[0]});
+drawParabola('graph-neg4', 1, 0, 0, {yMax:20, yMin:-10, highlightY:-4});
+// Stage 7 graph: y = x² + 6x + 5, vertex (-3,-4), roots -1 and -5
+drawParabola('graph-full', 1, 6, 5, {xMin:-8, xMax:4, yMin:-6, yMax:14, roots:[-1,-5], vertex:[-3,-4]});
+
+// ---- buildTryMC: renders a dynamic multiple-choice checkpoint (per-stage, gated) ----
+function buildTryMC(containerId, generator){
+  const container = document.getElementById(containerId);
+  const q = generator();
+  container.innerHTML = `
+    <p><strong>Your turn:</strong> ${q.question}</p>
+    <div class="mc-opts"></div>
+    <div class="working" style="display:none;"></div>
+    <div class="mc-feedback" style="display:none;font-weight:700;margin-top:8px;"></div>
+    <button class="next-btn" style="display:none;">Continue →</button>
+  `;
+  const optsWrap = container.querySelector('.mc-opts');
+  const workingEl = container.querySelector('.working');
+  const feedbackEl = container.querySelector('.mc-feedback');
+  const nextBtn = container.querySelector('.next-btn');
+  q.options.forEach((opt,i)=>{
+    const b = document.createElement('button');
+    b.className = 'mc-opt';
+    b.innerHTML = opt;
+    b.onclick = ()=>{
+      [...optsWrap.children].forEach(c=>c.disabled=true);
+      if(i === q.correct){
+        b.classList.add('mc-correct');
+        workingEl.style.display = 'block'; workingEl.innerHTML = q.working;
+        feedbackEl.style.display = 'block'; feedbackEl.style.color = '#2e7d32'; feedbackEl.textContent = '✓ Correct!';
+        nextBtn.style.display = 'inline-block';
+      } else {
+        b.classList.add('mc-wrong');
+        optsWrap.children[q.correct].classList.add('mc-correct');
+        workingEl.style.display = 'block'; workingEl.innerHTML = q.working;
+        feedbackEl.style.display = 'block'; feedbackEl.style.color = '#c62828';
+        feedbackEl.textContent = 'Not quite — have a look at the working, then try a new question.';
+        nextBtn.textContent = 'Try again';
+        nextBtn.style.display = 'inline-block';
+        nextBtn.onclick = ()=>{ buildTryMC(containerId, generator); };
+        return;
+      }
+    };
+    optsWrap.appendChild(b);
+  });
+  nextBtn.onclick = ()=>{ advanceStage(); };
+}
+
+// ---- scoring-aware version used only in the final quiz ----
+function buildQuizMC(containerId, generator, onAnswered){
+  const container = document.getElementById(containerId);
+  const q = generator();
+  container.innerHTML = `
+    <p><strong>${q.question}</strong></p>
+    <div class="mc-opts"></div>
+    <div class="working" style="display:none;"></div>
+    <button class="next-btn" style="display:none;">Next question →</button>
+  `;
+  const optsWrap = container.querySelector('.mc-opts');
+  const workingEl = container.querySelector('.working');
+  const nextBtn = container.querySelector('.next-btn');
+  q.options.forEach((opt,i)=>{
+    const b = document.createElement('button');
+    b.className = 'mc-opt';
+    b.innerHTML = opt;
+    b.onclick = ()=>{
+      [...optsWrap.children].forEach(c=>c.disabled=true);
+      if(i === q.correct){ b.classList.add('mc-correct'); quizScore++; }
+      else { b.classList.add('mc-wrong'); optsWrap.children[q.correct].classList.add('mc-correct'); }
+      workingEl.style.display = 'block'; workingEl.innerHTML = q.working;
+      nextBtn.style.display = 'inline-block';
+    };
+    optsWrap.appendChild(b);
+  });
+  nextBtn.onclick = ()=>{ onAnswered(); };
+}
+
+// ---- Question generators ----
+function genQ1(){ // x² = k, two rational solutions
+  const perfectSquares = [4,9,16,25,36,49,64,81];
+  const k = pick(perfectSquares);
+  const n = Math.sqrt(k);
+  const ans = `x = +${n} or x = −${n}`;
+  const wrongs = [`x = ${n} only`, `x = ${k}`, `x = +${n+1} or x = −${n+1}`];
+  const opts = [ans, ...wrongs].sort(()=>Math.random()-0.5);
+  return {
+    question:`Solve: x² = ${k}`,
+    options: opts,
+    correct: opts.indexOf(ans),
+    working:`x = ±√${k} = ±${n}, so x = ${n} or x = −${n}. Both check: ${n}² = ${k} and (−${n})² = ${k}.`
+  };
+}
+function genQ2(){ // classify number of real solutions (mixed - used in final quiz for variety)
+  const cases = [
+    {k: pick([4,9,16,25,36]), count:'2'},
+    {k: 0, count:'1'},
+    {k: -1*pick([1,4,9,16]), count:'0'}
+  ];
+  const c = pick(cases);
+  const opts = ['0','1','2'].sort(()=>Math.random()-0.5);
+  return {
+    question:`How many real solutions does x² = ${c.k} have?`,
+    options: opts,
+    correct: opts.indexOf(c.count),
+    working: c.k > 0
+      ? `${c.k} is positive, so x² = ${c.k} has two solutions: x = ±√${c.k}.`
+      : c.k === 0
+        ? `x² = 0 only has one solution: x = 0 (the two ± answers collapse into one).`
+        : `x² can never be negative, so x² = ${c.k} has no real solutions.`
+  };
+}
+function genOneSol(){ // Stage 2 specific: repeated root, previews completing-the-square form
+  const a = rnd(1,6);
+  const ans = `x = ${a} (repeated)`;
+  const wrongs = [`x = ${a} or x = −${a}`, `No real solution`, `x = −${a} only`];
+  const opts = [ans, ...wrongs].sort(()=>Math.random()-0.5);
+  return {
+    question:`Solve: (x − ${a})² = 0`,
+    options: opts,
+    correct: opts.indexOf(ans),
+    working:`(x − ${a})² = 0 means x − ${a} = 0 (only one value works, since +0 and −0 are the same), so x = ${a}. This is a repeated root.`
+  };
+}
+function genNoSol(){ // Stage 3 specific: reinforces "x² is never negative"
+  const k = rnd(1,9);
+  const ans = 'No real solution';
+  const wrongs = [`x = ${k} or x = −${k}`, `x = ${k} only`, `x = 0`];
+  const opts = [ans, ...wrongs].sort(()=>Math.random()-0.5);
+  return {
+    question:`Solve: x² = −${k}`,
+    options: opts,
+    correct: opts.indexOf(ans),
+    working:`x² can never be negative for any real x, so x² = −${k} has no real solution.`
+  };
+}
+function genQ3(){ // factorising
+  const sets = [
+    {expr:'x² + 5x + 6', ans:'x = −2 or x = −3', work:'(x+2)(x+3)=0 → x=−2 or x=−3', wrongs:['x = 2 or x = 3','x = −2 or x = 3','x = −6 or x = 1']},
+    {expr:'x² + 7x + 12', ans:'x = −3 or x = −4', work:'(x+3)(x+4)=0 → x=−3 or x=−4', wrongs:['x = 3 or x = 4','x = −3 or x = 4','x = −12 or x = 1']},
+    {expr:'x² − 5x + 6', ans:'x = 2 or x = 3', work:'(x−2)(x−3)=0 → x=2 or x=3', wrongs:['x = −2 or x = −3','x = 2 or x = −3','x = 6 or x = 1']},
+    {expr:'x² − x − 6', ans:'x = 3 or x = −2', work:'(x−3)(x+2)=0 → x=3 or x=−2', wrongs:['x = −3 or x = 2','x = 3 or x = 2','x = 6 or x = −1']},
+    {expr:'x² + 3x − 10', ans:'x = 2 or x = −5', work:'(x−2)(x+5)=0 → x=2 or x=−5', wrongs:['x = −2 or x = 5','x = 10 or x = −1','x = 2 or x = 5']}
+  ];
+  const s = pick(sets);
+  const opts = [s.ans, ...s.wrongs].sort(()=>Math.random()-0.5);
+  return {
+    question:`Solve: ${s.expr} = 0`,
+    options: opts,
+    correct: opts.indexOf(s.ans),
+    working: s.work
+  };
+}
+function genQ4(){ // completing the square
+  const sets = [
+    {expr:'x² + 6x + 5', ans:'x = −1 or x = −5', work:'(x+3)²−4=0 → x+3=±2 → x=−1 or x=−5', wrongs:['x = 1 or x = 5','x = −3 or x = 4','x = −1 or x = 5']},
+    {expr:'x² + 4x + 3', ans:'x = −1 or x = −3', work:'(x+2)²−1=0 → x+2=±1 → x=−1 or x=−3', wrongs:['x = 1 or x = 3','x = −2 or x = 1','x = −1 or x = 3']},
+    {expr:'x² + 8x + 12', ans:'x = −2 or x = −6', work:'(x+4)²−4=0 → x+4=±2 → x=−2 or x=−6', wrongs:['x = 2 or x = 6','x = −4 or x = 2','x = −2 or x = 6']},
+    {expr:'x² + 2x − 3', ans:'x = 1 or x = −3', work:'(x+1)²−4=0 → x+1=±2 → x=1 or x=−3', wrongs:['x = −1 or x = 3','x = 1 or x = 3','x = −1 or x = −3']}
+  ];
+  const s = pick(sets);
+  const opts = [s.ans, ...s.wrongs].sort(()=>Math.random()-0.5);
+  return {
+    question:`Solve by completing the square: ${s.expr} = 0`,
+    options: opts,
+    correct: opts.indexOf(s.ans),
+    working: s.work
+  };
+}
+function genQ5(){ // reading roots from the graph story
+  const cases = [
+    {desc:'crosses the x-axis twice', ans:'2 real solutions'},
+    {desc:'just touches the x-axis once', ans:'1 real solution (repeated)'},
+    {desc:'never touches the x-axis', ans:'0 real solutions'}
+  ];
+  const c = pick(cases);
+  const allAns = ['2 real solutions','1 real solution (repeated)','0 real solutions'];
+  const opts = [...allAns].sort(()=>Math.random()-0.5);
+  return {
+    question:`A parabola ${c.desc}. How many real solutions does its equation have?`,
+    options: opts,
+    correct: opts.indexOf(c.ans),
+    working:`The number of times a parabola crosses or touches the x-axis is exactly the number of real solutions.`
+  };
+}
+const ALL_GENERATORS = [genQ1, genOneSol, genNoSol, genQ2, genQ3, genQ4, genQ5];
+
+// ---- Stage progression ----
+let currentStage = 1;
+let highestStageReached = 1;
+const totalStages = 8;
+
+function renderProgress(){
+  const bar = document.getElementById('progress-bar');
+  bar.innerHTML = '';
+  for(let i=1;i<=totalStages;i++){
+    const seg = document.createElement('span');
+    if(i<=highestStageReached) seg.classList.add('done');
+    bar.appendChild(seg);
+  }
+}
+
+function advanceStage(){
+  if(currentStage >= totalStages) return;
+  document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display='none';
+  currentStage++;
+  if(currentStage > highestStageReached) highestStageReached = currentStage;
+  document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display='block';
+  renderProgress();
+  recordProgress('started', currentStage);
+  if(currentStage === totalStages) startFinalQuiz();
+  window.scrollTo({top:document.querySelector(`.stage[data-stage="${currentStage}"]`).offsetTop-20, behavior:'smooth'});
+}
+window.advanceStage = advanceStage;
+
+function goToStage(n){
+  if(n < 1 || n >= currentStage) return;
+  document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display = 'none';
+  currentStage = n;
+  document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display = 'block';
+  renderProgress();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+window.goToStage = goToStage;
+
+// ---- Final 10-question mastery check (shuffled generator order each attempt) ----
+let quizIndex = 0;
+let quizScore = 0;
+let shuffledGenerators = [];
+const QUIZ_LENGTH = 10;
+
+function startFinalQuiz(){
+  quizIndex = 0;
+  quizScore = 0;
+  shuffledGenerators = [...ALL_GENERATORS];
+  for(let i = shuffledGenerators.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [shuffledGenerators[i], shuffledGenerators[j]] = [shuffledGenerators[j], shuffledGenerators[i]];
+  }
+  renderQuizQuestion();
+}
+function renderQuizQuestion(){
+  const area = document.getElementById('quiz-area');
+  if(quizIndex >= QUIZ_LENGTH){
+    area.innerHTML = `
+      <div class="quiz-score">You scored ${quizScore} / ${QUIZ_LENGTH}</div>
+      <p style="text-align:center;color:#555;">${quizScore >= 7 ? "Great work — you've got a solid handle on solving quadratics!" : 'Worth another pass through the earlier stages before moving on.'}</p>
+    `;
+    recordProgress('completed', totalStages);
+    return;
+  }
+  const generator = shuffledGenerators[quizIndex % shuffledGenerators.length];
+  area.innerHTML = `<div class="quiz-counter">Question ${quizIndex+1} of ${QUIZ_LENGTH} — Score so far: ${quizScore}</div><div id="quiz-q"></div>`;
+  buildQuizMC('quiz-q', generator, ()=>{
+    quizIndex++;
+    renderQuizQuestion();
+  });
+}
+
+(async function init(){
+  await checkSession();
+  renderProgress();
+  buildTryMC('try-1', genQ1);
+  buildTryMC('try-2', genOneSol);
+  buildTryMC('try-3', genNoSol);
+  buildTryMC('try-4', genQ5);
+  buildTryMC('try-5', genQ3);
+  buildTryMC('try-6', genQ4);
+  buildTryMC('try-7', genQ5);
+  recordProgress('started', currentStage);
+})();
+</script>
+</body>
+</html>
