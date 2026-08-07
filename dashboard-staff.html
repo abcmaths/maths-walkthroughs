@@ -146,6 +146,7 @@
   <div class="nav-tab" onclick="showTab('diagnostic')">Diagnostic</div>
   <div class="nav-tab" onclick="showTab('reviews')">Review Walkthroughs</div>
   <div class="nav-tab" onclick="showTab('import')">Import Users</div>
+  <div class="nav-tab" onclick="showTab('deepdive')">Deep Dive Progress</div>
 </div>
 
 <main>
@@ -812,6 +813,7 @@
             <option value="bridge_science">🌉 Bridge Science</option>
             <option value="extension_english">🚀 Extension English</option>
             <option value="extension_maths">🚀 Extension Maths</option>
+            <option value="deepdive_maths">🪜 Deep Dive: Maths</option>
           </select>
           <select id="review-filter-year" onchange="renderReviewTab()">
             <option value="">All Year Groups</option>
@@ -936,6 +938,30 @@
         <div class="import-log" id="import-log"></div>
       </div>
     </div>
+    </div>
+
+    <!-- DEEP DIVE PROGRESS -->
+    <div class="tab-panel" id="tab-deepdive">
+      <div class="filter-bar">
+        <select id="dd-filter-topic" onchange="renderDeepDiveProgressTab()">
+          <option value="">All Deep Dive Topics</option>
+        </select>
+        <select id="dd-filter-status" onchange="renderDeepDiveProgressTab()">
+          <option value="">All Statuses</option>
+          <option value="started">▶ In Progress</option>
+          <option value="completed">✓ Completed</option>
+          <option value="opted_out">⏸ Opted Out</option>
+        </select>
+        <input type="text" id="dd-filter-search" placeholder="Search by name…" oninput="renderDeepDiveProgressTab()">
+      </div>
+      <div class="section">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Student</th><th>Year</th><th>Topic</th><th>Status</th><th>Stage Reached</th><th>Last Visited</th></tr></thead>
+            <tbody id="deepdive-progress-tbody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -1178,6 +1204,71 @@
     }).join('');
   };
 
+  // ── Deep Dive Progress: one row per student per deepdive_* topic, showing stage-level
+  // progress so staff can see which topics students struggle with / opt out of. ──
+  window.renderDeepDiveProgressTab = function() {
+    const deepDiveTopics = allTopics.filter(t => (t.subject || '').startsWith('deepdive'));
+    const topicMap = {};
+    deepDiveTopics.forEach(t => topicMap[t.id] = t);
+
+    // Populate the topic filter dropdown once (idempotent)
+    const topicSel = document.getElementById('dd-filter-topic');
+    if (topicSel && !topicSel.dataset.populated) {
+      deepDiveTopics.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = t.topic_name;
+        topicSel.appendChild(opt);
+      });
+      topicSel.dataset.populated = '1';
+    }
+
+    const topicFilter  = document.getElementById('dd-filter-topic').value;
+    const statusFilter = document.getElementById('dd-filter-status').value;
+    const searchFilter = document.getElementById('dd-filter-search').value.toLowerCase();
+
+    const studentMap = {};
+    allStudents.forEach(s => studentMap[s.id] = s);
+
+    let rows = allProgress.filter(p => topicMap[p.topic_id]);
+    if (topicFilter)  rows = rows.filter(p => p.topic_id === topicFilter);
+    if (statusFilter) rows = rows.filter(p => p.status === statusFilter);
+    if (searchFilter) {
+      rows = rows.filter(p => {
+        const s = studentMap[p.student_id];
+        return s && s.full_name.toLowerCase().includes(searchFilter);
+      });
+    }
+    rows = rows.slice().sort((a,b) => new Date(b.last_visited_at || 0) - new Date(a.last_visited_at || 0));
+
+    const tbody = document.getElementById('deepdive-progress-tbody');
+    if (deepDiveTopics.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:24px">No Deep Dive topics found yet.</td></tr>';
+      return;
+    }
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:24px">No Deep Dive activity matches these filters.</td></tr>';
+      return;
+    }
+    const statusLabel = { started: '▶ In progress', completed: '✓ Completed', opted_out: '⏸ Opted out' };
+    const statusColor  = { started: '#f57f17', completed: '#2e7d32', opted_out: '#888' };
+
+    tbody.innerHTML = rows.map(p => {
+      const s = studentMap[p.student_id];
+      const t = topicMap[p.topic_id];
+      const lastDate = p.last_visited_at ? new Date(p.last_visited_at).toLocaleDateString('en-GB') : '—';
+      const stage = (p.stage_reached !== null && p.stage_reached !== undefined) ? p.stage_reached : '—';
+      return `<tr>
+        <td><strong>${s ? s.full_name : 'Unknown student'}</strong></td>
+        <td>Year ${s ? (s.year_group || '—') : '—'}</td>
+        <td>${t ? t.topic_name : p.topic_id}</td>
+        <td style="color:${statusColor[p.status] || '#888'};font-weight:700">${statusLabel[p.status] || p.status || '—'}</td>
+        <td>${stage}</td>
+        <td>${lastDate}</td>
+      </tr>`;
+    }).join('');
+  };
+
   // ── Student modal ──
   let _currentModalStudentId = null;
 
@@ -1384,7 +1475,7 @@
 
   // ── Tab switching ──
   window.showTab = function(name) {
-    const names = ['overview','progress','tests','topics','feedback','bugs','users','diagnostic','reviews','import'];
+    const names = ['overview','progress','tests','topics','feedback','bugs','users','diagnostic','reviews','import','deepdive'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
@@ -1395,6 +1486,7 @@
     if (name === 'tests')    window.renderTestsTab();
     if (name === 'diagnostic') window.switchDiagYear();
     if (name === 'reviews')  window.renderReviewTab();
+    if (name === 'deepdive') window.renderDeepDiveProgressTab();
 
     // Subject toggle only applies to Browse Topics — hide it on every other tab
     const subjToggle = document.querySelector('.subject-toggle');
