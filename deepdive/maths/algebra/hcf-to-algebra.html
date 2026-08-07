@@ -203,12 +203,38 @@
     <div class="try-it" id="try-5"></div>
   </section>
 
-  <!-- STAGE 6: Final Check — 10 question mastery quiz -->
+  <!-- STAGE 6: Factorising Quadratic Trinomials -->
   <section class="stage" data-stage="6" style="display:none;">
+    <span class="stage-label">Stage 6</span>
+    <h2>Factorising Quadratic Trinomials</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(5)">← Back to Stage 5</button>
+    <p>Stage 5 worked because 6x² and 9x shared a common factor. But x² + 5x + 6 has no common factor at all (the HCF of x², 5x, and 6 is just 1) — so it needs two brackets instead of one.</p>
+    <div class="example" style="border-left-color:var(--gold);">
+      <strong>Key rule</strong> — for x² + bx + c, find two numbers that <strong>multiply</strong> to give c and <strong>add</strong> to give b.
+    </div>
+    <button class="reveal-btn" onclick="revealNext('r6', this)">Show me — factorise x² + 5x + 6</button>
+    <div class="reveal-step" id="r6-0">
+      <p>We need two numbers that multiply to 6 and add to 5. Check the factor pairs of 6:</p>
+      <div class="example">1 × 6 = 6, but 1 + 6 = 7 ✗<br>2 × 3 = 6, and 2 + 3 = 5 ✓</div>
+      <button class="reveal-btn" onclick="revealNext('r6', this)">Write the brackets</button>
+    </div>
+    <div class="reveal-step" id="r6-1">
+      <div class="example"><strong>x² + 5x + 6 = (x + 2)(x + 3)</strong></div>
+      <button class="reveal-btn" onclick="revealNext('r6', this)">What about negative numbers?</button>
+    </div>
+    <div class="reveal-step" id="r6-2">
+      <p>The same rule works with negatives — just make sure the sign of each number is right.</p>
+      <div class="example">x² − x − 6: need two numbers that multiply to −6 and add to −1.<br>2 × (−3) = −6, and 2 + (−3) = −1 ✓<br><strong>x² − x − 6 = (x + 2)(x − 3)</strong></div>
+    </div>
+    <div class="try-it" id="try-6"></div>
+  </section>
+
+  <!-- STAGE 7: Final Check — 10 question mastery quiz -->
+  <section class="stage" data-stage="7" style="display:none;">
     <span class="stage-label">Final Check</span>
     <h2>Show What You Know</h2>
-    <button class="reveal-btn" style="background:#888;" onclick="goToStage(5)">← Back to Stage 5</button>
-        <p>10 mixed questions covering everything from this walkthrough — listing factors, prime factorisation, HCF of numbers and algebraic terms, and factorising. Take your time.</p>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(6)">← Back to Stage 6</button>
+        <p>10 mixed questions covering everything from this walkthrough — listing factors, prime factorisation, HCF of numbers and algebraic terms, factorising, and factorising quadratics. Take your time.</p>
     <div id="quiz-area"></div>
     <p style="margin-top:16px;"><a href="../../../login.html">Return to dashboard</a></p>
   </section>
@@ -657,10 +683,55 @@ function genStage5(){
 }
 const ALL_GENERATORS = [genStage1, genStage2, genStage3, genStage4, genStage5];
 
+function formatBracket(v){ return v>=0 ? `x + ${v}` : `x − ${Math.abs(v)}`; }
+function formatFactored(p,q){ return `(${formatBracket(p)})(${formatBracket(q)})`; }
+function genFactoriseQuad(){
+  const bank = [
+    {b:5,  c:6,   p:2,  q:3},
+    {b:7,  c:12,  p:3,  q:4},
+    {b:-5, c:6,   p:-2, q:-3},
+    {b:-1, c:-6,  p:2,  q:-3},
+    {b:3,  c:-10, p:5,  q:-2},
+    {b:1,  c:-12, p:4,  q:-3},
+    {b:-7, c:10,  p:-5, q:-2}
+  ];
+  const s = pick(bank);
+  const correctStr = formatFactored(s.p, s.q);
+  // Generate wrong bracket-pairs programmatically and verify each expands to a DIFFERENT
+  // (b,c) than the target — avoids the earlier bug class where a "wrong" answer turned out
+  // to be mathematically identical to the correct one (e.g. reordered brackets, or a
+  // notation-only change). Every candidate is checked by actually expanding it.
+  const seenSignatures = new Set([`${s.b},${s.c}`]);
+  const candidates = [
+    [-s.p, s.q], [s.p, -s.q], [-s.p, -s.q],
+    [s.p+1, s.q], [s.p, s.q+1], [s.p-1, s.q], [s.p, s.q-1],
+    [s.p+2, s.q-1], [s.p-1, s.q+2], [s.q, s.p+1]
+  ];
+  const wrongs = [];
+  for(const [cp,cq] of candidates){
+    const eb = cp+cq, ec = cp*cq;
+    const sig = `${eb},${ec}`;
+    if(seenSignatures.has(sig)) continue;
+    seenSignatures.add(sig);
+    wrongs.push(formatFactored(cp,cq));
+    if(wrongs.length === 3) break;
+  }
+  const bStr = s.b===0 ? '' : Math.abs(s.b)===1 ? (s.b>0?'+ x':'− x') : (s.b>0?`+ ${s.b}x`:`− ${Math.abs(s.b)}x`);
+  const cStr = s.c>=0 ? `+ ${s.c}` : `− ${Math.abs(s.c)}`;
+  const opts = [correctStr, ...wrongs].sort(()=>Math.random()-0.5);
+  return {
+    question:`Factorise: x² ${bStr} ${cStr}`,
+    options: opts,
+    correct: opts.indexOf(correctStr),
+    working:`Find two numbers that multiply to ${s.c} and add to ${s.b}: ${s.p} and ${s.q}. So x² ${bStr} ${cStr} = ${correctStr}.`
+  };
+}
+ALL_GENERATORS.push(genFactoriseQuad);
+
 // ---- Stage progression ----
 let currentStage = 1;
 let highestStageReached = 1;
-const totalStages = 6;
+const totalStages = 7;
 
 function renderProgress(){
   const bar = document.getElementById('progress-bar');
@@ -700,11 +771,19 @@ window.goToStage = goToStage;
 // ---- Final 10-question mastery check ----
 let quizIndex = 0;
 let quizScore = 0;
+let shuffledGenerators = [];
 const QUIZ_LENGTH = 10;
 
 function startFinalQuiz(){
   quizIndex = 0;
   quizScore = 0;
+  // Fisher-Yates shuffle so every generator appears in a random position each attempt,
+  // rather than always landing in the same fixed slot.
+  shuffledGenerators = [...ALL_GENERATORS];
+  for(let i = shuffledGenerators.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [shuffledGenerators[i], shuffledGenerators[j]] = [shuffledGenerators[j], shuffledGenerators[i]];
+  }
   renderQuizQuestion();
 }
 
@@ -718,7 +797,7 @@ function renderQuizQuestion(){
     recordProgress('completed', totalStages);
     return;
   }
-  const generator = ALL_GENERATORS[quizIndex % ALL_GENERATORS.length];
+  const generator = shuffledGenerators[quizIndex % shuffledGenerators.length];
   area.innerHTML = `<div class="quiz-counter">Question ${quizIndex+1} of ${QUIZ_LENGTH} — Score so far: ${quizScore}</div><div id="quiz-q"></div>`;
   buildQuizMC('quiz-q', generator, ()=>{
     quizIndex++;
@@ -734,6 +813,7 @@ function renderQuizQuestion(){
   buildTryMC('try-3', genStage3);
   buildTryMC('try-4', genStage4);
   buildTryMC('try-5', genStage5);
+  buildTryMC('try-6', genFactoriseQuad);
   recordProgress('started', currentStage);
 })();
 </script>

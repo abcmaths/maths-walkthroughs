@@ -57,7 +57,7 @@
   <!-- STAGE 1: Two solutions -->
   <section class="stage" data-stage="1">
     <span class="stage-label">Stage 1</span>
-    <h2>x² = 16 — Two Solutions</h2>
+    <h2>x² = 16: Two Solutions</h2>
     <p>In Part A you learned that every positive number has <strong>two</strong> square roots. That matters a lot here.</p>
     <button class="reveal-btn" onclick="revealNext('r1', this)">Show me — solving x² = 16</button>
     <div class="reveal-step" id="r1-0">
@@ -74,7 +74,7 @@
   <!-- STAGE 2: One solution -->
   <section class="stage" data-stage="2" style="display:none;">
     <span class="stage-label">Stage 2</span>
-    <h2>x² = 0 — Only One Solution</h2>
+    <h2>x² = 0: Only One Solution</h2>
     <button class="reveal-btn" style="background:#888;" onclick="goToStage(1)">← Back to Stage 1</button>
     <p>What happens at the boundary case, when the number being square-rooted is zero?</p>
     <button class="reveal-btn" onclick="revealNext('r2', this)">Show me — solving x² = 0</button>
@@ -92,7 +92,7 @@
   <!-- STAGE 3: No real solution -->
   <section class="stage" data-stage="3" style="display:none;">
     <span class="stage-label">Stage 3</span>
-    <h2>x² = −4 — No Real Solution</h2>
+    <h2>x² = −4: No Real Solution</h2>
     <button class="reveal-btn" style="background:#888;" onclick="goToStage(2)">← Back to Stage 2</button>
     <p>Recall from Part A: squaring a positive number gives a positive result, and squaring a negative number <em>also</em> gives a positive result.</p>
     <button class="reveal-btn" onclick="revealNext('r3', this)">Show me — what about x² = −4?</button>
@@ -116,7 +116,7 @@
     <button class="reveal-btn" onclick="revealNext('r4', this)">Now overlay y = 16 (Stage 1's case)</button>
     <div class="reveal-step" id="r4-0">
       <div class="venn-wrap" id="graph-16"></div>
-      <p>The line y = 16 crosses the curve at <strong>two</strong> points — x = −4 and x = 4. Two crossings, two solutions.</p>
+      <p>The line y = 16 crosses the curve at <strong>two</strong> points: x = −4 and x = 4. Two crossings, two solutions.</p>
       <button class="reveal-btn" onclick="revealNext('r4', this)">Now overlay y = 0 (Stage 2's case)</button>
     </div>
     <div class="reveal-step" id="r4-1">
@@ -182,10 +182,10 @@
     <button class="reveal-btn" onclick="revealNext('r7', this)">Show me the graph of x² + 6x + 5</button>
     <div class="reveal-step" id="r7-0">
       <div class="venn-wrap" id="graph-full"></div>
-      <div class="example">Vertex at (−3, −4) — read directly from (x + 3)² − 4.<br>The curve crosses the x-axis at x = −1 and x = −5 — exactly the answers from Stage 6.</div>
+      <div class="example">Vertex at (−3, −4), read directly from (x + 3)² − 4.<br>The curve crosses the x-axis at x = −1 and x = −5, exactly the answers from Stage 6.</div>
     </div>
     <div class="reveal-step" id="r7-1" style="display:block;">
-      <div class="example" style="border-left-color:var(--gold);">The whole story in one sentence: how many times the parabola crosses the x-axis <strong>is</strong> how many real solutions the equation has — 2 crossings, 1 touch, or 0.</div>
+      <div class="example" style="border-left-color:var(--gold);">The whole story in one sentence: how many times the parabola crosses the x-axis <strong>is</strong> how many real solutions the equation has: 2 crossings, 1 touch, or 0.</div>
     </div>
     <div class="try-it" id="try-7"></div>
   </section>
@@ -283,6 +283,12 @@ function drawParabola(containerId, a, b, c, opts){
   }
 
   let parts = [];
+  // solution-count badge, top-left — makes each case unambiguous even if the
+  // reference line is hard to distinguish from the axis (e.g. the y=0 case)
+  if(opts.note){
+    parts.push(`<rect x="6" y="6" width="${opts.note.length*7+18}" height="22" rx="11" fill="${opts.noteColor || '#C0272D'}"/>`);
+    parts.push(`<text x="15" y="21" font-size="12" font-weight="700" fill="#fff">${opts.note}</text>`);
+  }
   // axes
   parts.push(`<line x1="${px(xMin)}" y1="${py(0)}" x2="${px(xMax)}" y2="${py(0)}" stroke="#999" stroke-width="1"/>`);
   parts.push(`<line x1="${px(0)}" y1="${py(yMin)}" x2="${px(0)}" y2="${py(yMax)}" stroke="#999" stroke-width="1"/>`);
@@ -290,14 +296,16 @@ function drawParabola(containerId, a, b, c, opts){
   parts.push(`<text x="${px(0)+6}" y="${py(yMax)+12}" font-size="11" fill="#888">y</text>`);
   // curve
   parts.push(`<polyline points="${points.join(' ')}" fill="none" stroke="#C0272D" stroke-width="2.5"/>`);
-  // optional reference line
-  if(opts.highlightY !== undefined){
+  // optional reference line — skipped when it coincides with the x-axis (y=0) to avoid
+  // drawing an invisible overlapping line and a label that collides with the "x" axis label
+  if(opts.highlightY !== undefined && opts.highlightY !== 0){
     parts.push(`<line x1="${px(xMin)}" y1="${py(opts.highlightY)}" x2="${px(xMax)}" y2="${py(opts.highlightY)}" stroke="#1565C0" stroke-width="2" stroke-dasharray="6,4"/>`);
     parts.push(`<text x="${px(xMax)-4}" y="${py(opts.highlightY)-6}" text-anchor="end" font-size="12" fill="#1565C0" font-weight="700">y = ${opts.highlightY}</text>`);
   }
-  // optional root markers
+  // optional root markers — gold for a repeated root (single touch point), green otherwise
   (opts.roots || []).forEach(rx=>{
-    parts.push(`<circle cx="${px(rx)}" cy="${py(a*rx*rx+b*rx+c)}" r="5" fill="#2e7d32" stroke="#1b5e20" stroke-width="1.5"/>`);
+    const isRepeated = (opts.roots.length === 1);
+    parts.push(`<circle cx="${px(rx)}" cy="${py(a*rx*rx+b*rx+c)}" r="6" fill="${isRepeated ? '#C8922A' : '#2e7d32'}" stroke="${isRepeated ? '#7A1418' : '#1b5e20'}" stroke-width="2"/>`);
   });
   // optional vertex marker
   if(opts.vertex){
@@ -313,12 +321,12 @@ function drawParabola(containerId, a, b, c, opts){
 // x-range chosen to match y-range (x=±4.5 → x²≈20) so the curve arcs cleanly to the
 // top corners instead of clipping into flat plateaus.
 drawParabola('graph-base', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20});
-drawParabola('graph-16', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, highlightY:16, roots:[-4,4]});
-drawParabola('graph-0', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, highlightY:0, roots:[0]});
-drawParabola('graph-neg4', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, highlightY:-4});
+drawParabola('graph-16', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, highlightY:16, roots:[-4,4], note:'2 solutions'});
+drawParabola('graph-0', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, highlightY:0, roots:[0], note:'1 solution (repeated)', noteColor:'#C8922A'});
+drawParabola('graph-neg4', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, highlightY:-4, note:'0 solutions', noteColor:'#888'});
 // Stage 7 graph: y = x² + 6x + 5, vertex (-3,-4), roots -1 and -5 — range chosen so the
 // curve exits near the top corners rather than clipping flat partway across.
-drawParabola('graph-full', 1, 6, 5, {xMin:-7.5, xMax:1.5, yMin:-6, yMax:14, roots:[-1,-5], vertex:[-3,-4]});
+drawParabola('graph-full', 1, 6, 5, {xMin:-7.5, xMax:1.5, yMin:-6, yMax:14, roots:[-1,-5], vertex:[-3,-4], note:'2 solutions'});
 
 // ---- buildTryMC: renders a dynamic multiple-choice checkpoint (per-stage, gated) ----
 function buildTryMC(containerId, generator){
