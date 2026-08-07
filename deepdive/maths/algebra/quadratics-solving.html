@@ -152,10 +152,34 @@
     <span class="stage-label">Stage 6</span>
     <h2>Completing the Square</h2>
     <button class="reveal-btn" style="background:#888;" onclick="goToStage(5)">← Back to Stage 5</button>
-    <p>Factorising doesn't always work nicely. Completing the square gives you a method that always does — and it brings back the ± idea from Stage 1.</p>
+    <p>Factorising doesn't always work nicely. Completing the square gives you a method that always does, and it brings back the ± idea from Stage 1.</p>
+
+    <p><strong>Where does "completing the square" actually come from?</strong> Picture x² + 6x as an area.</p>
+    <button class="reveal-btn" onclick="revealNext('r6a', this)">Show me — the square of x²</button>
+    <div class="reveal-step" id="r6a-0">
+      <div class="venn-wrap" id="square-diagram"></div>
+      <p>Start with a square with sides of length x. Its area is x².</p>
+      <button class="reveal-btn" onclick="revealNext('r6a', this)">Now add the 6x</button>
+    </div>
+    <div class="reveal-step" id="r6a-1">
+      <div class="venn-wrap" id="square-diagram-2"></div>
+      <p>Split 6x into two strips of width 3, and attach one to the right and one to the bottom. Each strip has area 3 × x = 3x, so together they add 6x. The shape is now an "L" with total area x² + 6x.</p>
+      <button class="reveal-btn" onclick="revealNext('r6a', this)">There's a piece missing...</button>
+    </div>
+    <div class="reveal-step" id="r6a-2">
+      <div class="venn-wrap" id="square-diagram-3"></div>
+      <p>There's a gap in the corner: a small square, 3 by 3, area 9. Without it, the shape isn't a proper square yet.</p>
+      <button class="reveal-btn" onclick="revealNext('r6a', this)">Add it in to complete the square</button>
+    </div>
+    <div class="reveal-step" id="r6a-3">
+      <div class="venn-wrap" id="square-diagram-4"></div>
+      <div class="example">Fill the gap and the whole shape becomes one big square, side (x + 3).<br>Area = (x + 3)² = x² + 6x + 9<br>So: <strong>x² + 6x = (x + 3)² − 9</strong> (we subtract the 9 we added to balance it back out)</div>
+    </div>
+
+    <p style="margin-top:20px;"><strong>Now use that to solve an equation.</strong></p>
     <button class="reveal-btn" onclick="revealNext('r6', this)">Show me — solving x² + 6x + 5 = 0</button>
     <div class="reveal-step" id="r6-0">
-      <div class="example">x² + 6x can be rewritten as (x + 3)² − 9<br><span style="color:#888;font-size:.85rem;">(Check: (x+3)² = x² + 6x + 9, so we subtract 9 to balance it back out.)</span></div>
+      <div class="example">x² + 6x can be rewritten as (x + 3)² − 9, exactly as the diagram showed.</div>
       <button class="reveal-btn" onclick="revealNext('r6', this)">Put the whole equation together</button>
     </div>
     <div class="reveal-step" id="r6-1">
@@ -164,7 +188,18 @@
     </div>
     <div class="reveal-step" id="r6-2">
       <div class="example">x + 3 = ±2 &nbsp;<span style="color:#888;font-size:.85rem;">(± again — same idea as Stage 1)</span><br>x = −3 + 2 = −1 &nbsp;&nbsp; or &nbsp;&nbsp; x = −3 − 2 = −5<br><strong>x = −1 or x = −5</strong></div>
+      <button class="reveal-btn" onclick="revealNext('r6', this)">What if the answer isn't a whole number?</button>
     </div>
+    <div class="reveal-step" id="r6-3">
+      <p>Completing the square doesn't need factors to exist. Try x² + 4x − 1 = 0 — this one won't factorise nicely at all.</p>
+      <div class="example">x² + 4x can be rewritten as (x + 2)² − 4 (half of 4 is 2, squared is 4)<br>x² + 4x − 1 = 0<br>(x + 2)² − 4 − 1 = 0<br>(x + 2)² = 5</div>
+      <button class="reveal-btn" onclick="revealNext('r6', this)">Square-root both sides — but 5 isn't a perfect square</button>
+    </div>
+    <div class="reveal-step" id="r6-4">
+      <div class="example">x + 2 = ±√5 &nbsp;<span style="color:#888;font-size:.85rem;">(√5 stays as a surd, from the Numbers chain)</span><br><strong>x = −2 + √5 &nbsp;or&nbsp; x = −2 − √5</strong></div>
+      <span style="color:#888;font-size:.85rem;">These are perfectly valid, exact answers — they just aren't whole numbers. A calculator would show √5 ≈ 2.236, but leaving it as √5 is the exact form.</span>
+    </div>
+
     <div class="try-it" id="try-6"></div>
   </section>
 
@@ -343,6 +378,53 @@ document.getElementById('graph-legend').innerHTML = `
 // curve exits near the top corners rather than clipping flat partway across.
 drawParabola('graph-full', 1, 6, 5, {xMin:-7.5, xMax:1.5, yMin:-6, yMax:14, roots:[-1,-5], vertex:[-3,-4], note:'2 solutions'});
 
+// ---- Completing-the-square area diagram: x² + 6x built up as a geometric shape ----
+// Schematic (not to scale): main square = x², two strips = 3x each, corner square = 9.
+function drawCompleteSquareDiagram(containerId, state){
+  // state: 0 = just x², 1 = + two strips (L-shape), 2 = + dashed missing corner, 3 = completed square
+  const S = 160; // main square side, px
+  const T = 46;  // strip thickness, px (represents "3")
+  const pad = 20;
+  const w = S + T + pad*2, h = S + T + pad*2;
+  const x0 = pad, y0 = pad;
+  let parts = [];
+
+  // main x-by-x square (always shown)
+  parts.push(`<rect x="${x0}" y="${y0}" width="${S}" height="${S}" fill="#C0272D22" stroke="#C0272D" stroke-width="2"/>`);
+  parts.push(`<text x="${x0+S/2}" y="${y0+S/2-6}" text-anchor="middle" font-size="15" font-weight="700" fill="#7A1418">x²</text>`);
+  parts.push(`<text x="${x0+S/2}" y="${y0-6}" text-anchor="middle" font-size="12" fill="#888">x</text>`);
+  parts.push(`<text x="${x0-10}" y="${y0+S/2+4}" text-anchor="end" font-size="12" fill="#888">x</text>`);
+
+  if(state >= 1){
+    // right strip (3 wide, x tall)
+    parts.push(`<rect x="${x0+S}" y="${y0}" width="${T}" height="${S}" fill="#1565C022" stroke="#1565C0" stroke-width="2"/>`);
+    parts.push(`<text x="${x0+S+T/2}" y="${y0+S/2}" text-anchor="middle" font-size="12" font-weight="700" fill="#1565C0">3x</text>`);
+    parts.push(`<text x="${x0+S+T/2}" y="${y0-6}" text-anchor="middle" font-size="11" fill="#888">3</text>`);
+    // bottom strip (x wide, 3 tall)
+    parts.push(`<rect x="${x0}" y="${y0+S}" width="${S}" height="${T}" fill="#1565C022" stroke="#1565C0" stroke-width="2"/>`);
+    parts.push(`<text x="${x0+S/2}" y="${y0+S+T/2+4}" text-anchor="middle" font-size="12" font-weight="700" fill="#1565C0">3x</text>`);
+  }
+  if(state === 2){
+    // dashed "missing" corner square
+    parts.push(`<rect x="${x0+S}" y="${y0+S}" width="${T}" height="${T}" fill="none" stroke="#C8922A" stroke-width="2" stroke-dasharray="4,3"/>`);
+    parts.push(`<text x="${x0+S+T/2}" y="${y0+S+T/2+4}" text-anchor="middle" font-size="10" font-weight="700" fill="#C8922A">?</text>`);
+  }
+  if(state >= 3){
+    // filled-in corner square
+    parts.push(`<rect x="${x0+S}" y="${y0+S}" width="${T}" height="${T}" fill="#C8922A44" stroke="#C8922A" stroke-width="2"/>`);
+    parts.push(`<text x="${x0+S+T/2}" y="${y0+S+T/2+4}" text-anchor="middle" font-size="11" font-weight="700" fill="#7A1418">9</text>`);
+    // outline of the completed big square, (x+3) by (x+3)
+    parts.push(`<rect x="${x0}" y="${y0}" width="${S+T}" height="${S+T}" fill="none" stroke="#2e7d32" stroke-width="3"/>`);
+    parts.push(`<text x="${x0+S+T+8}" y="${y0+(S+T)/2}" font-size="12" font-weight="700" fill="#2e7d32">x + 3</text>`);
+  }
+  document.getElementById(containerId).innerHTML =
+    `<svg viewBox="0 0 ${w+40} ${h}" width="${w+40}" height="${h}" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
+}
+drawCompleteSquareDiagram('square-diagram', 0);
+drawCompleteSquareDiagram('square-diagram-2', 1);
+drawCompleteSquareDiagram('square-diagram-3', 2);
+drawCompleteSquareDiagram('square-diagram-4', 3);
+
 // ---- buildTryMC: renders a dynamic multiple-choice checkpoint (per-stage, gated) ----
 function buildTryMC(containerId, generator, onComplete){
   onComplete = onComplete || advanceStage;
@@ -496,7 +578,12 @@ function genQ4(){ // completing the square
     {expr:'x² + 6x + 5', ans:'x = −1 or x = −5', work:'(x+3)²−4=0 → x+3=±2 → x=−1 or x=−5', wrongs:['x = 1 or x = 5','x = −3 or x = 4','x = −1 or x = 5']},
     {expr:'x² + 4x + 3', ans:'x = −1 or x = −3', work:'(x+2)²−1=0 → x+2=±1 → x=−1 or x=−3', wrongs:['x = 1 or x = 3','x = −2 or x = 1','x = −1 or x = 3']},
     {expr:'x² + 8x + 12', ans:'x = −2 or x = −6', work:'(x+4)²−4=0 → x+4=±2 → x=−2 or x=−6', wrongs:['x = 2 or x = 6','x = −4 or x = 2','x = −2 or x = 6']},
-    {expr:'x² + 2x − 3', ans:'x = 1 or x = −3', work:'(x+1)²−4=0 → x+1=±2 → x=1 or x=−3', wrongs:['x = −1 or x = 3','x = 1 or x = 3','x = −1 or x = −3']}
+    {expr:'x² + 2x − 3', ans:'x = 1 or x = −3', work:'(x+1)²−4=0 → x+1=±2 → x=1 or x=−3', wrongs:['x = −1 or x = 3','x = 1 or x = 3','x = −1 or x = −3']},
+    // irrational-answer entries (verified symbolically) — the surd stays unsimplified, tying back to the Numbers chain
+    {expr:'x² + 4x − 1', ans:'x = −2 + √5 or x = −2 − √5', work:'(x+2)²=5 → x+2=±√5 → x=−2±√5', wrongs:['x = 2 + √5 or x = 2 − √5','x = −2 + √4 or x = −2 − √4','x = −4 + √5 or x = −4 − √5']},
+    {expr:'x² + 2x − 4', ans:'x = −1 + √5 or x = −1 − √5', work:'(x+1)²=5 → x+1=±√5 → x=−1±√5', wrongs:['x = 1 + √5 or x = 1 − √5','x = −1 + √4 or x = −1 − √4','x = −2 + √5 or x = −2 − √5']},
+    {expr:'x² + 6x + 2', ans:'x = −3 + √7 or x = −3 − √7', work:'(x+3)²=7 → x+3=±√7 → x=−3±√7', wrongs:['x = 3 + √7 or x = 3 − √7','x = −3 + √9 or x = −3 − √9','x = −6 + √7 or x = −6 − √7']},
+    {expr:'x² − 4x − 1', ans:'x = 2 + √5 or x = 2 − √5', work:'(x−2)²=5 → x−2=±√5 → x=2±√5', wrongs:['x = −2 + √5 or x = −2 − √5','x = 2 + √4 or x = 2 − √4','x = 4 + √5 or x = 4 − √5']}
   ];
   const s = pick(sets);
   const opts = [s.ans, ...s.wrongs].sort(()=>Math.random()-0.5);
