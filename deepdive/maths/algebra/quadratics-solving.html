@@ -111,23 +111,18 @@
     <span class="stage-label">Stage 4</span>
     <h2>Seeing It on a Graph</h2>
     <button class="reveal-btn" style="background:#888;" onclick="goToStage(3)">← Back to Stage 3</button>
-    <p>The graph of y = x² is a curve called a <strong>parabola</strong>. It never dips below the x-axis — which matches exactly what you found in Stage 3.</p>
+    <p>The graph of y = x² is a curve called a <strong>parabola</strong>. It never dips below the x-axis, which matches exactly what you found in Stage 3.</p>
     <div class="venn-wrap" id="graph-base"></div>
-    <button class="reveal-btn" onclick="revealNext('r4', this)">Now overlay y = 16 (Stage 1's case)</button>
-    <div class="reveal-step" id="r4-0">
-      <div class="venn-wrap" id="graph-16"></div>
-      <p>The line y = 16 crosses the curve at <strong>two</strong> points: x = −4 and x = 4. Two crossings, two solutions.</p>
-      <button class="reveal-btn" onclick="revealNext('r4', this)">Now overlay y = 0 (Stage 2's case)</button>
-    </div>
-    <div class="reveal-step" id="r4-1">
-      <div class="venn-wrap" id="graph-0"></div>
-      <p>The line y = 0 (the x-axis itself) just <strong>touches</strong> the curve once, at the very bottom. One touch, one repeated solution.</p>
-      <button class="reveal-btn" onclick="revealNext('r4', this)">Now overlay y = −4 (Stage 3's case)</button>
-    </div>
-    <div class="reveal-step" id="r4-2">
-      <div class="venn-wrap" id="graph-neg4"></div>
-      <div class="example">The line y = −4 never touches the curve at all. Zero crossings, zero real solutions — exactly what Stage 3 found algebraically.</div>
-    </div>
+
+    <p>Now add all three lines from Stages 1 to 3 onto that <strong>same</strong> curve, so you can compare them directly.</p>
+    <div class="venn-wrap" id="graph-combined"></div>
+    <div id="graph-legend" style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:.82rem;margin:-6px 0 14px;"></div>
+
+    <p>The line y = 16 crosses the curve at <strong>two</strong> points: x = −4 and x = 4. Two crossings, two solutions.</p>
+    <p>The line y = 0 (the x-axis itself) just <strong>touches</strong> the curve once, at the very bottom. One touch, one repeated solution.</p>
+    <div class="example">The line y = −4 never touches the curve at all. Zero crossings, zero real solutions, exactly what Stage 3 found algebraically.</div>
+
+    <p style="font-size:.85rem;color:#888;">Three quick checks below, one for each case on the graph above.</p>
     <div class="try-it" id="try-4"></div>
   </section>
 
@@ -296,17 +291,28 @@ function drawParabola(containerId, a, b, c, opts){
   parts.push(`<text x="${px(0)+6}" y="${py(yMax)+12}" font-size="11" fill="#888">y</text>`);
   // curve
   parts.push(`<polyline points="${points.join(' ')}" fill="none" stroke="#C0272D" stroke-width="2.5"/>`);
-  // optional reference line — skipped when it coincides with the x-axis (y=0) to avoid
-  // drawing an invisible overlapping line and a label that collides with the "x" axis label
-  if(opts.highlightY !== undefined && opts.highlightY !== 0){
-    parts.push(`<line x1="${px(xMin)}" y1="${py(opts.highlightY)}" x2="${px(xMax)}" y2="${py(opts.highlightY)}" stroke="#1565C0" stroke-width="2" stroke-dasharray="6,4"/>`);
-    parts.push(`<text x="${px(xMax)-4}" y="${py(opts.highlightY)-6}" text-anchor="end" font-size="12" fill="#1565C0" font-weight="700">y = ${opts.highlightY}</text>`);
-  }
-  // optional root markers — gold for a repeated root (single touch point), green otherwise
-  (opts.roots || []).forEach(rx=>{
-    const isRepeated = (opts.roots.length === 1);
-    parts.push(`<circle cx="${px(rx)}" cy="${py(a*rx*rx+b*rx+c)}" r="6" fill="${isRepeated ? '#C8922A' : '#2e7d32'}" stroke="${isRepeated ? '#7A1418' : '#1b5e20'}" stroke-width="2"/>`);
+  // optional reference line(s) — a single one via opts.highlightY, or several at once
+  // via opts.lines (used for the Stage 4 combined graph where all three cases sit on
+  // one curve together). The y=0 line is skipped since it coincides with the x-axis.
+  const lineList = opts.lines || (opts.highlightY !== undefined ? [{y:opts.highlightY, color:'#1565C0', roots:opts.roots}] : []);
+  lineList.forEach((ln, i)=>{
+    if(ln.y !== 0){
+      parts.push(`<line x1="${px(xMin)}" y1="${py(ln.y)}" x2="${px(xMax)}" y2="${py(ln.y)}" stroke="${ln.color || '#1565C0'}" stroke-width="2" stroke-dasharray="6,4"/>`);
+      const labelOnLeft = ln.labelLeft;
+      parts.push(`<text x="${labelOnLeft ? px(xMin)+4 : px(xMax)-4}" y="${py(ln.y)-6}" text-anchor="${labelOnLeft ? 'start' : 'end'}" font-size="12" fill="${ln.color || '#1565C0'}" font-weight="700">y = ${ln.y}</text>`);
+    }
+    (ln.roots || []).forEach(rx=>{
+      const isRepeated = (ln.roots.length === 1);
+      parts.push(`<circle cx="${px(rx)}" cy="${py(a*rx*rx+b*rx+c)}" r="6" fill="${isRepeated ? '#C8922A' : (ln.markerColor || '#2e7d32')}" stroke="${isRepeated ? '#7A1418' : '#1b5e20'}" stroke-width="2"/>`);
+    });
   });
+  // optional root markers passed directly (used when opts.lines isn't set, e.g. Stage 7's graph)
+  if(!opts.lines && opts.roots){
+    const isRepeated = (opts.roots.length === 1);
+    opts.roots.forEach(rx=>{
+      parts.push(`<circle cx="${px(rx)}" cy="${py(a*rx*rx+b*rx+c)}" r="6" fill="${isRepeated ? '#C8922A' : '#2e7d32'}" stroke="${isRepeated ? '#7A1418' : '#1b5e20'}" stroke-width="2"/>`);
+    });
+  }
   // optional vertex marker
   if(opts.vertex){
     parts.push(`<circle cx="${px(opts.vertex[0])}" cy="${py(opts.vertex[1])}" r="5" fill="#C8922A" stroke="#7A1418" stroke-width="1.5"/>`);
@@ -321,15 +327,25 @@ function drawParabola(containerId, a, b, c, opts){
 // x-range chosen to match y-range (x=±4.5 → x²≈20) so the curve arcs cleanly to the
 // top corners instead of clipping into flat plateaus.
 drawParabola('graph-base', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20});
-drawParabola('graph-16', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, highlightY:16, roots:[-4,4], note:'2 solutions'});
-drawParabola('graph-0', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, highlightY:0, roots:[0], note:'1 solution (repeated)', noteColor:'#C8922A'});
-drawParabola('graph-neg4', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, highlightY:-4, note:'0 solutions', noteColor:'#888'});
+// Combined graph: all three lines added onto the SAME curve, so they're directly comparable
+// rather than three separate drawings. y=0's label goes on the left to avoid colliding
+// with the "x" axis label on the right; y=−4 sits well clear of both.
+drawParabola('graph-combined', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, lines:[
+  {y:16, color:'#1565C0', roots:[-4,4], markerColor:'#2e7d32'},
+  {y:0,  color:'#C8922A', roots:[0],    markerColor:'#C8922A', labelLeft:true},
+  {y:-4, color:'#888',    roots:[]}
+]});
+document.getElementById('graph-legend').innerHTML = `
+  <span style="color:#1565C0;font-weight:700;">● y = 16 → 2 solutions</span>
+  <span style="color:#C8922A;font-weight:700;">● y = 0 → 1 solution</span>
+  <span style="color:#888;font-weight:700;">● y = −4 → 0 solutions</span>`;
 // Stage 7 graph: y = x² + 6x + 5, vertex (-3,-4), roots -1 and -5 — range chosen so the
 // curve exits near the top corners rather than clipping flat partway across.
 drawParabola('graph-full', 1, 6, 5, {xMin:-7.5, xMax:1.5, yMin:-6, yMax:14, roots:[-1,-5], vertex:[-3,-4], note:'2 solutions'});
 
 // ---- buildTryMC: renders a dynamic multiple-choice checkpoint (per-stage, gated) ----
-function buildTryMC(containerId, generator){
+function buildTryMC(containerId, generator, onComplete){
+  onComplete = onComplete || advanceStage;
   const container = document.getElementById(containerId);
   const q = generator();
   container.innerHTML = `
@@ -362,13 +378,13 @@ function buildTryMC(containerId, generator){
         feedbackEl.textContent = 'Not quite — have a look at the working, then try a new question.';
         nextBtn.textContent = 'Try again';
         nextBtn.style.display = 'inline-block';
-        nextBtn.onclick = ()=>{ buildTryMC(containerId, generator); };
+        nextBtn.onclick = ()=>{ buildTryMC(containerId, generator, onComplete); };
         return;
       }
     };
     optsWrap.appendChild(b);
   });
-  nextBtn.onclick = ()=>{ advanceStage(); };
+  nextBtn.onclick = ()=>{ onComplete(); };
 }
 
 // ---- scoring-aware version used only in the final quiz ----
@@ -491,7 +507,7 @@ function genQ4(){ // completing the square
     working: s.work
   };
 }
-function genQ5(){ // reading roots from the graph story
+function genQ5(){ // reading roots from the graph story (mixed - used in final quiz for variety)
   const cases = [
     {desc:'crosses the x-axis twice', ans:'2 real solutions'},
     {desc:'just touches the x-axis once', ans:'1 real solution (repeated)'},
@@ -505,6 +521,37 @@ function genQ5(){ // reading roots from the graph story
     options: opts,
     correct: opts.indexOf(c.ans),
     working:`The number of times a parabola crosses or touches the x-axis is exactly the number of real solutions.`
+  };
+}
+// Stage 4 specific: three separate, deterministic checks (one per case on the combined
+// graph), always asked in sequence so all three are guaranteed to be tested, not just
+// one at random.
+const allSolutionAnswers = ['2 real solutions','1 real solution (repeated)','0 real solutions'];
+function genGraphTwo(){
+  const opts = [...allSolutionAnswers].sort(()=>Math.random()-0.5);
+  return {
+    question:`On the graph above, the line y = 16 crosses the curve twice. How many real solutions does x² = 16 have?`,
+    options: opts,
+    correct: opts.indexOf('2 real solutions'),
+    working:`Two crossings on the graph means two real solutions: x = 4 and x = −4.`
+  };
+}
+function genGraphOne(){
+  const opts = [...allSolutionAnswers].sort(()=>Math.random()-0.5);
+  return {
+    question:`On the graph above, the line y = 0 just touches the curve once. How many real solutions does x² = 0 have?`,
+    options: opts,
+    correct: opts.indexOf('1 real solution (repeated)'),
+    working:`One touch on the graph means one repeated real solution: x = 0.`
+  };
+}
+function genGraphZero(){
+  const opts = [...allSolutionAnswers].sort(()=>Math.random()-0.5);
+  return {
+    question:`On the graph above, the line y = −4 never touches the curve. How many real solutions does x² = −4 have?`,
+    options: opts,
+    correct: opts.indexOf('0 real solutions'),
+    working:`No crossings on the graph means no real solutions at all.`
   };
 }
 const ALL_GENERATORS = [genQ1, genOneSol, genNoSol, genQ2, genQ3, genQ4, genQ5];
@@ -587,7 +634,11 @@ function renderQuizQuestion(){
   buildTryMC('try-1', genQ1);
   buildTryMC('try-2', genOneSol);
   buildTryMC('try-3', genNoSol);
-  buildTryMC('try-4', genQ5);
+  buildTryMC('try-4', genGraphTwo, ()=>{
+    buildTryMC('try-4', genGraphOne, ()=>{
+      buildTryMC('try-4', genGraphZero, advanceStage);
+    });
+  });
   buildTryMC('try-5', genQ3);
   buildTryMC('try-6', genQ4);
   buildTryMC('try-7', genQ5);
