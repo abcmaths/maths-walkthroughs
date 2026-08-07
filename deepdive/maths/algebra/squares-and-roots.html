@@ -35,6 +35,9 @@
   .venn-wrap{display:flex;justify-content:center;margin:16px 0;}
   .quiz-score{font-size:1.4rem;font-weight:700;color:var(--dark);text-align:center;margin:18px 0;}
   .quiz-counter{font-size:.8rem;color:#888;margin-bottom:8px;}
+  .frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:0.95em;line-height:1.15;margin:0 3px;position:relative;top:0.15em;}
+  .frac .num{border-bottom:1.5px solid currentColor;padding:0 5px 2px;}
+  .frac .den{padding:2px 5px 0;}
 </style>
 </head>
 <body>
@@ -235,7 +238,13 @@
     <p>Dividing by a surd is awkward. Fix: multiply top and bottom by the same surd.</p>
     <button class="reveal-btn" onclick="revealNext('r9', this)">Show me — 1/√2</button>
     <div class="reveal-step" id="r9-0">
-      <div class="example">1/√2 = (1 × √2)/(√2 × √2) = <strong>√2/2</strong></div>
+      <div class="example">
+        <span class="frac"><span class="num">1</span><span class="den">√2</span></span>
+        =
+        <span class="frac"><span class="num">1 × √2</span><span class="den">√2 × √2</span></span>
+        =
+        <strong><span class="frac"><span class="num">√2</span><span class="den">2</span></span></strong>
+      </div>
       <span style="color:#888;font-size:.85rem;">√2 × √2 = 2 — the surd on the bottom disappears.</span>
     </div>
     <div class="try-it" id="try-9"></div>
@@ -298,6 +307,9 @@ async function recordProgress(status, stageReached){
 
 function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function fracHTML(num, den){
+  return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+}
 
 // ---- progressive "click to reveal" teaching steps ----
 const revealState = {};
@@ -387,18 +399,18 @@ function buildTryMC(containerId, generator){
   q.options.forEach((opt,i)=>{
     const b = document.createElement('button');
     b.className = 'mc-opt';
-    b.textContent = opt;
+    b.innerHTML = opt;
     b.onclick = ()=>{
       [...optsWrap.children].forEach(c=>c.disabled=true);
       if(i === q.correct){
         b.classList.add('mc-correct');
-        workingEl.style.display = 'block'; workingEl.textContent = q.working;
+        workingEl.style.display = 'block'; workingEl.innerHTML = q.working;
         feedbackEl.style.display = 'block'; feedbackEl.style.color = '#2e7d32'; feedbackEl.textContent = '✓ Correct!';
         nextBtn.style.display = 'inline-block';
       } else {
         b.classList.add('mc-wrong');
         optsWrap.children[q.correct].classList.add('mc-correct');
-        workingEl.style.display = 'block'; workingEl.textContent = q.working;
+        workingEl.style.display = 'block'; workingEl.innerHTML = q.working;
         feedbackEl.style.display = 'block'; feedbackEl.style.color = '#c62828';
         feedbackEl.textContent = 'Not quite — have a look at the working, then try a new question.';
         nextBtn.textContent = 'Try again';
@@ -428,12 +440,12 @@ function buildQuizMC(containerId, generator, onAnswered){
   q.options.forEach((opt,i)=>{
     const b = document.createElement('button');
     b.className = 'mc-opt';
-    b.textContent = opt;
+    b.innerHTML = opt;
     b.onclick = ()=>{
       [...optsWrap.children].forEach(c=>c.disabled=true);
       if(i === q.correct){ b.classList.add('mc-correct'); quizScore++; }
       else { b.classList.add('mc-wrong'); optsWrap.children[q.correct].classList.add('mc-correct'); }
-      workingEl.style.display = 'block'; workingEl.textContent = q.working;
+      workingEl.style.display = 'block'; workingEl.innerHTML = q.working;
       nextBtn.style.display = 'inline-block';
     };
     optsWrap.appendChild(b);
@@ -574,14 +586,18 @@ function genSurdMultiply(){
 }
 function genSurdRationalise(){
   const n = pick([2,3,5,7,10]);
-  const ans = `√${n}/${n}`;
-  const wrongSet = new Set([`1/√${n}`, `√${n}`, `${n}/√${n}`].filter(w=>w!==ans));
-  const opts = [ans, ...[...wrongSet].slice(0,3)].sort(()=>Math.random()-0.5);
+  const ansHTML = fracHTML(`√${n}`, n);
+  const wrongHTML = [
+    fracHTML(1, `√${n}`),
+    `√${n}`,
+    fracHTML(n, `√${n}`)
+  ];
+  const opts = [ansHTML, ...wrongHTML].sort(()=>Math.random()-0.5);
   return {
-    question:`Rationalise the denominator: 1/√${n}`,
+    question:`Rationalise the denominator: ${fracHTML(1, `√${n}`)}`,
     options: opts,
-    correct: opts.indexOf(ans),
-    working:`Multiply top and bottom by √${n}: (1×√${n})/(√${n}×√${n}) = √${n}/${n}.`
+    correct: opts.indexOf(ansHTML),
+    working:`Multiply top and bottom by √${n}: ${fracHTML(`1 × √${n}`, `√${n} × √${n}`)} = ${fracHTML(`√${n}`, n)}.`
   };
 }
 const ALL_GENERATORS = [genSq1, genSq2, genSq3, genSq4, genSq5, genSq6, genSurdAdd, genSurdMultiply, genSurdRationalise];
@@ -627,11 +643,19 @@ window.goToStage = goToStage;
 // ---- Final 10-question mastery check ----
 let quizIndex = 0;
 let quizScore = 0;
+let shuffledGenerators = [];
 const QUIZ_LENGTH = 10;
 
 function startFinalQuiz(){
   quizIndex = 0;
   quizScore = 0;
+  // Fisher-Yates shuffle so every generator (including surd operations) appears in a
+  // random position each attempt, rather than always landing in the same fixed slot.
+  shuffledGenerators = [...ALL_GENERATORS];
+  for(let i = shuffledGenerators.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [shuffledGenerators[i], shuffledGenerators[j]] = [shuffledGenerators[j], shuffledGenerators[i]];
+  }
   renderQuizQuestion();
 }
 function renderQuizQuestion(){
@@ -644,7 +668,7 @@ function renderQuizQuestion(){
     recordProgress('completed', totalStages);
     return;
   }
-  const generator = ALL_GENERATORS[quizIndex % ALL_GENERATORS.length];
+  const generator = shuffledGenerators[quizIndex % shuffledGenerators.length];
   area.innerHTML = `<div class="quiz-counter">Question ${quizIndex+1} of ${QUIZ_LENGTH} — Score so far: ${quizScore}</div><div id="quiz-q"></div>`;
   buildQuizMC('quiz-q', generator, ()=>{
     quizIndex++;
