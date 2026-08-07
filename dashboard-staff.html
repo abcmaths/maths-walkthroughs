@@ -1061,7 +1061,7 @@
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
   window._supabase = supabase;
 
-  let allStudents = [], allProgress = [], allTopics = [];
+  let allStudents = [], allProgress = [], allTopics = [], allPeople = [];
 
   // ── Use getSession directly — more reliable than onAuthStateChange for page loads ──
   async function init() {
@@ -1104,6 +1104,10 @@
     allStudents = students || [];
     allTopics   = topics   || [];
     allProgress = progress || [];
+    // allPeople covers students AND staff/admin, so Deep Dive Progress rows
+    // created by staff testing accounts (e.g. Chris, Kingsley) still resolve
+    // a name instead of showing "Unknown student".
+    allPeople   = [...(students || []), ...(teachers || [])];
 
     // ── Overview stats ──
     document.getElementById('ov-students').textContent    = allStudents.length;
@@ -1228,7 +1232,7 @@
     const searchFilter = document.getElementById('dd-filter-search').value.toLowerCase();
 
     const studentMap = {};
-    allStudents.forEach(s => studentMap[s.id] = s);
+    allPeople.forEach(s => studentMap[s.id] = s);
 
     let rows = allProgress.filter(p => topicMap[p.topic_id]);
     if (topicFilter)  rows = rows.filter(p => p.topic_id === topicFilter);
@@ -1260,7 +1264,7 @@
       const stage = (p.stage_reached !== null && p.stage_reached !== undefined) ? p.stage_reached : '—';
       return `<tr>
         <td><strong>${s ? s.full_name : 'Unknown student'}</strong></td>
-        <td>Year ${s ? (s.year_group || '—') : '—'}</td>
+        <td>${s ? (s.year_group ? 'Year ' + s.year_group : 'Staff') : '—'}</td>
         <td>${t ? t.topic_name : p.topic_id}</td>
         <td style="color:${statusColor[p.status] || '#888'};font-weight:700">${statusLabel[p.status] || p.status || '—'}</td>
         <td>${stage}</td>
