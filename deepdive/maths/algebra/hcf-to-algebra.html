@@ -56,19 +56,26 @@
   <section class="stage" data-stage="1">
     <span class="stage-label">Stage 1</span>
     <h2>What is a Highest Common Factor?</h2>
-    <p>The <strong>factors</strong> of a number are all the whole numbers that divide into it exactly.</p>
+    <div class="example" style="border-left-color:var(--gold);">
+      <strong>Key words</strong><br>
+      <strong>Factor</strong> — a number that divides exactly into another number, with nothing left over.<br>
+      <strong>Common</strong> — shared by two or more things.<br>
+      <strong>Highest</strong> — the biggest one.
+    </div>
+    <p>A <strong>factor</strong> of a number is a whole number that divides into it with <strong>nothing left over</strong>.</p>
+    <p>Another way to think about it: if two numbers multiply together to make 12 (like 3 × 4 = 12), then both 3 and 4 are factors of 12.</p>
     <button class="reveal-btn" onclick="revealNext('r1', this)">Show me — factors of 12</button>
-    <div class="reveal-step" id="r1-0"><div class="example">Factors of 12: 1, 2, 3, 4, 6, 12</div>
+    <div class="reveal-step" id="r1-0"><div class="example">Factors of 12: 1, 2, 3, 4, 6, 12<br><span style="color:#888;font-size:.85rem;">(12 ÷ 3 = 4 exactly, so 3 is a factor. 12 ÷ 5 = 2.4, so 5 is NOT a factor.)</span></div>
       <button class="reveal-btn" onclick="revealNext('r1', this)">Show me — factors of 18</button></div>
     <div class="reveal-step" id="r1-1"><div class="example">Factors of 18: 1, 2, 3, 6, 9, 18</div>
-      <button class="reveal-btn" onclick="revealNext('r1', this)">Show me both together</button></div>
+      <button class="reveal-btn" onclick="revealNext('r1', this)">Show me how they overlap</button></div>
     <div class="reveal-step" id="r1-2">
-      <p>The circles below show the factors of each number. Where the circles <strong>overlap</strong>, that's a factor of <em>both</em> 12 and 18.</p>
-      <div class="venn-wrap" id="venn-1"></div>
+      <p>Where the two circles <strong>overlap</strong> (cross over), those numbers are factors of <em>both</em> 12 and 18 — they are <strong>common factors</strong>.</p>
       <button class="reveal-btn" onclick="revealNext('r1', this)">So what's the HCF?</button>
     </div>
+    <div class="venn-wrap" id="venn-1" style="display:none;"></div>
     <div class="reveal-step" id="r1-3">
-      <div class="example">Common factors: 1, 2, 3, 6 &nbsp;→&nbsp; the <strong>highest</strong> one is 6.<br><strong>Highest Common Factor (HCF) of 12 and 18 = 6</strong></div>
+      <div class="example">Common factors: 1, 2, 3, 6 &nbsp;→&nbsp; the <strong>highest</strong> (biggest) one is 6.<br><strong>Highest Common Factor (HCF) of 12 and 18 = 6</strong></div>
     </div>
     <div class="try-it" id="try-1"></div>
   </section>
@@ -191,19 +198,22 @@ async function checkSession(){
   if(!error && topic){ topicId = topic.id; }
 }
 
-async function recordProgress(status){
+async function recordProgress(status, stageReached){
   // matches the schema the revision walkthroughs already write to:
   // student_id, topic_id, status ('started'|'completed'), last_visited_at
+  // + stage_reached (new column, specific to multi-stage Deep Dive walkthroughs)
   if(!currentUser || !topicId) return;
   try{
+    const payload = {
+      student_id: currentUser.id,
+      topic_id: topicId,
+      status: status,
+      last_visited_at: new Date().toISOString()
+    };
+    if(stageReached !== undefined) payload.stage_reached = stageReached;
     const { error } = await supabase
       .from('walkthrough_progress')
-      .upsert({
-        student_id: currentUser.id,
-        topic_id: topicId,
-        status: status,
-        last_visited_at: new Date().toISOString()
-      }, { onConflict: 'student_id,topic_id' });
+      .upsert(payload, { onConflict: 'student_id,topic_id' });
     if(error) console.error('Progress save failed:', error);
   }catch(e){ console.error('Progress save failed:', e); }
 }
@@ -220,10 +230,49 @@ function revealNext(groupPrefix, btnEl){
   const el = document.getElementById(`${groupPrefix}-${idx}`);
   if(el) el.classList.add('shown');
   if(btnEl) btnEl.style.display = 'none';
+  if(groupPrefix === 'r1') drawVennStep('venn-1', idx);
 }
 window.revealNext = revealNext;
 
-// ---- Venn diagram renderer: two overlapping circles, three text regions ----
+// ---- Venn diagram: builds up circle-by-circle (Stage 1 specific: 12 vs 18) ----
+function factorsOf(n){
+  const f = [];
+  for(let i=1;i<=n;i++){ if(n%i===0) f.push(i); }
+  return f;
+}
+function drawVennStep(containerId, step){
+  const el = document.getElementById(containerId);
+  el.style.display = 'flex';
+  const fa = factorsOf(12), fb = factorsOf(18);
+  const common = fa.filter(x=>fb.includes(x));
+  const onlyA = fa.filter(x=>!common.includes(x));
+  const onlyB = fb.filter(x=>!common.includes(x));
+  if(step === 0){
+    // Circle A only — all factors of 12
+    el.innerHTML = `
+      <svg viewBox="0 0 480 220" width="480" height="220" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="180" cy="110" r="95" fill="#C0272D22" stroke="#C0272D" stroke-width="2"/>
+        <text x="110" y="35" class="venn-label">Factors of 12</text>
+        <text x="180" y="115" text-anchor="middle" class="venn-item">${fa.join(', ')}</text>
+      </svg>`;
+  } else if(step === 1){
+    // Both circles appear, full lists shown side by side (not yet sorted into overlap)
+    el.innerHTML = `
+      <svg viewBox="0 0 480 220" width="480" height="220" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="180" cy="110" r="95" fill="#C0272D22" stroke="#C0272D" stroke-width="2"/>
+        <circle cx="300" cy="110" r="95" fill="#1565C022" stroke="#1565C0" stroke-width="2"/>
+        <text x="110" y="35" class="venn-label">Factors of 12</text>
+        <text x="330" y="35" class="venn-label" text-anchor="end">Factors of 18</text>
+        <text x="150" y="115" text-anchor="middle" class="venn-item">${fa.join(', ')}</text>
+        <text x="330" y="115" text-anchor="middle" class="venn-item">${fb.join(', ')}</text>
+      </svg>`;
+  } else {
+    // Final split: common factors pulled into the overlap region
+    drawVenn(containerId, onlyA, common, onlyB, 'Factors of 12', 'Factors of 18');
+  }
+}
+
+// ---- Generic Venn diagram renderer (used for the final split view + Stage 3) ----
 function drawVenn(containerId, onlyA, common, onlyB, labelA, labelB){
   const w = 480, h = 220;
   const svg = `
@@ -238,20 +287,6 @@ function drawVenn(containerId, onlyA, common, onlyB, labelA, labelB){
     </svg>`;
   document.getElementById(containerId).innerHTML = svg;
 }
-
-function factorsOf(n){
-  const f = [];
-  for(let i=1;i<=n;i++){ if(n%i===0) f.push(i); }
-  return f;
-}
-
-(function(){
-  const fa = factorsOf(12), fb = factorsOf(18);
-  const common = fa.filter(x=>fb.includes(x));
-  const onlyA = fa.filter(x=>!common.includes(x));
-  const onlyB = fb.filter(x=>!common.includes(x));
-  drawVenn('venn-1', onlyA, common, onlyB, 'Factors of 12', 'Factors of 18');
-})();
 
 (function(){
   const a = [2,2,3,3], b = [2,2,2,2,3];
@@ -441,7 +476,7 @@ function advanceStage(){
   currentStage++;
   document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display='block';
   renderProgress();
-  recordProgress('started');
+  recordProgress('started', currentStage);
   if(currentStage === totalStages) startFinalQuiz();
   window.scrollTo({top:document.querySelector(`.stage[data-stage="${currentStage}"]`).offsetTop-20, behavior:'smooth'});
 }
@@ -465,7 +500,7 @@ function renderQuizQuestion(){
       <div class="quiz-score">You scored ${quizScore} / ${QUIZ_LENGTH}</div>
       <p style="text-align:center;color:#555;">${quizScore >= 7 ? "Great work — you've got a solid handle on HCF!" : 'Worth another pass through the earlier stages before moving on.'}</p>
     `;
-    recordProgress('completed');
+    recordProgress('completed', totalStages);
     return;
   }
   const generator = ALL_GENERATORS[quizIndex % ALL_GENERATORS.length];
@@ -484,7 +519,7 @@ function renderQuizQuestion(){
   buildTryMC('try-3', genStage3);
   buildTryMC('try-4', genStage4);
   buildTryMC('try-5', genStage5);
-  recordProgress('started');
+  recordProgress('started', currentStage);
 })();
 </script>
 </body>
