@@ -112,22 +112,19 @@
     <h2>Seeing It on a Graph</h2>
     <button class="reveal-btn" style="background:#888;" onclick="goToStage(3)">← Back to Stage 3</button>
     <p>The graph of y = x² is a curve called a <strong>parabola</strong>. It never dips below the x-axis — which matches exactly what you found in Stage 3.</p>
-    <button class="reveal-btn" onclick="revealNext('r4', this)">Show me the graph</button>
+    <div class="venn-wrap" id="graph-base"></div>
+    <button class="reveal-btn" onclick="revealNext('r4', this)">Now overlay y = 16 (Stage 1's case)</button>
     <div class="reveal-step" id="r4-0">
-      <div class="venn-wrap" id="graph-base"></div>
-      <button class="reveal-btn" onclick="revealNext('r4', this)">Now overlay y = 16 (Stage 1's case)</button>
-    </div>
-    <div class="reveal-step" id="r4-1">
       <div class="venn-wrap" id="graph-16"></div>
       <p>The line y = 16 crosses the curve at <strong>two</strong> points — x = −4 and x = 4. Two crossings, two solutions.</p>
       <button class="reveal-btn" onclick="revealNext('r4', this)">Now overlay y = 0 (Stage 2's case)</button>
     </div>
-    <div class="reveal-step" id="r4-2">
+    <div class="reveal-step" id="r4-1">
       <div class="venn-wrap" id="graph-0"></div>
       <p>The line y = 0 (the x-axis itself) just <strong>touches</strong> the curve once, at the very bottom. One touch, one repeated solution.</p>
       <button class="reveal-btn" onclick="revealNext('r4', this)">Now overlay y = −4 (Stage 3's case)</button>
     </div>
-    <div class="reveal-step" id="r4-3">
+    <div class="reveal-step" id="r4-2">
       <div class="venn-wrap" id="graph-neg4"></div>
       <div class="example">The line y = −4 never touches the curve at all. Zero crossings, zero real solutions — exactly what Stage 3 found algebraically.</div>
     </div>
@@ -312,12 +309,16 @@ function drawParabola(containerId, a, b, c, opts){
 }
 
 // Stage 4 graphs
-drawParabola('graph-base', 1, 0, 0, {yMax:20});
-drawParabola('graph-16', 1, 0, 0, {yMax:20, highlightY:16, roots:[-4,4]});
-drawParabola('graph-0', 1, 0, 0, {yMax:20, highlightY:0, roots:[0]});
-drawParabola('graph-neg4', 1, 0, 0, {yMax:20, yMin:-10, highlightY:-4});
-// Stage 7 graph: y = x² + 6x + 5, vertex (-3,-4), roots -1 and -5
-drawParabola('graph-full', 1, 6, 5, {xMin:-8, xMax:4, yMin:-6, yMax:14, roots:[-1,-5], vertex:[-3,-4]});
+// Stage 4 graphs — consistent window across all four so they're directly comparable,
+// x-range chosen to match y-range (x=±4.5 → x²≈20) so the curve arcs cleanly to the
+// top corners instead of clipping into flat plateaus.
+drawParabola('graph-base', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20});
+drawParabola('graph-16', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, highlightY:16, roots:[-4,4]});
+drawParabola('graph-0', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, highlightY:0, roots:[0]});
+drawParabola('graph-neg4', 1, 0, 0, {xMin:-4.5, xMax:4.5, yMin:-6, yMax:20, highlightY:-4});
+// Stage 7 graph: y = x² + 6x + 5, vertex (-3,-4), roots -1 and -5 — range chosen so the
+// curve exits near the top corners rather than clipping flat partway across.
+drawParabola('graph-full', 1, 6, 5, {xMin:-7.5, xMax:1.5, yMin:-6, yMax:14, roots:[-1,-5], vertex:[-3,-4]});
 
 // ---- buildTryMC: renders a dynamic multiple-choice checkpoint (per-stage, gated) ----
 function buildTryMC(containerId, generator){
