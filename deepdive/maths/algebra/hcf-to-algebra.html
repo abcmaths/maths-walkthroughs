@@ -42,6 +42,9 @@
   .ladder-row:last-child .ladder-value{border-bottom:none;font-weight:700;}
   .quiz-score{font-size:1.4rem;font-weight:700;color:var(--dark);text-align:center;margin:18px 0;}
   .quiz-counter{font-size:.8rem;color:#888;margin-bottom:8px;}
+  .chip-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+  .chip{background:#fff;border:2px solid var(--line);border-radius:6px;padding:8px 14px;font-weight:700;font-family:'Consolas',monospace;font-size:1rem;}
+  .chip.common{background:#fdf3d9;border-color:var(--gold);color:var(--dark);}
 </style>
 </head>
 <body>
@@ -50,6 +53,12 @@
   <p>From factors of numbers all the way to factorising algebraic expressions</p>
 </header>
 <div class="wrap">
+  <div class="example" style="border-left-color:#1565C0;">
+    <strong>How long will this take?</strong><br>
+    Most students: around 25–35 minutes.<br>
+    Still building confidence with this topic? Take your time — up to 45–50 minutes is completely fine, there's no rush.<br>
+    Already confident? You might move through it in 15–20 minutes.
+  </div>
   <div class="progress" id="progress-bar"></div>
 
   <!-- STAGE 1: Factors + Venn diagram -->
@@ -83,17 +92,23 @@
   <!-- STAGE 2: Prime factorisation via division ladder -->
   <section class="stage" data-stage="2" style="display:none;">
     <span class="stage-label">Stage 2</span>
-    <h2>Prime Factorisation — the Division Ladder</h2>
+    <h2>Prime Factorisation — Two Ways to See It</h2>
     <button class="reveal-btn" style="background:#888;" onclick="goToStage(1)">← Back to Stage 1</button>
-        <p>Listing every factor gets slow for bigger numbers. Instead, we can break a number down into <strong>prime factors</strong> using a division ladder — exactly how you'd do it on paper.</p>
-    <p>Divide by the smallest prime number that goes in exactly, write the answer underneath, and repeat until you reach 1.</p>
-    <button class="reveal-btn" onclick="revealNext('r2', this)">Show me — dividing 36</button>
+        <p>Listing every factor gets slow for bigger numbers. Instead, we can break a number down into <strong>prime factors</strong> — numbers that can't be split any further (like 2, 3, 5, 7...).</p>
+    <p>There are two common paper methods for this. They always give the same answer — just drawn differently.</p>
+    <button class="reveal-btn" onclick="revealNext('r2', this)">Method 1 — Show me the factor tree for 36</button>
     <div class="reveal-step" id="r2-0">
-      <div class="ladder" id="ladder-36"></div>
-      <button class="reveal-btn" onclick="revealNext('r2', this)">So what does this tell us?</button>
+      <p>Split 36 into two factors, then keep splitting each branch until every end is a prime number (can't split any further).</p>
+      <div class="venn-wrap" id="tree-36"></div>
+      <button class="reveal-btn" onclick="revealNext('r2', this)">Method 2 — Show me the division ladder for 36</button>
     </div>
     <div class="reveal-step" id="r2-1">
-      <div class="example">Reading the divisors down the side: 36 = 2 × 2 × 3 × 3</div>
+      <p>Divide by the smallest prime number that goes in exactly, write the answer underneath, and repeat until you reach 1.</p>
+      <div class="ladder" id="ladder-36"></div>
+      <button class="reveal-btn" onclick="revealNext('r2', this)">Do both methods agree?</button>
+    </div>
+    <div class="reveal-step" id="r2-2">
+      <div class="example">Tree and ladder both end up with the same set of primes: 36 = 2 × 2 × 3 × 3<br><span style="color:#888;font-size:.85rem;">Use whichever picture makes more sense to you — they always match.</span></div>
     </div>
     <div class="try-it" id="try-2"></div>
   </section>
@@ -128,18 +143,27 @@
     <span class="stage-label">Stage 4</span>
     <h2>HCF of Algebraic Terms</h2>
     <button class="reveal-btn" style="background:#888;" onclick="goToStage(3)">← Back to Stage 3</button>
-        <p>The same idea applies to terms with letters. Find the HCF of the numbers as before, then take the <strong>lowest power</strong> of any letter that appears in every term.</p>
-    <button class="reveal-btn" onclick="revealNext('r4', this)">Show me — HCF of 8x²y and 12xy³</button>
+        <p>The same "break it into pieces" idea works for terms with letters too. We can decompose 8x²y and 12xy³ into their individual building blocks, exactly like we did with the tree and ladder — just written as separate pieces multiplied together.</p>
+    <p>Remember: x² means x × x, and y³ means y × y × y.</p>
+    <button class="reveal-btn" onclick="revealNext('r4', this)">Show me — break down 8x²y</button>
     <div class="reveal-step" id="r4-0">
-      <div class="example">Numbers: HCF(8, 12) = 4</div>
-      <button class="reveal-btn" onclick="revealNext('r4', this)">Now the letters</button>
+      <p>8x²y = 2 × 2 × 2 × x × x × y</p>
+      <div id="chips-a"></div>
+      <button class="reveal-btn" onclick="revealNext('r4', this)">Now break down 12xy³</button>
     </div>
     <div class="reveal-step" id="r4-1">
-      <div class="example">x appears as x² and x¹ → lowest power is x¹<br>y appears as y¹ and y³ → lowest power is y¹</div>
-      <button class="reveal-btn" onclick="revealNext('r4', this)">Put it together</button>
+      <p>12xy³ = 2 × 2 × 3 × x × y × y × y</p>
+      <div id="chips-b"></div>
+      <button class="reveal-btn" onclick="revealNext('r4', this)">Show me which pieces they share</button>
     </div>
     <div class="reveal-step" id="r4-2">
-      <div class="example"><strong>HCF of 8x²y and 12xy³ = 4xy</strong></div>
+      <p>The <strong>gold</strong> pieces below appear in both breakdowns — those are the pieces the HCF is built from:</p>
+      <div id="chips-a-highlighted"></div>
+      <div id="chips-b-highlighted"></div>
+      <button class="reveal-btn" onclick="revealNext('r4', this)">So what's the HCF?</button>
+    </div>
+    <div class="reveal-step" id="r4-3">
+      <div class="example">Shared pieces: 2 × 2 × x × y &nbsp;→&nbsp; <strong>HCF of 8x²y and 12xy³ = 4xy</strong></div>
     </div>
     <div class="try-it" id="try-4"></div>
   </section>
@@ -324,6 +348,99 @@ function renderLadder(containerId, n){
 renderLadder('ladder-36', 36);
 renderLadder('ladder-36b', 36);
 renderLadder('ladder-48', 48);
+
+// ---- Factor tree renderer (paper method 2) ----
+function isPrime(n){
+  if(n < 2) return false;
+  for(let i=2; i*i<=n; i++){ if(n % i === 0) return false; }
+  return true;
+}
+function findFactorPair(n){
+  for(let i=Math.floor(Math.sqrt(n)); i>=2; i--){
+    if(n % i === 0) return [i, n/i];
+  }
+  return [1, n];
+}
+function buildTree(n){
+  if(isPrime(n)) return {val:n, leaf:true};
+  const [a,b] = findFactorPair(n);
+  return {val:n, leaf:false, children:[buildTree(a), buildTree(b)]};
+}
+function countLeaves(node){
+  return node.leaf ? 1 : countLeaves(node.children[0]) + countLeaves(node.children[1]);
+}
+function layoutTree(node, depth, xLeft, xRight){
+  node.depth = depth;
+  if(node.leaf){ node.x = (xLeft+xRight)/2; return; }
+  const leftLeaves = countLeaves(node.children[0]);
+  const totalLeaves = countLeaves(node);
+  const splitX = xLeft + (xRight-xLeft) * (leftLeaves/totalLeaves);
+  layoutTree(node.children[0], depth+1, xLeft, splitX);
+  layoutTree(node.children[1], depth+1, splitX, xRight);
+  node.x = (node.children[0].x + node.children[1].x) / 2;
+}
+function collectDepths(node){
+  return node.leaf ? [node.depth] : node.children.flatMap(collectDepths);
+}
+function renderTreeNode(node, elements){
+  const y = 30 + node.depth * 55;
+  if(!node.leaf){
+    node.children.forEach(c=>{
+      const cy = 30 + c.depth * 55;
+      elements.push(`<line x1="${node.x}" y1="${y+14}" x2="${c.x}" y2="${cy-14}" stroke="#bbb" stroke-width="1.5"/>`);
+    });
+  }
+  const isLeaf = node.leaf;
+  elements.push(`<circle cx="${node.x}" cy="${y}" r="17" fill="${isLeaf ? '#C0272D' : '#fff'}" stroke="${isLeaf ? '#7A1418' : '#C8922A'}" stroke-width="2"/>`);
+  elements.push(`<text x="${node.x}" y="${y+5}" text-anchor="middle" font-size="14" font-weight="700" fill="${isLeaf ? '#fff' : '#333'}">${node.val}</text>`);
+  if(!node.leaf) node.children.forEach(c=>renderTreeNode(c, elements));
+}
+function drawFactorTree(containerId, n){
+  const tree = buildTree(n);
+  layoutTree(tree, 0, 30, 450);
+  const elements = [];
+  renderTreeNode(tree, elements);
+  const maxDepth = Math.max(...collectDepths(tree));
+  const height = 30 + maxDepth * 55 + 40;
+  document.getElementById(containerId).innerHTML =
+    `<svg viewBox="0 0 480 ${height}" width="480" height="${height}" xmlns="http://www.w3.org/2000/svg">${elements.join('')}</svg>`;
+}
+drawFactorTree('tree-36', 36);
+
+// ---- Multiset "common items" helper (shared by Venn diagrams and chip breakdowns) ----
+function multisetCommon(a, b){
+  const bCopy = [...b];
+  const common = [];
+  a.forEach(item=>{
+    const idx = bCopy.indexOf(item);
+    if(idx > -1){ common.push(item); bCopy.splice(idx,1); }
+  });
+  return common;
+}
+
+// ---- Chip breakdown renderer (Stage 4: decompose algebraic terms into pieces) ----
+function renderChips(containerId, chips, highlightSet){
+  let remaining = highlightSet ? [...highlightSet] : [];
+  const html = chips.map(c=>{
+    let isCommon = false;
+    if(highlightSet){
+      const idx = remaining.indexOf(c);
+      if(idx > -1){ isCommon = true; remaining.splice(idx,1); }
+    }
+    return `<div class="chip ${isCommon ? 'common' : ''}">${c}</div>`;
+  }).join('');
+  document.getElementById(containerId).innerHTML = `<div class="chip-row">${html}</div>`;
+}
+// Static Stage 4 example: 8x²y vs 12xy³
+(function(){
+  const chipsA = ['2','2','2','x','x','y'];
+  const chipsB = ['2','2','3','x','y','y','y'];
+  renderChips('chips-a', chipsA);
+  renderChips('chips-b', chipsB);
+  const common = multisetCommon(chipsA, chipsB);
+  renderChips('chips-a-highlighted', chipsA, common);
+  renderChips('chips-b-highlighted', chipsB, common);
+})();
 
 // ---- buildTryMC: renders a dynamic multiple-choice checkpoint (per-stage, gated) ----
 function buildTryMC(containerId, generator){
