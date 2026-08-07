@@ -296,6 +296,26 @@ async function recordProgress(status, stageReached){
   }catch(e){ console.error('Progress save failed:', e); }
 }
 
+// Called once on page load. Deliberately does NOT unconditionally overwrite status —
+// reopening a page a student already opted out of (or completed) shouldn't silently
+// erase that record just from viewing it again. Only writes 'started' if this is a
+// genuinely new visit (no existing row) or the student was already mid-lesson.
+async function recordInitialVisit(){
+  if(!currentUser || !topicId) return;
+  try{
+    const { data: existing } = await supabase
+      .from('walkthrough_progress')
+      .select('status')
+      .eq('student_id', currentUser.id)
+      .eq('topic_id', topicId)
+      .maybeSingle();
+    if(!existing || existing.status === 'started'){
+      await recordProgress('started', currentStage);
+    }
+    // existing.status === 'completed' or 'opted_out': leave untouched on mere page load
+  }catch(e){ console.error('Initial visit check failed:', e); }
+}
+
 window.optOut = async function(){
   if(!confirm("Save your progress and exit this walkthrough? You can come back and pick up from where you left off.")) return;
   await recordProgress('opted_out', typeof currentStage !== 'undefined' ? currentStage : undefined);
@@ -829,7 +849,7 @@ function renderQuizQuestion(){
   buildTryMC('try-4', genStage4);
   buildTryMC('try-5', genStage5);
   buildTryMC('try-6', genFactoriseQuad);
-  recordProgress('started', currentStage);
+  recordInitialVisit();
 })();
 </script>
 </body>
