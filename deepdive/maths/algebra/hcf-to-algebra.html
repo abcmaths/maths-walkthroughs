@@ -24,11 +24,24 @@
   .mc-opt:hover{background:var(--cream);}
   .mc-correct{background:#e6f4ea!important;border-color:#2e7d32!important;}
   .mc-wrong{background:#fdecea!important;border-color:#c62828!important;}
-  .working{margin-top:10px;font-size:.9rem;color:#555;display:none;}
-  button.next-btn{background:var(--red);color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;margin-top:14px;}
+  .working{margin-top:10px;font-size:.9rem;color:#555;}
+  button.next-btn, button.reveal-btn{background:var(--red);color:#fff;border:none;padding:9px 18px;border-radius:6px;cursor:pointer;margin-top:12px;font-size:.88rem;}
+  button.reveal-btn{background:var(--gold);}
   .progress{display:flex;gap:6px;margin-bottom:18px;}
   .progress span{flex:1;height:6px;border-radius:3px;background:var(--line);}
   .progress span.done{background:var(--red);}
+  .reveal-step{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+  .reveal-step.shown{display:block;}
+  .venn-wrap{display:flex;justify-content:center;margin:16px 0;}
+  .venn-label{font-size:.78rem;font-weight:700;fill:var(--dark);}
+  .venn-item{font-size:.82rem;fill:#2b2b2b;}
+  .ladder{display:inline-block;font-family:'Consolas',monospace;font-size:1rem;margin:14px 0;}
+  .ladder-row{display:flex;align-items:center;}
+  .ladder-divisor{width:44px;text-align:center;font-weight:700;color:var(--red);border-right:2px solid #333;padding:4px 8px;}
+  .ladder-value{padding:4px 14px;border-bottom:1px solid #ddd;min-width:60px;}
+  .ladder-row:last-child .ladder-value{border-bottom:none;font-weight:700;}
+  .quiz-score{font-size:1.4rem;font-weight:700;color:var(--dark);text-align:center;margin:18px 0;}
+  .quiz-counter{font-size:.8rem;color:#888;margin-bottom:8px;}
 </style>
 </head>
 <body>
@@ -39,73 +52,127 @@
 <div class="wrap">
   <div class="progress" id="progress-bar"></div>
 
-  <!-- STAGE 1 -->
+  <!-- STAGE 1: Factors + Venn diagram -->
   <section class="stage" data-stage="1">
     <span class="stage-label">Stage 1</span>
     <h2>What is a Highest Common Factor?</h2>
     <p>The <strong>factors</strong> of a number are all the whole numbers that divide into it exactly.</p>
-    <div class="example">
-      Factors of 12: 1, 2, 3, 4, 6, 12<br>
-      Factors of 18: 1, 2, 3, 6, 9, 18<br>
-      Common factors: 1, 2, 3, 6 &nbsp;→&nbsp; <strong>Highest Common Factor (HCF) = 6</strong>
+    <button class="reveal-btn" onclick="revealNext('r1', this)">Show me — factors of 12</button>
+    <div class="reveal-step" id="r1-0"><div class="example">Factors of 12: 1, 2, 3, 4, 6, 12</div>
+      <button class="reveal-btn" onclick="revealNext('r1', this)">Show me — factors of 18</button></div>
+    <div class="reveal-step" id="r1-1"><div class="example">Factors of 18: 1, 2, 3, 6, 9, 18</div>
+      <button class="reveal-btn" onclick="revealNext('r1', this)">Show me both together</button></div>
+    <div class="reveal-step" id="r1-2">
+      <p>The circles below show the factors of each number. Where the circles <strong>overlap</strong>, that's a factor of <em>both</em> 12 and 18.</p>
+      <div class="venn-wrap" id="venn-1"></div>
+      <button class="reveal-btn" onclick="revealNext('r1', this)">So what's the HCF?</button>
+    </div>
+    <div class="reveal-step" id="r1-3">
+      <div class="example">Common factors: 1, 2, 3, 6 &nbsp;→&nbsp; the <strong>highest</strong> one is 6.<br><strong>Highest Common Factor (HCF) of 12 and 18 = 6</strong></div>
     </div>
     <div class="try-it" id="try-1"></div>
   </section>
 
-  <!-- STAGE 2 -->
+  <!-- STAGE 2: Prime factorisation via division ladder -->
   <section class="stage" data-stage="2" style="display:none;">
     <span class="stage-label">Stage 2</span>
-    <h2>Finding HCF using Prime Factorisation</h2>
-    <p>Listing factors gets slow for bigger numbers. Instead, break each number into <strong>prime factors</strong>, then multiply the primes they share.</p>
-    <div class="example">
-      36 = 2 × 2 × 3 × 3<br>
-      48 = 2 × 2 × 2 × 2 × 3<br>
-      Shared primes: 2 × 2 × 3 = <strong>HCF = 12</strong>
+    <h2>Prime Factorisation — the Division Ladder</h2>
+    <p>Listing every factor gets slow for bigger numbers. Instead, we can break a number down into <strong>prime factors</strong> using a division ladder — exactly how you'd do it on paper.</p>
+    <p>Divide by the smallest prime number that goes in exactly, write the answer underneath, and repeat until you reach 1.</p>
+    <button class="reveal-btn" onclick="revealNext('r2', this)">Show me — dividing 36</button>
+    <div class="reveal-step" id="r2-0">
+      <div class="ladder" id="ladder-36"></div>
+      <button class="reveal-btn" onclick="revealNext('r2', this)">So what does this tell us?</button>
+    </div>
+    <div class="reveal-step" id="r2-1">
+      <div class="example">Reading the divisors down the side: 36 = 2 × 2 × 3 × 3</div>
     </div>
     <div class="try-it" id="try-2"></div>
   </section>
 
-  <!-- STAGE 3 -->
+  <!-- STAGE 3: HCF via prime factorisation + Venn -->
   <section class="stage" data-stage="3" style="display:none;">
     <span class="stage-label">Stage 3</span>
-    <h2>HCF of Algebraic Terms</h2>
-    <p>The same idea applies to terms with letters. Find the HCF of the numbers, then take the <strong>lowest power</strong> of any letter common to all terms.</p>
-    <div class="example">
-      HCF of 8x²y and 12xy³:<br>
-      Numbers: HCF(8,12) = 4<br>
-      x: lowest power is x¹ &nbsp; y: lowest power is y¹<br>
-      <strong>HCF = 4xy</strong>
+    <h2>Finding HCF using Prime Factorisation</h2>
+    <p>Once two numbers are broken into prime factors, their HCF is simply the primes they <strong>share</strong>.</p>
+    <button class="reveal-btn" onclick="revealNext('r3', this)">Show me — 36 and 48 as ladders</button>
+    <div class="reveal-step" id="r3-0">
+      <div style="display:flex;gap:32px;flex-wrap:wrap;justify-content:center;">
+        <div class="ladder" id="ladder-36b"></div>
+        <div class="ladder" id="ladder-48"></div>
+      </div>
+      <button class="reveal-btn" onclick="revealNext('r3', this)">Show me the shared primes</button>
+    </div>
+    <div class="reveal-step" id="r3-1">
+      <p>36 = 2 × 2 × 3 × 3 &nbsp;&nbsp; 48 = 2 × 2 × 2 × 2 × 3</p>
+      <div class="venn-wrap" id="venn-2"></div>
+      <button class="reveal-btn" onclick="revealNext('r3', this)">So what's the HCF?</button>
+    </div>
+    <div class="reveal-step" id="r3-2">
+      <div class="example">Shared primes: 2 × 2 × 3 = <strong>HCF = 12</strong></div>
     </div>
     <div class="try-it" id="try-3"></div>
   </section>
 
-  <!-- STAGE 4 -->
+  <!-- STAGE 4: HCF of algebraic terms -->
   <section class="stage" data-stage="4" style="display:none;">
     <span class="stage-label">Stage 4</span>
-    <h2>Using HCF to Factorise Expressions</h2>
-    <p>Factorising means writing an expression as the HCF multiplied by what's left over in brackets.</p>
-    <div class="example">
-      Factorise 6x² + 9x:<br>
-      HCF of 6x² and 9x is 3x<br>
-      6x² ÷ 3x = 2x &nbsp;&nbsp; 9x ÷ 3x = 3<br>
-      <strong>6x² + 9x = 3x(2x + 3)</strong>
+    <h2>HCF of Algebraic Terms</h2>
+    <p>The same idea applies to terms with letters. Find the HCF of the numbers as before, then take the <strong>lowest power</strong> of any letter that appears in every term.</p>
+    <button class="reveal-btn" onclick="revealNext('r4', this)">Show me — HCF of 8x²y and 12xy³</button>
+    <div class="reveal-step" id="r4-0">
+      <div class="example">Numbers: HCF(8, 12) = 4</div>
+      <button class="reveal-btn" onclick="revealNext('r4', this)">Now the letters</button>
+    </div>
+    <div class="reveal-step" id="r4-1">
+      <div class="example">x appears as x² and x¹ → lowest power is x¹<br>y appears as y¹ and y³ → lowest power is y¹</div>
+      <button class="reveal-btn" onclick="revealNext('r4', this)">Put it together</button>
+    </div>
+    <div class="reveal-step" id="r4-2">
+      <div class="example"><strong>HCF of 8x²y and 12xy³ = 4xy</strong></div>
     </div>
     <div class="try-it" id="try-4"></div>
+  </section>
+
+  <!-- STAGE 5: Factorising using HCF -->
+  <section class="stage" data-stage="5" style="display:none;">
+    <span class="stage-label">Stage 5</span>
+    <h2>Using HCF to Factorise Expressions</h2>
+    <p>Factorising means writing an expression as the HCF multiplied by whatever's left over in brackets.</p>
+    <button class="reveal-btn" onclick="revealNext('r5', this)">Show me — factorise 6x² + 9x</button>
+    <div class="reveal-step" id="r5-0">
+      <div class="example">HCF of 6x² and 9x is 3x</div>
+      <button class="reveal-btn" onclick="revealNext('r5', this)">Divide each term by the HCF</button>
+    </div>
+    <div class="reveal-step" id="r5-1">
+      <div class="example">6x² ÷ 3x = 2x &nbsp;&nbsp; 9x ÷ 3x = 3</div>
+      <button class="reveal-btn" onclick="revealNext('r5', this)">Write the final answer</button>
+    </div>
+    <div class="reveal-step" id="r5-2">
+      <div class="example"><strong>6x² + 9x = 3x(2x + 3)</strong></div>
+    </div>
+    <div class="try-it" id="try-5"></div>
+  </section>
+
+  <!-- STAGE 6: Final Check — 10 question mastery quiz -->
+  <section class="stage" data-stage="6" style="display:none;">
+    <span class="stage-label">Final Check</span>
+    <h2>Show What You Know</h2>
+    <p>10 mixed questions covering everything from this walkthrough — listing factors, prime factorisation, HCF of numbers and algebraic terms, and factorising. Take your time.</p>
+    <div id="quiz-area"></div>
     <p style="margin-top:16px;"><a href="../../../login.html">Return to dashboard</a></p>
   </section>
 </div>
 
 <script type="module">
-// ---- session check (same pattern as dashboard-student.html / add_login_check.py) ----
+// ---- session check (same pattern as dashboard-student.html) ----
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const SUPABASE_URL = "https://lnwinoghbefmjpvmixzo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Identity for this deep-dive topic — must match a row in `topics`
-// (subject='deepdive_maths', topic_code='TCH-ALG-01')
-const TOPIC_CODE = "TCH-ALG-01";
+const TOPIC_CODE = "TCH-ALG-01"; // must match a row in `topics` (subject='deepdive_maths')
 let currentUser = null;
 let topicId = null;
 
@@ -116,7 +183,6 @@ async function checkSession(){
     return;
   }
   currentUser = session.user;
-  // resolve topic_id from topic_code (topics table has no file_path, so this is the join key)
   const { data: topic, error } = await supabase
     .from('topics')
     .select('id')
@@ -126,7 +192,7 @@ async function checkSession(){
 }
 
 async function recordProgress(status){
-  // matches the same schema/columns the revision walkthroughs already write to:
+  // matches the schema the revision walkthroughs already write to:
   // student_id, topic_id, status ('started'|'completed'), last_visited_at
   if(!currentUser || !topicId) return;
   try{
@@ -142,43 +208,144 @@ async function recordProgress(status){
   }catch(e){ console.error('Progress save failed:', e); }
 }
 
-// ---- shared helpers (same conventions as revision walkthroughs) ----
+// ---- shared helpers ----
 function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 
-function buildTryMC(containerId, generator){
-  const container = document.getElementById(containerId);
-  function render(){
-    const q = generator();
-    container.innerHTML = `
-      <p><strong>Your turn:</strong> ${q.question}</p>
-      <div class="mc-opts"></div>
-      <div class="working"></div>
-      <button class="next-btn" style="display:none;">Next question →</button>
-    `;
-    const optsWrap = container.querySelector('.mc-opts');
-    const workingEl = container.querySelector('.working');
-    const nextBtn = container.querySelector('.next-btn');
-    q.options.forEach((opt,i)=>{
-      const b = document.createElement('button');
-      b.className = 'mc-opt';
-      b.textContent = opt;
-      b.onclick = ()=>{
-        [...optsWrap.children].forEach(c=>c.disabled=true);
-        if(i===q.correct){ b.classList.add('mc-correct'); }
-        else { b.classList.add('mc-wrong'); optsWrap.children[q.correct].classList.add('mc-correct'); }
-        workingEl.style.display='block';
-        workingEl.textContent = q.working;
-        nextBtn.style.display='inline-block';
-      };
-      optsWrap.appendChild(b);
-    });
-    nextBtn.onclick = ()=>{ advanceStage(); };
-  }
-  render();
+// ---- progressive "click to reveal" teaching steps ----
+const revealState = {};
+function revealNext(groupPrefix, btnEl){
+  const idx = revealState[groupPrefix] === undefined ? 0 : revealState[groupPrefix] + 1;
+  revealState[groupPrefix] = idx;
+  const el = document.getElementById(`${groupPrefix}-${idx}`);
+  if(el) el.classList.add('shown');
+  if(btnEl) btnEl.style.display = 'none';
+}
+window.revealNext = revealNext;
+
+// ---- Venn diagram renderer: two overlapping circles, three text regions ----
+function drawVenn(containerId, onlyA, common, onlyB, labelA, labelB){
+  const w = 480, h = 220;
+  const svg = `
+    <svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="180" cy="110" r="95" fill="#C0272D22" stroke="#C0272D" stroke-width="2"/>
+      <circle cx="300" cy="110" r="95" fill="#1565C022" stroke="#1565C0" stroke-width="2"/>
+      <text x="110" y="35" class="venn-label">${labelA}</text>
+      <text x="330" y="35" class="venn-label" text-anchor="end">${labelB}</text>
+      <text x="130" y="110" text-anchor="middle" class="venn-item">${onlyA.join(', ')}</text>
+      <text x="240" y="110" text-anchor="middle" class="venn-item" font-weight="700">${common.join(', ')}</text>
+      <text x="350" y="110" text-anchor="middle" class="venn-item">${onlyB.join(', ')}</text>
+    </svg>`;
+  document.getElementById(containerId).innerHTML = svg;
 }
 
-// ---- Stage 1: HCF of two small numbers (listing factors) ----
+function factorsOf(n){
+  const f = [];
+  for(let i=1;i<=n;i++){ if(n%i===0) f.push(i); }
+  return f;
+}
+
+(function(){
+  const fa = factorsOf(12), fb = factorsOf(18);
+  const common = fa.filter(x=>fb.includes(x));
+  const onlyA = fa.filter(x=>!common.includes(x));
+  const onlyB = fb.filter(x=>!common.includes(x));
+  drawVenn('venn-1', onlyA, common, onlyB, 'Factors of 12', 'Factors of 18');
+})();
+
+(function(){
+  const a = [2,2,3,3], b = [2,2,2,2,3];
+  const bCopy = [...b];
+  const common = [];
+  a.forEach(p=>{ const idx = bCopy.indexOf(p); if(idx>-1){ common.push(p); bCopy.splice(idx,1); } });
+  const aCopy = [...a]; common.forEach(p=>{ const idx = aCopy.indexOf(p); if(idx>-1) aCopy.splice(idx,1); });
+  drawVenn('venn-2', aCopy, common, bCopy, '36', '48');
+})();
+
+// ---- Division ladder renderer (paper method) ----
+function primeFactorSteps(n){
+  const steps = [];
+  let cur = n, p = 2;
+  while(cur > 1){
+    if(cur % p === 0){ steps.push({divisor:p, remainder: cur / p}); cur = cur / p; }
+    else { p++; }
+  }
+  return steps;
+}
+function renderLadder(containerId, n){
+  const steps = primeFactorSteps(n);
+  let rows = `<div class="ladder-row"><div class="ladder-divisor"></div><div class="ladder-value" style="font-weight:700;border-bottom:2px solid #333;">${n}</div></div>`;
+  steps.forEach(s=>{
+    rows += `<div class="ladder-row"><div class="ladder-divisor">${s.divisor}</div><div class="ladder-value">${s.remainder}</div></div>`;
+  });
+  document.getElementById(containerId).innerHTML = rows;
+}
+renderLadder('ladder-36', 36);
+renderLadder('ladder-36b', 36);
+renderLadder('ladder-48', 48);
+
+// ---- buildTryMC: renders a dynamic multiple-choice checkpoint (per-stage, no scoring) ----
+function buildTryMC(containerId, generator){
+  const container = document.getElementById(containerId);
+  const q = generator();
+  container.innerHTML = `
+    <p><strong>Your turn:</strong> ${q.question}</p>
+    <div class="mc-opts"></div>
+    <div class="working" style="display:none;"></div>
+    <button class="next-btn" style="display:none;">Continue →</button>
+  `;
+  const optsWrap = container.querySelector('.mc-opts');
+  const workingEl = container.querySelector('.working');
+  const nextBtn = container.querySelector('.next-btn');
+  q.options.forEach((opt,i)=>{
+    const b = document.createElement('button');
+    b.className = 'mc-opt';
+    b.textContent = opt;
+    b.onclick = ()=>{
+      [...optsWrap.children].forEach(c=>c.disabled=true);
+      if(i === q.correct){ b.classList.add('mc-correct'); }
+      else { b.classList.add('mc-wrong'); optsWrap.children[q.correct].classList.add('mc-correct'); }
+      workingEl.style.display = 'block';
+      workingEl.textContent = q.working;
+      nextBtn.style.display = 'inline-block';
+    };
+    optsWrap.appendChild(b);
+  });
+  nextBtn.onclick = ()=>{ advanceStage(); };
+}
+
+// ---- scoring-aware version used only in the final 10-question check ----
+function buildQuizMC(containerId, generator, onAnswered){
+  const container = document.getElementById(containerId);
+  const q = generator();
+  container.innerHTML = `
+    <p><strong>${q.question}</strong></p>
+    <div class="mc-opts"></div>
+    <div class="working" style="display:none;"></div>
+    <button class="next-btn" style="display:none;">Next question →</button>
+  `;
+  const optsWrap = container.querySelector('.mc-opts');
+  const workingEl = container.querySelector('.working');
+  const nextBtn = container.querySelector('.next-btn');
+  q.options.forEach((opt,i)=>{
+    const b = document.createElement('button');
+    b.className = 'mc-opt';
+    b.textContent = opt;
+    b.onclick = ()=>{
+      [...optsWrap.children].forEach(c=>c.disabled=true);
+      const correct = (i === q.correct);
+      if(correct){ b.classList.add('mc-correct'); quizScore++; }
+      else { b.classList.add('mc-wrong'); optsWrap.children[q.correct].classList.add('mc-correct'); }
+      workingEl.style.display = 'block';
+      workingEl.textContent = q.working;
+      nextBtn.style.display = 'inline-block';
+    };
+    optsWrap.appendChild(b);
+  });
+  nextBtn.onclick = ()=>{ onAnswered(); };
+}
+
+// ---- Question generators (also reused for the final 10-question check) ----
 function genStage1(){
   const pairs = [[12,18,6],[8,12,4],[15,20,5],[9,15,3],[10,25,5],[14,21,7]];
   const [a,b,ans] = pick(pairs);
@@ -190,9 +357,21 @@ function genStage1(){
     working:`List the factors of ${a} and ${b}, find the largest one they share: HCF = ${ans}.`
   };
 }
-
-// ---- Stage 2: HCF via prime factorisation ----
 function genStage2(){
+  const nums = [36,48,60,90,72];
+  const n = pick(nums);
+  const steps = primeFactorSteps(n);
+  const work = steps.map(s=>s.divisor).join(' × ');
+  const wrongWork = steps.map(s=>s.divisor).reverse().join(' + ');
+  const opts = [work, wrongWork, steps.map(s=>s.divisor+1).join(' × '), steps.slice(0,-1).map(s=>s.divisor).join(' × ')].sort(()=>Math.random()-0.5);
+  return {
+    question:`Using a division ladder, what are the prime factors of ${n}?`,
+    options: opts.map(o=>`${n} = ${o}`),
+    correct: opts.indexOf(work),
+    working: `Divide ${n} repeatedly by the smallest prime: ${n} = ${work}`
+  };
+}
+function genStage3(){
   const sets = [
     {a:36,b:48,ans:12,work:"36=2²×3², 48=2⁴×3 → shared 2²×3 = 12"},
     {a:24,b:60,ans:12,work:"24=2³×3, 60=2²×3×5 → shared 2²×3 = 12"},
@@ -208,9 +387,7 @@ function genStage2(){
     working: s.work
   };
 }
-
-// ---- Stage 3: HCF of algebraic terms ----
-function genStage3(){
+function genStage4(){
   const sets = [
     {t1:"8x²y", t2:"12xy³", ans:"4xy", work:"HCF(8,12)=4, lowest x power = x¹, lowest y power = y¹ → 4xy"},
     {t1:"6a³b", t2:"9a²b²", ans:"3a²b", work:"HCF(6,9)=3, lowest a power = a², lowest b power = b¹ → 3a²b"},
@@ -226,9 +403,7 @@ function genStage3(){
     working: s.work
   };
 }
-
-// ---- Stage 4: Factorise using HCF ----
-function genStage4(){
+function genStage5(){
   const sets = [
     {expr:"6x² + 9x", ans:"3x(2x + 3)", work:"HCF=3x → 6x²÷3x=2x, 9x÷3x=3"},
     {expr:"10x² + 15x", ans:"5x(2x + 3)", work:"HCF=5x → 10x²÷5x=2x, 15x÷5x=3"},
@@ -244,9 +419,11 @@ function genStage4(){
     working: s.work
   };
 }
+const ALL_GENERATORS = [genStage1, genStage2, genStage3, genStage4, genStage5];
 
+// ---- Stage progression ----
 let currentStage = 1;
-const totalStages = 4;
+const totalStages = 6;
 
 function renderProgress(){
   const bar = document.getElementById('progress-bar');
@@ -259,16 +436,44 @@ function renderProgress(){
 }
 
 function advanceStage(){
-  if(currentStage>=totalStages){
-    recordProgress('completed');
-    return;
-  }
+  if(currentStage >= totalStages) return;
   document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display='none';
   currentStage++;
   document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display='block';
   renderProgress();
   recordProgress('started');
+  if(currentStage === totalStages) startFinalQuiz();
   window.scrollTo({top:document.querySelector(`.stage[data-stage="${currentStage}"]`).offsetTop-20, behavior:'smooth'});
+}
+window.advanceStage = advanceStage;
+
+// ---- Final 10-question mastery check ----
+let quizIndex = 0;
+let quizScore = 0;
+const QUIZ_LENGTH = 10;
+
+function startFinalQuiz(){
+  quizIndex = 0;
+  quizScore = 0;
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion(){
+  const area = document.getElementById('quiz-area');
+  if(quizIndex >= QUIZ_LENGTH){
+    area.innerHTML = `
+      <div class="quiz-score">You scored ${quizScore} / ${QUIZ_LENGTH}</div>
+      <p style="text-align:center;color:#555;">${quizScore >= 7 ? "Great work — you've got a solid handle on HCF!" : 'Worth another pass through the earlier stages before moving on.'}</p>
+    `;
+    recordProgress('completed');
+    return;
+  }
+  const generator = ALL_GENERATORS[quizIndex % ALL_GENERATORS.length];
+  area.innerHTML = `<div class="quiz-counter">Question ${quizIndex+1} of ${QUIZ_LENGTH} — Score so far: ${quizScore}</div><div id="quiz-q"></div>`;
+  buildQuizMC('quiz-q', generator, ()=>{
+    quizIndex++;
+    renderQuizQuestion();
+  });
 }
 
 (async function init(){
@@ -278,6 +483,7 @@ function advanceStage(){
   buildTryMC('try-2', genStage2);
   buildTryMC('try-3', genStage3);
   buildTryMC('try-4', genStage4);
+  buildTryMC('try-5', genStage5);
   recordProgress('started');
 })();
 </script>
