@@ -143,26 +143,40 @@
     <span class="stage-label">Stage 4</span>
     <h2>HCF of Algebraic Terms</h2>
     <button class="reveal-btn" style="background:#888;" onclick="goToStage(3)">← Back to Stage 3</button>
-        <p>The same "break it into pieces" idea works for terms with letters too. We can decompose 8x²y and 12xy³ into their individual building blocks, exactly like we did with the tree and ladder — just written as separate pieces multiplied together.</p>
-    <p>Remember: x² means x × x, and y³ means y × y × y.</p>
-    <button class="reveal-btn" onclick="revealNext('r4', this)">Show me — break down 8x²y</button>
+        <p>The same tree idea from Stage 2 works for terms with letters too. Remember: x² means x × x, and y³ means y × y × y — so a term like 8x²y can be split into branches exactly like a number can.</p>
+    <button class="reveal-btn" onclick="revealNext('r4', this)">Show me — the tree for 8x²y and 12xy³</button>
     <div class="reveal-step" id="r4-0">
+      <p>Each term splits into its number branch (broken down just like Stage 2) plus one branch per letter.</p>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;">
+        <div>
+          <p style="text-align:center;font-weight:700;color:var(--dark);margin-bottom:4px;">8x²y</p>
+          <div class="venn-wrap" id="term-tree-a"></div>
+        </div>
+        <div>
+          <p style="text-align:center;font-weight:700;color:var(--dark);margin-bottom:4px;">12xy³</p>
+          <div class="venn-wrap" id="term-tree-b"></div>
+        </div>
+      </div>
+      <button class="reveal-btn" onclick="revealNext('r4', this)">Now let's write these as pieces</button>
+    </div>
+    <div class="reveal-step" id="r4-1">
+      <p>Reading the leaves of each tree gives the same breakdown, just written in a row instead of branches:</p>
       <p>8x²y = 2 × 2 × 2 × x × x × y</p>
       <div id="chips-a"></div>
       <button class="reveal-btn" onclick="revealNext('r4', this)">Now break down 12xy³</button>
     </div>
-    <div class="reveal-step" id="r4-1">
+    <div class="reveal-step" id="r4-2">
       <p>12xy³ = 2 × 2 × 3 × x × y × y × y</p>
       <div id="chips-b"></div>
       <button class="reveal-btn" onclick="revealNext('r4', this)">Show me which pieces they share</button>
     </div>
-    <div class="reveal-step" id="r4-2">
+    <div class="reveal-step" id="r4-3">
       <p>The <strong>gold</strong> pieces below appear in both breakdowns — those are the pieces the HCF is built from:</p>
       <div id="chips-a-highlighted"></div>
       <div id="chips-b-highlighted"></div>
       <button class="reveal-btn" onclick="revealNext('r4', this)">So what's the HCF?</button>
     </div>
-    <div class="reveal-step" id="r4-3">
+    <div class="reveal-step" id="r4-4">
       <div class="example">Shared pieces: 2 × 2 × x × y &nbsp;→&nbsp; <strong>HCF of 8x²y and 12xy³ = 4xy</strong></div>
     </div>
     <div class="try-it" id="try-4"></div>
@@ -367,17 +381,20 @@ function buildTree(n){
   return {val:n, leaf:false, children:[buildTree(a), buildTree(b)]};
 }
 function countLeaves(node){
-  return node.leaf ? 1 : countLeaves(node.children[0]) + countLeaves(node.children[1]);
+  return node.leaf ? 1 : node.children.reduce((sum,c)=>sum+countLeaves(c), 0);
 }
 function layoutTree(node, depth, xLeft, xRight){
   node.depth = depth;
   if(node.leaf){ node.x = (xLeft+xRight)/2; return; }
-  const leftLeaves = countLeaves(node.children[0]);
   const totalLeaves = countLeaves(node);
-  const splitX = xLeft + (xRight-xLeft) * (leftLeaves/totalLeaves);
-  layoutTree(node.children[0], depth+1, xLeft, splitX);
-  layoutTree(node.children[1], depth+1, splitX, xRight);
-  node.x = (node.children[0].x + node.children[1].x) / 2;
+  let cursor = xLeft;
+  node.children.forEach(child=>{
+    const childLeaves = countLeaves(child);
+    const childRight = cursor + (xRight-xLeft) * (childLeaves/totalLeaves);
+    layoutTree(child, depth+1, cursor, childRight);
+    cursor = childRight;
+  });
+  node.x = (node.children[0].x + node.children[node.children.length-1].x) / 2;
 }
 function collectDepths(node){
   return node.leaf ? [node.depth] : node.children.flatMap(collectDepths);
@@ -407,6 +424,27 @@ function drawFactorTree(containerId, n){
 }
 drawFactorTree('tree-36', 36);
 
+// ---- Term tree: same tree idea, applied to an algebraic term ----
+// e.g. 8x²y branches into a numeric prime-subtree (8 -> 2,2,2) plus one leaf per letter (x, x, y)
+function buildTermTree(label, coeff, letters){
+  const coeffTree = buildTree(coeff);
+  const letterLeaves = [];
+  letters.forEach(({letter, power})=>{
+    for(let i=0; i<power; i++) letterLeaves.push({val:letter, leaf:true});
+  });
+  return {val:label, leaf:false, children:[coeffTree, ...letterLeaves]};
+}
+function drawTermTree(containerId, label, coeff, letters){
+  const tree = buildTermTree(label, coeff, letters);
+  layoutTree(tree, 0, 30, 450);
+  const elements = [];
+  renderTreeNode(tree, elements);
+  const maxDepth = Math.max(...collectDepths(tree));
+  const height = 30 + maxDepth * 55 + 40;
+  document.getElementById(containerId).innerHTML =
+    `<svg viewBox="0 0 480 ${height}" width="480" height="${height}" xmlns="http://www.w3.org/2000/svg">${elements.join('')}</svg>`;
+}
+
 // ---- Multiset "common items" helper (shared by Venn diagrams and chip breakdowns) ----
 function multisetCommon(a, b){
   const bCopy = [...b];
@@ -432,6 +470,8 @@ function renderChips(containerId, chips, highlightSet){
   document.getElementById(containerId).innerHTML = `<div class="chip-row">${html}</div>`;
 }
 // Static Stage 4 example: 8x²y vs 12xy³
+drawTermTree('term-tree-a', '8x²y', 8, [{letter:'x', power:2}, {letter:'y', power:1}]);
+drawTermTree('term-tree-b', '12xy³', 12, [{letter:'x', power:1}, {letter:'y', power:3}]);
 (function(){
   const chipsA = ['2','2','2','x','x','y'];
   const chipsB = ['2','2','3','x','y','y','y'];
@@ -523,7 +563,11 @@ function buildQuizMC(containerId, generator, onAnswered){
 
 // ---- Question generators (also reused for the final 10-question check) ----
 function genStage1(){
-  const pairs = [[12,18,6],[8,12,4],[15,20,5],[9,15,3],[10,25,5],[14,21,7]];
+  const pairs = [
+    [12,18,6],[8,12,4],[15,20,5],[9,15,3],[10,25,5],[14,21,7],
+    [16,24,8],[18,27,9],[20,30,10],[21,35,7],[24,36,12],[15,25,5],
+    [22,33,11],[12,16,4],[30,45,15],[16,40,8]
+  ];
   const [a,b,ans] = pick(pairs);
   const opts = [ans, ans+2, Math.max(1,ans-1), ans*2].sort(()=>Math.random()-0.5);
   return {
@@ -534,7 +578,7 @@ function genStage1(){
   };
 }
 function genStage2(){
-  const nums = [36,48,60,90,72];
+  const nums = [36,48,60,90,72,100,120,144,150,180];
   const n = pick(nums);
   const steps = primeFactorSteps(n);
   const work = steps.map(s=>s.divisor).join(' × ');
@@ -552,7 +596,11 @@ function genStage3(){
     {a:36,b:48,ans:12,work:"36=2²×3², 48=2⁴×3 → shared 2²×3 = 12"},
     {a:24,b:60,ans:12,work:"24=2³×3, 60=2²×3×5 → shared 2²×3 = 12"},
     {a:45,b:60,ans:15,work:"45=3²×5, 60=2²×3×5 → shared 3×5 = 15"},
-    {a:28,b:42,ans:14,work:"28=2²×7, 42=2×3×7 → shared 2×7 = 14"}
+    {a:28,b:42,ans:14,work:"28=2²×7, 42=2×3×7 → shared 2×7 = 14"},
+    {a:50,b:75,ans:25,work:"50=2×5², 75=3×5² → shared 5² = 25"},
+    {a:32,b:80,ans:16,work:"32=2⁵, 80=2⁴×5 → shared 2⁴ = 16"},
+    {a:63,b:90,ans:9,work:"63=3²×7, 90=2×3²×5 → shared 3² = 9"},
+    {a:54,b:72,ans:18,work:"54=2×3³, 72=2³×3² → shared 2×3² = 18"}
   ];
   const s = pick(sets);
   const opts = [s.ans, s.ans+3, s.ans-2, s.ans*2].sort(()=>Math.random()-0.5);
@@ -565,13 +613,19 @@ function genStage3(){
 }
 function genStage4(){
   const sets = [
-    {t1:"8x²y", t2:"12xy³", ans:"4xy", work:"HCF(8,12)=4, lowest x power = x¹, lowest y power = y¹ → 4xy"},
-    {t1:"6a³b", t2:"9a²b²", ans:"3a²b", work:"HCF(6,9)=3, lowest a power = a², lowest b power = b¹ → 3a²b"},
-    {t1:"10p²q³", t2:"15pq²", ans:"5pq²", work:"HCF(10,15)=5, lowest p power = p¹, lowest q power = q² → 5pq²"}
+    {t1:"8x²y", t2:"12xy³", ans:"4xy", work:"HCF(8,12)=4, lowest x power = x¹, lowest y power = y¹ → 4xy",
+     wrongs:["8xy", "4x²y", "4x"]},
+    {t1:"6a³b", t2:"9a²b²", ans:"3a²b", work:"HCF(6,9)=3, lowest a power = a², lowest b power = b¹ → 3a²b",
+     wrongs:["3a³b²", "6a²b", "3ab"]},
+    {t1:"10p²q³", t2:"15pq²", ans:"5pq²", work:"HCF(10,15)=5, lowest p power = p¹, lowest q power = q² → 5pq²",
+     wrongs:["5p²q³", "10pq²", "5pq"]},
+    {t1:"12m³n", t2:"18mn²", ans:"6mn", work:"HCF(12,18)=6, lowest m power = m¹, lowest n power = n¹ → 6mn",
+     wrongs:["6m³n²", "12mn", "3mn"]},
+    {t1:"9x²y³", t2:"15xy²", ans:"3xy²", work:"HCF(9,15)=3, lowest x power = x¹, lowest y power = y² → 3xy²",
+     wrongs:["3x²y³", "9xy²", "5xy²"]}
   ];
   const s = pick(sets);
-  const wrongs = [s.ans.replace(/^\d+/, n=>String(Number(n)*2)), s.ans+"²", s.ans.slice(0,-1)];
-  const opts = [s.ans, ...wrongs].sort(()=>Math.random()-0.5);
+  const opts = [s.ans, ...s.wrongs].sort(()=>Math.random()-0.5);
   return {
     question:`Find the HCF of ${s.t1} and ${s.t2}.`,
     options: opts,
@@ -581,13 +635,19 @@ function genStage4(){
 }
 function genStage5(){
   const sets = [
-    {expr:"6x² + 9x", ans:"3x(2x + 3)", work:"HCF=3x → 6x²÷3x=2x, 9x÷3x=3"},
-    {expr:"10x² + 15x", ans:"5x(2x + 3)", work:"HCF=5x → 10x²÷5x=2x, 15x÷5x=3"},
-    {expr:"4x² - 8x", ans:"4x(x - 2)", work:"HCF=4x → 4x²÷4x=x, -8x÷4x=-2"}
+    {expr:"6x² + 9x", ans:"3x(2x + 3)", work:"HCF=3x → 6x²÷3x=2x, 9x÷3x=3",
+     wrongs:["x(6x + 9)", "3(2x² + 3x)", "3x(2x + 9)"]},
+    {expr:"10x² + 15x", ans:"5x(2x + 3)", work:"HCF=5x → 10x²÷5x=2x, 15x÷5x=3",
+     wrongs:["x(10x + 15)", "5(2x² + 3x)", "5x(2x + 15)"]},
+    {expr:"4x² - 8x", ans:"4x(x - 2)", work:"HCF=4x → 4x²÷4x=x, -8x÷4x=-2",
+     wrongs:["x(4x - 8)", "4(x² - 2x)", "4x(x - 8)"]},
+    {expr:"12x² + 18x", ans:"6x(2x + 3)", work:"HCF=6x → 12x²÷6x=2x, 18x÷6x=3",
+     wrongs:["x(12x + 18)", "6(2x² + 3x)", "6x(2x + 18)"]},
+    {expr:"15x² - 20x", ans:"5x(3x - 4)", work:"HCF=5x → 15x²÷5x=3x, -20x÷5x=-4",
+     wrongs:["x(15x - 20)", "5(3x² - 4x)", "5x(3x - 20)"]}
   ];
   const s = pick(sets);
-  const wrongs = ["x(6x+9)", "3(2x²+3x)", s.ans.replace('(','[').replace(')',']')];
-  const opts = [s.ans, ...wrongs].sort(()=>Math.random()-0.5);
+  const opts = [s.ans, ...s.wrongs].sort(()=>Math.random()-0.5);
   return {
     question:`Factorise fully: ${s.expr}`,
     options: opts,
