@@ -45,9 +45,9 @@
 <div class="wrap">
   <div class="example" style="border-left-color:#1565C0;">
     <strong>How long will this take?</strong><br>
-    Most students: around 20–30 minutes.<br>
-    Still building confidence? Take up to 40 minutes — there's no rush.<br>
-    Already confident? You might move through it in 12–15 minutes.
+    Most students: around 35–45 minutes.<br>
+    Still building confidence? Take up to 60 minutes — there's no rush, and you can always come back and pick up where you left off.<br>
+    Already confident? You might move through it in 20–25 minutes.
   </div>
   <div class="progress" id="progress-bar"></div>
 
@@ -134,12 +134,66 @@
     <div class="try-it" id="try-4"></div>
   </section>
 
-  <!-- STAGE 5: Final Check -->
+  <!-- STAGE 5: Rational and Irrational Numbers -->
   <section class="stage" data-stage="5" style="display:none;">
+    <span class="stage-label">Stage 5</span>
+    <h2>Rational and Irrational Numbers</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(4)">← Back to Stage 4</button>
+    <div class="example" style="border-left-color:var(--gold);">
+      <strong>Key words</strong><br>
+      <strong>Rational number</strong> — can be written as a fraction (one whole number divided by another).<br>
+      <strong>Irrational number</strong> — cannot be written as a fraction; its decimal goes on forever without ever repeating.
+    </div>
+    <p>Square roots of perfect squares are always whole numbers — so they're rational. But what about square roots of numbers that <em>aren't</em> perfect squares, like √20 from Stage 3?</p>
+    <button class="reveal-btn" onclick="revealNext('r5', this)">Show me — is √16 rational?</button>
+    <div class="reveal-step" id="r5-0">
+      <div class="example">√16 = 4, and 4 can be written as the fraction 4/1. So √16 is <strong>rational</strong>.</div>
+      <button class="reveal-btn" onclick="revealNext('r5', this)">Now what about √20?</button>
+    </div>
+    <div class="reveal-step" id="r5-1">
+      <div class="example">√20 = 4.472135955... — the decimal carries on forever, with no repeating pattern. It can't be written as an exact fraction. So √20 is <strong>irrational</strong>.</div>
+      <button class="reveal-btn" onclick="revealNext('r5', this)">So what's the rule?</button>
+    </div>
+    <div class="reveal-step" id="r5-2">
+      <div class="example">The square root of a <strong>perfect square</strong> is always rational (a whole number).<br>The square root of any other whole number is always <strong>irrational</strong>.</div>
+    </div>
+    <div class="try-it" id="try-5"></div>
+  </section>
+
+  <!-- STAGE 6: Surds -->
+  <section class="stage" data-stage="6" style="display:none;">
+    <span class="stage-label">Stage 6</span>
+    <h2>Surds — Simplifying Irrational Roots</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(5)">← Back to Stage 5</button>
+    <div class="example" style="border-left-color:var(--gold);">
+      <strong>Key words</strong><br>
+      <strong>Surd</strong> — a square root that's left in root form (like √3) because it's irrational and can't be simplified to a whole number.
+    </div>
+    <p>Even though a surd can't become a whole number, it can often be made <strong>simpler</strong>. The trick: pull out any perfect square factor hiding inside it.</p>
+    <button class="reveal-btn" onclick="revealNext('r6', this)">Show me — simplifying √12</button>
+    <div class="reveal-step" id="r6-0">
+      <p>12 can be split into 4 × 3. And 4 is a perfect square (2² = 4) — exactly the kind of number from Stage 1.</p>
+      <div class="venn-wrap" id="surd-split-12"></div>
+      <button class="reveal-btn" onclick="revealNext('r6', this)">Pull the perfect square out of the root</button>
+    </div>
+    <div class="reveal-step" id="r6-1">
+      <div class="example">√12 = √(4 × 3) = √4 × √3 = 2 × √3 = <strong>2√3</strong></div>
+      <p>3 has no perfect square factor left (other than 1), so 2√3 can't be simplified any further — that's the final answer.</p>
+      <button class="reveal-btn" onclick="revealNext('r6', this)">Try a bigger example — √50</button>
+    </div>
+    <div class="reveal-step" id="r6-2">
+      <div class="example">50 = 25 × 2, and 25 = 5² is a perfect square.<br>√50 = √(25 × 2) = √25 × √2 = <strong>5√2</strong></div>
+      <span style="color:#888;font-size:.85rem;">Tip: always look for the <em>largest</em> perfect square factor you can find — it saves a step.</span>
+    </div>
+    <div class="try-it" id="try-6"></div>
+  </section>
+
+  <!-- STAGE 7: Final Check -->
+  <section class="stage" data-stage="7" style="display:none;">
     <span class="stage-label">Final Check</span>
     <h2>Show What You Know</h2>
-    <button class="reveal-btn" style="background:#888;" onclick="goToStage(4)">← Back to Stage 4</button>
-    <p>10 mixed questions — squaring, square roots, estimating, and the ± idea. Take your time.</p>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(6)">← Back to Stage 6</button>
+    <p>10 mixed questions — squaring, square roots, estimating, ±roots, rational/irrational, and simplifying surds. Take your time.</p>
     <div id="quiz-area"></div>
     <p style="margin-top:16px;"><a href="../../../login.html">Return to dashboard</a></p>
   </section>
@@ -242,6 +296,25 @@ function drawEstimateLine(containerId, target){
   document.getElementById(containerId).innerHTML = svg;
 }
 drawEstimateLine('numberline-20', 20);
+
+// ---- Surd-split visual: shows n = perfectSquareFactor × remainder, with the perfect square highlighted ----
+function drawSurdSplit(containerId, n, sqFactor){
+  const root = Math.sqrt(sqFactor);
+  const remainder = n / sqFactor;
+  const svg = `
+    <svg viewBox="0 0 400 90" width="400" height="90" xmlns="http://www.w3.org/2000/svg">
+      <text x="30" y="45" font-size="22" font-weight="700" fill="#333">${n} =</text>
+      <rect x="90" y="18" width="70" height="54" rx="8" fill="#C0272D22" stroke="#C0272D" stroke-width="2"/>
+      <text x="125" y="50" text-anchor="middle" font-size="20" font-weight="700" fill="#7A1418">${sqFactor}</text>
+      <text x="125" y="14" text-anchor="middle" font-size="11" fill="#7A1418">perfect square (${root}²)</text>
+      <text x="180" y="45" font-size="22" font-weight="700" fill="#333">×</text>
+      <rect x="210" y="18" width="70" height="54" rx="8" fill="#1565C022" stroke="#1565C0" stroke-width="2"/>
+      <text x="245" y="50" text-anchor="middle" font-size="20" font-weight="700" fill="#1565C0">${remainder}</text>
+      <text x="245" y="14" text-anchor="middle" font-size="11" fill="#1565C0">left over</text>
+    </svg>`;
+  document.getElementById(containerId).innerHTML = svg;
+}
+drawSurdSplit('surd-split-12', 12, 4);
 
 // ---- buildTryMC: renders a dynamic multiple-choice checkpoint (per-stage, gated) ----
 function buildTryMC(containerId, generator){
@@ -376,12 +449,47 @@ function genSq4(){
     working:`Both ${n}² = ${sq} and (−${n})² = ${sq}, so ${sq} has two square roots: +${n} and −${n}.`
   };
 }
-const ALL_GENERATORS = [genSq1, genSq2, genSq3, genSq4];
+function genSq5(){
+  const perfectOptions = [4,9,16,25,36,49];
+  const nonPerfectOptions = [8,10,12,18,20,24,27,32];
+  const isPerfect = Math.random() < 0.5;
+  const n = isPerfect ? pick(perfectOptions) : pick(nonPerfectOptions);
+  const correctStr = isPerfect ? 'Rational' : 'Irrational';
+  const opts = ['Rational', 'Irrational'].sort(()=>Math.random()-0.5);
+  const rootDisplay = isPerfect ? Math.sqrt(n) : Math.sqrt(n).toFixed(3)+'...';
+  return {
+    question:`Is √${n} rational or irrational?`,
+    options: opts,
+    correct: opts.indexOf(correctStr),
+    working: isPerfect
+      ? `${n} is a perfect square, so √${n} = ${Math.sqrt(n)} exactly — a whole number, so it's rational.`
+      : `${n} is not a perfect square, so √${n} ≈ ${rootDisplay} — the decimal never terminates or repeats, so it's irrational.`
+  };
+}
+function genSq6(){
+  const sets = [
+    {n:8, sq:4, ans:'2√2'}, {n:18, sq:9, ans:'3√2'}, {n:20, sq:4, ans:'2√5'},
+    {n:27, sq:9, ans:'3√3'}, {n:32, sq:16, ans:'4√2'}, {n:45, sq:9, ans:'3√5'},
+    {n:50, sq:25, ans:'5√2'}, {n:75, sq:25, ans:'5√3'}
+  ];
+  const s = pick(sets);
+  const root = Math.sqrt(s.sq);
+  const remainder = s.n / s.sq;
+  const wrongs = [`${root}√${s.n}`, `${remainder}√${root}`, `√${s.n}`].filter(w=>w!==s.ans);
+  const opts = [s.ans, ...wrongs.slice(0,3)].sort(()=>Math.random()-0.5);
+  return {
+    question:`Simplify √${s.n} fully.`,
+    options: opts,
+    correct: opts.indexOf(s.ans),
+    working: `${s.n} = ${s.sq} × ${remainder}, and ${s.sq} = ${root}² is a perfect square. √${s.n} = √${s.sq} × √${remainder} = ${root}√${remainder} = ${s.ans}.`
+  };
+}
+const ALL_GENERATORS = [genSq1, genSq2, genSq3, genSq4, genSq5, genSq6];
 
 // ---- Stage progression ----
 let currentStage = 1;
 let highestStageReached = 1;
-const totalStages = 5;
+const totalStages = 7;
 
 function renderProgress(){
   const bar = document.getElementById('progress-bar');
@@ -451,6 +559,8 @@ function renderQuizQuestion(){
   buildTryMC('try-2', genSq2);
   buildTryMC('try-3', genSq3);
   buildTryMC('try-4', genSq4);
+  buildTryMC('try-5', genSq5);
+  buildTryMC('try-6', genSq6);
   recordProgress('started', currentStage);
 })();
 </script>
