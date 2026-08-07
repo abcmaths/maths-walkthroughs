@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Circle Geometry: Building Proofs from Angle Facts — ABC Learning Portal</title>
+<style>
+  :root{
+    --red:#C0272D; --dark:#7A1418; --cream:#FBF6F1; --line:#E8D9CE; --gold:#C8922A;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;margin:0;background:var(--cream);color:#2b2b2b;}
+  header{background:var(--red);color:#fff;padding:18px 24px;}
+  header h1{margin:0;font-size:1.3rem;}
+  header p{margin:4px 0 0;opacity:.9;font-size:.9rem;}
+  .wrap{max-width:860px;margin:0 auto;padding:24px;}
+  .stage{background:#fff;border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:22px;}
+  .stage h2{color:var(--dark);margin-top:0;border-bottom:2px solid var(--gold);padding-bottom:8px;clear:both;}
+  .stage h3{font-size:1.02rem;margin-top:22px;color:var(--dark);}
+  .stage-label{display:inline-block;background:var(--gold);color:#fff;font-size:.75rem;padding:2px 10px;border-radius:12px;margin-bottom:10px;}
+  .example{background:var(--cream);border-left:4px solid var(--red);padding:12px 16px;margin:14px 0;border-radius:6px;}
+  .fact-list{background:var(--cream);border-radius:8px;padding:12px 18px;margin:10px 0;}
+  .fact-list li{margin-bottom:6px;}
+  .try-it{border:2px dashed var(--gold);border-radius:8px;padding:16px;margin-top:18px;}
+  .mc-opts{display:grid;gap:8px;margin-top:10px;}
+  .mc-opt{background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 14px;cursor:pointer;text-align:left;}
+  .mc-opt:hover{background:var(--cream);}
+  .mc-correct{background:#e6f4ea!important;border-color:#2e7d32!important;}
+  .mc-wrong{background:#fdecea!important;border-color:#c62828!important;}
+  .working{margin-top:10px;font-size:.9rem;color:#555;}
+  button.next-btn, button.reveal-btn, button.step-btn{background:var(--red);color:#fff;border:none;padding:9px 18px;border-radius:6px;cursor:pointer;margin-top:12px;font-size:.88rem;}
+  button.reveal-btn{background:var(--gold);}
+  button.step-btn:hover, button.next-btn:hover{background:var(--dark);}
+  button.step-btn.secondary{background:#888;}
+  button.step-btn:disabled{background:#ccc;cursor:not-allowed;}
+  .progress{display:flex;gap:6px;margin-bottom:18px;}
+  .progress span{flex:1;height:6px;border-radius:3px;background:var(--line);}
+  .progress span.done{background:var(--red);}
+  .opt-out-btn{float:right;background:none;border:1px solid #ccc;color:#888;font-size:.75rem;padding:5px 12px;border-radius:14px;cursor:pointer;}
+  .opt-out-btn:hover{border-color:#C0272D;color:#C0272D;}
+  .quiz-score{font-size:1.4rem;font-weight:700;color:var(--dark);text-align:center;margin:18px 0;}
+  .quiz-counter{font-size:.8rem;color:#888;margin-bottom:8px;}
+
+  /* proof-card + SVG diagram + step-reveal (content-specific, kept from original build) */
+  .proof-card{border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0;background:#fffefc;}
+  .proof-grid{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;}
+  .diagram-wrap{flex:0 0 260px;text-align:center;}
+  svg{max-width:100%;background:#fff;border:1px solid var(--line);border-radius:6px;}
+  .proof-steps{flex:1 1 280px;min-width:240px;}
+  .step-line{display:none;padding:6px 10px;border-left:3px solid var(--gold);background:var(--cream);margin-bottom:6px;border-radius:0 6px 6px 0;font-size:.92rem;}
+  .step-line.visible{display:block;}
+  .step-controls{margin-top:10px;display:flex;gap:8px;}
+  .key-move{background:#fff7e6;border:1px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:.9rem;margin:14px 0;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Deep Dive: Circle Geometry — Building Proofs from Angle Facts</h1>
+  <p>From lines and angles &rarr; triangles &rarr; polygons &rarr; circle theorems, derived not quoted</p>
+</header>
+<div class="wrap">
+  <div class="example" style="border-left-color:#1565C0;">
+    <strong>How long will this take?</strong><br>
+    Most students: around 30–40 minutes.<br>
+    Still building confidence with this topic? Take your time — up to 55–60 minutes is completely fine, there's no rush.<br>
+    Already confident? You might move through it in 20–25 minutes.
+  </div>
+  <div class="progress" id="progress-bar"></div>
+
+  <!-- STAGE 1: Foundations: lines and angles -->
+  <section class="stage" data-stage="1">
+    <span class="stage-label">Stage 1</span>
+    <button class="opt-out-btn" onclick="optOut()">Opt out</button>
+    <h2>Foundations: Lines and Angles</h2>
+    <p>Every circle theorem eventually reduces to these facts. Get these solid first.</p>
+    <ul class="fact-list">
+      <li>Angles on a straight line sum to 180°</li>
+      <li>Angles at a point sum to 360°</li>
+      <li>Vertically opposite angles are equal</li>
+      <li>Parallel lines: corresponding angles equal, alternate angles equal, co-interior angles sum to 180°</li>
+    </ul>
+
+    <h3>Proof: angle sum of a triangle = 180°</h3>
+    <div class="proof-card">
+      <div class="proof-grid">
+        <div class="diagram-wrap">
+          <svg id="svg-tri-sum" viewBox="0 0 260 200" width="260" height="200"></svg>
+        </div>
+        <div class="proof-steps">
+          <div class="step-line" data-step="1">Draw triangle ABC. Draw a line through C parallel to AB.</div>
+          <div class="step-line" data-step="2">Alternate angles: the angle at C on the left equals angle A (angles between parallel lines and transversal AC).</div>
+          <div class="step-line" data-step="3">Alternate angles: the angle at C on the right equals angle B (transversal BC).</div>
+          <div class="step-line" data-step="4">The three angles at C sit on a straight line, so they sum to 180°. Since they equal A, C, and B — angle A + angle B + angle C = 180°. <strong>QED</strong></div>
+          <div class="step-controls">
+            <button class="step-btn" onclick="stepForward('tri-sum')">Next step</button>
+            <button class="step-btn secondary" onclick="stepReset('tri-sum')">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="key-move">
+      <strong>Exterior angle rule</strong> follows immediately: since interior angles sum to 180°, and the exterior angle plus its adjacent interior angle sum to 180° (angles on a line), the exterior angle must equal the sum of the two non-adjacent interior angles.
+    </div>
+
+    <div class="try-it"><div id="try-1"></div></div>
+  </section>
+
+  <!-- STAGE 2: Polygons -->
+  <section class="stage" data-stage="2" style="display:none;">
+    <span class="stage-label">Stage 2</span>
+    <button class="opt-out-btn" onclick="optOut()">Opt out</button>
+    <h2>Polygons</h2>
+
+    <h3>Proof: angle sum of a polygon</h3>
+    <div class="proof-card">
+      <div class="proof-grid">
+        <div class="diagram-wrap">
+          <svg id="svg-poly-sum" viewBox="0 0 260 200" width="260" height="200"></svg>
+        </div>
+        <div class="proof-steps">
+          <div class="step-line" data-step="1">Take any polygon with n sides. Pick one vertex.</div>
+          <div class="step-line" data-step="2">Draw diagonals from that vertex to every other non-adjacent vertex. This splits the polygon into (n − 2) triangles.</div>
+          <div class="step-line" data-step="3">Each triangle's angles sum to 180° (proved in Stage 1).</div>
+          <div class="step-line" data-step="4">The triangle angles together make up exactly the polygon's interior angles, so interior angle sum = (n − 2) × 180°. <strong>QED</strong></div>
+          <div class="step-controls">
+            <button class="step-btn" onclick="stepForward('poly-sum')">Next step</button>
+            <button class="step-btn secondary" onclick="stepReset('poly-sum')">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ul class="fact-list">
+      <li>Exterior angles of any convex polygon sum to 360° (one full turn walking around the shape)</li>
+      <li>Regular polygon: each interior angle = (n−2)×180° ÷ n; each exterior angle = 360° ÷ n</li>
+      <li>Special quadrilaterals (parallelogram, kite, trapezium) — their angle and side properties can all be proved from triangle congruence and parallel line facts, not just stated</li>
+    </ul>
+
+    <div class="try-it"><div id="try-2"></div></div>
+  </section>
+
+  <!-- STAGE 3: The bridge - isosceles triangles in circles -->
+  <section class="stage" data-stage="3" style="display:none;">
+    <span class="stage-label">Stage 3</span>
+    <button class="opt-out-btn" onclick="optOut()">Opt out</button>
+    <h2>The Bridge: Isosceles Triangles in Circles</h2>
+    <p>This is the single most important idea in the whole topic. <strong>Two radii drawn to any two points on a circle always form an isosceles triangle</strong>, because all radii are equal in length. Every circle theorem in Stage 4 is really just this fact applied cleverly.</p>
+
+    <div class="proof-card">
+      <div class="proof-grid">
+        <div class="diagram-wrap">
+          <svg id="svg-bridge" viewBox="0 0 260 220" width="260" height="220"></svg>
+        </div>
+        <div class="proof-steps">
+          <div class="step-line" data-step="1">Centre O. Points A and B on the circumference. Draw radii OA and OB.</div>
+          <div class="step-line" data-step="2">OA = OB (both are radii of the same circle).</div>
+          <div class="step-line" data-step="3">Triangle OAB is isosceles, so the base angles are equal: angle OAB = angle OBA.</div>
+          <div class="step-line" data-step="4">This one fact — base angles of an isosceles triangle are equal — is the engine behind every proof in Stage 4.</div>
+          <div class="step-controls">
+            <button class="step-btn" onclick="stepForward('bridge')">Next step</button>
+            <button class="step-btn secondary" onclick="stepReset('bridge')">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="try-it">
+      <p style="margin-top:0;color:#888;font-size:.85rem;"><em>Practice before we name any circle theorem — this is pure isosceles-triangle reasoning.</em></p>
+      <div id="try-3"></div>
+    </div>
+  </section>
+
+  <!-- STAGE 4: Circle theorems, derived not quoted -->
+  <section class="stage" data-stage="4" style="display:none;">
+    <span class="stage-label">Stage 4</span>
+    <button class="opt-out-btn" onclick="optOut()">Opt out</button>
+    <h2>Circle Theorems — Derived, Not Quoted</h2>
+
+    <h3>Angle at the centre = twice the angle at the circumference</h3>
+    <div class="proof-card">
+      <div class="proof-grid">
+        <div class="diagram-wrap">
+          <svg id="svg-centre" viewBox="0 0 260 230" width="260" height="230"></svg>
+        </div>
+        <div class="proof-steps">
+          <div class="step-line" data-step="1">Centre O, points A, B, C on the circle. Draw OA, OB, OC, then extend CO to a point D outside the circle.</div>
+          <div class="step-line" data-step="2">Triangle OAC is isosceles (OA = OC), so angle OAC = angle OCA. Exterior angle AOD = angle OAC + angle OCA = 2 × angle OCA.</div>
+          <div class="step-line" data-step="3">Triangle OBC is isosceles (OB = OC), so similarly angle BOD = 2 × angle OCB.</div>
+          <div class="step-line" data-step="4">Adding: angle AOB = angle AOD + angle BOD = 2(angle OCA + angle OCB) = 2 × angle ACB. So the angle at the centre is twice the angle at the circumference, standing on the same arc AB. <strong>QED</strong></div>
+          <div class="step-controls">
+            <button class="step-btn" onclick="stepForward('centre')">Next step</button>
+            <button class="step-btn secondary" onclick="stepReset('centre')">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Angle in a semicircle = 90°</h3>
+    <div class="proof-card">
+      <div class="proof-grid">
+        <div class="diagram-wrap">
+          <svg id="svg-semi" viewBox="0 0 260 200" width="260" height="200"></svg>
+        </div>
+        <div class="proof-steps">
+          <div class="step-line" data-step="1">AB is a diameter, so it passes through centre O. The angle at the centre, angle AOB, is a straight line — 180°.</div>
+          <div class="step-line" data-step="2">By the theorem just proved, the angle at the circumference is half the angle at the centre.</div>
+          <div class="step-line" data-step="3">So angle ACB = 180° ÷ 2 = 90°, for any point C on the circumference. <strong>QED</strong></div>
+          <div class="step-controls">
+            <button class="step-btn" onclick="stepForward('semi')">Next step</button>
+            <button class="step-btn secondary" onclick="stepReset('semi')">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ul class="fact-list">
+      <li><strong>Angles in the same segment are equal</strong> — both equal half the same angle at the centre, so they equal each other</li>
+      <li><strong>Cyclic quadrilateral:</strong> opposite angles sum to 180° — split by the two diagonals into arcs; the angle at the centre for the full circle is 360°, so the two circumference angles (each half of "their" centre angle) sum to 180°</li>
+      <li><strong>Tangent ⊥ radius</strong> at the point of contact — proved by contradiction: any other line from O to the tangent would be longer than the radius, so the radius gives the shortest (perpendicular) distance</li>
+      <li><strong>Two tangents from an external point are equal in length</strong> — the two right-angled triangles formed (radius, tangent, line to external point) share a hypotenuse and both have a right angle and equal radius, so they're congruent (RHS)</li>
+      <li><strong>Alternate segment theorem:</strong> the angle between a tangent and a chord equals the angle in the alternate segment — proved using tangent⊥radius plus angle-in-semicircle plus angle sum of a triangle</li>
+    </ul>
+
+    <div class="try-it"><div id="try-4"></div></div>
+  </section>
+
+  <!-- STAGE 5: Synthesis - angle chasing with reasons -->
+  <section class="stage" data-stage="5" style="display:none;">
+    <span class="stage-label">Stage 5</span>
+    <button class="opt-out-btn" onclick="optOut()">Opt out</button>
+    <h2>Synthesis: Angle Chasing with Reasons</h2>
+    <p>In exam-style and formal proof answers, every line needs a <em>statement</em> and a <em>reason</em>. This is what full marks look like:</p>
+
+    <div class="proof-card">
+      <div class="proof-grid">
+        <div class="diagram-wrap">
+          <svg id="svg-synth" viewBox="0 0 260 220" width="260" height="220"></svg>
+        </div>
+        <div class="proof-steps">
+          <div class="step-line" data-step="1"><strong>Given:</strong> ABCD is a cyclic quadrilateral, angle DAB = 100°. Find angle BCD.</div>
+          <div class="step-line" data-step="2"><strong>Statement:</strong> angle DAB + angle BCD = 180°&nbsp; <strong>Reason:</strong> opposite angles in a cyclic quadrilateral sum to 180°.</div>
+          <div class="step-line" data-step="3"><strong>Statement:</strong> angle BCD = 180° − 100° = 80°&nbsp; <strong>Reason:</strong> rearranging the equation above.</div>
+          <div class="step-line" data-step="4">Notice: the reason always cites a named fact (isosceles triangle, parallel lines, angle sum, or a proved circle theorem) — never "it looks like it."</div>
+          <div class="step-controls">
+            <button class="step-btn" onclick="stepForward('synth')">Next step</button>
+            <button class="step-btn secondary" onclick="stepReset('synth')">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="try-it">
+      <p style="margin-top:0;"><strong>Part 1 — cyclic quadrilateral</strong></p>
+      <div id="try-5a"></div>
+    </div>
+    <div class="try-it">
+      <p style="margin-top:0;"><strong>Part 2 — multi-step chase (working backwards from the centre theorem)</strong></p>
+      <div id="try-5b"></div>
+    </div>
+  </section>
+
+  <!-- STAGE 6: Final Check -->
+  <section class="stage" data-stage="6" style="display:none;">
+    <span class="stage-label">Final Check</span>
+    <button class="opt-out-btn" onclick="optOut()">Opt out</button>
+    <h2>Mastery Check — 10 Questions</h2>
+    <p>A mix of everything from this walkthrough: triangle and polygon angle sums, isosceles triangles in circles, and circle theorems in both directions.</p>
+    <div id="quiz-area"></div>
+  </section>
+
+</div>
+
+<script type="module">
+// ---- session check (same pattern as dashboard-student.html) ----
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const SUPABASE_URL = "https://lnwinoghbefmjpvmixzo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const TOPIC_CODE = "TCH-GEO-01"; // must match a row in `topics` (subject='deepdive_maths') — NOT YET INSERTED, needs SQL run first
+let currentUser = null;
+let topicId = null;
+let initialVisitPromise = null; // tracked so optOut() can wait for it, avoiding a write race
+
+async function checkSession(){
+  const { data:{ session } } = await supabase.auth.getSession();
+  if(!session){
+    window.location.href = "../../../login.html";
+    return;
+  }
+  currentUser = session.user;
+  const { data: topic, error } = await supabase
+    .from('topics')
+    .select('id')
+    .eq('topic_code', TOPIC_CODE)
+    .single();
+  if(!error && topic){ topicId = topic.id; }
+}
+
+async function recordProgress(status, stageReached){
+  if(!currentUser || !topicId) return;
+  try{
+    const payload = {
+      student_id: currentUser.id,
+      topic_id: topicId,
+      status: status,
+      last_visited_at: new Date().toISOString()
+    };
+    if(stageReached !== undefined) payload.stage_reached = stageReached;
+    const { error } = await supabase
+      .from('walkthrough_progress')
+      .upsert(payload, { onConflict: 'student_id,topic_id' });
+    if(error) console.error('Progress save failed:', error);
+  }catch(e){ console.error('Progress save failed:', e); }
+}
+
+async function recordInitialVisit(){
+  if(!currentUser || !topicId) return;
+  try{
+    const { data: existing } = await supabase
+      .from('walkthrough_progress')
+      .select('status')
+      .eq('student_id', currentUser.id)
+      .eq('topic_id', topicId)
+      .maybeSingle();
+    if(!existing || existing.status === 'started'){
+      await recordProgress('started', currentStage);
+    }
+  }catch(e){ console.error('Initial visit check failed:', e); }
+}
+
+window.optOut = async function(){
+  if(!confirm("Save your progress and exit this walkthrough? You can come back and pick up from where you left off.")) return;
+  if(initialVisitPromise) await initialVisitPromise;
+  await recordProgress('opted_out', typeof currentStage !== 'undefined' ? currentStage : undefined);
+  window.location.href = "../../../login.html";
+};
+
+// ---- shared helpers ----
+function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+/* ---------- Step-indexed proof reveal (content-specific, kept from original build) ---------- */
+const stepState={};
+function stepForward(id){
+  if(stepState[id]===undefined) stepState[id]=0;
+  const container=document.getElementById('svg-'+id).closest('.proof-card');
+  const stepLines=container.querySelectorAll('.step-line');
+  stepState[id]++;
+  stepLines.forEach(line=>{
+    if(parseInt(line.dataset.step)<=stepState[id]) line.classList.add('visible');
+  });
+  drawStep(id, stepState[id]);
+  const btn=container.querySelector('.step-btn');
+  if(stepState[id]>=stepLines.length) btn.disabled=true;
+}
+window.stepForward = stepForward;
+function stepReset(id){
+  stepState[id]=0;
+  const container=document.getElementById('svg-'+id).closest('.proof-card');
+  container.querySelectorAll('.step-line').forEach(l=>l.classList.remove('visible'));
+  container.querySelector('.step-btn').disabled=false;
+  drawStep(id,0);
+}
+window.stepReset = stepReset;
+
+/* ---------- SVG drawing per diagram, keyed by step ---------- */
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs){
+  const e=document.createElementNS(NS,tag);
+  for(const k in attrs) e.setAttribute(k,attrs[k]);
+  return e;
+}
+function clearSvg(id){
+  const svg=document.getElementById('svg-'+id);
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  return svg;
+}
+
+function drawStep(id, step){
+  if(id==='tri-sum') return drawTriSum(step);
+  if(id==='poly-sum') return drawPolySum(step);
+  if(id==='bridge') return drawBridge(step);
+  if(id==='centre') return drawCentre(step);
+  if(id==='semi') return drawSemi(step);
+  if(id==='synth') return drawSynth(step);
+}
+
+function drawTriSum(step){
+  const svg=clearSvg('tri-sum');
+  const A=[40,160], B=[220,160], C=[110,40];
+  svg.appendChild(line(A,B)); svg.appendChild(line(A,C)); svg.appendChild(line(B,C));
+  svg.appendChild(label(A[0]-10,A[1]+16,'A'));
+  svg.appendChild(label(B[0]+4,B[1]+16,'B'));
+  svg.appendChild(label(C[0]-4,C[1]-10,'C'));
+  if(step>=1){
+    const D=[10,40], E=[210,40];
+    svg.appendChild(line(D,E,'#999','4,3'));
+    svg.appendChild(label(D[0]-6,D[1]-6,'',9));
+  }
+  if(step>=2){ svg.appendChild(arc(C,150,190,'#C0272D')); }
+  if(step>=3){ svg.appendChild(arc(C,-10,30,'#1f7a3d')); }
+  if(step>=4){ svg.appendChild(label(110,190,'A+B+C=180\u00b0',11,'#C0272D')); }
+}
+
+function drawPolySum(step){
+  const svg=clearSvg('poly-sum');
+  const cx=130, cy=100, r=70, n=6;
+  const pts=[];
+  for(let i=0;i<n;i++){
+    const ang=-Math.PI/2 + i*2*Math.PI/n;
+    pts.push([cx+r*Math.cos(ang), cy+r*Math.sin(ang)]);
+  }
+  for(let i=0;i<n;i++) svg.appendChild(line(pts[i], pts[(i+1)%n]));
+  if(step>=1){ svg.appendChild(dot(pts[0])); }
+  if(step>=2){
+    for(let i=2;i<n-1;i++) svg.appendChild(line(pts[0], pts[i], '#C0272D','3,2'));
+  }
+  if(step>=3){
+    svg.appendChild(label(cx-30,cy+5,'4 triangles',10,'#1f7a3d'));
+  }
+  if(step>=4){
+    svg.appendChild(label(cx-40,cy+30,'sum=(n-2)\u00d7180\u00b0',10,'#C0272D'));
+  }
+}
+
+function drawBridge(step){
+  const svg=clearSvg('bridge');
+  const O=[130,110], r=80;
+  svg.appendChild(el('circle',{cx:O[0],cy:O[1],r:r,fill:'none',stroke:'#999'}));
+  const A=[O[0]-r*0.8, O[1]+r*0.55];
+  const B=[O[0]+r*0.75, O[1]+r*0.6];
+  if(step>=1){
+    svg.appendChild(line(O,A)); svg.appendChild(line(O,B));
+    svg.appendChild(dot(O)); svg.appendChild(label(O[0]-14,O[1]-6,'O'));
+    svg.appendChild(label(A[0]-14,A[1]+16,'A'));
+    svg.appendChild(label(B[0]+4,B[1]+16,'B'));
+  }
+  if(step>=2){
+    svg.appendChild(label((O[0]+A[0])/2-30,(O[1]+A[1])/2,'OA',10,'#C0272D'));
+    svg.appendChild(label((O[0]+B[0])/2+8,(O[1]+B[1])/2,'OB',10,'#C0272D'));
+  }
+  if(step>=3){
+    svg.appendChild(line(A,B));
+    svg.appendChild(arc(A,-20,20,'#1f7a3d',14));
+    svg.appendChild(arc(B,160,200,'#1f7a3d',14));
+  }
+  if(step>=4){
+    svg.appendChild(label(70,190,'base angles equal',10,'#C0272D'));
+  }
+}
+
+function drawCentre(step){
+  const svg=clearSvg('centre');
+  const O=[130,120], r=75;
+  svg.appendChild(el('circle',{cx:O[0],cy:O[1],r:r,fill:'none',stroke:'#999'}));
+  const A=[O[0]-r*0.9, O[1]-r*0.2];
+  const B=[O[0]+r*0.85, O[1]-r*0.25];
+  const C=[O[0]-r*0.15, O[1]+r*0.95];
+  if(step>=1){
+    svg.appendChild(line(O,A)); svg.appendChild(line(O,B)); svg.appendChild(line(O,C));
+    svg.appendChild(line(A,C)); svg.appendChild(line(B,C));
+    const D=[O[0]+(O[0]-C[0])*0.4, O[1]+(O[1]-C[1])*0.4];
+    svg.appendChild(line(C,D,'#999','4,3'));
+    svg.appendChild(label(A[0]-14,A[1]-4,'A')); svg.appendChild(label(B[0]+4,B[1]-4,'B'));
+    svg.appendChild(label(C[0]-6,C[1]+16,'C')); svg.appendChild(label(O[0]-14,O[1]-6,'O'));
+    svg.appendChild(label(D[0]+2,D[1]-2,'D',9));
+  }
+  if(step>=2){
+    svg.appendChild(arc(A,-20,25,'#C0272D',12));
+    svg.appendChild(arc(C, 200,245,'#C0272D',12));
+  }
+  if(step>=3){
+    svg.appendChild(arc(B,140,190,'#1f7a3d',12));
+    svg.appendChild(arc(C,300,345,'#1f7a3d',12));
+  }
+  if(step>=4){
+    svg.appendChild(label(60,20,'AOB = 2\u00d7ACB',11,'#C0272D'));
+  }
+}
+
+function drawSemi(step){
+  const svg=clearSvg('semi');
+  const O=[130,110], r=75;
+  svg.appendChild(el('circle',{cx:O[0],cy:O[1],r:r,fill:'none',stroke:'#999'}));
+  const A=[O[0]-r,O[1]], B=[O[0]+r,O[1]];
+  const C=[O[0]-10,O[1]-r+8];
+  svg.appendChild(line(A,B));
+  svg.appendChild(label(A[0]-12,A[1]+16,'A')); svg.appendChild(label(B[0]+4,B[1]+16,'B'));
+  if(step>=1){
+    svg.appendChild(dot(O)); svg.appendChild(label(O[0]-4,O[1]+16,'O',9));
+  }
+  if(step>=2){
+    svg.appendChild(line(A,C)); svg.appendChild(line(B,C));
+    svg.appendChild(label(C[0]-4,C[1]-6,'C'));
+  }
+  if(step>=3){
+    svg.appendChild(el('rect',{x:C[0]-10,y:C[1]+2,width:12,height:12,fill:'none',stroke:'#C0272D','stroke-width':2}));
+    svg.appendChild(label(C[0]-10,C[1]+34,'90\u00b0',11,'#C0272D'));
+  }
+}
+
+function drawSynth(step){
+  const svg=clearSvg('synth');
+  const O=[130,120], r=75;
+  svg.appendChild(el('circle',{cx:O[0],cy:O[1],r:r,fill:'none',stroke:'#999'}));
+  const A=[O[0]-r*0.85,O[1]-r*0.3];
+  const B=[O[0]+r*0.2,O[1]-r*0.95];
+  const C=[O[0]+r*0.9,O[1]+r*0.2];
+  const D=[O[0]-r*0.3,O[1]+r*0.85];
+  [ [A,B],[B,C],[C,D],[D,A] ].forEach(([p,q])=>svg.appendChild(line(p,q)));
+  svg.appendChild(label(A[0]-16,A[1],'A')); svg.appendChild(label(B[0]-4,B[1]-8,'B'));
+  svg.appendChild(label(C[0]+6,C[1],'C')); svg.appendChild(label(D[0]-4,D[1]+16,'D'));
+  if(step>=1){ svg.appendChild(label(60,200,'DAB = 100\u00b0',10,'#C0272D')); }
+  if(step>=2){ svg.appendChild(arc(A,-20,50,'#C0272D',12)); svg.appendChild(arc(C,150,220,'#1f7a3d',12)); }
+  if(step>=3){ svg.appendChild(label(60,215,'BCD = 80\u00b0',10,'#1f7a3d')); }
+}
+
+/* ---------- small SVG helpers ---------- */
+function line(p,q,stroke='#333',dash=null){
+  const attrs={x1:p[0],y1:p[1],x2:q[0],y2:q[1],stroke,'stroke-width':2};
+  if(dash) attrs['stroke-dasharray']=dash;
+  return el('line',attrs);
+}
+function dot(p){ return el('circle',{cx:p[0],cy:p[1],r:2.5,fill:'#333'}); }
+function label(x,y,text,size=12,color='#222'){
+  const t=el('text',{x,y,'font-size':size,fill:color,'font-family':'Segoe UI, Arial, sans-serif'});
+  t.textContent=text;
+  return t;
+}
+function arc(center,startDeg,endDeg,color='#C0272D',radius=18){
+  const cx=center[0],cy=center[1];
+  const s=startDeg*Math.PI/180, e=endDeg*Math.PI/180;
+  const x1=cx+radius*Math.cos(s), y1=cy+radius*Math.sin(s);
+  const x2=cx+radius*Math.cos(e), y2=cy+radius*Math.sin(e);
+  const large=(endDeg-startDeg)>180?1:0;
+  return el('path',{d:`M ${x1} ${y1} A ${radius} ${radius} 0 ${large} 1 ${x2} ${y2}`,fill:'none',stroke:color,'stroke-width':2});
+}
+
+/* ---------- standard try-it / quiz MC engine (matches other Deep Dive files) ---------- */
+// Variant of buildTryMC whose Continue button does NOT advance the outer stage —
+// used for the first of two sequential try-its in Stage 5 (Part 1 of 2).
+function buildTryMCNoAdvance(containerId, generator, onDone){
+  const container = document.getElementById(containerId);
+  const q = generator();
+  container.innerHTML = `
+    <p><strong>Your turn:</strong> ${q.question}</p>
+    <div class="mc-opts"></div>
+    <div class="working" style="display:none;"></div>
+    <div class="mc-feedback" style="display:none;font-weight:700;margin-top:8px;"></div>
+    <button class="next-btn" style="display:none;">Continue →</button>
+  `;
+  const optsWrap = container.querySelector('.mc-opts');
+  const workingEl = container.querySelector('.working');
+  const feedbackEl = container.querySelector('.mc-feedback');
+  const nextBtn = container.querySelector('.next-btn');
+  q.options.forEach((opt,i)=>{
+    const b = document.createElement('button');
+    b.className = 'mc-opt';
+    b.textContent = opt;
+    b.onclick = ()=>{
+      [...optsWrap.children].forEach(c=>c.disabled=true);
+      if(i === q.correct){
+        b.classList.add('mc-correct');
+        workingEl.style.display = 'block';
+        workingEl.textContent = q.working;
+        feedbackEl.style.display = 'block';
+        feedbackEl.style.color = '#2e7d32';
+        feedbackEl.textContent = '✓ Correct!';
+        nextBtn.style.display = 'inline-block';
+      } else {
+        b.classList.add('mc-wrong');
+        optsWrap.children[q.correct].classList.add('mc-correct');
+        workingEl.style.display = 'block';
+        workingEl.textContent = q.working;
+        feedbackEl.style.display = 'block';
+        feedbackEl.style.color = '#c62828';
+        feedbackEl.textContent = 'Not quite — have a look at the working, then try a new question.';
+        nextBtn.textContent = 'Try again';
+        nextBtn.style.display = 'inline-block';
+        nextBtn.onclick = ()=>{ buildTryMCNoAdvance(containerId, generator, onDone); };
+        return;
+      }
+    };
+    optsWrap.appendChild(b);
+  });
+  nextBtn.onclick = ()=>{ onDone(); };
+}
+
+function buildQuizMC(containerId, generator, onAnswered){
+  const container = document.getElementById(containerId);
+  const q = generator();
+  container.innerHTML = `
+    <p><strong>${q.question}</strong></p>
+    <div class="mc-opts"></div>
+    <div class="working" style="display:none;"></div>
+    <button class="next-btn" style="display:none;">Next question →</button>
+  `;
+  const optsWrap = container.querySelector('.mc-opts');
+  const workingEl = container.querySelector('.working');
+  const nextBtn = container.querySelector('.next-btn');
+  q.options.forEach((opt,i)=>{
+    const b = document.createElement('button');
+    b.className = 'mc-opt';
+    b.textContent = opt;
+    b.onclick = ()=>{
+      [...optsWrap.children].forEach(c=>c.disabled=true);
+      const correct = (i === q.correct);
+      if(correct){ b.classList.add('mc-correct'); quizScore++; }
+      else { b.classList.add('mc-wrong'); optsWrap.children[q.correct].classList.add('mc-correct'); }
+      workingEl.style.display = 'block';
+      workingEl.textContent = q.working;
+      nextBtn.style.display = 'inline-block';
+    };
+    optsWrap.appendChild(b);
+  });
+  nextBtn.onclick = ()=>{ onAnswered(); };
+}
+
+// ---- Question generators ----
+function genStage1(){
+  const a = rnd(40,85), b = rnd(30,80);
+  const c = 180-a-b;
+  const opts = new Set([String(c)]);
+  [String(a+b), String(180-a), String(Math.abs(a-b))].forEach(v=>{ if(v!==String(c) && opts.size<4) opts.add(v); });
+  while(opts.size<4){ opts.add(String(c+rnd(1,9))); }
+  const arr = [...opts].sort(()=>Math.random()-0.5);
+  return {
+    question:`A triangle has angles of ${a}° and ${b}°. What is the third angle?`,
+    options: arr.map(o=>`${o}°`),
+    correct: arr.indexOf(String(c)),
+    working:`Third angle = 180° − ${a}° − ${b}° = ${c}°. Reason: angle sum of a triangle = 180°.`
+  };
+}
+function genStage2(){
+  const n = rnd(5,10);
+  const sum = (n-2)*180;
+  const each = Math.round((sum/n)*10)/10;
+  const opts = new Set([String(each)]);
+  [String(sum), String(Math.round((sum/(n-1))*10)/10), String(each+10)].forEach(v=>{ if(v!==String(each) && opts.size<4) opts.add(v); });
+  while(opts.size<4){ opts.add(String(each+rnd(2,9))); }
+  const arr = [...opts].sort(()=>Math.random()-0.5);
+  return {
+    question:`Find one interior angle of a regular ${n}-sided polygon.`,
+    options: arr.map(o=>`${o}°`),
+    correct: arr.indexOf(String(each)),
+    working:`Sum = (${n}−2)×180° = ${sum}°. Each interior angle = ${sum}° ÷ ${n} = ${each}°.`
+  };
+}
+function genStage3(){
+  const x = rnd(35,70);
+  const ans = 180-2*x;
+  const opts = new Set([String(ans)]);
+  [String(2*x), String(90-x), String(x)].forEach(v=>{ if(v!==String(ans) && opts.size<4) opts.add(v); });
+  while(opts.size<4){ opts.add(String(ans+rnd(2,9))); }
+  const arr = [...opts].sort(()=>Math.random()-0.5);
+  return {
+    question:`O is the centre. OA = OB = radius. Angle OAB = ${x}°. Find angle AOB. (No circle theorem names allowed — isosceles triangle facts only.)`,
+    options: arr.map(o=>`${o}°`),
+    correct: arr.indexOf(String(ans)),
+    working:`Angle OBA = ${x}° (base angles of isosceles triangle OAB are equal). Angle AOB = 180° − ${x}° − ${x}° = ${ans}° (angle sum of a triangle).`
+  };
+}
+function genStage4(){
+  const circ = rnd(40,80);
+  const ans = circ*2;
+  const opts = new Set([String(ans)]);
+  [String(Math.round(circ/2)), String(circ+90), String(circ)].forEach(v=>{ if(v!==String(ans) && opts.size<4) opts.add(v); });
+  while(opts.size<4){ opts.add(String(ans+rnd(2,9))); }
+  const arr = [...opts].sort(()=>Math.random()-0.5);
+  return {
+    question:`The angle at the circumference standing on arc PQ is ${circ}°. Find the angle at the centre standing on the same arc.`,
+    options: arr.map(o=>`${o}°`),
+    correct: arr.indexOf(String(ans)),
+    working:`Angle at centre = 2 × ${circ}° = ${ans}°. Reason: angle at the centre is twice the angle at the circumference (same arc).`
+  };
+}
+function genStage5a(){
+  const dab = rnd(60,140);
+  const bcd = 180-dab;
+  const opts = new Set([String(bcd)]);
+  [String(dab), String(360-dab), String(90-Math.abs(90-dab))].forEach(v=>{ if(v!==String(bcd) && opts.size<4) opts.add(v); });
+  while(opts.size<4){ opts.add(String(bcd+rnd(2,9))); }
+  const arr = [...opts].sort(()=>Math.random()-0.5);
+  return {
+    question:`ABCD is a cyclic quadrilateral. Angle DAB = ${dab}°. Find angle BCD.`,
+    options: arr.map(o=>`${o}°`),
+    correct: arr.indexOf(String(bcd)),
+    working:`Angle DAB + angle BCD = 180° (opposite angles in a cyclic quadrilateral). Angle BCD = 180° − ${dab}° = ${bcd}°.`
+  };
+}
+function genStage5b(){
+  const centreAngle = 2*rnd(30,70);
+  const ans = centreAngle/2;
+  const opts = new Set([String(ans)]);
+  [centreAngle*2, centreAngle, centreAngle-90].forEach(v=>{ if(v>0 && v!==ans && opts.size<4) opts.add(String(v)); });
+  while(opts.size<4){ opts.add(String(ans+rnd(2,9))); }
+  const arr = [...opts].sort(()=>Math.random()-0.5);
+  return {
+    question:`A, B, C lie on a circle centre O. Angle AOB (at the centre) = ${centreAngle}°. D lies on the major arc. Find angle ADB, giving a reason.`,
+    options: arr.map(o=>`${o}°`),
+    correct: arr.indexOf(String(ans)),
+    working:`Angle ADB = ${centreAngle}° ÷ 2 = ${ans}°. Reason: angle at the centre (AOB) is twice the angle at the circumference (ADB) standing on the same arc AB.`
+  };
+}
+
+const ALL_GENERATORS = [genStage1, genStage2, genStage3, genStage4, genStage5a, genStage5b];
+
+let currentStage = 1;
+let highestStageReached = 1;
+const totalStages = 6;
+
+function renderProgress(){
+  const bar = document.getElementById('progress-bar');
+  bar.innerHTML = '';
+  for(let i=1;i<=totalStages;i++){
+    const seg = document.createElement('span');
+    if(i<=highestStageReached) seg.classList.add('done');
+    bar.appendChild(seg);
+  }
+}
+
+function advanceStage(){
+  if(currentStage >= totalStages) return;
+  document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display='none';
+  currentStage++;
+  if(currentStage > highestStageReached) highestStageReached = currentStage;
+  document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display='block';
+  renderProgress();
+  recordProgress('started', currentStage);
+  if(currentStage === totalStages) startFinalQuiz();
+  window.scrollTo({top:document.querySelector(`.stage[data-stage="${currentStage}"]`).offsetTop-20, behavior:'smooth'});
+}
+window.advanceStage = advanceStage;
+
+function goToStage(n){
+  if(n < 1 || n >= currentStage) return;
+  document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display = 'none';
+  currentStage = n;
+  document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display = 'block';
+  renderProgress();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+window.goToStage = goToStage;
+
+let quizIndex = 0;
+let quizScore = 0;
+let shuffledGenerators = [];
+const QUIZ_LENGTH = 10;
+
+function startFinalQuiz(){
+  quizIndex = 0;
+  quizScore = 0;
+  shuffledGenerators = [...ALL_GENERATORS];
+  for(let i = shuffledGenerators.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [shuffledGenerators[i], shuffledGenerators[j]] = [shuffledGenerators[j], shuffledGenerators[i]];
+  }
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion(){
+  const area = document.getElementById('quiz-area');
+  if(quizIndex >= QUIZ_LENGTH){
+    area.innerHTML = `
+      <div class="quiz-score">You scored ${quizScore} / ${QUIZ_LENGTH}</div>
+      <p style="text-align:center;color:#555;">${quizScore >= 7 ? "Great work — solid grasp of circle geometry proofs!" : 'Worth another pass through the earlier stages before moving on.'}</p>
+    `;
+    recordProgress('completed', totalStages);
+    return;
+  }
+  const generator = shuffledGenerators[quizIndex % shuffledGenerators.length];
+  area.innerHTML = `<div class="quiz-counter">Question ${quizIndex+1} of ${QUIZ_LENGTH} — Score so far: ${quizScore}</div><div id="quiz-q"></div>`;
+  buildQuizMC('quiz-q', generator, ()=>{
+    quizIndex++;
+    renderQuizQuestion();
+  });
+}
+
+(async function init(){
+  await checkSession();
+  renderProgress();
+  ['tri-sum','poly-sum','bridge','centre','semi','synth'].forEach(id=>drawStep(id,0));
+  buildTryMCAdvance('try-1', genStage1);
+  buildTryMCAdvance('try-2', genStage2);
+  buildTryMCAdvance('try-3', genStage3);
+  buildTryMCAdvance('try-4', genStage4);
+  buildTryMCNoAdvance('try-5a', genStage5a, ()=>{
+    buildTryMCAdvance('try-5b', genStage5b);
+  });
+  initialVisitPromise = recordInitialVisit();
+})();
+
+// Thin wrapper: standard buildTryMC, but Continue always advances the outer stage.
+function buildTryMCAdvance(containerId, generator){
+  const container = document.getElementById(containerId);
+  const q = generator();
+  container.innerHTML = `
+    <p><strong>Your turn:</strong> ${q.question}</p>
+    <div class="mc-opts"></div>
+    <div class="working" style="display:none;"></div>
+    <div class="mc-feedback" style="display:none;font-weight:700;margin-top:8px;"></div>
+    <button class="next-btn" style="display:none;">Continue →</button>
+  `;
+  const optsWrap = container.querySelector('.mc-opts');
+  const workingEl = container.querySelector('.working');
+  const feedbackEl = container.querySelector('.mc-feedback');
+  const nextBtn = container.querySelector('.next-btn');
+  q.options.forEach((opt,i)=>{
+    const b = document.createElement('button');
+    b.className = 'mc-opt';
+    b.textContent = opt;
+    b.onclick = ()=>{
+      [...optsWrap.children].forEach(c=>c.disabled=true);
+      if(i === q.correct){
+        b.classList.add('mc-correct');
+        workingEl.style.display = 'block';
+        workingEl.textContent = q.working;
+        feedbackEl.style.display = 'block';
+        feedbackEl.style.color = '#2e7d32';
+        feedbackEl.textContent = '✓ Correct!';
+        nextBtn.style.display = 'inline-block';
+      } else {
+        b.classList.add('mc-wrong');
+        optsWrap.children[q.correct].classList.add('mc-correct');
+        workingEl.style.display = 'block';
+        workingEl.textContent = q.working;
+        feedbackEl.style.display = 'block';
+        feedbackEl.style.color = '#c62828';
+        feedbackEl.textContent = 'Not quite — have a look at the working, then try a new question.';
+        nextBtn.textContent = 'Try again';
+        nextBtn.style.display = 'inline-block';
+        nextBtn.onclick = ()=>{ buildTryMCAdvance(containerId, generator); };
+        return;
+      }
+    };
+    optsWrap.appendChild(b);
+  });
+  nextBtn.onclick = ()=>{ advanceStage(); };
+}
+</script>
+</body>
+</html>
