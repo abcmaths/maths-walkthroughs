@@ -84,7 +84,8 @@
   <section class="stage" data-stage="2" style="display:none;">
     <span class="stage-label">Stage 2</span>
     <h2>Prime Factorisation — the Division Ladder</h2>
-    <p>Listing every factor gets slow for bigger numbers. Instead, we can break a number down into <strong>prime factors</strong> using a division ladder — exactly how you'd do it on paper.</p>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(1)">← Back to Stage 1</button>
+        <p>Listing every factor gets slow for bigger numbers. Instead, we can break a number down into <strong>prime factors</strong> using a division ladder — exactly how you'd do it on paper.</p>
     <p>Divide by the smallest prime number that goes in exactly, write the answer underneath, and repeat until you reach 1.</p>
     <button class="reveal-btn" onclick="revealNext('r2', this)">Show me — dividing 36</button>
     <div class="reveal-step" id="r2-0">
@@ -101,7 +102,8 @@
   <section class="stage" data-stage="3" style="display:none;">
     <span class="stage-label">Stage 3</span>
     <h2>Finding HCF using Prime Factorisation</h2>
-    <p>Once two numbers are broken into prime factors, their HCF is simply the primes they <strong>share</strong>.</p>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(2)">← Back to Stage 2</button>
+        <p>Once two numbers are broken into prime factors, their HCF is simply the primes they <strong>share</strong>.</p>
     <button class="reveal-btn" onclick="revealNext('r3', this)">Show me — 36 and 48 as ladders</button>
     <div class="reveal-step" id="r3-0">
       <div style="display:flex;gap:32px;flex-wrap:wrap;justify-content:center;">
@@ -125,7 +127,8 @@
   <section class="stage" data-stage="4" style="display:none;">
     <span class="stage-label">Stage 4</span>
     <h2>HCF of Algebraic Terms</h2>
-    <p>The same idea applies to terms with letters. Find the HCF of the numbers as before, then take the <strong>lowest power</strong> of any letter that appears in every term.</p>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(3)">← Back to Stage 3</button>
+        <p>The same idea applies to terms with letters. Find the HCF of the numbers as before, then take the <strong>lowest power</strong> of any letter that appears in every term.</p>
     <button class="reveal-btn" onclick="revealNext('r4', this)">Show me — HCF of 8x²y and 12xy³</button>
     <div class="reveal-step" id="r4-0">
       <div class="example">Numbers: HCF(8, 12) = 4</div>
@@ -145,7 +148,8 @@
   <section class="stage" data-stage="5" style="display:none;">
     <span class="stage-label">Stage 5</span>
     <h2>Using HCF to Factorise Expressions</h2>
-    <p>Factorising means writing an expression as the HCF multiplied by whatever's left over in brackets.</p>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(4)">← Back to Stage 4</button>
+        <p>Factorising means writing an expression as the HCF multiplied by whatever's left over in brackets.</p>
     <button class="reveal-btn" onclick="revealNext('r5', this)">Show me — factorise 6x² + 9x</button>
     <div class="reveal-step" id="r5-0">
       <div class="example">HCF of 6x² and 9x is 3x</div>
@@ -165,7 +169,8 @@
   <section class="stage" data-stage="6" style="display:none;">
     <span class="stage-label">Final Check</span>
     <h2>Show What You Know</h2>
-    <p>10 mixed questions covering everything from this walkthrough — listing factors, prime factorisation, HCF of numbers and algebraic terms, and factorising. Take your time.</p>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(5)">← Back to Stage 5</button>
+        <p>10 mixed questions covering everything from this walkthrough — listing factors, prime factorisation, HCF of numbers and algebraic terms, and factorising. Take your time.</p>
     <div id="quiz-area"></div>
     <p style="margin-top:16px;"><a href="../../../login.html">Return to dashboard</a></p>
   </section>
@@ -302,24 +307,25 @@ function primeFactorSteps(n){
   const steps = [];
   let cur = n, p = 2;
   while(cur > 1){
-    if(cur % p === 0){ steps.push({divisor:p, remainder: cur / p}); cur = cur / p; }
+    if(cur % p === 0){ steps.push({divisor:p, dividend:cur}); cur = cur / p; }
     else { p++; }
   }
   return steps;
 }
 function renderLadder(containerId, n){
   const steps = primeFactorSteps(n);
-  let rows = `<div class="ladder-row"><div class="ladder-divisor"></div><div class="ladder-value" style="font-weight:700;border-bottom:2px solid #333;">${n}</div></div>`;
+  let rows = '';
   steps.forEach(s=>{
-    rows += `<div class="ladder-row"><div class="ladder-divisor">${s.divisor}</div><div class="ladder-value">${s.remainder}</div></div>`;
+    rows += `<div class="ladder-row"><div class="ladder-divisor">${s.divisor}</div><div class="ladder-value">${s.dividend}</div></div>`;
   });
+  rows += `<div class="ladder-row"><div class="ladder-divisor"></div><div class="ladder-value" style="font-weight:700;">1</div></div>`;
   document.getElementById(containerId).innerHTML = rows;
 }
 renderLadder('ladder-36', 36);
 renderLadder('ladder-36b', 36);
 renderLadder('ladder-48', 48);
 
-// ---- buildTryMC: renders a dynamic multiple-choice checkpoint (per-stage, no scoring) ----
+// ---- buildTryMC: renders a dynamic multiple-choice checkpoint (per-stage, gated) ----
 function buildTryMC(containerId, generator){
   const container = document.getElementById(containerId);
   const q = generator();
@@ -327,10 +333,12 @@ function buildTryMC(containerId, generator){
     <p><strong>Your turn:</strong> ${q.question}</p>
     <div class="mc-opts"></div>
     <div class="working" style="display:none;"></div>
+    <div class="mc-feedback" style="display:none;font-weight:700;margin-top:8px;"></div>
     <button class="next-btn" style="display:none;">Continue →</button>
   `;
   const optsWrap = container.querySelector('.mc-opts');
   const workingEl = container.querySelector('.working');
+  const feedbackEl = container.querySelector('.mc-feedback');
   const nextBtn = container.querySelector('.next-btn');
   q.options.forEach((opt,i)=>{
     const b = document.createElement('button');
@@ -338,11 +346,27 @@ function buildTryMC(containerId, generator){
     b.textContent = opt;
     b.onclick = ()=>{
       [...optsWrap.children].forEach(c=>c.disabled=true);
-      if(i === q.correct){ b.classList.add('mc-correct'); }
-      else { b.classList.add('mc-wrong'); optsWrap.children[q.correct].classList.add('mc-correct'); }
-      workingEl.style.display = 'block';
-      workingEl.textContent = q.working;
-      nextBtn.style.display = 'inline-block';
+      if(i === q.correct){
+        b.classList.add('mc-correct');
+        workingEl.style.display = 'block';
+        workingEl.textContent = q.working;
+        feedbackEl.style.display = 'block';
+        feedbackEl.style.color = '#2e7d32';
+        feedbackEl.textContent = '✓ Correct!';
+        nextBtn.style.display = 'inline-block';
+      } else {
+        b.classList.add('mc-wrong');
+        optsWrap.children[q.correct].classList.add('mc-correct');
+        workingEl.style.display = 'block';
+        workingEl.textContent = q.working;
+        feedbackEl.style.display = 'block';
+        feedbackEl.style.color = '#c62828';
+        feedbackEl.textContent = 'Not quite — have a look at the working, then try a new question.';
+        nextBtn.textContent = 'Try again';
+        nextBtn.style.display = 'inline-block';
+        nextBtn.onclick = ()=>{ buildTryMC(containerId, generator); };
+        return;
+      }
     };
     optsWrap.appendChild(b);
   });
@@ -458,6 +482,7 @@ const ALL_GENERATORS = [genStage1, genStage2, genStage3, genStage4, genStage5];
 
 // ---- Stage progression ----
 let currentStage = 1;
+let highestStageReached = 1;
 const totalStages = 6;
 
 function renderProgress(){
@@ -465,7 +490,7 @@ function renderProgress(){
   bar.innerHTML = '';
   for(let i=1;i<=totalStages;i++){
     const seg = document.createElement('span');
-    if(i<=currentStage) seg.classList.add('done');
+    if(i<=highestStageReached) seg.classList.add('done');
     bar.appendChild(seg);
   }
 }
@@ -474,6 +499,7 @@ function advanceStage(){
   if(currentStage >= totalStages) return;
   document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display='none';
   currentStage++;
+  if(currentStage > highestStageReached) highestStageReached = currentStage;
   document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display='block';
   renderProgress();
   recordProgress('started', currentStage);
@@ -481,6 +507,18 @@ function advanceStage(){
   window.scrollTo({top:document.querySelector(`.stage[data-stage="${currentStage}"]`).offsetTop-20, behavior:'smooth'});
 }
 window.advanceStage = advanceStage;
+
+// Backward navigation only — lets a student revisit earlier content.
+// Doesn't touch recorded progress (stage_reached keeps the highest point actually reached).
+function goToStage(n){
+  if(n < 1 || n >= currentStage) return;
+  document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display = 'none';
+  currentStage = n;
+  document.querySelector(`.stage[data-stage="${currentStage}"]`).style.display = 'block';
+  renderProgress();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+window.goToStage = goToStage;
 
 // ---- Final 10-question mastery check ----
 let quizIndex = 0;
