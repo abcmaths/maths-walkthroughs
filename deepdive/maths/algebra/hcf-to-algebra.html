@@ -260,6 +260,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const TOPIC_CODE = "TCH-ALG-01"; // must match a row in `topics` (subject='deepdive_maths')
 let currentUser = null;
 let topicId = null;
+let initialVisitPromise = null; // tracked so optOut() can wait for it, avoiding a write race
 
 async function checkSession(){
   const { data:{ session } } = await supabase.auth.getSession();
@@ -318,6 +319,11 @@ async function recordInitialVisit(){
 
 window.optOut = async function(){
   if(!confirm("Save your progress and exit this walkthrough? You can come back and pick up from where you left off.")) return;
+  // Wait for the page-load write to finish first (if it's still in flight) so this
+  // write happens strictly after it, never racing it — otherwise whichever request's
+  // network response arrives last silently wins, and could overwrite 'opted_out' back
+  // to 'started'.
+  if(initialVisitPromise) await initialVisitPromise;
   await recordProgress('opted_out', typeof currentStage !== 'undefined' ? currentStage : undefined);
   window.location.href = "../../../login.html";
 };
@@ -849,7 +855,7 @@ function renderQuizQuestion(){
   buildTryMC('try-4', genStage4);
   buildTryMC('try-5', genStage5);
   buildTryMC('try-6', genFactoriseQuad);
-  recordInitialVisit();
+  initialVisitPromise = recordInitialVisit();
 })();
 </script>
 </body>
