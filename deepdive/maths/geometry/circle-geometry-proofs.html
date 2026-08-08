@@ -509,17 +509,17 @@ function drawStep(id, step){
 function drawTriSum(step){
   const svg=clearSvg('tri-sum');
   const A=[40,160], B=[220,160], C=[110,40];
+  const D=[10,40], E=[210,40];
   svg.appendChild(line(A,B)); svg.appendChild(line(A,C)); svg.appendChild(line(B,C));
   svg.appendChild(label(A[0]-10,A[1]+16,'A'));
   svg.appendChild(label(B[0]+4,B[1]+16,'B'));
   svg.appendChild(label(C[0]-4,C[1]-10,'C'));
   if(step>=1){
-    const D=[10,40], E=[210,40];
     svg.appendChild(line(D,E,'#999','4,3'));
     svg.appendChild(label(D[0]-6,D[1]-6,'',9));
   }
-  if(step>=2){ svg.appendChild(arc(C,150,190,'#C0272D')); }
-  if(step>=3){ svg.appendChild(arc(C,-10,30,'#1f7a3d')); }
+  if(step>=2){ svg.appendChild(angleMarker(C,D,A,'#C0272D',22)); }
+  if(step>=3){ svg.appendChild(angleMarker(C,E,B,'#1f7a3d',22)); }
   if(step>=4){ svg.appendChild(label(110,190,'A+B+C=180\u00b0',11,'#C0272D')); }
 }
 
@@ -562,8 +562,8 @@ function drawBridge(step){
   }
   if(step>=3){
     svg.appendChild(line(A,B));
-    svg.appendChild(arc(A,-20,20,'#1f7a3d',14));
-    svg.appendChild(arc(B,160,200,'#1f7a3d',14));
+    svg.appendChild(angleMarker(A,O,B,'#1f7a3d',18));
+    svg.appendChild(angleMarker(B,O,A,'#1f7a3d',18));
   }
   if(step>=4){
     svg.appendChild(label(70,190,'base angles equal',10,'#C0272D'));
@@ -587,12 +587,12 @@ function drawCentre(step){
     svg.appendChild(label(D[0]+2,D[1]-2,'D',9));
   }
   if(step>=2){
-    svg.appendChild(arc(A,-20,25,'#C0272D',12));
-    svg.appendChild(arc(C, 200,245,'#C0272D',12));
+    svg.appendChild(angleMarker(A,O,C,'#C0272D',14));
+    svg.appendChild(angleMarker(C,O,A,'#C0272D',14));
   }
   if(step>=3){
-    svg.appendChild(arc(B,140,190,'#1f7a3d',12));
-    svg.appendChild(arc(C,300,345,'#1f7a3d',12));
+    svg.appendChild(angleMarker(B,O,C,'#1f7a3d',14));
+    svg.appendChild(angleMarker(C,O,B,'#1f7a3d',24));
   }
   if(step>=4){
     svg.appendChild(label(60,20,'AOB = 2\u00d7ACB',11,'#C0272D'));
@@ -637,15 +637,15 @@ function drawSameSegment(step){
   if(step>=2){
     svg.appendChild(line(O,A)); svg.appendChild(line(O,B));
     svg.appendChild(dot(O)); svg.appendChild(label(O[0]-6,O[1]+4,'O',9));
-    svg.appendChild(arc(O,60,120,'#C0272D',16));
+    svg.appendChild(angleMarker(O,A,B,'#C0272D',20));
   }
   if(step>=3){
     svg.appendChild(line(A,C)); svg.appendChild(line(C,B));
-    svg.appendChild(arc(C,20,70,'#1f7a3d',12));
+    svg.appendChild(angleMarker(C,A,B,'#1f7a3d',16));
   }
   if(step>=4){
     svg.appendChild(line(A,D)); svg.appendChild(line(D,B));
-    svg.appendChild(arc(D,10,55,'#1f7a3d',12));
+    svg.appendChild(angleMarker(D,A,B,'#1f7a3d',16));
     svg.appendChild(label(60,25,'\u2220ACB = \u2220ADB',10,'#C0272D'));
   }
 }
@@ -666,11 +666,11 @@ function drawCyclicProof(step){
   }
   if(step>=2){
     svg.appendChild(line(O,B)); svg.appendChild(line(O,D));
-    svg.appendChild(arc(O,-95,-15,'#C0272D',18));
+    svg.appendChild(angleMarkerThrough(O,B,D,A,'#C0272D',20));
     svg.appendChild(label(70,205,'\u2220BOD (via A) = 2\u00d7\u2220BCD',9,'#C0272D'));
   }
   if(step>=3){
-    svg.appendChild(arc(O,80,175,'#1f7a3d',18));
+    svg.appendChild(angleMarkerThrough(O,B,D,C,'#1f7a3d',30));
     svg.appendChild(label(70,220,'\u2220BOD (via C) = 2\u00d7\u2220BAD',9,'#1f7a3d'));
   }
   if(step>=4){
@@ -737,11 +737,12 @@ function drawAltSegment(step){
   const Q=[O[0]-13,O[1]-64];
   svg.appendChild(el('circle',{cx:O[0],cy:O[1],r:r,fill:'none',stroke:'#999'}));
   if(step>=1){
-    svg.appendChild(line([P[0],P[1]-45],[P[0],P[1]+45],'#C0272D'));
+    const tangentTop=[P[0],P[1]-45];
+    svg.appendChild(line(tangentTop,[P[0],P[1]+45],'#C0272D'));
     svg.appendChild(dot(P)); svg.appendChild(label(P[0]-16,P[1]+4,'P'));
     svg.appendChild(dot(Q)); svg.appendChild(label(Q[0]-6,Q[1]-8,'Q'));
     svg.appendChild(line(P,Q));
-    svg.appendChild(arc(P,-45,10,'#1f7a3d',18));
+    svg.appendChild(angleMarker(P,tangentTop,Q,'#1f7a3d',22));
     svg.appendChild(label(P[0]+22,P[1]-22,'\u03b8',10,'#1f7a3d'));
   }
   if(step>=2){
@@ -754,7 +755,7 @@ function drawAltSegment(step){
     svg.appendChild(el('rect',{x:Q[0]-2,y:Q[1]+2,width:10,height:10,fill:'none',stroke:'#C0272D','stroke-width':1.5}));
   }
   if(step>=4){
-    svg.appendChild(arc(R,140,175,'#C0272D',14));
+    svg.appendChild(angleMarker(R,P,Q,'#C0272D',18));
     svg.appendChild(label(R[0]-45,R[1]+20,'\u2220PRQ = \u03b8',10,'#C0272D'));
   }
 }
@@ -772,7 +773,7 @@ function drawSynth(step){
   svg.appendChild(label(A[0]-16,A[1],'A')); svg.appendChild(label(B[0]-4,B[1]-8,'B'));
   svg.appendChild(label(C[0]+6,C[1],'C')); svg.appendChild(label(D[0]-4,D[1]+16,'D'));
   if(step>=1){ svg.appendChild(label(60,200,'DAB = 100\u00b0',10,'#C0272D')); }
-  if(step>=2){ svg.appendChild(arc(A,-20,50,'#C0272D',12)); svg.appendChild(arc(C,150,220,'#1f7a3d',12)); }
+  if(step>=2){ svg.appendChild(angleMarker(A,D,B,'#C0272D',18)); svg.appendChild(angleMarker(C,B,D,'#1f7a3d',18)); }
   if(step>=3){ svg.appendChild(label(60,215,'BCD = 80\u00b0',10,'#1f7a3d')); }
 }
 
@@ -795,6 +796,42 @@ function arc(center,startDeg,endDeg,color='#C0272D',radius=18){
   const x2=cx+radius*Math.cos(e), y2=cy+radius*Math.sin(e);
   const large=(endDeg-startDeg)>180?1:0;
   return el('path',{d:`M ${x1} ${y1} A ${radius} ${radius} 0 ${large} 1 ${x2} ${y2}`,fill:'none',stroke:color,'stroke-width':2});
+}
+
+/* ---------- angle markers computed from real geometry, not hand-picked degrees ---------- */
+// An arc drawn from hardcoded start/end degrees drifts out of sync with the actual
+// lines the moment a diagram's coordinates change, producing a short mismatched
+// squiggle instead of a marker that visibly spans the real angle. These helpers
+// compute the marker directly from the two rays meeting at the vertex instead.
+function angleOf(vertex, p){ return Math.atan2(p[1]-vertex[1], p[0]-vertex[0]) * 180/Math.PI; }
+function norm360(deg){ return ((deg % 360) + 360) % 360; }
+
+// Marks the SHORT (non-reflex) angle at `vertex` between rays vertex->p1 and vertex->p2.
+function angleMarker(vertex, p1, p2, color='#C0272D', radius=18){
+  const a1 = norm360(angleOf(vertex,p1));
+  const a2 = norm360(angleOf(vertex,p2));
+  let diff = a2-a1; if(diff<0) diff+=360;
+  let start=a1, end=a1+diff;
+  if(diff>180){ start=a2; end=a2+(360-diff); } // swap to the shorter sweep
+  return arc(vertex, start, end, color, radius);
+}
+
+// Marks whichever of the two angles (short or reflex) at `vertex` between rays
+// vertex->p1 and vertex->p2 passes on the same side as `throughPoint` — used for the
+// cyclic-quadrilateral proof, where we deliberately want to show both the ordinary
+// angle AND its reflex complement, and which is which depends on where the other two
+// vertices of the quadrilateral actually sit.
+function angleMarkerThrough(vertex, p1, p2, throughPoint, color, radius){
+  const a1 = norm360(angleOf(vertex,p1));
+  const a2 = norm360(angleOf(vertex,p2));
+  const at = norm360(angleOf(vertex,throughPoint));
+  let diff = a2-a1; if(diff<0) diff+=360;
+  let rel = at-a1; if(rel<0) rel+=360;
+  const inSweep = rel <= diff;
+  let start, end;
+  if(inSweep){ start=a1; end=a1+diff; }
+  else { start=a2; end=a2+(360-diff); }
+  return arc(vertex, start, end, color, radius);
 }
 
 /* ---------- standard try-it / quiz MC engine (matches other Deep Dive files) ---------- */
