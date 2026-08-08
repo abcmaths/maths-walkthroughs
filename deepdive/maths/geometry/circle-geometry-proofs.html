@@ -150,6 +150,25 @@
       </div>
     </div>
 
+    <h3>Explore It Yourself</h3>
+    <div class="example" style="border-left-color:#1565C0;">
+      <p style="margin-top:0;">Drag the tilt slider and switch between angle pairs. However the transversal is tilted, corresponding, alternate, and vertically opposite angles stay <strong>equal</strong> — and co-interior angles always sum to <strong>180°</strong>.</p>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+        <label style="font-size:.85rem;">Pair:
+          <select id="pl-pair" onchange="renderParallelLive()" style="margin-left:6px;padding:4px 8px;border-radius:6px;border:1px solid var(--line);">
+            <option value="corresponding">Corresponding</option>
+            <option value="alternate">Alternate</option>
+            <option value="cointerior">Co-interior</option>
+            <option value="vertical">Vertically opposite</option>
+          </select>
+        </label>
+        <label style="font-size:.85rem;flex:1;min-width:200px;">Tilt: <span id="pl-tilt-val">55</span>°
+          <input type="range" id="pl-tilt" min="20" max="160" value="55" oninput="renderParallelLive()" style="width:100%;">
+        </label>
+      </div>
+      <div class="diagram-wrap"><svg id="svg-parallel-live" viewBox="0 0 400 300" width="400" height="300"></svg></div>
+    </div>
+
     <div class="try-it">
       <p style="margin-top:0;"><strong>Part 1 — the idioms so far</strong></p>
       <div id="try-1a"></div>
@@ -625,7 +644,6 @@ function drawLine180(step){
     // opposite rays already drawn as the line itself; nothing extra to add here
   }
   if(step>=2){
-    svg.appendChild(dot(P)); svg.appendChild(label(P[0]+4,P[1]-4,'P'));
     svg.appendChild(line(O,P,'#999','4,3'));
   }
   if(step>=3){
@@ -640,8 +658,8 @@ function drawLine180(step){
 function drawVertical(step){
   const svg=clearSvg('vertical');
   const O=[130,115];
-  const A=pointAt(O,200,80), B=pointAt(O,20,80);
-  const C=pointAt(O,290,80), D=pointAt(O,110,80);
+  const A=pointAt(O,195,80), B=pointAt(O,15,80);
+  const C=pointAt(O,258,80), D=pointAt(O,78,80);
   if(step>=1){
     svg.appendChild(line(A,B)); svg.appendChild(line(C,D));
     svg.appendChild(dot(O));
@@ -709,6 +727,76 @@ function drawParallelDeriv(step){
   }
 }
 
+/* ---------- interactive angle-pair explorer ---------- */
+function angleMagnitude(vertex,p1,p2){
+  const a1=norm360(angleOf(vertex,p1)), a2=norm360(angleOf(vertex,p2));
+  let diff=Math.abs(a1-a2);
+  if(diff>180) diff=360-diff;
+  return diff;
+}
+function computeParallelLive(tilt){
+  const rad=tilt*Math.PI/180;
+  const dir=[Math.cos(rad), -Math.sin(rad)];
+  const pivot=[200,160];
+  const y1=100, y2=220;
+  const sUp=(y1-pivot[1])/dir[1];
+  const sDown=(y2-pivot[1])/dir[1];
+  const Pu=[pivot[0]+sUp*dir[0], y1];
+  const Pl=[pivot[0]+sDown*dir[0], y2];
+  const extTop=[pivot[0]+(sUp*1.4)*dir[0], pivot[1]+(sUp*1.4)*dir[1]];
+  const extBot=[pivot[0]+(sDown*1.4)*dir[0], pivot[1]+(sDown*1.4)*dir[1]];
+  return {Pu,Pl,extTop,extBot};
+}
+function valueLabel(x,y,text,color){
+  const grp = el('g',{});
+  const w = 16+text.length*8;
+  grp.appendChild(el('rect',{x:x-w/2,y:y-12,width:w,height:22,rx:11,fill:color}));
+  const t = el('text',{x,y:y+4,'text-anchor':'middle','font-size':12,fill:'#fff','font-weight':700});
+  t.textContent=text;
+  grp.appendChild(t);
+  return grp;
+}
+window.renderParallelLive = function(){
+  const tiltInput = document.getElementById('pl-tilt');
+  const pairSelect = document.getElementById('pl-pair');
+  if(!tiltInput || !pairSelect) return; // guard: called before this stage's DOM exists
+  const tilt = parseFloat(tiltInput.value);
+  document.getElementById('pl-tilt-val').textContent = tilt.toFixed(0);
+  const pairType = pairSelect.value;
+  const {Pu,Pl,extTop,extBot} = computeParallelLive(tilt);
+  const svg = clearSvg('parallel-live');
+  const Lup=[20,100], Rup=[380,100], Ldown=[20,220], Rdown=[380,220];
+  svg.appendChild(line(Lup,Rup,'#2e7d32'));
+  svg.appendChild(line(Ldown,Rdown,'#2e7d32'));
+  svg.appendChild(line(extTop,extBot,'#1565C0'));
+  svg.appendChild(dot(Pu)); svg.appendChild(dot(Pl));
+
+  let mA,mB,valA,valB,capt;
+  if(pairType==='corresponding'){
+    mA=angleMarker(Pu,extTop,Rup,'#C0272D',26); mB=angleMarker(Pl,Pu,Rdown,'#C0272D',26);
+    valA=angleMagnitude(Pu,extTop,Rup); valB=angleMagnitude(Pl,Pu,Rdown);
+    capt='Corresponding angles — always equal';
+  } else if(pairType==='alternate'){
+    mA=angleMarker(Pu,Pl,Lup,'#C0272D',26); mB=angleMarker(Pl,Pu,Rdown,'#C0272D',26);
+    valA=angleMagnitude(Pu,Pl,Lup); valB=angleMagnitude(Pl,Pu,Rdown);
+    capt='Alternate angles — always equal';
+  } else if(pairType==='cointerior'){
+    mA=angleMarker(Pu,Pl,Rup,'#C0272D',26); mB=angleMarker(Pl,Pu,Rdown,'#1f7a3d',26);
+    valA=angleMagnitude(Pu,Pl,Rup); valB=angleMagnitude(Pl,Pu,Rdown);
+    capt='Co-interior angles — always sum to 180°';
+  } else {
+    mA=angleMarker(Pu,extTop,Rup,'#C0272D',22); mB=angleMarker(Pu,Pl,Lup,'#C0272D',22);
+    valA=angleMagnitude(Pu,extTop,Rup); valB=angleMagnitude(Pu,Pl,Lup);
+    capt='Vertically opposite angles — always equal';
+  }
+  svg.appendChild(mA); svg.appendChild(mB);
+  const labelPosA = pairType==='vertical' ? [Pu[0]+55,Pu[1]-28] : [Pu[0]+45,Pu[1]-24];
+  const labelPosB = pairType==='vertical' ? [Pu[0]-55,Pu[1]+34] : [Pl[0]+45,Pl[1]-24];
+  svg.appendChild(valueLabel(labelPosA[0],labelPosA[1],`${valA.toFixed(0)}\u00b0`,'#1565C0'));
+  svg.appendChild(valueLabel(labelPosB[0],labelPosB[1],`${valB.toFixed(0)}\u00b0`,'#1565C0'));
+  svg.appendChild(label(20,290,capt,11,'#555'));
+};
+
 function drawTriSum(step){
   const svg=clearSvg('tri-sum');
   const A=[40,160], B=[220,160], C=[110,40];
@@ -721,8 +809,14 @@ function drawTriSum(step){
     svg.appendChild(line(D,E,'#999','4,3'));
     svg.appendChild(label(D[0]-6,D[1]-6,'',9));
   }
-  if(step>=2){ svg.appendChild(angleMarker(C,D,A,'#C0272D',22)); }
-  if(step>=3){ svg.appendChild(angleMarker(C,E,B,'#1f7a3d',22)); }
+  if(step>=2){
+    svg.appendChild(angleMarker(C,D,A,'#C0272D',22));
+    svg.appendChild(angleMarker(A,B,C,'#C0272D',22));
+  }
+  if(step>=3){
+    svg.appendChild(angleMarker(C,E,B,'#1f7a3d',22));
+    svg.appendChild(angleMarker(B,A,C,'#1f7a3d',22));
+  }
   if(step>=4){ svg.appendChild(label(110,190,'A+B+C=180\u00b0',11,'#C0272D')); }
 }
 
@@ -1378,6 +1472,7 @@ function renderQuizQuestion(){
   await checkSession();
   renderProgress();
   ['point360','line180','vertical','parallel-intro','parallel-deriv','tri-sum','poly-sum','bridge','centre','semi','same-segment','cyclic-proof','tangent-perp','two-tangents','alt-segment','synth'].forEach(id=>drawStep(id,0));
+  renderParallelLive();
   buildTryMCNoAdvance('try-1a', genLinesAnglesEither, ()=>{
     buildTryMCAdvance('try-1b', genStage1);
   });
