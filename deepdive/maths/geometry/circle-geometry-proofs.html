@@ -108,19 +108,30 @@
     <div class="proof-card">
       <div class="proof-grid">
         <div class="diagram-wrap">
-          <svg id="svg-vertical" viewBox="0 0 260 220" width="260" height="220"></svg>
+          <svg id="svg-vertical" viewBox="0 0 260 260" width="260" height="260"></svg>
         </div>
         <div class="proof-steps">
           <div class="step-line" data-step="1">Two straight lines cross at O, forming four angles going around: angle AOC, angle COB, angle BOD, angle DOA.</div>
-          <div class="step-line" data-step="2">angle AOC + angle COB = 180° (angles on a straight line — line AB, just proved above).</div>
-          <div class="step-line" data-step="3">angle COB + angle BOD = 180° (angles on a straight line — line CD, the same fact applied to the other line).</div>
-          <div class="step-line" data-step="4">Both sums equal 180°, so angle AOC + angle COB = angle COB + angle BOD. Subtracting angle COB from both sides: <strong>angle AOC = angle BOD</strong>. The same argument gives angle COB = angle DOA. Vertically opposite angles are equal — built entirely from the straight-line fact, nothing new assumed. <strong>QED</strong></div>
+          <div class="step-line" data-step="2">Look at just angle AOC on its own, shown in red.</div>
+          <div class="step-line" data-step="3">Now angle COB, shown in gold. angle AOC + angle COB = 180° (angles on a straight line — line AB, just proved above).</div>
+          <div class="step-line" data-step="4">Now angle BOD, shown in red like AOC — this is the one we're trying to compare it to. angle COB + angle BOD = 180° (angles on a straight line — line CD, the same fact applied to the other line).</div>
+          <div class="step-line" data-step="5">Both equations equal 180°, and angle COB (gold) is the exact same wedge in both of them — it hasn't moved. So we can subtract it from each side: angle AOC + angle COB = angle COB + angle BOD becomes <strong>angle AOC = angle BOD</strong>.</div>
+          <div class="step-line" data-step="6">Vertically opposite angles are equal (and the same argument, using the gold and red swapped, gives angle COB = angle DOA). Built entirely from the straight-line fact, nothing new assumed. <strong>QED</strong></div>
           <div class="step-controls">
             <button class="step-btn" onclick="stepForward('vertical')">Next step</button>
             <button class="step-btn secondary" onclick="stepReset('vertical')">Reset</button>
           </div>
         </div>
       </div>
+    </div>
+
+    <h3>Explore It Yourself</h3>
+    <div class="example" style="border-left-color:#1565C0;">
+      <p style="margin-top:0;">Drag the slider to change the angle between the two lines. Whatever the angle, the two <span style="color:#C0272D;font-weight:700;">red</span> angles (vertically opposite each other) always stay equal.</p>
+      <label style="font-size:.85rem;display:block;margin-bottom:10px;">Angle: <span id="vt-angle-val">50</span>°
+        <input type="range" id="vt-angle" min="10" max="170" value="50" oninput="renderVerticalLive()" style="width:100%;">
+      </label>
+      <div class="diagram-wrap"><svg id="svg-vertical-live" viewBox="0 0 260 200" width="260" height="200"></svg></div>
     </div>
 
     <h3>A New Idiom: Parallel Lines</h3>
@@ -644,11 +655,11 @@ function drawLine180(step){
     // opposite rays already drawn as the line itself; nothing extra to add here
   }
   if(step>=2){
-    svg.appendChild(line(O,P,'#999','4,3'));
+    svg.appendChild(line(O,P,'#666'));
   }
   if(step>=3){
-    svg.appendChild(angleMarker(O,L,P,'#C0272D',26));
-    svg.appendChild(angleMarker(O,P,R,'#1f7a3d',26));
+    svg.appendChild(angleMarker(O,L,P,'#C0272D',30));
+    svg.appendChild(angleMarker(O,P,R,'#1f7a3d',30));
     svg.appendChild(label(70,80,'p',11,'#C0272D'));
     svg.appendChild(label(185,80,'q',11,'#1f7a3d'));
     svg.appendChild(label(70,175,'p + q = 180\u00b0',10,'#888'));
@@ -657,9 +668,9 @@ function drawLine180(step){
 
 function drawVertical(step){
   const svg=clearSvg('vertical');
-  const O=[130,115];
-  const A=pointAt(O,195,80), B=pointAt(O,15,80);
-  const C=pointAt(O,258,80), D=pointAt(O,78,80);
+  const O=[130,165];
+  const A=pointAt(O,195,75), B=pointAt(O,15,75);
+  const C=pointAt(O,258,75), D=pointAt(O,78,75);
   if(step>=1){
     svg.appendChild(line(A,B)); svg.appendChild(line(C,D));
     svg.appendChild(dot(O));
@@ -667,15 +678,21 @@ function drawVertical(step){
     svg.appendChild(label(C[0]-6,C[1]+16,'C')); svg.appendChild(label(D[0]-2,D[1]-10,'D'));
   }
   if(step>=2){
-    svg.appendChild(angleMarker(O,A,C,'#C0272D',20));
-    svg.appendChild(angleMarker(O,C,B,'#C8922A',20));
+    svg.appendChild(angleMarker(O,A,C,'#C0272D',18));
   }
   if(step>=3){
-    svg.appendChild(angleMarker(O,C,B,'#C8922A',20));
-    svg.appendChild(angleMarker(O,B,D,'#C0272D',20));
+    svg.appendChild(angleMarker(O,C,B,'#C8922A',30));
+    svg.appendChild(label(10,30,'\u2220AOC + \u2220COB = 180\u00b0',9,'#888'));
   }
   if(step>=4){
-    svg.appendChild(label(60,20,'\u2220AOC = \u2220BOD',11,'#C0272D'));
+    svg.appendChild(angleMarker(O,B,D,'#C0272D',18));
+    svg.appendChild(label(10,45,'\u2220COB + \u2220BOD = 180\u00b0',9,'#888'));
+  }
+  if(step>=5){
+    svg.appendChild(label(10,60,'gold \u2220COB is shared \u2014 subtract it',9,'#C8922A'));
+  }
+  if(step>=6){
+    svg.appendChild(label(10,75,'\u2220AOC = \u2220BOD',11,'#C0272D'));
   }
 }
 
@@ -795,6 +812,30 @@ window.renderParallelLive = function(){
   svg.appendChild(valueLabel(labelPosA[0],labelPosA[1],`${valA.toFixed(0)}\u00b0`,'#1565C0'));
   svg.appendChild(valueLabel(labelPosB[0],labelPosB[1],`${valB.toFixed(0)}\u00b0`,'#1565C0'));
   svg.appendChild(label(20,290,capt,11,'#555'));
+};
+
+window.renderVerticalLive = function(){
+  const angleInput = document.getElementById('vt-angle');
+  if(!angleInput) return; // guard: called before this stage's DOM exists
+  const theta = parseFloat(angleInput.value);
+  document.getElementById('vt-angle-val').textContent = theta.toFixed(0);
+  const O=[130,100];
+  const L=[20,100], R=[240,100];
+  const dir2 = [Math.cos(theta*Math.PI/180), -Math.sin(theta*Math.PI/180)];
+  const C=[O[0]+80*dir2[0], O[1]+80*dir2[1]];
+  const D=[O[0]-80*dir2[0], O[1]-80*dir2[1]];
+  const svg = clearSvg('vertical-live');
+  svg.appendChild(line(L,R));
+  svg.appendChild(line(C,D,'#1565C0'));
+  svg.appendChild(dot(O));
+  const mA = angleMarker(O,R,C,'#C0272D',24);
+  const mB = angleMarker(O,L,D,'#C0272D',24);
+  const mC = angleMarker(O,C,L,'#C8922A',36);
+  svg.appendChild(mC); svg.appendChild(mA); svg.appendChild(mB);
+  const valA = angleMagnitude(O,R,C), valB = angleMagnitude(O,L,D);
+  svg.appendChild(valueLabel(O[0]+55,O[1]-40,`${valA.toFixed(0)}\u00b0`,'#C0272D'));
+  svg.appendChild(valueLabel(O[0]-55,O[1]+40,`${valB.toFixed(0)}\u00b0`,'#C0272D'));
+  svg.appendChild(label(15,185,'Vertically opposite (red) — always equal',10,'#555'));
 };
 
 function drawTriSum(step){
@@ -1473,6 +1514,7 @@ function renderQuizQuestion(){
   renderProgress();
   ['point360','line180','vertical','parallel-intro','parallel-deriv','tri-sum','poly-sum','bridge','centre','semi','same-segment','cyclic-proof','tangent-perp','two-tangents','alt-segment','synth'].forEach(id=>drawStep(id,0));
   renderParallelLive();
+  renderVerticalLive();
   buildTryMCNoAdvance('try-1a', genLinesAnglesEither, ()=>{
     buildTryMCAdvance('try-1b', genStage1);
   });
