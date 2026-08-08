@@ -82,6 +82,7 @@
     <span class="stage-label">Stage 2</span>
     <button class="opt-out-btn" onclick="optOut()">Opt out</button>
     <h2>What is a Decimal?</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(1)">← Back to Stage 1</button>
     <div class="example" style="border-left-color:var(--gold);">
       <strong>Key words</strong><br>
       <strong>Decimal point</strong> — separates whole numbers from parts of a whole.<br>
@@ -101,6 +102,7 @@
     <span class="stage-label">Stage 3</span>
     <button class="opt-out-btn" onclick="optOut()">Opt out</button>
     <h2>What is a Percentage?</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(2)">← Back to Stage 2</button>
     <div class="example" style="border-left-color:var(--gold);">
       <strong>Key words</strong><br>
       <strong>Per cent</strong> — literally means "out of a hundred" (Latin: <em>per centum</em>).<br>
@@ -119,6 +121,7 @@
     <span class="stage-label">Stage 4</span>
     <button class="opt-out-btn" onclick="optOut()">Opt out</button>
     <h2>The Conversion Triangle</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(3)">← Back to Stage 3</button>
     <p>Fractions, decimals and percentages are three names for the same amount. You can convert between any two of them, in either direction:</p>
     <div class="triangle-wrap" id="triangle-1"></div>
     <div class="example">
@@ -138,6 +141,7 @@
     <span class="stage-label">Stage 5</span>
     <button class="opt-out-btn" onclick="optOut()">Opt out</button>
     <h2>Ordering a Mixed Set</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(4)">← Back to Stage 4</button>
     <p>When a question mixes fractions, decimals and percentages together, the safest approach is to convert everything into the <strong>same</strong> form first — decimals are usually quickest to compare.</p>
     <div class="example">
       <strong>Worked example:</strong> Order <span class="frac"><span class="num">3</span><span class="den">4</span></span>, 0.7, and 68% from smallest to largest.<br>
@@ -154,6 +158,7 @@
     <span class="stage-label">Stage 6</span>
     <button class="opt-out-btn" onclick="optOut()">Opt out</button>
     <h2>Percentage of an Amount — Multiplier Method</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(5)">← Back to Stage 5</button>
     <p>To find a percentage of an amount, convert the percentage to a decimal (its <strong>multiplier</strong>) and multiply.</p>
     <div class="example">
       <strong>Worked example:</strong> Find 35% of £160.<br>
@@ -172,6 +177,7 @@
     <span class="stage-label">Stage 7</span>
     <button class="opt-out-btn" onclick="optOut()">Opt out</button>
     <h2>Percentage of an Amount — Building-Block Method</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(6)">← Back to Stage 6</button>
     <p>Without a calculator, it's often faster to build the percentage you need out of 10%, 5%, and 1% blocks.</p>
     <div class="example">
       <strong>Worked example:</strong> Find 35% of £160 (no calculator).<br>
@@ -192,6 +198,7 @@
     <span class="stage-label">Final Check</span>
     <button class="opt-out-btn" onclick="optOut()">Opt out</button>
     <h2>Mastery Check — 10 Questions</h2>
+    <button class="reveal-btn" style="background:#888;" onclick="goToStage(7)">← Back to Stage 7</button>
     <p>A mix of everything from this walkthrough: converting between fractions, decimals and percentages, ordering, and finding a percentage of an amount.</p>
     <div id="quiz-area"></div>
   </section>
@@ -325,7 +332,7 @@ drawGrid('grid-2', 37);
       <text x="60" y="225" text-anchor="middle" font-weight="700" fill="#0d47a1">Decimal</text>
       <circle cx="360" cy="220" r="42" fill="#2e7d3222" stroke="#2e7d32" stroke-width="2"/>
       <text x="360" y="225" text-anchor="middle" font-weight="700" fill="#1b5e20">Percentage</text>
-      <text x="115" y="115" font-size="11" fill="#888">÷ denominator</text>
+      <text x="115" y="115" font-size="11" fill="#888">numerator ÷ denominator</text>
       <text x="255" y="115" font-size="11" fill="#888" text-anchor="end">÷ 100</text>
       <text x="210" y="212" font-size="11" fill="#888" text-anchor="middle">× 100</text>
     </svg>`;
@@ -349,13 +356,13 @@ function buildTryMC(containerId, generator){
   q.options.forEach((opt,i)=>{
     const b = document.createElement('button');
     b.className = 'mc-opt';
-    b.textContent = opt;
+    b.innerHTML = opt;
     b.onclick = ()=>{
       [...optsWrap.children].forEach(c=>c.disabled=true);
       if(i === q.correct){
         b.classList.add('mc-correct');
         workingEl.style.display = 'block';
-        workingEl.textContent = q.working;
+        workingEl.innerHTML = q.working;
         feedbackEl.style.display = 'block';
         feedbackEl.style.color = '#2e7d32';
         feedbackEl.textContent = '✓ Correct!';
@@ -364,7 +371,7 @@ function buildTryMC(containerId, generator){
         b.classList.add('mc-wrong');
         optsWrap.children[q.correct].classList.add('mc-correct');
         workingEl.style.display = 'block';
-        workingEl.textContent = q.working;
+        workingEl.innerHTML = q.working;
         feedbackEl.style.display = 'block';
         feedbackEl.style.color = '#c62828';
         feedbackEl.textContent = 'Not quite — have a look at the working, then try a new question.';
@@ -394,14 +401,14 @@ function buildQuizMC(containerId, generator, onAnswered){
   q.options.forEach((opt,i)=>{
     const b = document.createElement('button');
     b.className = 'mc-opt';
-    b.textContent = opt;
+    b.innerHTML = opt;
     b.onclick = ()=>{
       [...optsWrap.children].forEach(c=>c.disabled=true);
       const correct = (i === q.correct);
       if(correct){ b.classList.add('mc-correct'); quizScore++; }
       else { b.classList.add('mc-wrong'); optsWrap.children[q.correct].classList.add('mc-correct'); }
       workingEl.style.display = 'block';
-      workingEl.textContent = q.working;
+      workingEl.innerHTML = q.working;
       nextBtn.style.display = 'inline-block';
     };
     optsWrap.appendChild(b);
@@ -422,32 +429,74 @@ const FRIENDLY = [
 function genStage1(){
   const total = pick([5,8,10]);
   const shaded = rnd(1, total-1);
-  const opts = new Set([`${shaded}/${total}`]);
-  while(opts.size < 4){
-    const cands = [`${total-shaded}/${total}`, `${shaded}/${total+1}`, `${Math.max(1,shaded-1)}/${total}`, `${shaded}/${Math.max(1,total-1)}`];
-    opts.add(pick(cands));
+  const correctStr = fracHTML(shaded, total);
+  const seen = new Set([`${shaded}/${total}`]);
+  const options = [correctStr];
+  function tryAdd(n,d){
+    const key = `${n}/${d}`;
+    if(n<1 || d<1 || seen.has(key)) return;
+    seen.add(key);
+    options.push(fracHTML(n,d));
   }
-  const arr = [...opts].sort(()=>Math.random()-0.5);
+  tryAdd(total-shaded, total);
+  tryAdd(shaded, total+1);
+  tryAdd(Math.max(1,shaded-1), total);
+  tryAdd(shaded, Math.max(1,total-1));
+  while(options.length < 4){
+    tryAdd(rnd(1,total-1), total);
+  }
+  const arr = options.slice(0,4).sort(()=>Math.random()-0.5);
   return {
     question:`A bar is split into ${total} equal parts. ${shaded} of them are shaded. What fraction is shaded?`,
     options: arr,
-    correct: arr.indexOf(`${shaded}/${total}`),
-    working:`${shaded} shaded parts out of ${total} equal parts = ${shaded}/${total}.`
+    correct: arr.indexOf(correctStr),
+    working:`${shaded} shaded parts out of ${total} equal parts = ${fracHTML(shaded,total)}.`
   };
 }
 function genStage2(){
   const h = rnd(1,99);
-  const correct = h < 10 ? `0.0${h}` : `0.${h}`;
-  const opts = new Set([correct]);
-  const cands = [`0.${h*10}`, h<10?`0.${h}`:`0.0${h}`, `${(h/100).toFixed(3)}0`.replace(/0$/,'1')];
-  while(opts.size < 4 && cands.length){ opts.add(cands.pop()); }
-  while(opts.size < 4){ opts.add(`0.${rnd(1,99)}`); }
-  const arr = [...opts].sort(()=>Math.random()-0.5);
+  const pad2 = h<10 ? `0${h}` : `${h}`;
+  const correctStr = `0.${pad2}`;
+  // Build distractors as {str, milli} pairs, where "milli" = value × 1000 (an integer),
+  // so we can reliably detect two DIFFERENT-LOOKING strings that are the SAME value
+  // (e.g. "0.82" and "0.820") and never offer both.
+  const correctMilli = h * 10;
+  const seenMilli = new Set([correctMilli]);
+  const options = [{ str: correctStr, milli: correctMilli }];
+
+  function tryAdd(val){
+    if(val < 1 || val > 999) return;
+    if(seenMilli.has(val)) return;
+    seenMilli.add(val);
+    const asHundredths = val / 10; // val is in thousandths; /10 gives hundredths-scale for display
+    let str;
+    if(Number.isInteger(asHundredths)){
+      const hh = asHundredths;
+      const p2 = hh<10 ? `0${hh}` : `${hh}`;
+      str = `0.${p2}`;
+    } else {
+      // thousandths that aren't a whole number of hundredths (the "misplaced decimal" distractor)
+      const thousandths = val;
+      const p3 = String(thousandths).padStart(3,'0');
+      str = `0.${p3}`;
+    }
+    options.push({ str, milli: val });
+  }
+
+  tryAdd(h);                 // misplaced decimal: h/1000 instead of h/100 (e.g. 0.082 instead of 0.82)
+  tryAdd((100-h)*10);        // counted the unshaded squares instead
+  const swapped = pad2[1]+pad2[0];
+  if(swapped[0] !== '0') tryAdd(parseInt(swapped,10)*10); // transposed digits
+  while(options.length < 4){
+    const r = rnd(1,99);
+    tryAdd(r*10);
+  }
+  const arr = options.map(o=>o.str).sort(()=>Math.random()-0.5);
   return {
     question:`On a 100-square grid, ${h} squares are shaded. What decimal does this represent?`,
     options: arr,
-    correct: arr.indexOf(correct),
-    working:`${h} out of 100 = ${h}/100 = ${correct} (the shaded count goes straight after the decimal point, filled to two digits).`
+    correct: arr.indexOf(correctStr),
+    working:`${h} out of 100 = ${h}/100 = ${correctStr} (the shaded count goes straight after the decimal point, filled to two digits).`
   };
 }
 function genStage3(){
@@ -473,13 +522,13 @@ function genStage4(){
   ];
   const dir = pick(directions);
   const display = { fraction: fracHTML(item.n,item.d), decimal: String(item.dec), percentage: `${item.pct}%` };
-  const answerVal = { fraction: `${item.n}/${item.d}`, decimal: String(item.dec), percentage: `${item.pct}%` };
+  const answerVal = { fraction: fracHTML(item.n,item.d), decimal: String(item.dec), percentage: `${item.pct}%` };
   const correct = answerVal[dir.to];
   const opts = new Set([correct]);
   const others = FRIENDLY.filter(f=>f!==item);
   while(opts.size < 4 && others.length){
     const o = pick(others);
-    const val = dir.to==='fraction' ? `${o.n}/${o.d}` : dir.to==='decimal' ? String(o.dec) : `${o.pct}%`;
+    const val = dir.to==='fraction' ? fracHTML(o.n,o.d) : dir.to==='decimal' ? String(o.dec) : `${o.pct}%`;
     opts.add(val);
   }
   const arr = [...opts].sort(()=>Math.random()-0.5);
@@ -487,7 +536,7 @@ function genStage4(){
     question:`Convert ${display[dir.from]} to a ${dir.to}.`,
     options: arr,
     correct: arr.indexOf(correct),
-    working:`${display[dir.from]} = ${item.dec} = ${item.n}/${item.d} = ${item.pct}% — these are all the same value written three ways.`
+    working:`${display[dir.from]} = ${item.dec} = ${fracHTML(item.n,item.d)} = ${item.pct}% — these are all the same value written three ways.`
   };
 }
 function genStage5(){
@@ -502,15 +551,15 @@ function genStage5(){
   const forms = ['fraction','decimal','percentage'].sort(()=>Math.random()-0.5);
   const shown = items.map((item,i)=>{
     const f = forms[i];
-    const label = f==='fraction' ? `${item.n}/${item.d}` : f==='decimal' ? String(item.dec) : `${item.pct}%`;
+    const label = f==='fraction' ? fracHTML(item.n,item.d) : f==='decimal' ? String(item.dec) : `${item.pct}%`;
     return { label, dec: item.dec };
   });
-  const correctOrder = [...shown].sort((a,b)=>a.dec-b.dec).map(s=>s.label).join(' < ');
+  const correctOrder = [...shown].sort((a,b)=>a.dec-b.dec).map(s=>s.label).join(' &lt; ');
   const opts = new Set([correctOrder]);
   const perms = [
-    [...shown].sort((a,b)=>b.dec-a.dec).map(s=>s.label).join(' < '),
-    [shown[1],shown[0],shown[2]].map(s=>s.label).join(' < '),
-    [shown[2],shown[1],shown[0]].map(s=>s.label).join(' < ')
+    [...shown].sort((a,b)=>b.dec-a.dec).map(s=>s.label).join(' &lt; '),
+    [shown[1],shown[0],shown[2]].map(s=>s.label).join(' &lt; '),
+    [shown[2],shown[1],shown[0]].map(s=>s.label).join(' &lt; ')
   ];
   perms.forEach(p=>{ if(opts.size<4) opts.add(p); });
   const arr = [...opts].sort(()=>Math.random()-0.5);
@@ -548,7 +597,7 @@ function genStage7(){
   while(opts.size<4){ opts.add(String(ans + rnd(1,9))); }
   const arr = [...opts].sort(()=>Math.random()-0.5);
   return {
-    question:`Using 10%/5% building blocks, what is ${p}% of £${A}?`,
+    question:`Using 10% and 5% blocks, what is ${p}% of £${A}?`,
     options: arr.map(o=>`£${o}`),
     correct: arr.indexOf(String(ans)),
     working:`10% of ${A} = ${tenPct}. Build ${p}% from tens and a five: e.g. ${p}% = ${Math.floor(p/10)*10}% + ${p%10===5?'5%':'0%'} → total £${ans}.`
