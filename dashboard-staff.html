@@ -957,7 +957,7 @@
       <div class="section">
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Student</th><th>Year</th><th>Topic</th><th>Status</th><th>Stage Reached</th><th>Last Visited</th></tr></thead>
+            <thead><tr><th>Student</th><th>Year</th><th>Topic</th><th>Status</th><th>Stage Reached</th><th>Final Check Score</th><th>Last Visited</th></tr></thead>
             <tbody id="deepdive-progress-tbody"></tbody>
           </table>
         </div>
@@ -1247,11 +1247,11 @@
 
     const tbody = document.getElementById('deepdive-progress-tbody');
     if (deepDiveTopics.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:24px">No Deep Dive topics found yet.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px">No Deep Dive topics found yet.</td></tr>';
       return;
     }
     if (rows.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:24px">No Deep Dive activity matches these filters.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px">No Deep Dive activity matches these filters.</td></tr>';
       return;
     }
     const statusLabel = { started: '▶ In progress', completed: '✓ Completed', opted_out: '⏸ Opted out' };
@@ -1262,12 +1262,14 @@
       const t = topicMap[p.topic_id];
       const lastDate = p.last_visited_at ? new Date(p.last_visited_at).toLocaleDateString('en-GB') : '—';
       const stage = (p.stage_reached !== null && p.stage_reached !== undefined) ? p.stage_reached : '—';
+      const score = (p.quiz_score !== null && p.quiz_score !== undefined) ? `${p.quiz_score} / 10` : '—';
       return `<tr>
         <td><strong>${s ? s.full_name : 'Unknown student'}</strong></td>
         <td>${s ? (s.year_group ? 'Year ' + s.year_group : 'Staff') : '—'}</td>
         <td>${t ? t.topic_name : p.topic_id}</td>
         <td style="color:${statusColor[p.status] || '#888'};font-weight:700">${statusLabel[p.status] || p.status || '—'}</td>
         <td>${stage}</td>
+        <td>${score}</td>
         <td>${lastDate}</td>
       </tr>`;
     }).join('');

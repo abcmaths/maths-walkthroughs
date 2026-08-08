@@ -56,6 +56,10 @@
     Still building confidence with this topic? Take your time — up to 45–50 minutes is completely fine, there's no rush.<br>
     Already confident? You might move through it in 15–20 minutes.
   </div>
+  <div class="example" style="border-left-color:#2e7d32;">
+    <strong>Calculator or no calculator?</strong><br>
+    Both come up in exams, so this walkthrough covers both. Stage 6 (multiplier method) is the fast route when you <em>do</em> have a calculator. Stage 7 (building blocks) is the method to know cold for <strong>non-calculator</strong> papers — it only needs the times tables and halving, done in your head or on paper.
+  </div>
   <div class="progress" id="progress-bar"></div>
 
   <!-- STAGE 1: What is a fraction -->
@@ -124,6 +128,9 @@
     <button class="reveal-btn" style="background:#888;" onclick="goToStage(3)">← Back to Stage 3</button>
     <p>Fractions, decimals and percentages are three names for the same amount. You can convert between any two of them, in either direction:</p>
     <div class="triangle-wrap" id="triangle-1"></div>
+    <div class="example" style="border-left-color:#2e7d32;">
+      <strong>No calculator?</strong> For "friendly" denominators (2, 4, 5, 8, 10, 20, 25, 50, 100) you can do fraction → decimal by short division, in your head or on paper — you don't need a calculator for 3 ÷ 4. A calculator just saves time, it doesn't unlock anything new here.
+    </div>
     <div class="example">
       <strong>Worked example:</strong> Convert <span class="frac"><span class="num">3</span><span class="den">4</span></span> to a decimal and a percentage.<br>
       Fraction → decimal: 3 ÷ 4 = 0.75<br>
@@ -157,7 +164,7 @@
   <section class="stage" data-stage="6" style="display:none;">
     <span class="stage-label">Stage 6</span>
     <button class="opt-out-btn" onclick="optOut()">Opt out</button>
-    <h2>Percentage of an Amount — Multiplier Method</h2>
+    <h2>Percentage of an Amount — Multiplier Method <span style="font-size:.7rem;background:#1565C0;color:#fff;padding:2px 8px;border-radius:10px;vertical-align:middle;">Calculator</span></h2>
     <button class="reveal-btn" style="background:#888;" onclick="goToStage(5)">← Back to Stage 5</button>
     <p>To find a percentage of an amount, convert the percentage to a decimal (its <strong>multiplier</strong>) and multiply.</p>
     <div class="example">
@@ -176,7 +183,7 @@
   <section class="stage" data-stage="7" style="display:none;">
     <span class="stage-label">Stage 7</span>
     <button class="opt-out-btn" onclick="optOut()">Opt out</button>
-    <h2>Percentage of an Amount — Building-Block Method</h2>
+    <h2>Percentage of an Amount — Building-Block Method <span style="font-size:.7rem;background:#2e7d32;color:#fff;padding:2px 8px;border-radius:10px;vertical-align:middle;">Non-Calculator</span></h2>
     <button class="reveal-btn" style="background:#888;" onclick="goToStage(6)">← Back to Stage 6</button>
     <p>Without a calculator, it's often faster to build the percentage you need out of 10%, 5%, and 1% blocks.</p>
     <div class="example">
@@ -186,6 +193,7 @@
       5% of 160 = 16 ÷ 2 = 8<br>
       35% = 30% + 5% = 48 + 8 = £56 ✓ (matches Stage 6's answer)
     </div>
+    <div class="bar-wrap" id="blocks-1"></div>
     <button class="reveal-btn" onclick="revealNext('r7', this)">Show me — building 15%</button>
     <div class="reveal-step" id="r7-0"><div class="example">Find 15% of £80.<br>10% of 80 = 8<br>5% of 80 = 4<br>15% = 10% + 5% = 8 + 4 = £12</div></div>
     <div class="try-it">
@@ -233,7 +241,7 @@ async function checkSession(){
   if(!error && topic){ topicId = topic.id; }
 }
 
-async function recordProgress(status, stageReached){
+async function recordProgress(status, stageReached, quizScoreVal){
   if(!currentUser || !topicId) return;
   try{
     const payload = {
@@ -243,6 +251,7 @@ async function recordProgress(status, stageReached){
       last_visited_at: new Date().toISOString()
     };
     if(stageReached !== undefined) payload.stage_reached = stageReached;
+    if(quizScoreVal !== undefined) payload.quiz_score = quizScoreVal;
     const { error } = await supabase
       .from('walkthrough_progress')
       .upsert(payload, { onConflict: 'student_id,topic_id' });
@@ -318,6 +327,35 @@ function drawGrid(containerId, shaded){
 drawGrid('grid-1', 37);
 drawGrid('grid-2', 37);
 
+// ---- Building-block bar (Stage 7): 100% split into ten 10% blocks, ----
+// ---- highlighting how 35% of £160 = three 10%-blocks + half a block (5%) ----
+function drawBuildingBlocks(containerId){
+  const segW = 40, segH = 44, n = 10;
+  const w = segW*n, h = segH + 30;
+  let rects = '';
+  for(let i=0;i<n;i++){
+    const x = i*segW;
+    if(i < 3){
+      rects += `<rect x="${x}" y="16" width="${segW}" height="${segH}" fill="#C0272D" stroke="#7A1418" stroke-width="1.5"/>`;
+      rects += `<text x="${x+segW/2}" y="${16+segH/2+4}" text-anchor="middle" font-size="11" fill="#fff" font-weight="700">16</text>`;
+    } else if(i === 3){
+      rects += `<rect x="${x}" y="16" width="${segW/2}" height="${segH}" fill="#C8922A" stroke="#7A1418" stroke-width="1.5"/>`;
+      rects += `<text x="${x+segW/4}" y="${16+segH/2+4}" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">8</text>`;
+      rects += `<rect x="${x+segW/2}" y="16" width="${segW/2}" height="${segH}" fill="#fff" stroke="#E8D9CE" stroke-width="1.5"/>`;
+    } else {
+      rects += `<rect x="${x}" y="16" width="${segW}" height="${segH}" fill="#fff" stroke="#E8D9CE" stroke-width="1.5"/>`;
+    }
+  }
+  let ticks = '';
+  for(let i=0;i<=n;i++){
+    ticks += `<text x="${i*segW}" y="${16+segH+16}" text-anchor="middle" font-size="9" fill="#888">${i*10}%</text>`;
+  }
+  const svg = `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">${rects}${ticks}</svg>`;
+  document.getElementById(containerId).innerHTML =
+    `<div>${svg}<p style="text-align:center;color:#888;font-size:.85rem;margin-top:4px;">3 full 10% blocks (£16 each) + half a block (5% = £8) = 35% = £56</p></div>`;
+}
+drawBuildingBlocks('blocks-1');
+
 // ---- Conversion triangle diagram (Stage 4) ----
 (function(){
   const w=420,h=260;
@@ -332,8 +370,8 @@ drawGrid('grid-2', 37);
       <text x="60" y="225" text-anchor="middle" font-weight="700" fill="#0d47a1">Decimal</text>
       <circle cx="360" cy="220" r="42" fill="#2e7d3222" stroke="#2e7d32" stroke-width="2"/>
       <text x="360" y="225" text-anchor="middle" font-weight="700" fill="#1b5e20">Percentage</text>
-      <text x="115" y="115" font-size="11" fill="#888">numerator ÷ denominator</text>
-      <text x="255" y="115" font-size="11" fill="#888" text-anchor="end">÷ 100</text>
+      <text x="125" y="118" text-anchor="middle" font-size="11" fill="#888">numerator ÷ denominator</text>
+      <text x="295" y="118" text-anchor="middle" font-size="11" fill="#888">÷ 100</text>
       <text x="210" y="212" font-size="11" fill="#888" text-anchor="middle">× 100</text>
     </svg>`;
   document.getElementById('triangle-1').innerHTML = svg;
@@ -666,7 +704,7 @@ function renderQuizQuestion(){
       <div class="quiz-score">You scored ${quizScore} / ${QUIZ_LENGTH}</div>
       <p style="text-align:center;color:#555;">${quizScore >= 7 ? "Great work — you've got a solid handle on fractions, decimals and percentages!" : 'Worth another pass through the earlier stages before moving on.'}</p>
     `;
-    recordProgress('completed', totalStages);
+    recordProgress('completed', totalStages, quizScore);
     return;
   }
   const generator = shuffledGenerators[quizIndex % shuffledGenerators.length];
