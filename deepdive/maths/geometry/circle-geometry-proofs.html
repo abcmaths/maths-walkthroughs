@@ -94,8 +94,8 @@
         </div>
         <div class="proof-steps">
           <div class="step-line" data-step="1">A straight line through O has two opposite rays, L and R.</div>
-          <div class="step-line" data-step="2">Rotating 180° about O swaps L and R with each other — that's exactly what makes the line <em>straight</em> rather than bent. So the "turn" on each side of the line is identical: the line splits the full 360° turn into two equal halves.</div>
-          <div class="step-line" data-step="3">Each half is therefore 360° ÷ 2 = 180°. So any angles that together make up one side of a straight line — like p and q here — must sum to 180°. <strong>QED</strong></div>
+          <div class="step-line" data-step="2">Shade the turn on one side of the line red.</div>
+          <div class="step-line" data-step="3">Shade the turn on the other side green. Together, red and green make up the full 360° turn around O. Rotating 180° about O swaps L and R with each other — that's exactly what makes the line <em>straight</em> rather than bent — and that same rotation swaps red and green too. So they must be equal: each is 360° ÷ 2 = 180°. This is why we say "angles on a straight line sum to 180°" — any angle or set of angles that together fill just one side (all of red, or all of green, or a few angles adding up to fill one side) will always total 180°. <strong>QED</strong></div>
           <div class="step-controls">
             <button class="step-btn" onclick="stepForward('line180')">Next step</button>
             <button class="step-btn secondary" onclick="stepReset('line180')">Reset</button>
@@ -646,23 +646,18 @@ function drawLine180(step){
   const svg=clearSvg('line180');
   const O=[130,110];
   const L=[30,110], R=[230,110];
-  const P=[172,42];
   svg.appendChild(line(L,R));
   svg.appendChild(dot(O));
   svg.appendChild(label(L[0]-14,L[1]+4,'L')); svg.appendChild(label(R[0]+6,R[1]+4,'R'));
   svg.appendChild(label(O[0]-4,O[1]+18,'O',10,'#888'));
-  if(step>=1){
-    // opposite rays already drawn as the line itself; nothing extra to add here
-  }
   if(step>=2){
-    svg.appendChild(line(O,P,'#666'));
+    svg.appendChild(arc(O,180,360,'#C0272D',60));
+    svg.appendChild(label(O[0]-6,O[1]-38,'red',10,'#C0272D'));
   }
   if(step>=3){
-    svg.appendChild(angleMarker(O,L,P,'#C0272D',30));
-    svg.appendChild(angleMarker(O,P,R,'#1f7a3d',30));
-    svg.appendChild(label(70,80,'p',11,'#C0272D'));
-    svg.appendChild(label(185,80,'q',11,'#1f7a3d'));
-    svg.appendChild(label(70,175,'p + q = 180\u00b0',10,'#888'));
+    svg.appendChild(arc(O,0,180,'#1f7a3d',60));
+    svg.appendChild(label(O[0]-14,O[1]+40,'green',10,'#1f7a3d'));
+    svg.appendChild(label(30,185,'red + green = 360\u00b0',10,'#888'));
   }
 }
 
@@ -1128,12 +1123,21 @@ function label(x,y,text,size=12,color='#222'){
   return t;
 }
 function arc(center,startDeg,endDeg,color='#C0272D',radius=18){
+  // Sampled as a polyline rather than a single SVG arc command: a native arc command's
+  // direction is ambiguous for an exact 180° sweep (a semicircle) since both the "large"
+  // and "small" arc between two diametrically-opposite points are the same size, and
+  // that ambiguity has bitten diagrams here before. Sampling avoids it entirely — every
+  // point along the sweep is placed explicitly, so there's nothing left to guess.
   const cx=center[0],cy=center[1];
-  const s=startDeg*Math.PI/180, e=endDeg*Math.PI/180;
-  const x1=cx+radius*Math.cos(s), y1=cy+radius*Math.sin(s);
-  const x2=cx+radius*Math.cos(e), y2=cy+radius*Math.sin(e);
-  const large=(endDeg-startDeg)>180?1:0;
-  return el('path',{d:`M ${x1} ${y1} A ${radius} ${radius} 0 ${large} 1 ${x2} ${y2}`,fill:'none',stroke:color,'stroke-width':2});
+  const steps = Math.max(8, Math.round(Math.abs(endDeg-startDeg)/6));
+  let d = '';
+  for(let i=0;i<=steps;i++){
+    const t = startDeg + (endDeg-startDeg)*i/steps;
+    const rad = t*Math.PI/180;
+    const x = cx+radius*Math.cos(rad), y = cy+radius*Math.sin(rad);
+    d += (i===0?'M ':'L ') + x + ' ' + y + ' ';
+  }
+  return el('path',{d,fill:'none',stroke:color,'stroke-width':2});
 }
 
 /* ---------- angle markers computed from real geometry, not hand-picked degrees ---------- */
