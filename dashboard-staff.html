@@ -1414,6 +1414,38 @@
   };
 
   
+  window.resetUserPassword = async function(userId, fullName) {
+    // Role-agnostic reset — works for teachers/admins as well as students, since the
+    // underlying Edge Function just resets Supabase Auth's password for a given userId
+    // and doesn't care about role. Used from the Users tab, where teachers/admins never
+    // get the "View" button (that opens a student-specific modal with test results etc.
+    // that don't apply to staff), so this is their only path to a password reset.
+    if (!confirm(`Reset password for ${fullName} to ABC2026?`)) return;
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      const resp = await fetch(
+        'https://lnwinoghbefmjpvmixzo.supabase.co/functions/v1/reset-student-password',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo',
+          },
+          body: JSON.stringify({ userId, newPassword: 'ABC2026' })
+        }
+      );
+      const result = await resp.json();
+      if (resp.ok && result.success) {
+        alert(`✓ Password reset to ABC2026 for ${fullName}`);
+      } else {
+        alert('Reset failed: ' + (result.error || 'Unknown error'));
+      }
+    } catch(e) {
+      alert('Error: ' + e.message);
+    }
+  };
+
   window.resetStudentPassword = async function() {
   const btn = document.getElementById('modal-reset-btn');
   const msg = document.getElementById('modal-reset-msg');
@@ -3110,6 +3142,7 @@
         <td>
           ${u.role === 'student' ? `<button class="btn-link" onclick="openStudentModal('${u.id}')">View</button>` : ''}
           <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${nameSafe}','${u.role}','${u.year_group||''}','${u.form_class||''}','${u.stream||'science'}',${(allStudents.find(s=>s.id===u.id)||{}).simplified_view===true},${(allStudents.find(s=>s.id===u.id)||{}).summer_only===true},${extMaths===true})">Edit</button>
+          <button class="btn-link" style="color:#1565C0" onclick="resetUserPassword('${u.id}','${nameSafe}')">Reset Password</button>
           ${isActive
             ? `<button class="btn-link" style="color:#C0272D" onclick="archiveUser('${u.id}','${nameSafe}')">Archive</button>`
             : `<button class="btn-link" style="color:#2E7D32" onclick="restoreUser('${u.id}','${nameSafe}')">Restore</button>`}
