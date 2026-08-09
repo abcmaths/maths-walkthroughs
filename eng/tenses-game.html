@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tense Sprint — ABC Learning Portal</title>
+<style>
+:root{--red:#E65100;--dark:#BF360C;--cream:#FFF3E0;--ink:#2a1a0d;--line:#FFE0B2;--gold:#C8922A;--good:#2e7d32;--goodbg:#e8f5e9;--bad:#c62828;--badbg:#fde8e8;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100vh;}
+header{background:var(--red);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+header h1{font-size:16px;font-weight:700;}
+.stats{display:flex;gap:14px;font-size:13px;font-weight:600;}
+.stat{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:5px 10px;}
+.wrap{max-width:640px;margin:0 auto;padding:28px 18px 60px;}
+.intro{background:#fff;border:1px solid var(--line);border-radius:8px;padding:28px 24px;text-align:center;}
+.intro h2{font-family:Georgia,serif;font-size:22px;margin-bottom:10px;}
+.intro p{font-size:14px;color:#555;line-height:1.6;margin-bottom:18px;}
+.diffs{display:flex;gap:10px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;}
+.diff-btn{border:1.5px solid var(--line);background:#fff;border-radius:6px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink);transition:.15s;}
+.diff-btn:hover{border-color:var(--red);color:var(--red);}
+.diff-btn.sel{background:var(--red);color:#fff;border-color:var(--red);}
+.start-btn{background:var(--red);color:#fff;border:none;border-radius:5px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+.start-btn:hover{background:var(--dark);}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+.card-top{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+.rnd{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700;}
+.streak{font-size:12px;font-weight:700;color:var(--red);}
+.qbox{padding:26px 24px 20px;}
+.qlbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:10px;}
+.sent{font-family:Georgia,serif;font-size:20px;line-height:1.5;margin-bottom:22px;}
+.sent b{color:var(--red);border-bottom:2px solid var(--gold);}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:480px){.opts{grid-template-columns:1fr;}}
+.opt{text-align:left;padding:12px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:13.5px;font-family:inherit;transition:.15s;color:var(--ink);}
+.opt:hover:not(:disabled){border-color:var(--gold);background:#fffaf0;}
+.opt:disabled{cursor:default;}
+.opt.ok{border-color:var(--good);background:var(--goodbg);color:var(--good);font-weight:700;}
+.opt.no{border-color:var(--bad);background:var(--badbg);color:var(--bad);}
+.fb{margin-top:16px;padding:14px 16px;border-radius:6px;font-size:13.5px;line-height:1.55;display:none;}
+.fb.show{display:block;}
+.fb.ok-fb{background:var(--goodbg);border:1px solid var(--good);color:#1b5e20;}
+.fb.no-fb{background:var(--badbg);border:1px solid var(--bad);color:#8b1a1a;}
+.next-btn{margin-top:16px;background:var(--red);color:#fff;border:none;border-radius:5px;padding:11px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:none;}
+.next-btn.show{display:inline-block;}
+.next-btn:hover{background:var(--dark);}
+.bar{height:5px;background:var(--line);}
+.bar-fill{height:100%;background:var(--red);transition:width .3s;}
+.results{background:#fff;border:1px solid var(--line);border-radius:8px;padding:32px 24px;text-align:center;}
+.results h2{font-family:Georgia,serif;font-size:24px;margin-bottom:6px;}
+.score{font-size:44px;font-weight:800;color:var(--red);margin:14px 0 4px;}
+.score-sub{font-size:13px;color:#888;margin-bottom:20px;}
+.msg{font-size:14px;color:#555;margin-bottom:22px;line-height:1.6;}
+.miss{text-align:left;background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:20px;font-size:13px;line-height:1.6;}
+.miss h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:8px;font-weight:700;}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+<header>
+  <a href="tenses.html" class="back">&larr; Tenses Walkthrough</a>
+  <h1>Tense Sprint</h1>
+  <div class="stats" id="hdrStats"></div>
+</header>
+<div class="wrap">
+
+  <div class="intro" id="intro">
+    <h2>Test your tense skills</h2>
+    <p>Identify the correct tense used in each sentence. Choose your level and see how many you can get right — streaks earn bonus points!</p>
+    <div class="diffs" id="diffs">
+      <button class="diff-btn" data-d="core">Core (9 tenses)</button>
+      <button class="diff-btn" data-d="all">All 12 tenses</button>
+    </div>
+    <button class="start-btn" id="startBtn">Start Game</button>
+  </div>
+
+  <div class="card hidden" id="game">
+    <div class="bar"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
+    <div class="card-top">
+      <div class="rnd" id="rndLbl">Question 1 of 10</div>
+      <div class="streak" id="streakLbl"></div>
+    </div>
+    <div class="qbox">
+      <div class="qlbl">Which tense is used here?</div>
+      <div class="sent" id="sent"></div>
+      <div class="opts" id="opts"></div>
+      <div class="fb" id="fb"></div>
+      <button class="next-btn" id="nextBtn">Next &rarr;</button>
+    </div>
+  </div>
+
+  <div class="results hidden" id="results">
+    <h2>Round Complete!</h2>
+    <div class="score" id="finalScore">0</div>
+    <div class="score-sub" id="finalSub">points</div>
+    <div class="msg" id="finalMsg"></div>
+    <div class="miss hidden" id="missBox"><h4>Worth reviewing</h4><div id="missList"></div></div>
+    <button class="start-btn" id="againBtn">Play Again</button>
+  </div>
+
+</div>
+<script>
+var TENSES_CORE=['Past simple','Present simple','Future simple','Past continuous','Present continuous','Future continuous','Past perfect','Present perfect','Future perfect'];
+var TENSES_ALL=TENSES_CORE.concat(['Past perfect continuous','Present perfect continuous','Future perfect continuous']);
+
+var BANK=[
+{s:'She <b>walked</b> to school yesterday.',t:'Past simple'},
+{s:'He <b>plays</b> football every Saturday.',t:'Present simple'},
+{s:'They <b>will visit</b> Lagos next month.',t:'Future simple'},
+{s:'I <b>was reading</b> when the phone rang.',t:'Past continuous'},
+{s:'We <b>are studying</b> for the exam right now.',t:'Present continuous'},
+{s:'This time tomorrow, I <b>will be flying</b> to Abuja.',t:'Future continuous'},
+{s:'She <b>had finished</b> her homework before dinner.',t:'Past perfect'},
+{s:'He <b>has visited</b> Lagos three times.',t:'Present perfect'},
+{s:'By next year, they <b>will have graduated</b>.',t:'Future perfect'},
+{s:'She <b>had been waiting</b> for an hour when the bus arrived.',t:'Past perfect continuous'},
+{s:'I <b>have been studying</b> English for six years.',t:'Present perfect continuous'},
+{s:'By 6pm, he <b>will have been working</b> for ten hours.',t:'Future perfect continuous'},
+{s:'The train <b>left</b> the station five minutes ago.',t:'Past simple'},
+{s:'Water <b>boils</b> at 100 degrees Celsius.',t:'Present simple'},
+{s:'I <b>will call</b> you when I arrive.',t:'Future simple'},
+{s:'It <b>was raining</b> heavily during the match.',t:'Past continuous'},
+{s:'Look! The children <b>are playing</b> in the garden.',t:'Present continuous'},
+{s:'Next week, we <b>will be celebrating</b> her birthday.',t:'Future continuous'},
+{s:'By the time we arrived, the film <b>had started</b>.',t:'Past perfect'},
+{s:'I <b>have never eaten</b> jollof rice before today.',t:'Present perfect'},
+{s:'She <b>will have finished</b> the report by Friday.',t:'Future perfect'},
+{s:'He <b>had been living</b> there for years before he moved.',t:'Past perfect continuous'},
+{s:'They <b>have been waiting</b> outside since noon.',t:'Present perfect continuous'},
+{s:'By December, she <b>will have been teaching</b> for a decade.',t:'Future perfect continuous'},
+{s:'My father <b>worked</b> in Lagos for ten years, then retired.',t:'Past simple'},
+{s:'The sun <b>rises</b> in the east.',t:'Present simple'},
+{s:'We <b>are meeting</b> the principal tomorrow morning.',t:'Present continuous'},
+{s:'She <b>has already submitted</b> her assignment.',t:'Present perfect'},
+{s:'I <b>was sleeping</b> when you called last night.',t:'Past continuous'},
+{s:'By the end of term, he <b>will have completed</b> all his projects.',t:'Future perfect'}
+];
+
+var mode='core', total=10, idx=0, score=0, streak=0, best=0, rounds=[], misses=[];
+
+function el(id){return document.getElementById(id);}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+document.querySelectorAll('.diff-btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.diff-btn').forEach(function(x){x.classList.remove('sel');});
+    b.classList.add('sel');mode=b.getAttribute('data-d');
+  });
+});
+document.querySelector('.diff-btn[data-d="core"]').classList.add('sel');
+
+el('startBtn').addEventListener('click', startGame);
+el('againBtn').addEventListener('click', function(){el('results').classList.add('hidden');el('intro').classList.remove('hidden');});
+el('nextBtn').addEventListener('click', nextQuestion);
+
+function startGame(){
+  var pool=BANK.filter(function(q){return mode==='core'?TENSES_CORE.indexOf(q.t)>=0:true;});
+  rounds=shuffle(pool).slice(0,total);
+  idx=0;score=0;streak=0;misses=[];
+  el('intro').classList.add('hidden');el('results').classList.add('hidden');
+  el('game').classList.remove('hidden');
+  renderQ();
+}
+
+function renderQ(){
+  var q=rounds[idx];
+  el('rndLbl').textContent='Question '+(idx+1)+' of '+total;
+  el('streakLbl').textContent=streak>1?('\uD83D\uDD25 Streak '+streak):'';
+  el('barFill').style.width=(idx/total*100)+'%';
+  el('sent').innerHTML=q.s;
+  updateHdr();
+
+  var opts=el('opts');opts.innerHTML='';
+  var poolTenses=mode==='core'?TENSES_CORE:TENSES_ALL;
+  var choices=shuffle(poolTenses.filter(function(t){return t!==q.t;})).slice(0,3);
+  choices.push(q.t);choices=shuffle(choices);
+
+  choices.forEach(function(c){
+    var b=document.createElement('button');
+    b.className='opt';b.textContent=c;
+    b.addEventListener('click',function(){answer(c,q,b,choices);});
+    opts.appendChild(b);
+  });
+  el('fb').className='fb';el('fb').innerHTML='';
+  el('nextBtn').className='next-btn';
+}
+
+function answer(choice,q,btn,choices){
+  var allBtns=el('opts').querySelectorAll('.opt');
+  allBtns.forEach(function(b){b.disabled=true;if(b.textContent===q.t)b.classList.add('ok');});
+  var fb=el('fb');
+  if(choice===q.t){
+    streak++;best=Math.max(best,streak);
+    var pts=10+(streak>1?streak*2:0);
+    score+=pts;
+    fb.className='fb ok-fb show';
+    fb.innerHTML='<b>&#10003; Correct!</b> +'+pts+' points'+(streak>1?' (streak bonus)':'')+'.';
+  }else{
+    btn.classList.add('no');
+    streak=0;
+    misses.push(q);
+    fb.className='fb no-fb show';
+    fb.innerHTML='<b>Not quite.</b> The correct answer is <b>'+q.t+'</b>.';
+  }
+  updateHdr();
+  el('nextBtn').className='next-btn show';
+}
+
+function nextQuestion(){
+  idx++;
+  if(idx>=total){showResults();return;}
+  renderQ();
+}
+
+function updateHdr(){
+  el('hdrStats').innerHTML='<div class="stat">Score: '+score+'</div><div class="stat">Best streak: '+best+'</div>';
+}
+
+function showResults(){
+  el('game').classList.add('hidden');
+  el('results').classList.remove('hidden');
+  el('finalScore').textContent=score;
+  var pct=Math.round((total-misses.length)/total*100);
+  el('finalSub').textContent=(total-misses.length)+' / '+total+' correct ('+pct+'%)';
+  var msg;
+  if(pct===100) msg="Perfect score! You've mastered these tenses.";
+  else if(pct>=80) msg="Strong performance — just a little more review needed.";
+  else if(pct>=50) msg="Good effort. Revisit the tenses walkthrough for the ones you missed.";
+  else msg="Keep practising — work through the Tenses walkthrough, then try again.";
+  el('finalMsg').textContent=msg;
+
+  var missBox=el('missBox'),missList=el('missList');
+  if(misses.length){
+    missBox.classList.remove('hidden');
+    missList.innerHTML=misses.map(function(m){return '<div style="margin-bottom:6px;">'+m.s.replace(/<b>|<\/b>/g,'')+' &rarr; <b>'+m.t+'</b></div>';}).join('');
+  }else{
+    missBox.classList.add('hidden');
+  }
+  updateHdr();
+  logResult(score,total-misses.length,total);
+}
+
+function logResult(pts,correctCount,totalCount){
+  window._sbGame && window._sbGame.auth.getSession().then(function(r){
+    var session=r.data.session;if(!session)return;
+    return window._sbGame.from('topics').select('id').eq('topic_code','ENG-GRAM-06-GAME').maybeSingle().then(function(res){
+      var topic=res.data;if(!topic)return;
+      return window._sbGame.from('walkthrough_progress').upsert({
+        student_id:session.user.id,topic_id:topic.id,status:'completed',
+        completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString(),
+        quiz_score:Math.round(correctCount/totalCount*10)
+      },{onConflict:'student_id,topic_id'});
+    });
+  });
+}
+
+updateHdr();
+</script>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+window._sbGame=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+</script>
+</body>
+</html>
