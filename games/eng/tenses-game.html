@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  window._lc=_lc;
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../../login.html';
+</script>
+<script src="../js/abc_game_widget.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tense Word Search — ABC Learning Portal</title>
+<style>
+:root{--red:#E65100;--dark:#BF360C;--cream:#FFF3E0;--ink:#2a1a0d;--line:#FFE0B2;--gold:#C8922A;--good:#2e7d32;--goodbg:#e8f5e9;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100vh;}
+header{background:var(--red);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+header h1{font-size:16px;font-weight:700;}
+.stat{font-size:12px;font-weight:700;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:5px 10px;}
+.wrap{max-width:620px;margin:0 auto;padding:22px 14px 60px;}
+.intro{background:#fff;border:1px solid var(--line);border-radius:8px;padding:28px 24px;text-align:center;}
+.intro h2{font-family:Georgia,serif;font-size:22px;margin-bottom:10px;}
+.intro p{font-size:14px;color:#555;line-height:1.6;margin-bottom:20px;}
+.start-btn{background:var(--red);color:#fff;border:none;border-radius:5px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+.start-btn:hover{background:var(--dark);}
+.panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;}
+.hint{font-size:12.5px;color:#888;text-align:center;margin-bottom:12px;}
+#gridBox{display:flex;justify-content:center;margin-bottom:16px;}
+#grid{display:grid;user-select:none;touch-action:none;border:2px solid var(--line);border-radius:6px;overflow:hidden;background:#fffaf3;}
+.cell{display:flex;align-items:center;justify-content:center;font-weight:700;font-size:calc(min(4.2vw,17px));color:var(--ink);border:.5px solid #fbe9d3;background:#fffaf3;cursor:pointer;transition:background .1s,color .1s;}
+.cell.sel{background:var(--gold);color:#fff;}
+.cell.found{background:var(--good);color:#fff;}
+.wordlist{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.word-chip{font-size:12.5px;font-weight:700;letter-spacing:.03em;padding:6px 12px;border:1.5px solid var(--line);border-radius:20px;color:var(--ink);background:var(--cream);}
+.word-chip.found{background:var(--goodbg);border-color:var(--good);color:var(--good);text-decoration:line-through;}
+.results{background:#fff;border:1px solid var(--line);border-radius:8px;padding:32px 24px;text-align:center;}
+.results h2{font-family:Georgia,serif;font-size:24px;margin-bottom:8px;}
+.results .time{font-size:40px;font-weight:800;color:var(--red);margin:10px 0 4px;}
+.results .sub{font-size:13px;color:#888;margin-bottom:18px;}
+.results p{font-size:14px;color:#555;margin-bottom:22px;line-height:1.6;}
+.gloss{text-align:left;background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:20px;font-size:13px;line-height:1.7;}
+.gloss h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:8px;font-weight:700;}
+.hidden{display:none;}
+.lb-box{background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:20px;text-align:left;}
+.lb-box h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:8px;font-weight:700;}
+.abcg-lb-loading,.abcg-lb-empty{color:#999;font-size:12.5px;}
+.abcg-lb-head,.abcg-lb-row{display:grid;grid-template-columns:24px 1fr 60px 60px;gap:6px;padding:3px 0;font-size:12.5px;}
+.abcg-lb-head{color:#999;font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.05em;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:4px;}
+.abcg-lb-row{color:var(--ink);}
+.abcg-lb-me{font-weight:700;color:var(--red);}
+.abcg-lb-rank{color:var(--gold);font-weight:700;}
+</style>
+</head>
+<body>
+<header>
+  <a href="../../eng/tenses.html" class="back">&larr; Tenses Walkthrough</a>
+  <h1>Tense Word Search</h1>
+  <div class="stat" id="timerStat">0:00</div>
+</header>
+<div class="wrap">
+
+  <div class="intro" id="intro">
+    <h2>Find the tense words</h2>
+    <p>Tap or click a letter and drag to the last letter of a word — in any direction, including diagonals. Find all the hidden words to finish.</p>
+    <button class="start-btn" id="startBtn">Start</button>
+  </div>
+
+  <div class="panel hidden" id="game">
+    <div class="hint">Drag across letters to select a word</div>
+    <div id="gridBox"><div id="grid"></div></div>
+    <div class="wordlist" id="wordlist"></div>
+  </div>
+
+  <div class="results hidden" id="results">
+    <h2>All words found!</h2>
+    <div class="time" id="finalTime">0:00</div>
+    <div class="sub">time taken</div>
+    <p id="finalMsg"></p>
+    <div class="lb-box"><h4>Leaderboard</h4><div id="lbList"></div></div>
+    <div class="gloss" id="glossBox"><h4>Quick reminders</h4><div id="glossList"></div></div>
+    <button class="start-btn" id="againBtn">Play Again</button>
+    <div style="margin-top:10px;"><a href="../games-list.html" style="font-size:12.5px;color:#888;">All games &rarr;</a></div>
+  </div>
+
+</div>
+<script>
+var WORDS=[
+  {w:'TENSE',def:'Tells us when an action happens.'},
+  {w:'PAST',def:'A time before now.'},
+  {w:'PRESENT',def:'Happening now, or a general fact.'},
+  {w:'FUTURE',def:'A time that has not happened yet.'},
+  {w:'SIMPLE',def:'The most basic form of a tense.'},
+  {w:'PERFECT',def:'Shows an action\\u2019s completion relative to a point in time.'},
+  {w:'DURATION',def:'How long an action continues.'},
+  {w:'VERB',def:'The action or state word in a sentence.'},
+  {w:'HABIT',def:'A regularly repeated action, often present simple.'},
+  {w:'ONGOING',def:'An action still in progress \\u2014 continuous tense.'},
+  {w:'ASPECT',def:'Simple, continuous, perfect, or perfect continuous.'},
+  {w:'AUXILIARY',def:'A helper verb like have, has, had, or be.'}
+];
+
+var GAME_CODE='tenses-01';
+var GRID_SIZE=13;
+var grid=[],placed=[],found={},startTime=null,timerInt=null;
+
+function el(id){return document.getElementById(id);}
+function rnd(n){return Math.floor(Math.random()*n);}
+var LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+var DIRS=[[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+
+function buildGrid(){
+  grid=[];for(var r=0;r<GRID_SIZE;r++){var row=[];for(var c=0;c<GRID_SIZE;c++)row.push(null);grid.push(row);}
+  placed=[];
+  var order=WORDS.slice().sort(function(a,b){return b.w.length-a.w.length;});
+  order.forEach(function(item){
+    var word=item.w,len=word.length,ok=false,attempts=0;
+    while(!ok&&attempts<300){
+      attempts++;
+      var dir=DIRS[rnd(DIRS.length)];
+      var startR=rnd(GRID_SIZE),startC=rnd(GRID_SIZE);
+      var endR=startR+dir[0]*(len-1),endC=startC+dir[1]*(len-1);
+      if(endR<0||endR>=GRID_SIZE||endC<0||endC>=GRID_SIZE)continue;
+      var fits=true;
+      for(var i=0;i<len;i++){
+        var rr=startR+dir[0]*i,cc=startC+dir[1]*i;
+        var existing=grid[rr][cc];
+        if(existing!==null&&existing!==word[i]){fits=false;break;}
+      }
+      if(!fits)continue;
+      for(var i=0;i<len;i++){var rr=startR+dir[0]*i,cc=startC+dir[1]*i;grid[rr][cc]=word[i];}
+      placed.push({w:word,startR:startR,startC:startC,endR:endR,endC:endC});
+      ok=true;
+    }
+  });
+  for(var r=0;r<GRID_SIZE;r++)for(var c=0;c<GRID_SIZE;c++)if(grid[r][c]===null)grid[r][c]=LETTERS[rnd(26)];
+}
+
+function renderGrid(){
+  var gridEl=el('grid');
+  gridEl.style.gridTemplateColumns='repeat('+GRID_SIZE+',1fr)';
+  var cellPx=Math.min(360/GRID_SIZE,26);
+  gridEl.style.width=(cellPx*GRID_SIZE)+'px';
+  gridEl.style.height=(cellPx*GRID_SIZE)+'px';
+  gridEl.innerHTML='';
+  for(var r=0;r<GRID_SIZE;r++){
+    for(var c=0;c<GRID_SIZE;c++){
+      var d=document.createElement('div');
+      d.className='cell';d.textContent=grid[r][c];
+      d.style.width=cellPx+'px';d.style.height=cellPx+'px';
+      d.dataset.r=r;d.dataset.c=c;
+      gridEl.appendChild(d);
+    }
+  }
+}
+
+function renderWordlist(){
+  var wl=el('wordlist');wl.innerHTML='';
+  WORDS.forEach(function(item){
+    var chip=document.createElement('div');
+    chip.className='word-chip'+(found[item.w]?' found':'');
+    chip.id='chip-'+item.w;
+    chip.textContent=item.w;
+    wl.appendChild(chip);
+  });
+}
+
+var dragging=false,startCell=null,curSel=[];
+
+function cellAt(r,c){return el('grid').children[r*GRID_SIZE+c];}
+
+function clearSel(){curSel.forEach(function(rc){var cell=cellAt(rc[0],rc[1]);if(!cell.classList.contains('found'))cell.classList.remove('sel');});curSel=[];}
+
+function lineBetween(r1,c1,r2,c2){
+  var dr=r2-r1,dc=c2-c1;
+  var steps=Math.max(Math.abs(dr),Math.abs(dc));
+  if(steps===0)return [[r1,c1]];
+  var stepR=dr===0?0:dr/Math.abs(dr),stepC=dc===0?0:dc/Math.abs(dc);
+  if(dr!==0&&dc!==0&&Math.abs(dr)!==Math.abs(dc))return null;
+  var out=[];
+  for(var i=0;i<=steps;i++)out.push([r1+stepR*i,c1+stepC*i]);
+  return out;
+}
+
+function startDrag(r,c){
+  dragging=true;startCell=[r,c];curSel=[[r,c]];
+  cellAt(r,c).classList.add('sel');
+}
+function updateDrag(r,c){
+  if(!dragging)return;
+  var line=lineBetween(startCell[0],startCell[1],r,c);
+  if(!line)return;
+  clearSel();
+  line.forEach(function(rc){cellAt(rc[0],rc[1]).classList.add('sel');});
+  curSel=line;
+}
+function endDrag(){
+  if(!dragging)return;
+  dragging=false;
+  var letters=curSel.map(function(rc){return grid[rc[0]][rc[1]];}).join('');
+  var rev=letters.split('').reverse().join('');
+  var match=WORDS.find(function(item){return !found[item.w]&&(item.w===letters||item.w===rev);});
+  if(match){
+    found[match.w]=true;
+    curSel.forEach(function(rc){cellAt(rc[0],rc[1]).classList.remove('sel');cellAt(rc[0],rc[1]).classList.add('found');});
+    var chip=el('chip-'+match.w);if(chip)chip.classList.add('found');
+    if(Object.keys(found).length===WORDS.length)finishGame();
+  }else{
+    clearSel();
+  }
+  curSel=[];startCell=null;
+}
+
+function attachEvents(){
+  var gridEl=el('grid');
+  gridEl.addEventListener('mousedown',function(e){
+    if(!e.target.classList.contains('cell'))return;
+    startDrag(+e.target.dataset.r,+e.target.dataset.c);
+  });
+  gridEl.addEventListener('mouseover',function(e){
+    if(!dragging||!e.target.classList.contains('cell'))return;
+    updateDrag(+e.target.dataset.r,+e.target.dataset.c);
+  });
+  document.addEventListener('mouseup',endDrag);
+
+  gridEl.addEventListener('touchstart',function(e){
+    var t=e.touches[0];var target=document.elementFromPoint(t.clientX,t.clientY);
+    if(!target||!target.classList.contains('cell'))return;
+    e.preventDefault();
+    startDrag(+target.dataset.r,+target.dataset.c);
+  },{passive:false});
+  gridEl.addEventListener('touchmove',function(e){
+    if(!dragging)return;
+    e.preventDefault();
+    var t=e.touches[0];var target=document.elementFromPoint(t.clientX,t.clientY);
+    if(!target||!target.classList.contains('cell'))return;
+    updateDrag(+target.dataset.r,+target.dataset.c);
+  },{passive:false});
+  gridEl.addEventListener('touchend',function(e){e.preventDefault();endDrag();},{passive:false});
+}
+
+function startGame(){
+  found={};
+  buildGrid();renderGrid();renderWordlist();attachEvents();
+  el('intro').classList.add('hidden');el('results').classList.add('hidden');
+  el('game').classList.remove('hidden');
+  startTime=Date.now();
+  clearInterval(timerInt);
+  timerInt=setInterval(function(){
+    var s=Math.floor((Date.now()-startTime)/1000);
+    el('timerStat').textContent=Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);
+  },500);
+}
+
+function finishGame(){
+  clearInterval(timerInt);
+  var secs=Math.floor((Date.now()-startTime)/1000);
+  var mm=Math.floor(secs/60),ss=secs%60;
+  el('game').classList.add('hidden');
+  el('results').classList.remove('hidden');
+  el('finalTime').textContent=mm+':'+(ss<10?'0':'')+ss;
+  var msg;
+  if(secs<=60)msg='Lightning fast \\u2014 you clearly know your tenses!';
+  else if(secs<=150)msg='Nicely done! Solid recall of tense vocabulary.';
+  else msg='All found! Review the terms below if any felt unfamiliar.';
+  el('finalMsg').textContent=msg;
+  el('glossList').innerHTML=WORDS.map(function(item){
+    return '<div style="margin-bottom:6px;"><b>'+item.w+'</b> \\u2014 '+item.def+'</div>';
+  }).join('');
+
+  // Score: higher is better, rewards speed. Capped at 0.
+  var score=Math.max(0,1000-secs*4);
+  if(window.ABCGame){
+    window.ABCGame.submitScore(GAME_CODE,score,secs).then(function(){
+      window.ABCGame.renderLeaderboard(GAME_CODE,el('lbList'),{limit:10});
+    });
+  }
+}
+
+el('startBtn').addEventListener('click',startGame);
+el('againBtn').addEventListener('click',startGame);
+</script>
+</body>
+</html>

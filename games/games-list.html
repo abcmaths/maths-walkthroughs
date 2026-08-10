@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  window._lc = createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  const {data:{session}} = await window._lc.auth.getSession();
+  if(!session) window.location.href='../login.html';
+</script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Games — ABC Learning Portal</title>
+<style>
+:root{--red:#C0272D;--dark:#8f1c21;--cream:#FBF6F0;--ink:#241412;--line:#EBD8D5;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100vh;}
+header{background:var(--red);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+header h1{font-size:16px;font-weight:700;}
+.wrap{max-width:900px;margin:0 auto;padding:22px 14px 60px;}
+.subject-block{margin-bottom:30px;}
+.subject-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin-bottom:10px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px;}
+.card h3{font-size:15px;}
+.card p{font-size:12.5px;color:#666;line-height:1.5;flex:1;}
+.card a.play{align-self:flex-start;background:var(--red);color:#fff;font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:4px;text-decoration:none;}
+.card a.play:hover{background:var(--dark);}
+.mini-lb{border-top:1px dashed var(--line);padding-top:8px;font-size:11.5px;}
+.abcg-lb-loading,.abcg-lb-empty{color:#999;font-size:11.5px;}
+.abcg-lb-head,.abcg-lb-row{display:grid;grid-template-columns:20px 1fr 40px 46px;gap:4px;padding:2px 0;}
+.abcg-lb-head{color:#999;font-weight:700;text-transform:uppercase;font-size:9.5px;letter-spacing:.05em;}
+.abcg-lb-row{color:#444;}
+.abcg-lb-me{font-weight:700;color:var(--red);}
+.abcg-lb-rank{color:var(--gold);font-weight:700;}
+.empty-state{font-size:13px;color:#888;padding:30px 0;text-align:center;}
+</style>
+</head>
+<body>
+<header>
+  <a href="../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <h1>Games</h1>
+  <span></span>
+</header>
+<div class="wrap" id="wrap">
+  <div class="empty-state">Loading games\u2026</div>
+</div>
+
+<script src="js/abc_game_widget.js"></script>
+<script type="module">
+  async function load() {
+    const sb = window._lc;
+    const { data: games, error } = await sb
+      .from('games')
+      .select('*')
+      .eq('active', true)
+      .order('subject', { ascending: true })
+      .order('sort_order', { ascending: true });
+
+    const wrap = document.getElementById('wrap');
+    if (error || !games || !games.length) {
+      wrap.innerHTML = '<div class="empty-state">No games available yet.</div>';
+      return;
+    }
+
+    const bySubject = {};
+    games.forEach(g => { (bySubject[g.subject] = bySubject[g.subject] || []).push(g); });
+
+    wrap.innerHTML = '';
+    Object.keys(bySubject).sort().forEach(subject => {
+      const block = document.createElement('div');
+      block.className = 'subject-block';
+      block.innerHTML = `<div class="subject-title">${subject}</div><div class="grid"></div>`;
+      const grid = block.querySelector('.grid');
+
+      bySubject[subject].forEach(g => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <h3>${g.title}</h3>
+          <p>${g.description || ''}</p>
+          <a class="play" href="../${g.file_path}">Play &rarr;</a>
+          <div class="mini-lb" id="lb-${g.game_code}"></div>
+        `;
+        grid.appendChild(card);
+        window.ABCGame.renderLeaderboard(g.game_code, card.querySelector('.mini-lb'), { limit: 3 });
+      });
+
+      wrap.appendChild(block);
+    });
+  }
+  load();
+</script>
+</body>
+</html>
