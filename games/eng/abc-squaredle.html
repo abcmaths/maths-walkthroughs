@@ -61,7 +61,7 @@ header h1{font-size:16px;font-weight:700;}
 
   <div class="intro" id="intro">
     <h2>Today's Grid</h2>
-    <p>Find every hidden word by tapping connected letters — up, down, sideways, or diagonally. Tap a letter, then keep tapping the next one in the chain. One puzzle per day — everyone gets the same grid!</p>
+    <p>Find every hidden word by connecting letters that touch — up, down, sideways, or diagonally. Either <b>drag</b> across the letters, or <b>tap them one at a time</b> then hit Submit. One puzzle per day — everyone gets the same grid!</p>
     <button class="start-btn" id="startBtn">Play Today's Puzzle</button>
   </div>
 
@@ -76,6 +76,10 @@ header h1{font-size:16px;font-weight:700;}
     <div class="progress" id="progressLbl"></div>
     <div class="current-word" id="currentWordLbl"></div>
     <div id="squareGrid"></div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;">
+      <button id="submitWordBtn" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:9px 20px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;">Submit Word</button>
+      <button id="clearWordBtn" style="background:#fff;color:#888;border:1.5px solid var(--line);border-radius:6px;padding:9px 20px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;">Clear</button>
+    </div>
     <div class="wordlist" id="wordlistBox"></div>
     <div class="feedback" id="feedback"></div>
   </div>
@@ -199,7 +203,7 @@ function getTodayPuzzle(){
 }
 
 var el=function(id){return document.getElementById(id);};
-var puzzle=null, foundWords=[], selectedPath=[], isDragging=false, startTime=null, timerInt=null;
+var puzzle=null, foundWords=[], selectedPath=[], isDragging=false, dragExtended=false, startTime=null, timerInt=null;
 
 function cellKey(r,c){return r+','+c;}
 
@@ -209,15 +213,34 @@ function buildGrid(){
     for(var c=0;c<SIZE;c++){
       var cell=document.createElement('div');
       cell.className='sq-cell';
+      cell.style.touchAction='none';
       cell.textContent=puzzle.grid[r][c];
       cell.dataset.r=r; cell.dataset.c=c;
       cell.addEventListener('pointerdown',function(e){ onCellDown(e); });
-      cell.addEventListener('pointerenter',function(e){ onCellEnter(e); });
       box.appendChild(cell);
     }
   }
-  box.addEventListener('pointerup',onPointerUp);
-  document.addEventListener('pointerup',onPointerUp);
+  // Touch/pointer devices keep routing events to the element where the
+  // pointer went down (implicit capture), so pointerenter on other cells
+  // never fires. Instead, track pointermove on the grid itself and use
+  // elementFromPoint to work out which cell is currently under the finger.
+  box.addEventListener('pointermove', onGridPointerMove);
+  box.addEventListener('pointerup', onPointerUp);
+  box.addEventListener('pointercancel', onPointerUp);
+  document.addEventListener('pointerup', onPointerUp);
+}
+
+function onGridPointerMove(e){
+  if(!isDragging) return;
+  var target = document.elementFromPoint(e.clientX, e.clientY);
+  if(!target || !target.classList.contains('sq-cell')) return;
+  var r=Number(target.dataset.r), c=Number(target.dataset.c);
+  var last=selectedPath[selectedPath.length-1];
+  if(last[0]===r && last[1]===c) return;
+  if(isAdjacent(last,[r,c])){
+    var already=selectedPath.some(function(p){return p[0]===r&&p[1]===c;});
+    if(!already){ selectedPath.push([r,c]); dragExtended=true; renderSelection(); }
+  }
 }
 
 function isAdjacent(a,b){
@@ -226,25 +249,39 @@ function isAdjacent(a,b){
 }
 
 function onCellDown(e){
+  e.preventDefault();
   isDragging=true;
+  dragExtended=false;
   var r=Number(e.currentTarget.dataset.r), c=Number(e.currentTarget.dataset.c);
+
+  if(selectedPath.length>0){
+    var last=selectedPath[selectedPath.length-1];
+    var already=selectedPath.some(function(p){return p[0]===r&&p[1]===c;});
+    if(isAdjacent(last,[r,c]) && !already){
+      // Tapping the next adjacent letter continues the word being built
+      selectedPath.push([r,c]);
+      renderSelection();
+      return;
+    }
+    if(last[0]===r && last[1]===c){
+      // Tapping the same (last) letter again — do nothing, just keep it selected
+      return;
+    }
+  }
+  // Otherwise, start a brand new word from this letter
   selectedPath=[[r,c]];
   renderSelection();
 }
-function onCellEnter(e){
-  if(!isDragging)return;
-  var r=Number(e.currentTarget.dataset.r), c=Number(e.currentTarget.dataset.c);
-  var last=selectedPath[selectedPath.length-1];
-  if(last[0]===r && last[1]===c) return;
-  if(isAdjacent(last,[r,c])){
-    var already=selectedPath.some(function(p){return p[0]===r&&p[1]===c;});
-    if(!already){ selectedPath.push([r,c]); renderSelection(); }
-  }
-}
+
 function onPointerUp(){
   if(!isDragging)return;
   isDragging=false;
-  checkWord();
+  if(dragExtended){
+    // A genuine drag gesture — check the word automatically on release
+    checkWord();
+  }
+  // Otherwise this was just a single tap — leave the path open so the
+  // student can keep tapping letters one at a time, then press Submit.
 }
 
 function renderSelection(){
@@ -272,9 +309,21 @@ function checkWord(){
   }else if(word.length>1){
     el('feedback').className='feedback bad';
     el('feedback').textContent = puzzle.words.indexOf(word)!==-1 ? 'Already found that one.' : 'Not a word in this grid — try again.';
+  }else if(word.length===1){
+    el('feedback').className='feedback bad';
+    el('feedback').textContent='Keep tapping adjacent letters, then press Submit.';
+    return; // don't clear a single selected letter — let them keep building
   }
   selectedPath=[];
   el('currentWordLbl').textContent='';
+  var cells=el('squareGrid').querySelectorAll('.sq-cell');
+  cells.forEach(function(cell){ if(!cell.classList.contains('found')) cell.classList.remove('selected'); });
+}
+
+function clearSelection(){
+  selectedPath=[];
+  el('currentWordLbl').textContent='';
+  el('feedback').textContent='';
   var cells=el('squareGrid').querySelectorAll('.sq-cell');
   cells.forEach(function(cell){ if(!cell.classList.contains('found')) cell.classList.remove('selected'); });
 }
@@ -349,6 +398,8 @@ if(checkAlreadyPlayed()){
   }
 }
 el('startBtn').addEventListener('click',startGame);
+el('submitWordBtn').addEventListener('click',checkWord);
+el('clearWordBtn').addEventListener('click',clearSelection);
 </script>
 </body>
 </html>
