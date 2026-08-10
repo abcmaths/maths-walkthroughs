@@ -1298,14 +1298,19 @@
     const { data: games, error: gErr } = await supabase.from('games').select('*').order('subject').order('sort_order');
     if (gErr || !games || !games.length) { el.innerHTML = '<p style="color:#888">No games registered yet.</p>'; return; }
 
-    // populate subject filter options (only once, preserving current selection)
+    const SUBJECT_LABELS = {
+      eng: 'English', maths: 'Maths', addmaths: 'Add Maths', furthermaths: 'Further Maths',
+      science: 'Combined Science', phy: 'Physics', che: 'Chemistry', bio: 'Biology',
+      crs: 'CRS', gov: 'Government', digks3: 'Digital Technologies (KS3)', digks4: 'Digital Technologies (KS4)'
+    };
+
     const subjectSelect = document.getElementById('games-filter-subject');
     if (subjectSelect && subjectSelect.dataset.populated !== '1') {
       const subjects = [...new Set(games.map(g => g.subject))].sort();
       subjects.forEach(s => {
         const opt = document.createElement('option');
         opt.value = s;
-        opt.textContent = s;
+        opt.textContent = SUBJECT_LABELS[s] || s;
         subjectSelect.appendChild(opt);
       });
       subjectSelect.dataset.populated = '1';
@@ -1318,8 +1323,6 @@
 
     if (!filteredGames.length) { el.innerHTML = '<p style="color:#888">No games in this subject.</p>'; return; }
 
-    const fmtTime = (s) => { if (s === null || s === undefined) return '—'; const m = Math.floor(s/60), sec = s%60; return m + ':' + (sec<10?'0':'') + sec; };
-
     let html = '<div class="tbl-wrap"><table><thead><tr><th>Game</th><th>Subject</th><th>Plays</th><th>Unique Players</th><th>Top Score</th><th>Fastest Time</th></tr></thead><tbody>';
     filteredGames.forEach(g => {
       const rows = (scores || []).filter(s => s.game_code === g.game_code);
@@ -1328,9 +1331,10 @@
       const top = (lb || []).filter(r => r.game_code === g.game_code).sort((a,b) => b.score - a.score)[0];
       const fastestRow = rows.filter(r => r.time_seconds !== null).sort((a,b) => a.time_seconds - b.time_seconds)[0];
       const fastestName = fastestRow ? ((allStudents.find(s => s.id === fastestRow.student_id) || {}).full_name || null) : null;
+      const fmtTime = (s) => { if (s === null || s === undefined) return '—'; const m = Math.floor(s/60), sec = s%60; return m + ':' + (sec<10?'0':'') + sec; };
       html += `<tr>
         <td><a href="${g.file_path}" target="_blank" style="color:#C0272D;font-weight:600;text-decoration:none">${g.title}</a></td>
-        <td>${g.subject}</td>
+        <td>${SUBJECT_LABELS[g.subject] || g.subject}</td>
         <td>${plays}</td>
         <td>${uniquePlayers}</td>
         <td>${top ? top.full_name + ' — ' + top.score : '—'}</td>
