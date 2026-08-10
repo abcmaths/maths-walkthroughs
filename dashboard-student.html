@@ -10,7 +10,7 @@
     header { background: #C0272D; color: white; padding: 0 12px 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .header-toggles { display: flex; align-items: center; gap: 10px; overflow-x: auto; flex: 1 1 auto; min-width: 0; scrollbar-width: none; -ms-overflow-style: none; }
     .header-toggles::-webkit-scrollbar { display: none; }
-    .subtabs-row { background: #fff; border-bottom: 1px solid #eee; padding: 8px 20px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+    .subtabs-row { background: #fff; border-bottom: 1px solid #eee; padding: 8px 20px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; display:none !important; }
     .subtabs-row::-webkit-scrollbar { display: none; }
     .header-account { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     /* Subject toggle */
@@ -167,7 +167,7 @@
     <div class="logo">ABC</div>
     <div class="subtitle" id="header-subtitle">ABC Learning Portal</div>
   </div>
-  <div class="header-toggles">
+  <div class="header-toggles" style="display:none">
     <div class="subject-toggle">
       <button id="toggle-english">✏️ English</button>
       <button id="toggle-maths" class="active">📐 Maths</button>
@@ -1037,7 +1037,8 @@
       if (!profile)     { showError('No profile found. Please contact your teacher.'); return; }
 
       if (profile.role === 'admin' || profile.role === 'teacher') {
-        window.location.href = 'dashboard-staff.html'; return;
+        const isPreview = new URLSearchParams(window.location.search).get('preview') === '1';
+        if (!isPreview) { window.location.href = 'dashboard-staff.html'; return; }
       }
 
       if (profile.active === false) {
@@ -1046,6 +1047,13 @@
       }
 
       myYearGroup = profile.year_group || 7;
+
+      if (new URLSearchParams(window.location.search).get('preview') === '1') {
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background:#C0272D;color:#fff;text-align:center;padding:8px;font-size:0.82rem;font-weight:600;';
+        banner.innerHTML = '👁 Staff Preview Mode — viewing the student dashboard · <a href="dashboard-staff.html" style="color:#fff;text-decoration:underline">Back to Staff Dashboard</a>';
+        document.body.insertBefore(banner, document.body.firstChild);
+      }
 
       // Year 7 / Year 8 / Year 9 / Year 10 / Year 11 / Year 12 Diagnostics —
       // compulsory, locks the dashboard until complete. Separate diagnostic
