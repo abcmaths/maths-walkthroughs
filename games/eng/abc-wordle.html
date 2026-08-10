@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  window._lc=_lc;
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../../login.html';
+</script>
+<script src="../js/abc_game_widget.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ABC Wordle — ABC Learning Portal</title>
+<style>
+:root{--red:#C0272D;--dark:#8f1c21;--cream:#FBF6F0;--ink:#241412;--line:#EBD8D5;--gold:#C8922A;--good:#2e7d32;--goodbg:#e8f5e9;--bad:#a01f24;--present:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100vh;}
+header{background:var(--red);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+header h1{font-size:16px;font-weight:700;}
+.stat{font-size:12px;font-weight:700;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:5px 10px;}
+.wrap{max-width:420px;margin:0 auto;padding:22px 14px 60px;}
+.intro,.results,.already{background:#fff;border:1px solid var(--line);border-radius:8px;padding:28px 24px;text-align:center;}
+.intro h2,.results h2,.already h2{font-family:Georgia,serif;font-size:22px;margin-bottom:10px;}
+.intro p,.already p{font-size:14px;color:#555;line-height:1.6;margin-bottom:20px;}
+.start-btn{background:var(--red);color:#fff;border:none;border-radius:5px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+.start-btn:hover{background:var(--dark);}
+.panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:18px;text-align:center;}
+.grid{display:grid;grid-template-rows:repeat(6,1fr);gap:6px;max-width:280px;margin:0 auto 18px;}
+.grow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.cell{aspect-ratio:1;border:2px solid var(--line);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;text-transform:uppercase;background:#fff;}
+.cell.filled{border-color:#aaa;}
+.cell.correct{background:var(--good);border-color:var(--good);color:#fff;}
+.cell.present{background:var(--present);border-color:var(--present);color:#fff;}
+.cell.absent{background:#999;border-color:#999;color:#fff;}
+.keyboard{display:flex;flex-direction:column;gap:6px;max-width:340px;margin:0 auto;}
+.krow{display:flex;gap:4px;justify-content:center;}
+.key{background:#e2e2e2;border:none;border-radius:4px;padding:12px 0;font-size:12px;font-weight:700;cursor:pointer;flex:1;min-width:24px;text-transform:uppercase;}
+.key.wide{flex:1.6;font-size:10px;}
+.key.correct{background:var(--good);color:#fff;}
+.key.present{background:var(--present);color:#fff;}
+.key.absent{background:#999;color:#fff;}
+.feedback{font-size:13.5px;font-weight:600;margin-top:12px;min-height:18px;}
+.feedback.good{color:var(--good);}
+.feedback.bad{color:var(--bad);}
+.results .word{font-size:28px;font-weight:800;color:var(--red);margin:10px 0;letter-spacing:2px;}
+.results .sub{font-size:13px;color:#888;margin-bottom:18px;}
+.lb-box{background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:20px;text-align:left;}
+.lb-box h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:8px;font-weight:700;}
+.abcg-lb-loading,.abcg-lb-empty{color:#999;font-size:12.5px;}
+.abcg-lb-head,.abcg-lb-row{display:grid;grid-template-columns:24px 1fr 60px 60px;gap:6px;padding:3px 0;font-size:12.5px;}
+.abcg-lb-head{color:#999;font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.05em;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:4px;}
+.abcg-lb-row{color:var(--ink);}
+.abcg-lb-me{font-weight:700;color:var(--red);}
+.abcg-lb-rank{color:var(--gold);font-weight:700;}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+<header>
+  <a href="../games-list.html" class="back">&larr; All Games</a>
+  <h1>ABC Wordle</h1>
+  <div class="stat" id="dateStat"></div>
+</header>
+<div class="wrap">
+
+  <div class="intro" id="intro">
+    <h2>Today's Word</h2>
+    <p>Guess the 5-letter word in 6 tries. After each guess, tiles show green (right letter, right spot), gold (right letter, wrong spot), or grey (not in the word). One puzzle per day — everyone gets the same word!</p>
+    <button class="start-btn" id="startBtn">Play Today's Puzzle</button>
+  </div>
+
+  <div class="already hidden" id="already">
+    <h2>Already played today!</h2>
+    <p id="alreadyMsg"></p>
+    <div class="lb-box"><h4>Today's Leaderboard</h4><div id="lbListAlready"></div></div>
+    <div style="margin-top:10px;"><a href="../games-list.html" style="font-size:12.5px;color:#888;">All games &rarr;</a></div>
+  </div>
+
+  <div class="panel hidden" id="game">
+    <div class="grid" id="grid"></div>
+    <div class="keyboard" id="keyboard"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="results hidden" id="results">
+    <h2 id="resultTitle">Nice one!</h2>
+    <div class="word" id="wordReveal"></div>
+    <div class="sub" id="guessesUsed"></div>
+    <div class="lb-box"><h4>Today's Leaderboard</h4><div id="lbList"></div></div>
+    <div style="margin-top:10px;"><a href="../games-list.html" style="font-size:12.5px;color:#888;">All games &rarr;</a></div>
+  </div>
+
+</div>
+<script>
+var GAME_CODE='abc-wordle';
+var WORD_LEN=5;
+var MAX_GUESSES=6;
+
+// Curated school-appropriate 5-letter word bank
+var WORDS=[
+  'ABOUT','THEIR','WOULD','THESE','OTHER','WHICH','WORLD','SOUND','SPELL','LEARN',
+  'STUDY','WRITE','THINK','BEGIN','CLASS','TEACH','PAPER','BOARD','GRADE','TERMS',
+  'STORY','NOVEL','VERSE','RHYME','PROSE','DRAMA','PLANT','WATER','EARTH','LIGHT',
+  'FORCE','POWER','SOLID','LIQUID','METAL','ATOMS','CELLS','TREND','GRAPH','SHAPE',
+  'ANGLE','TOTAL','EQUAL','VALUE','MEDIA','MOUSE','TABLE','CHAIR','SMILE','HAPPY',
+  'QUICK','BRAVE','SHARP','FRESH','CLEAN','SUNNY','CLOUD','RIVER','STONE','FOREST',
+  'HOUSE','TRAIN','PLANE','MUSIC','DANCE','PAINT','BREAD','FRUIT','JUICE','BEACH',
+  'HEART','BRAIN','HONOR','TRUST','FAITH','HOPES','PEACE','UNITY','GRACE','MERCY'
+].filter(function(w){return w.length===5;});
+
+function seedFromDate(dateStr){
+  var hash=0;
+  for(var i=0;i<dateStr.length;i++){
+    hash=((hash<<5)-hash+dateStr.charCodeAt(i))|0;
+  }
+  return Math.abs(hash);
+}
+function mulberry32(seed){
+  return function(){
+    seed|=0; seed=(seed+0x6D2B79F5)|0;
+    var t=Math.imul(seed^(seed>>>15),1|seed);
+    t=(t+Math.imul(t^(t>>>7),61|t))^t;
+    return ((t^(t>>>14))>>>0)/4294967296;
+  };
+}
+function todayStr(){
+  var d=new Date();
+  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+function getTodayWord(){
+  var seed=seedFromDate(todayStr());
+  var rng=mulberry32(seed);
+  var idx=Math.floor(rng()*WORDS.length);
+  return WORDS[idx];
+}
+
+var el=function(id){return document.getElementById(id);};
+var TARGET='', guesses=[], currentGuess='', rowIdx=0, startTime=null, timerInt=null;
+var keyStates={};
+
+function buildGrid(){
+  var grid=el('grid');grid.innerHTML='';
+  for(var r=0;r<MAX_GUESSES;r++){
+    var row=document.createElement('div');
+    row.className='grow';
+    row.id='row-'+r;
+    for(var c=0;c<WORD_LEN;c++){
+      var cell=document.createElement('div');
+      cell.className='cell';
+      cell.id='cell-'+r+'-'+c;
+      row.appendChild(cell);
+    }
+    grid.appendChild(row);
+  }
+}
+
+var KB_ROWS=['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
+function buildKeyboard(){
+  var kb=el('keyboard');kb.innerHTML='';
+  KB_ROWS.forEach(function(rowStr,i){
+    var row=document.createElement('div');
+    row.className='krow';
+    if(i===2){
+      var enterBtn=document.createElement('button');
+      enterBtn.className='key wide';
+      enterBtn.textContent='ENTER';
+      enterBtn.addEventListener('click',submitGuess);
+      row.appendChild(enterBtn);
+    }
+    rowStr.split('').forEach(function(ch){
+      var btn=document.createElement('button');
+      btn.className='key';
+      btn.textContent=ch;
+      btn.id='key-'+ch;
+      btn.addEventListener('click',function(){typeChar(ch);});
+      row.appendChild(btn);
+    });
+    if(i===2){
+      var delBtn=document.createElement('button');
+      delBtn.className='key wide';
+      delBtn.textContent='DEL';
+      delBtn.addEventListener('click',deleteChar);
+      row.appendChild(delBtn);
+    }
+    kb.appendChild(row);
+  });
+}
+
+function typeChar(ch){
+  if(currentGuess.length>=WORD_LEN)return;
+  currentGuess+=ch;
+  updateRowDisplay();
+}
+function deleteChar(){
+  currentGuess=currentGuess.slice(0,-1);
+  updateRowDisplay();
+}
+function updateRowDisplay(){
+  for(var c=0;c<WORD_LEN;c++){
+    var cell=el('cell-'+rowIdx+'-'+c);
+    if(c<currentGuess.length){
+      cell.textContent=currentGuess[c];
+      cell.classList.add('filled');
+    }else{
+      cell.textContent='';
+      cell.classList.remove('filled');
+    }
+  }
+}
+
+function submitGuess(){
+  if(currentGuess.length!==WORD_LEN){
+    el('feedback').className='feedback bad';
+    el('feedback').textContent='Enter a full 5-letter word first.';
+    return;
+  }
+  var guess=currentGuess;
+  var targetArr=TARGET.split('');
+  var guessArr=guess.split('');
+  var result=new Array(WORD_LEN).fill('absent');
+  var used=new Array(WORD_LEN).fill(false);
+
+  for(var i=0;i<WORD_LEN;i++){
+    if(guessArr[i]===targetArr[i]){ result[i]='correct'; used[i]=true; }
+  }
+  for(var i=0;i<WORD_LEN;i++){
+    if(result[i]==='correct')continue;
+    for(var j=0;j<WORD_LEN;j++){
+      if(!used[j] && guessArr[i]===targetArr[j]){ result[i]='present'; used[j]=true; break; }
+    }
+  }
+
+  for(var c=0;c<WORD_LEN;c++){
+    var cell=el('cell-'+rowIdx+'-'+c);
+    cell.classList.add(result[c]);
+    var key=el('key-'+guessArr[c]);
+    if(key){
+      var rank={absent:0,present:1,correct:2};
+      var existing=keyStates[guessArr[c]]||'absent';
+      if(rank[result[c]]>=rank[existing]){
+        keyStates[guessArr[c]]=result[c];
+        key.className='key '+result[c];
+      }
+    }
+  }
+
+  guesses.push(guess);
+  el('feedback').textContent='';
+
+  if(guess===TARGET){
+    setTimeout(function(){ finishGame(true); },900);
+    return;
+  }
+  rowIdx++;
+  currentGuess='';
+  if(rowIdx>=MAX_GUESSES){
+    setTimeout(function(){ finishGame(false); },900);
+  }
+}
+
+document.addEventListener('keydown',function(e){
+  if(el('game').classList.contains('hidden'))return;
+  if(e.key==='Enter'){ submitGuess(); }
+  else if(e.key==='Backspace'){ deleteChar(); }
+  else if(/^[a-zA-Z]$/.test(e.key)){ typeChar(e.key.toUpperCase()); }
+});
+
+function checkAlreadyPlayed(){
+  try{
+    var last=localStorage.getItem('abc_wordle_last_played');
+    return last===todayStr();
+  }catch(e){ return false; }
+}
+function markPlayed(){
+  try{ localStorage.setItem('abc_wordle_last_played', todayStr()); }catch(e){}
+}
+
+function startGame(){
+  TARGET=getTodayWord();
+  guesses=[];currentGuess='';rowIdx=0;keyStates={};
+  el('intro').classList.add('hidden');
+  el('game').classList.remove('hidden');
+  buildGrid();
+  buildKeyboard();
+  startTime=Date.now();
+  clearInterval(timerInt);
+  timerInt=setInterval(function(){
+    var s=Math.floor((Date.now()-startTime)/1000);
+    el('dateStat').textContent=Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);
+  },500);
+}
+
+function finishGame(won){
+  clearInterval(timerInt);
+  markPlayed();
+  var secs=Math.floor((Date.now()-startTime)/1000);
+  el('game').classList.add('hidden');
+  el('results').classList.remove('hidden');
+  el('resultTitle').textContent = won ? ['Genius!','Magnificent!','Impressive!','Splendid!','Great job!','Phew!'][guesses.length-1] : 'So close!';
+  el('wordReveal').textContent=TARGET;
+  el('guessesUsed').textContent= won ? ('Solved in '+guesses.length+' guess'+(guesses.length===1?'':'es')) : 'Not solved this time';
+
+  var score = won ? Math.max(100,(MAX_GUESSES-guesses.length+1)*200) : 50;
+  if(window.ABCGame){
+    window.ABCGame.submitScore(GAME_CODE,score,secs).then(function(){
+      window.ABCGame.renderLeaderboard(GAME_CODE,el('lbList'),{limit:10});
+    });
+  }
+}
+
+// On load, check if already played today
+if(checkAlreadyPlayed()){
+  el('intro').classList.add('hidden');
+  el('already').classList.remove('hidden');
+  el('alreadyMsg').textContent="You've already solved today's word puzzle. Come back tomorrow for a new one!";
+  if(window.ABCGame){
+    window.ABCGame.renderLeaderboard(GAME_CODE,el('lbListAlready'),{limit:10});
+  }
+}
+el('dateStat').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+el('startBtn').addEventListener('click',startGame);
+</script>
+</body>
+</html>
