@@ -15,23 +15,6 @@
     .user-name { font-size: 0.9rem; opacity: 0.9; }
     .btn-signout { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; padding: 5px 12px; font-size: 0.82rem; cursor: pointer; }
     .btn-signout:hover { background: rgba(255,255,255,0.3); }
-    .btn-chpwd { background: none; color: white; border: none; font-size: 0.82rem; cursor: pointer; opacity: 0.8; text-decoration: underline; white-space: nowrap; }
-    .btn-chpwd:hover { opacity: 1; }
-    /* Change password modal */
-    .cp-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; font-family: 'Segoe UI', Arial, sans-serif; }
-    .cp-overlay.open { display: flex; }
-    .cp-modal { background: white; border-radius: 10px; width: 90%; max-width: 380px; padding: 28px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); }
-    .cp-modal h2 { font-size: 1.1rem; font-weight: 700; color: #333; margin-bottom: 20px; }
-    .cp-modal label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
-    .cp-modal input { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 5px; font-size: 0.9rem; margin-bottom: 14px; box-sizing: border-box; font-family: inherit; }
-    .cp-modal input:focus { outline: none; border-color: #C0272D; }
-    .cp-btns { display: flex; gap: 10px; margin-top: 4px; }
-    .cp-submit { background: #C0272D; color: white; border: none; border-radius: 5px; padding: 10px 20px; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit; }
-    .cp-submit:disabled { background: #ccc; cursor: not-allowed; }
-    .cp-cancel { background: none; border: 1.5px solid #ddd; border-radius: 5px; padding: 10px 14px; font-size: 0.9rem; color: #888; cursor: pointer; font-family: inherit; }
-    .cp-msg { margin-top: 12px; padding: 10px 14px; border-radius: 5px; font-size: 0.85rem; display: none; }
-    .cp-msg.error   { background: #fde8e8; color: #a01f24; display: block; }
-    .cp-msg.success { background: #e8f5e9; color: #2e7d32; display: block; }
     .nav-tabs { background: white; border-bottom: 2px solid #eee; display: flex; padding: 0 24px; }
     .nav-tab { padding: 14px 20px; font-size: 0.9rem; font-weight: 600; color: #888; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
     .nav-tab.active { color: #C0272D; border-bottom-color: #C0272D; }
@@ -148,26 +131,9 @@
       <button class="science-subtab" id="subtab-biology" style="--subtab-accent:#2E7D32" onclick="window.switchSubject('biology')">🌿 Biology</button>
     </div>
     <span class="user-name" id="header-name"></span>
-    <button class="btn-chpwd" onclick="openChangePwd()">Change Password</button>
     <button class="btn-signout" onclick="signOut()">Sign out</button>
   </div>
 </header>
-
-<!-- Change Password Modal -->
-<div class="cp-overlay" id="cp-overlay">
-  <div class="cp-modal">
-    <h2>Change Password</h2>
-    <label>New Password</label>
-    <input type="password" id="cp-new" placeholder="At least 6 characters">
-    <label>Confirm New Password</label>
-    <input type="password" id="cp-confirm" placeholder="Repeat new password">
-    <div class="cp-btns">
-      <button class="cp-submit" id="cp-submit-btn" onclick="submitChangePwd()">Update Password</button>
-      <button class="cp-cancel" onclick="closeChangePwd()">Cancel</button>
-    </div>
-    <div class="cp-msg" id="cp-msg"></div>
-  </div>
-</div>
 
 <div class="nav-tabs">
   <div class="nav-tab active" onclick="showTab('overview')">Overview</div>
@@ -180,7 +146,7 @@
   <div class="nav-tab" onclick="showTab('diagnostic')">Diagnostic</div>
   <div class="nav-tab" onclick="showTab('reviews')">Review Walkthroughs</div>
   <div class="nav-tab" onclick="showTab('import')">Import Users</div>
-  <div class="nav-tab" onclick="showTab('deepdive')">Deep Dive Progress</div>
+  <div class="nav-tab" onclick="showTab('games')">Games</div>
 </div>
 
 <main>
@@ -297,12 +263,6 @@
                 <option value="crs">✝️ CRS</option>
                 <option value="government">🏛️ Government</option>
                 <option value="digitaltech">💻 Digital Tech</option>
-                <option value="bridge_english">🌉 Bridge English</option>
-                <option value="bridge_maths">🌉 Bridge Maths</option>
-                <option value="bridge_science">🌉 Bridge Science</option>
-                <option value="ext_english">🚀 Extension English</option>
-                <option value="ext_maths">🚀 Extension Maths</option>
-                <option value="deepdive_maths">🪜 Deep Dive: Maths</option>
         </select>
         <select id="topics-filter-year" onchange="renderTopicsTab()">
           <option value="7">Year 7</option>
@@ -459,11 +419,6 @@
         <select id="users-filter-extmaths" onchange="renderUsersTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.85rem">
           <option value="">All Students</option>
           <option value="yes">➕ Add/Further Maths only</option>
-        </select>
-        <select id="users-filter-status" onchange="renderUsersTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.85rem">
-          <option value="active">Active only</option>
-          <option value="archived">Archived only</option>
-          <option value="all">All</option>
         </select>
         <input type="text" id="users-search" placeholder="Search by name or email…" oninput="renderUsersTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.88rem;color:#333;min-width:200px">
         <button class="btn-outline" style="font-size:0.82rem;padding:6px 14px" onclick="exportUsers()">↓ Export CSV</button>
@@ -842,12 +797,7 @@
             <option value="crs">✝️ CRS</option>
             <option value="government">🏛️ Government</option>
             <option value="digitaltech">💻 Digital Tech</option>
-            <option value="bridge_english">🌉 Bridge English</option>
-            <option value="bridge_maths">🌉 Bridge Maths</option>
-            <option value="bridge_science">🌉 Bridge Science</option>
-            <option value="extension_english">🚀 Extension English</option>
-            <option value="extension_maths">🚀 Extension Maths</option>
-            <option value="deepdive_maths">🪜 Deep Dive: Maths</option>
+            <option value="bridge">🌉 Bridge</option>
           </select>
           <select id="review-filter-year" onchange="renderReviewTab()">
             <option value="">All Year Groups</option>
@@ -870,10 +820,7 @@
             <option value="locked">🔒 Locked (2+ reviews)</option>
           </select>
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-          <div class="section-title">Walkthroughs <span id="review-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></div>
-          <button class="btn-outline" id="export-all-locked-btn" style="font-size:0.82rem;padding:6px 14px;display:none" onclick="exportAllLockedReviews()">↓ Export All Locked Reviews</button>
-        </div>
+        <div class="section-title" style="margin-bottom:16px">Walkthroughs <span id="review-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></div>
         <div id="review-list"></div>
       </div>
     </div>
@@ -974,31 +921,17 @@
     </div>
     </div>
 
-    <!-- DEEP DIVE PROGRESS -->
-    <div class="tab-panel" id="tab-deepdive">
-      <div class="filter-bar">
-        <select id="dd-filter-topic" onchange="renderDeepDiveProgressTab()">
-          <option value="">All Deep Dive Topics</option>
-        </select>
-        <select id="dd-filter-status" onchange="renderDeepDiveProgressTab()">
-          <option value="">All Statuses</option>
-          <option value="started">▶ In Progress</option>
-          <option value="completed">✓ Completed</option>
-          <option value="opted_out">⏸ Opted Out</option>
-        </select>
-        <input type="text" id="dd-filter-search" placeholder="Search by name…" oninput="renderDeepDiveProgressTab()">
-      </div>
-      <div class="section">
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Student</th><th>Year</th><th>Topic</th><th>Status</th><th>Stage Reached</th><th>Final Check Score</th><th>Last Visited</th></tr></thead>
-            <tbody id="deepdive-progress-tbody"></tbody>
-          </table>
-        </div>
+  </div>
+
+    <!-- GAMES -->
+    <div class="tab-panel" id="tab-games">
+      <div class="section" style="margin-bottom:24px">
+        <div class="section-title" style="margin-bottom:16px">Games &amp; Leaderboards</div>
+        <p style="font-size:0.85rem;color:#888;margin-bottom:20px">Play counts and top scorers per game. Data refreshes on tab open.</p>
+        <div id="games-tab-content" style="font-size:0.9rem;color:#888">Loading…</div>
       </div>
     </div>
 
-  </div>
 </main>
 
 <!-- Edit User Modal -->
@@ -1095,7 +1028,7 @@
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
   window._supabase = supabase;
 
-  let allStudents = [], allProgress = [], allTopics = [], allPeople = [];
+  let allStudents = [], allProgress = [], allTopics = [];
 
   // ── Use getSession directly — more reliable than onAuthStateChange for page loads ──
   async function init() {
@@ -1119,29 +1052,25 @@
     }
 
     document.getElementById('header-name').textContent = profile.full_name;
-    window.currentUserRole = profile.role;
 
     // ── Fetch all data in parallel ──
     const [
       { data: students },
       { data: teachers },
-      { data: topics }
+      { data: topics },
+      { data: progress }
     ] = await Promise.all([
       supabase.from('profiles').select('*').eq('role', 'student').eq('active', true).order('full_name'),
       supabase.from('profiles').select('*').in('role', ['teacher', 'admin']),
-      supabase.from('topics').select('*').order('year_group').order('topic_code')
+      supabase.from('topics').select('*').order('year_group').order('topic_code'),
+      supabase.from('walkthrough_progress').select('*')
     ]);
-    const progress = await loadAllRows('walkthrough_progress');
 
     console.log('Data loaded — students:', (students||[]).length, 'topics:', (topics||[]).length);
 
     allStudents = students || [];
     allTopics   = topics   || [];
     allProgress = progress || [];
-    // allPeople covers students AND staff/admin, so Deep Dive Progress rows
-    // created by staff testing accounts (e.g. Chris, Kingsley) still resolve
-    // a name instead of showing "Unknown student".
-    allPeople   = [...(students || []), ...(teachers || [])];
 
     // ── Overview stats ──
     document.getElementById('ov-students').textContent    = allStudents.length;
@@ -1238,73 +1167,6 @@
         <td><div class="progress-cell"><div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div><div class="pct-label">${pct}%</div></div></td>
         <td>${lastDate}</td>
         <td><button class="btn-link" onclick="openStudentModal('${s.id}')">View</button></td>
-      </tr>`;
-    }).join('');
-  };
-
-  // ── Deep Dive Progress: one row per student per deepdive_* topic, showing stage-level
-  // progress so staff can see which topics students struggle with / opt out of. ──
-  window.renderDeepDiveProgressTab = function() {
-    const deepDiveTopics = allTopics.filter(t => (t.subject || '').startsWith('deepdive'));
-    const topicMap = {};
-    deepDiveTopics.forEach(t => topicMap[t.id] = t);
-
-    // Populate the topic filter dropdown once (idempotent)
-    const topicSel = document.getElementById('dd-filter-topic');
-    if (topicSel && !topicSel.dataset.populated) {
-      deepDiveTopics.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t.id;
-        opt.textContent = t.topic_name;
-        topicSel.appendChild(opt);
-      });
-      topicSel.dataset.populated = '1';
-    }
-
-    const topicFilter  = document.getElementById('dd-filter-topic').value;
-    const statusFilter = document.getElementById('dd-filter-status').value;
-    const searchFilter = document.getElementById('dd-filter-search').value.toLowerCase();
-
-    const studentMap = {};
-    allPeople.forEach(s => studentMap[s.id] = s);
-
-    let rows = allProgress.filter(p => topicMap[p.topic_id]);
-    if (topicFilter)  rows = rows.filter(p => p.topic_id === topicFilter);
-    if (statusFilter) rows = rows.filter(p => p.status === statusFilter);
-    if (searchFilter) {
-      rows = rows.filter(p => {
-        const s = studentMap[p.student_id];
-        return s && s.full_name.toLowerCase().includes(searchFilter);
-      });
-    }
-    rows = rows.slice().sort((a,b) => new Date(b.last_visited_at || 0) - new Date(a.last_visited_at || 0));
-
-    const tbody = document.getElementById('deepdive-progress-tbody');
-    if (deepDiveTopics.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px">No Deep Dive topics found yet.</td></tr>';
-      return;
-    }
-    if (rows.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px">No Deep Dive activity matches these filters.</td></tr>';
-      return;
-    }
-    const statusLabel = { started: '▶ In progress', completed: '✓ Completed', opted_out: '⏸ Opted out' };
-    const statusColor  = { started: '#f57f17', completed: '#2e7d32', opted_out: '#888' };
-
-    tbody.innerHTML = rows.map(p => {
-      const s = studentMap[p.student_id];
-      const t = topicMap[p.topic_id];
-      const lastDate = p.last_visited_at ? new Date(p.last_visited_at).toLocaleDateString('en-GB') : '—';
-      const stage = (p.stage_reached !== null && p.stage_reached !== undefined) ? p.stage_reached : '—';
-      const score = (p.quiz_score !== null && p.quiz_score !== undefined) ? `${p.quiz_score} / 10` : '—';
-      return `<tr>
-        <td><strong>${s ? s.full_name : 'Unknown student'}</strong></td>
-        <td>${s ? (s.year_group ? 'Year ' + s.year_group : 'Staff') : '—'}</td>
-        <td>${t ? t.topic_name : p.topic_id}</td>
-        <td style="color:${statusColor[p.status] || '#888'};font-weight:700">${statusLabel[p.status] || p.status || '—'}</td>
-        <td>${stage}</td>
-        <td>${score}</td>
-        <td>${lastDate}</td>
       </tr>`;
     }).join('');
   };
@@ -1448,38 +1310,6 @@
   };
 
   
-  window.resetUserPassword = async function(userId, fullName) {
-    // Role-agnostic reset — works for teachers/admins as well as students, since the
-    // underlying Edge Function just resets Supabase Auth's password for a given userId
-    // and doesn't care about role. Used from the Users tab, where teachers/admins never
-    // get the "View" button (that opens a student-specific modal with test results etc.
-    // that don't apply to staff), so this is their only path to a password reset.
-    if (!confirm(`Reset password for ${fullName} to ABC2026?`)) return;
-    try {
-      const session = (await supabase.auth.getSession()).data.session;
-      const resp = await fetch(
-        'https://lnwinoghbefmjpvmixzo.supabase.co/functions/v1/reset-student-password',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo',
-          },
-          body: JSON.stringify({ userId, newPassword: 'ABC2026' })
-        }
-      );
-      const result = await resp.json();
-      if (resp.ok && result.success) {
-        alert(`✓ Password reset to ABC2026 for ${fullName}`);
-      } else {
-        alert('Reset failed: ' + (result.error || 'Unknown error'));
-      }
-    } catch(e) {
-      alert('Error: ' + e.message);
-    }
-  };
-
   window.resetStudentPassword = async function() {
   const btn = document.getElementById('modal-reset-btn');
   const msg = document.getElementById('modal-reset-msg');
@@ -1547,7 +1377,7 @@
 
   // ── Tab switching ──
   window.showTab = function(name) {
-    const names = ['overview','progress','tests','topics','feedback','bugs','users','diagnostic','reviews','import','deepdive'];
+    const names = ['overview','progress','tests','topics','feedback','bugs','users','diagnostic','reviews','import','games'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
@@ -1558,7 +1388,7 @@
     if (name === 'tests')    window.renderTestsTab();
     if (name === 'diagnostic') window.switchDiagYear();
     if (name === 'reviews')  window.renderReviewTab();
-    if (name === 'deepdive') window.renderDeepDiveProgressTab();
+    if (name === 'games')    window.renderGamesTab();
 
     // Subject toggle only applies to Browse Topics — hide it on every other tab
     const subjToggle = document.querySelector('.subject-toggle');
@@ -1566,6 +1396,34 @@
     const sciSubtabs = document.getElementById('science-subtabs');
     if (sciSubtabs && name !== 'topics') sciSubtabs.classList.remove('visible');
     if (sciSubtabs && name === 'topics' && SCIENCE_SUBJECTS.includes(staffSubject)) sciSubtabs.classList.add('visible');
+  };
+
+  // ── Games tab ──
+  window.renderGamesTab = async function() {
+    const el = document.getElementById('games-tab-content');
+    el.innerHTML = 'Loading…';
+    const { data: games, error: gErr } = await supabase.from('games').select('*').order('subject').order('sort_order');
+    if (gErr || !games || !games.length) { el.innerHTML = '<p style="color:#888">No games registered yet.</p>'; return; }
+
+    const { data: scores } = await supabase.from('game_scores').select('game_code, score, time_seconds, student_id');
+    const { data: lb } = await supabase.from('game_leaderboard').select('game_code, full_name, score, time_seconds');
+
+    let html = '<div class="tbl-wrap"><table><thead><tr><th>Game</th><th>Subject</th><th>Plays</th><th>Unique Players</th><th>Top Score</th></tr></thead><tbody>';
+    games.forEach(g => {
+      const rows = (scores || []).filter(s => s.game_code === g.game_code);
+      const plays = rows.length;
+      const uniquePlayers = new Set(rows.map(r => r.student_id)).size;
+      const top = (lb || []).filter(r => r.game_code === g.game_code).sort((a,b) => b.score - a.score)[0];
+      html += `<tr>
+        <td><a href="${g.file_path}" target="_blank" style="color:#C0272D;font-weight:600;text-decoration:none">${g.title}</a></td>
+        <td>${g.subject}</td>
+        <td>${plays}</td>
+        <td>${uniquePlayers}</td>
+        <td>${top ? top.full_name + ' — ' + top.score : '—'}</td>
+      </tr>`;
+    });
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
   };
 
   // ── Diagnostic year switcher ──
@@ -2272,45 +2130,35 @@
   };
 
   const GOV_WALKTHROUGH_FILES = {
-    // Section A: Elements of Government (Year 10)
-    'GOV-ELE-01': 'gov10/meaning-and-scope-of-government.html',
-    'GOV-ELE-02': 'gov10/the-state-and-nation.html',
-    'GOV-ELE-03': 'gov10/constitution.html',
-    'GOV-ELE-04': 'gov10/rule-of-law-and-democracy.html',
-    'GOV-ELE-05': 'gov10/forms-of-government.html',
-    'GOV-ELE-06': 'gov10/arms-of-government.html',
-    'GOV-ELE-07': 'gov10/citizenship-parties-pressure-groups.html',
-    'GOV-ELE-08': 'gov10/public-opinion-and-media.html',
-    'GOV-ELE-09': 'gov11/electoral-systems.html',
-    'GOV-ELE-10': 'gov12/federalism.html',
-    // Section B: Political & Constitutional Development (Years 11-12)
-    'GOV-POL-01': 'gov11/pre-colonial-political-systems.html',
-    'GOV-POL-02': 'gov11/colonial-administration.html',
-    'GOV-POL-03': 'gov11/nationalism-and-decolonisation.html',
-    'GOV-POL-04': 'gov11/constitutional-development-nigeria.html',
-    'GOV-POL-05': 'gov12/military-rule-in-nigeria.html',
-    'GOV-POL-06': 'gov11/west-african-political-development.html',
-    'GOV-POL-07': 'gov12/nigeria-since-1999.html',
-    // Section C: International Relations (Year 12)
-    'GOV-INT-01': 'gov12/meaning-and-scope-of-ir.html',
-    'GOV-INT-02': 'gov12/national-interest-and-foreign-policy.html',
-    'GOV-INT-03': 'gov12/diplomacy.html',
-    'GOV-INT-04': 'gov12/united-nations.html',
-    'GOV-INT-05': 'gov12/african-union-and-ecowas.html',
-    'GOV-INT-06': 'gov12/commonwealth-and-opec.html',
-    'GOV-INT-07': 'gov12/nigeria-in-international-relations.html',
-    'GOV-INT-08': 'gov12/conflict-resolution-and-peacekeeping.html',
-    'GOV-INT-09': 'gov12/globalisation.html',
-    // Gap-fill additions (Y10 Basic Concepts, Y11 Public Administration, Y12 Political Development)
-    'GOV10-BAS-01': 'gov10/basic-concepts-power-authority-legitimacy-sovereignty-y10.html',
-    'GOV10-BAS-02': 'gov10/political-concepts-ideologies-y10.html',
-    'GOV10-BAS-03': 'gov10/society-state-relationship-y10.html',
-    'GOV11-ADM-01': 'gov11/public-administration-civil-service-y11.html',
-    'GOV11-ADM-02': 'gov11/public-corporations-y11.html',
-    'GOV11-ADM-03': 'gov11/local-government-administration-y11.html',
-    'GOV12-POL-08': 'gov12/minority-issues-state-creation-y12.html',
-    'GOV12-POL-09': 'gov12/development-of-political-parties-nigeria-y12.html',
-    'GOV12-POL-10': 'gov12/leadership-and-followership-y12.html',
+    // Section A: Elements of Government
+    'GOV-ELE-01': 'gov/meaning-and-scope-of-government.html',
+    'GOV-ELE-02': 'gov/the-state-and-nation.html',
+    'GOV-ELE-03': 'gov/constitution.html',
+    'GOV-ELE-04': 'gov/rule-of-law-and-democracy.html',
+    'GOV-ELE-05': 'gov/forms-of-government.html',
+    'GOV-ELE-06': 'gov/arms-of-government.html',
+    'GOV-ELE-07': 'gov/citizenship-parties-pressure-groups.html',
+    'GOV-ELE-08': 'gov/public-opinion-and-media.html',
+    'GOV-ELE-09': 'gov/electoral-systems.html',
+    'GOV-ELE-10': 'gov/federalism.html',
+    // Section B: Political & Constitutional Development
+    'GOV-POL-01': 'gov/pre-colonial-political-systems.html',
+    'GOV-POL-02': 'gov/colonial-administration.html',
+    'GOV-POL-03': 'gov/nationalism-and-decolonisation.html',
+    'GOV-POL-04': 'gov/constitutional-development-nigeria.html',
+    'GOV-POL-05': 'gov/military-rule-in-nigeria.html',
+    'GOV-POL-06': 'gov/west-african-political-development.html',
+    'GOV-POL-07': 'gov/nigeria-since-1999.html',
+    // Section C: International Relations
+    'GOV-INT-01': 'gov/meaning-and-scope-of-ir.html',
+    'GOV-INT-02': 'gov/national-interest-and-foreign-policy.html',
+    'GOV-INT-03': 'gov/diplomacy.html',
+    'GOV-INT-04': 'gov/united-nations.html',
+    'GOV-INT-05': 'gov/african-union-and-ecowas.html',
+    'GOV-INT-06': 'gov/commonwealth-and-opec.html',
+    'GOV-INT-07': 'gov/nigeria-in-international-relations.html',
+    'GOV-INT-08': 'gov/conflict-resolution-and-peacekeeping.html',
+    'GOV-INT-09': 'gov/globalisation.html',
   };
 
   const DIGITALTECH_WALKTHROUGH_FILES = {
@@ -2435,26 +2283,6 @@
     'BRG11-SCI-03': 'bridge_sci_y11/BRG11-SCI-03.html',
   };
 
-  // Extension content (Y7 stretch material)
-  const EXTENSION_WALKTHROUGH_FILES = {
-    'EXT-ENG-01': 'ext_eng/EXT-ENG-01.html',
-    'EXT-ENG-02': 'ext_eng/EXT-ENG-02.html',
-    'EXT-ENG-03': 'ext_eng/EXT-ENG-03.html',
-    'EXT-ENG-04': 'ext_eng/EXT-ENG-04.html',
-    'EXT-ENG-05': 'ext_eng/EXT-ENG-05.html',
-    'EXT-ENG-06': 'ext_eng/EXT-ENG-06.html',
-    'EXT-ENG-07': 'ext_eng/EXT-ENG-07.html',
-    'EXT-ENG-08': 'ext_eng/EXT-ENG-08.html',
-    'EXT-MTH-01': 'ext_mth/EXT-MTH-01.html',
-    'EXT-MTH-02': 'ext_mth/EXT-MTH-02.html',
-    'EXT-MTH-03': 'ext_mth/EXT-MTH-03.html',
-    'EXT-MTH-04': 'ext_mth/EXT-MTH-04.html',
-    'EXT-MTH-05': 'ext_mth/EXT-MTH-05.html',
-    'EXT-MTH-06': 'ext_mth/EXT-MTH-06.html',
-    'EXT-MTH-07': 'ext_mth/EXT-MTH-07.html',
-    'EXT-MTH-08': 'ext_mth/EXT-MTH-08.html',
-  };
-
   const DIGITALTECH_STRAND_COLOURS = {
     'Foundations':             '#37474F',
     'Data & Safety':           '#00838F',
@@ -2493,31 +2321,6 @@
     chemistry: { 'Physical Chemistry':'#1565C0','Atomic Structure':'#6A1B9A','Bonding':'#E65100','Stoichiometry':'#C0272D','Electrochemistry':'#00695C','Energetics':'#C0272D','Kinetics':'#E65100','Redox':'#6A1B9A','Acids & Bases':'#C0272D','Periodic Table':'#1565C0','Metals':'#00695C','Environment':'#2E7D32','Organic':'#E65100','Analysis':'#555','Inorganic':'#888','Practical':'#888' },
     biology:   { 'Classification':'#2E7D32','Cell Biology':'#1565C0','Biochemistry':'#6A1B9A','Plant Biology':'#2E7D32','Human Biology':'#C0272D','Health & Disease':'#E65100','Reproduction':'#E65100','Genetics':'#6A1B9A','Ecology':'#00695C','Biotechnology':'#1565C0','Evolution':'#00695C','Practical':'#888' },
     digitaltech: DIGITALTECH_STRAND_COLOURS,
-    deepdive_maths: { 'Deep Dive': '#7A1418' },
-  };
-
-  // Deep Dive chains: each entry is an ORDERED list of topic_codes forming one teaching ladder.
-  // Used to render the chain/ladder view instead of a flat card grid, on both dashboards.
-  // Deep Dive chains: ORDERED list of topic_codes forming one teaching ladder.
-  // Only include topic_codes for files that are ACTUALLY LIVE (built + in topics table).
-  // Append to a chain's topicCodes as each new file gets built — don't pre-list future
-  // topic_codes, since that renders permanent "Coming soon" locked rungs students can't use.
-  const DEEPDIVE_CHAINS = {
-    deepdive_maths: [
-      { chainId: 'alg-hcf', chainName: 'HCF: From Numbers to Algebra', topicCodes: ['TCH-ALG-01'] },
-      { chainId: 'quadratics', chainName: 'Quadratics', topicCodes: ['TCH-NUM-01', 'TCH-QUAD-01'] },
-      { chainId: 'fdp', chainName: 'Fractions, Decimals & Percentages', topicCodes: ['TCH-FDP-01', 'TCH-FDP-02'] },
-      { chainId: 'circle-geometry', chainName: 'Lines and Angles', topicCodes: ['TCH-GEO-01'] },
-    ],
-  };
-
-  const DEEPDIVE_MATHS_WALKTHROUGH_FILES = {
-    'TCH-ALG-01': 'deepdive/maths/algebra/hcf-to-algebra.html',
-    'TCH-NUM-01': 'deepdive/maths/algebra/squares-and-roots.html',
-    'TCH-QUAD-01': 'deepdive/maths/algebra/quadratics-solving.html',
-    'TCH-FDP-01': 'deepdive/maths/number/fdp-foundations.html',
-    'TCH-FDP-02': 'deepdive/maths/number/fdp-increase-decrease.html',
-    'TCH-GEO-01': 'deepdive/maths/geometry/circle-geometry-proofs.html',
   };
 
   function getWalkthroughFile(subject, topicCode) {
@@ -2530,16 +2333,11 @@
     else if (subject === 'crs')        file = CRS_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'government') file = GOV_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'digitaltech') file = DIGITALTECH_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'bridge_english' || subject === 'bridge_maths' || subject === 'bridge_science')
-                                         file = BRIDGE_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'ext_english' || subject === 'ext_maths')
-                                         file = EXTENSION_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'deepdive_maths') file = DEEPDIVE_MATHS_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'bridge')      file = BRIDGE_WALKTHROUGH_FILES[topicCode];
     else file = WALKTHROUGH_FILES[topicCode];
-    // Fallback: bridge/extension codes may be tagged under any subject value in the topics table —
-    // always check by code shape so review/testing isn't blocked on that.
+    // Fallback: bridge codes may be tagged under any subject value in the topics table —
+    // always check the bridge map by code shape so review/testing isn't blocked on that.
     if (!file && /^BRG/.test(topicCode)) file = BRIDGE_WALKTHROUGH_FILES[topicCode];
-    if (!file && /^EXT/.test(topicCode)) file = EXTENSION_WALKTHROUGH_FILES[topicCode];
     return file || '#';
   }
 
@@ -2547,25 +2345,11 @@
 
   let staffSubject = 'maths';
 
-  // Shared pagination helper — Supabase caps a plain select at 1,000 rows silently
-  async function loadAllRows(table, selectStr) {
-    let all = [];
-    let from = 0;
-    const pageSize = 1000;
-    while (true) {
-      let q = supabase.from(table).select(selectStr || '*').range(from, from + pageSize - 1);
-      const { data, error } = await q;
-      if (error) { console.error(`loadAllRows(${table}) failed:`, error); break; }
-      if (!data || data.length === 0) break;
-      all = all.concat(data);
-      if (data.length < pageSize) break;
-      from += pageSize;
-    }
-    return all;
-  }
-
   async function loadReviews() {
-    allReviews = await loadAllRows('walkthrough_reviews', '*, profiles(full_name)');
+    const { data } = await supabase
+      .from('walkthrough_reviews')
+      .select('*, profiles(full_name)');
+    allReviews = data || [];
   }
 
   // Extract question titles from a walkthrough file
@@ -2599,9 +2383,6 @@
     const subjectFilter = document.getElementById('review-filter-subject').value;
     const statusFilter = document.getElementById('review-filter-status').value;
 
-    const exportAllBtn = document.getElementById('export-all-locked-btn');
-    if (exportAllBtn) exportAllBtn.style.display = (window.currentUserRole === 'admin') ? '' : 'none';
-
     // Show/hide year options based on which subject ranges apply:
     //   Science (combined): Y7-9 only
     //   Physics/Chemistry/Biology: Y10-12 only
@@ -2634,9 +2415,8 @@
     // Build review map: topicId -> { reviewerIds, ratings }
     const reviewMap = {};
     allReviews.forEach(r => {
-      if (!reviewMap[r.topic_id]) reviewMap[r.topic_id] = { reviewers: new Set(), reviewerNames: new Set(), ratings: [], questions: new Set() };
+      if (!reviewMap[r.topic_id]) reviewMap[r.topic_id] = { reviewers: new Set(), ratings: [], questions: new Set() };
       reviewMap[r.topic_id].reviewers.add(r.reviewer_id);
-      reviewMap[r.topic_id].reviewerNames.add(r.profiles?.full_name || 'Unknown');
       reviewMap[r.topic_id].ratings.push(r.rating);
       reviewMap[r.topic_id].questions.add(r.question_number);
     });
@@ -2746,7 +2526,7 @@
       const subj = t.subject || 'maths';
       const colourLookup = ALL_STRAND_COLOURS[subj] || null;
       const strandColour = colourLookup ? (colourLookup[t.strand] || '#1565C0') : '#888';
-      const subjIcons = { maths:'📐', science:'🔬', physics:'⚡', chemistry:'⚗️', biology:'🌿', crs:'✝️', government:'🏛️', english:'✏️', digitaltech:'💻', bridge_english:'🌉', bridge_maths:'🌉', bridge_science:'🌉', extension_english:'🚀', extension_maths:'🚀' };
+      const subjIcons = { maths:'📐', science:'🔬', physics:'⚡', chemistry:'⚗️', biology:'🌿', crs:'✝️', government:'🏛️', english:'✏️', digitaltech:'💻' };
       const subjIcon = subjIcons[subj] || '📚';
       const subjectLabel = subj !== 'maths'
         ? `<span style="color:${strandColour}">${subjIcon} ${t.strand || subj}</span>`
@@ -2763,12 +2543,8 @@
              dominant === 'needs_improvement' ? '<span class="badge badge-yellow">⚠ Needs work</span>' :
              '<span class="badge badge-red">✗ Not good</span>')
           : '<span class="badge badge-grey">Not reviewed</span>');
-      const updatedBadge = t.content_updated_at
-        ? `<span class="badge badge-green" title="Content updated ${new Date(t.content_updated_at).toLocaleString()}">✎ Updated ${new Date(t.content_updated_at).toLocaleDateString()}</span>`
-        : '';
       const actionButtons = isLocked
         ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="exportReviewComments(${t.id},'${escAttr(t.topic_name)}','${t.topic_code}','${subj}')">📋 Export Comments</button>
-           <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;color:#2e7d32;border-color:#a5d6a7" onclick="markTopicUpdated(${t.id})">✎ Mark Updated</button>
            <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;color:#888;border-color:#ccc" onclick="unlockTopicReview(${t.id})">🔓 Unlock</button>`
         : `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}','${subj}')">
              ${rm ? 'Add/Edit Review' : 'Review'}
@@ -2779,13 +2555,9 @@
           <div style="font-size:0.75rem;color:#888">${yearLabel} · ${subjectLabel}</div>
           ${isLocked ? `<div style="font-size:0.72rem;color:#aaa;font-family:monospace;margin-top:2px">${filePath}</div>` : ''}
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
-          <div style="display:flex;align-items:center;gap:8px">
-            ${statusBadge}
-            ${updatedBadge}
-            ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} · ${qCount} Qs</span>` : ''}
-          </div>
-          ${rm && rm.reviewerNames.size > 0 ? `<div style="font-size:0.7rem;color:#aaa">${[...rm.reviewerNames].join(', ')}</div>` : ''}
+        <div style="display:flex;align-items:center;gap:8px">
+          ${statusBadge}
+          ${reviewerCount > 0 ? `<span style="font-size:0.75rem;color:#888">${reviewerCount} reviewer${reviewerCount>1?'s':''} · ${qCount} Qs</span>` : ''}
         </div>
         ${actionButtons}
       </div>`;
@@ -2965,10 +2737,9 @@
     const { data: { session } } = await supabase.auth.getSession();
 
     // Upsert each question review
-    let upsertError = null;
     for (const q of currentReviewQuestions) {
       const comment = document.getElementById('comment-' + q.num)?.value.trim();
-      const { error } = await supabase.from('walkthrough_reviews').upsert({
+      await supabase.from('walkthrough_reviews').upsert({
         topic_id:        currentReviewTopicId,
         question_number: q.num,
         reviewer_id:     session.user.id,
@@ -2976,15 +2747,6 @@
         comment,
         reviewed_at:     new Date().toISOString()
       }, { onConflict: 'topic_id,question_number,reviewer_id' });
-      if (error) { upsertError = error; break; }
-    }
-
-    if (upsertError) {
-      btn.disabled = false;
-      btn.textContent = 'Submit Review';
-      msg.style.color = '#C0272D';
-      msg.textContent = `Save failed: ${upsertError.message}. Nothing was recorded — please try again or tell Chris.`;
-      return;
     }
 
     // Reload reviews
@@ -2993,13 +2755,9 @@
     // Auto-lock: once 2+ distinct staff have reviewed this topic, lock it for further review
     const reviewerIds = new Set(allReviews.filter(r => r.topic_id === currentReviewTopicId).map(r => r.reviewer_id));
     if (reviewerIds.size >= 2) {
-      const { error: lockError } = await supabase.from('topics').update({ locked: true }).eq('id', currentReviewTopicId);
-      if (lockError) {
-        console.error('Auto-lock failed:', lockError);
-      } else {
-        const t = allTopics.find(t => t.id === currentReviewTopicId);
-        if (t) t.locked = true;
-      }
+      await supabase.from('topics').update({ locked: true }).eq('id', currentReviewTopicId);
+      const t = allTopics.find(t => t.id === currentReviewTopicId);
+      if (t) t.locked = true;
     }
 
     window.renderReviewTab();
@@ -3056,41 +2814,6 @@
     if (navigator.clipboard) navigator.clipboard.writeText(ta.value).catch(()=>{});
   };
 
-  window.exportAllLockedReviews = function() {
-    const lockedTopics = allTopics.filter(t => !!t.locked);
-    if (lockedTopics.length === 0) {
-      alert('No locked walkthroughs to export.');
-      return;
-    }
-    const ratingLabel = { good: 'Good', needs_improvement: 'Needs work', not_good: 'Not good' };
-    const rows = [['Topic Code', 'Topic Name', 'Subject', 'Year Group', 'File Path', 'Reviewers', 'Question', 'Reviewer Name', 'Rating', 'Comment']];
-    lockedTopics.forEach(t => {
-      const subj = t.subject || 'maths';
-      const reviews = allReviews.filter(r => r.topic_id === t.id);
-      const filePath = getWalkthroughFile(subj, t.topic_code) || '(file path unknown)';
-      const reviewerCount = new Set(reviews.map(r => r.reviewer_id)).size;
-      if (reviews.length === 0) {
-        rows.push([t.topic_code, t.topic_name, subj, t.year_group, filePath, reviewerCount, '', '', '', '']);
-        return;
-      }
-      reviews
-        .slice()
-        .sort((a, b) => Number(a.question_number) - Number(b.question_number))
-        .forEach(r => {
-          rows.push([
-            t.topic_code, t.topic_name, subj, t.year_group, filePath, reviewerCount,
-            r.question_number, r.profiles?.full_name || 'Reviewer',
-            ratingLabel[r.rating] || r.rating, r.comment || ''
-          ]);
-        });
-    });
-    const csv = rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g,'""') + '"').join(',')).join('\n');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-    a.download = 'abc_locked_reviews_' + new Date().toISOString().slice(0,10) + '.csv';
-    a.click();
-  };
-
   window.unlockTopicReview = async function(topicId) {
     if (!confirm('Unlock this walkthrough? This clears the previous reviews and resets the reviewer count to 0 — do this after uploading an improved version.')) return;
     await supabase.from('walkthrough_reviews').delete().eq('topic_id', topicId);
@@ -3098,15 +2821,6 @@
     const t = allTopics.find(t => t.id === topicId);
     if (t) t.locked = false;
     allReviews = allReviews.filter(r => r.topic_id !== topicId);
-    window.renderReviewTab();
-  };
-
-  window.markTopicUpdated = async function(topicId) {
-    const now = new Date().toISOString();
-    const { error } = await supabase.from('topics').update({ content_updated_at: now }).eq('id', topicId);
-    if (error) { alert('Could not mark as updated: ' + error.message); return; }
-    const t = allTopics.find(t => t.id === topicId);
-    if (t) t.content_updated_at = now;
     window.renderReviewTab();
   };
 
@@ -3119,14 +2833,6 @@
       .select('*')
       .order('full_name');
     allUsersWithEmail = data || [];
-
-    // user_emails view doesn't carry the `active` column — fetch and merge from profiles
-    const { data: activeRows } = await supabase
-      .from('profiles')
-      .select('id, active');
-    const activeMap = {};
-    (activeRows || []).forEach(r => { activeMap[r.id] = r.active !== false; }); // default true if null
-    allUsersWithEmail.forEach(u => { u.active = activeMap.hasOwnProperty(u.id) ? activeMap[u.id] : true; });
   }
 
   window.renderUsersTab = function() {
@@ -3136,17 +2842,13 @@
 
     const streamFilter = document.getElementById('users-filter-stream') ? document.getElementById('users-filter-stream').value : '';
     const extMathsFilter = document.getElementById('users-filter-extmaths') ? document.getElementById('users-filter-extmaths').value : '';
-    const statusFilterEl = document.getElementById('users-filter-status');
-    const statusFilter = statusFilterEl ? statusFilterEl.value : 'active';
     const filtered = allUsersWithEmail.filter(u => {
       const matchRole   = !roleFilter   || u.role === roleFilter;
       const matchYear   = !yearFilter   || String(u.year_group) === yearFilter;
       const matchSearch = !searchFilter || u.full_name.toLowerCase().includes(searchFilter);
       const matchStream = !streamFilter || (u.stream || 'science') === streamFilter;
       const matchExtMaths = !extMathsFilter || (allStudents.find(s=>s.id===u.id)||{}).takes_extended_maths === true;
-      const isActive = u.active !== false;
-      const matchStatus = statusFilter === 'all' || (statusFilter === 'archived' ? !isActive : isActive);
-      return matchRole && matchYear && matchSearch && matchStream && matchExtMaths && matchStatus;
+      return matchRole && matchYear && matchSearch && matchStream && matchExtMaths;
     });
 
     document.getElementById('users-count').textContent = `— ${filtered.length} user${filtered.length !== 1 ? 's' : ''}`;
@@ -3162,11 +2864,8 @@
       const lastSignIn = u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString('en-GB') : 'Never';
       const extMaths = (allStudents.find(s=>s.id===u.id)||{}).takes_extended_maths;
       const extMathsLabel = Number(u.year_group) === 12 ? 'Further Maths' : 'Add Maths';
-      const isActive = u.active !== false;
-      const rowStyle = isActive ? '' : 'opacity:0.5;background:#FAFAFA';
-      const nameSafe = u.full_name.replace(/'/g,"\\'");
-      return `<tr style="${rowStyle}">
-        <td><strong>${u.full_name}</strong>${!isActive ? ' <span style="font-size:0.68rem;padding:1px 6px;border-radius:8px;font-weight:700;background:#EEEEEE;color:#888">ARCHIVED</span>' : ''}</td>
+      return `<tr>
+        <td><strong>${u.full_name}</strong></td>
         <td style="font-size:0.82rem;color:#666">${u.email || '—'}</td>
         <td><span class="badge ${roleBadge}">${u.role}</span></td>
         <td>${u.year_group ? 'Year ' + u.year_group : '—'}${extMaths ? `<br><span style="font-size:0.72rem;padding:1px 6px;border-radius:8px;font-weight:600;background:#FFF3E0;color:#C8922A">➕ ${extMathsLabel}</span>` : ''}</td>
@@ -3175,48 +2874,24 @@
         <td style="font-size:0.82rem;color:#888">${lastSignIn}</td>
         <td>
           ${u.role === 'student' ? `<button class="btn-link" onclick="openStudentModal('${u.id}')">View</button>` : ''}
-          <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${nameSafe}','${u.role}','${u.year_group||''}','${u.form_class||''}','${u.stream||'science'}',${(allStudents.find(s=>s.id===u.id)||{}).simplified_view===true},${(allStudents.find(s=>s.id===u.id)||{}).summer_only===true},${extMaths===true})">Edit</button>
-          <button class="btn-link" style="color:#1565C0" onclick="resetUserPassword('${u.id}','${nameSafe}')">Reset Password</button>
-          ${isActive
-            ? `<button class="btn-link" style="color:#C0272D" onclick="archiveUser('${u.id}','${nameSafe}')">Archive</button>`
-            : `<button class="btn-link" style="color:#2E7D32" onclick="restoreUser('${u.id}','${nameSafe}')">Restore</button>`}
+          <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${u.full_name.replace(/'/g,"\\'")}','${u.role}','${u.year_group||''}','${u.form_class||''}','${u.stream||'science'}',${(allStudents.find(s=>s.id===u.id)||{}).simplified_view===true},${(allStudents.find(s=>s.id===u.id)||{}).summer_only===true},${extMaths===true})">Edit</button>
         </td>
       </tr>`;
     }).join('');
-  };
-
-  window.archiveUser = async function(id, name) {
-    if (!confirm(`Archive ${name}? This hides them from the Active list but keeps all test/progress history. You can restore them any time.`)) return;
-    const { error } = await supabase.from('profiles').update({ active: false }).eq('id', id);
-    if (error) { alert('Archive failed: ' + error.message); return; }
-    await loadUsersWithEmail();
-    window.renderUsersTab();
-  };
-
-  window.restoreUser = async function(id, name) {
-    const { error } = await supabase.from('profiles').update({ active: true }).eq('id', id);
-    if (error) { alert('Restore failed: ' + error.message); return; }
-    await loadUsersWithEmail();
-    window.renderUsersTab();
   };
 
   window.exportUsers = function() {
     const roleFilter   = document.getElementById('users-filter-role').value;
     const yearFilter   = document.getElementById('users-filter-year').value;
     const searchFilter = document.getElementById('users-search').value.toLowerCase();
-    const statusFilterEl = document.getElementById('users-filter-status');
-    const statusFilter = statusFilterEl ? statusFilterEl.value : 'active';
 
     const filtered = allUsersWithEmail.filter(u => {
-      const isActive = u.active !== false;
-      const matchStatus = statusFilter === 'all' || (statusFilter === 'archived' ? !isActive : isActive);
       return (!roleFilter   || u.role === roleFilter) &&
              (!yearFilter   || String(u.year_group) === yearFilter) &&
-             (!searchFilter || u.full_name.toLowerCase().includes(searchFilter)) &&
-             matchStatus;
+             (!searchFilter || u.full_name.toLowerCase().includes(searchFilter));
     });
 
-    const rows = [['Full Name', 'Email', 'Role', 'Year Group', 'Form Class', 'Last Sign In', 'Status']];
+    const rows = [['Full Name', 'Email', 'Role', 'Year Group', 'Form Class', 'Last Sign In']];
     filtered.forEach(u => {
       rows.push([
         u.full_name,
@@ -3224,8 +2899,7 @@
         u.role,
         u.year_group || '',
         u.form_class || '',
-        u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString('en-GB') : 'Never',
-        u.active !== false ? 'Active' : 'Archived'
+        u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString('en-GB') : 'Never'
       ]);
     });
 
@@ -3941,55 +3615,6 @@
     document.getElementById('cu-password').value = 'ABC2026';
   };
 
-  window.openChangePwd = function() {
-    document.getElementById('cp-new').value     = '';
-    document.getElementById('cp-confirm').value = '';
-    document.getElementById('cp-msg').className = 'cp-msg';
-    document.getElementById('cp-msg').textContent = '';
-    document.getElementById('cp-overlay').classList.add('open');
-  };
-
-  window.closeChangePwd = function() {
-    document.getElementById('cp-overlay').classList.remove('open');
-  };
-
-  window.submitChangePwd = async function() {
-    const newPwd     = document.getElementById('cp-new').value;
-    const confirmPwd = document.getElementById('cp-confirm').value;
-    const msg        = document.getElementById('cp-msg');
-    const btn        = document.getElementById('cp-submit-btn');
-
-    if (newPwd.length < 6) {
-      msg.className = 'cp-msg error';
-      msg.textContent = 'Password must be at least 6 characters.';
-      return;
-    }
-    if (newPwd !== confirmPwd) {
-      msg.className = 'cp-msg error';
-      msg.textContent = 'Passwords do not match.';
-      return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = 'Updating…';
-
-    const { error } = await supabase.auth.updateUser({ password: newPwd });
-
-    if (error) {
-      msg.className = 'cp-msg error';
-      msg.textContent = 'Error: ' + error.message;
-      btn.disabled = false;
-      btn.textContent = 'Update Password';
-      return;
-    }
-
-    msg.className = 'cp-msg success';
-    msg.textContent = '✓ Password updated successfully!';
-    btn.disabled = false;
-    btn.textContent = 'Update Password';
-    setTimeout(closeChangePwd, 2000);
-  };
-
   window.signOut = async function() {
     await supabase.auth.signOut();
     window.location.href = 'login.html';
@@ -3997,21 +3622,10 @@
 
   // ── Render topics tab ──
   window.renderTopicsTab = function() {
-    const subject = document.getElementById('topics-filter-subject').value;
-    const yearFilterEl = document.getElementById('topics-filter-year');
-
-    // Deep Dive subjects render as a chain/ladder, not a flat card grid, and aren't year-filtered.
-    if (subject.startsWith('deepdive')) {
-      if (yearFilterEl) yearFilterEl.style.display = 'none';
-      renderDeepDiveLadder(subject, document.getElementById('topics-grid'));
-      return;
-    }
-    if (yearFilterEl) yearFilterEl.style.display = '';
-
     const yr      = parseInt(document.getElementById('topics-filter-year').value) || 13;
+    const subject = document.getElementById('topics-filter-subject').value;
     const filtered = allTopics.filter(t => t.year_group === yr && (t.subject || 'maths') === subject);
     const grid = document.getElementById('topics-grid');
-    grid.style.display = 'grid';
 
     // Hide Add Maths / Further Maths when any non-Maths subject is selected
     const addMathsOpt = document.querySelector('#topics-filter-year option[value="13"]');
@@ -4067,48 +3681,6 @@
       return strandHeader + cards;
     }).join('');
   };
-  // Renders one or more teaching chains as a vertical ladder: connected boxes,
-  // one per stage, with staff-facing completion/started counts per chain.
-  // Currently each chain maps to a single deep-dive file with internal stages,
-  // so "completion" here reflects the topic-level walkthrough_progress row.
-  window.renderDeepDiveLadder = function(subject, container) {
-    const chains = DEEPDIVE_CHAINS[subject] || [];
-    if (chains.length === 0) {
-      container.innerHTML = '<div style="color:#aaa;padding:32px;font-style:italic">No deep dive chains configured for this subject yet.</div>';
-      return;
-    }
-    container.style.display = 'block';
-    container.innerHTML = chains.map(chain => {
-      const rungs = chain.topicCodes.map((code, i) => {
-        const topic = allTopics.find(t => t.topic_code === code);
-        const file = getWalkthroughFile(subject, code);
-        const completions = topic ? allProgress.filter(p => p.topic_id === topic.id && p.status === 'completed').length : 0;
-        const started = topic ? allProgress.filter(p => p.topic_id === topic.id && p.status === 'started').length : 0;
-        const label = topic ? topic.topic_name : code;
-        const missing = !topic || file === '#';
-        return `
-          <div style="display:flex;align-items:stretch;gap:0;">
-            <div style="display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0;">
-              <div style="width:24px;height:24px;border-radius:50%;background:${missing ? '#eee' : '#7A1418'};color:${missing ? '#aaa' : '#fff'};display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;">${i + 1}</div>
-              ${i < chain.topicCodes.length - 1 ? '<div style="width:2px;flex:1;background:#e0c9c9;min-height:18px;"></div>' : ''}
-            </div>
-            <a href="${missing ? '#' : file}" ${missing ? 'onclick="return false;"' : 'target="_blank"'} style="
-              flex:1;display:block;background:white;border:1.5px solid ${missing ? '#eee' : '#e8d9ce'};border-radius:6px;
-              padding:12px 16px;margin:0 0 10px 12px;text-decoration:none;color:#333;
-            ">
-              <div style="font-size:0.88rem;font-weight:700;color:#333;">${label}</div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
-                <span style="font-size:0.72rem;font-weight:700;background:#e8f5e9;color:#2e7d32;padding:2px 7px;border-radius:99px;">✓ ${completions} completed</span>
-                ${started > 0 ? `<span style="font-size:0.72rem;font-weight:700;background:#fffde7;color:#f57f17;padding:2px 7px;border-radius:99px;">▶ ${started} started</span>` : ''}
-                ${missing ? `<span style="font-size:0.72rem;font-weight:700;background:#f5f5f5;color:#aaa;padding:2px 7px;border-radius:99px;">🔒 Coming soon</span>` : ''}
-              </div>
-            </a>
-          </div>`;
-      }).join('');
-      return `<div style="margin-bottom:24px;"><div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#7A1418;padding:4px 0 10px;">${chain.chainName}</div>${rungs}</div>`;
-    }).join('');
-  };
-
   window.switchSubject = function(subject) {
     staffSubject = subject;
     const isMaths  = subject === 'maths';
