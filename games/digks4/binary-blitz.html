@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  window._lc=_lc;
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../../login.html';
+</script>
+<script src="../js/abc_game_widget.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Binary Blitz (8-bit) — ABC Learning Portal</title>
+<style>
+:root{--red:#C0272D;--dark:#8f1c21;--cream:#FBF6F0;--ink:#241412;--line:#EBD8D5;--gold:#C8922A;--good:#2e7d32;--goodbg:#e8f5e9;--bad:#a01f24;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100vh;}
+header{background:var(--red);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+header h1{font-size:16px;font-weight:700;}
+.stat{font-size:12px;font-weight:700;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:5px 10px;}
+.wrap{max-width:560px;margin:0 auto;padding:22px 14px 60px;}
+.intro,.results{background:#fff;border:1px solid var(--line);border-radius:8px;padding:28px 24px;text-align:center;}
+.intro h2,.results h2{font-family:Georgia,serif;font-size:22px;margin-bottom:10px;}
+.intro p{font-size:14px;color:#555;line-height:1.6;margin-bottom:20px;}
+.start-btn{background:var(--red);color:#fff;border:none;border-radius:5px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+.start-btn:hover{background:var(--dark);}
+.panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:20px;text-align:center;}
+.round-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;}
+.qtext{font-size:19px;font-weight:700;line-height:1.5;margin:6px 0 20px;font-family:Georgia,serif;}
+.qtext code, .code-block{display:block;background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:12px;font-family:'Courier New',monospace;font-size:14px;text-align:left;white-space:pre;line-height:1.6;}
+.code-line{cursor:pointer;padding:2px 4px;border-radius:3px;}
+.code-line:hover{background:#FFF3E0;}
+.code-line.correct{background:var(--goodbg);color:var(--good);font-weight:700;}
+.code-line.wrong{background:#fde8e8;color:var(--bad);}
+.opts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.opt-btn{background:#fff;border:2px solid var(--line);border-radius:7px;padding:12px 18px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;}
+.opt-btn:hover{border-color:var(--gold);}
+.opt-btn.correct{border-color:var(--good);background:var(--goodbg);color:var(--good);}
+.opt-btn.wrong{border-color:var(--bad);background:#fde8e8;color:var(--bad);}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.bin-btn{border:2px solid var(--line);border-radius:8px;padding:14px 10px;font-size:14px;font-weight:700;cursor:pointer;background:#fff;font-family:inherit;}
+.bin-btn:hover{border-color:var(--gold);}
+.bin-btn.correct{border-color:var(--good);background:var(--goodbg);color:var(--good);}
+.bin-btn.wrong{border-color:var(--bad);background:#fde8e8;color:var(--bad);}
+.built-box{background:var(--cream);border:2px dashed var(--line);border-radius:8px;min-height:56px;padding:10px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;}
+.built-word{background:#fff;border:2px solid var(--good);color:var(--good);border-radius:6px;padding:6px 10px;font-size:14px;font-weight:700;cursor:pointer;}
+.pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px;}
+.pool-word{background:#fff;border:2px solid var(--line);border-radius:6px;padding:8px 12px;font-size:14px;font-weight:700;cursor:pointer;}
+.pool-word:hover{border-color:var(--gold);}
+.check-btn{background:var(--red);color:#fff;border:none;border-radius:6px;padding:12px 24px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+.check-btn:hover{background:var(--dark);}
+.check-btn:disabled{opacity:.4;cursor:default;}
+#answerInput{font-size:20px;font-weight:700;text-align:center;padding:10px;border:2px solid var(--line);border-radius:6px;font-family:inherit;width:180px;}
+#answerInput:focus{outline:none;border-color:var(--gold);}
+.feedback{font-size:13.5px;font-weight:600;margin-top:12px;min-height:18px;}
+.feedback.good{color:var(--good);}
+.feedback.bad{color:var(--bad);}
+.results .time{font-size:40px;font-weight:800;color:var(--red);margin:10px 0 4px;}
+.results .sub{font-size:13px;color:#888;margin-bottom:18px;}
+.lb-box{background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:20px;text-align:left;}
+.lb-box h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:8px;font-weight:700;}
+.abcg-lb-loading,.abcg-lb-empty{color:#999;font-size:12.5px;}
+.abcg-lb-head,.abcg-lb-row{display:grid;grid-template-columns:24px 1fr 60px 60px;gap:6px;padding:3px 0;font-size:12.5px;}
+.abcg-lb-head{color:#999;font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.05em;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:4px;}
+.abcg-lb-row{color:var(--ink);}
+.abcg-lb-me{font-weight:700;color:var(--red);}
+.abcg-lb-rank{color:var(--gold);font-weight:700;}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+<header>
+  <a href="../games-list.html" class="back">&larr; All Games</a>
+  <h1>Binary Blitz</h1>
+  <div class="stat" id="timerStat">0:00</div>
+</header>
+<div class="wrap">
+
+  <div class="intro" id="intro">
+    <h2>Convert to binary (8-bit)</h2>
+    <p>Tap the correct 8-bit binary form of the decimal number shown. 10 rounds, no skipping wrong taps.</p>
+    <button class="start-btn" id="startBtn">Start</button>
+  </div>
+
+  <div class="panel hidden" id="game">
+    <div class="round-hdr"><span id="roundLbl">Round 1 of 10</span><span id="scoreLbl">0 correct</span></div>
+    <div class="qtext">What is <span id="decDisplay" style="color:var(--red)"></span> in binary?</div>
+    <div class="opts" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="results hidden" id="results">
+    <h2>All rounds complete!</h2>
+    <div class="time" id="finalTime">0:00</div>
+    <div class="sub">time taken</div>
+    <div class="lb-box"><h4>Leaderboard</h4><div id="lbList"></div></div>
+    <button class="start-btn" id="againBtn">Play Again</button>
+    <div style="margin-top:10px;"><a href="../games-list.html" style="font-size:12.5px;color:#888;">All games &rarr;</a></div>
+  </div>
+
+</div>
+<script>
+var GAME_CODE='binary-blitz';
+var TOTAL_ROUNDS=10;
+
+var BITS = 8;
+var MAXVAL = 255;
+function rnd(n){return Math.floor(Math.random()*n);}
+function toBin(n){var s=n.toString(2);while(s.length<BITS)s='0'+s;return s;}
+function genRound(){
+  var n=rnd(MAXVAL+1);
+  var correct=toBin(n);
+  var opts=[correct];
+  var guard=0;
+  while(opts.length<4 && guard<50){
+    guard++;
+    var d=rnd(MAXVAL+1);
+    var b=toBin(d);
+    if(opts.indexOf(b)===-1) opts.push(b);
+  }
+  for(var i=opts.length-1;i>0;i--){var j=rnd(i+1);var t=opts[i];opts[i]=opts[j];opts[j]=t;}
+  return {n:n,correct:correct,opts:opts};
+}
+var el=function(id){return document.getElementById(id);};
+var round=0,correctCount=0,current=null,startTime=null,timerInt=null;
+function nextRound(){
+  current=genRound();
+  el('roundLbl').textContent='Round '+(round+1)+' of '+TOTAL_ROUNDS;
+  el('decDisplay').textContent=current.n;
+  el('feedback').textContent='';
+  var box=el('opts');box.innerHTML='';
+  current.opts.forEach(function(b){
+    var btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.textContent=b;
+    btn.addEventListener('click',function(){onOptionClick(b,btn,box);});
+    box.appendChild(btn);
+  });
+}
+function onOptionClick(val, btnEl, box){
+  if(box.dataset.locked==='1')return;
+  if(val===current.correct){
+    box.dataset.locked='1';
+    btnEl.classList.add('correct');
+    el('feedback').className='feedback good';
+    el('feedback').textContent='Correct!';
+    correctCount++;
+    el('scoreLbl').textContent=correctCount+' correct';
+    round++;
+    if(round>=TOTAL_ROUNDS){ setTimeout(finishGame,700); }
+    else{ setTimeout(function(){box.dataset.locked='';nextRound();},700); }
+  }else{
+    btnEl.classList.add('wrong');
+    el('feedback').className='feedback bad';
+    el('feedback').textContent='Not quite — try again.';
+  }
+}
+function startGame(){
+  round=0;correctCount=0;
+  el('intro').classList.add('hidden');el('results').classList.add('hidden');
+  el('game').classList.remove('hidden');
+  el('scoreLbl').textContent='0 correct';
+  nextRound();
+  startTime=Date.now();
+  clearInterval(timerInt);
+  timerInt=setInterval(function(){
+    var s=Math.floor((Date.now()-startTime)/1000);
+    el('timerStat').textContent=Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);
+  },500);
+}
+function finishGame(){
+  clearInterval(timerInt);
+  var secs=Math.floor((Date.now()-startTime)/1000);
+  var mm=Math.floor(secs/60),ss=secs%60;
+  el('game').classList.add('hidden');
+  el('results').classList.remove('hidden');
+  el('finalTime').textContent=mm+':'+(ss<10?'0':'')+ss;
+  var score=Math.max(0,1500-secs*3);
+  if(window.ABCGame){
+    window.ABCGame.submitScore(GAME_CODE,score,secs).then(function(){
+      window.ABCGame.renderLeaderboard(GAME_CODE,el('lbList'),{limit:10});
+    });
+  }
+}
+el('startBtn').addEventListener('click',startGame);
+el('againBtn').addEventListener('click',startGame);
+
+</script>
+</body>
+</html>
