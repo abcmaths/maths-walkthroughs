@@ -58,18 +58,22 @@ header h1{font-size:16px;font-weight:700;}
 <div class="wrap">
 
   <div class="intro" id="intro">
-    <h2>Solid, liquid or gas?</h2>
-    <p>Sort each substance or property into the correct state of matter. Tap the correct bin as fast as you can. 12 rounds, no skipping wrong taps.</p>
+    <h2>Name the change</h2>
+    <p>A scenario appears — is it melting, freezing, evaporating, condensing, or subliming? Watch out — sometimes nothing is actually changing state at all. Tap the correct answer as fast as you can. 12 rounds, no skipping wrong taps.</p>
     <button class="start-btn" id="startBtn">Start</button>
   </div>
 
   <div class="panel hidden" id="game">
     <div class="round-hdr"><span id="roundLbl">Round 1 of 12</span><span id="scoreLbl">0 correct</span></div>
-    <div class="word-card" id="wordCard"></div>
-    <div class="bins" id="bins" style="grid-template-columns:1fr 1fr 1fr">
-      <button class="bin-btn" data-cls="solid">Solid</button>
-      <button class="bin-btn" data-cls="liquid">Liquid</button>
-      <button class="bin-btn" data-cls="gas">Gas</button>
+    <div id="iconBox" style="margin-bottom:10px;"></div>
+    <div class="word-card" id="wordCard" style="font-size:18px;line-height:1.4;font-family:Georgia,serif;min-height:70px;display:flex;align-items:center;justify-content:center;"></div>
+    <div class="bins" id="bins" style="grid-template-columns:1fr 1fr">
+      <button class="bin-btn" data-cls="melting">Melting</button>
+      <button class="bin-btn" data-cls="freezing">Freezing</button>
+      <button class="bin-btn" data-cls="evaporating">Evaporating</button>
+      <button class="bin-btn" data-cls="condensing">Condensing</button>
+      <button class="bin-btn" data-cls="subliming" style="grid-column:1/2">Subliming</button>
+      <button class="bin-btn" data-cls="none" style="grid-column:2/3">No Change</button>
     </div>
     <div class="feedback" id="feedback"></div>
   </div>
@@ -88,29 +92,76 @@ header h1{font-size:16px;font-weight:700;}
 var GAME_CODE='states-of-matter-sort';
 var TOTAL_ROUNDS=12;
 
+// [scenario text, correct class, icon key]
 var BANK=[
-  ['Ice cube','solid'],['Wooden table','solid'],['Rock','solid'],['Glass bottle','solid'],['Iron nail','solid'],
-  ['Ice cream (frozen)','solid'],['Brick','solid'],['Diamond','solid'],['Chalk','solid'],['Plastic ruler','solid'],
-  ['Water','liquid'],['Milk','liquid'],['Cooking oil','liquid'],['Orange juice','liquid'],['Melted chocolate','liquid'],
-  ['Petrol','liquid'],['Vinegar','liquid'],['Liquid soap','liquid'],['Mercury','liquid'],['Rain','liquid'],
-  ['Oxygen','gas'],['Steam','gas'],['Carbon dioxide','gas'],['Helium (in a balloon)','gas'],['Air','gas'],
-  ['Water vapour','gas'],['Nitrogen','gas'],['Smoke','gas'],['Hydrogen','gas'],['Natural gas','gas'],
-  ['Has a fixed shape and volume','solid'],['Particles vibrate in fixed positions','solid'],
-  ['Takes the shape of its container but has fixed volume','liquid'],['Particles can slide past each other','liquid'],
-  ['Has no fixed shape or volume','gas'],['Particles move freely and quickly','gas'],
-  ['Particles are tightly packed together','solid'],['Can be compressed easily','gas'],
-  ['Cannot be compressed','solid'],['Flows and can be poured','liquid']
+  ['An ice cube left on the kitchen counter slowly turns into a puddle.','melting','iceMelt'],
+  ['A chocolate bar left in a hot car goes soft and runny.','melting','sunMelt'],
+  ['Molten lava cools and hardens into solid rock.','freezing','volcano'],
+  ['Water in an ice cube tray turns solid overnight in the freezer.','freezing','iceTray'],
+  ['A puddle disappears on a warm, sunny day.','evaporating','puddleSun'],
+  ['Wet washing on a line dries in the sun.','evaporating','washingLine'],
+  ['Sweat on your skin dries as you cool down after running.','evaporating','sweatDry'],
+  ['Mist forms on a cold bathroom mirror after a hot shower.','condensing','mirror'],
+  ['Water droplets form on the outside of a cold glass of juice.','condensing','coldGlass'],
+  ['Clouds form high in the sky as water vapour cools.','condensing','cloud'],
+  ['Solid carbon dioxide (dry ice) turns straight into a smoky gas.','subliming','dryIce'],
+  ['Mothballs slowly shrink and disappear over several weeks, without any liquid forming.','subliming','mothball'],
+  ['Frost on a freezer wall disappears without ever becoming liquid.','subliming','frost'],
+  ['A metal spoon left in a hot pan of soup gets too hot to hold, but stays solid.','none','spoonPot'],
+  ['Steam rising from a boiling kettle turns into tiny water droplets in the cold air.','condensing','kettle'],
+  ['Butter left out of the fridge on a warm day slowly turns to liquid.','melting','butter'],
+  ['Liquid nitrogen is used to instantly freeze a piece of fruit solid.','freezing','liquidN2'],
+  ['A puddle of nail varnish remover left open in a room slowly vanishes.','evaporating','bottleFumes'],
+  ['Snow on a mountain top turns to water as spring arrives.','melting','mountain'],
+  ['A block of solid air freshener gradually gets smaller in a room without leaving any residue.','subliming','airFreshener']
 ];
+
+// Simple flat SVG icons, 70x70 viewBox, no external images
+var ICONS={
+  iceMelt:'<rect x="24" y="18" width="22" height="22" rx="3" fill="#AED6F1" stroke="#1565C0" stroke-width="2"/><path d="M28 42 q3 8 0 14 M35 42 q3 10 0 16 M42 42 q3 8 0 14" stroke="#5DADE2" stroke-width="2" fill="none" stroke-linecap="round"/>',
+  sunMelt:'<circle cx="35" cy="20" r="10" fill="#F5B041"/><path d="M35 4v6M35 30v6M19 20h6M45 20h6M23 8l4 4M47 28l4 4M23 32l4-4M47 12l4-4" stroke="#F5B041" stroke-width="2"/><path d="M20 50 q15 8 30 0 q-2 8-15 8 t-15-8" fill="#D6A15C"/>',
+  volcano:'<path d="M15 55 L35 15 L55 55 Z" fill="#8D6E63"/><circle cx="35" cy="15" r="5" fill="#E67E22"/><path d="M28 55 q7 -6 14 0" fill="#E67E22"/>',
+  iceTray:'<rect x="12" y="24" width="46" height="22" rx="3" fill="#CFD8DC" stroke="#90A4AE" stroke-width="2"/><rect x="18" y="30" width="10" height="10" fill="#AED6F1"/><rect x="30" y="30" width="10" height="10" fill="#AED6F1"/><rect x="42" y="30" width="10" height="10" fill="#AED6F1"/>',
+  puddleSun:'<circle cx="35" cy="16" r="9" fill="#F5B041"/><ellipse cx="35" cy="52" rx="20" ry="7" fill="#AED6F1" opacity="0.7"/><path d="M20 40 q15 -4 30 0" stroke="#F5B041" stroke-width="2" fill="none" stroke-dasharray="3,3"/>',
+  washingLine:'<line x1="10" y1="18" x2="60" y2="18" stroke="#8D6E63" stroke-width="2"/><path d="M25 18 v14 q0 8 8 8 q8 0 8 -8 v-14" fill="#5DADE2"/><circle cx="52" cy="14" r="8" fill="#F5B041"/>',
+  sweatDry:'<circle cx="35" cy="30" r="16" fill="none" stroke="#5DADE2" stroke-width="2"/><path d="M35 14 q4 8 0 14 q-4 -6 0 -14" fill="#5DADE2"/><path d="M20 50 q15 6 30 0" stroke="#F5B041" stroke-width="2" fill="none"/>',
+  mirror:'<rect x="15" y="10" width="40" height="46" rx="4" fill="#EAF2F8" stroke="#AAB7B8" stroke-width="2"/><circle cx="27" cy="24" r="2" fill="#D5DBDB"/><circle cx="40" cy="20" r="2" fill="#D5DBDB"/><circle cx="46" cy="33" r="2" fill="#D5DBDB"/><circle cx="22" cy="38" r="2" fill="#D5DBDB"/><circle cx="35" cy="45" r="2" fill="#D5DBDB"/>',
+  coldGlass:'<path d="M22 12 h26 l-4 42 h-18 Z" fill="#D6EAF8" stroke="#5DADE2" stroke-width="2"/><circle cx="20" cy="24" r="2" fill="#5DADE2"/><circle cx="50" cy="30" r="2" fill="#5DADE2"/><circle cx="18" cy="38" r="2" fill="#5DADE2"/><circle cx="52" cy="18" r="2" fill="#5DADE2"/>',
+  cloud:'<ellipse cx="30" cy="35" rx="14" ry="10" fill="#D6DBDF"/><ellipse cx="44" cy="30" rx="12" ry="9" fill="#D6DBDF"/><ellipse cx="20" cy="30" rx="10" ry="8" fill="#D6DBDF"/>',
+  dryIce:'<rect x="22" y="30" width="26" height="18" rx="2" fill="#EAF2F8" stroke="#AAB7B8" stroke-width="2"/><path d="M28 30 q-4 -10 0 -20 M35 30 q2 -12 -2 -22 M42 30 q4 -10 0 -20" stroke="#D5DBDB" stroke-width="2" fill="none" stroke-linecap="round"/>',
+  mothball:'<rect x="18" y="14" width="34" height="40" rx="3" fill="none" stroke="#8D6E63" stroke-width="2"/><circle cx="35" cy="34" r="7" fill="#F4F6F6" stroke="#AAB7B8" stroke-width="1.5"/>',
+  frost:'<rect x="12" y="12" width="46" height="46" rx="3" fill="#EAF2F8" stroke="#AAB7B8" stroke-width="2"/><path d="M35 20v10M30 25h10M25 40l6 -6M45 40l-6 -6M27 45h16" stroke="#5DADE2" stroke-width="1.5"/>',
+  spoonPot:'<ellipse cx="35" cy="48" rx="22" ry="8" fill="#B0BEC5"/><rect x="14" y="30" width="42" height="18" rx="3" fill="#90A4AE"/><rect x="33" y="8" width="4" height="30" rx="2" fill="#78909C"/><ellipse cx="35" cy="8" rx="6" ry="4" fill="#78909C"/>',
+  kettle:'<path d="M18 40 q0 -18 17 -18 q17 0 17 18 v6 h-34 Z" fill="#B0BEC5"/><rect x="30" y="46" width="10" height="6" fill="#90A4AE"/><path d="M40 20 q6 -6 4 -14 M44 22 q8 -4 8 -14" stroke="#D6DBDF" stroke-width="2" fill="none" stroke-linecap="round"/>',
+  butter:'<rect x="14" y="26" width="42" height="18" rx="2" fill="#F7DC6F"/><path d="M18 44 q4 6 2 10 M30 44 q4 8 1 12 M44 44 q4 6 2 10" stroke="#F5B041" stroke-width="2" fill="none" stroke-linecap="round"/>',
+  liquidN2:'<ellipse cx="35" cy="45" rx="10" ry="9" fill="#F1948A"/><path d="M35 8 q2 6 -2 10 M28 12 q4 4 0 10 M42 12 q-4 4 0 10" stroke="#AED6F1" stroke-width="2" fill="none" stroke-linecap="round"/>',
+  bottleFumes:'<path d="M28 14 h14 v8 l6 8 v22 h-26 v-22 l6 -8 Z" fill="#D6EAF8" stroke="#5DADE2" stroke-width="2"/><path d="M30 10 q3 -4 0 -8 M40 10 q3 -4 0 -8" stroke="#AAB7B8" stroke-width="1.5" fill="none" stroke-linecap="round"/>',
+  mountain:'<path d="M8 55 L28 20 L38 34 L48 15 L62 55 Z" fill="#95A5A6"/><path d="M28 20 L33 28 L23 28 Z" fill="#EAF2F8"/><path d="M48 15 L53 24 L43 24 Z" fill="#EAF2F8"/>',
+  airFreshener:'<rect x="24" y="20" width="22" height="30" rx="3" fill="#A9DFBF"/><path d="M50 24 q6 0 6 6 M50 34 q8 0 8 8 M50 42 q5 0 5 5" stroke="#82C99A" stroke-width="1.5" fill="none" stroke-linecap="round"/>'
+};
+
+function iconSvg(key){
+  return '<svg width="70" height="70" viewBox="0 0 70 70">'+(ICONS[key]||'')+'</svg>';
+}
 
 function rnd(n){return Math.floor(Math.random()*n);}
 
 var el=function(id){return document.getElementById(id);};
-var round=0,correctCount=0,current=null,startTime=null,timerInt=null;
+var round=0,correctCount=0,current=null,startTime=null,timerInt=null,usedIdx=[];
+
+function pickItem(){
+  var pool=BANK.map(function(b,i){return i;}).filter(function(i){return usedIdx.indexOf(i)===-1;});
+  if(pool.length===0){usedIdx=[];pool=BANK.map(function(b,i){return i;});}
+  var idx=pool[rnd(pool.length)];
+  usedIdx.push(idx);
+  return BANK[idx];
+}
 
 function nextRound(){
-  var item=BANK[rnd(BANK.length)];
-  current={word:item[0],cls:item[1]};
+  var item=pickItem();
+  current={word:item[0],cls:item[1],icon:item[2]};
   el('roundLbl').textContent='Round '+(round+1)+' of '+TOTAL_ROUNDS;
+  el('iconBox').innerHTML=iconSvg(current.icon);
   el('wordCard').textContent=current.word;
   el('wordCard').style.fontSize = current.word.length>28 ? '18px' : '34px';
   el('feedback').textContent='';
@@ -144,7 +195,7 @@ function onBinClick(e){
 }
 
 function startGame(){
-  round=0;correctCount=0;
+  round=0;correctCount=0;usedIdx=[];
   el('intro').classList.add('hidden');el('results').classList.add('hidden');
   el('game').classList.remove('hidden');
   el('scoreLbl').textContent='0 correct';
