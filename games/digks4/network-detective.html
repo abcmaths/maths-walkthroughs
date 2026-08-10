@@ -86,6 +86,7 @@ header h1{font-size:16px;font-weight:700;}
   <div class="panel hidden" id="game">
     <div class="round-hdr"><span id="roundLbl">Round 1 of 10</span><span id="scoreLbl">0 correct</span></div>
     <div class="qtext" id="qtext" style="font-size:16px"></div>
+    <div id="rewardIcon" style="min-height:56px;"></div>
     <div class="opts" id="opts"></div>
     <div class="feedback" id="feedback"></div>
   </div>
@@ -106,8 +107,35 @@ var TOTAL_ROUNDS=10;
 
 var BANK = [{"q": "A set of rules that governs how data is transmitted across a network.", "a": "Protocol", "d": ["Packet", "Bandwidth", "Topology"]}, {"q": "A small unit of data sent across a network, containing a header and payload.", "a": "Packet", "d": ["Protocol", "Frame", "Segment"]}, {"q": "The maximum rate of data transfer across a network path.", "a": "Bandwidth", "d": ["Latency", "Throughput", "Protocol"]}, {"q": "The physical or logical arrangement of devices on a network.", "a": "Topology", "d": ["Protocol", "Bandwidth", "Encryption"]}, {"q": "A service that translates domain names into IP addresses.", "a": "DNS", "d": ["DHCP", "HTTP", "FTP"]}, {"q": "A service that automatically assigns IP addresses to devices on a network.", "a": "DHCP", "d": ["DNS", "VPN", "NAT"]}, {"q": "A secure, encrypted connection that lets a device access a network remotely.", "a": "VPN", "d": ["Firewall", "Proxy", "LAN"]}, {"q": "The process of scrambling data so it cannot be read without a key.", "a": "Encryption", "d": ["Compression", "Authentication", "Hashing"]}, {"q": "A technique that allows multiple devices on a LAN to share one public IP address.", "a": "NAT", "d": ["DHCP", "DNS", "VPN"]}, {"q": "The protocol used to transfer web pages between a server and browser.", "a": "HTTP", "d": ["FTP", "SMTP", "TCP"]}, {"q": "The delay between sending and receiving data across a network.", "a": "Latency", "d": ["Bandwidth", "Throughput", "Jitter"]}, {"q": "A server that sits between a client and the internet, often for security or caching.", "a": "Proxy server", "d": ["DNS server", "Web server", "File server"]}];
 function rnd(n){return Math.floor(Math.random()*n);}
+var ICONS={
+  'Protocol':'<rect x="8" y="20" width="54" height="20" rx="4" fill="#D6EAF8" stroke="#1565C0" stroke-width="2"/><path d="M14 30 h10 M28 30 h10 M42 30 h10" stroke="#1565C0" stroke-width="2" stroke-dasharray="2,2"/>',
+  'Packet':'<rect x="16" y="18" width="38" height="24" rx="3" fill="#E8F8F0" stroke="#2E7D32" stroke-width="2"/><rect x="16" y="18" width="12" height="24" fill="#82C99A"/>',
+  'Bandwidth':'<line x1="10" y1="42" x2="10" y2="10" stroke="#888" stroke-width="1.5"/><line x1="10" y1="42" x2="60" y2="42" stroke="#888" stroke-width="1.5"/><rect x="16" y="30" width="8" height="12" fill="#F5B041"/><rect x="28" y="20" width="8" height="22" fill="#F5B041"/><rect x="40" y="12" width="8" height="30" fill="#F5B041"/>',
+  'Topology':'<circle cx="35" cy="30" r="4" fill="#1565C0"/><circle cx="15" cy="15" r="4" fill="#1565C0"/><circle cx="55" cy="15" r="4" fill="#1565C0"/><circle cx="15" cy="45" r="4" fill="#1565C0"/><circle cx="55" cy="45" r="4" fill="#1565C0"/><line x1="35" y1="30" x2="15" y2="15" stroke="#1565C0" stroke-width="1.5"/><line x1="35" y1="30" x2="55" y2="15" stroke="#1565C0" stroke-width="1.5"/><line x1="35" y1="30" x2="15" y2="45" stroke="#1565C0" stroke-width="1.5"/><line x1="35" y1="30" x2="55" y2="45" stroke="#1565C0" stroke-width="1.5"/>',
+  'DNS':'<rect x="8" y="20" width="54" height="20" rx="10" fill="#D6EAF8" stroke="#1565C0" stroke-width="2"/><text x="35" y="34" text-anchor="middle" font-size="10" fill="#1565C0" font-weight="700">abc.sch.ng</text>',
+  'DHCP':'<rect x="8" y="18" width="54" height="24" rx="4" fill="#E8F8F0" stroke="#2E7D32" stroke-width="2"/><text x="35" y="34" text-anchor="middle" font-size="10" fill="#2E7D32" font-weight="700">192.168.x</text>',
+  'VPN':'<rect x="14" y="16" width="42" height="28" rx="4" fill="#F1948A" stroke="#a01f24" stroke-width="2"/><rect x="26" y="26" width="18" height="14" rx="2" fill="#fff" stroke="#a01f24" stroke-width="1.5"/><path d="M29 26 v-5 a6 6 0 0 1 12 0 v5" fill="none" stroke="#a01f24" stroke-width="2"/>',
+  'Encryption':'<rect x="20" y="26" width="30" height="20" rx="3" fill="#F9E9F3" stroke="#8E44AD" stroke-width="2"/><path d="M25 26 v-6 a10 10 0 0 1 20 0 v6" fill="none" stroke="#8E44AD" stroke-width="2"/><circle cx="35" cy="36" r="3" fill="#8E44AD"/>',
+  'NAT':'<rect x="8" y="24" width="20" height="14" rx="2" fill="#D6EAF8" stroke="#1565C0" stroke-width="1.5"/><rect x="42" y="24" width="20" height="14" rx="2" fill="#E8F8F0" stroke="#2E7D32" stroke-width="1.5"/><path d="M28 31 h14" stroke="#888" stroke-width="2" marker-end="none"/><path d="M38 27 l4 4 l-4 4" fill="none" stroke="#888" stroke-width="2"/>',
+  'HTTP':'<rect x="8" y="18" width="54" height="24" rx="3" fill="#EAF2F8" stroke="#1565C0" stroke-width="2"/><text x="35" y="34" text-anchor="middle" font-size="11" fill="#1565C0" font-weight="700">http://</text>',
+  'Latency':'<circle cx="35" cy="28" r="18" fill="none" stroke="#F5B041" stroke-width="2"/><line x1="35" y1="28" x2="35" y2="16" stroke="#F5B041" stroke-width="2"/><line x1="35" y1="28" x2="44" y2="32" stroke="#F5B041" stroke-width="2"/>',
+  'Proxy server':'<rect x="16" y="8" width="38" height="14" rx="2" fill="#B0BEC5" stroke="#607D8B" stroke-width="1.5"/><rect x="16" y="26" width="38" height="14" rx="2" fill="#B0BEC5" stroke="#607D8B" stroke-width="1.5"/><circle cx="48" cy="15" r="3" fill="#F5B041"/>'
+};
+function iconSvg(name){
+  var body=ICONS[name];
+  if(!body) return '';
+  return '<svg width="70" height="52" viewBox="0 0 70 52">'+body+'</svg>';
+}
+var usedIdx=[];
+function pickItem(){
+  var pool=BANK.map(function(b,i){return i;}).filter(function(i){return usedIdx.indexOf(i)===-1;});
+  if(pool.length===0){usedIdx=[];pool=BANK.map(function(b,i){return i;});}
+  var idx=pool[rnd(pool.length)];
+  usedIdx.push(idx);
+  return BANK[idx];
+}
 function genRound(){
-  var item=BANK[rnd(BANK.length)];
+  var item=pickItem();
   var opts=[item.a].concat(item.d);
   for(var i=opts.length-1;i>0;i--){var j=rnd(i+1);var t=opts[i];opts[i]=opts[j];opts[j]=t;}
   return {q:item.q,correct:item.a,opts:opts};
@@ -119,6 +147,7 @@ function nextRound(){
   el('roundLbl').textContent='Round '+(round+1)+' of '+TOTAL_ROUNDS;
   el('qtext').textContent=current.q;
   el('feedback').textContent='';
+  if(el('rewardIcon')) el('rewardIcon').innerHTML='';
   var box=el('opts');box.innerHTML='';
   current.opts.forEach(function(w){
     var btn=document.createElement('button');
@@ -133,6 +162,7 @@ function onOptionClick(word, btnEl, box){
   if(word===current.correct){
     box.dataset.locked='1';
     btnEl.classList.add('correct');
+    if(el('rewardIcon')) el('rewardIcon').innerHTML=iconSvg(current.correct);
     el('feedback').className='feedback good';
     el('feedback').textContent='Correct!';
     correctCount++;
@@ -147,7 +177,7 @@ function onOptionClick(word, btnEl, box){
   }
 }
 function startGame(){
-  round=0;correctCount=0;
+  round=0;correctCount=0;usedIdx=[];
   el('intro').classList.add('hidden');el('results').classList.add('hidden');
   el('game').classList.remove('hidden');
   el('scoreLbl').textContent='0 correct';

@@ -78,13 +78,14 @@ header h1{font-size:16px;font-weight:700;}
 <div class="wrap">
 
   <div class="intro" id="intro">
-    <h2>Spot the bug</h2>
+    <h2>\ud83d\udd0d Bug Hunt</h2>
     <p>Each snippet has exactly one line with a bug. Tap the buggy line as fast as you can. 8 rounds, no skipping wrong taps.</p>
     <button class="start-btn" id="startBtn">Start</button>
   </div>
 
   <div class="panel hidden" id="game">
     <div class="round-hdr"><span id="roundLbl">Round 1 of 8</span><span id="scoreLbl">0 correct</span></div>
+    <div style="font-size:11.5px;color:var(--red);font-weight:700;margin-bottom:8px;min-height:16px;" id="streakLbl"></div>
     <div class="qtext" style="font-size:14px;text-align:left">Tap the line that contains the bug:</div>
     <div class="code-block" id="codeBlock"></div>
     <div class="feedback" id="feedback"></div>
@@ -107,12 +108,20 @@ var TOTAL_ROUNDS=8;
 var BANK = [{"lines": ["def factorial(n):", "    if n == 0:", "        return 0", "    return n * factorial(n-1)"], "bug": 2}, {"lines": ["nums = [4, 8, 15, 16, 23, 42]", "total = 0", "for i in range(len(nums)):", "    total += nums[i+1]"], "bug": 3}, {"lines": ["def is_even(n):", "    return n % 2 = 0", "print(is_even(4))"], "bug": 1}, {"lines": ["scores = [55, 70, 82, 90]", "average = sum(scores) / len(score)", "print(average)"], "bug": 1}, {"lines": ["i = 0", "while i < 10:", "    print(i)", "    i = i - 1"], "bug": 3}, {"lines": ["def find_max(lst):", "    max_val = lst[0]", "    for item in lst:", "        if item < max_val:", "            max_val = item", "    return max_val"], "bug": 3}, {"lines": ["class Student:", "    def __init__(self, name):", "        self.name = Name", "s = Student('Ade')"], "bug": 2}, {"lines": ["total = 0", "count = 0", "for n in [2, 4, 6]:", "    total += n", "    count += 1", "average = total / count", "print(averge)"], "bug": 6}, {"lines": ["def is_prime(n):", "    if n < 2:", "        return False", "    for i in range(2, n):", "        if n % i == 0:", "            return True", "    return True"], "bug": 5}, {"lines": ["try:", "    result = 10 / 0", "except:", "    print('Error')", "finally", "    print('Done')"], "bug": 4}];
 function rnd(n){return Math.floor(Math.random()*n);}
 var el=function(id){return document.getElementById(id);};
-var round=0,correctCount=0,current=null,startTime=null,timerInt=null;
+var round=0,correctCount=0,streak=0,current=null,startTime=null,timerInt=null,usedIdx=[];
+function pickItem(){
+  var pool=BANK.map(function(b,i){return i;}).filter(function(i){return usedIdx.indexOf(i)===-1;});
+  if(pool.length===0){usedIdx=[];pool=BANK.map(function(b,i){return i;});}
+  var idx=pool[rnd(pool.length)];
+  usedIdx.push(idx);
+  return BANK[idx];
+}
 function nextRound(){
-  var item=BANK[rnd(BANK.length)];
+  var item=pickItem();
   current={lines:item.lines,bugLine:item.bug};
   el('roundLbl').textContent='Round '+(round+1)+' of '+TOTAL_ROUNDS;
   el('feedback').textContent='';
+  if(el('streakLbl')) el('streakLbl').textContent = streak>=2 ? '\ud83d\udd0d '+streak+' bugs found in a row!' : '';
   var box=el('codeBlock');box.innerHTML='';
   current.lines.forEach(function(line,i){
     var d=document.createElement('div');
@@ -131,6 +140,7 @@ function onLineClick(i, lineEl, box){
     el('feedback').className='feedback good';
     el('feedback').textContent='Found it!';
     correctCount++;
+    streak++;
     el('scoreLbl').textContent=correctCount+' correct';
     round++;
     if(round>=TOTAL_ROUNDS){ setTimeout(finishGame,800); }
@@ -139,11 +149,12 @@ function onLineClick(i, lineEl, box){
     lineEl.classList.add('wrong');
     el('feedback').className='feedback bad';
     el('feedback').textContent='Not that line — try again.';
+    streak=0;
     setTimeout(function(){lineEl.classList.remove('wrong');},400);
   }
 }
 function startGame(){
-  round=0;correctCount=0;
+  round=0;correctCount=0;streak=0;usedIdx=[];
   el('intro').classList.add('hidden');el('results').classList.add('hidden');
   el('game').classList.remove('hidden');
   el('scoreLbl').textContent='0 correct';

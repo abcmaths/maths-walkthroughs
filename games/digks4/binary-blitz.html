@@ -86,6 +86,7 @@ header h1{font-size:16px;font-weight:700;}
   <div class="panel hidden" id="game">
     <div class="round-hdr"><span id="roundLbl">Round 1 of 10</span><span id="scoreLbl">0 correct</span></div>
     <div class="qtext">What is <span id="decDisplay" style="color:var(--red)"></span> in binary?</div>
+    <div id="placeValueBox"></div>
     <div class="opts" id="opts"></div>
     <div class="feedback" id="feedback"></div>
   </div>
@@ -108,8 +109,17 @@ var BITS = 8;
 var MAXVAL = 255;
 function rnd(n){return Math.floor(Math.random()*n);}
 function toBin(n){var s=n.toString(2);while(s.length<BITS)s='0'+s;return s;}
+var usedVals=[];
+function pickVal(){
+  var pool=[];
+  for(var i=0;i<=MAXVAL;i++){ if(usedVals.indexOf(i)===-1) pool.push(i); }
+  if(pool.length===0){ usedVals=[]; for(var i=0;i<=MAXVAL;i++) pool.push(i); }
+  var n=pool[rnd(pool.length)];
+  usedVals.push(n);
+  return n;
+}
 function genRound(){
-  var n=rnd(MAXVAL+1);
+  var n=pickVal();
   var correct=toBin(n);
   var opts=[correct];
   var guard=0;
@@ -122,6 +132,15 @@ function genRound(){
   for(var i=opts.length-1;i>0;i--){var j=rnd(i+1);var t=opts[i];opts[i]=opts[j];opts[j]=t;}
   return {n:n,correct:correct,opts:opts};
 }
+function placeValueSvg(){
+  var vals=[128,64,32,16,8,4,2,1];
+  var boxes=vals.map(function(v){
+    return '<div style="display:inline-block;width:32px;text-align:center;margin:0 2px;">'+
+           '<div style="font-size:9.5px;color:#888;font-weight:700;">'+v+'</div>'+
+           '<div style="width:26px;height:26px;border:2px solid var(--line);border-radius:5px;margin:2px auto 0;"></div></div>';
+  }).join('');
+  return '<div style="margin-bottom:6px;">'+boxes+'</div>';
+}
 var el=function(id){return document.getElementById(id);};
 var round=0,correctCount=0,current=null,startTime=null,timerInt=null;
 function nextRound(){
@@ -129,6 +148,7 @@ function nextRound(){
   el('roundLbl').textContent='Round '+(round+1)+' of '+TOTAL_ROUNDS;
   el('decDisplay').textContent=current.n;
   el('feedback').textContent='';
+  if(el('placeValueBox')) el('placeValueBox').innerHTML=placeValueSvg();
   var box=el('opts');box.innerHTML='';
   current.opts.forEach(function(b){
     var btn=document.createElement('button');
@@ -157,7 +177,7 @@ function onOptionClick(val, btnEl, box){
   }
 }
 function startGame(){
-  round=0;correctCount=0;
+  round=0;correctCount=0;usedVals=[];
   el('intro').classList.add('hidden');el('results').classList.add('hidden');
   el('game').classList.remove('hidden');
   el('scoreLbl').textContent='0 correct';

@@ -86,6 +86,7 @@ header h1{font-size:16px;font-weight:700;}
   <div class="panel hidden" id="game">
     <div class="round-hdr"><span id="roundLbl">Round 1 of 10</span><span id="scoreLbl">0 correct</span></div>
     <div class="qtext" id="qtext"></div>
+    <div id="hexHelperBox" style="margin-bottom:8px;"></div>
     <div class="opts" id="opts"></div>
     <div class="feedback" id="feedback"></div>
   </div>
@@ -107,8 +108,17 @@ var TOTAL_ROUNDS=10;
 var MAXVAL=255;
 function rnd(n){return Math.floor(Math.random()*n);}
 function toHex(n){var s=n.toString(16).toUpperCase();if(s.length<2)s='0'+s;return s;}
+var usedVals=[];
+function pickVal(){
+  var pool=[];
+  for(var i=0;i<=MAXVAL;i++){ if(usedVals.indexOf(i)===-1) pool.push(i); }
+  if(pool.length===0){ usedVals=[]; for(var i=0;i<=MAXVAL;i++) pool.push(i); }
+  var n=pool[rnd(pool.length)];
+  usedVals.push(n);
+  return n;
+}
 function genRound(){
-  var n=rnd(MAXVAL+1);
+  var n=pickVal();
   var toHexDir = rnd(2)===0;
   var correct = toHexDir ? toHex(n) : String(n);
   var opts=[correct];
@@ -125,6 +135,15 @@ function genRound(){
     correct:correct, opts:opts
   };
 }
+function hexHelperSvg(){
+  var labels=['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'];
+  var cells=labels.map(function(l,i){
+    return '<div style="display:inline-block;width:20px;text-align:center;margin:1px;">'+
+           '<div style="font-size:8.5px;color:#888;">'+i+'</div>'+
+           '<div style="font-size:12px;font-weight:800;color:var(--gold);">'+l+'</div></div>';
+  }).join('');
+  return '<div style="font-size:10px;color:#888;margin-bottom:2px;">Hex digits 0\u2013F = denary 0\u201315:</div><div>'+cells+'</div>';
+}
 var el=function(id){return document.getElementById(id);};
 var round=0,correctCount=0,current=null,startTime=null,timerInt=null;
 function nextRound(){
@@ -132,6 +151,7 @@ function nextRound(){
   el('roundLbl').textContent='Round '+(round+1)+' of '+TOTAL_ROUNDS;
   el('qtext').textContent=current.q;
   el('feedback').textContent='';
+  if(el('hexHelperBox')) el('hexHelperBox').innerHTML=hexHelperSvg();
   var box=el('opts');box.innerHTML='';
   current.opts.forEach(function(v){
     var btn=document.createElement('button');
@@ -160,7 +180,7 @@ function onOptionClick(val, btnEl, box){
   }
 }
 function startGame(){
-  round=0;correctCount=0;
+  round=0;correctCount=0;usedVals=[];
   el('intro').classList.add('hidden');el('results').classList.add('hidden');
   el('game').classList.remove('hidden');
   el('scoreLbl').textContent='0 correct';
