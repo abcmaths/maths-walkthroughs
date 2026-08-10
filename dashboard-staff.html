@@ -1298,18 +1298,22 @@
     const { data: scores } = await supabase.from('game_scores').select('game_code, score, time_seconds, student_id');
     const { data: lb } = await supabase.from('game_leaderboard').select('game_code, full_name, score, time_seconds');
 
-    let html = '<div class="tbl-wrap"><table><thead><tr><th>Game</th><th>Subject</th><th>Plays</th><th>Unique Players</th><th>Top Score</th></tr></thead><tbody>';
+    let html = '<div class="tbl-wrap"><table><thead><tr><th>Game</th><th>Subject</th><th>Plays</th><th>Unique Players</th><th>Top Score</th><th>Fastest Time</th></tr></thead><tbody>';
     games.forEach(g => {
       const rows = (scores || []).filter(s => s.game_code === g.game_code);
       const plays = rows.length;
       const uniquePlayers = new Set(rows.map(r => r.student_id)).size;
       const top = (lb || []).filter(r => r.game_code === g.game_code).sort((a,b) => b.score - a.score)[0];
+      const fastestRow = rows.filter(r => r.time_seconds !== null).sort((a,b) => a.time_seconds - b.time_seconds)[0];
+      const fastestName = fastestRow ? ((allStudents.find(s => s.id === fastestRow.student_id) || {}).full_name || null) : null;
+      const fmtTime = (s) => { if (s === null || s === undefined) return '—'; const m = Math.floor(s/60), sec = s%60; return m + ':' + (sec<10?'0':'') + sec; };
       html += `<tr>
         <td><a href="${g.file_path}" target="_blank" style="color:#C0272D;font-weight:600;text-decoration:none">${g.title}</a></td>
         <td>${g.subject}</td>
         <td>${plays}</td>
         <td>${uniquePlayers}</td>
         <td>${top ? top.full_name + ' — ' + top.score : '—'}</td>
+        <td>${fastestRow ? fmtTime(fastestRow.time_seconds) + (fastestName ? ' (' + fastestName + ')' : '') : '—'}</td>
       </tr>`;
     });
     html += '</tbody></table></div>';
