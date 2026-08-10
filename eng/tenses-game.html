@@ -8,263 +8,258 @@
   if(!session) window.location.href='../login.html';
 </script>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tense Sprint — ABC Learning Portal</title>
+<title>Tense Word Search — ABC Learning Portal</title>
 <style>
-:root{--red:#E65100;--dark:#BF360C;--cream:#FFF3E0;--ink:#2a1a0d;--line:#FFE0B2;--gold:#C8922A;--good:#2e7d32;--goodbg:#e8f5e9;--bad:#c62828;--badbg:#fde8e8;}
-*{box-sizing:border-box;margin:0;padding:0;}
+:root{--red:#E65100;--dark:#BF360C;--cream:#FFF3E0;--ink:#2a1a0d;--line:#FFE0B2;--gold:#C8922A;--good:#2e7d32;--goodbg:#e8f5e9;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100vh;}
 header{background:var(--red);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 6px rgba(0,0,0,.12);}
 .back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
 header h1{font-size:16px;font-weight:700;}
-.stats{display:flex;gap:14px;font-size:13px;font-weight:600;}
-.stat{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:5px 10px;}
-.wrap{max-width:640px;margin:0 auto;padding:28px 18px 60px;}
+.stat{font-size:12px;font-weight:700;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:5px 10px;}
+.wrap{max-width:620px;margin:0 auto;padding:22px 14px 60px;}
 .intro{background:#fff;border:1px solid var(--line);border-radius:8px;padding:28px 24px;text-align:center;}
 .intro h2{font-family:Georgia,serif;font-size:22px;margin-bottom:10px;}
-.intro p{font-size:14px;color:#555;line-height:1.6;margin-bottom:18px;}
-.diffs{display:flex;gap:10px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;}
-.diff-btn{border:1.5px solid var(--line);background:#fff;border-radius:6px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink);transition:.15s;}
-.diff-btn:hover{border-color:var(--red);color:var(--red);}
-.diff-btn.sel{background:var(--red);color:#fff;border-color:var(--red);}
+.intro p{font-size:14px;color:#555;line-height:1.6;margin-bottom:20px;}
 .start-btn{background:var(--red);color:#fff;border:none;border-radius:5px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
 .start-btn:hover{background:var(--dark);}
-.card{background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
-.card-top{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
-.rnd{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700;}
-.streak{font-size:12px;font-weight:700;color:var(--red);}
-.qbox{padding:26px 24px 20px;}
-.qlbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:10px;}
-.sent{font-family:Georgia,serif;font-size:20px;line-height:1.5;margin-bottom:22px;}
-.sent b{color:var(--red);border-bottom:2px solid var(--gold);}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-@media(max-width:480px){.opts{grid-template-columns:1fr;}}
-.opt{text-align:left;padding:12px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:13.5px;font-family:inherit;transition:.15s;color:var(--ink);}
-.opt:hover:not(:disabled){border-color:var(--gold);background:#fffaf0;}
-.opt:disabled{cursor:default;}
-.opt.ok{border-color:var(--good);background:var(--goodbg);color:var(--good);font-weight:700;}
-.opt.no{border-color:var(--bad);background:var(--badbg);color:var(--bad);}
-.fb{margin-top:16px;padding:14px 16px;border-radius:6px;font-size:13.5px;line-height:1.55;display:none;}
-.fb.show{display:block;}
-.fb.ok-fb{background:var(--goodbg);border:1px solid var(--good);color:#1b5e20;}
-.fb.no-fb{background:var(--badbg);border:1px solid var(--bad);color:#8b1a1a;}
-.next-btn{margin-top:16px;background:var(--red);color:#fff;border:none;border-radius:5px;padding:11px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:none;}
-.next-btn.show{display:inline-block;}
-.next-btn:hover{background:var(--dark);}
-.bar{height:5px;background:var(--line);}
-.bar-fill{height:100%;background:var(--red);transition:width .3s;}
+.panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;}
+.hint{font-size:12.5px;color:#888;text-align:center;margin-bottom:12px;}
+#gridBox{display:flex;justify-content:center;margin-bottom:16px;}
+#grid{display:grid;user-select:none;touch-action:none;border:2px solid var(--line);border-radius:6px;overflow:hidden;background:#fffaf3;}
+.cell{display:flex;align-items:center;justify-content:center;font-weight:700;font-size:calc(min(4.2vw,17px));color:var(--ink);border:.5px solid #fbe9d3;background:#fffaf3;cursor:pointer;transition:background .1s,color .1s;}
+.cell.sel{background:var(--gold);color:#fff;}
+.cell.found{background:var(--good);color:#fff;}
+.wordlist{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.word-chip{font-size:12.5px;font-weight:700;letter-spacing:.03em;padding:6px 12px;border:1.5px solid var(--line);border-radius:20px;color:var(--ink);background:var(--cream);}
+.word-chip.found{background:var(--goodbg);border-color:var(--good);color:var(--good);text-decoration:line-through;}
 .results{background:#fff;border:1px solid var(--line);border-radius:8px;padding:32px 24px;text-align:center;}
-.results h2{font-family:Georgia,serif;font-size:24px;margin-bottom:6px;}
-.score{font-size:44px;font-weight:800;color:var(--red);margin:14px 0 4px;}
-.score-sub{font-size:13px;color:#888;margin-bottom:20px;}
-.msg{font-size:14px;color:#555;margin-bottom:22px;line-height:1.6;}
-.miss{text-align:left;background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:20px;font-size:13px;line-height:1.6;}
-.miss h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:8px;font-weight:700;}
+.results h2{font-family:Georgia,serif;font-size:24px;margin-bottom:8px;}
+.results .time{font-size:40px;font-weight:800;color:var(--red);margin:10px 0 4px;}
+.results .sub{font-size:13px;color:#888;margin-bottom:18px;}
+.results p{font-size:14px;color:#555;margin-bottom:22px;line-height:1.6;}
+.gloss{text-align:left;background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:20px;font-size:13px;line-height:1.7;}
+.gloss h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:8px;font-weight:700;}
 .hidden{display:none;}
 </style>
 </head>
 <body>
 <header>
   <a href="tenses.html" class="back">&larr; Tenses Walkthrough</a>
-  <h1>Tense Sprint</h1>
-  <div class="stats" id="hdrStats"></div>
+  <h1>Tense Word Search</h1>
+  <div class="stat" id="timerStat">0:00</div>
 </header>
 <div class="wrap">
 
   <div class="intro" id="intro">
-    <h2>Test your tense skills</h2>
-    <p>Identify the correct tense used in each sentence. Choose your level and see how many you can get right — streaks earn bonus points!</p>
-    <div class="diffs" id="diffs">
-      <button class="diff-btn" data-d="core">Core (9 tenses)</button>
-      <button class="diff-btn" data-d="all">All 12 tenses</button>
-    </div>
-    <button class="start-btn" id="startBtn">Start Game</button>
+    <h2>Find the tense words</h2>
+    <p>Tap or click a letter and drag to the last letter of a word — in any direction, including diagonals. Find all the hidden words to finish.</p>
+    <button class="start-btn" id="startBtn">Start</button>
   </div>
 
-  <div class="card hidden" id="game">
-    <div class="bar"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
-    <div class="card-top">
-      <div class="rnd" id="rndLbl">Question 1 of 10</div>
-      <div class="streak" id="streakLbl"></div>
-    </div>
-    <div class="qbox">
-      <div class="qlbl">Which tense is used here?</div>
-      <div class="sent" id="sent"></div>
-      <div class="opts" id="opts"></div>
-      <div class="fb" id="fb"></div>
-      <button class="next-btn" id="nextBtn">Next &rarr;</button>
-    </div>
+  <div class="panel hidden" id="game">
+    <div class="hint">Drag across letters to select a word</div>
+    <div id="gridBox"><div id="grid"></div></div>
+    <div class="wordlist" id="wordlist"></div>
   </div>
 
   <div class="results hidden" id="results">
-    <h2>Round Complete!</h2>
-    <div class="score" id="finalScore">0</div>
-    <div class="score-sub" id="finalSub">points</div>
-    <div class="msg" id="finalMsg"></div>
-    <div class="miss hidden" id="missBox"><h4>Worth reviewing</h4><div id="missList"></div></div>
+    <h2>All words found!</h2>
+    <div class="time" id="finalTime">0:00</div>
+    <div class="sub">time taken</div>
+    <p id="finalMsg"></p>
+    <div class="gloss" id="glossBox"><h4>Quick reminders</h4><div id="glossList"></div></div>
     <button class="start-btn" id="againBtn">Play Again</button>
   </div>
 
 </div>
 <script>
-var TENSES_CORE=['Past simple','Present simple','Future simple','Past continuous','Present continuous','Future continuous','Past perfect','Present perfect','Future perfect'];
-var TENSES_ALL=TENSES_CORE.concat(['Past perfect continuous','Present perfect continuous','Future perfect continuous']);
-
-var BANK=[
-{s:'She <b>walked</b> to school yesterday.',t:'Past simple'},
-{s:'He <b>plays</b> football every Saturday.',t:'Present simple'},
-{s:'They <b>will visit</b> Lagos next month.',t:'Future simple'},
-{s:'I <b>was reading</b> when the phone rang.',t:'Past continuous'},
-{s:'We <b>are studying</b> for the exam right now.',t:'Present continuous'},
-{s:'This time tomorrow, I <b>will be flying</b> to Abuja.',t:'Future continuous'},
-{s:'She <b>had finished</b> her homework before dinner.',t:'Past perfect'},
-{s:'He <b>has visited</b> Lagos three times.',t:'Present perfect'},
-{s:'By next year, they <b>will have graduated</b>.',t:'Future perfect'},
-{s:'She <b>had been waiting</b> for an hour when the bus arrived.',t:'Past perfect continuous'},
-{s:'I <b>have been studying</b> English for six years.',t:'Present perfect continuous'},
-{s:'By 6pm, he <b>will have been working</b> for ten hours.',t:'Future perfect continuous'},
-{s:'The train <b>left</b> the station five minutes ago.',t:'Past simple'},
-{s:'Water <b>boils</b> at 100 degrees Celsius.',t:'Present simple'},
-{s:'I <b>will call</b> you when I arrive.',t:'Future simple'},
-{s:'It <b>was raining</b> heavily during the match.',t:'Past continuous'},
-{s:'Look! The children <b>are playing</b> in the garden.',t:'Present continuous'},
-{s:'Next week, we <b>will be celebrating</b> her birthday.',t:'Future continuous'},
-{s:'By the time we arrived, the film <b>had started</b>.',t:'Past perfect'},
-{s:'I <b>have never eaten</b> jollof rice before today.',t:'Present perfect'},
-{s:'She <b>will have finished</b> the report by Friday.',t:'Future perfect'},
-{s:'He <b>had been living</b> there for years before he moved.',t:'Past perfect continuous'},
-{s:'They <b>have been waiting</b> outside since noon.',t:'Present perfect continuous'},
-{s:'By December, she <b>will have been teaching</b> for a decade.',t:'Future perfect continuous'},
-{s:'My father <b>worked</b> in Lagos for ten years, then retired.',t:'Past simple'},
-{s:'The sun <b>rises</b> in the east.',t:'Present simple'},
-{s:'We <b>are meeting</b> the principal tomorrow morning.',t:'Present continuous'},
-{s:'She <b>has already submitted</b> her assignment.',t:'Present perfect'},
-{s:'I <b>was sleeping</b> when you called last night.',t:'Past continuous'},
-{s:'By the end of term, he <b>will have completed</b> all his projects.',t:'Future perfect'}
+var WORDS=[
+  {w:'TENSE',def:'Tells us when an action happens.'},
+  {w:'PAST',def:'A time before now.'},
+  {w:'PRESENT',def:'Happening now, or a general fact.'},
+  {w:'FUTURE',def:'A time that has not happened yet.'},
+  {w:'SIMPLE',def:'The most basic form of a tense.'},
+  {w:'PERFECT',def:'Shows an action\\u2019s completion relative to a point in time.'},
+  {w:'DURATION',def:'How long an action continues.'},
+  {w:'VERB',def:'The action or state word in a sentence.'},
+  {w:'HABIT',def:'A regularly repeated action, often present simple.'},
+  {w:'ONGOING',def:'An action still in progress \\u2014 continuous tense.'},
+  {w:'ASPECT',def:'Simple, continuous, perfect, or perfect continuous.'},
+  {w:'AUXILIARY',def:'A helper verb like have, has, had, or be.'}
 ];
 
-var mode='core', total=10, idx=0, score=0, streak=0, best=0, rounds=[], misses=[];
+var GRID_SIZE=13;
+var grid=[],placed=[],found={},startTime=null,timerInt=null;
 
 function el(id){return document.getElementById(id);}
-function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function rnd(n){return Math.floor(Math.random()*n);}
+var LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-document.querySelectorAll('.diff-btn').forEach(function(b){
-  b.addEventListener('click',function(){
-    document.querySelectorAll('.diff-btn').forEach(function(x){x.classList.remove('sel');});
-    b.classList.add('sel');mode=b.getAttribute('data-d');
+var DIRS=[[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+
+function buildGrid(){
+  grid=[];for(var r=0;r<GRID_SIZE;r++){var row=[];for(var c=0;c<GRID_SIZE;c++)row.push(null);grid.push(row);}
+  placed=[];
+  var order=WORDS.slice().sort(function(a,b){return b.w.length-a.w.length;});
+  order.forEach(function(item){
+    var word=item.w,len=word.length,ok=false,attempts=0;
+    while(!ok&&attempts<300){
+      attempts++;
+      var dir=DIRS[rnd(DIRS.length)];
+      var startR=rnd(GRID_SIZE),startC=rnd(GRID_SIZE);
+      var endR=startR+dir[0]*(len-1),endC=startC+dir[1]*(len-1);
+      if(endR<0||endR>=GRID_SIZE||endC<0||endC>=GRID_SIZE)continue;
+      var fits=true;
+      for(var i=0;i<len;i++){
+        var rr=startR+dir[0]*i,cc=startC+dir[1]*i;
+        var existing=grid[rr][cc];
+        if(existing!==null&&existing!==word[i]){fits=false;break;}
+      }
+      if(!fits)continue;
+      for(var i=0;i<len;i++){var rr=startR+dir[0]*i,cc=startC+dir[1]*i;grid[rr][cc]=word[i];}
+      placed.push({w:word,startR:startR,startC:startC,endR:endR,endC:endC});
+      ok=true;
+    }
   });
-});
-document.querySelector('.diff-btn[data-d="core"]').classList.add('sel');
+  for(var r=0;r<GRID_SIZE;r++)for(var c=0;c<GRID_SIZE;c++)if(grid[r][c]===null)grid[r][c]=LETTERS[rnd(26)];
+}
 
-el('startBtn').addEventListener('click', startGame);
-el('againBtn').addEventListener('click', function(){el('results').classList.add('hidden');el('intro').classList.remove('hidden');});
-el('nextBtn').addEventListener('click', nextQuestion);
+function renderGrid(){
+  var gridEl=el('grid');
+  gridEl.style.gridTemplateColumns='repeat('+GRID_SIZE+',1fr)';
+  var cellPx=Math.min(360/GRID_SIZE,26);
+  gridEl.style.width=(cellPx*GRID_SIZE)+'px';
+  gridEl.style.height=(cellPx*GRID_SIZE)+'px';
+  gridEl.innerHTML='';
+  for(var r=0;r<GRID_SIZE;r++){
+    for(var c=0;c<GRID_SIZE;c++){
+      var d=document.createElement('div');
+      d.className='cell';d.textContent=grid[r][c];
+      d.style.width=cellPx+'px';d.style.height=cellPx+'px';
+      d.dataset.r=r;d.dataset.c=c;
+      gridEl.appendChild(d);
+    }
+  }
+}
+
+function renderWordlist(){
+  var wl=el('wordlist');wl.innerHTML='';
+  WORDS.forEach(function(item){
+    var chip=document.createElement('div');
+    chip.className='word-chip'+(found[item.w]?' found':'');
+    chip.id='chip-'+item.w;
+    chip.textContent=item.w;
+    wl.appendChild(chip);
+  });
+}
+
+var dragging=false,startCell=null,curSel=[];
+
+function cellAt(r,c){return el('grid').children[r*GRID_SIZE+c];}
+
+function clearSel(){curSel.forEach(function(rc){var cell=cellAt(rc[0],rc[1]);if(!cell.classList.contains('found'))cell.classList.remove('sel');});curSel=[];}
+
+function lineBetween(r1,c1,r2,c2){
+  var dr=r2-r1,dc=c2-c1;
+  var steps=Math.max(Math.abs(dr),Math.abs(dc));
+  if(steps===0)return [[r1,c1]];
+  var stepR=dr===0?0:dr/Math.abs(dr),stepC=dc===0?0:dc/Math.abs(dc);
+  if(dr!==0&&dc!==0&&Math.abs(dr)!==Math.abs(dc))return null;
+  var out=[];
+  for(var i=0;i<=steps;i++)out.push([r1+stepR*i,c1+stepC*i]);
+  return out;
+}
+
+function startDrag(r,c){
+  dragging=true;startCell=[r,c];curSel=[[r,c]];
+  cellAt(r,c).classList.add('sel');
+}
+function updateDrag(r,c){
+  if(!dragging)return;
+  var line=lineBetween(startCell[0],startCell[1],r,c);
+  if(!line)return;
+  clearSel();
+  line.forEach(function(rc){cellAt(rc[0],rc[1]).classList.add('sel');});
+  curSel=line;
+}
+function endDrag(){
+  if(!dragging)return;
+  dragging=false;
+  var letters=curSel.map(function(rc){return grid[rc[0]][rc[1]];}).join('');
+  var rev=letters.split('').reverse().join('');
+  var match=WORDS.find(function(item){return !found[item.w]&&(item.w===letters||item.w===rev);});
+  if(match){
+    found[match.w]=true;
+    curSel.forEach(function(rc){cellAt(rc[0],rc[1]).classList.remove('sel');cellAt(rc[0],rc[1]).classList.add('found');});
+    var chip=el('chip-'+match.w);if(chip)chip.classList.add('found');
+    if(Object.keys(found).length===WORDS.length)finishGame();
+  }else{
+    clearSel();
+  }
+  curSel=[];startCell=null;
+}
+
+function attachEvents(){
+  var gridEl=el('grid');
+  gridEl.addEventListener('mousedown',function(e){
+    if(!e.target.classList.contains('cell'))return;
+    startDrag(+e.target.dataset.r,+e.target.dataset.c);
+  });
+  gridEl.addEventListener('mouseover',function(e){
+    if(!dragging||!e.target.classList.contains('cell'))return;
+    updateDrag(+e.target.dataset.r,+e.target.dataset.c);
+  });
+  document.addEventListener('mouseup',endDrag);
+
+  gridEl.addEventListener('touchstart',function(e){
+    var t=e.touches[0];var target=document.elementFromPoint(t.clientX,t.clientY);
+    if(!target||!target.classList.contains('cell'))return;
+    e.preventDefault();
+    startDrag(+target.dataset.r,+target.dataset.c);
+  },{passive:false});
+  gridEl.addEventListener('touchmove',function(e){
+    if(!dragging)return;
+    e.preventDefault();
+    var t=e.touches[0];var target=document.elementFromPoint(t.clientX,t.clientY);
+    if(!target||!target.classList.contains('cell'))return;
+    updateDrag(+target.dataset.r,+target.dataset.c);
+  },{passive:false});
+  gridEl.addEventListener('touchend',function(e){e.preventDefault();endDrag();},{passive:false});
+}
 
 function startGame(){
-  var pool=BANK.filter(function(q){return mode==='core'?TENSES_CORE.indexOf(q.t)>=0:true;});
-  rounds=shuffle(pool).slice(0,total);
-  idx=0;score=0;streak=0;misses=[];
+  found={};
+  buildGrid();renderGrid();renderWordlist();attachEvents();
   el('intro').classList.add('hidden');el('results').classList.add('hidden');
   el('game').classList.remove('hidden');
-  renderQ();
+  startTime=Date.now();
+  clearInterval(timerInt);
+  timerInt=setInterval(function(){
+    var s=Math.floor((Date.now()-startTime)/1000);
+    el('timerStat').textContent=Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);
+  },500);
 }
 
-function renderQ(){
-  var q=rounds[idx];
-  el('rndLbl').textContent='Question '+(idx+1)+' of '+total;
-  el('streakLbl').textContent=streak>1?('\uD83D\uDD25 Streak '+streak):'';
-  el('barFill').style.width=(idx/total*100)+'%';
-  el('sent').innerHTML=q.s;
-  updateHdr();
-
-  var opts=el('opts');opts.innerHTML='';
-  var poolTenses=mode==='core'?TENSES_CORE:TENSES_ALL;
-  var choices=shuffle(poolTenses.filter(function(t){return t!==q.t;})).slice(0,3);
-  choices.push(q.t);choices=shuffle(choices);
-
-  choices.forEach(function(c){
-    var b=document.createElement('button');
-    b.className='opt';b.textContent=c;
-    b.addEventListener('click',function(){answer(c,q,b,choices);});
-    opts.appendChild(b);
-  });
-  el('fb').className='fb';el('fb').innerHTML='';
-  el('nextBtn').className='next-btn';
-}
-
-function answer(choice,q,btn,choices){
-  var allBtns=el('opts').querySelectorAll('.opt');
-  allBtns.forEach(function(b){b.disabled=true;if(b.textContent===q.t)b.classList.add('ok');});
-  var fb=el('fb');
-  if(choice===q.t){
-    streak++;best=Math.max(best,streak);
-    var pts=10+(streak>1?streak*2:0);
-    score+=pts;
-    fb.className='fb ok-fb show';
-    fb.innerHTML='<b>&#10003; Correct!</b> +'+pts+' points'+(streak>1?' (streak bonus)':'')+'.';
-  }else{
-    btn.classList.add('no');
-    streak=0;
-    misses.push(q);
-    fb.className='fb no-fb show';
-    fb.innerHTML='<b>Not quite.</b> The correct answer is <b>'+q.t+'</b>.';
-  }
-  updateHdr();
-  el('nextBtn').className='next-btn show';
-}
-
-function nextQuestion(){
-  idx++;
-  if(idx>=total){showResults();return;}
-  renderQ();
-}
-
-function updateHdr(){
-  el('hdrStats').innerHTML='<div class="stat">Score: '+score+'</div><div class="stat">Best streak: '+best+'</div>';
-}
-
-function showResults(){
+function finishGame(){
+  clearInterval(timerInt);
+  var secs=Math.floor((Date.now()-startTime)/1000);
+  var mm=Math.floor(secs/60),ss=secs%60;
   el('game').classList.add('hidden');
   el('results').classList.remove('hidden');
-  el('finalScore').textContent=score;
-  var pct=Math.round((total-misses.length)/total*100);
-  el('finalSub').textContent=(total-misses.length)+' / '+total+' correct ('+pct+'%)';
+  el('finalTime').textContent=mm+':'+(ss<10?'0':'')+ss;
   var msg;
-  if(pct===100) msg="Perfect score! You've mastered these tenses.";
-  else if(pct>=80) msg="Strong performance — just a little more review needed.";
-  else if(pct>=50) msg="Good effort. Revisit the tenses walkthrough for the ones you missed.";
-  else msg="Keep practising — work through the Tenses walkthrough, then try again.";
+  if(secs<=60)msg='Lightning fast \\u2014 you clearly know your tenses!';
+  else if(secs<=150)msg='Nicely done! Solid recall of tense vocabulary.';
+  else msg='All found! Review the terms below if any felt unfamiliar.';
   el('finalMsg').textContent=msg;
-
-  var missBox=el('missBox'),missList=el('missList');
-  if(misses.length){
-    missBox.classList.remove('hidden');
-    missList.innerHTML=misses.map(function(m){return '<div style="margin-bottom:6px;">'+m.s.replace(/<b>|<\/b>/g,'')+' &rarr; <b>'+m.t+'</b></div>';}).join('');
-  }else{
-    missBox.classList.add('hidden');
-  }
-  updateHdr();
-  logResult(score,total-misses.length,total);
+  el('glossList').innerHTML=WORDS.map(function(item){
+    return '<div style="margin-bottom:6px;"><b>'+item.w+'</b> \\u2014 '+item.def+'</div>';
+  }).join('');
 }
 
-function logResult(pts,correctCount,totalCount){
-  window._sbGame && window._sbGame.auth.getSession().then(function(r){
-    var session=r.data.session;if(!session)return;
-    return window._sbGame.from('topics').select('id').eq('topic_code','ENG-GRAM-06-GAME').maybeSingle().then(function(res){
-      var topic=res.data;if(!topic)return;
-      return window._sbGame.from('walkthrough_progress').upsert({
-        student_id:session.user.id,topic_id:topic.id,status:'completed',
-        completed_at:new Date().toISOString(),last_visited_at:new Date().toISOString(),
-        quiz_score:Math.round(correctCount/totalCount*10)
-      },{onConflict:'student_id,topic_id'});
-    });
-  });
-}
-
-updateHdr();
-</script>
-<script type="module">
-import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-window._sbGame=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+el('startBtn').addEventListener('click',startGame);
+el('againBtn').addEventListener('click',startGame);
 </script>
 </body>
 </html>
