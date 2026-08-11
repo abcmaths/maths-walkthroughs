@@ -10,7 +10,7 @@
     header { background: #C0272D; color: white; padding: 0 12px 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .header-toggles { display: flex; align-items: center; gap: 10px; overflow-x: auto; flex: 1 1 auto; min-width: 0; scrollbar-width: none; -ms-overflow-style: none; }
     .header-toggles::-webkit-scrollbar { display: none; }
-    .subtabs-row { background: #fff; border-bottom: 1px solid #eee; padding: 8px 20px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; display:none !important; }
+    .subtabs-row { background: #fff; border-bottom: 1px solid #eee; padding: 8px 20px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; display:none; }
     .subtabs-row::-webkit-scrollbar { display: none; }
     .header-account { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     /* Subject toggle */
@@ -167,7 +167,7 @@
     <div class="logo">ABC</div>
     <div class="subtitle" id="header-subtitle">ABC Learning Portal</div>
   </div>
-  <div class="header-toggles" style="display:none">
+  <div class="header-toggles">
     <div class="subject-toggle">
       <button id="toggle-english">✏️ English</button>
       <button id="toggle-maths" class="active">📐 Maths</button>
@@ -1095,7 +1095,7 @@
         const eligibleYear = yrNum === 10 || yrNum === 11 || yrNum === 12;
         if (profile.takes_extended_maths && eligibleYear) {
           addMathsBt.style.display = '';
-          addMathsBt.textContent = yrNum === 12 ? '\u2795 Further Maths' : '\u2795 Add Maths';
+          addMathsBt.textContent = yrNum === 12 ? '➕ Further Maths' : '➕ Add Maths';
         } else {
           addMathsBt.style.display = 'none';
         }
@@ -1499,11 +1499,17 @@
     const value = document.getElementById('year-select').value;
     let filtered, label;
 
-    const isArtsSubj = ARTS_SUBJECTS.includes(currentSubject) || BRIDGE_SUBJECTS.includes(currentSubject) || PHONICS_SUBJECTS.includes(currentSubject) || EXTENSION_SUBJECTS.includes(currentSubject);
-    if (isArtsSubj) {
-      // CRS, Government, Bridge, Phonics, and Extension span a fixed set of topics regardless of year — show all
+    const isBridgeSubj = BRIDGE_SUBJECTS.includes(currentSubject);
+    const isArtsSubj = ARTS_SUBJECTS.includes(currentSubject) || PHONICS_SUBJECTS.includes(currentSubject) || EXTENSION_SUBJECTS.includes(currentSubject);
+    if (isBridgeSubj) {
+      // Bridge topics are year-specific remedial packs (BRG9-MTH-*, BRG11-MTH-*, etc.)
+      // — unlike CRS/Government, they must be filtered to the student's own year.
+      filtered = allTopics.filter(t => (t.subject || 'maths') === currentSubject && t.year_group === myYearGroup);
+      label    = 'Your Bridge topics';
+    } else if (isArtsSubj) {
+      // CRS, Government, Phonics, and Extension span a fixed set of topics regardless of year — show all
       filtered = allTopics.filter(t => (t.subject || 'maths') === currentSubject);
-      label    = BRIDGE_SUBJECTS.includes(currentSubject) ? 'Your Bridge topics' : (PHONICS_SUBJECTS.includes(currentSubject) ? 'Your Phonics topics' : (EXTENSION_SUBJECTS.includes(currentSubject) ? 'Your Extension topics' : ('Showing all ' + (currentSubject === 'crs' ? 'CRS' : 'Government') + ' topics')));
+      label    = PHONICS_SUBJECTS.includes(currentSubject) ? 'Your Phonics topics' : (EXTENSION_SUBJECTS.includes(currentSubject) ? 'Your Extension topics' : ('Showing all ' + (currentSubject === 'crs' ? 'CRS' : 'Government') + ' topics'));
     } else if (value === 'own') {
       filtered = allTopics.filter(t => topicMatchesYear(t, currentSubject, myYearGroup) && (t.subject || 'maths') === currentSubject);
       label    = 'Showing your Year ' + myYearGroup + ' topics';
