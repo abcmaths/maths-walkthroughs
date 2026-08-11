@@ -86,6 +86,7 @@ header h1{font-size:16px;font-weight:700;}
   <div class="panel hidden" id="game">
     <div class="round-hdr"><span id="roundLbl">Round 1 of 10</span><span id="scoreLbl">0 correct</span></div>
     <div class="qtext">What is <span id="binDisplay" style="color:var(--red);font-family:monospace"></span> in denary?</div>
+    <div id="placeValueBox"></div>
     <div class="opts" id="opts"></div>
     <div class="feedback" id="feedback"></div>
   </div>
@@ -107,8 +108,17 @@ var TOTAL_ROUNDS=10;
 var BITS=4, MAXVAL=15;
 function rnd(n){return Math.floor(Math.random()*n);}
 function toBin(n){var s=n.toString(2);while(s.length<BITS)s='0'+s;return s;}
+var usedVals=[];
+function pickVal(){
+  var pool=[];
+  for(var i=0;i<=MAXVAL;i++){ if(usedVals.indexOf(i)===-1) pool.push(i); }
+  if(pool.length===0){ usedVals=[]; for(var i=0;i<=MAXVAL;i++) pool.push(i); }
+  var n=pool[rnd(pool.length)];
+  usedVals.push(n);
+  return n;
+}
 function genRound(){
-  var n=rnd(MAXVAL+1);
+  var n=pickVal();
   var opts=[n];
   var guard=0;
   while(opts.length<4 && guard<50){
@@ -119,12 +129,24 @@ function genRound(){
   for(var i=opts.length-1;i>0;i--){var j=rnd(i+1);var t=opts[i];opts[i]=opts[j];opts[j]=t;}
   return {bin:toBin(n),correct:n,opts:opts};
 }
+function placeValueSvg(binStr){
+  var vals=[8,4,2,1];
+  var boxes=vals.map(function(v,i){
+    var bit=binStr[i];
+    var on = bit==='1';
+    return '<div style="display:inline-block;width:44px;text-align:center;margin:0 3px;">'+
+           '<div style="font-size:11px;color:#888;font-weight:700;">'+v+'</div>'+
+           '<div style="width:36px;height:36px;border:2px solid '+(on?'var(--good)':'var(--line)')+';background:'+(on?'var(--goodbg)':'#fff')+';border-radius:6px;margin:2px auto 0;display:flex;align-items:center;justify-content:center;font-weight:800;color:'+(on?'var(--good)':'#ccc')+';">'+bit+'</div></div>';
+  }).join('');
+  return '<div style="margin-bottom:6px;">'+boxes+'</div>';
+}
 var el=function(id){return document.getElementById(id);};
 var round=0,correctCount=0,current=null,startTime=null,timerInt=null;
 function nextRound(){
   current=genRound();
   el('roundLbl').textContent='Round '+(round+1)+' of '+TOTAL_ROUNDS;
   el('binDisplay').textContent=current.bin;
+  if(el('placeValueBox')) el('placeValueBox').innerHTML=placeValueSvg(current.bin);
   el('feedback').textContent='';
   var box=el('opts');box.innerHTML='';
   current.opts.forEach(function(d){
@@ -154,7 +176,7 @@ function onOptionClick(val, btnEl, box){
   }
 }
 function startGame(){
-  round=0;correctCount=0;
+  round=0;correctCount=0;usedVals=[];
   el('intro').classList.add('hidden');el('results').classList.add('hidden');
   el('game').classList.remove('hidden');
   el('scoreLbl').textContent='0 correct';
