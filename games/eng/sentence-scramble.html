@@ -87,28 +87,45 @@ header h1{font-size:16px;font-weight:700;}
 var GAME_CODE='sentence-scramble';
 var TOTAL_ROUNDS=8;
 
+// Each entry: base sentence, plus any genuinely valid alternate word orders
+// (same meaning, same first word so capitalisation stays correct).
 var SENTENCES=[
-  'The curious cat crept slowly across the garden wall.',
-  'Every morning the baker opens his shop at dawn.',
-  'She carefully wrapped the gift before the party started.',
-  'The thunderstorm rolled quickly across the darkening sky.',
-  'Our teacher explained the tricky maths problem twice.',
-  'The old library smelled of dust and forgotten books.',
-  'A gentle breeze drifted through the open classroom window.',
-  'He practised his lines before the school play began.',
-  'The children built a tall sandcastle near the shore.',
-  'Bright fireworks lit up the night sky above the town.',
-  'The scientist recorded her results in a small notebook.',
-  'We watched the sunset from the top of the hill.',
-  'The nervous student waited outside the exam hall quietly.',
-  'A sudden silence fell over the crowded assembly hall.',
-  'The farmer collected fresh eggs early every single morning.'
+  { base:'The curious cat crept slowly across the garden wall.',
+    alts:['The curious cat slowly crept across the garden wall.'] },
+  { base:'Every morning the baker opens his shop at dawn.',
+    alts:[] },
+  { base:'She carefully wrapped the gift before the party started.',
+    alts:['She wrapped the gift carefully before the party started.'] },
+  { base:'The thunderstorm rolled quickly across the darkening sky.',
+    alts:['The thunderstorm quickly rolled across the darkening sky.','The thunderstorm rolled across the darkening sky quickly.'] },
+  { base:'Our teacher explained the tricky maths problem twice.',
+    alts:[] },
+  { base:'The old library smelled of dust and forgotten books.',
+    alts:['The old library smelled of forgotten books and dust.'] },
+  { base:'A gentle breeze drifted through the open classroom window.',
+    alts:[] },
+  { base:'He practised his lines before the school play began.',
+    alts:[] },
+  { base:'The children built a tall sandcastle near the shore.',
+    alts:[] },
+  { base:'Bright fireworks lit up the night sky above the town.',
+    alts:[] },
+  { base:'The scientist recorded her results in a small notebook.',
+    alts:[] },
+  { base:'We watched the sunset from the top of the hill.',
+    alts:[] },
+  { base:'The nervous student waited outside the exam hall quietly.',
+    alts:['The nervous student quietly waited outside the exam hall.'] },
+  { base:'A sudden silence fell over the crowded assembly hall.',
+    alts:[] },
+  { base:'The farmer collected fresh eggs early every single morning.',
+    alts:['The farmer collected fresh eggs every single morning early.'] }
 ];
 
 function rnd(n){return Math.floor(Math.random()*n);}
 
 var el=function(id){return document.getElementById(id);};
-var round=0,correctCount=0,correctWords=[],builtWords=[],poolWords=[],startTime=null,timerInt=null,usedIdx=[];
+var round=0,correctCount=0,acceptedOrders=[],correctWords=[],builtWords=[],poolWords=[],startTime=null,timerInt=null,usedIdx=[];
 
 function pickSentence(){
   var pool=SENTENCES.map(function(s,i){return i;}).filter(function(i){return usedIdx.indexOf(i)===-1;});
@@ -118,10 +135,14 @@ function pickSentence(){
   return SENTENCES[idx];
 }
 
+function toWords(sentence){
+  return sentence.replace(/\.$/,'').split(' ');
+}
+
 function nextRound(){
-  var sentence=pickSentence();
-  var clean=sentence.replace(/\.$/,'');
-  correctWords=clean.split(' ');
+  var entry=pickSentence();
+  correctWords=toWords(entry.base);
+  acceptedOrders=[correctWords].concat(entry.alts.map(toWords));
   builtWords=[];
   poolWords=correctWords.slice();
   for(var i=poolWords.length-1;i>0;i--){var j=rnd(i+1);var t=poolWords[i];poolWords[i]=poolWords[j];poolWords[j]=t;}
@@ -162,7 +183,9 @@ function renderBoxes(){
 }
 
 function checkSentence(){
-  var ok = builtWords.length===correctWords.length && builtWords.every(function(w,i){return w===correctWords[i];});
+  var ok = acceptedOrders.some(function(order){
+    return builtWords.length===order.length && builtWords.every(function(w,i){return w===order[i];});
+  });
   if(ok){
     el('feedback').className='feedback good';
     el('feedback').textContent='Correct!';
