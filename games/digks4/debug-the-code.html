@@ -10,7 +10,7 @@
 </script>
 <script src="../js/abc_game_widget.js"></script>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sentence Scramble — ABC Learning Portal</title>
+<title>Debug the Code — ABC Learning Portal</title>
 <style>
 :root{--red:#C0272D;--dark:#8f1c21;--cream:#FBF6F0;--ink:#241412;--line:#EBD8D5;--gold:#C8922A;--good:#2e7d32;--goodbg:#e8f5e9;--bad:#a01f24;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -19,7 +19,7 @@ header{background:var(--red);color:#fff;padding:14px 20px;display:flex;align-ite
 .back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
 header h1{font-size:16px;font-weight:700;}
 .stat{font-size:12px;font-weight:700;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:5px 10px;}
-.wrap{max-width:540px;margin:0 auto;padding:22px 14px 60px;}
+.wrap{max-width:560px;margin:0 auto;padding:22px 14px 60px;}
 .intro,.results{background:#fff;border:1px solid var(--line);border-radius:8px;padding:28px 24px;text-align:center;}
 .intro h2,.results h2{font-family:Georgia,serif;font-size:22px;margin-bottom:10px;}
 .intro p{font-size:14px;color:#555;line-height:1.6;margin-bottom:20px;}
@@ -27,15 +27,33 @@ header h1{font-size:16px;font-weight:700;}
 .start-btn:hover{background:var(--dark);}
 .panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:20px;text-align:center;}
 .round-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;}
+.qtext{font-size:19px;font-weight:700;line-height:1.5;margin:6px 0 20px;font-family:Georgia,serif;}
+.qtext code, .code-block{display:block;background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:12px;font-family:'Courier New',monospace;font-size:14px;text-align:left;white-space:pre;line-height:1.6;}
+.code-line{cursor:pointer;padding:2px 4px;border-radius:3px;}
+.code-line:hover{background:#FFF3E0;}
+.code-line.correct{background:var(--goodbg);color:var(--good);font-weight:700;}
+.code-line.wrong{background:#fde8e8;color:var(--bad);}
+.opts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.opt-btn{background:#fff;border:2px solid var(--line);border-radius:7px;padding:12px 18px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;}
+.opt-btn:hover{border-color:var(--gold);}
+.opt-btn.correct{border-color:var(--good);background:var(--goodbg);color:var(--good);}
+.opt-btn.wrong{border-color:var(--bad);background:#fde8e8;color:var(--bad);}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.bin-btn{border:2px solid var(--line);border-radius:8px;padding:14px 10px;font-size:14px;font-weight:700;cursor:pointer;background:#fff;font-family:inherit;}
+.bin-btn:hover{border-color:var(--gold);}
+.bin-btn.correct{border-color:var(--good);background:var(--goodbg);color:var(--good);}
+.bin-btn.wrong{border-color:var(--bad);background:#fde8e8;color:var(--bad);}
 .built-box{background:var(--cream);border:2px dashed var(--line);border-radius:8px;min-height:56px;padding:10px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;}
-.built-word{background:#fff;border:2px solid var(--good);color:var(--good);border-radius:6px;padding:6px 10px;font-size:15px;font-weight:700;cursor:pointer;}
+.built-word{background:#fff;border:2px solid var(--good);color:var(--good);border-radius:6px;padding:6px 10px;font-size:14px;font-weight:700;cursor:pointer;}
 .pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px;}
-.pool-word{background:#fff;border:2px solid var(--line);border-radius:6px;padding:8px 12px;font-size:15px;font-weight:700;cursor:pointer;}
+.pool-word{background:#fff;border:2px solid var(--line);border-radius:6px;padding:8px 12px;font-size:14px;font-weight:700;cursor:pointer;}
 .pool-word:hover{border-color:var(--gold);}
 .check-btn{background:var(--red);color:#fff;border:none;border-radius:6px;padding:12px 24px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
 .check-btn:hover{background:var(--dark);}
 .check-btn:disabled{opacity:.4;cursor:default;}
-.feedback{font-size:13.5px;font-weight:600;margin-top:10px;min-height:18px;}
+#answerInput{font-size:20px;font-weight:700;text-align:center;padding:10px;border:2px solid var(--line);border-radius:6px;font-family:inherit;width:180px;}
+#answerInput:focus{outline:none;border-color:var(--gold);}
+.feedback{font-size:13.5px;font-weight:600;margin-top:12px;min-height:18px;}
 .feedback.good{color:var(--good);}
 .feedback.bad{color:var(--bad);}
 .results .time{font-size:40px;font-weight:800;color:var(--red);margin:10px 0 4px;}
@@ -54,22 +72,22 @@ header h1{font-size:16px;font-weight:700;}
 <body>
 <header>
   <a href="../games-list.html" class="back">&larr; All Games</a>
-  <h1>Sentence Scramble</h1>
+  <h1>Debug the Code</h1>
   <div class="stat" id="timerStat">0:00</div>
 </header>
 <div class="wrap">
 
   <div class="intro" id="intro">
-    <h2>Rebuild the sentence</h2>
-    <p>Tap the scrambled words in the right order to rebuild a correct sentence. Tap a word in the box above to remove it if you change your mind. 8 rounds.</p>
+    <h2>\ud83d\udd0d Bug Hunt</h2>
+    <p>Each snippet has exactly one line with a bug. Tap the buggy line as fast as you can. 8 rounds, no skipping wrong taps.</p>
     <button class="start-btn" id="startBtn">Start</button>
   </div>
 
   <div class="panel hidden" id="game">
     <div class="round-hdr"><span id="roundLbl">Round 1 of 8</span><span id="scoreLbl">0 correct</span></div>
-    <div class="built-box" id="builtBox"></div>
-    <div class="pool" id="poolBox"></div>
-    <button class="check-btn" id="checkBtn" disabled>Check Sentence</button>
+    <div style="font-size:11.5px;color:var(--red);font-weight:700;margin-bottom:8px;min-height:16px;" id="streakLbl"></div>
+    <div class="qtext" style="font-size:14px;text-align:left">Tap the line that contains the bug:</div>
+    <div class="code-block" id="codeBlock"></div>
     <div class="feedback" id="feedback"></div>
   </div>
 
@@ -84,127 +102,59 @@ header h1{font-size:16px;font-weight:700;}
 
 </div>
 <script>
-var GAME_CODE='sentence-scramble';
+var GAME_CODE='debug-the-code-ks4';
 var TOTAL_ROUNDS=8;
 
-// Each entry: base sentence, plus any genuinely valid alternate word orders
-// (same meaning, same first word so capitalisation stays correct).
-var SENTENCES=[
-  { base:'The curious cat crept slowly across the garden wall.',
-    alts:['The curious cat slowly crept across the garden wall.'] },
-  { base:'Every morning the baker opens his shop at dawn.',
-    alts:[] },
-  { base:'She carefully wrapped the gift before the party started.',
-    alts:['She wrapped the gift carefully before the party started.'] },
-  { base:'The thunderstorm rolled quickly across the darkening sky.',
-    alts:['The thunderstorm quickly rolled across the darkening sky.','The thunderstorm rolled across the darkening sky quickly.'] },
-  { base:'Our teacher explained the tricky maths problem twice.',
-    alts:[] },
-  { base:'The old library smelled of dust and forgotten books.',
-    alts:['The old library smelled of forgotten books and dust.'] },
-  { base:'A gentle breeze drifted through the open classroom window.',
-    alts:[] },
-  { base:'He practised his lines before the school play began.',
-    alts:[] },
-  { base:'The children built a tall sandcastle near the shore.',
-    alts:[] },
-  { base:'Bright fireworks lit up the night sky above the town.',
-    alts:[] },
-  { base:'The scientist recorded her results in a small notebook.',
-    alts:[] },
-  { base:'We watched the sunset from the top of the hill.',
-    alts:[] },
-  { base:'The nervous student waited outside the exam hall quietly.',
-    alts:['The nervous student quietly waited outside the exam hall.'] },
-  { base:'A sudden silence fell over the crowded assembly hall.',
-    alts:[] },
-  { base:'The farmer collected fresh eggs early every single morning.',
-    alts:['The farmer collected fresh eggs every single morning early.'] }
-];
-
+var BANK = [{"lines": ["def factorial(n):", "    if n == 0:", "        return 0", "    return n * factorial(n-1)"], "bug": 2}, {"lines": ["nums = [4, 8, 15, 16, 23, 42]", "total = 0", "for i in range(len(nums)):", "    total += nums[i+1]"], "bug": 3}, {"lines": ["def is_even(n):", "    return n % 2 = 0", "print(is_even(4))"], "bug": 1}, {"lines": ["scores = [55, 70, 82, 90]", "average = sum(scores) / len(score)", "print(average)"], "bug": 1}, {"lines": ["i = 0", "while i < 10:", "    print(i)", "    i = i - 1"], "bug": 3}, {"lines": ["def find_max(lst):", "    max_val = lst[0]", "    for item in lst:", "        if item < max_val:", "            max_val = item", "    return max_val"], "bug": 3}, {"lines": ["class Student:", "    def __init__(self, name):", "        self.name = Name", "s = Student('Ade')"], "bug": 2}, {"lines": ["total = 0", "count = 0", "for n in [2, 4, 6]:", "    total += n", "    count += 1", "average = total / count", "print(averge)"], "bug": 6}, {"lines": ["def is_prime(n):", "    if n < 2:", "        return False", "    for i in range(2, n):", "        if n % i == 0:", "            return True", "    return True"], "bug": 5}, {"lines": ["try:", "    result = 10 / 0", "except:", "    print('Error')", "finally", "    print('Done')"], "bug": 4}];
 function rnd(n){return Math.floor(Math.random()*n);}
-
 var el=function(id){return document.getElementById(id);};
-var round=0,correctCount=0,acceptedOrders=[],correctWords=[],builtWords=[],poolWords=[],startTime=null,timerInt=null,usedIdx=[];
-
-function pickSentence(){
-  var pool=SENTENCES.map(function(s,i){return i;}).filter(function(i){return usedIdx.indexOf(i)===-1;});
-  if(pool.length===0){usedIdx=[];pool=SENTENCES.map(function(s,i){return i;});}
+var round=0,correctCount=0,streak=0,current=null,startTime=null,timerInt=null,usedIdx=[];
+function pickItem(){
+  var pool=BANK.map(function(b,i){return i;}).filter(function(i){return usedIdx.indexOf(i)===-1;});
+  if(pool.length===0){usedIdx=[];pool=BANK.map(function(b,i){return i;});}
   var idx=pool[rnd(pool.length)];
   usedIdx.push(idx);
-  return SENTENCES[idx];
+  return BANK[idx];
 }
-
-function toWords(sentence){
-  return sentence.replace(/\.$/,'').split(' ');
-}
-
 function nextRound(){
-  var entry=pickSentence();
-  correctWords=toWords(entry.base);
-  acceptedOrders=[correctWords].concat(entry.alts.map(toWords));
-  builtWords=[];
-  poolWords=correctWords.slice();
-  for(var i=poolWords.length-1;i>0;i--){var j=rnd(i+1);var t=poolWords[i];poolWords[i]=poolWords[j];poolWords[j]=t;}
+  var item=pickItem();
+  current={lines:item.lines,bugLine:item.bug};
   el('roundLbl').textContent='Round '+(round+1)+' of '+TOTAL_ROUNDS;
   el('feedback').textContent='';
-  renderBoxes();
+  if(el('streakLbl')) el('streakLbl').textContent = streak>=2 ? '\ud83d\udd0d '+streak+' bugs found in a row!' : '';
+  var box=el('codeBlock');box.innerHTML='';
+  current.lines.forEach(function(line,i){
+    var d=document.createElement('div');
+    d.className='code-line';
+    d.textContent=(i+1)+'.  '+line;
+    d.dataset.i=i;
+    d.addEventListener('click',function(){onLineClick(i,d,box);});
+    box.appendChild(d);
+  });
 }
-
-function renderBoxes(){
-  var built=el('builtBox');built.innerHTML='';
-  if(builtWords.length===0){
-    built.innerHTML='<span style="color:#bbb;font-size:13px">Tap words below to build the sentence&hellip;</span>';
-  }
-  builtWords.forEach(function(w,i){
-    var d=document.createElement('span');
-    d.className='built-word';
-    d.textContent=w;
-    d.addEventListener('click',function(){
-      poolWords.push(builtWords.splice(i,1)[0]);
-      renderBoxes();
-    });
-    built.appendChild(d);
-  });
-
-  var pool=el('poolBox');pool.innerHTML='';
-  poolWords.forEach(function(w,i){
-    var d=document.createElement('span');
-    d.className='pool-word';
-    d.textContent=w;
-    d.addEventListener('click',function(){
-      builtWords.push(poolWords.splice(i,1)[0]);
-      renderBoxes();
-    });
-    pool.appendChild(d);
-  });
-
-  el('checkBtn').disabled = poolWords.length!==0;
-}
-
-function checkSentence(){
-  var ok = acceptedOrders.some(function(order){
-    return builtWords.length===order.length && builtWords.every(function(w,i){return w===order[i];});
-  });
-  if(ok){
+function onLineClick(i, lineEl, box){
+  if(box.dataset.locked==='1')return;
+  if(i===current.bugLine){
+    box.dataset.locked='1';
+    lineEl.classList.add('correct');
     el('feedback').className='feedback good';
-    el('feedback').textContent='Correct!';
+    el('feedback').textContent='Found it!';
     correctCount++;
+    streak++;
     el('scoreLbl').textContent=correctCount+' correct';
     round++;
-    if(round>=TOTAL_ROUNDS){
-      setTimeout(finishGame,700);
-    }else{
-      setTimeout(nextRound,700);
-    }
+    if(round>=TOTAL_ROUNDS){ setTimeout(finishGame,800); }
+    else{ setTimeout(function(){box.dataset.locked='';nextRound();},800); }
   }else{
+    lineEl.classList.add('wrong');
     el('feedback').className='feedback bad';
-    el('feedback').textContent='Not quite the right order — tap words in the box to remove and retry.';
+    el('feedback').textContent='Not that line — try again.';
+    streak=0;
+    setTimeout(function(){lineEl.classList.remove('wrong');},400);
   }
 }
-
 function startGame(){
-  round=0;correctCount=0;usedIdx=[];
+  round=0;correctCount=0;streak=0;usedIdx=[];
   el('intro').classList.add('hidden');el('results').classList.add('hidden');
   el('game').classList.remove('hidden');
   el('scoreLbl').textContent='0 correct';
@@ -216,7 +166,6 @@ function startGame(){
     el('timerStat').textContent=Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);
   },500);
 }
-
 function finishGame(){
   clearInterval(timerInt);
   var secs=Math.floor((Date.now()-startTime)/1000);
@@ -224,18 +173,16 @@ function finishGame(){
   el('game').classList.add('hidden');
   el('results').classList.remove('hidden');
   el('finalTime').textContent=mm+':'+(ss<10?'0':'')+ss;
-
-  var score=Math.max(0,1500-secs*3);
+  var score=Math.max(0,1400-secs*3);
   if(window.ABCGame){
     window.ABCGame.submitScore(GAME_CODE,score,secs).then(function(){
       window.ABCGame.renderLeaderboard(GAME_CODE,el('lbList'),{limit:10});
     });
   }
 }
-
 el('startBtn').addEventListener('click',startGame);
-el('checkBtn').addEventListener('click',checkSentence);
 el('againBtn').addEventListener('click',startGame);
+
 </script>
 </body>
 </html>

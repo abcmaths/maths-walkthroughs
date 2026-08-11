@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc=createClient('https://lnwinoghbefmjpvmixzo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+  window._lc=_lc;
+  const {data:{session}}=await _lc.auth.getSession();
+  if(!session) window.location.href='../../login.html';
+</script>
+<script src="../js/abc_game_widget.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ABC Squaredle — ABC Learning Portal</title>
+<style>
+:root{--red:#C0272D;--dark:#8f1c21;--cream:#FBF6F0;--ink:#241412;--line:#EBD8D5;--gold:#C8922A;--good:#2e7d32;--goodbg:#e8f5e9;--bad:#a01f24;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100vh;}
+header{background:var(--red);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+header h1{font-size:16px;font-weight:700;}
+.stat{font-size:12px;font-weight:700;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:5px 10px;}
+.wrap{max-width:460px;margin:0 auto;padding:22px 14px 60px;}
+.intro,.results,.already{background:#fff;border:1px solid var(--line);border-radius:8px;padding:28px 24px;text-align:center;}
+.intro h2,.results h2,.already h2{font-family:Georgia,serif;font-size:22px;margin-bottom:10px;}
+.intro p,.already p{font-size:14px;color:#555;line-height:1.6;margin-bottom:20px;}
+.start-btn{background:var(--red);color:#fff;border:none;border-radius:5px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+.start-btn:hover{background:var(--dark);}
+.panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;text-align:center;}
+.progress{font-size:13px;color:#888;margin-bottom:10px;}
+#squareGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-width:320px;margin:0 auto 14px;touch-action:none;position:relative;}
+.sq-cell{aspect-ratio:1;border:2px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;background:#fff;cursor:pointer;text-transform:uppercase;transition:background .1s,border-color .1s;}
+.sq-cell.selected{background:#FFF3E0;border-color:var(--gold);}
+.sq-cell.found{background:var(--goodbg);border-color:var(--good);color:var(--good);}
+.current-word{font-size:22px;font-weight:800;letter-spacing:3px;min-height:30px;margin-bottom:10px;color:var(--red);}
+.wordlist{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px;}
+.wl-item{font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:10px;background:#f0f0f0;color:#aaa;}
+.wl-item.found{background:var(--goodbg);color:var(--good);}
+.feedback{font-size:13.5px;font-weight:600;margin-top:10px;min-height:18px;}
+.feedback.good{color:var(--good);}
+.feedback.bad{color:var(--bad);}
+.results .sub{font-size:13px;color:#888;margin-bottom:18px;}
+.results .time{font-size:40px;font-weight:800;color:var(--red);margin:10px 0 4px;}
+.lb-box{background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:20px;text-align:left;}
+.lb-box h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:8px;font-weight:700;}
+.abcg-lb-loading,.abcg-lb-empty{color:#999;font-size:12.5px;}
+.abcg-lb-head,.abcg-lb-row{display:grid;grid-template-columns:24px 1fr 60px 60px;gap:6px;padding:3px 0;font-size:12.5px;}
+.abcg-lb-head{color:#999;font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.05em;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:4px;}
+.abcg-lb-row{color:var(--ink);}
+.abcg-lb-me{font-weight:700;color:var(--red);}
+.abcg-lb-rank{color:var(--gold);font-weight:700;}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+<header>
+  <a href="../games-list.html" class="back">&larr; All Games</a>
+  <h1>ABC Squaredle</h1>
+  <div class="stat" id="timerStat">0:00</div>
+</header>
+<div class="wrap">
+
+  <div class="intro" id="intro">
+    <h2>Today's Grid</h2>
+    <p>Find every hidden word by connecting letters that touch — up, down, sideways, or diagonally. Either <b>drag</b> across the letters, or <b>tap them one at a time</b> then hit Submit. One puzzle per day — everyone gets the same grid!</p>
+    <button class="start-btn" id="startBtn">Play Today's Puzzle</button>
+  </div>
+
+  <div class="already hidden" id="already">
+    <h2>Already played today!</h2>
+    <p>You've already completed today's Squaredle. Come back tomorrow for a new grid!</p>
+    <div class="lb-box"><h4>Today's Leaderboard</h4><div id="lbListAlready"></div></div>
+    <div style="margin-top:10px;"><a href="../games-list.html" style="font-size:12.5px;color:#888;">All games &rarr;</a></div>
+  </div>
+
+  <div class="panel hidden" id="game">
+    <div class="progress" id="progressLbl"></div>
+    <div class="current-word" id="currentWordLbl"></div>
+    <div id="squareGrid"></div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;">
+      <button id="submitWordBtn" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:9px 20px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;">Submit Word</button>
+      <button id="clearWordBtn" style="background:#fff;color:#888;border:1.5px solid var(--line);border-radius:6px;padding:9px 20px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;">Clear</button>
+    </div>
+    <div class="wordlist" id="wordlistBox"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="results hidden" id="results">
+    <h2>Grid complete!</h2>
+    <div class="time" id="finalTime">0:00</div>
+    <div class="sub">time taken</div>
+    <div class="lb-box"><h4>Today's Leaderboard</h4><div id="lbList"></div></div>
+    <div style="margin-top:10px;"><a href="../games-list.html" style="font-size:12.5px;color:#888;">All games &rarr;</a></div>
+  </div>
+
+</div>
+<script>
+var GAME_CODE='abc-squaredle';
+var SIZE=5;
+
+var WORD_BANK=[
+  'NOUN','VERB','TENSE','CLAUSE','PHRASE','SIMILE','RHYME','STANZA','PROSE','PLOT',
+  'THEME','SETTING','CHARACTER','METAPHOR','IRONY','TONE','MOOD','GENRE','DIALOGUE',
+  'ADJECTIVE','ADVERB','SYLLABLE','VOWEL','SUFFIX','PREFIX','SYNONYM','ANTONYM',
+  'PARAGRAPH','SENTENCE','GRAMMAR','SPELLING','FLUENT','ESSAY','FABLE','MYTH','POEM'
+];
+
+function seedFromDate(dateStr){
+  var hash=0;
+  for(var i=0;i<dateStr.length;i++){ hash=((hash<<5)-hash+dateStr.charCodeAt(i))|0; }
+  return Math.abs(hash);
+}
+function mulberry32(seed){
+  return function(){
+    seed|=0; seed=(seed+0x6D2B79F5)|0;
+    var t=Math.imul(seed^(seed>>>15),1|seed);
+    t=(t+Math.imul(t^(t>>>7),61|t))^t;
+    return ((t^(t>>>14))>>>0)/4294967296;
+  };
+}
+function todayStr(){
+  var d=new Date();
+  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+
+var DIRS=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+function shuffle(arr, rng){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j=Math.floor(rng()*(i+1));
+    var t=a[i];a[i]=a[j];a[j]=t;
+  }
+  return a;
+}
+
+// (word placement logic lives inline in getTodayPuzzle below)
+
+function getTodayPuzzle(){
+  var seed=seedFromDate(todayStr());
+  var rng=mulberry32(seed);
+  var candidates=shuffle(WORD_BANK,rng).filter(function(w){return w.length<=8;});
+  var TARGET_COUNT=6;
+  var chosenSoFar=[];
+  var grid=null, paths=null;
+
+  // Keep trying words from the shuffled bank until we hit the target count or run out
+  var grid2=[];
+  for(var r=0;r<SIZE;r++){ grid2.push(new Array(SIZE).fill(null)); }
+  var placedPaths={};
+  var placedWords=[];
+
+  function tryPlaceWord(word){
+    var cells=[];
+    for(var r=0;r<SIZE;r++) for(var c=0;c<SIZE;c++) cells.push([r,c]);
+    cells=shuffle(cells,rng);
+    for(var s=0;s<cells.length;s++){
+      var startCell=cells[s];
+      if(grid2[startCell[0]][startCell[1]]!==null && grid2[startCell[0]][startCell[1]]!==word[0]) continue;
+      var path=[startCell];
+      var visited={}; visited[startCell[0]+','+startCell[1]]=true;
+      if(attemptPath(word,1,path,visited)) return path;
+    }
+    return null;
+  }
+  function attemptPath(word, idx, path, visited){
+    if(idx>=word.length) return true;
+    var last=path[path.length-1];
+    var dirs=shuffle(DIRS,rng);
+    for(var d=0;d<dirs.length;d++){
+      var nr=last[0]+dirs[d][0], nc=last[1]+dirs[d][1];
+      if(nr<0||nr>=SIZE||nc<0||nc>=SIZE) continue;
+      var key=nr+','+nc;
+      if(visited[key]) continue;
+      var existing=grid2[nr][nc];
+      if(existing!==null && existing!==word[idx]) continue;
+      path.push([nr,nc]);
+      visited[key]=true;
+      if(attemptPath(word, idx+1, path, visited)) return true;
+      path.pop();
+      delete visited[key];
+    }
+    return false;
+  }
+
+  for(var w=0; w<candidates.length && placedWords.length<TARGET_COUNT; w++){
+    var word=candidates[w];
+    var path=tryPlaceWord(word);
+    if(path){
+      placedPaths[word]=path;
+      path.forEach(function(cell,i){ grid2[cell[0]][cell[1]]=word[i]; });
+      placedWords.push(word);
+    }
+  }
+
+  var ALPHA='ETAOINSHRDLCUMWFGYPBVKJXQZ';
+  for(var r=0;r<SIZE;r++){
+    for(var c=0;c<SIZE;c++){
+      if(grid2[r][c]===null){ grid2[r][c]=ALPHA[Math.floor(rng()*ALPHA.length)]; }
+    }
+  }
+
+  return {grid:grid2, paths:placedPaths, words:placedWords};
+}
+
+var el=function(id){return document.getElementById(id);};
+var puzzle=null, foundWords=[], selectedPath=[], isDragging=false, dragExtended=false, startTime=null, timerInt=null;
+
+function cellKey(r,c){return r+','+c;}
+
+function buildGrid(){
+  var box=el('squareGrid');box.innerHTML='';
+  for(var r=0;r<SIZE;r++){
+    for(var c=0;c<SIZE;c++){
+      var cell=document.createElement('div');
+      cell.className='sq-cell';
+      cell.style.touchAction='none';
+      cell.textContent=puzzle.grid[r][c];
+      cell.dataset.r=r; cell.dataset.c=c;
+      cell.addEventListener('pointerdown',function(e){ onCellDown(e); });
+      box.appendChild(cell);
+    }
+  }
+  // Touch/pointer devices keep routing events to the element where the
+  // pointer went down (implicit capture), so pointerenter on other cells
+  // never fires. Instead, track pointermove on the grid itself and use
+  // elementFromPoint to work out which cell is currently under the finger.
+  box.addEventListener('pointermove', onGridPointerMove);
+  box.addEventListener('pointerup', onPointerUp);
+  box.addEventListener('pointercancel', onPointerUp);
+  document.addEventListener('pointerup', onPointerUp);
+}
+
+function onGridPointerMove(e){
+  if(!isDragging) return;
+  var target = document.elementFromPoint(e.clientX, e.clientY);
+  if(!target || !target.classList.contains('sq-cell')) return;
+  var r=Number(target.dataset.r), c=Number(target.dataset.c);
+  var last=selectedPath[selectedPath.length-1];
+  if(last[0]===r && last[1]===c) return;
+  if(isAdjacent(last,[r,c])){
+    var already=selectedPath.some(function(p){return p[0]===r&&p[1]===c;});
+    if(!already){ selectedPath.push([r,c]); dragExtended=true; renderSelection(); }
+  }
+}
+
+function isAdjacent(a,b){
+  var dr=Math.abs(a[0]-b[0]), dc=Math.abs(a[1]-b[1]);
+  return dr<=1 && dc<=1 && !(dr===0&&dc===0);
+}
+
+function onCellDown(e){
+  e.preventDefault();
+  isDragging=true;
+  dragExtended=false;
+  var r=Number(e.currentTarget.dataset.r), c=Number(e.currentTarget.dataset.c);
+
+  if(selectedPath.length>0){
+    var last=selectedPath[selectedPath.length-1];
+    var already=selectedPath.some(function(p){return p[0]===r&&p[1]===c;});
+    if(isAdjacent(last,[r,c]) && !already){
+      // Tapping the next adjacent letter continues the word being built
+      selectedPath.push([r,c]);
+      renderSelection();
+      return;
+    }
+    if(last[0]===r && last[1]===c){
+      // Tapping the same (last) letter again — do nothing, just keep it selected
+      return;
+    }
+  }
+  // Otherwise, start a brand new word from this letter
+  selectedPath=[[r,c]];
+  renderSelection();
+}
+
+function onPointerUp(){
+  if(!isDragging)return;
+  isDragging=false;
+  if(dragExtended){
+    // A genuine drag gesture — check the word automatically on release
+    checkWord();
+  }
+  // Otherwise this was just a single tap — leave the path open so the
+  // student can keep tapping letters one at a time, then press Submit.
+}
+
+function renderSelection(){
+  var cells=el('squareGrid').querySelectorAll('.sq-cell');
+  cells.forEach(function(cell){
+    var r=Number(cell.dataset.r), c=Number(cell.dataset.c);
+    var inPath=selectedPath.some(function(p){return p[0]===r&&p[1]===c;});
+    cell.classList.toggle('selected', inPath && !cell.classList.contains('found'));
+  });
+  var word=selectedPath.map(function(p){return puzzle.grid[p[0]][p[1]];}).join('');
+  el('currentWordLbl').textContent=word;
+}
+
+function checkWord(){
+  var word=selectedPath.map(function(p){return puzzle.grid[p[0]][p[1]];}).join('');
+  if(puzzle.words.indexOf(word)!==-1 && foundWords.indexOf(word)===-1){
+    foundWords.push(word);
+    markFound(selectedPath);
+    el('feedback').className='feedback good';
+    el('feedback').textContent='Found "'+word+'"!';
+    updateWordlist();
+    if(foundWords.length>=puzzle.words.length){
+      setTimeout(finishGame,700);
+    }
+  }else if(word.length>1){
+    el('feedback').className='feedback bad';
+    el('feedback').textContent = puzzle.words.indexOf(word)!==-1 ? 'Already found that one.' : 'Not a word in this grid — try again.';
+  }else if(word.length===1){
+    el('feedback').className='feedback bad';
+    el('feedback').textContent='Keep tapping adjacent letters, then press Submit.';
+    return; // don't clear a single selected letter — let them keep building
+  }
+  selectedPath=[];
+  el('currentWordLbl').textContent='';
+  var cells=el('squareGrid').querySelectorAll('.sq-cell');
+  cells.forEach(function(cell){ if(!cell.classList.contains('found')) cell.classList.remove('selected'); });
+}
+
+function clearSelection(){
+  selectedPath=[];
+  el('currentWordLbl').textContent='';
+  el('feedback').textContent='';
+  var cells=el('squareGrid').querySelectorAll('.sq-cell');
+  cells.forEach(function(cell){ if(!cell.classList.contains('found')) cell.classList.remove('selected'); });
+}
+
+function markFound(path){
+  var cells=el('squareGrid').querySelectorAll('.sq-cell');
+  cells.forEach(function(cell){
+    var r=Number(cell.dataset.r), c=Number(cell.dataset.c);
+    if(path.some(function(p){return p[0]===r&&p[1]===c;})){
+      cell.classList.add('found');
+      cell.classList.remove('selected');
+    }
+  });
+}
+
+function updateWordlist(){
+  var box=el('wordlistBox');box.innerHTML='';
+  puzzle.words.forEach(function(w){
+    var span=document.createElement('span');
+    span.className='wl-item'+(foundWords.indexOf(w)!==-1?' found':'');
+    span.textContent = foundWords.indexOf(w)!==-1 ? w : ('\u2022'.repeat(w.length));
+    box.appendChild(span);
+  });
+  el('progressLbl').textContent=foundWords.length+' of '+puzzle.words.length+' words found';
+}
+
+function checkAlreadyPlayed(){
+  try{ return localStorage.getItem('abc_squaredle_last_played')===todayStr(); }catch(e){ return false; }
+}
+function markPlayed(){
+  try{ localStorage.setItem('abc_squaredle_last_played', todayStr()); }catch(e){}
+}
+
+function startGame(){
+  puzzle=getTodayPuzzle();
+  foundWords=[];selectedPath=[];
+  el('intro').classList.add('hidden');
+  el('game').classList.remove('hidden');
+  buildGrid();
+  updateWordlist();
+  el('feedback').textContent='';
+  startTime=Date.now();
+  clearInterval(timerInt);
+  timerInt=setInterval(function(){
+    var s=Math.floor((Date.now()-startTime)/1000);
+    el('timerStat').textContent=Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);
+  },500);
+}
+
+function finishGame(){
+  clearInterval(timerInt);
+  markPlayed();
+  var secs=Math.floor((Date.now()-startTime)/1000);
+  var mm=Math.floor(secs/60),ss=secs%60;
+  el('game').classList.add('hidden');
+  el('results').classList.remove('hidden');
+  el('finalTime').textContent=mm+':'+(ss<10?'0':'')+ss;
+
+  var score=Math.max(0,1800-secs*3);
+  if(window.ABCGame){
+    window.ABCGame.submitScore(GAME_CODE,score,secs).then(function(){
+      window.ABCGame.renderLeaderboard(GAME_CODE,el('lbList'),{limit:10});
+    });
+  }
+}
+
+if(checkAlreadyPlayed()){
+  el('intro').classList.add('hidden');
+  el('already').classList.remove('hidden');
+  if(window.ABCGame){
+    window.ABCGame.renderLeaderboard(GAME_CODE,el('lbListAlready'),{limit:10});
+  }
+}
+el('startBtn').addEventListener('click',startGame);
+el('submitWordBtn').addEventListener('click',checkWord);
+el('clearWordBtn').addEventListener('click',clearSelection);
+</script>
+</body>
+</html>
