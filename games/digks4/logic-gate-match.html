@@ -12,48 +12,38 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Logic Gate Match — ABC Learning Portal</title>
 <style>
-:root{--red:#C0272D;--dark:#8f1c21;--cream:#FBF6F0;--ink:#241412;--line:#EBD8D5;--gold:#C8922A;--good:#2e7d32;--goodbg:#e8f5e9;--bad:#a01f24;}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{--red:#C0272D;--dark:#8f1c21;--cream:#FBF6F0;--ink:#241412;--line:#EBD8D5;--gold:#C8922A;--good:#2e7d32;--goodbg:#e8f5e9;--bad:#a01f24;--off:#ccc;--on:#F5B041;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
 body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100vh;}
 header{background:var(--red);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 6px rgba(0,0,0,.12);}
 .back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
 header h1{font-size:16px;font-weight:700;}
 .stat{font-size:12px;font-weight:700;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:5px 10px;}
-.wrap{max-width:560px;margin:0 auto;padding:22px 14px 60px;}
+.wrap{max-width:480px;margin:0 auto;padding:22px 14px 60px;}
 .intro,.results{background:#fff;border:1px solid var(--line);border-radius:8px;padding:28px 24px;text-align:center;}
 .intro h2,.results h2{font-family:Georgia,serif;font-size:22px;margin-bottom:10px;}
 .intro p{font-size:14px;color:#555;line-height:1.6;margin-bottom:20px;}
 .start-btn{background:var(--red);color:#fff;border:none;border-radius:5px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
 .start-btn:hover{background:var(--dark);}
 .panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:20px;text-align:center;}
-.round-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;}
-.qtext{font-size:19px;font-weight:700;line-height:1.5;margin:6px 0 20px;font-family:Georgia,serif;}
-.qtext code, .code-block{display:block;background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:12px;font-family:'Courier New',monospace;font-size:14px;text-align:left;white-space:pre;line-height:1.6;}
-.code-line{cursor:pointer;padding:2px 4px;border-radius:3px;}
-.code-line:hover{background:#FFF3E0;}
-.code-line.correct{background:var(--goodbg);color:var(--good);font-weight:700;}
-.code-line.wrong{background:#fde8e8;color:var(--bad);}
-.opts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-.opt-btn{background:#fff;border:2px solid var(--line);border-radius:7px;padding:12px 18px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;}
+.round-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.05em;}
+.streak{font-size:11.5px;color:var(--red);font-weight:700;margin-bottom:10px;min-height:16px;}
+.circuit{display:flex;align-items:center;justify-content:center;gap:6px;margin:10px 0 18px;}
+.switch-col{display:flex;flex-direction:column;gap:14px;}
+.switch{width:52px;height:52px;border-radius:50%;border:3px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;cursor:pointer;transition:all .15s;color:#aaa;}
+.switch.on{background:var(--on);border-color:#C8922A;color:#fff;box-shadow:0 0 12px rgba(245,176,65,.6);}
+.wire{width:26px;height:3px;background:var(--line);}
+.wire.on{background:var(--on);}
+.mystery-box{width:70px;height:60px;border:3px solid var(--ink);border-radius:8px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#888;}
+.bulb{width:46px;height:46px;border-radius:50%;border:3px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#ccc;transition:all .15s;}
+.bulb.on{background:#FFF3C4;border-color:var(--on);color:#a1650f;box-shadow:0 0 16px rgba(245,176,65,.7);}
+.hint{font-size:12.5px;color:#888;margin-bottom:14px;}
+.opts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.opt-btn{background:#fff;border:2px solid var(--line);border-radius:7px;padding:9px 14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;}
 .opt-btn:hover{border-color:var(--gold);}
 .opt-btn.correct{border-color:var(--good);background:var(--goodbg);color:var(--good);}
 .opt-btn.wrong{border-color:var(--bad);background:#fde8e8;color:var(--bad);}
-.bins{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.bin-btn{border:2px solid var(--line);border-radius:8px;padding:14px 10px;font-size:14px;font-weight:700;cursor:pointer;background:#fff;font-family:inherit;}
-.bin-btn:hover{border-color:var(--gold);}
-.bin-btn.correct{border-color:var(--good);background:var(--goodbg);color:var(--good);}
-.bin-btn.wrong{border-color:var(--bad);background:#fde8e8;color:var(--bad);}
-.built-box{background:var(--cream);border:2px dashed var(--line);border-radius:8px;min-height:56px;padding:10px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;}
-.built-word{background:#fff;border:2px solid var(--good);color:var(--good);border-radius:6px;padding:6px 10px;font-size:14px;font-weight:700;cursor:pointer;}
-.pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px;}
-.pool-word{background:#fff;border:2px solid var(--line);border-radius:6px;padding:8px 12px;font-size:14px;font-weight:700;cursor:pointer;}
-.pool-word:hover{border-color:var(--gold);}
-.check-btn{background:var(--red);color:#fff;border:none;border-radius:6px;padding:12px 24px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
-.check-btn:hover{background:var(--dark);}
-.check-btn:disabled{opacity:.4;cursor:default;}
-#answerInput{font-size:20px;font-weight:700;text-align:center;padding:10px;border:2px solid var(--line);border-radius:6px;font-family:inherit;width:180px;}
-#answerInput:focus{outline:none;border-color:var(--gold);}
-.feedback{font-size:13.5px;font-weight:600;margin-top:12px;min-height:18px;}
+.feedback{font-size:13.5px;font-weight:600;margin-top:14px;min-height:18px;}
 .feedback.good{color:var(--good);}
 .feedback.bad{color:var(--bad);}
 .results .time{font-size:40px;font-weight:800;color:var(--red);margin:10px 0 4px;}
@@ -72,33 +62,28 @@ header h1{font-size:16px;font-weight:700;}
 <body>
 <header>
   <a href="../games-list.html" class="back">&larr; All Games</a>
-  <h1>Logic Gate Match</h1>
+  <h1>Mystery Gate Box</h1>
   <div class="stat" id="timerStat">0:00</div>
 </header>
 <div class="wrap">
 
   <div class="intro" id="intro">
-    <h2>Name the gate</h2>
-    <p>Read the scenario and tap the correct logic gate: AND, OR, NOT, NAND, NOR, XOR. 10 rounds, no skipping wrong taps.</p>
+    <h2>\ud83d\udd0c What's in the box?</h2>
+    <p>There's a hidden logic gate inside each box — could be AND, OR, NOT, NAND, NOR or XOR. Tap the switches to try different inputs and watch the light — then work out which gate is hiding inside. 10 boxes, no skipping wrong guesses.</p>
     <button class="start-btn" id="startBtn">Start</button>
   </div>
 
   <div class="panel hidden" id="game">
-    <div class="round-hdr"><span id="roundLbl">Round 1 of 10</span><span id="scoreLbl">0 correct</span></div>
-    <div class="qtext" id="qtext" style="font-size:16px"></div>
-    <div class="bins" id="bins" style="grid-template-columns:1fr 1fr">
-      <button class="bin-btn" data-cls="AND"><svg width="40" height="26" viewBox="0 0 46 30" style="display:block;margin:0 auto 3px"><path d="M4 4 h14 a11 11 0 0 1 0 22 h-14 Z" fill="#FDEBD0" stroke="#C8922A" stroke-width="2"/><line x1="0" y1="9" x2="4" y2="9" stroke="#C8922A" stroke-width="2"/><line x1="0" y1="21" x2="4" y2="21" stroke="#C8922A" stroke-width="2"/><line x1="32" y1="15" x2="46" y2="15" stroke="#C8922A" stroke-width="2"/></svg>AND</button>
-      <button class="bin-btn" data-cls="OR"><svg width="40" height="26" viewBox="0 0 46 30" style="display:block;margin:0 auto 3px"><path d="M4 4 Q14 15 4 26 Q20 26 30 15 Q20 4 4 4 Z" fill="#D6EAF8" stroke="#1565C0" stroke-width="2"/><line x1="0" y1="9" x2="6" y2="9" stroke="#1565C0" stroke-width="2"/><line x1="0" y1="21" x2="6" y2="21" stroke="#1565C0" stroke-width="2"/><line x1="30" y1="15" x2="44" y2="15" stroke="#1565C0" stroke-width="2"/></svg>OR</button>
-      <button class="bin-btn" data-cls="NOT"><svg width="40" height="26" viewBox="0 0 46 30" style="display:block;margin:0 auto 3px"><path d="M6 4 L6 26 L26 15 Z" fill="#F5B7B1" stroke="#a01f24" stroke-width="2"/><circle cx="30" cy="15" r="3" fill="#fff" stroke="#a01f24" stroke-width="2"/><line x1="0" y1="15" x2="6" y2="15" stroke="#a01f24" stroke-width="2"/><line x1="33" y1="15" x2="44" y2="15" stroke="#a01f24" stroke-width="2"/></svg>NOT</button>
-      <button class="bin-btn" data-cls="NAND"><svg width="40" height="26" viewBox="0 0 46 30" style="display:block;margin:0 auto 3px"><path d="M4 4 h14 a11 11 0 0 1 0 22 h-14 Z" fill="#F9E9F3" stroke="#8E44AD" stroke-width="2"/><circle cx="29" cy="15" r="3" fill="#fff" stroke="#8E44AD" stroke-width="2"/><line x1="0" y1="9" x2="4" y2="9" stroke="#8E44AD" stroke-width="2"/><line x1="0" y1="21" x2="4" y2="21" stroke="#8E44AD" stroke-width="2"/><line x1="32" y1="15" x2="46" y2="15" stroke="#8E44AD" stroke-width="2"/></svg>NAND</button>
-      <button class="bin-btn" data-cls="NOR"><svg width="40" height="26" viewBox="0 0 46 30" style="display:block;margin:0 auto 3px"><path d="M4 4 Q14 15 4 26 Q20 26 30 15 Q20 4 4 4 Z" fill="#EAF2E8" stroke="#2E7D32" stroke-width="2"/><circle cx="33" cy="15" r="3" fill="#fff" stroke="#2E7D32" stroke-width="2"/><line x1="0" y1="9" x2="6" y2="9" stroke="#2E7D32" stroke-width="2"/><line x1="0" y1="21" x2="6" y2="21" stroke="#2E7D32" stroke-width="2"/><line x1="36" y1="15" x2="46" y2="15" stroke="#2E7D32" stroke-width="2"/></svg>NOR</button>
-      <button class="bin-btn" data-cls="XOR"><svg width="40" height="26" viewBox="0 0 46 30" style="display:block;margin:0 auto 3px"><path d="M0 4 Q10 15 0 26" fill="none" stroke="#C0272D" stroke-width="2"/><path d="M4 4 Q14 15 4 26 Q20 26 30 15 Q20 4 4 4 Z" fill="#FDE8E8" stroke="#C0272D" stroke-width="2"/><line x1="30" y1="15" x2="44" y2="15" stroke="#C0272D" stroke-width="2"/></svg>XOR</button>
-    </div>
+    <div class="round-hdr"><span id="roundLbl">Box 1 of 10</span><span id="scoreLbl">0 correct</span></div>
+    <div class="streak" id="streakLbl"></div>
+    <div class="circuit" id="circuitBox"></div>
+    <div class="hint">Tap the switches to test inputs, then pick the gate.</div>
+    <div class="opts" id="opts"></div>
     <div class="feedback" id="feedback"></div>
   </div>
 
   <div class="results hidden" id="results">
-    <h2>All rounds complete!</h2>
+    <h2>All boxes solved!</h2>
     <div class="time" id="finalTime">0:00</div>
     <div class="sub">time taken</div>
     <div class="lb-box"><h4>Leaderboard</h4><div id="lbList"></div></div>
@@ -108,67 +93,112 @@ header h1{font-size:16px;font-weight:700;}
 
 </div>
 <script>
-var GAME_CODE='logic-gate-match';
+var GAME_CODE_PLACEHOLDER='logic-gate-match-ks4';
 var TOTAL_ROUNDS=10;
+var GATE_TYPES=['AND','OR','NOT','NAND','NOR','XOR'];
 
-var BANK = [
-  ['Output is 1 only when BOTH inputs are 1.','AND'],
-  ['Output is 1 when EITHER input is 1 (or both).','OR'],
-  ['Output is the opposite of the single input.','NOT'],
-  ['Output is 0 only when both inputs are 1 — the opposite of AND.','NAND'],
-  ['Output is 1 only when both inputs are 0 — the opposite of OR.','NOR'],
-  ['Output is 1 only when the inputs are DIFFERENT from each other.','XOR'],
-  ['This gate is used to build all other logic gates and is never true when both inputs are true.','NAND'],
-  ['Output is true only if exactly one input is true, not both and not neither.','XOR'],
-  ['This gate\'s output is false whenever at least one input is true.','NOR'],
-  ['Two switches must both be closed for current to flow.','AND'],
-  ['A smoke alarm triggers if smoke OR heat is detected.','OR'],
-  ['A comparison circuit outputs true only when two bits do not match.','XOR'],
-  ['The output is high unless both inputs are high.','NAND'],
-  ['The output is high only when all inputs are low.','NOR']
-];
 function rnd(n){return Math.floor(Math.random()*n);}
+
+function gateOutput(type, a, b){
+  switch(type){
+    case 'AND': return (a&&b)?1:0;
+    case 'OR': return (a||b)?1:0;
+    case 'NOT': return a?0:1;
+    case 'NAND': return (a&&b)?0:1;
+    case 'NOR': return (a||b)?0:1;
+    case 'XOR': return (a!==b)?1:0;
+  }
+  return 0;
+}
+
+var GATE_ICONS={
+  AND:'<svg width="34" height="22" viewBox="0 0 46 30"><path d="M4 4 h14 a11 11 0 0 1 0 22 h-14 Z" fill="#FDEBD0" stroke="#C8922A" stroke-width="2"/></svg>',
+  OR:'<svg width="34" height="22" viewBox="0 0 46 30"><path d="M4 4 Q14 15 4 26 Q20 26 30 15 Q20 4 4 4 Z" fill="#D6EAF8" stroke="#1565C0" stroke-width="2"/></svg>',
+  NOT:'<svg width="34" height="22" viewBox="0 0 46 30"><path d="M6 4 L6 26 L26 15 Z" fill="#F5B7B1" stroke="#a01f24" stroke-width="2"/><circle cx="30" cy="15" r="3" fill="#fff" stroke="#a01f24" stroke-width="2"/></svg>',
+  NAND:'<svg width="34" height="22" viewBox="0 0 46 30"><path d="M4 4 h14 a11 11 0 0 1 0 22 h-14 Z" fill="#F9E9F3" stroke="#8E44AD" stroke-width="2"/><circle cx="29" cy="15" r="3" fill="#fff" stroke="#8E44AD" stroke-width="2"/></svg>',
+  NOR:'<svg width="34" height="22" viewBox="0 0 46 30"><path d="M4 4 Q14 15 4 26 Q20 26 30 15 Q20 4 4 4 Z" fill="#EAF2E8" stroke="#2E7D32" stroke-width="2"/><circle cx="33" cy="15" r="3" fill="#fff" stroke="#2E7D32" stroke-width="2"/></svg>',
+  XOR:'<svg width="34" height="22" viewBox="0 0 46 30"><path d="M0 4 Q10 15 0 26" fill="none" stroke="#C0272D" stroke-width="2"/><path d="M4 4 Q14 15 4 26 Q20 26 30 15 Q20 4 4 4 Z" fill="#FDE8E8" stroke="#C0272D" stroke-width="2"/></svg>'
+};
+
 var el=function(id){return document.getElementById(id);};
-var round=0,correctCount=0,current=null,startTime=null,timerInt=null,usedIdx=[];
-function pickItem(){
-  var pool=BANK.map(function(b,i){return i;}).filter(function(i){return usedIdx.indexOf(i)===-1;});
-  if(pool.length===0){usedIdx=[];pool=BANK.map(function(b,i){return i;});}
-  var idx=pool[rnd(pool.length)];
-  usedIdx.push(idx);
-  return BANK[idx];
+var round=0,correctCount=0,streak=0,current=null,inputA=0,inputB=0,startTime=null,timerInt=null,usedIdx=[],pool=[];
+
+function refillPool(){
+  pool=GATE_TYPES.slice();
+  for(var i=pool.length-1;i>0;i--){var j=rnd(i+1);var t=pool[i];pool[i]=pool[j];pool[j]=t;}
 }
-function nextRound(){
-  var item=pickItem();
-  current={q:item[0],cls:item[1]};
-  el('roundLbl').textContent='Round '+(round+1)+' of '+TOTAL_ROUNDS;
-  el('qtext').textContent=current.q;
-  el('feedback').textContent='';
-  var buttons=el('bins').querySelectorAll('.bin-btn');
-  buttons.forEach(function(b){b.classList.remove('correct','wrong');});
+function pickGate(){
+  if(pool.length===0) refillPool();
+  return pool.shift();
 }
-function onBinClick(e){
-  var box=el('bins');
-  if(box.dataset.locked==='1')return;
-  var btn=e.currentTarget;
-  var cls=btn.dataset.cls;
-  if(cls===current.cls){
-    box.dataset.locked='1';
-    btn.classList.add('correct');
-    el('feedback').className='feedback good';
-    el('feedback').textContent='Correct!';
-    correctCount++;
-    el('scoreLbl').textContent=correctCount+' correct';
-    round++;
-    if(round>=TOTAL_ROUNDS){ setTimeout(finishGame,600); }
-    else{ setTimeout(function(){box.dataset.locked='';nextRound();},600); }
-  }else{
-    btn.classList.add('wrong');
-    el('feedback').className='feedback bad';
-    el('feedback').textContent='Not quite — try again.';
+
+function renderCircuit(){
+  var isNot=current==='NOT';
+  var box=el('circuitBox');
+  var out=gateOutput(current, inputA, isNot?0:inputB);
+  var html='<div class="switch-col">';
+  html+='<div class="switch'+(inputA?' on':'')+'" id="swA">'+inputA+'</div>';
+  if(!isNot){
+    html+='<div class="switch'+(inputB?' on':'')+'" id="swB">'+inputB+'</div>';
+  }
+  html+='</div>';
+  html+='<div class="wire'+(inputA||(!isNot&&inputB)?' on':'')+'"></div>';
+  html+='<div class="mystery-box">?</div>';
+  html+='<div class="wire'+(out?' on':'')+'"></div>';
+  html+='<div class="bulb'+(out?' on':'')+'">'+out+'</div>';
+  box.innerHTML=html;
+
+  el('swA').addEventListener('click',function(){ inputA=inputA?0:1; renderCircuit(); });
+  if(!isNot){
+    el('swB').addEventListener('click',function(){ inputB=inputB?0:1; renderCircuit(); });
   }
 }
+
+function nextRound(){
+  current=pickGate();
+  inputA=0; inputB=0;
+  el('roundLbl').textContent='Box '+(round+1)+' of '+TOTAL_ROUNDS;
+  el('feedback').textContent='';
+  el('streakLbl').textContent = streak>=2 ? '\u26a1 '+streak+' in a row!' : '';
+  renderCircuit();
+
+  var box=el('opts');box.innerHTML='';
+  GATE_TYPES.forEach(function(g){
+    var btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.innerHTML=(GATE_ICONS[g]||'')+'<span>'+g+'</span>';
+    btn.addEventListener('click',function(){ onGuess(g,btn,box); });
+    box.appendChild(btn);
+  });
+}
+
+function onGuess(guess, btnEl, box){
+  if(box.dataset.locked==='1')return;
+  if(guess===current){
+    box.dataset.locked='1';
+    btnEl.classList.add('correct');
+    el('feedback').className='feedback good';
+    el('feedback').textContent='Correct — it was '+current+'!';
+    correctCount++;
+    streak++;
+    el('scoreLbl').textContent=correctCount+' correct';
+    round++;
+    if(round>=TOTAL_ROUNDS){
+      setTimeout(finishGame,900);
+    }else{
+      setTimeout(function(){box.dataset.locked='';nextRound();},900);
+    }
+  }else{
+    btnEl.classList.add('wrong');
+    el('feedback').className='feedback bad';
+    el('feedback').textContent='Not that one — test more inputs and try again.';
+    streak=0;
+  }
+}
+
 function startGame(){
-  round=0;correctCount=0;usedIdx=[];
+  round=0;correctCount=0;streak=0;
+  refillPool();
   el('intro').classList.add('hidden');el('results').classList.add('hidden');
   el('game').classList.remove('hidden');
   el('scoreLbl').textContent='0 correct';
@@ -180,6 +210,7 @@ function startGame(){
     el('timerStat').textContent=Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);
   },500);
 }
+
 function finishGame(){
   clearInterval(timerInt);
   var secs=Math.floor((Date.now()-startTime)/1000);
@@ -187,17 +218,17 @@ function finishGame(){
   el('game').classList.add('hidden');
   el('results').classList.remove('hidden');
   el('finalTime').textContent=mm+':'+(ss<10?'0':'')+ss;
+
   var score=Math.max(0,1600-secs*3);
   if(window.ABCGame){
-    window.ABCGame.submitScore(GAME_CODE,score,secs).then(function(){
-      window.ABCGame.renderLeaderboard(GAME_CODE,el('lbList'),{limit:10});
+    window.ABCGame.submitScore(GAME_CODE_PLACEHOLDER,score,secs).then(function(){
+      window.ABCGame.renderLeaderboard(GAME_CODE_PLACEHOLDER,el('lbList'),{limit:10});
     });
   }
 }
-el('bins').querySelectorAll('.bin-btn').forEach(function(b){b.addEventListener('click',onBinClick);});
+
 el('startBtn').addEventListener('click',startGame);
 el('againBtn').addEventListener('click',startGame);
-
 </script>
 </body>
 </html>
