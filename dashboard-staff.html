@@ -922,6 +922,7 @@
   window._supabase = supabase;
 
   let allStudents = [], allProgress = [], allTopics = [];
+  let allStaffActiveMap = {};
 
   // ── Use getSession directly — more reliable than onAuthStateChange for page loads ──
   async function init() {
@@ -958,6 +959,7 @@
       while (true) {
         let q = supabase.from(table).select(selectStr);
         if (applyFilters) q = applyFilters(q);
+        else q = q.order('id', { ascending: true });
         const { data, error } = await q.range(from, from + PAGE - 1);
         if (error) { console.error(`load ${table} error:`, error); break; }
         all = all.concat(data || []);
@@ -977,6 +979,8 @@
     console.log('Data loaded — students:', students.length, 'topics:', topics.length, 'progress:', progress.length);
 
     allStudents = students || [];
+    allStaffActiveMap = {};
+    (teachers || []).forEach(t => { allStaffActiveMap[t.id] = t.active !== false; });
     allTopics   = topics   || [];
     allProgress = progress || [];
 
@@ -2157,6 +2161,7 @@
       const { data, error } = await supabase
         .from('walkthrough_reviews')
         .select('*, profiles(full_name)')
+        .order('id', { ascending: true })
         .range(from, from + PAGE - 1);
       if (error) { console.error('loadReviews error:', error); break; }
       all = all.concat(data || []);
@@ -2238,6 +2243,7 @@
     // Teacher summary
     const teacherMap = {};
     allReviews.forEach(r => {
+      if (allStaffActiveMap.hasOwnProperty(r.reviewer_id) && allStaffActiveMap[r.reviewer_id] === false) return; // skip archived staff
       if (!teacherMap[r.reviewer_id]) teacherMap[r.reviewer_id] = { name: r.profiles?.full_name || '—', count: 0, topics: new Set(), rows: [] };
       teacherMap[r.reviewer_id].topics.add(r.topic_id);
       teacherMap[r.reviewer_id].count++;
@@ -2245,7 +2251,7 @@
     });
 
     const COMMENT_MIN_CHARS = 10;
-    const RAPID_SECONDS = 5;
+    const RAPID_SECONDS = 1.2;
 
     const summaryEl = document.getElementById('review-teacher-summary');
     const teacherList = Object.values(teacherMap).sort((a, b) => b.topics.size - a.topics.size);
