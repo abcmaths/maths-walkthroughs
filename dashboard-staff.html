@@ -2354,6 +2354,15 @@
           .sort((a, b) => a - b)
           .map((idx, i) => ({ num: i + 1, title: `Bridge Question ${idx + 1}` }));
       }
+      // Deep Dive format: <section class="stage" data-stage="N" ...>...<h2>Title</h2>
+      // Multi-stage teaching files, structured as HTML sections rather than a JS array.
+      const stageMatches = [...html.matchAll(/<section class="stage" data-stage="(\d+)"[^>]*>[\s\S]*?<h2>([^<]+)<\/h2>/g)];
+      if (stageMatches.length > 0) {
+        return stageMatches
+          .map(m => ({ stage: parseInt(m[1], 10), title: m[2] }))
+          .sort((a, b) => a.stage - b.stage)
+          .map((s, i) => ({ num: i + 1, title: s.title }));
+      }
       return [];
     } catch(e) { return []; }
   }
