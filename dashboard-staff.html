@@ -263,6 +263,12 @@
                 <option value="crs">✝️ CRS</option>
                 <option value="government">🏛️ Government</option>
                 <option value="digitaltech">💻 Digital Tech</option>
+                <option value="bridge_maths">📐 Bridge Maths</option>
+                <option value="bridge_science">🔬 Bridge Science</option>
+                <option value="bridge_english">✏️ Bridge English</option>
+                <option value="phonics">🔤 Phonics</option>
+                <option value="ext_maths">📐 Extension Maths</option>
+                <option value="ext_english">✏️ Extension English</option>
         </select>
         <select id="topics-filter-year" onchange="renderTopicsTab()">
           <option value="7">Year 7</option>
@@ -2098,6 +2104,43 @@
     'BRG11-SCI-03': 'bridge_sci_y11/BRG11-SCI-03.html',
   };
 
+  const PHONICS_WALKTHROUGH_FILES = {
+    'PHO-01': 'phonics/PHO-01.html',
+    'PHO-02': 'phonics/PHO-02.html',
+    'PHO-03': 'phonics/PHO-03.html',
+    'PHO-04': 'phonics/PHO-04.html',
+    'PHO-05': 'phonics/PHO-05.html',
+    'PHO-06': 'phonics/PHO-06.html',
+    'PHO-07': 'phonics/PHO-07.html',
+    'PHO-08': 'phonics/PHO-08.html',
+    'PHO-09': 'phonics/PHO-09.html',
+    'PHO-10': 'phonics/PHO-10.html',
+    'PHO-11': 'phonics/PHO-11.html',
+    'PHO-12': 'phonics/PHO-12.html',
+  };
+
+  const EXT_MTH_WALKTHROUGH_FILES = {
+    'EXT-MTH-01': 'ext_mth/EXT-MTH-01.html',
+    'EXT-MTH-02': 'ext_mth/EXT-MTH-02.html',
+    'EXT-MTH-03': 'ext_mth/EXT-MTH-03.html',
+    'EXT-MTH-04': 'ext_mth/EXT-MTH-04.html',
+    'EXT-MTH-05': 'ext_mth/EXT-MTH-05.html',
+    'EXT-MTH-06': 'ext_mth/EXT-MTH-06.html',
+    'EXT-MTH-07': 'ext_mth/EXT-MTH-07.html',
+    'EXT-MTH-08': 'ext_mth/EXT-MTH-08.html',
+  };
+
+  const EXT_ENG_WALKTHROUGH_FILES = {
+    'EXT-ENG-01': 'ext_eng/EXT-ENG-01.html',
+    'EXT-ENG-02': 'ext_eng/EXT-ENG-02.html',
+    'EXT-ENG-03': 'ext_eng/EXT-ENG-03.html',
+    'EXT-ENG-04': 'ext_eng/EXT-ENG-04.html',
+    'EXT-ENG-05': 'ext_eng/EXT-ENG-05.html',
+    'EXT-ENG-06': 'ext_eng/EXT-ENG-06.html',
+    'EXT-ENG-07': 'ext_eng/EXT-ENG-07.html',
+    'EXT-ENG-08': 'ext_eng/EXT-ENG-08.html',
+  };
+
   const DIGITALTECH_STRAND_COLOURS = {
     'Foundations':             '#37474F',
     'Data & Safety':           '#00838F',
@@ -2136,6 +2179,12 @@
     chemistry: { 'Physical Chemistry':'#1565C0','Atomic Structure':'#6A1B9A','Bonding':'#E65100','Stoichiometry':'#C0272D','Electrochemistry':'#00695C','Energetics':'#C0272D','Kinetics':'#E65100','Redox':'#6A1B9A','Acids & Bases':'#C0272D','Periodic Table':'#1565C0','Metals':'#00695C','Environment':'#2E7D32','Organic':'#E65100','Analysis':'#555','Inorganic':'#888','Practical':'#888' },
     biology:   { 'Classification':'#2E7D32','Cell Biology':'#1565C0','Biochemistry':'#6A1B9A','Plant Biology':'#2E7D32','Human Biology':'#C0272D','Health & Disease':'#E65100','Reproduction':'#E65100','Genetics':'#6A1B9A','Ecology':'#00695C','Biotechnology':'#1565C0','Evolution':'#00695C','Practical':'#888' },
     digitaltech: DIGITALTECH_STRAND_COLOURS,
+    bridge_maths: { 'Bridge': '#C0272D' },
+    bridge_science: { 'Bridge': '#C0272D' },
+    bridge_english: { 'Bridge': '#C0272D' },
+    phonics: { 'Phonics': '#C0272D' },
+    ext_maths: { 'Extension': '#C0272D' },
+    ext_english: { 'Extension': '#C0272D' },
   };
 
   function getWalkthroughFile(subject, topicCode) {
@@ -2148,7 +2197,10 @@
     else if (subject === 'crs')        file = CRS_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'government') file = GOV_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'digitaltech') file = DIGITALTECH_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'bridge')      file = BRIDGE_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'bridge' || subject === 'bridge_maths' || subject === 'bridge_science' || subject === 'bridge_english') file = BRIDGE_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'phonics')    file = PHONICS_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'ext_maths')  file = EXT_MTH_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'ext_english') file = EXT_ENG_WALKTHROUGH_FILES[topicCode];
     else file = WALKTHROUGH_FILES[topicCode];
     // Fallback: bridge codes may be tagged under any subject value in the topics table —
     // always check the bridge map by code shape so review/testing isn't blocked on that.
@@ -3629,18 +3681,23 @@
   };
 
   // ── Render topics tab ──
+  const YEAR_AGNOSTIC_SUBJECTS = ['phonics', 'ext_maths', 'ext_english'];
+
   window.renderTopicsTab = function() {
     const yr      = parseInt(document.getElementById('topics-filter-year').value) || 13;
     const subject = document.getElementById('topics-filter-subject').value;
-    const filtered = allTopics.filter(t => t.year_group === yr && (t.subject || 'maths') === subject);
+    const isYearAgnostic = YEAR_AGNOSTIC_SUBJECTS.includes(subject);
+    const filtered = allTopics.filter(t => (isYearAgnostic || t.year_group === yr) && (t.subject || 'maths') === subject);
     const grid = document.getElementById('topics-grid');
+    const yearSelectEl = document.getElementById('topics-filter-year');
+    yearSelectEl.style.display = isYearAgnostic ? 'none' : '';
 
     // Hide Add Maths / Further Maths when any non-Maths subject is selected
     const addMathsOpt = document.querySelector('#topics-filter-year option[value="13"]');
     const furtherMathsOpt = document.querySelector('#topics-filter-year option[value="14"]');
     if (addMathsOpt) addMathsOpt.style.display = subject === 'maths' ? '' : 'none';
     if (furtherMathsOpt) furtherMathsOpt.style.display = subject === 'maths' ? '' : 'none';
-    if (subject !== 'maths' && (yr === 13 || yr === 14)) {
+    if (subject !== 'maths' && !isYearAgnostic && (yr === 13 || yr === 14)) {
       document.getElementById('topics-filter-year').value = '10';
       window.renderTopicsTab(); return;
     }
