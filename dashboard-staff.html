@@ -134,7 +134,7 @@
   <div class="nav-tab" onclick="showTab('topics')">Browse Topics</div>
   <div class="nav-tab" onclick="showTab('users')">Users</div>
   <div class="nav-tab" onclick="showTab('diagnostic')">Diagnostic</div>
-  <div class="nav-tab" onclick="showTab('reviews')">Review Walkthroughs</div>
+  <div class="nav-tab" id="nav-tab-reviews" onclick="showTab('reviews')">Review Walkthroughs</div>
   <div class="nav-tab" onclick="showTab('import')">Import Users</div>
   <div class="nav-tab" onclick="showTab('deepdive')">Deep Dive Progress</div>
   <div class="nav-tab" onclick="showTab('games')">Games</div>
@@ -957,6 +957,8 @@
   let allStudents = [], allProgress = [], allTopics = [], allPeople = [];
   let allStaffActiveMap = {};
 
+  let isAbcSchool = true; // default true; set precisely once branding loads
+
   async function applySchoolBranding(schoolId) {
     try {
       const { data: school } = await supabase
@@ -987,6 +989,12 @@
         document.documentElement.style.setProperty('--brand', school.primary_color);
         document.querySelectorAll('header, .card-header').forEach(el => el.style.background = school.primary_color);
       }
+
+      // Review Walkthroughs (and its per-question payment tracking) is an
+      // ABC-only internal process — hide entirely for other schools.
+      isAbcSchool = isAbc;
+      const reviewsTab = document.getElementById('nav-tab-reviews');
+      if (reviewsTab) reviewsTab.style.display = isAbc ? '' : 'none';
     } catch (e) {
       console.warn('Branding load failed, using defaults', e);
     }
@@ -1429,6 +1437,7 @@
 
   // ── Tab switching ──
   window.showTab = function(name) {
+    if (name === 'reviews' && !isAbcSchool) { name = 'overview'; }
     const names = ['overview','progress','tests','topics','users','diagnostic','reviews','import','deepdive','games'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
