@@ -2247,10 +2247,12 @@
       reviewMap[r.topic_id].questions.add(r.question_number);
     });
 
-    // Teacher summary
+    // Teacher summary — only reviews submitted under the new pay policy count
+    const PAY_POLICY_CUTOFF = new Date('2026-08-13T00:00:00Z');
     const teacherMap = {};
     allReviews.forEach(r => {
       if (allStaffActiveMap.hasOwnProperty(r.reviewer_id) && allStaffActiveMap[r.reviewer_id] === false) return; // skip archived staff
+      if (new Date(r.reviewed_at) < PAY_POLICY_CUTOFF) return; // skip pre-cutoff reviews, already settled
       if (!teacherMap[r.reviewer_id]) teacherMap[r.reviewer_id] = { name: r.profiles?.full_name || '—', count: 0, topics: new Set(), rows: [] };
       teacherMap[r.reviewer_id].topics.add(r.topic_id);
       teacherMap[r.reviewer_id].count++;
