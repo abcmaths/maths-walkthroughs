@@ -135,7 +135,8 @@
   <div class="nav-tab" onclick="showTab('users')">Users</div>
   <div class="nav-tab" onclick="showTab('diagnostic')">Diagnostic</div>
   <div class="nav-tab" id="nav-tab-reviews" onclick="showTab('reviews')">Review Walkthroughs</div>
-  <div class="nav-tab" onclick="showTab('import')">Import Users</div>
+  <div class="nav-tab" id="nav-tab-import" onclick="showTab('import')">Import Users</div>
+  <div class="nav-tab" id="nav-tab-schools" onclick="showTab('schools')">Schools</div>
   <div class="nav-tab" onclick="showTab('deepdive')">Deep Dive Progress</div>
   <div class="nav-tab" onclick="showTab('games')">Games</div>
 </div>
@@ -747,6 +748,10 @@
         <div class="section-title" style="margin-bottom:20px">Create Individual User</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:16px">
           <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">School</label>
+            <select id="cu-school" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;background:white"></select>
+          </div>
+          <div>
             <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Full Name</label>
             <input type="text" id="cu-name" placeholder="e.g. Amara Okafor" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
           </div>
@@ -789,6 +794,10 @@
       <!-- CSV Import -->
       <div class="section">
         <div class="section-title" style="margin-bottom:8px">Import Students via CSV</div>
+        <div style="margin-bottom:16px;max-width:280px">
+          <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">School</label>
+          <select id="csv-school" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;background:white"></select>
+        </div>
         <p style="font-size:0.85rem;color:#666;margin-bottom:16px">
           CSV must have these column headers:<br>
           <code style="background:#f5f5f5;padding:2px 6px;border-radius:3px">email, full_name, year_group, password</code>
@@ -818,6 +827,42 @@
         <div class="import-log" id="import-log"></div>
       </div>
     </div>
+    </div>
+
+    <!-- SCHOOLS (super-admin only) -->
+    <div class="tab-panel" id="tab-schools">
+      <div class="section" style="margin-bottom:24px">
+        <div class="section-title" style="margin-bottom:20px">Add School</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:16px">
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">School Name</label>
+            <input type="text" id="sc-name" placeholder="e.g. Greenfield International School" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">School Code</label>
+            <input type="text" id="sc-code" placeholder="e.g. greenfield (lowercase, unique)" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Brand Color</label>
+            <input type="color" id="sc-color" value="#2C6E49" style="width:100%;padding:4px;border:1.5px solid #ddd;border-radius:5px;height:42px">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Logo URL (optional)</label>
+            <input type="text" id="sc-logo" placeholder="https://…" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
+          </div>
+        </div>
+        <button class="btn" style="width:auto;padding:10px 28px" onclick="createSchool()">Add School</button>
+        <div class="message" id="sc-msg"></div>
+      </div>
+      <div class="section">
+        <div class="section-title" style="margin-bottom:12px">Existing Schools</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Code</th><th>Color</th><th>Students</th><th>Staff</th></tr></thead>
+            <tbody id="schools-tbody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -959,6 +1004,7 @@
   let allStaffActiveMap = {};
 
   let isAbcSchool = true; // default true; set precisely once branding loads
+  let isSuperAdmin = false;
 
   async function applySchoolBranding(schoolId) {
     try {
@@ -1023,6 +1069,14 @@
     }
 
     await applySchoolBranding(profile.school_id);
+
+    // ── Super-admin only: user creation + school management ──
+    isSuperAdmin = profile.is_super_admin === true;
+    const importTab  = document.getElementById('nav-tab-import');
+    const schoolsTab = document.getElementById('nav-tab-schools');
+    if (importTab)  importTab.style.display  = isSuperAdmin ? '' : 'none';
+    if (schoolsTab) schoolsTab.style.display = isSuperAdmin ? '' : 'none';
+    if (isSuperAdmin) await loadSchoolsForPickers();
 
     document.getElementById('header-name').textContent = profile.full_name;
     if (profile.role === 'admin') {
@@ -1439,9 +1493,86 @@
   window.closeModal = function() { document.getElementById('modal').classList.remove('open'); };
 
   // ── Tab switching ──
+  let allSchoolsList = [];
+
+  async function loadSchoolsForPickers() {
+    const { data, error } = await supabase.from('schools').select('*').order('name');
+    if (error) { console.error('load schools error:', error); return; }
+    allSchoolsList = data || [];
+    const options = allSchoolsList.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    const cuSel  = document.getElementById('cu-school');
+    const csvSel = document.getElementById('csv-school');
+    if (cuSel)  cuSel.innerHTML  = options;
+    if (csvSel) csvSel.innerHTML = options;
+    // Default the picker to the logged-in staff member's own school
+    if (cuSel)  cuSel.value  = mySchoolId;
+    if (csvSel) csvSel.value = mySchoolId;
+  }
+
+  async function renderSchoolsTable() {
+    await loadSchoolsForPickers();
+    const tbody = document.getElementById('schools-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5">Loading…</td></tr>';
+
+    const [{ data: students }, { data: staff }] = await Promise.all([
+      supabase.from('profiles').select('school_id').eq('role', 'student'),
+      supabase.from('profiles').select('school_id').in('role', ['teacher', 'admin'])
+    ]);
+    const studentCounts = {}, staffCounts = {};
+    (students || []).forEach(s => { studentCounts[s.school_id] = (studentCounts[s.school_id] || 0) + 1; });
+    (staff || []).forEach(s => { staffCounts[s.school_id] = (staffCounts[s.school_id] || 0) + 1; });
+
+    tbody.innerHTML = allSchoolsList.map(s => `
+      <tr>
+        <td>${s.name}${s.is_demo ? ' <span class="badge badge-blue">demo</span>' : ''}</td>
+        <td><code>${s.school_code}</code></td>
+        <td><span style="display:inline-block;width:16px;height:16px;border-radius:3px;background:${s.primary_color || '#C0272D'};vertical-align:middle;border:1px solid #ddd"></span></td>
+        <td>${studentCounts[s.id] || 0}</td>
+        <td>${staffCounts[s.id] || 0}</td>
+      </tr>
+    `).join('');
+  }
+
+  window.createSchool = async function() {
+    const name  = document.getElementById('sc-name').value.trim();
+    const code  = document.getElementById('sc-code').value.trim().toLowerCase();
+    const color = document.getElementById('sc-color').value;
+    const logo  = document.getElementById('sc-logo').value.trim();
+    const btn   = document.querySelector('#tab-schools .btn');
+
+    if (!name || !code) { showMsg('sc-msg', 'error', 'Please enter a school name and code.'); return; }
+    if (!/^[a-z0-9_-]+$/.test(code)) { showMsg('sc-msg', 'error', 'School code should be lowercase letters, numbers, - or _ only.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Adding…';
+
+    const { error } = await supabase.from('schools').insert({
+      name, school_code: code, primary_color: color || '#C0272D', logo_url: logo || null
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Add School';
+
+    if (error) {
+      showMsg('sc-msg', 'error', 'Error: ' + error.message);
+      return;
+    }
+
+    showMsg('sc-msg', 'success', `✓ ${name} added.`);
+    document.getElementById('sc-name').value = '';
+    document.getElementById('sc-code').value = '';
+    document.getElementById('sc-logo').value = '';
+    document.getElementById('sc-color').value = '#2C6E49';
+    await renderSchoolsTable();
+  };
+
+
   window.showTab = function(name) {
     if (name === 'reviews' && !isAbcSchool) { name = 'overview'; }
-    const names = ['overview','progress','tests','topics','users','diagnostic','reviews','import','deepdive','games'];
+    if ((name === 'import' || name === 'schools') && !isSuperAdmin) { name = 'overview'; }
+    if (name === 'schools') { renderSchoolsTable(); }
+    const names = ['overview','progress','tests','topics','users','diagnostic','reviews','import','schools','deepdive','games'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
@@ -1563,6 +1694,8 @@
 
   window.runImport = async function() {
     if (!parsedRows.length) return;
+    const schoolId = document.getElementById('csv-school').value;
+    if (!schoolId) { showMsg('import-msg', 'error', 'Please select a school before importing.'); return; }
     const btn  = document.getElementById('import-btn');
     const log  = document.getElementById('import-log');
     const prog = document.getElementById('import-progress');
@@ -1576,11 +1709,11 @@
       try {
         const { data, error } = await supabase.auth.signUp({
           email: row.email, password: row.password,
-          options: { data: { full_name: row.full_name, role: 'student' } }
+          options: { data: { full_name: row.full_name, role: 'student', school_id: schoolId } }
         });
         if (error) throw new Error(error.message);
         if (data.user) {
-          await supabase.from('profiles').update({ year_group: parseInt(row.year_group) || null }).eq('id', data.user.id);
+          await supabase.from('profiles').update({ year_group: parseInt(row.year_group) || null, school_id: schoolId }).eq('id', data.user.id);
         }
         log.innerHTML += `<div class="ok">✓ ${row.full_name} (${row.email})</div>`;
         ok++;
@@ -3798,11 +3931,16 @@
     const role     = document.getElementById('cu-role').value;
     const year     = parseInt(document.getElementById('cu-year').value);
     const form     = document.getElementById('cu-form').value.trim();
+    const schoolId = document.getElementById('cu-school').value;
     const msg      = document.getElementById('cu-msg');
     const btn      = document.querySelector('#tab-import .btn');
 
     if (!name || !email || !password) {
       showMsg('cu-msg', 'error', 'Please fill in name, email and password.');
+      return;
+    }
+    if (!schoolId) {
+      showMsg('cu-msg', 'error', 'Please select a school.');
       return;
     }
 
@@ -3812,7 +3950,7 @@
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: name, role } }
+      options: { data: { full_name: name, role, school_id: schoolId } }
     });
 
     if (error) {
@@ -3823,7 +3961,7 @@
     }
 
     if (data.user) {
-      const update = { full_name: name, role };
+      const update = { full_name: name, role, school_id: schoolId };
       if (role === 'student') {
         update.year_group  = year;
         update.form_class  = form || null;
