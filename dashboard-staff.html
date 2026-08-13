@@ -2984,13 +2984,15 @@
     const { data } = await supabase
       .from('user_emails')
       .select('*')
+      .eq('school_id', mySchoolId)
       .order('full_name');
     allUsersWithEmail = data || [];
 
     // user_emails view doesn't carry the `active` column — fetch and merge from profiles
     const { data: activeRows } = await supabase
       .from('profiles')
-      .select('id, active');
+      .select('id, active')
+      .eq('school_id', mySchoolId);
     const activeMap = {};
     (activeRows || []).forEach(r => { activeMap[r.id] = r.active !== false; }); // default true if null
     allUsersWithEmail.forEach(u => { u.active = activeMap.hasOwnProperty(u.id) ? activeMap[u.id] : true; });
