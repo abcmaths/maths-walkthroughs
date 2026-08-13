@@ -1086,7 +1086,7 @@
     try {
       const { data: school } = await supabase
         .from('schools').select('name, logo_url, primary_color, school_code').eq('id', schoolId).maybeSingle();
-      if (!school) return;
+      if (!school) return true; // fail open to ABC behaviour if lookup fails
 
       const logoEl = document.getElementById('header-logo');
       const subtitleEl = document.getElementById('header-subtitle');
@@ -1112,8 +1112,10 @@
         document.documentElement.style.setProperty('--brand', school.primary_color);
         document.querySelectorAll('header, .card-header').forEach(el => el.style.background = school.primary_color);
       }
+      return isAbc;
     } catch (e) {
       console.warn('Branding load failed, using defaults', e);
+      return true; // fail open to ABC behaviour
     }
   }
 
@@ -1129,7 +1131,7 @@
       if (profileError) { showError('Error loading profile: ' + profileError.message); return; }
       if (!profile)     { showError('No profile found. Please contact your teacher.'); return; }
 
-      await applySchoolBranding(profile.school_id);
+      const isAbcSchool = await applySchoolBranding(profile.school_id);
 
       if (profile.role === 'admin' || profile.role === 'teacher') {
         const isPreview = new URLSearchParams(window.location.search).get('preview') === '1';
