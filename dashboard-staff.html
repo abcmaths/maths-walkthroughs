@@ -121,16 +121,6 @@
     <div class="subtitle" id="header-subtitle">ABC Learning Portal — Staff</div>
   </div>
   <div class="header-right">
-    <div class="subject-toggle" style="display:none">
-      <button id="toggle-maths" class="active">📐 Maths</button>
-      <button id="toggle-science">🔬 Science</button>
-    </div>
-    <div class="science-subtabs" id="science-subtabs">
-      <button class="science-subtab" id="subtab-science" style="--subtab-accent:#1565C0" onclick="window.switchSubject('science')">🔬 Combined Sci</button>
-      <button class="science-subtab" id="subtab-physics" style="--subtab-accent:#1565C0" onclick="window.switchSubject('physics')">⚡ Physics</button>
-      <button class="science-subtab" id="subtab-chemistry" style="--subtab-accent:#6A1B9A" onclick="window.switchSubject('chemistry')">⚗️ Chemistry</button>
-      <button class="science-subtab" id="subtab-biology" style="--subtab-accent:#2E7D32" onclick="window.switchSubject('biology')">🌿 Biology</button>
-    </div>
     <span class="user-name" id="header-name"></span>
     <a class="btn-outline" id="view-as-student-btn" href="dashboard-student.html?preview=1" style="display:none;text-decoration:none;font-size:0.82rem;padding:6px 12px;margin-right:8px">👁 View as Student</a>
     <button class="btn-signout" onclick="signOut()">Sign out</button>
@@ -1408,13 +1398,6 @@
     if (name === 'reviews')  window.renderReviewTab();
     if (name === 'games')    window.renderGamesTab();
     if (name === 'deepdive') window.renderDeepDiveProgressTab();
-
-    // Subject toggle only applies to Browse Topics — hide it on every other tab
-    const subjToggle = document.querySelector('.subject-toggle');
-    if (subjToggle) subjToggle.style.display = (name === 'topics') ? 'flex' : 'none';
-    const sciSubtabs = document.getElementById('science-subtabs');
-    if (sciSubtabs && name !== 'topics') sciSubtabs.classList.remove('visible');
-    if (sciSubtabs && name === 'topics' && SCIENCE_SUBJECTS.includes(staffSubject)) sciSubtabs.classList.add('visible');
   };
 
   // ── Games tab ──
@@ -2329,10 +2312,6 @@
     if (!file && /^BRG/.test(topicCode)) file = BRIDGE_WALKTHROUGH_FILES[topicCode];
     return file || '#';
   }
-
-  const SCIENCE_SUBJECTS = ['science', 'physics', 'chemistry', 'biology'];
-
-  let staffSubject = 'maths';
 
   async function loadReviews() {
     let all = [];
@@ -3920,33 +3899,8 @@
     }).join('');
   };
 
-  window.switchSubject = function(subject) {
-    staffSubject = subject;
-    const isMaths  = subject === 'maths';
-    const isSciGrp = SCIENCE_SUBJECTS.includes(subject);
 
-    document.getElementById('toggle-maths').classList.toggle('active', isMaths);
-    document.getElementById('toggle-science').classList.toggle('active', isSciGrp);
-    document.getElementById('science-subtabs').classList.toggle('visible', isSciGrp);
 
-    ['science', 'physics', 'chemistry', 'biology'].forEach(s => {
-      const el = document.getElementById('subtab-' + s);
-      if (el) el.classList.toggle('active', s === subject);
-    });
-
-    const subtitles = { maths: 'ABC Learning Portal — Staff', science: 'Science Portal — Staff', physics: 'Physics Portal — Staff', chemistry: 'Chemistry Portal — Staff', biology: 'Biology Portal — Staff' };
-    document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Staff Portal';
-
-    // Sync Browse Topics subject filter
-    const subjectSelect = document.getElementById('topics-filter-subject');
-    if (subjectSelect) subjectSelect.value = subject;
-    window.renderTopicsTab();
-  };
-
-  document.getElementById('toggle-maths').addEventListener('click', () => window.switchSubject('maths'));
-  document.getElementById('toggle-science').addEventListener('click', () => {
-    if (!SCIENCE_SUBJECTS.includes(staffSubject)) window.switchSubject('science');
-  });
 </script>
 
 </body>
