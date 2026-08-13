@@ -179,6 +179,7 @@
       <button id="toggle-bridge" style="display:none">🌉 Bridge</button>
       <button id="toggle-phonics" style="display:none">🔤 Phonics</button>
       <button id="toggle-extension" style="display:none">⭐ Extension</button>
+      <button id="toggle-deepdive">🪜 Deep Dive</button>
     </div>
   </div>
   <div class="header-account">
@@ -1007,6 +1008,28 @@
 
 
   // Resolve walkthrough file for any subject/topic_code combination
+  const DEEPDIVE_MATHS_WALKTHROUGH_FILES = {
+    'TCH-ALG-01': 'deepdive/maths/algebra/hcf-to-algebra.html',
+    'TCH-NUM-01': 'deepdive/maths/algebra/squares-and-roots.html',
+    'TCH-QUAD-01': 'deepdive/maths/algebra/quadratics-solving.html',
+    'TCH-FDP-01': 'deepdive/maths/number/fdp-foundations.html',
+    'TCH-FDP-02': 'deepdive/maths/number/fdp-increase-decrease.html',
+    'TCH-GEO-01': 'deepdive/maths/geometry/circle-geometry-proofs.html',
+  };
+
+  // Deep Dive chains: ORDERED list of topic_codes forming one teaching ladder.
+  // Only include topic_codes for files that are ACTUALLY LIVE (built + in topics table).
+  // Append to a chain's topicCodes as each new file gets built — don't pre-list future
+  // topic_codes, since that renders permanent "Coming soon" locked rungs students can't use.
+  const DEEPDIVE_CHAINS = {
+    deepdive_maths: [
+      { chainId: 'alg-hcf', chainName: 'HCF: From Numbers to Algebra', topicCodes: ['TCH-ALG-01'] },
+      { chainId: 'quadratics', chainName: 'Quadratics', topicCodes: ['TCH-NUM-01', 'TCH-QUAD-01'] },
+      { chainId: 'fdp', chainName: 'Fractions, Decimals & Percentages', topicCodes: ['TCH-FDP-01', 'TCH-FDP-02'] },
+      { chainId: 'circle-geometry', chainName: 'Lines and Angles', topicCodes: ['TCH-GEO-01'] },
+    ],
+  };
+
   function getWalkthroughFile(subject, topicCode) {
     let file;
     if (subject === 'english')   file = ENGLISH_WALKTHROUGH_FILES[topicCode];
@@ -1023,6 +1046,7 @@
     else if (subject === 'phonics') file = PHONICS_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'ext_maths') file = EXT_MTH_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'ext_english') file = EXT_ENG_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'deepdive_maths') file = DEEPDIVE_MATHS_WALKTHROUGH_FILES[topicCode];
     else file = WALKTHROUGH_FILES[topicCode];
     return file || '#';
   }
@@ -1440,6 +1464,7 @@
   const BRIDGE_SUBJECTS = ['bridge_maths', 'bridge_science', 'bridge_english'];
   const PHONICS_SUBJECTS = ['phonics'];
   const EXTENSION_SUBJECTS = ['ext_maths', 'ext_english'];
+  const DEEPDIVE_SUBJECTS = ['deepdive_maths'];
 
   const BRIDGE_STRAND_COLOURS = {
     'bridge': '#C0272D',
@@ -1469,6 +1494,7 @@
     const isBridgeGrp = BRIDGE_SUBJECTS.includes(subject);
     const isPhonicsGrp = PHONICS_SUBJECTS.includes(subject);
     const isExtGrp = EXTENSION_SUBJECTS.includes(subject);
+    const isDeepDiveGrp = DEEPDIVE_SUBJECTS.includes(subject);
 
     // Main toggle active state
     document.getElementById('toggle-maths').classList.toggle('active', isMaths);
@@ -1487,6 +1513,8 @@
     if (phonicsBt) phonicsBt.classList.toggle('active', isPhonicsGrp);
     const extBt = document.getElementById('toggle-extension');
     if (extBt) extBt.classList.toggle('active', isExtGrp);
+    const deepDiveBt = document.getElementById('toggle-deepdive');
+    if (deepDiveBt) deepDiveBt.classList.toggle('active', isDeepDiveGrp);
 
     // Show/hide science sub-tabs
     document.getElementById('science-subtabs').classList.toggle('visible', isSciGrp);
@@ -1510,12 +1538,12 @@
     });
 
     // Header subtitle
-    const subtitles = { maths: 'ABC Learning Portal', english: 'English Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal', digitaltech: 'Digital Technologies Portal', bridge_maths: 'Bridge Maths', bridge_science: 'Bridge Science', bridge_english: 'Bridge English', phonics: 'Phonics Support', ext_maths: 'Extension Maths', ext_english: 'Extension English' };
+    const subtitles = { maths: 'ABC Learning Portal', english: 'English Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal', digitaltech: 'Digital Technologies Portal', bridge_maths: 'Bridge Maths', bridge_science: 'Bridge Science', bridge_english: 'Bridge English', phonics: 'Phonics Support', ext_maths: 'Extension Maths', ext_english: 'Extension English', deepdive_maths: 'Deep Dive: Maths' };
     document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Portal';
 
-    // Year selector: hide Add Maths (Y13) when not in Maths; hide entirely for arts/bridge/phonics/extension
+    // Year selector: hide Add Maths (Y13) when not in Maths; hide entirely for arts/bridge/phonics/extension/deepdive
     const yearSelector = document.querySelector('.year-selector') || document.getElementById('year-selector');
-    if (yearSelector) yearSelector.style.display = (isArtsGrp || isBridgeGrp || isPhonicsGrp || isExtGrp) ? 'none' : '';
+    if (yearSelector) yearSelector.style.display = (isArtsGrp || isBridgeGrp || isPhonicsGrp || isExtGrp || isDeepDiveGrp) ? 'none' : '';
     const addMathsOpt = document.querySelector('#year-select option[value="13"]');
     const furtherMathsOpt = document.querySelector('#year-select option[value="14"]');
     if (addMathsOpt) addMathsOpt.style.display = isMaths ? '' : 'none';
@@ -1530,6 +1558,12 @@
   };
 
   window.renderTopics = function() {
+    if (DEEPDIVE_SUBJECTS.includes(currentSubject)) {
+      document.getElementById('viewing-label').textContent = 'Work through each stage in order — build up from the basics';
+      renderDeepDiveLadderStudent(currentSubject, document.getElementById('topic-grid'));
+      return;
+    }
+
     const value = document.getElementById('year-select').value;
     let filtered, label;
 
@@ -1626,6 +1660,49 @@
     }
 
     grid.innerHTML = filtered.map(buildCard).join('');
+  };
+
+  // Renders Deep Dive topics as a connected vertical ladder rather than a card grid.
+  // Each rung locks until the previous rung is marked 'completed' in progressMap,
+  // encouraging students to build up from the basics rather than skip ahead.
+  window.renderDeepDiveLadderStudent = function(subject, container) {
+    const chains = DEEPDIVE_CHAINS[subject] || [];
+    if (chains.length === 0) {
+      container.innerHTML = '<div class="no-topics">No deep dive walkthroughs here yet — check back soon!</div>';
+      return;
+    }
+    container.innerHTML = chains.map(chain => {
+      let previousComplete = true; // first rung in a chain is always unlocked
+      const rungs = chain.topicCodes.map((code, i) => {
+        const topic = allTopics.find(t => t.topic_code === code);
+        const file = topic ? getWalkthroughFile(subject, code) : '#';
+        const status = topic ? (progressMap[topic.id] || 'not-started') : 'not-started';
+        const comingSoon = !topic || file === '#';
+        const locked = !previousComplete && !comingSoon;
+        previousComplete = status === 'completed';
+
+        const circleBg = comingSoon ? '#eee' : status === 'completed' ? '#2e7d32' : status === 'started' ? '#f57f17' : locked ? '#ccc' : '#7A1418';
+        const circleFg = comingSoon || locked ? '#999' : '#fff';
+        const circleContent = status === 'completed' ? '✓' : locked ? '🔒' : (i + 1);
+        const statusLbl = comingSoon ? '🔒 Coming soon' : locked ? 'Complete the previous stage first' : status === 'completed' ? '✓ Completed' : status === 'started' ? '▶ In progress' : '○ Not started';
+        const label = topic ? topic.topic_name : code;
+        const clickable = !comingSoon && !locked;
+
+        return `
+          <div style="display:flex;align-items:stretch;gap:0;">
+            <div style="display:flex;flex-direction:column;align-items:center;width:32px;flex-shrink:0;">
+              <div style="width:28px;height:28px;border-radius:50%;background:${circleBg};color:${circleFg};display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;">${circleContent}</div>
+              ${i < chain.topicCodes.length - 1 ? `<div style="width:3px;flex:1;background:${previousComplete ? '#a5d6a7' : '#e0e0e0'};min-height:20px;"></div>` : ''}
+            </div>
+            <div class="topic-card ${status}" style="flex:1;margin:0 0 12px 12px;${locked || comingSoon ? 'opacity:0.6;' : ''}" ${clickable ? `onclick="openTopic('${topic.id}','${file}')"` : ''}>
+              <div class="t-name">${label}</div>
+              <div class="t-status">${statusLbl}</div>
+              ${clickable ? `<div class="t-btns" style="--accent:#7A1418"><button class="t-btn-walk" onclick="event.stopPropagation();openTopic('${topic.id}','${file}')">Start / Continue</button></div>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+      return `<div style="margin-bottom:26px;"><div style="font-size:0.85rem;font-weight:700;color:#7A1418;margin-bottom:10px;">${chain.chainName}</div>${rungs}</div>`;
+    }).join('');
   };
 
   window.openTest = function(topicId) {
@@ -1731,6 +1808,10 @@
   if (document.getElementById('toggle-extension'))
     document.getElementById('toggle-extension').addEventListener('click', () => {
       if (!EXTENSION_SUBJECTS.includes(currentSubject)) window.switchSubject('ext_maths');
+    });
+  if (document.getElementById('toggle-deepdive'))
+    document.getElementById('toggle-deepdive').addEventListener('click', () => {
+      window.switchSubject('deepdive_maths');
     });
 
   init();
