@@ -99,8 +99,8 @@
 <body>
 
 <header>
-  <div class="logo">ABC</div>
-  <div class="subtitle">Adorable British College — ABC Learning Portal</div>
+  <div class="logo" id="header-logo">ABC</div>
+  <div class="subtitle" id="header-subtitle">Adorable British College — ABC Learning Portal</div>
 </header>
 
 <main>
@@ -117,6 +117,12 @@
 
       <!-- SIGN IN -->
       <div class="panel active" id="panel-login">
+        <div class="form-group">
+          <label>School</label>
+          <select id="login-school" onchange="onSchoolChange()">
+            <option value="">Loading schools…</option>
+          </select>
+        </div>
         <div class="form-group">
           <label>Email</label>
           <input type="email" id="login-email" placeholder="your@email.com">
@@ -149,6 +155,60 @@
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+  let schoolsList = [];
+
+  // ── Populate school picker ──
+  async function loadSchools() {
+    const { data, error } = await supabase.from('schools').select('id, name, school_code, logo_url, primary_color').order('name');
+    const sel = document.getElementById('login-school');
+    if (error || !data || data.length === 0) {
+      sel.innerHTML = '<option value="">Adorable British College</option>';
+      return;
+    }
+    schoolsList = data;
+    sel.innerHTML = data.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    // Default to ABC if present, else first school
+    const abc = data.find(s => s.school_code === 'abc');
+    sel.value = abc ? abc.id : data[0].id;
+    onSchoolChange();
+  }
+
+  window.onSchoolChange = function() {
+    const sel = document.getElementById('login-school');
+    const school = schoolsList.find(s => s.id === sel.value);
+    if (!school) return;
+    applyBranding(school);
+  };
+
+  function applyBranding(school) {
+    const logoEl = document.getElementById('header-logo');
+    const subtitleEl = document.getElementById('header-subtitle');
+    const cardHeader = document.querySelector('.card-header');
+    const isAbc = school.school_code === 'abc';
+
+    logoEl.innerHTML = '';
+    if (school.logo_url) {
+      const img = document.createElement('img');
+      img.src = school.logo_url;
+      img.alt = school.name;
+      img.style.cssText = 'height:28px;display:block';
+      logoEl.appendChild(img);
+    } else {
+      logoEl.textContent = isAbc ? 'ABC' : school.name;
+    }
+    subtitleEl.textContent = isAbc ? 'Adorable British College — ABC Learning Portal' : school.name + ' — Learning Portal';
+
+    const color = school.primary_color || '#C0272D';
+    document.querySelectorAll('header, .card-header, .btn').forEach(el => el.style.background = color);
+    document.querySelectorAll('.tab.active').forEach(el => el.style.color = color);
+    const styleTag = document.getElementById('dynamic-brand-style') || (() => {
+      const s = document.createElement('style'); s.id = 'dynamic-brand-style'; document.head.appendChild(s); return s;
+    })();
+    styleTag.textContent = `.tab.active{color:${color};border-bottom-color:${color}} input:focus,select:focus{border-color:${color}} .btn:hover{filter:brightness(0.88)}`;
+  }
+
+  await loadSchools();
+
   // ── If already logged in, redirect immediately ──
   const { data: { session } } = await supabase.auth.getSession();
   if (session) {
@@ -170,12 +230,14 @@
 
   // ── Sign In ──
   window.handleLogin = async function() {
-    const email    = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-    const msg      = document.getElementById('login-msg');
-    const btn      = document.getElementById('login-btn');
+    const email      = document.getElementById('login-email').value.trim();
+    const password   = document.getElementById('login-password').value;
+    const schoolId   = document.getElementById('login-school').value;
+    const msg        = document.getElementById('login-msg');
+    const btn        = document.getElementById('login-btn');
 
     if (!email || !password) { showMsg(msg, 'error', 'Please enter your email and password.'); return; }
+    if (!schoolId) { showMsg(msg, 'error', 'Please select your school.'); return; }
 
     btn.disabled = true;
     btn.textContent = 'Signing in…';
@@ -184,6 +246,16 @@
 
     if (error) {
       showMsg(msg, 'error', 'Incorrect email or password. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+      return;
+    }
+
+    // ── Confirm this account actually belongs to the selected school ──
+    const { data: profile } = await supabase.from('profiles').select('school_id').eq('id', data.user.id).maybeSingle();
+    if (!profile || profile.school_id !== schoolId) {
+      showMsg(msg, 'error', 'That account does not belong to the selected school. Please choose the correct school and try again.');
+      await supabase.auth.signOut();
       btn.disabled = false;
       btn.textContent = 'Sign In';
       return;

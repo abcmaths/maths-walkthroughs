@@ -164,7 +164,7 @@
 
 <header>
   <div class="header-left">
-    <div class="logo">ABC</div>
+    <div class="logo" id="header-logo">ABC</div>
     <div class="subtitle" id="header-subtitle">ABC Learning Portal</div>
   </div>
   <div class="header-toggles">
@@ -1082,6 +1082,41 @@
     document.getElementById('error-section').style.display = 'block';
   }
 
+  async function applySchoolBranding(schoolId) {
+    try {
+      const { data: school } = await supabase
+        .from('schools').select('name, logo_url, primary_color, school_code').eq('id', schoolId).maybeSingle();
+      if (!school) return;
+
+      const logoEl = document.getElementById('header-logo');
+      const subtitleEl = document.getElementById('header-subtitle');
+      const isAbc = school.school_code === 'abc';
+
+      if (logoEl) {
+        logoEl.innerHTML = '';
+        if (school.logo_url) {
+          const img = document.createElement('img');
+          img.src = school.logo_url;
+          img.alt = school.name;
+          img.style.cssText = 'height:28px;display:block';
+          logoEl.appendChild(img);
+        } else if (isAbc) {
+          logoEl.textContent = 'ABC';
+        } else {
+          logoEl.textContent = school.name;
+        }
+      }
+      if (subtitleEl && !isAbc) subtitleEl.textContent = school.name + ' — Learning Portal';
+
+      if (school.primary_color) {
+        document.documentElement.style.setProperty('--brand', school.primary_color);
+        document.querySelectorAll('header, .card-header').forEach(el => el.style.background = school.primary_color);
+      }
+    } catch (e) {
+      console.warn('Branding load failed, using defaults', e);
+    }
+  }
+
   async function init() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -1093,6 +1128,8 @@
 
       if (profileError) { showError('Error loading profile: ' + profileError.message); return; }
       if (!profile)     { showError('No profile found. Please contact your teacher.'); return; }
+
+      await applySchoolBranding(profile.school_id);
 
       if (profile.role === 'admin' || profile.role === 'teacher') {
         const isPreview = new URLSearchParams(window.location.search).get('preview') === '1';

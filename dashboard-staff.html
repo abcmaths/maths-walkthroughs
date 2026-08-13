@@ -117,7 +117,7 @@
 
 <header>
   <div class="header-left">
-    <div class="logo">ABC</div>
+    <div class="logo" id="header-logo">ABC</div>
     <div class="subtitle" id="header-subtitle">ABC Learning Portal — Staff</div>
   </div>
   <div class="header-right">
@@ -957,6 +957,41 @@
   let allStudents = [], allProgress = [], allTopics = [], allPeople = [];
   let allStaffActiveMap = {};
 
+  async function applySchoolBranding(schoolId) {
+    try {
+      const { data: school } = await supabase
+        .from('schools').select('name, logo_url, primary_color, school_code').eq('id', schoolId).maybeSingle();
+      if (!school) return;
+
+      const logoEl = document.getElementById('header-logo');
+      const subtitleEl = document.getElementById('header-subtitle');
+      const isAbc = school.school_code === 'abc';
+
+      if (logoEl) {
+        logoEl.innerHTML = '';
+        if (school.logo_url) {
+          const img = document.createElement('img');
+          img.src = school.logo_url;
+          img.alt = school.name;
+          img.style.cssText = 'height:28px;display:block';
+          logoEl.appendChild(img);
+        } else if (isAbc) {
+          logoEl.textContent = 'ABC';
+        } else {
+          logoEl.textContent = school.name;
+        }
+      }
+      if (subtitleEl && !isAbc) subtitleEl.textContent = school.name + ' — Learning Portal';
+
+      if (school.primary_color) {
+        document.documentElement.style.setProperty('--brand', school.primary_color);
+        document.querySelectorAll('header, .card-header').forEach(el => el.style.background = school.primary_color);
+      }
+    } catch (e) {
+      console.warn('Branding load failed, using defaults', e);
+    }
+  }
+
   // ── Use getSession directly — more reliable than onAuthStateChange for page loads ──
   async function init() {
     console.log('Checking session…');
@@ -977,6 +1012,8 @@
       window.location.href = 'dashboard-student.html';
       return;
     }
+
+    await applySchoolBranding(profile.school_id);
 
     document.getElementById('header-name').textContent = profile.full_name;
     if (profile.role === 'admin') {
