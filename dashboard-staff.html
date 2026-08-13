@@ -42,6 +42,7 @@
     .badge-yellow { background: #fffde7; color: #f57f17; }
     .badge-grey   { background: #f5f5f5; color: #999; }
     .badge-red    { background: #fde8e8; color: #C0272D; }
+    .badge-blue   { background: #e3f2fd; color: #1565C0; }
     .science-subtabs { display:none; gap:6px; margin-top:8px; }
     .science-subtabs.visible { display:flex; }
     .science-subtab { padding:4px 12px; border-radius:14px; border:1.5px solid #ddd; background:white; font-size:0.75rem; font-weight:600; cursor:pointer; color:#666; transition:all 0.15s; }
@@ -708,9 +709,13 @@
             <option value="not_good">Not good</option>
             <option value="partial">Partially reviewed</option>
             <option value="locked">🔒 Locked (2+ reviews)</option>
+            <option value="claude_updated">🤖 Updated by Claude</option>
           </select>
         </div>
-        <div class="section-title" style="margin-bottom:16px">Walkthroughs <span id="review-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></div>
+        <div class="section-title" style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+          <span>Walkthroughs <span id="review-count" style="font-size:0.82rem;font-weight:400;color:#888"></span></span>
+          <button id="btn-export-locked-reviews" class="btn-outline" style="display:none;font-size:0.82rem;padding:6px 14px" onclick="exportLockedReviews()">↓ Export All (2+ Reviewers)</button>
+        </div>
         <div id="review-list"></div>
       </div>
     </div>
@@ -949,6 +954,8 @@
     if (profile.role === 'admin') {
       const viewAsBtn = document.getElementById('view-as-student-btn');
       if (viewAsBtn) viewAsBtn.style.display = 'inline-block';
+      const exportReviewsBtn = document.getElementById('btn-export-locked-reviews');
+      if (exportReviewsBtn) exportReviewsBtn.style.display = '';
     }
 
     // ── Fetch all data in parallel ──
@@ -2252,6 +2259,8 @@
 
     const COMMENT_MIN_CHARS = 10;
     const RAPID_SECONDS = 1.2;
+    const PAY_PER_QUESTION = 100;
+    const MIN_SECONDS_PER_WALKTHROUGH = 250; // 25s/question across a 10-question walkthrough
 
     const summaryEl = document.getElementById('review-teacher-summary');
     const teacherList = Object.values(teacherMap).sort((a, b) => b.topics.size - a.topics.size);
@@ -2259,7 +2268,7 @@
     if (teacherList.length === 0) {
       summaryEl.innerHTML = '<div style="color:#aaa;font-style:italic;font-size:0.85rem">No reviews submitted yet.</div>';
     } else {
-      let totalFlagged = 0, totalPay = 0;
+      let totalFlagged = 0, totalPay = 0, totalPaidQuestions = 0, totalRejectedWalkthroughs = 0;
 
       const rowsHtml = teacherList.map(t => {
         const rows = t.rows.slice().sort((a, b) => new Date(a.reviewed_at) - new Date(b.reviewed_at));
@@ -2273,14 +2282,36 @@
           }
           if (shortComment && rapid) flagged++;
         });
-        const pay = t.topics.size * 1000;
+
+        // Pay: N100 per question, but only for walkthroughs where time from first to
+        // last review meets the minimum — walkthroughs finished too fast earn nothing.
+        const byTopic = {};
+        rows.forEach(r => {
+          if (!byTopic[r.topic_id]) byTopic[r.topic_id] = [];
+          byTopic[r.topic_id].push(r);
+        });
+        let pay = 0, paidQuestions = 0, rejectedWalkthroughs = 0;
+        Object.values(byTopic).forEach(topicRows => {
+          const times = topicRows.map(r => new Date(r.reviewed_at).getTime());
+          const durationSec = (Math.max(...times) - Math.min(...times)) / 1000;
+          if (durationSec >= MIN_SECONDS_PER_WALKTHROUGH) {
+            pay += topicRows.length * PAY_PER_QUESTION;
+            paidQuestions += topicRows.length;
+          } else {
+            rejectedWalkthroughs++;
+          }
+        });
+
         totalFlagged += flagged;
         totalPay += pay;
+        totalPaidQuestions += paidQuestions;
+        totalRejectedWalkthroughs += rejectedWalkthroughs;
         return `<tr>
           <td style="padding:8px 12px;font-weight:600">${t.name}</td>
           <td style="padding:8px 12px;text-align:right">${t.topics.size}</td>
           <td style="padding:8px 12px;text-align:right">${t.count}</td>
           <td style="padding:8px 12px;text-align:right${flagged > 0 ? ';color:#C0272D;font-weight:700' : ''}">${flagged}</td>
+          <td style="padding:8px 12px;text-align:right${rejectedWalkthroughs > 0 ? ';color:#C0272D;font-weight:700' : ''}">${rejectedWalkthroughs}</td>
           <td style="padding:8px 12px;text-align:right">₦${pay.toLocaleString()}</td>
         </tr>`;
       }).join('');
@@ -2296,10 +2327,15 @@
             <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${totalFlagged}</div>
           </div>
           <div style="background:#f9f9f9;border-radius:6px;padding:12px 16px">
+            <div style="font-size:0.78rem;color:#888;margin-bottom:4px">Rejected (too fast)</div>
+            <div style="font-size:1.4rem;font-weight:700;color:#C0272D">${totalRejectedWalkthroughs}</div>
+          </div>
+          <div style="background:#f9f9f9;border-radius:6px;padding:12px 16px">
             <div style="font-size:0.78rem;color:#888;margin-bottom:4px">Total to pay</div>
             <div style="font-size:1.4rem;font-weight:700">₦${totalPay.toLocaleString()}</div>
           </div>
         </div>
+        <div style="font-size:0.78rem;color:#888;margin-bottom:12px">₦${PAY_PER_QUESTION}/question · walkthroughs completed in under ${MIN_SECONDS_PER_WALKTHROUGH}s (first to last review) earn ₦0</div>
         <div style="overflow-x:auto">
           <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #eee;border-radius:6px;overflow:hidden">
             <thead>
@@ -2308,6 +2344,7 @@
                 <th style="padding:8px 12px;text-align:right;background:#C0272D;color:#fff;font-size:0.8rem">Walkthroughs</th>
                 <th style="padding:8px 12px;text-align:right;background:#C0272D;color:#fff;font-size:0.8rem">Questions</th>
                 <th style="padding:8px 12px;text-align:right;background:#C0272D;color:#fff;font-size:0.8rem">Flagged</th>
+                <th style="padding:8px 12px;text-align:right;background:#C0272D;color:#fff;font-size:0.8rem">Rejected</th>
                 <th style="padding:8px 12px;text-align:right;background:#C0272D;color:#fff;font-size:0.8rem">Pay</th>
               </tr>
             </thead>
@@ -2326,7 +2363,8 @@
       const rm = reviewMap[t.id];
       if (statusFilter === 'not_reviewed') return !rm;
       if (statusFilter === 'partial') return rm && rm.questions.size > 0 && rm.questions.size < 10;
-      if (statusFilter === 'locked') return !!t.locked;
+      if (statusFilter === 'locked') return !!t.locked && !t.claude_updated;
+      if (statusFilter === 'claude_updated') return !!t.claude_updated;
       if (!rm) return false;
       const dominant = getDominantRating(rm.ratings);
       return dominant === statusFilter;
@@ -2355,20 +2393,27 @@
       const qCount = rm ? rm.questions.size : 0;
       const dominant = rm ? getDominantRating(rm.ratings) : null;
       const isLocked = !!t.locked;
+      const isClaudeUpdated = !!t.claude_updated;
       const filePath = getWalkthroughFile(subj, t.topic_code) || '(file path unknown)';
-      const statusBadge = isLocked
-        ? '<span class="badge badge-grey">🔒 Locked</span>'
-        : (dominant
-          ? (dominant === 'good' ? '<span class="badge badge-green">✓ Good</span>' :
-             dominant === 'needs_improvement' ? '<span class="badge badge-yellow">⚠ Needs work</span>' :
-             '<span class="badge badge-red">✗ Not good</span>')
-          : '<span class="badge badge-grey">Not reviewed</span>');
-      const actionButtons = isLocked
+      const statusBadge = isClaudeUpdated
+        ? '<span class="badge badge-blue">🤖 Updated by Claude</span>'
+        : (isLocked
+          ? '<span class="badge badge-grey">🔒 Locked</span>'
+          : (dominant
+            ? (dominant === 'good' ? '<span class="badge badge-green">✓ Good</span>' :
+               dominant === 'needs_improvement' ? '<span class="badge badge-yellow">⚠ Needs work</span>' :
+               '<span class="badge badge-red">✗ Not good</span>')
+            : '<span class="badge badge-grey">Not reviewed</span>'));
+      const actionButtons = isClaudeUpdated
         ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="exportReviewComments(${t.id},'${escAttr(t.topic_name)}','${t.topic_code}','${subj}')">📋 Export Comments</button>
            <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;color:#888;border-color:#ccc" onclick="unlockTopicReview(${t.id})">🔓 Unlock</button>`
-        : `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}','${subj}')">
-             ${rm ? 'Add/Edit Review' : 'Review'}
-           </button>`;
+        : (isLocked
+          ? `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="exportReviewComments(${t.id},'${escAttr(t.topic_name)}','${t.topic_code}','${subj}')">📋 Export Comments</button>
+             <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;color:#1565C0;border-color:#1565C0" onclick="markUpdatedByClaude(${t.id})">🤖 Mark Updated by Claude</button>
+             <button class="btn-outline" style="font-size:0.8rem;padding:5px 14px;color:#888;border-color:#ccc" onclick="unlockTopicReview(${t.id})">🔓 Unlock</button>`
+          : `<button class="btn-outline" style="font-size:0.8rem;padding:5px 14px" onclick="openReviewModal(${t.id},'${t.topic_code}','${t.topic_name}','${subj}')">
+               ${rm ? 'Add/Edit Review' : 'Review'}
+             </button>`);
       return `<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap">
         <div style="flex:1;min-width:200px">
           <div style="font-weight:600;font-size:0.88rem;color:#333">${t.topic_name}</div>
@@ -2637,11 +2682,69 @@
   window.unlockTopicReview = async function(topicId) {
     if (!confirm('Unlock this walkthrough? This clears the previous reviews and resets the reviewer count to 0 — do this after uploading an improved version.')) return;
     await supabase.from('walkthrough_reviews').delete().eq('topic_id', topicId);
-    await supabase.from('topics').update({ locked: false }).eq('id', topicId);
+    await supabase.from('topics').update({ locked: false, claude_updated: false, claude_updated_at: null }).eq('id', topicId);
     const t = allTopics.find(t => t.id === topicId);
-    if (t) t.locked = false;
+    if (t) { t.locked = false; t.claude_updated = false; }
     allReviews = allReviews.filter(r => r.topic_id !== topicId);
     window.renderReviewTab();
+  };
+
+  // ── Mark a locked (2+ reviewed) walkthrough as updated by Claude ──
+  window.markUpdatedByClaude = async function(topicId) {
+    await supabase.from('topics').update({ claude_updated: true, claude_updated_at: new Date().toISOString() }).eq('id', topicId);
+    const t = allTopics.find(t => t.id === topicId);
+    if (t) t.claude_updated = true;
+    window.renderReviewTab();
+  };
+
+  // ── Export all reviews for topics with 2+ reviewers (admin only) ──
+  window.exportLockedReviews = function() {
+    const lockedTopics = allTopics.filter(t => t.locked === true && !t.claude_updated);
+    if (lockedTopics.length === 0) {
+      alert('No walkthroughs currently have 2+ reviewers pending an update (excluding those already marked "Updated by Claude").');
+      return;
+    }
+
+    const rows = [['Topic Code', 'Topic Name', 'Subject', 'Year Group', 'File Reference', 'Question', 'Reviewer', 'Rating', 'Comment', 'Reviewed At']];
+
+    lockedTopics.forEach(t => {
+      const subj = t.subject || 'maths';
+      const filePath = getWalkthroughFile(subj, t.topic_code) || '(unknown)';
+      const yearLabel = t.year_group === 13 ? 'Add Maths' : t.year_group === 14 ? 'Further Maths' : 'Year ' + t.year_group;
+      const topicReviews = allReviews
+        .filter(r => r.topic_id === t.id)
+        .sort((a, b) => a.question_number - b.question_number);
+
+      topicReviews.forEach(r => {
+        rows.push([
+          t.topic_code || '',
+          t.topic_name || '',
+          subj,
+          yearLabel,
+          filePath,
+          r.question_number,
+          r.profiles?.full_name || r.reviewer_id,
+          r.rating,
+          r.comment || '',
+          r.reviewed_at || ''
+        ]);
+      });
+    });
+
+    const csv = rows.map(row =>
+      row.map(v => {
+        const s = String(v ?? '');
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      }).join(',')
+    ).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `walkthrough-reviews-2plus-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   // ── Users tab ──
