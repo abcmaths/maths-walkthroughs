@@ -955,6 +955,7 @@
   window._supabase = supabase;
 
   let allStudents = [], allProgress = [], allTopics = [], allPeople = [];
+  let mySchoolId = null;
   let allStaffActiveMap = {};
 
   let isAbcSchool = true; // default true; set precisely once branding loads
@@ -1049,11 +1050,13 @@
       return all;
     }
 
+    mySchoolId = profile.school_id;
+
     const [students, teachers, topics, progress] = await Promise.all([
-      loadAllPaginated('profiles', '*', q => q.eq('role', 'student').eq('active', true).order('full_name')),
-      loadAllPaginated('profiles', '*', q => q.in('role', ['teacher', 'admin'])),
+      loadAllPaginated('profiles', '*', q => q.eq('role', 'student').eq('active', true).eq('school_id', mySchoolId).order('full_name')),
+      loadAllPaginated('profiles', '*', q => q.in('role', ['teacher', 'admin']).eq('school_id', mySchoolId)),
       loadAllPaginated('topics', '*', q => q.order('year_group').order('topic_code')),
-      loadAllPaginated('walkthrough_progress', '*')
+      loadAllPaginated('walkthrough_progress', '*', q => q.eq('school_id', mySchoolId))
     ]);
 
     console.log('Data loaded — students:', students.length, 'topics:', topics.length, 'progress:', progress.length);
@@ -1478,8 +1481,8 @@
     const subjectFilter = subjectSelect ? subjectSelect.value : '';
     const filteredGames = subjectFilter ? games.filter(g => g.subject === subjectFilter) : games;
 
-    const { data: scores } = await supabase.from('game_scores').select('game_code, score, time_seconds, student_id');
-    const { data: lb } = await supabase.from('game_leaderboard').select('game_code, full_name, score, time_seconds');
+    const { data: scores } = await supabase.from('game_scores').select('game_code, score, time_seconds, student_id').eq('school_id', mySchoolId);
+    const { data: lb } = await supabase.from('game_leaderboard').select('game_code, full_name, score, time_seconds, school_id').eq('school_id', mySchoolId);
 
     if (!filteredGames.length) { el.innerHTML = '<p style="color:#888">No games in this subject.</p>'; return; }
 
@@ -1618,6 +1621,7 @@
     const { data } = await supabase
       .from('test_results')
       .select('*, profiles(full_name, year_group), topics(topic_name, year_group)')
+      .eq('school_id', mySchoolId)
       .order('completed_at', { ascending: false });
     allTestResults = data || [];
   }
