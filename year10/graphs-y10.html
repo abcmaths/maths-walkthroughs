@@ -440,6 +440,57 @@ if(p>=1){
   s.innerHTML=o.join('');
 }
 
+/* Q9 Exponential */
+function dQ9(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=110,oy=250,scx=55,scy=22;
+  o.push(L(20,oy,460,oy,'#ddd',1.5));o.push(L(ox,20,ox,280,'#ddd',1.5));
+  [-3,-2,-1,1,2,3].forEach(function(v){o.push(T(ox+v*scx,oy+14,v,'#aaa',9));});
+  [2,4,6,8].forEach(function(v){o.push(T(ox-14,oy-v*scy+4,v,'#aaa',9,'end'));});
+  if(p>=1){
+    var pts=[];for(var xi=-3;xi<=3;xi+=0.1){var yi=Math.pow(2,xi);if(yi<=9)pts.push([ox+xi*scx,oy-yi*scy]);}
+    var path='M';pts.forEach(function(pt,i){path+=(i===0?'':' L')+pt[0].toFixed(1)+','+pt[1].toFixed(1);});
+    o.push('<path d="'+path+'" fill="none" stroke="#C0272D" stroke-width="2.5"/>');
+  }
+  if(p>=2){
+    o.push(L(20,oy,460,oy,'#C8922A',1,'4,3'));
+    o.push('<circle cx="'+ox+'" cy="'+(oy-1*scy)+'" r="5" fill="#1a5a8a" stroke="#fff" stroke-width="1.5"/>');
+    o.push(T(ox+10,oy-1*scy-10,'(0, 1)','#1a5a8a',10,'start',true));
+    o.push(T(ox-60,oy-8,'Asymptote: y=0','#C8922A',9,'start',false));
+  }
+  if(p>=3){
+    [1,2,3].forEach(function(xv){var yv=Math.pow(2,xv);o.push('<circle cx="'+(ox+xv*scx)+'" cy="'+(oy-yv*scy)+'" r="4" fill="#C0272D" stroke="#fff" stroke-width="1.5"/>');o.push(T(ox+xv*scx,oy-yv*scy-10,'('+xv+', '+yv+')','#C0272D',9,'middle',true));});
+    o.push(T(240,290,'Each step right doubles y','#888',10,'middle',false));
+  }
+  o.push(T(240,14,'y = 2^x','#C0272D',13,'middle',true));
+  s.innerHTML=o.join('');
+}
+
+/* Q10 Logarithmic */
+function dQ10(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  var ox=90,oy=150,scx=45,scy=35;
+  o.push(L(20,oy,460,oy,'#ddd',1.5));o.push(L(ox,20,ox,280,'#ddd',1.5));
+  [-3,-2,-1,1,2,3].forEach(function(v){o.push(T(ox-14,oy-v*scy+4,v,'#aaa',9,'end'));});
+  if(p>=1){
+    var pts=[];for(var xi=0.15;xi<=8;xi+=0.05){var yi=Math.log2(xi);var px=ox+xi*scx;if(px<=460)pts.push([px,oy-yi*scy]);}
+    var path='M';pts.forEach(function(pt,i){path+=(i===0?'':' L')+pt[0].toFixed(1)+','+pt[1].toFixed(1);});
+    o.push('<path d="'+path+'" fill="none" stroke="#C0272D" stroke-width="2.5"/>');
+  }
+  if(p>=2){
+    o.push(L(ox,20,ox,280,'#C8922A',1,'4,3'));
+    o.push('<circle cx="'+(ox+1*scx)+'" cy="'+oy+'" r="5" fill="#1a5a8a" stroke="#fff" stroke-width="1.5"/>');
+    o.push(T(ox+1*scx+10,oy-8,'(1, 0)','#1a5a8a',10,'start',true));
+    o.push(T(ox+8,40,'Asymptote: x=0','#C8922A',9,'start',false));
+  }
+  if(p>=3){
+    [2,4,8].forEach(function(xv){var yv=Math.log2(xv);o.push('<circle cx="'+(ox+xv*scx)+'" cy="'+(oy-yv*scy)+'" r="4" fill="#C0272D" stroke="#fff" stroke-width="1.5"/>');o.push(T(ox+xv*scx,oy-yv*scy-10,'('+xv+', '+yv+')','#C0272D',9,'middle',true));});
+    o.push(T(240,290,'Reflection of y=2^x in the line y=x','#888',10,'middle',false));
+  }
+  o.push(T(240,14,'y = log2(x)','#C0272D',13,'middle',true));
+  s.innerHTML=o.join('');
+}
+
 var QS=[
   {ey:'Q1 - Graphs',ti:'Linear Graphs: y = mx + c',su:'Plot y = x - 2 and y = 4. Find their intersection.',steps:[
     {lb:'The graph',dr:dQ1,ht:'<p>For <b>y = mx + c</b>, m is the gradient (slope) and c is the y-intercept. y = x - 2 has gradient 1 and crosses the y-axis at -2.</p>'},
@@ -509,6 +560,20 @@ var QS=[
         extraSVG:function(ox,oy,unit){return L(ox+(-1)*unit,oy-(m*-1+c3)*unit,ox+5*unit,oy-(m*5+c3)*unit,'#C0272D',2)+L(ox+(-1)*unit,oy-(-1*-1+c4)*unit,ox+5*unit,oy-(-1*5+c4)*unit,'#1a5a8a',2);},
         working:'Setting equal: '+(m+1)+'x = '+(c4-c3)+', x = '+xv};
     })}
+  ]},
+  {ey:'Q9 - Graphs',ti:'Exponential Graphs',su:'Sketch y = 2^x, identifying the y-intercept, asymptote and growth pattern.',steps:[
+    {lb:'The shape',dr:dQ9,ht:'<p>An <b>exponential graph</b> like y = 2^x gets steeper as x increases. It never touches or crosses the x-axis, and y is always positive.</p>'},
+    {lb:'Step 1 - Key values',dr:dQ9,ht:'<div class="fm">2^-1 = 0.5 &nbsp;|&nbsp; 2^0 = 1 &nbsp;|&nbsp; 2^1 = 2</div><div class="fm">2^2 = 4 &nbsp;|&nbsp; 2^3 = 8</div><p>Each time x increases by 1, y <b>doubles</b>.</p>'},
+    {lb:'Step 2 - Intercept and asymptote',dr:dQ9,ht:'<p>Any number to the power 0 is 1, so the graph always crosses the y-axis at <b>(0, 1)</b>.</p><div class="fm">Horizontal asymptote: y = 0</div><p>The curve gets closer and closer to y=0 as x decreases, but never reaches it.</p>'},
+    {lb:'Step 3 - Growth pattern',dr:dQ9,ht:'<p>For y = a^x with a &gt; 1, the graph shows exponential growth — this is the shape behind things like compound interest, population growth and viral spread.</p>'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var a=pick([2,3,4,5]),x=pick([1,2,3]);return{question:'For <b>y = '+a+'^x</b>, find y when x = '+x+'.',hints:['Multiply '+a+' by itself '+x+' time(s)'],ans:Math.pow(a,x),tol:0,unit:'',working:a+'^'+x+' = '+Math.pow(a,x)};})}
+  ]},
+  {ey:'Q10 - Graphs',ti:'Logarithmic Graphs',su:'Sketch y = log2(x), the inverse of an exponential graph.',steps:[
+    {lb:'The shape',dr:dQ10,ht:'<p>A <b>logarithmic graph</b> is the <b>inverse</b> of an exponential graph — it is only defined for x &gt; 0, and it increases slowly as x gets large.</p>'},
+    {lb:'Step 1 - Key values',dr:dQ10,ht:'<div class="fm">log2(1) = 0 &nbsp;|&nbsp; log2(2) = 1 &nbsp;|&nbsp; log2(4) = 2</div><div class="fm">log2(8) = 3</div><p>log2(x) asks: "2 to what power gives x?"</p>'},
+    {lb:'Step 2 - Intercept and asymptote',dr:dQ10,ht:'<p>The graph always passes through <b>(1, 0)</b>, since any number to the power 0 is 1.</p><div class="fm">Vertical asymptote: x = 0</div><p>The curve is undefined for x ≤ 0 and shoots down steeply as x approaches 0 from the right.</p>'},
+    {lb:'Step 3 - Reflection',dr:dQ10,ht:'<p>y = log2(x) is the reflection of y = 2^x in the line <b>y = x</b> — swapping x and y undoes the exponential, since logarithms and exponentials are inverse operations.</p>'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var p=pick([1,2,3,4]);var x=Math.pow(2,p);return{question:'Find log2('+x+').',hints:['Ask: 2 to what power gives '+x+'?'],ans:p,tol:0,unit:'',working:'2^'+p+' = '+x+', so log2('+x+') = '+p};})}
   ]}
 ];
 
