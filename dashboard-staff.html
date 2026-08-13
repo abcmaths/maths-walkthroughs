@@ -922,6 +922,7 @@
   window._supabase = supabase;
 
   let allStudents = [], allProgress = [], allTopics = [];
+  let allStaffActiveMap = {};
 
   // ── Use getSession directly — more reliable than onAuthStateChange for page loads ──
   async function init() {
@@ -951,21 +952,35 @@
     }
 
     // ── Fetch all data in parallel ──
-    const [
-      { data: students },
-      { data: teachers },
-      { data: topics },
-      { data: progress }
-    ] = await Promise.all([
-      supabase.from('profiles').select('*').eq('role', 'student').eq('active', true).order('full_name'),
-      supabase.from('profiles').select('*').in('role', ['teacher', 'admin']),
-      supabase.from('topics').select('*').order('year_group').order('topic_code'),
-      supabase.from('walkthrough_progress').select('*')
+    async function loadAllPaginated(table, selectStr, applyFilters) {
+      let all = [];
+      let from = 0;
+      const PAGE = 1000;
+      while (true) {
+        let q = supabase.from(table).select(selectStr);
+        if (applyFilters) q = applyFilters(q);
+        else q = q.order('id', { ascending: true });
+        const { data, error } = await q.range(from, from + PAGE - 1);
+        if (error) { console.error(`load ${table} error:`, error); break; }
+        all = all.concat(data || []);
+        if (!data || data.length < PAGE) break;
+        from += PAGE;
+      }
+      return all;
+    }
+
+    const [students, teachers, topics, progress] = await Promise.all([
+      loadAllPaginated('profiles', '*', q => q.eq('role', 'student').eq('active', true).order('full_name')),
+      loadAllPaginated('profiles', '*', q => q.in('role', ['teacher', 'admin'])),
+      loadAllPaginated('topics', '*', q => q.order('year_group').order('topic_code')),
+      loadAllPaginated('walkthrough_progress', '*')
     ]);
 
-    console.log('Data loaded — students:', (students||[]).length, 'topics:', (topics||[]).length);
+    console.log('Data loaded — students:', students.length, 'topics:', topics.length, 'progress:', progress.length);
 
     allStudents = students || [];
+    allStaffActiveMap = {};
+    (teachers || []).forEach(t => { allStaffActiveMap[t.id] = t.active !== false; });
     allTopics   = topics   || [];
     allProgress = progress || [];
 
@@ -2139,10 +2154,21 @@
   let staffSubject = 'maths';
 
   async function loadReviews() {
-    const { data } = await supabase
-      .from('walkthrough_reviews')
-      .select('*, profiles(full_name)');
-    allReviews = data || [];
+    let all = [];
+    let from = 0;
+    const PAGE = 1000;
+    while (true) {
+      const { data, error } = await supabase
+        .from('walkthrough_reviews')
+        .select('*, profiles(full_name)')
+        .order('id', { ascending: true })
+        .range(from, from + PAGE - 1);
+      if (error) { console.error('loadReviews error:', error); break; }
+      all = all.concat(data || []);
+      if (!data || data.length < PAGE) break;
+      from += PAGE;
+    }
+    allReviews = all;
   }
 
   // Extract question titles from a walkthrough file
@@ -2217,6 +2243,7 @@
     // Teacher summary
     const teacherMap = {};
     allReviews.forEach(r => {
+      if (allStaffActiveMap.hasOwnProperty(r.reviewer_id) && allStaffActiveMap[r.reviewer_id] === false) return; // skip archived staff
       if (!teacherMap[r.reviewer_id]) teacherMap[r.reviewer_id] = { name: r.profiles?.full_name || '—', count: 0, topics: new Set(), rows: [] };
       teacherMap[r.reviewer_id].topics.add(r.topic_id);
       teacherMap[r.reviewer_id].count++;
@@ -2224,7 +2251,7 @@
     });
 
     const COMMENT_MIN_CHARS = 10;
-    const RAPID_SECONDS = 5;
+    const RAPID_SECONDS = 1.2;
 
     const summaryEl = document.getElementById('review-teacher-summary');
     const teacherList = Object.values(teacherMap).sort((a, b) => b.topics.size - a.topics.size);
@@ -2244,7 +2271,7 @@
             const dt = (new Date(rows[i].reviewed_at) - new Date(rows[i - 1].reviewed_at)) / 1000;
             if (dt >= 0 && dt < RAPID_SECONDS) rapid = true;
           }
-          if (shortComment || rapid) flagged++;
+          if (shortComment && rapid) flagged++;
         });
         const pay = t.topics.size * 1000;
         totalFlagged += flagged;
