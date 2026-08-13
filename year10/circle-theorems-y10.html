@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circle Theorems - Maths Walkthroughs</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:215px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#6b5750;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:170px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;margin-bottom:8px;line-height:1.5;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.mc-opt{text-align:left;padding:10px 14px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold);background:#fffaf0;}
+.mc-opt:disabled{cursor:default;opacity:.9;}
+.mc-opt.mc-correct{border-color:#2e7d32;background:#e8f5e9;color:#1b5e20;font-weight:600;}
+.mc-opt.mc-wrong{border-color:#c62828;background:#fde8e8;color:#a01820;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:">";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Circle Theorems</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 300"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+var ST={};
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,genFn:genFn,mc:true};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Your Turn</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=entry.genFn();entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);
+    ST[id]={o:o,genFn:entry.genFn,mc:true};
+    return;
+  }
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');
+    allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){el.classList.add('mc-correct');fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;}
+    else{el.classList.add('mc-wrong');allBtns[o.correct].classList.add('mc-correct');fb.className='try-fb er';fb.textContent='Not quite \u2014 the correct answer is highlighted above.';}
+    return;
+  }
+});
+function g(){var el=document.getElementById('dg');el.innerHTML='';return el;}
+function T(x,y,txt,c,sz,a,bold){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function CIR(cx,cy,r,fill,stroke,sw){fill=fill||'none';stroke=stroke||'#241A17';sw=sw||1.5;return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'"/>';}
+function DOT(x,y,c){return '<circle cx="'+x+'" cy="'+y+'" r="3.5" fill="'+(c||'#241A17')+'"/>';}
+/* Point on a circle centred (cx,cy) radius r at angle deg (0=east, ccw positive, y flipped for SVG) */
+function pt(cx,cy,r,deg){var rad=deg*Math.PI/180;return [cx+r*Math.cos(rad),cy-r*Math.sin(rad)];}
+function arcPath(cx,cy,r,d1,d2,large,sweep){var p1=pt(cx,cy,r,d1),p2=pt(cx,cy,r,d2);large=large?1:0;sweep=sweep!=null?sweep:0;return '<path d="M'+p1[0].toFixed(1)+','+p1[1].toFixed(1)+' A'+r+','+r+' 0 '+large+' '+sweep+' '+p2[0].toFixed(1)+','+p2[1].toFixed(1)+'" fill="none" stroke="#C8922A" stroke-width="2"/>';}
+function angleArc(cx,cy,r,d1,d2){ // small marker arc for showing an angle at a vertex
+  var p1=pt(cx,cy,r,d1),p2=pt(cx,cy,r,d2);
+  return '<path d="M'+p1[0].toFixed(1)+','+p1[1].toFixed(1)+' A'+r+','+r+' 0 0 0 '+p2[0].toFixed(1)+','+p2[1].toFixed(1)+'" fill="none" stroke="#1a5a8a" stroke-width="2"/>';
+}
+
+var CX=240,CY=155,R=95;
+
+/* Q1 - Angle in a semicircle */
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(CIR(CX,CY,R));
+  var A=pt(CX,CY,R,200),B=pt(CX,CY,R,20),C=pt(CX,CY,R,70);
+  if(p>=1){o.push(L(A[0],A[1],B[0],B[1],'#C0272D',2.5));o.push(T((A[0]+B[0])/2,(A[1]+B[1])/2+18,'diameter','#C0272D',10));}
+  o.push(DOT(A[0],A[1]));o.push(T(A[0]-10,A[1]+5,'A','#241A17',13,'end',true));
+  o.push(DOT(B[0],B[1]));o.push(T(B[0]+10,B[1]+5,'B','#241A17',13,'start',true));
+  o.push(DOT(CX,CY,'#888'));
+  if(p>=2){
+    o.push(L(A[0],A[1],C[0],C[1],'#1a5a8a',2));o.push(L(B[0],B[1],C[0],C[1],'#1a5a8a',2));
+    o.push(DOT(C[0],C[1]));o.push(T(C[0],C[1]-12,'C','#1a5a8a',13,'middle',true));
+    o.push('<rect x="'+(C[0]-14)+'" y="'+(C[1]-14)+'" width="14" height="14" fill="none" stroke="#1a5a8a" stroke-width="2"/>');
+  }
+  if(p>=3){o.push(T(240,280,'Angle ACB = 90\u00b0, wherever C sits on the circle','#1a7a3a',12,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+/* Q2 - Angle at centre = 2 x angle at circumference */
+function dQ2(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(CIR(CX,CY,R));
+  var A=pt(CX,CY,R,160),B=pt(CX,CY,R,20),C=pt(CX,CY,R,260);
+  o.push(DOT(A[0],A[1]));o.push(T(A[0]-8,A[1]-6,'A','#241A17',13,'end',true));
+  o.push(DOT(B[0],B[1]));o.push(T(B[0]+8,B[1]-6,'B','#241A17',13,'start',true));
+  o.push(DOT(CX,CY,'#888'));o.push(T(CX+4,CY+16,'O','#888',11,'start'));
+  if(p>=1){o.push(L(CX,CY,A[0],A[1],'#C0272D',2));o.push(L(CX,CY,B[0],B[1],'#C0272D',2));o.push(angleArc(CX,CY,26,20,160));o.push(T(CX,CY-34,'angle at centre','#C0272D',10,'middle',true));}
+  if(p>=2){
+    o.push(L(A[0],A[1],C[0],C[1],'#1a5a8a',2));o.push(L(B[0],B[1],C[0],C[1],'#1a5a8a',2));
+    o.push(DOT(C[0],C[1]));o.push(T(C[0],C[1]+16,'C','#1a5a8a',13,'middle',true));
+  }
+  if(p>=3){o.push(T(240,282,'Angle AOB = 2 \u00d7 Angle ACB','#1a7a3a',13,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+/* Q3 - Angles in the same segment */
+function dQ3(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(CIR(CX,CY,R));
+  var A=pt(CX,CY,R,190),B=pt(CX,CY,R,-10),C=pt(CX,CY,R,55),D=pt(CX,CY,R,110);
+  o.push(DOT(A[0],A[1]));o.push(T(A[0]-8,A[1]+4,'A','#241A17',13,'end',true));
+  o.push(DOT(B[0],B[1]));o.push(T(B[0]+8,B[1]+4,'B','#241A17',13,'start',true));
+  if(p>=1){o.push(L(A[0],A[1],C[0],C[1],'#1a5a8a',2));o.push(L(B[0],B[1],C[0],C[1],'#1a5a8a',2));o.push(DOT(C[0],C[1]));o.push(T(C[0]+8,C[1]-6,'C','#1a5a8a',13,'start',true));}
+  if(p>=2){o.push(L(A[0],A[1],D[0],D[1],'#C0272D',2));o.push(L(B[0],B[1],D[0],D[1],'#C0272D',2));o.push(DOT(D[0],D[1]));o.push(T(D[0]-6,D[1]-8,'D','#C0272D',13,'end',true));}
+  if(p>=3){o.push(T(240,282,'Angle ACB = Angle ADB (same segment, same arc AB)','#1a7a3a',12,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+/* Q4 - Cyclic quadrilateral */
+function dQ4(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(CIR(CX,CY,R));
+  var A=pt(CX,CY,R,150),B=pt(CX,CY,R,60),C=pt(CX,CY,R,-40),D=pt(CX,CY,R,220);
+  var pts=[A,B,C,D],labs=['A','B','C','D'],cols=['#241A17','#241A17','#241A17','#241A17'];
+  if(p>=1){for(var i=0;i<4;i++){var n=pts[(i+1)%4];o.push(L(pts[i][0],pts[i][1],n[0],n[1],'#C0272D',2));}}
+  pts.forEach(function(pt2,i){o.push(DOT(pt2[0],pt2[1]));var dx=pt2[0]>CX?10:-10,dy=pt2[1]>CY?14:-8;o.push(T(pt2[0]+dx,pt2[1]+dy,labs[i],'#241A17',13,dx>0?'start':'end',true));});
+  if(p>=2){o.push(angleArc(A[0],A[1],16,pt(CX,CY,R,150)[0]-A[0]+0,0));}
+  if(p>=3){o.push(T(240,282,'Angle A + Angle C = 180\u00b0  and  Angle B + Angle D = 180\u00b0','#1a7a3a',12,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+/* Q5 - Tangent perpendicular to radius */
+function dQ5(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(CIR(CX,CY,R));
+  var Tp=pt(CX,CY,R,0);
+  o.push(DOT(CX,CY,'#888'));o.push(T(CX-8,CY+16,'O','#888',11,'end'));
+  if(p>=1){o.push(L(CX,CY,Tp[0],Tp[1],'#1a5a8a',2));o.push(T((CX+Tp[0])/2,Tp[1]-10,'radius','#1a5a8a',10));}
+  o.push(DOT(Tp[0],Tp[1]));o.push(T(Tp[0]+12,Tp[1]+4,'T','#241A17',13,'start',true));
+  if(p>=2){
+    o.push(L(Tp[0],Tp[1]-70,Tp[0],Tp[1]+70,'#C0272D',2.5));
+    o.push(T(Tp[0]+16,Tp[1]-60,'tangent line','#C0272D',10,'start'));
+    o.push('<rect x="'+(Tp[0]-16)+'" y="'+(Tp[1]-16)+'" width="16" height="16" fill="none" stroke="#1a7a3a" stroke-width="2"/>');
+  }
+  if(p>=3){o.push(T(240,282,'The tangent at T is always perpendicular (90\u00b0) to the radius OT','#1a7a3a',12,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+/* Q6 - Two tangents from an external point */
+function dQ6(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(CIR(CX,CY,R));
+  var A=pt(CX,CY,R,150),B=pt(CX,CY,R,30);
+  var P=[CX+ (CX-((A[0]+B[0])/2))*-1 +  (A[0]+B[0])/2 - (A[0]+B[0])/2, 0]; // placeholder unused
+  var Px=CX, Py=CY-R-70;
+  o.push(DOT(CX,CY,'#888'));
+  if(p>=1){o.push(L(Px,Py,A[0],A[1],'#C0272D',2));o.push(L(Px,Py,B[0],B[1],'#C0272D',2));}
+  o.push(DOT(A[0],A[1]));o.push(T(A[0]-10,A[1]+2,'A','#241A17',13,'end',true));
+  o.push(DOT(B[0],B[1]));o.push(T(B[0]+10,B[1]+2,'B','#241A17',13,'start',true));
+  o.push(DOT(Px,Py));o.push(T(Px,Py-10,'P','#241A17',13,'middle',true));
+  if(p>=2){o.push(T((Px+A[0])/2-30,(Py+A[1])/2,'PA','#C0272D',11));o.push(T((Px+B[0])/2+18,(Py+B[1])/2,'PB','#C0272D',11));}
+  if(p>=3){o.push(T(240,282,'PA = PB \u2014 the two tangents from an external point are equal','#1a7a3a',12,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+/* Q7 - Alternate segment theorem */
+function dQ7(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(CIR(CX,CY,R));
+  var Tp=pt(CX,CY,R,-60),A=pt(CX,CY,R,150),Cx=pt(CX,CY,R,40);
+  if(p>=1){o.push(L(Tp[0]-90,Tp[1]+52,Tp[0]+90,Tp[1]-52,'#888',2));o.push(T(Tp[0]+95,Tp[1]-56,'tangent','#888',10,'start'));}
+  if(p>=2){o.push(L(Tp[0],Tp[1],A[0],A[1],'#C0272D',2));o.push(DOT(A[0],A[1]));o.push(T(A[0]-10,A[1]+4,'A','#241A17',13,'end',true));}
+  o.push(DOT(Tp[0],Tp[1]));o.push(T(Tp[0]+4,Tp[1]+16,'T','#241A17',13,'start',true));
+  if(p>=3){o.push(L(Tp[0],Tp[1],Cx[0],Cx[1],'#1a5a8a',2));o.push(L(A[0],A[1],Cx[0],Cx[1],'#1a5a8a',2));o.push(DOT(Cx[0],Cx[1]));o.push(T(Cx[0]+10,Cx[1]-2,'C','#1a5a8a',13,'start',true));}
+  if(p>=4){o.push(T(240,282,'Angle between tangent and chord TA = angle ACT in the alternate segment','#1a7a3a',11,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+/* Q8 - Radius bisects a chord at 90 */
+function dQ8(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(CIR(CX,CY,R));
+  var A=pt(CX,CY,R,160),B=pt(CX,CY,R,20);
+  var M=[(A[0]+B[0])/2,(A[1]+B[1])/2];
+  o.push(DOT(CX,CY,'#888'));o.push(T(CX-8,CY-8,'O','#888',11,'end'));
+  if(p>=1){o.push(L(A[0],A[1],B[0],B[1],'#C0272D',2.5));o.push(DOT(A[0],A[1]));o.push(T(A[0]-8,A[1]-4,'A','#241A17',13,'end',true));o.push(DOT(B[0],B[1]));o.push(T(B[0]+8,B[1]-4,'B','#241A17',13,'start',true));}
+  if(p>=2){o.push(L(CX,CY,M[0],M[1],'#1a5a8a',2));o.push(DOT(M[0],M[1]));o.push(T(M[0],M[1]+18,'M','#1a5a8a',12,'middle',true));}
+  if(p>=3){o.push('<rect x="'+(M[0]-14)+'" y="'+(M[1]-14)+'" width="14" height="14" fill="none" stroke="#1a7a3a" stroke-width="2" transform="rotate(20 '+M[0]+' '+M[1]+')"/>');}
+  if(p>=4){o.push(T(240,282,'OM \u22a5 AB and AM = MB \u2014 the radius bisects the chord at right angles','#1a7a3a',11,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+/* Q9 - Combined theorem problem */
+function dQ9(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(CIR(CX,CY,R));
+  var A=pt(CX,CY,R,160),B=pt(CX,CY,R,20),Cx=pt(CX,CY,R,270);
+  o.push(DOT(A[0],A[1]));o.push(T(A[0]-8,A[1]-4,'A','#241A17',13,'end',true));
+  o.push(DOT(B[0],B[1]));o.push(T(B[0]+8,B[1]-4,'B','#241A17',13,'start',true));
+  o.push(DOT(CX,CY,'#888'));o.push(T(CX+4,CY-8,'O','#888',10,'start'));
+  if(p>=1){o.push(L(CX,CY,A[0],A[1],'#C0272D',2));o.push(L(CX,CY,B[0],B[1],'#C0272D',2));o.push(angleArc(CX,CY,24,20,160));o.push(T(CX,CY-38,'angle AOB = 100\u00b0','#C0272D',10,'middle',true));}
+  if(p>=2){o.push(L(A[0],A[1],Cx[0],Cx[1],'#1a5a8a',2));o.push(L(B[0],B[1],Cx[0],Cx[1],'#1a5a8a',2));o.push(DOT(Cx[0],Cx[1]));o.push(T(Cx[0],Cx[1]+16,'C','#1a5a8a',13,'middle',true));}
+  if(p>=3){o.push(T(240,20,'Angle ACB = angle AOB \u00f7 2 = 50\u00b0','#1a5a8a',11,'middle',true));}
+  if(p>=4){o.push(T(240,282,'Combine theorems: centre/circumference here, then use the result in the next step','#1a7a3a',10,'middle',true));}
+  s.innerHTML=o.join('');
+}
+
+/* Q10 - Mixed summary */
+function dQ10(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 300');var o=[];
+  o.push(T(240,24,'Circle Theorems \u2014 Summary','#C0272D',15,'middle',true));
+  var rows=['Semicircle: angle = 90\u00b0','Centre = 2 \u00d7 circumference','Same segment: angles equal','Cyclic quad: opposite angles = 180\u00b0','Tangent \u22a5 radius','Tangents from a point are equal','Alternate segment theorem','Radius bisects chord at 90\u00b0'];
+  rows.forEach(function(r,i){if(i<=p*2){var y=54+i*26;o.push(T(240,y,r,'#241A17',12,'middle',i<2));}});
+  s.innerHTML=o.join('');
+}
+
+var QS=[
+  {ey:'Q1 - Circle Theorems',ti:'Angle in a Semicircle',su:'The angle in a semicircle is always 90°.',steps:[
+    {lb:'The theorem',dr:dQ1,ht:'<p>If AB is a <b>diameter</b> of a circle, and C is any other point on the circle, then <b>angle ACB = 90\u00b0</b>. This is true no matter where C sits on the circle.</p>'},
+    {lb:'Step 1 - Draw the diameter',dr:dQ1,ht:'<div class="fm">AB is the diameter, so it passes through the centre O.</div>'},
+    {lb:'Step 2 - Add point C',dr:dQ1,ht:'<div class="fm">Join C to A and to B. This creates triangle ACB, with a right angle always at C.</div>'},
+    {lb:'Step 3 - The result',dr:dQ1,ht:'<p>Angle ACB = <b>90\u00b0</b>. This is one of the most useful circle theorems for finding missing angles and sides using Pythagoras or trigonometry.</p>'},
+    {lb:'Your turn',dr:dQ1,ht:tryItMC(function(){var x=pick([25,30,35,40,50]);var y=90-x;return{question:'AB is a diameter. Angle BAC = '+x+'\u00b0. What is angle ABC?',options:[y+'\u00b0',(90+x)+'\u00b0','90\u00b0',x+'\u00b0'],correct:0,working:'Angle ACB = 90\u00b0 (semicircle). Angles in triangle ABC sum to 180\u00b0, so angle ABC = 180 \u2212 90 \u2212 '+x+' = '+y+'\u00b0.'};})}
+  ]},
+  {ey:'Q2 - Circle Theorems',ti:'Angle at the Centre',su:'The angle at the centre is twice the angle at the circumference.',steps:[
+    {lb:'The theorem',dr:dQ2,ht:'<p>When two points A and B on a circle are joined to the centre O, and also to a point C on the major arc, the <b>angle at the centre is twice the angle at the circumference</b>.</p>'},
+    {lb:'Step 1 - Angle at the centre',dr:dQ2,ht:'<div class="fm">Angle AOB is formed at the centre O by radii OA and OB.</div>'},
+    {lb:'Step 2 - Angle at the circumference',dr:dQ2,ht:'<div class="fm">Angle ACB is formed at C, standing on the same arc AB.</div>'},
+    {lb:'Step 3 - The result',dr:dQ2,ht:'<p><b>Angle AOB = 2 \u00d7 Angle ACB</b>. Both angles "stand on" the same arc AB \u2014 the one at the centre is always double the one at the circumference.</p>'},
+    {lb:'Your turn',dr:dQ2,ht:tryItMC(function(){var c=pick([30,35,40,45,55]);var ctr=c*2;return{question:'Angle ACB (at the circumference) = '+c+'\u00b0. Find angle AOB (at the centre).',options:[ctr+'\u00b0',c+'\u00b0',(180-c)+'\u00b0',(c+90)+'\u00b0'],correct:0,working:'Angle at centre = 2 \u00d7 angle at circumference = 2 \u00d7 '+c+' = '+ctr+'\u00b0.'};})}
+  ]},
+  {ey:'Q3 - Circle Theorems',ti:'Angles in the Same Segment',su:'Angles subtended by the same arc, in the same segment, are equal.',steps:[
+    {lb:'The theorem',dr:dQ3,ht:'<p>If two points C and D lie on the <b>same side</b> of chord AB (the same segment), then <b>angle ACB = angle ADB</b> \u2014 they are both "standing on" the same arc AB.</p>'},
+    {lb:'Step 1 - First angle',dr:dQ3,ht:'<div class="fm">Angle ACB is formed by joining C to A and B.</div>'},
+    {lb:'Step 2 - Second angle',dr:dQ3,ht:'<div class="fm">Angle ADB is formed by joining D to A and B, on the same side of AB as C.</div>'},
+    {lb:'Step 3 - The result',dr:dQ3,ht:'<p><b>Angle ACB = Angle ADB</b>. This only works when C and D are in the same segment \u2014 on the same side of the chord.</p>'},
+    {lb:'Your turn',dr:dQ3,ht:tryItMC(function(){var x=pick([28,34,42,48,56]);return{question:'C and D are in the same segment. Angle ACB = '+x+'\u00b0. Find angle ADB.',options:[x+'\u00b0',(180-x)+'\u00b0',(90-x)+'\u00b0',(2*x)+'\u00b0'],correct:0,working:'Angles in the same segment, standing on the same arc AB, are always equal. So angle ADB = '+x+'\u00b0.'};})}
+  ]},
+  {ey:'Q4 - Circle Theorems',ti:'Cyclic Quadrilaterals',su:'Opposite angles in a cyclic quadrilateral sum to 180°.',steps:[
+    {lb:'The theorem',dr:dQ4,ht:'<p>A <b>cyclic quadrilateral</b> has all four vertices on the circle. Its <b>opposite angles sum to 180\u00b0</b>.</p>'},
+    {lb:'Step 1 - Label the quadrilateral',dr:dQ4,ht:'<div class="fm">ABCD has all four points A, B, C, D on the circle.</div>'},
+    {lb:'Step 2 - Opposite pairs',dr:dQ4,ht:'<div class="fm">Angle A and Angle C are opposite. Angle B and Angle D are opposite.</div>'},
+    {lb:'Step 3 - The result',dr:dQ4,ht:'<p><b>Angle A + Angle C = 180\u00b0</b> and <b>Angle B + Angle D = 180\u00b0</b>.</p>'},
+    {lb:'Your turn',dr:dQ4,ht:tryItMC(function(){var a=pick([70,80,95,105,115]);var c=180-a;return{question:'ABCD is a cyclic quadrilateral. Angle A = '+a+'\u00b0. Find angle C.',options:[c+'\u00b0',a+'\u00b0',(360-a)+'\u00b0',(90-a>0?90-a:a-90)+'\u00b0'],correct:0,working:'Opposite angles in a cyclic quadrilateral sum to 180\u00b0. Angle C = 180 \u2212 '+a+' = '+c+'\u00b0.'};})}
+  ]},
+  {ey:'Q5 - Circle Theorems',ti:'Tangent and Radius',su:'A tangent is always perpendicular to the radius at the point of contact.',steps:[
+    {lb:'The theorem',dr:dQ5,ht:'<p>A <b>tangent</b> touches a circle at exactly one point. At that point of contact, the tangent is always <b>perpendicular (90\u00b0)</b> to the radius.</p>'},
+    {lb:'Step 1 - The radius',dr:dQ5,ht:'<div class="fm">OT is a radius, drawn to the point of contact T.</div>'},
+    {lb:'Step 2 - The tangent line',dr:dQ5,ht:'<div class="fm">The tangent touches the circle only at T, and is drawn perpendicular to OT.</div>'},
+    {lb:'Step 3 - The result',dr:dQ5,ht:'<p>Angle OTtangent = <b>90\u00b0</b> always. This is very useful for right-angled triangle problems involving tangents.</p>'},
+    {lb:'Your turn',dr:dQ5,ht:tryItMC(function(){var r=pick([5,6,8,9,12]);var d=pick([13,15,17,20,25]);var tang=Math.round(Math.sqrt(d*d-r*r)*10)/10;return{question:'A radius OT = '+r+' cm. The distance from the centre O to an external point P is '+d+' cm, with PT tangent to the circle at T. Find PT.',options:[tang+' cm',(d-r)+' cm',(d+r)+' cm',Math.round(Math.sqrt(d*d+r*r)*10)/10+' cm'],correct:0,working:'Angle OTP = 90\u00b0 (tangent \u22a5 radius), so triangle OTP is right-angled at T. By Pythagoras: PT = \u221a('+d+'\u00b2 \u2212 '+r+'\u00b2) = '+tang+' cm.'};})}
+  ]},
+  {ey:'Q6 - Circle Theorems',ti:'Two Tangents from a Point',su:'Tangents drawn from the same external point are equal in length.',steps:[
+    {lb:'The theorem',dr:dQ6,ht:'<p>If two tangents are drawn from the same external point P, touching the circle at A and B, then <b>PA = PB</b>.</p>'},
+    {lb:'Step 1 - Draw both tangents',dr:dQ6,ht:'<div class="fm">PA and PB both touch the circle, at A and B respectively.</div>'},
+    {lb:'Step 2 - Why they are equal',dr:dQ6,ht:'<p>Triangles OAP and OBP are congruent (OA = OB = radius, OP is shared, both have a right angle at A and B), so PA = PB.</p>'},
+    {lb:'Step 3 - The result',dr:dQ6,ht:'<p><b>PA = PB</b>. The triangle OAP formed with the centre is also isosceles-related since PA=PB, useful for angle-chasing problems.</p>'},
+    {lb:'Your turn',dr:dQ6,ht:tryItMC(function(){var pa=pick([6,8,9,10,12]);return{question:'PA and PB are tangents to a circle from external point P. PA = '+pa+' cm. What is PB?',options:[pa+' cm',(pa*2)+' cm',(pa/2)+' cm','Cannot be found',],correct:0,working:'Two tangents drawn from the same external point are always equal in length, so PB = PA = '+pa+' cm.'};})}
+  ]},
+  {ey:'Q7 - Circle Theorems',ti:'Alternate Segment Theorem',su:'The angle between a tangent and a chord equals the angle in the alternate segment.',steps:[
+    {lb:'The theorem',dr:dQ7,ht:'<p>The <b>alternate segment theorem</b>: the angle between a tangent and a chord drawn from the point of contact equals the angle in the <b>alternate segment</b> (the segment on the other side of the chord).</p>'},
+    {lb:'Step 1 - Tangent and chord',dr:dQ7,ht:'<div class="fm">TA is a chord drawn from the point of tangency T.</div>'},
+    {lb:'Step 2 - The angle at T',dr:dQ7,ht:'<div class="fm">The angle between the tangent and chord TA is measured at T.</div>'},
+    {lb:'Step 3 - The alternate segment',dr:dQ7,ht:'<p>Point C is in the segment on the other side of chord TA \u2014 the "alternate" segment. <b>Angle(tangent, TA) = Angle ACT</b>.</p>'},
+    {lb:'Your turn',dr:dQ7,ht:tryItMC(function(){var x=pick([35,40,48,55,62]);return{question:'The angle between a tangent and a chord at the point of contact is '+x+'\u00b0. Find the angle in the alternate segment.',options:[x+'\u00b0',(180-x)+'\u00b0',(90-x)+'\u00b0',(2*x)+'\u00b0'],correct:0,working:'By the alternate segment theorem, the angle between the tangent and chord equals the angle in the alternate segment: '+x+'\u00b0.'};})}
+  ]},
+  {ey:'Q8 - Circle Theorems',ti:'Radius Bisecting a Chord',su:'A radius (or diameter) that meets a chord at 90° bisects the chord.',steps:[
+    {lb:'The theorem',dr:dQ8,ht:'<p>If a radius (or diameter) is drawn <b>perpendicular</b> to a chord AB, it <b>bisects</b> the chord \u2014 cutting it exactly in half.</p>'},
+    {lb:'Step 1 - The chord',dr:dQ8,ht:'<div class="fm">AB is a chord of the circle, not passing through the centre.</div>'},
+    {lb:'Step 2 - The perpendicular radius',dr:dQ8,ht:'<div class="fm">OM is drawn from the centre O, perpendicular to AB, meeting it at M.</div>'},
+    {lb:'Step 3 - The result',dr:dQ8,ht:'<p><b>AM = MB</b> and angle OMA = angle OMB = 90\u00b0. This is very useful for finding chord lengths using Pythagoras.</p>'},
+    {lb:'Your turn',dr:dQ8,ht:tryItMC(function(){var r=pick([10,12,13,15,17]);var d=pick([6,8,5,9,8]);if(d>=r)d=r-2;var half=Math.round(Math.sqrt(r*r-d*d)*10)/10;var full=Math.round(half*2*10)/10;return{question:'A chord is '+d+' cm from the centre of a circle with radius '+r+' cm. Find the length of the chord.',options:[full+' cm',half+' cm',(r-d)+' cm',(r+d)+' cm'],correct:0,working:'Half the chord = \u221a(r\u00b2 \u2212 d\u00b2) = \u221a('+r+'\u00b2 \u2212 '+d+'\u00b2) = '+half+' cm. Since the radius bisects the chord, full length = 2 \u00d7 '+half+' = '+full+' cm.'};})}
+  ]},
+  {ey:'Q9 - Circle Theorems',ti:'Combining Two Theorems',su:'Use the centre/circumference theorem, then apply the result to a second angle.',steps:[
+    {lb:'The problem',dr:dQ9,ht:'<p>Circle theorem problems often need <b>two theorems in sequence</b>. Here, angle AOB = 100\u00b0 at the centre. Find angle ACB, where C is on the circumference.</p>'},
+    {lb:'Step 1 - Apply centre/circumference',dr:dQ9,ht:'<div class="fm">Angle ACB = Angle AOB \u00f7 2 = 100\u00b0 \u00f7 2 = 50\u00b0</div>'},
+    {lb:'Step 2 - Use the result',dr:dQ9,ht:'<div class="fm">If ABCD were also cyclic, angle ADB (opposite arc) could now be found using the cyclic quadrilateral rule.</div>'},
+    {lb:'Step 3 - Chain theorems together',dr:dQ9,ht:'<p>Circle theorem questions are often solved by working through <b>2-3 theorems in a chain</b> \u2014 always state which theorem you use at each step.</p>'},
+    {lb:'Your turn',dr:dQ9,ht:tryItMC(function(){var ctr=pick([80,90,100,110,120]);var circ=ctr/2;var cyc=180-circ;return{question:'Angle at the centre AOB = '+ctr+'\u00b0. C is on the circumference. D is opposite C in cyclic quadrilateral ACBD. Find angle ADB.',options:[cyc+'\u00b0',circ+'\u00b0',ctr+'\u00b0',(180-ctr)+'\u00b0'],correct:0,working:'Angle ACB = '+ctr+' \u00f7 2 = '+circ+'\u00b0 (centre/circumference). Then angle ADB = 180 \u2212 '+circ+' = '+cyc+'\u00b0 (opposite angles in cyclic quadrilateral).'};})}
+  ]},
+  {ey:'Q10 - Circle Theorems',ti:'Mixed Review',su:'A mixed random question drawing on all eight circle theorems.',steps:[
+    {lb:'Recap: theorems 1-2',dr:dQ10,ht:'<p><b>1. Semicircle:</b> angle = 90\u00b0. &nbsp; <b>2. Centre = 2 \u00d7 circumference.</b></p>'},
+    {lb:'Recap: theorems 3-4',dr:dQ10,ht:'<p><b>3. Same segment:</b> angles equal. &nbsp; <b>4. Cyclic quadrilateral:</b> opposite angles = 180\u00b0.</p>'},
+    {lb:'Recap: theorems 5-6',dr:dQ10,ht:'<p><b>5. Tangent \u22a5 radius.</b> &nbsp; <b>6. Two tangents from a point are equal.</b></p>'},
+    {lb:'Recap: theorems 7-8',dr:dQ10,ht:'<p><b>7. Alternate segment theorem.</b> &nbsp; <b>8. Radius bisects a chord at 90\u00b0.</b></p>'},
+    {lb:'Your turn',dr:dQ10,ht:tryItMC(function(){var qs=[
+      {q:'AB is a diameter and C is on the circle. What is angle ACB?',o:['90\u00b0','45\u00b0','60\u00b0','180\u00b0'],a:0,w:'Angle in a semicircle is always 90\u00b0.'},
+      {q:'Angle at the centre is 130\u00b0. What is the angle at the circumference on the same arc?',o:['65\u00b0','130\u00b0','260\u00b0','50\u00b0'],a:0,w:'Angle at centre = 2 \u00d7 angle at circumference, so circumference angle = 130 \u00f7 2 = 65\u00b0.'},
+      {q:'ABCD is a cyclic quadrilateral with angle B = 100\u00b0. What is angle D?',o:['80\u00b0','100\u00b0','260\u00b0','50\u00b0'],a:0,w:'Opposite angles in a cyclic quadrilateral sum to 180\u00b0, so angle D = 180 \u2212 100 = 80\u00b0.'},
+      {q:'What is the angle between a tangent and the radius at the point of contact?',o:['90\u00b0','45\u00b0','180\u00b0','60\u00b0'],a:0,w:'A tangent is always perpendicular to the radius at the point of contact \u2014 90\u00b0.'},
+      {q:'PA and PB are tangents from point P. If PA = 11 cm, what is PB?',o:['11 cm','5.5 cm','22 cm','Cannot be found'],a:0,w:'Two tangents from the same external point are always equal in length.'}
+    ];var q=qs[Math.floor(Math.random()*qs.length)];return{question:q.q,options:q.o,correct:q.a,working:q.w};})}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').textContent=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=si===0;document.getElementById('nb').textContent=si===q.steps.length-1?'Restart':'Next \u2192';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=si===q.steps.length-1?0:si+1;render();});
+render();
+</script>
+
+
+<!-- ABC Supabase Progress Tracking -->
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase = _sb;
+window._abcTopicCode = 'Y10-GEO-10';
+window.markComplete = async function() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) return;
+  const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', window._abcTopicCode).maybeSingle();
+  if (!topic) return;
+  window._abcTopicId = topic.id;
+  await _sb.from('walkthrough_progress').upsert({
+    student_id: session.user.id, topic_id: topic.id,
+    status: 'completed', completed_at: new Date().toISOString(),
+    last_visited_at: new Date().toISOString(),
+  }, { onConflict: 'student_id,topic_id' });
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>
