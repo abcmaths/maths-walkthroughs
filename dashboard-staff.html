@@ -117,20 +117,10 @@
 
 <header>
   <div class="header-left">
-    <div class="logo">ABC</div>
+    <div class="logo" id="header-logo">ABC</div>
     <div class="subtitle" id="header-subtitle">ABC Learning Portal — Staff</div>
   </div>
   <div class="header-right">
-    <div class="subject-toggle" style="display:none">
-      <button id="toggle-maths" class="active">📐 Maths</button>
-      <button id="toggle-science">🔬 Science</button>
-    </div>
-    <div class="science-subtabs" id="science-subtabs">
-      <button class="science-subtab" id="subtab-science" style="--subtab-accent:#1565C0" onclick="window.switchSubject('science')">🔬 Combined Sci</button>
-      <button class="science-subtab" id="subtab-physics" style="--subtab-accent:#1565C0" onclick="window.switchSubject('physics')">⚡ Physics</button>
-      <button class="science-subtab" id="subtab-chemistry" style="--subtab-accent:#6A1B9A" onclick="window.switchSubject('chemistry')">⚗️ Chemistry</button>
-      <button class="science-subtab" id="subtab-biology" style="--subtab-accent:#2E7D32" onclick="window.switchSubject('biology')">🌿 Biology</button>
-    </div>
     <span class="user-name" id="header-name"></span>
     <a class="btn-outline" id="view-as-student-btn" href="dashboard-student.html?preview=1" style="display:none;text-decoration:none;font-size:0.82rem;padding:6px 12px;margin-right:8px">👁 View as Student</a>
     <button class="btn-signout" onclick="signOut()">Sign out</button>
@@ -144,8 +134,10 @@
   <div class="nav-tab" onclick="showTab('topics')">Browse Topics</div>
   <div class="nav-tab" onclick="showTab('users')">Users</div>
   <div class="nav-tab" onclick="showTab('diagnostic')">Diagnostic</div>
-  <div class="nav-tab" onclick="showTab('reviews')">Review Walkthroughs</div>
-  <div class="nav-tab" onclick="showTab('import')">Import Users</div>
+  <div class="nav-tab" id="nav-tab-reviews" onclick="showTab('reviews')">Review Walkthroughs</div>
+  <div class="nav-tab" id="nav-tab-import" onclick="showTab('import')">Import Users</div>
+  <div class="nav-tab" id="nav-tab-schools" onclick="showTab('schools')">Schools</div>
+  <div class="nav-tab" onclick="showTab('deepdive')">Deep Dive Progress</div>
   <div class="nav-tab" onclick="showTab('games')">Games</div>
 </div>
 
@@ -263,6 +255,13 @@
                 <option value="crs">✝️ CRS</option>
                 <option value="government">🏛️ Government</option>
                 <option value="digitaltech">💻 Digital Tech</option>
+                <option value="bridge_maths">📐 Bridge Maths</option>
+                <option value="bridge_science">🔬 Bridge Science</option>
+                <option value="bridge_english">✏️ Bridge English</option>
+                <option value="phonics">🔤 Phonics</option>
+                <option value="ext_maths">📐 Extension Maths</option>
+                <option value="ext_english">✏️ Extension English</option>
+                <option value="deepdive_maths">🪜 Deep Dive: Maths</option>
         </select>
         <select id="topics-filter-year" onchange="renderTopicsTab()">
           <option value="7">Year 7</option>
@@ -688,7 +687,13 @@
             <option value="crs">✝️ CRS</option>
             <option value="government">🏛️ Government</option>
             <option value="digitaltech">💻 Digital Tech</option>
-            <option value="bridge">🌉 Bridge</option>
+            <option value="bridge_maths">🌉 Bridge Maths</option>
+            <option value="bridge_science">🌉 Bridge Science</option>
+            <option value="bridge_english">🌉 Bridge English</option>
+            <option value="phonics">🔤 Phonics</option>
+            <option value="ext_maths">📐 Extension Maths</option>
+            <option value="ext_english">✏️ Extension English</option>
+            <option value="deepdive_maths">🪜 Deep Dive: Maths</option>
           </select>
           <select id="review-filter-year" onchange="renderReviewTab()">
             <option value="">All Year Groups</option>
@@ -743,6 +748,10 @@
         <div class="section-title" style="margin-bottom:20px">Create Individual User</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:16px">
           <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">School</label>
+            <select id="cu-school" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;background:white"></select>
+          </div>
+          <div>
             <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Full Name</label>
             <input type="text" id="cu-name" placeholder="e.g. Amara Okafor" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
           </div>
@@ -785,6 +794,10 @@
       <!-- CSV Import -->
       <div class="section">
         <div class="section-title" style="margin-bottom:8px">Import Students via CSV</div>
+        <div style="margin-bottom:16px;max-width:280px">
+          <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">School</label>
+          <select id="csv-school" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;background:white"></select>
+        </div>
         <p style="font-size:0.85rem;color:#666;margin-bottom:16px">
           CSV must have these column headers:<br>
           <code style="background:#f5f5f5;padding:2px 6px;border-radius:3px">email, full_name, year_group, password</code>
@@ -816,7 +829,67 @@
     </div>
     </div>
 
+    <!-- SCHOOLS (super-admin only) -->
+    <div class="tab-panel" id="tab-schools">
+      <div class="section" style="margin-bottom:24px">
+        <div class="section-title" style="margin-bottom:20px">Add School</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:16px">
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">School Name</label>
+            <input type="text" id="sc-name" placeholder="e.g. Greenfield International School" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">School Code</label>
+            <input type="text" id="sc-code" placeholder="e.g. greenfield (lowercase, unique)" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Brand Color</label>
+            <input type="color" id="sc-color" value="#2C6E49" style="width:100%;padding:4px;border:1.5px solid #ddd;border-radius:5px;height:42px">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Logo URL (optional)</label>
+            <input type="text" id="sc-logo" placeholder="https://…" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
+          </div>
+        </div>
+        <button class="btn" style="width:auto;padding:10px 28px" onclick="createSchool()">Add School</button>
+        <div class="message" id="sc-msg"></div>
+      </div>
+      <div class="section">
+        <div class="section-title" style="margin-bottom:12px">Existing Schools</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Code</th><th>Color</th><th>Students</th><th>Staff</th></tr></thead>
+            <tbody id="schools-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
+
+    <!-- DEEP DIVE PROGRESS -->
+    <div class="tab-panel" id="tab-deepdive">
+      <div class="filter-bar">
+        <select id="dd-filter-topic" onchange="renderDeepDiveProgressTab()">
+          <option value="">All Deep Dive Topics</option>
+        </select>
+        <select id="dd-filter-status" onchange="renderDeepDiveProgressTab()">
+          <option value="">All Statuses</option>
+          <option value="started">▶ In Progress</option>
+          <option value="completed">✓ Completed</option>
+          <option value="opted_out">⏸ Opted Out</option>
+        </select>
+        <input type="text" id="dd-filter-search" placeholder="Search by name…" oninput="renderDeepDiveProgressTab()">
+      </div>
+      <div class="section">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Student</th><th>Year</th><th>Topic</th><th>Status</th><th>Stage Reached</th><th>Final Check Score</th><th>Last Visited</th></tr></thead>
+            <tbody id="deepdive-progress-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
     <!-- GAMES -->
     <div class="tab-panel" id="tab-games">
@@ -926,8 +999,53 @@
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
   window._supabase = supabase;
 
-  let allStudents = [], allProgress = [], allTopics = [];
+  let allStudents = [], allProgress = [], allTopics = [], allPeople = [];
+  let mySchoolId = null;
   let allStaffActiveMap = {};
+
+  let isAbcSchool = true; // default true; set precisely once branding loads
+  let isSuperAdmin = false;
+
+  async function applySchoolBranding(schoolId) {
+    try {
+      const { data: school } = await supabase
+        .from('schools').select('name, logo_url, primary_color, school_code').eq('id', schoolId).maybeSingle();
+      if (!school) return;
+
+      const logoEl = document.getElementById('header-logo');
+      const subtitleEl = document.getElementById('header-subtitle');
+      const isAbc = school.school_code === 'abc';
+
+      if (logoEl) {
+        logoEl.innerHTML = '';
+        if (school.logo_url) {
+          const img = document.createElement('img');
+          img.src = school.logo_url;
+          img.alt = school.name;
+          img.style.cssText = 'height:28px;display:block';
+          logoEl.appendChild(img);
+        } else if (isAbc) {
+          logoEl.textContent = 'ABC';
+        } else {
+          logoEl.textContent = school.name;
+        }
+      }
+      if (subtitleEl && !isAbc) subtitleEl.textContent = school.name + ' — Learning Portal';
+
+      if (school.primary_color) {
+        document.documentElement.style.setProperty('--brand', school.primary_color);
+        document.querySelectorAll('header, .card-header').forEach(el => el.style.background = school.primary_color);
+      }
+
+      // Review Walkthroughs (and its per-question payment tracking) is an
+      // ABC-only internal process — hide entirely for other schools.
+      isAbcSchool = isAbc;
+      const reviewsTab = document.getElementById('nav-tab-reviews');
+      if (reviewsTab) reviewsTab.style.display = isAbc ? '' : 'none';
+    } catch (e) {
+      console.warn('Branding load failed, using defaults', e);
+    }
+  }
 
   // ── Use getSession directly — more reliable than onAuthStateChange for page loads ──
   async function init() {
@@ -949,6 +1067,16 @@
       window.location.href = 'dashboard-student.html';
       return;
     }
+
+    await applySchoolBranding(profile.school_id);
+
+    // ── Super-admin only: user creation + school management ──
+    isSuperAdmin = profile.is_super_admin === true;
+    const importTab  = document.getElementById('nav-tab-import');
+    const schoolsTab = document.getElementById('nav-tab-schools');
+    if (importTab)  importTab.style.display  = isSuperAdmin ? '' : 'none';
+    if (schoolsTab) schoolsTab.style.display = isSuperAdmin ? '' : 'none';
+    if (isSuperAdmin) await loadSchoolsForPickers();
 
     document.getElementById('header-name').textContent = profile.full_name;
     if (profile.role === 'admin') {
@@ -976,11 +1104,13 @@
       return all;
     }
 
+    mySchoolId = profile.school_id;
+
     const [students, teachers, topics, progress] = await Promise.all([
-      loadAllPaginated('profiles', '*', q => q.eq('role', 'student').eq('active', true).order('full_name')),
-      loadAllPaginated('profiles', '*', q => q.in('role', ['teacher', 'admin'])),
+      loadAllPaginated('profiles', '*', q => q.eq('role', 'student').eq('active', true).eq('school_id', mySchoolId).order('full_name')),
+      loadAllPaginated('profiles', '*', q => q.in('role', ['teacher', 'admin']).eq('school_id', mySchoolId)),
       loadAllPaginated('topics', '*', q => q.order('year_group').order('topic_code')),
-      loadAllPaginated('walkthrough_progress', '*')
+      loadAllPaginated('walkthrough_progress', '*', q => q.eq('school_id', mySchoolId))
     ]);
 
     console.log('Data loaded — students:', students.length, 'topics:', topics.length, 'progress:', progress.length);
@@ -988,6 +1118,9 @@
     allStudents = students || [];
     allStaffActiveMap = {};
     (teachers || []).forEach(t => { allStaffActiveMap[t.id] = t.active !== false; });
+    // allPeople covers students AND staff/admin, so Deep Dive Progress rows
+    // can resolve a student_id even when a teacher/admin has worked through a Deep Dive topic.
+    allPeople   = [...(students || []), ...(teachers || [])];
     allTopics   = topics   || [];
     allProgress = progress || [];
 
@@ -1084,6 +1217,73 @@
         <td><div class="progress-cell"><div class="mini-bar"><div class="mini-fill" style="width:${pct}%"></div></div><div class="pct-label">${pct}%</div></div></td>
         <td>${lastDate}</td>
         <td><button class="btn-link" onclick="openStudentModal('${s.id}')">View</button></td>
+      </tr>`;
+    }).join('');
+  };
+
+  // ── Deep Dive Progress: one row per student per deepdive_* topic, showing stage-level
+  // progress so staff can see which topics students struggle with / opt out of. ──
+  window.renderDeepDiveProgressTab = function() {
+    const deepDiveTopics = allTopics.filter(t => (t.subject || '').startsWith('deepdive'));
+    const topicMap = {};
+    deepDiveTopics.forEach(t => topicMap[t.id] = t);
+
+    // Populate the topic filter dropdown once (idempotent)
+    const topicSel = document.getElementById('dd-filter-topic');
+    if (topicSel && !topicSel.dataset.populated) {
+      deepDiveTopics.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = t.topic_name;
+        topicSel.appendChild(opt);
+      });
+      topicSel.dataset.populated = '1';
+    }
+
+    const topicFilter  = document.getElementById('dd-filter-topic').value;
+    const statusFilter = document.getElementById('dd-filter-status').value;
+    const searchFilter = document.getElementById('dd-filter-search').value.toLowerCase();
+
+    const studentMap = {};
+    allPeople.forEach(s => studentMap[s.id] = s);
+
+    let rows = allProgress.filter(p => topicMap[p.topic_id]);
+    if (topicFilter)  rows = rows.filter(p => p.topic_id === topicFilter);
+    if (statusFilter) rows = rows.filter(p => p.status === statusFilter);
+    if (searchFilter) {
+      rows = rows.filter(p => {
+        const s = studentMap[p.student_id];
+        return s && s.full_name.toLowerCase().includes(searchFilter);
+      });
+    }
+    rows = rows.slice().sort((a,b) => new Date(b.last_visited_at || 0) - new Date(a.last_visited_at || 0));
+
+    const tbody = document.getElementById('deepdive-progress-tbody');
+    if (deepDiveTopics.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px">No Deep Dive topics found yet.</td></tr>';
+      return;
+    }
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px">No Deep Dive activity matches these filters.</td></tr>';
+      return;
+    }
+    const statusLabel = { started: '▶ In progress', completed: '✓ Completed', opted_out: '⏸ Opted out' };
+    const statusColor  = { started: '#f57f17', completed: '#2e7d32', opted_out: '#888' };
+
+    tbody.innerHTML = rows.map(p => {
+      const s = studentMap[p.student_id];
+      const t = topicMap[p.topic_id];
+      const lastDate = p.last_visited_at ? new Date(p.last_visited_at).toLocaleDateString('en-GB') : '—';
+      const stage = (p.stage_reached !== null && p.stage_reached !== undefined) ? p.stage_reached : '—';
+      const score = (p.quiz_score !== null && p.quiz_score !== undefined) ? `${p.quiz_score} / 10` : '—';
+      return `<tr>
+        <td><strong>${s ? s.full_name : 'Unknown student'}</strong></td>
+        <td>${s ? (s.year_group ? 'Year ' + s.year_group : 'Staff') : '—'}</td>
+        <td>${t ? t.topic_name : p.topic_id}</td>
+        <td style="color:${statusColor[p.status] || '#888'};font-weight:700">${statusLabel[p.status] || p.status || '—'}</td>
+        <td>${stage}</td>
+        <td>${score}</td>
+        <td>${lastDate}</td>
       </tr>`;
     }).join('');
   };
@@ -1293,8 +1493,86 @@
   window.closeModal = function() { document.getElementById('modal').classList.remove('open'); };
 
   // ── Tab switching ──
+  let allSchoolsList = [];
+
+  async function loadSchoolsForPickers() {
+    const { data, error } = await supabase.from('schools').select('*').order('name');
+    if (error) { console.error('load schools error:', error); return; }
+    allSchoolsList = data || [];
+    const options = allSchoolsList.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    const cuSel  = document.getElementById('cu-school');
+    const csvSel = document.getElementById('csv-school');
+    if (cuSel)  cuSel.innerHTML  = options;
+    if (csvSel) csvSel.innerHTML = options;
+    // Default the picker to the logged-in staff member's own school
+    if (cuSel)  cuSel.value  = mySchoolId;
+    if (csvSel) csvSel.value = mySchoolId;
+  }
+
+  async function renderSchoolsTable() {
+    await loadSchoolsForPickers();
+    const tbody = document.getElementById('schools-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5">Loading…</td></tr>';
+
+    const [{ data: students }, { data: staff }] = await Promise.all([
+      supabase.from('profiles').select('school_id').eq('role', 'student'),
+      supabase.from('profiles').select('school_id').in('role', ['teacher', 'admin'])
+    ]);
+    const studentCounts = {}, staffCounts = {};
+    (students || []).forEach(s => { studentCounts[s.school_id] = (studentCounts[s.school_id] || 0) + 1; });
+    (staff || []).forEach(s => { staffCounts[s.school_id] = (staffCounts[s.school_id] || 0) + 1; });
+
+    tbody.innerHTML = allSchoolsList.map(s => `
+      <tr>
+        <td>${s.name}${s.is_demo ? ' <span class="badge badge-blue">demo</span>' : ''}</td>
+        <td><code>${s.school_code}</code></td>
+        <td><span style="display:inline-block;width:16px;height:16px;border-radius:3px;background:${s.primary_color || '#C0272D'};vertical-align:middle;border:1px solid #ddd"></span></td>
+        <td>${studentCounts[s.id] || 0}</td>
+        <td>${staffCounts[s.id] || 0}</td>
+      </tr>
+    `).join('');
+  }
+
+  window.createSchool = async function() {
+    const name  = document.getElementById('sc-name').value.trim();
+    const code  = document.getElementById('sc-code').value.trim().toLowerCase();
+    const color = document.getElementById('sc-color').value;
+    const logo  = document.getElementById('sc-logo').value.trim();
+    const btn   = document.querySelector('#tab-schools .btn');
+
+    if (!name || !code) { showMsg('sc-msg', 'error', 'Please enter a school name and code.'); return; }
+    if (!/^[a-z0-9_-]+$/.test(code)) { showMsg('sc-msg', 'error', 'School code should be lowercase letters, numbers, - or _ only.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Adding…';
+
+    const { error } = await supabase.from('schools').insert({
+      name, school_code: code, primary_color: color || '#C0272D', logo_url: logo || null
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Add School';
+
+    if (error) {
+      showMsg('sc-msg', 'error', 'Error: ' + error.message);
+      return;
+    }
+
+    showMsg('sc-msg', 'success', `✓ ${name} added.`);
+    document.getElementById('sc-name').value = '';
+    document.getElementById('sc-code').value = '';
+    document.getElementById('sc-logo').value = '';
+    document.getElementById('sc-color').value = '#2C6E49';
+    await renderSchoolsTable();
+  };
+
+
   window.showTab = function(name) {
-    const names = ['overview','progress','tests','topics','users','diagnostic','reviews','import','games'];
+    if (name === 'reviews' && !isAbcSchool) { name = 'overview'; }
+    if ((name === 'import' || name === 'schools') && !isSuperAdmin) { name = 'overview'; }
+    if (name === 'schools') { renderSchoolsTable(); }
+    const names = ['overview','progress','tests','topics','users','diagnostic','reviews','import','schools','deepdive','games'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
@@ -1304,13 +1582,7 @@
     if (name === 'diagnostic') window.switchDiagYear();
     if (name === 'reviews')  window.renderReviewTab();
     if (name === 'games')    window.renderGamesTab();
-
-    // Subject toggle only applies to Browse Topics — hide it on every other tab
-    const subjToggle = document.querySelector('.subject-toggle');
-    if (subjToggle) subjToggle.style.display = (name === 'topics') ? 'flex' : 'none';
-    const sciSubtabs = document.getElementById('science-subtabs');
-    if (sciSubtabs && name !== 'topics') sciSubtabs.classList.remove('visible');
-    if (sciSubtabs && name === 'topics' && SCIENCE_SUBJECTS.includes(staffSubject)) sciSubtabs.classList.add('visible');
+    if (name === 'deepdive') window.renderDeepDiveProgressTab();
   };
 
   // ── Games tab ──
@@ -1340,8 +1612,8 @@
     const subjectFilter = subjectSelect ? subjectSelect.value : '';
     const filteredGames = subjectFilter ? games.filter(g => g.subject === subjectFilter) : games;
 
-    const { data: scores } = await supabase.from('game_scores').select('game_code, score, time_seconds, student_id');
-    const { data: lb } = await supabase.from('game_leaderboard').select('game_code, full_name, score, time_seconds');
+    const { data: scores } = await supabase.from('game_scores').select('game_code, score, time_seconds, student_id').eq('school_id', mySchoolId);
+    const { data: lb } = await supabase.from('game_leaderboard').select('game_code, full_name, score, time_seconds, school_id').eq('school_id', mySchoolId);
 
     if (!filteredGames.length) { el.innerHTML = '<p style="color:#888">No games in this subject.</p>'; return; }
 
@@ -1422,6 +1694,8 @@
 
   window.runImport = async function() {
     if (!parsedRows.length) return;
+    const schoolId = document.getElementById('csv-school').value;
+    if (!schoolId) { showMsg('import-msg', 'error', 'Please select a school before importing.'); return; }
     const btn  = document.getElementById('import-btn');
     const log  = document.getElementById('import-log');
     const prog = document.getElementById('import-progress');
@@ -1435,11 +1709,11 @@
       try {
         const { data, error } = await supabase.auth.signUp({
           email: row.email, password: row.password,
-          options: { data: { full_name: row.full_name, role: 'student' } }
+          options: { data: { full_name: row.full_name, role: 'student', school_id: schoolId } }
         });
         if (error) throw new Error(error.message);
         if (data.user) {
-          await supabase.from('profiles').update({ year_group: parseInt(row.year_group) || null }).eq('id', data.user.id);
+          await supabase.from('profiles').update({ year_group: parseInt(row.year_group) || null, school_id: schoolId }).eq('id', data.user.id);
         }
         log.innerHTML += `<div class="ok">✓ ${row.full_name} (${row.email})</div>`;
         ok++;
@@ -1480,6 +1754,7 @@
     const { data } = await supabase
       .from('test_results')
       .select('*, profiles(full_name, year_group), topics(topic_name, year_group)')
+      .eq('school_id', mySchoolId)
       .order('completed_at', { ascending: false });
     allTestResults = data || [];
   }
@@ -1616,28 +1891,29 @@
     'Y10-GEO-02': 'year10/mensuration-y10.html',
     'Y10-GEO-03': 'year10/constructions-y10.html',
     'Y10-GEO-04': 'year10/trig-y10.html',
-    'Y10-CAL-01': 'year10/calculus-diff-y10.html',
+    'Y11-CAL-01': 'year10/calculus-diff-y10.html',
     'Y10-STA-01': 'year10/stats-y10.html',
     'Y10-MIS-01': 'year10/misconceptions-y10.html',
     'Y10-ALG-03': 'year10/proportion-y10.html',
     'Y10-GEO-05': 'year10/similarity-y10.html',
     'Y10-GEO-06': 'year10/elevation-depression-y10.html',
+    'Y10-GEO-10': 'year10/circle-theorems-y10.html',
     // Year 11
     'Y11-ALG-01': 'year11/algebra-y11.html',
     'Y11-GEO-01': 'year11/geometry-y11.html',
     'Y11-GEO-02': 'year11/mensuration-y11.html',
-    'Y11-GEO-03': 'year11/transformations-y11.html',
+    'Y10-GEO-07': 'year11/transformations-y11.html',
     'Y11-NUM-01': 'year11/percentages-y11.html',
     'Y11-ALG-02': 'year11/sets-y12.html',
-    'Y11-VEC-01': 'year11/vectors-y11.html',
+    'Y10-VEC-01': 'year11/vectors-y11.html',
     'Y11-MIS-01': 'year11/misconceptions-y11.html',
-    'Y11-ALG-03': 'year11/sequences-adv-y11.html',
+    'Y10-ALG-04': 'year11/sequences-adv-y11.html',
     'Y11-ALG-04': 'year11/inequalities-y11.html',
-    'Y11-GEO-04': 'year11/trig-graphs-y11.html',
-    'Y11-GEO-05': 'year11/transformations-adv-y11.html',
+    'Y10-GEO-09': 'year11/trig-graphs-y11.html',
+    'Y10-GEO-08': 'year11/transformations-adv-y11.html',
     'Y11-NUM-02': 'year11/exponential-y11.html',
     'Y11-PRO-01': 'year11/probability-adv-y11.html',
-    'Y11-SET-01': 'year11/sets-y11.html',
+    'Y10-SET-01': 'year11/sets-y11.html',
     'Y11-STA-01': 'year11/histograms-y11.html',
     // Year 12
     'Y12-ALG-01': 'year12/algebra-y12.html',
@@ -2098,6 +2374,43 @@
     'BRG11-SCI-03': 'bridge_sci_y11/BRG11-SCI-03.html',
   };
 
+  const PHONICS_WALKTHROUGH_FILES = {
+    'PHO-01': 'phonics/PHO-01.html',
+    'PHO-02': 'phonics/PHO-02.html',
+    'PHO-03': 'phonics/PHO-03.html',
+    'PHO-04': 'phonics/PHO-04.html',
+    'PHO-05': 'phonics/PHO-05.html',
+    'PHO-06': 'phonics/PHO-06.html',
+    'PHO-07': 'phonics/PHO-07.html',
+    'PHO-08': 'phonics/PHO-08.html',
+    'PHO-09': 'phonics/PHO-09.html',
+    'PHO-10': 'phonics/PHO-10.html',
+    'PHO-11': 'phonics/PHO-11.html',
+    'PHO-12': 'phonics/PHO-12.html',
+  };
+
+  const EXT_MTH_WALKTHROUGH_FILES = {
+    'EXT-MTH-01': 'ext_mth/EXT-MTH-01.html',
+    'EXT-MTH-02': 'ext_mth/EXT-MTH-02.html',
+    'EXT-MTH-03': 'ext_mth/EXT-MTH-03.html',
+    'EXT-MTH-04': 'ext_mth/EXT-MTH-04.html',
+    'EXT-MTH-05': 'ext_mth/EXT-MTH-05.html',
+    'EXT-MTH-06': 'ext_mth/EXT-MTH-06.html',
+    'EXT-MTH-07': 'ext_mth/EXT-MTH-07.html',
+    'EXT-MTH-08': 'ext_mth/EXT-MTH-08.html',
+  };
+
+  const EXT_ENG_WALKTHROUGH_FILES = {
+    'EXT-ENG-01': 'ext_eng/EXT-ENG-01.html',
+    'EXT-ENG-02': 'ext_eng/EXT-ENG-02.html',
+    'EXT-ENG-03': 'ext_eng/EXT-ENG-03.html',
+    'EXT-ENG-04': 'ext_eng/EXT-ENG-04.html',
+    'EXT-ENG-05': 'ext_eng/EXT-ENG-05.html',
+    'EXT-ENG-06': 'ext_eng/EXT-ENG-06.html',
+    'EXT-ENG-07': 'ext_eng/EXT-ENG-07.html',
+    'EXT-ENG-08': 'ext_eng/EXT-ENG-08.html',
+  };
+
   const DIGITALTECH_STRAND_COLOURS = {
     'Foundations':             '#37474F',
     'Data & Safety':           '#00838F',
@@ -2136,6 +2449,35 @@
     chemistry: { 'Physical Chemistry':'#1565C0','Atomic Structure':'#6A1B9A','Bonding':'#E65100','Stoichiometry':'#C0272D','Electrochemistry':'#00695C','Energetics':'#C0272D','Kinetics':'#E65100','Redox':'#6A1B9A','Acids & Bases':'#C0272D','Periodic Table':'#1565C0','Metals':'#00695C','Environment':'#2E7D32','Organic':'#E65100','Analysis':'#555','Inorganic':'#888','Practical':'#888' },
     biology:   { 'Classification':'#2E7D32','Cell Biology':'#1565C0','Biochemistry':'#6A1B9A','Plant Biology':'#2E7D32','Human Biology':'#C0272D','Health & Disease':'#E65100','Reproduction':'#E65100','Genetics':'#6A1B9A','Ecology':'#00695C','Biotechnology':'#1565C0','Evolution':'#00695C','Practical':'#888' },
     digitaltech: DIGITALTECH_STRAND_COLOURS,
+    bridge_maths: { 'Bridge': '#C0272D' },
+    bridge_science: { 'Bridge': '#C0272D' },
+    bridge_english: { 'Bridge': '#C0272D' },
+    phonics: { 'Phonics': '#C0272D' },
+    ext_maths: { 'Extension': '#C0272D' },
+    ext_english: { 'Extension': '#C0272D' },
+    deepdive_maths: { 'Deep Dive': '#7A1418' },
+  };
+
+  // Deep Dive chains: ORDERED list of topic_codes forming one teaching ladder.
+  // Only include topic_codes for files that are ACTUALLY LIVE (built + in topics table).
+  // Append to a chain's topicCodes as each new file gets built — don't pre-list future
+  // topic_codes, since that renders permanent "Coming soon" locked rungs students can't use.
+  const DEEPDIVE_CHAINS = {
+    deepdive_maths: [
+      { chainId: 'alg-hcf', chainName: 'HCF: From Numbers to Algebra', topicCodes: ['TCH-ALG-01'] },
+      { chainId: 'quadratics', chainName: 'Quadratics', topicCodes: ['TCH-NUM-01', 'TCH-QUAD-01'] },
+      { chainId: 'fdp', chainName: 'Fractions, Decimals & Percentages', topicCodes: ['TCH-FDP-01', 'TCH-FDP-02'] },
+      { chainId: 'circle-geometry', chainName: 'Lines and Angles', topicCodes: ['TCH-GEO-01'] },
+    ],
+  };
+
+  const DEEPDIVE_MATHS_WALKTHROUGH_FILES = {
+    'TCH-ALG-01': 'deepdive/maths/algebra/hcf-to-algebra.html',
+    'TCH-NUM-01': 'deepdive/maths/algebra/squares-and-roots.html',
+    'TCH-QUAD-01': 'deepdive/maths/algebra/quadratics-solving.html',
+    'TCH-FDP-01': 'deepdive/maths/number/fdp-foundations.html',
+    'TCH-FDP-02': 'deepdive/maths/number/fdp-increase-decrease.html',
+    'TCH-GEO-01': 'deepdive/maths/geometry/circle-geometry-proofs.html',
   };
 
   function getWalkthroughFile(subject, topicCode) {
@@ -2143,22 +2485,22 @@
     if (subject === 'english')   file = ENGLISH_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'science')   file = SCIENCE_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'physics')   file = PHYSICS_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'chemistry') file = CHEMISTRY_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'biology')   file = BIOLOGY_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'chemistry') file = CHEMISTRY_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'crs')        file = CRS_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'government') file = GOV_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'digitaltech') file = DIGITALTECH_WALKTHROUGH_FILES[topicCode];
-    else if (subject === 'bridge')      file = BRIDGE_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'bridge' || subject === 'bridge_maths' || subject === 'bridge_science' || subject === 'bridge_english') file = BRIDGE_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'phonics')    file = PHONICS_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'ext_maths')  file = EXT_MTH_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'ext_english') file = EXT_ENG_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'deepdive_maths') file = DEEPDIVE_MATHS_WALKTHROUGH_FILES[topicCode];
     else file = WALKTHROUGH_FILES[topicCode];
     // Fallback: bridge codes may be tagged under any subject value in the topics table —
     // always check the bridge map by code shape so review/testing isn't blocked on that.
     if (!file && /^BRG/.test(topicCode)) file = BRIDGE_WALKTHROUGH_FILES[topicCode];
     return file || '#';
   }
-
-  const SCIENCE_SUBJECTS = ['science', 'physics', 'chemistry', 'biology'];
-
-  let staffSubject = 'maths';
 
   async function loadReviews() {
     let all = [];
@@ -2200,6 +2542,15 @@
           .map(m => parseInt(m[1], 10))
           .sort((a, b) => a - b)
           .map((idx, i) => ({ num: i + 1, title: `Bridge Question ${idx + 1}` }));
+      }
+      // Deep Dive format: <section class="stage" data-stage="N" ...>...<h2>Title</h2>
+      // Multi-stage teaching files, structured as HTML sections rather than a JS array.
+      const stageMatches = [...html.matchAll(/<section class="stage" data-stage="(\d+)"[^>]*>[\s\S]*?<h2>([^<]+)<\/h2>/g)];
+      if (stageMatches.length > 0) {
+        return stageMatches
+          .map(m => ({ stage: parseInt(m[1], 10), title: m[2] }))
+          .sort((a, b) => a.stage - b.stage)
+          .map((s, i) => ({ num: i + 1, title: s.title }));
       }
       return [];
     } catch(e) { return []; }
@@ -2613,18 +2964,29 @@
     const n = currentReviewQuestions.length;
 
     // Upsert each question review
+    let submitError = null;
     for (let i = 0; i < n; i++) {
       const q = currentReviewQuestions[i];
       const comment = document.getElementById('comment-' + q.num)?.value.trim();
       const ts = n > 1 ? openedAt + totalDurationMs * (i / (n - 1)) : submitTime;
-      await supabase.from('walkthrough_reviews').upsert({
+      const { error } = await supabase.from('walkthrough_reviews').upsert({
         topic_id:        currentReviewTopicId,
         question_number: q.num,
         reviewer_id:     session.user.id,
+        school_id:       mySchoolId,
         rating:          ratings[q.num],
         comment,
         reviewed_at:     new Date(ts).toISOString()
       }, { onConflict: 'topic_id,question_number,reviewer_id' });
+      if (error) { submitError = error; console.error('Review upsert failed:', error); break; }
+    }
+
+    if (submitError) {
+      msg.style.color = '#C0272D';
+      msg.textContent = '✗ Failed to save review: ' + submitError.message;
+      btn.disabled = false;
+      btn.textContent = 'Submit Review';
+      return;
     }
 
     // Reload reviews
@@ -2767,13 +3129,15 @@
     const { data } = await supabase
       .from('user_emails')
       .select('*')
+      .eq('school_id', mySchoolId)
       .order('full_name');
     allUsersWithEmail = data || [];
 
     // user_emails view doesn't carry the `active` column — fetch and merge from profiles
     const { data: activeRows } = await supabase
       .from('profiles')
-      .select('id, active');
+      .select('id, active')
+      .eq('school_id', mySchoolId);
     const activeMap = {};
     (activeRows || []).forEach(r => { activeMap[r.id] = r.active !== false; }); // default true if null
     allUsersWithEmail.forEach(u => { u.active = activeMap.hasOwnProperty(u.id) ? activeMap[u.id] : true; });
@@ -3579,11 +3943,16 @@
     const role     = document.getElementById('cu-role').value;
     const year     = parseInt(document.getElementById('cu-year').value);
     const form     = document.getElementById('cu-form').value.trim();
+    const schoolId = document.getElementById('cu-school').value;
     const msg      = document.getElementById('cu-msg');
     const btn      = document.querySelector('#tab-import .btn');
 
     if (!name || !email || !password) {
       showMsg('cu-msg', 'error', 'Please fill in name, email and password.');
+      return;
+    }
+    if (!schoolId) {
+      showMsg('cu-msg', 'error', 'Please select a school.');
       return;
     }
 
@@ -3593,7 +3962,7 @@
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: name, role } }
+      options: { data: { full_name: name, role, school_id: schoolId } }
     });
 
     if (error) {
@@ -3604,7 +3973,7 @@
     }
 
     if (data.user) {
-      const update = { full_name: name, role };
+      const update = { full_name: name, role, school_id: schoolId };
       if (role === 'student') {
         update.year_group  = year;
         update.form_class  = form || null;
@@ -3629,18 +3998,32 @@
   };
 
   // ── Render topics tab ──
+  const YEAR_AGNOSTIC_SUBJECTS = ['phonics', 'ext_maths', 'ext_english'];
+
   window.renderTopicsTab = function() {
-    const yr      = parseInt(document.getElementById('topics-filter-year').value) || 13;
     const subject = document.getElementById('topics-filter-subject').value;
-    const filtered = allTopics.filter(t => t.year_group === yr && (t.subject || 'maths') === subject);
+    const yearSelectEl = document.getElementById('topics-filter-year');
+
+    // Deep Dive subjects render as a chain/ladder, not a flat card grid, and aren't year-filtered.
+    if (subject.startsWith('deepdive')) {
+      if (yearSelectEl) yearSelectEl.style.display = 'none';
+      renderDeepDiveLadder(subject, document.getElementById('topics-grid'));
+      return;
+    }
+
+    const yr      = parseInt(document.getElementById('topics-filter-year').value) || 13;
+    const isYearAgnostic = YEAR_AGNOSTIC_SUBJECTS.includes(subject);
+    const filtered = allTopics.filter(t => (isYearAgnostic || t.year_group === yr) && (t.subject || 'maths') === subject);
     const grid = document.getElementById('topics-grid');
+    grid.style.display = 'grid';
+    yearSelectEl.style.display = isYearAgnostic ? 'none' : '';
 
     // Hide Add Maths / Further Maths when any non-Maths subject is selected
     const addMathsOpt = document.querySelector('#topics-filter-year option[value="13"]');
     const furtherMathsOpt = document.querySelector('#topics-filter-year option[value="14"]');
     if (addMathsOpt) addMathsOpt.style.display = subject === 'maths' ? '' : 'none';
     if (furtherMathsOpt) furtherMathsOpt.style.display = subject === 'maths' ? '' : 'none';
-    if (subject !== 'maths' && (yr === 13 || yr === 14)) {
+    if (subject !== 'maths' && !isYearAgnostic && (yr === 13 || yr === 14)) {
       document.getElementById('topics-filter-year').value = '10';
       window.renderTopicsTab(); return;
     }
@@ -3689,33 +4072,51 @@
       return strandHeader + cards;
     }).join('');
   };
-  window.switchSubject = function(subject) {
-    staffSubject = subject;
-    const isMaths  = subject === 'maths';
-    const isSciGrp = SCIENCE_SUBJECTS.includes(subject);
 
-    document.getElementById('toggle-maths').classList.toggle('active', isMaths);
-    document.getElementById('toggle-science').classList.toggle('active', isSciGrp);
-    document.getElementById('science-subtabs').classList.toggle('visible', isSciGrp);
-
-    ['science', 'physics', 'chemistry', 'biology'].forEach(s => {
-      const el = document.getElementById('subtab-' + s);
-      if (el) el.classList.toggle('active', s === subject);
-    });
-
-    const subtitles = { maths: 'ABC Learning Portal — Staff', science: 'Science Portal — Staff', physics: 'Physics Portal — Staff', chemistry: 'Chemistry Portal — Staff', biology: 'Biology Portal — Staff' };
-    document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Staff Portal';
-
-    // Sync Browse Topics subject filter
-    const subjectSelect = document.getElementById('topics-filter-subject');
-    if (subjectSelect) subjectSelect.value = subject;
-    window.renderTopicsTab();
+  // Renders one or more teaching chains as a vertical ladder: connected boxes,
+  // one per stage, with staff-facing completion/started counts per chain.
+  // Currently each chain maps to a single deep-dive file with internal stages,
+  // so "completion" here reflects the topic-level walkthrough_progress row.
+  window.renderDeepDiveLadder = function(subject, container) {
+    const chains = DEEPDIVE_CHAINS[subject] || [];
+    if (chains.length === 0) {
+      container.innerHTML = '<div style="color:#aaa;padding:32px;font-style:italic">No deep dive chains configured for this subject yet.</div>';
+      return;
+    }
+    container.style.display = 'block';
+    container.innerHTML = chains.map(chain => {
+      const rungs = chain.topicCodes.map((code, i) => {
+        const topic = allTopics.find(t => t.topic_code === code);
+        const file = getWalkthroughFile(subject, code);
+        const completions = topic ? allProgress.filter(p => p.topic_id === topic.id && p.status === 'completed').length : 0;
+        const started = topic ? allProgress.filter(p => p.topic_id === topic.id && p.status === 'started').length : 0;
+        const label = topic ? topic.topic_name : code;
+        const missing = !topic || file === '#';
+        return `
+          <div style="display:flex;align-items:stretch;gap:0;">
+            <div style="display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0;">
+              <div style="width:24px;height:24px;border-radius:50%;background:${missing ? '#eee' : '#7A1418'};color:${missing ? '#aaa' : '#fff'};display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;">${i + 1}</div>
+              ${i < chain.topicCodes.length - 1 ? '<div style="width:2px;flex:1;background:#e0c9c9;min-height:18px;"></div>' : ''}
+            </div>
+            <a href="${missing ? '#' : file}" ${missing ? 'onclick="return false;"' : 'target="_blank"'} style="
+              flex:1;display:block;background:white;border:1.5px solid ${missing ? '#eee' : '#e8d9ce'};border-radius:6px;
+              padding:12px 16px;margin:0 0 10px 12px;text-decoration:none;color:#333;
+            ">
+              <div style="font-size:0.88rem;font-weight:700;color:#333;">${label}</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+                <span style="font-size:0.72rem;font-weight:700;background:#e8f5e9;color:#2e7d32;padding:2px 7px;border-radius:99px;">✓ ${completions} completed</span>
+                ${started > 0 ? `<span style="font-size:0.72rem;font-weight:700;background:#fffde7;color:#f57f17;padding:2px 7px;border-radius:99px;">▶ ${started} started</span>` : ''}
+                ${missing ? `<span style="font-size:0.72rem;font-weight:700;background:#f5f5f5;color:#aaa;padding:2px 7px;border-radius:99px;">🔒 Coming soon</span>` : ''}
+              </div>
+            </a>
+          </div>`;
+      }).join('');
+      return `<div style="margin-bottom:24px;"><div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#7A1418;padding:4px 0 10px;">${chain.chainName}</div>${rungs}</div>`;
+    }).join('');
   };
 
-  document.getElementById('toggle-maths').addEventListener('click', () => window.switchSubject('maths'));
-  document.getElementById('toggle-science').addEventListener('click', () => {
-    if (!SCIENCE_SUBJECTS.includes(staffSubject)) window.switchSubject('science');
-  });
+
+
 </script>
 
 </body>
