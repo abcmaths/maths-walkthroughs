@@ -207,6 +207,7 @@ function nextStep() {
   if (stepIdx < 3) {
     stepIdx++;
   } else {
+    logWalkthroughInteraction(qIdx + 1);
     if (qIdx < 9) {
       qIdx++; stepIdx = 0;
     } else {
@@ -256,22 +257,28 @@ const _abcTopicCode = 'BRG12-MTH-03';
   if (!session) { window.location.href = '../login.html'; return; }
 })();
 
+async function logWalkthroughInteraction(questionIndex) {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    const { data: topicRow } = await supabase.from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
+    if (!topicRow) return;
+    const { data: profRow } = await supabase.from('profiles').select('school_id').eq('id', session.user.id).maybeSingle();
+    if (!profRow) return;
+    await supabase.from('walkthrough_interactions').insert({
+      student_id: session.user.id,
+      topic_id: topicRow.id,
+      school_id: profRow.school_id,
+      question_index: questionIndex
+    });
+  } catch(e) { console.error('interaction log failed:', e); }
+}
+
 window.markComplete = async function() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error('Not logged in');
 
-  const { data: topicRow, error: topicErr } = await supabase
-    .from('topics').select('id').eq('topic_code', _abcTopicCode).maybeSingle();
-  if (topicErr || !topicRow) throw new Error('Could not find topic: ' + _abcTopicCode);
-
-  const { data: __mySchoolProfile } = await supabase.from('profiles').select('school_id').eq('id', session.user.id).maybeSingle();
-  const __mySchoolId = __mySchoolProfile ? __mySchoolProfile.school_id : null;
-  const { error } = await supabase.from('walkthrough_progress').upsert({
-    student_id: session.user.id, school_id: __mySchoolId,
-    topic_id: topicRow.id,
-    status: 'completed',
-    last_visited_at: new Date().toISOString()
-  }, { onConflict: 'student_id,topic_id' });
+  const { data, error } = await supabase.rpc('mark_walkthrough_complete', { p_topic_code: _abcTopicCode });
   if (error) throw error;
 };
 </script>
