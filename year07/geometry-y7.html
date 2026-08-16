@@ -776,8 +776,10 @@ window.markComplete = async function() {
   const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', window._abcTopicCode).maybeSingle();
   if (!topic) return;
   window._abcTopicId = topic.id;
+  const { data: __mySchoolProfile } = await _sb.from('profiles').select('school_id').eq('id', session.user.id).maybeSingle();
+  const __mySchoolId = __mySchoolProfile ? __mySchoolProfile.school_id : null;
   await _sb.from('walkthrough_progress').upsert({
-    student_id: session.user.id, topic_id: topic.id,
+    student_id: session.user.id, school_id: __mySchoolId, topic_id: topic.id,
     status: 'completed', completed_at: new Date().toISOString(),
     last_visited_at: new Date().toISOString(),
   }, { onConflict: 'student_id,topic_id' });

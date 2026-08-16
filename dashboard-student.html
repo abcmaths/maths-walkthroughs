@@ -457,29 +457,28 @@
     'Y10-GEO-02': 'year10/mensuration-y10.html',
     'Y10-GEO-03': 'year10/constructions-y10.html',
     'Y10-GEO-04': 'year10/trig-y10.html',
-    'Y11-CAL-01': 'year10/calculus-diff-y10.html',
+    'Y10-CAL-01': 'year10/calculus-diff-y10.html',
     'Y10-STA-01': 'year10/stats-y10.html',
     'Y10-MIS-01': 'year10/misconceptions-y10.html',
     'Y10-ALG-03': 'year10/proportion-y10.html',
     'Y10-GEO-05': 'year10/similarity-y10.html',
     'Y10-GEO-06': 'year10/elevation-depression-y10.html',
-    'Y10-GEO-10': 'year10/circle-theorems-y10.html',
     // Year 11
     'Y11-ALG-01': 'year11/algebra-y11.html',
     'Y11-GEO-01': 'year11/geometry-y11.html',
     'Y11-GEO-02': 'year11/mensuration-y11.html',
-    'Y10-GEO-07': 'year11/transformations-y11.html',
+    'Y11-GEO-03': 'year11/transformations-y11.html',
     'Y11-NUM-01': 'year11/percentages-y11.html',
     'Y11-ALG-02': 'year11/sets-y12.html',
-    'Y10-VEC-01': 'year11/vectors-y11.html',
+    'Y11-VEC-01': 'year11/vectors-y11.html',
     'Y11-MIS-01': 'year11/misconceptions-y11.html',
-    'Y10-ALG-04': 'year11/sequences-adv-y11.html',
+    'Y11-ALG-03': 'year11/sequences-adv-y11.html',
     'Y11-ALG-04': 'year11/inequalities-y11.html',
-    'Y10-GEO-09': 'year11/trig-graphs-y11.html',
-    'Y10-GEO-08': 'year11/transformations-adv-y11.html',
+    'Y11-GEO-04': 'year11/trig-graphs-y11.html',
+    'Y11-GEO-05': 'year11/transformations-adv-y11.html',
     'Y11-NUM-02': 'year11/exponential-y11.html',
     'Y11-PRO-01': 'year11/probability-adv-y11.html',
-    'Y10-SET-01': 'year11/sets-y11.html',
+    'Y11-SET-01': 'year11/sets-y11.html',
     'Y11-STA-01': 'year11/histograms-y11.html',
     // Year 12
     'Y12-ALG-01': 'year12/algebra-y12.html',
@@ -1075,6 +1074,7 @@
   let testResultsMap = {};
   let myYearGroup = 7;
   let userId      = null;
+  let myStudentSchoolId = null;
   let currentSubject = 'maths';
 
   function showError(msg) {
@@ -1131,6 +1131,8 @@
 
       if (profileError) { showError('Error loading profile: ' + profileError.message); return; }
       if (!profile)     { showError('No profile found. Please contact your teacher.'); return; }
+
+      myStudentSchoolId = profile.school_id;
 
       const isAbcSchool = await applySchoolBranding(profile.school_id);
 
@@ -1754,7 +1756,7 @@
     if (file === '#') { alert('This walkthrough is coming soon!'); return; }
     if (progressMap[topicId] !== 'completed') {
       await supabase.from('walkthrough_progress').upsert({
-        student_id: userId, topic_id: parseInt(topicId),
+        student_id: userId, topic_id: parseInt(topicId), school_id: myStudentSchoolId,
         status: 'started', last_visited_at: new Date().toISOString(),
       }, { onConflict: 'student_id,topic_id' });
       progressMap[topicId] = 'started';
