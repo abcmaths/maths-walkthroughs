@@ -111,7 +111,140 @@
     @media (max-width: 380px) {
       .summary-row { grid-template-columns: 1fr; }
     }
+    /* Nested flyout dropdown — progressively enhances a <select> with optgroups
+       into a true tap-to-expand nested menu (the underlying <select> stays the
+       source of truth; filtering logic never needs to change). */
+    .nflyout-wrap { position: relative; display: inline-block; }
+    .nflyout-trigger {
+      font-size: 0.85rem; padding: 7px 12px; border: 1.5px solid #ddd; border-radius: 5px;
+      background: #fff; color: #333; cursor: pointer; font-family: inherit; white-space: nowrap;
+    }
+    .nflyout-trigger:hover { border-color: #C0272D; }
+    .nflyout-panel {
+      display: none; position: absolute; top: calc(100% + 6px); left: 0;
+      background: #fff; border: 1.5px solid #eee; border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12); padding: 6px;
+      flex-direction: column; gap: 2px; z-index: 60; min-width: 200px;
+    }
+    .nflyout-panel.open { display: flex; }
+    .nflyout-item {
+      text-align: left; white-space: nowrap; background: #fff; color: #333;
+      border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;
+      font-size: 0.85rem; font-family: inherit;
+    }
+    .nflyout-item:hover { background: #f8f0ee; }
+    .nflyout-item.sel { background: #C0272D; color: #fff; }
+    .nflyout-item.has-sub { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .nflyout-item.has-sub .arrow { color: #C0272D; font-weight: 700; }
+    .nflyout-item.has-sub.group-label { color: #999; cursor: default; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.4px; padding-top: 10px; }
+    .nflyout-sub {
+      display: none; position: absolute; top: -6px; left: calc(100% + 6px);
+      background: #fff; border: 1.5px solid #eee; border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12); padding: 6px;
+      flex-direction: column; gap: 2px; z-index: 61; min-width: 190px;
+    }
+    .nflyout-sub.open { display: flex; }
+    @media (max-width: 480px) {
+      .nflyout-sub { position: static; box-shadow: none; margin: 2px 0 4px 12px; }
+    }
   </style>
+  <script>
+    // Reads a <select> (with optional <optgroup>s) and builds a nested flyout
+    // beside it that drives the same select — so existing onchange logic,
+    // data-fixed-year attributes, and render functions all keep working untouched.
+    function buildNestedFlyout(selectId) {
+      const sel = document.getElementById(selectId);
+      if (!sel || sel.dataset.flyoutBuilt) return;
+      sel.dataset.flyoutBuilt = '1';
+      sel.style.display = 'none';
+
+      const wrapId = selectId + '-flyout';
+      const wrap = document.createElement('div');
+      wrap.className = 'nflyout-wrap';
+      wrap.id = wrapId;
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.className = 'nflyout-trigger';
+      trigger.textContent = (sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].textContent : 'Select') + ' ▾';
+      const panel = document.createElement('div');
+      panel.className = 'nflyout-panel';
+
+      function makeLeaf(opt, idx) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'nflyout-item' + (idx === sel.selectedIndex ? ' sel' : '');
+        btn.textContent = opt.textContent;
+        btn.addEventListener('click', () => {
+          sel.selectedIndex = idx;
+          sel.dispatchEvent(new Event('change'));
+          trigger.textContent = opt.textContent + ' ▾';
+          wrap.querySelectorAll('.nflyout-item').forEach(b => b.classList.remove('sel'));
+          btn.classList.add('sel');
+          closeAllFlyouts();
+        });
+        return btn;
+      }
+
+      Array.from(sel.children).forEach(child => {
+        if (child.tagName === 'OPTGROUP') {
+          const row = document.createElement('div');
+          row.className = 'nflyout-item has-sub';
+          const label = document.createElement('span');
+          label.textContent = child.label;
+          const arrow = document.createElement('span');
+          arrow.className = 'arrow';
+          arrow.textContent = '▸';
+          row.appendChild(label);
+          row.appendChild(arrow);
+          const sub = document.createElement('div');
+          sub.className = 'nflyout-sub';
+          Array.from(child.children).forEach(opt => {
+            const idx = Array.prototype.indexOf.call(sel.options, opt);
+            sub.appendChild(makeLeaf(opt, idx));
+          });
+          row.appendChild(sub);
+          row.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const wasOpen = sub.classList.contains('open');
+            wrap.querySelectorAll('.nflyout-sub').forEach(s => s.classList.remove('open'));
+            if (!wasOpen) sub.classList.add('open');
+          });
+          panel.appendChild(row);
+        } else if (child.tagName === 'OPTION') {
+          const idx = Array.prototype.indexOf.call(sel.options, child);
+          panel.appendChild(makeLeaf(child, idx));
+        }
+      });
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const wasOpen = panel.classList.contains('open');
+        closeAllFlyouts();
+        if (!wasOpen) panel.classList.add('open');
+      });
+
+      wrap.appendChild(trigger);
+      wrap.appendChild(panel);
+      sel.parentNode.insertBefore(wrap, sel);
+
+      // Keep the visible trigger label in sync if something else changes
+      // the select's value programmatically (e.g. auto-reset logic).
+      sel.addEventListener('change', () => {
+        const opt = sel.options[sel.selectedIndex];
+        if (opt) trigger.textContent = opt.textContent + ' ▾';
+      });
+    }
+    function closeAllFlyouts() {
+      document.querySelectorAll('.nflyout-panel, .nflyout-sub').forEach(p => p.classList.remove('open'));
+    }
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.nflyout-wrap')) closeAllFlyouts();
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+      buildNestedFlyout('topics-filter-subject');
+      buildNestedFlyout('review-filter-subject');
+    });
+  </script>
 </head>
 <body>
 
