@@ -184,7 +184,23 @@ document.addEventListener('click',function(e){
   }
 });
 function g(){return document.getElementById('dg');}
-function T(x,y,txt,c,sz,a,bold){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function T(x,y,txt,c,sz,a,bold){
+  c=c||'#241A17';sz=sz||12;a=a||'middle';
+  // Supports inline superscripts written as ^(...) or ^X (single char) —
+  // rendered as real SVG superscripts via baseline-shift, not literal carets.
+  var parts=String(txt).split(/\^(\([^)]*\)|\S)/);
+  var tspans='';
+  for(var i=0;i<parts.length;i++){
+    if(!parts[i])continue;
+    if(i%2===1){
+      var exp=parts[i].replace(/^\(|\)$/g,'');
+      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+exp+'</tspan>';
+    }else{
+      tspans+='<tspan>'+parts[i]+'</tspan>';
+    }
+  }
+  return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+tspans+'</text>';
+}
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
@@ -214,11 +230,11 @@ function drawGeneric(title, boxes, p){
 var Q=[
  {ey:'Checkpoint 1 of 10',ti:'Differentiating eˣ',su:'The function that is its own derivative',panels:[
    {dtitle:'d/dx(eˣ) = eˣ',boxes:[{"stage": 1, "text": "eˣ is unique — it never changes under differentiation", "bg": "#fff5f0"}],p:1,html:'<p>This remarkable property is WHY e is defined the way it is — no other base has this behaviour.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Differentiate y=3eˣ", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule with a constant multiple.</p>'+tryItMC(function(){return {question:'What is dy/dx for y=3e\u02e3?',options:['3e\u02e3','e\u02e3','3xe^(x\u22121)','3'],correct:0,working:'Constant multiples carry straight through: d/dx(3e\u02e3)=3e\u02e3.'};})}
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "Differentiate y=3eˣ", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule with a constant multiple.</p>'+tryItMC(function(){return {question:'What is dy/dx for y=3e\u02e3?',options:['3e\u02e3','e\u02e3','3xe<sup>x\u22121</sup>','3'],correct:0,working:'Constant multiples carry straight through: d/dx(3e\u02e3)=3e\u02e3.'};})}
   ]},
- {ey:'Checkpoint 2 of 10',ti:'Differentiating e^(kx)',su:'Using the chain rule idea informally',panels:[
+ {ey:'Checkpoint 2 of 10',ti:'Differentiating exponentials',su:'Using the chain rule idea informally',panels:[
    {dtitle:'d/dx(e^(kx)) = ke^(kx)',boxes:[{"stage": 1, "text": "The constant k comes down as a multiplier", "bg": "#fff5f0"}],p:1,html:'<p>A very common AS pattern — differentiating e to a linear power multiplies by that power’s coefficient.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Differentiate y=e^(5x)", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule.</p>'+tryItMC(function(){return {question:'What is dy/dx for y=e^(5x)?',options:['5e^(5x)','e^(5x)','5e\u02e3','e^(4x)'],correct:0,working:'d/dx(e^(kx))=ke^(kx), here k=5: 5e^(5x).'};})}
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "Differentiate y=e^(5x)", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule.</p>'+tryItMC(function(){return {question:'What is dy/dx for y=e<sup>5x</sup>?',options:['5e<sup>5x</sup>','e<sup>5x</sup>','5e\u02e3','e<sup>4x</sup>'],correct:0,working:'d/dx(e<sup>kx</sup>)=ke<sup>kx</sup>, here k=5: 5e<sup>5x</sup>.'};})}
   ]},
  {ey:'Checkpoint 3 of 10',ti:'Differentiating ln(x)',su:'d/dx(ln x) = 1/x',panels:[
    {dtitle:'ln(x) differentiates to a simple fraction',boxes:[{"stage": 1, "text": "d/dx(ln x) = 1/x", "bg": "#fff5f0"}],p:1,html:'<p>Remarkably simple given how complex ln(x) looks — this connects logarithms directly to the reciprocal function.</p>'},
@@ -233,7 +249,7 @@ var Q=[
    {dtitle:'Check',boxes:[{"stage": 1, "text": "Differentiate y = 3cosx", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule with a constant.</p>'+tryItMC(function(){return {question:'What is dy/dx for y=3cosx?',options:['\u22123sinx','3sinx','\u22123cosx','3cosx'],correct:0,working:'d/dx(3cosx)=3\u00d7(\u2212sinx)=\u22123sinx.'};})}
   ]},
  {ey:'Checkpoint 6 of 10',ti:'Differentiating sin(kx) and cos(kx)',su:'The constant multiplier pattern again',panels:[
-   {dtitle:'d/dx[sin(kx)] = k·cos(kx)',boxes:[{"stage": 1, "text": "d/dx[sin(kx)] = k cos(kx)", "bg": "#fff5f0"}, {"stage": 2, "text": "d/dx[cos(kx)] = −k sin(kx)", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Same pattern as e^(kx) — the inner constant k comes out as a multiplier.</p>'},
+   {dtitle:'d/dx[sin(kx)] = k·cos(kx)',boxes:[{"stage": 1, "text": "d/dx[sin(kx)] = k cos(kx)", "bg": "#fff5f0"}, {"stage": 2, "text": "d/dx[cos(kx)] = −k sin(kx)", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Same pattern as e<sup>kx</sup> — the inner constant k comes out as a multiplier.</p>'},
    {dtitle:'Check',boxes:[{"stage": 1, "text": "Differentiate y=sin(4x)", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule.</p>'+tryItMC(function(){return {question:'What is dy/dx for y=sin(4x)?',options:['4cos(4x)','cos(4x)','4sin(4x)','\u22124cos(4x)'],correct:0,working:'d/dx[sin(kx)]=k cos(kx), here k=4: 4cos(4x).'};})}
   ]},
  {ey:'Checkpoint 7 of 10',ti:'Stationary points with new functions',su:'Applying the same method as Pure 1',panels:[
@@ -246,7 +262,7 @@ var Q=[
   ]},
  {ey:'Checkpoint 9 of 10',ti:'Rates of change with exponential models',su:'Applying calculus to growth/decay',panels:[
    {dtitle:'Differentiate the model to find the rate',boxes:[{"stage": 1, "text": "P = 500e^(0.2t)  →  dP/dt = 100e^(0.2t)", "bg": "#fff5f0"}],p:1,html:'<p>Differentiating an exponential growth model gives the instantaneous rate of change at any time t.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "N=200e^(0.05t)", "bg": "#fff5f0"}],p:1,html:'<p>Find dN/dt.</p>'+tryItMC(function(){return {question:'For N=200e^(0.05t), what is dN/dt?',options:['10e^(0.05t)','200e^(0.05t)','0.05e^(0.05t)','10e^(0.2t)'],correct:0,working:'dN/dt=200\u00d70.05\u00d7e^(0.05t)=10e^(0.05t).'};})}
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "N=200e^(0.05t)", "bg": "#fff5f0"}],p:1,html:'<p>Find dN/dt.</p>'+tryItMC(function(){return {question:'For N=200e<sup>0.05t</sup>, what is dN/dt?',options:['10e<sup>0.05t</sup>','200e<sup>0.05t</sup>','0.05e<sup>0.05t</sup>','10e<sup>0.2t</sup>'],correct:0,working:'dN/dt=200\u00d70.05\u00d7e<sup>0.05t</sup>=10e<sup>0.05t</sup>.'};})}
   ]},
  {ey:'Checkpoint 10 of 10',ti:'Bringing it together',su:'Consolidating Paper 2 Differentiation',panels:[
    {dtitle:'The Paper 2 Differentiation toolkit',boxes:[{"stage": 1, "text": "eˣ, e^(kx), ln(x), ln(f(x))", "bg": "#fff5f0"}, {"stage": 2, "text": "sinx, cosx, sin(kx), cos(kx)", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Stationary points, tangents, rates of change", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>These new derivative rules are the building blocks for the full chain, product, and quotient rules met at A2.</p>'},

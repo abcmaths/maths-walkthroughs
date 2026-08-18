@@ -184,7 +184,23 @@ document.addEventListener('click',function(e){
   }
 });
 function g(){return document.getElementById('dg');}
-function T(x,y,txt,c,sz,a,bold){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function T(x,y,txt,c,sz,a,bold){
+  c=c||'#241A17';sz=sz||12;a=a||'middle';
+  // Supports inline superscripts written as ^(...) or ^X (single char) —
+  // rendered as real SVG superscripts via baseline-shift, not literal carets.
+  var parts=String(txt).split(/\^(\([^)]*\)|\S)/);
+  var tspans='';
+  for(var i=0;i<parts.length;i++){
+    if(!parts[i])continue;
+    if(i%2===1){
+      var exp=parts[i].replace(/^\(|\)$/g,'');
+      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+exp+'</tspan>';
+    }else{
+      tspans+='<tspan>'+parts[i]+'</tspan>';
+    }
+  }
+  return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+tspans+'</text>';
+}
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
@@ -212,9 +228,9 @@ function drawGeneric(title, boxes, p){
 }
 
 var Q=[
- {ey:'Checkpoint 1 of 10',ti:'Integrating e^(kx)',su:'Reverse of the derivative rule',panels:[
-   {dtitle:'∫e^(kx) dx = (1/k)e^(kx) + c',boxes:[{"stage": 1, "text": "Divide by k when integrating (opposite of differentiating)", "bg": "#fff5f0"}],p:1,html:'<p>Since differentiating e^(kx) multiplies by k, integrating does the reverse: divide by k.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "∫e^(2x) dx", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule.</p>'+tryItMC(function(){return {question:'What is \u222be^(2x) dx?',options:['\u00bde^(2x)+c','2e^(2x)+c','e^(2x)+c','e^(x)+c'],correct:0,working:'\u222be^(kx)dx=(1/k)e^(kx)+c, here k=2: \u00bde^(2x)+c.'};})}
+ {ey:'Checkpoint 1 of 10',ti:'Integrating exponentials',su:'Reverse of the derivative rule',panels:[
+   {dtitle:'∫e^(kx) dx = (1/k)e^(kx) + c',boxes:[{"stage": 1, "text": "Divide by k when integrating (opposite of differentiating)", "bg": "#fff5f0"}],p:1,html:'<p>Since differentiating e<sup>kx</sup> multiplies by k, integrating does the reverse: divide by k.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "∫e^(2x) dx", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule.</p>'+tryItMC(function(){return {question:'What is \u222be<sup>2x</sup> dx?',options:['\u00bde<sup>2x</sup>+c','2e<sup>2x</sup>+c','e<sup>2x</sup>+c','e<sup>x</sup>+c'],correct:0,working:'\u222be<sup>kx</sup>dx=(1/k)e<sup>kx</sup>+c, here k=2: \u00bde<sup>2x</sup>+c.'};})}
   ]},
  {ey:'Checkpoint 2 of 10',ti:'Integrating 1/x',su:'∫1/x dx = ln|x| + c',panels:[
    {dtitle:'The missing piece from the power rule',boxes:[{"stage": 1, "text": "The power rule fails for x⁻¹ (n+1 would be 0)", "bg": "#fde8e8", "stroke": "#a01820"}, {"stage": 2, "text": "∫1/x dx = ln|x| + c", "text2": "modulus needed since ln is undefined for negative numbers", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>This fills the gap the power rule leaves at n=−1, connecting integration directly back to logarithms.</p>'},
@@ -225,12 +241,12 @@ var Q=[
    {dtitle:'Check',boxes:[{"stage": 1, "text": "∫4sinx dx", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule.</p>'+tryItMC(function(){return {question:'What is \u222b4sinx dx?',options:['\u22124cosx+c','4cosx+c','\u22124sinx+c','4sinx+c'],correct:0,working:'\u222b4sinx dx = 4\u00d7(\u2212cosx)+c = \u22124cosx+c.'};})}
   ]},
  {ey:'Checkpoint 4 of 10',ti:'Integrating sin(kx) and cos(kx)',su:'The 1/k pattern again',panels:[
-   {dtitle:'∫sin(kx)dx = −(1/k)cos(kx)+c',boxes:[{"stage": 1, "text": "∫sin(kx)dx = −(1/k)cos(kx)+c", "bg": "#fff5f0"}, {"stage": 2, "text": "∫cos(kx)dx = (1/k)sin(kx)+c", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Same 1/k division pattern as integrating e^(kx) — recognising this pattern across function types saves memorisation.</p>'},
+   {dtitle:'∫sin(kx)dx = −(1/k)cos(kx)+c',boxes:[{"stage": 1, "text": "∫sin(kx)dx = −(1/k)cos(kx)+c", "bg": "#fff5f0"}, {"stage": 2, "text": "∫cos(kx)dx = (1/k)sin(kx)+c", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Same 1/k division pattern as integrating e<sup>kx</sup> — recognising this pattern across function types saves memorisation.</p>'},
    {dtitle:'Check',boxes:[{"stage": 1, "text": "∫cos(3x) dx", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule.</p>'+tryItMC(function(){return {question:'What is \u222bcos(3x) dx?',options:['(1/3)sin(3x)+c','3sin(3x)+c','sin(3x)+c','(1/3)cos(3x)+c'],correct:0,working:'\u222bcos(kx)dx=(1/k)sin(kx)+c, here k=3.'};})}
   ]},
  {ey:'Checkpoint 5 of 10',ti:'Definite integrals with new functions',su:'Applying limits as before',panels:[
    {dtitle:'Same method, new antiderivatives',boxes:[{"stage": 1, "text": "∫₀^(ln2) eˣ dx = [eˣ]₀^(ln2) = e^(ln2) − e⁰ = 2 − 1 = 1", "bg": "#fff5f0"}],p:1,html:'<p>The definite integral method is identical to Pure 1 — only the antiderivative formula changes.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "∫₁^e 1/x dx", "bg": "#fff5f0"}],p:1,html:'<p>Evaluate using ln.</p>'+tryItMC(function(){return {question:'What is \u222b\u2081^e (1/x) dx?',options:['1','e','0','e\u22121'],correct:0,working:'[ln|x|]\u2081^e = ln(e)\u2212ln(1) = 1\u22120 = 1.'};})}
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "∫₁^e 1/x dx", "bg": "#fff5f0"}],p:1,html:'<p>Evaluate using ln.</p>'+tryItMC(function(){return {question:'What is \u222b\u2081<sup>e</sup> (1/x) dx?',options:['1','e','0','e\u22121'],correct:0,working:'[ln|x|]\u2081<sup>e</sup> = ln(e)\u2212ln(1) = 1\u22120 = 1.'};})}
   ]},
  {ey:'Checkpoint 6 of 10',ti:'Area under exponential and log curves',su:'Applying the area interpretation',panels:[
    {dtitle:'Same "area under the curve" meaning',boxes:[{"stage": 1, "text": "∫ₐᵇ f(x) dx still gives the area, regardless of function type", "bg": "#fff5f0"}],p:1,html:'<p>The geometric meaning of a definite integral (area) doesn’t change just because the function is exponential or logarithmic.</p>'},
@@ -242,11 +258,11 @@ var Q=[
   ]},
  {ey:'Checkpoint 8 of 10',ti:'Area between curve and axis, new functions',su:'Applying the full method',panels:[
    {dtitle:'Full worked method',boxes:[{"stage": 1, "text": "1. Find limits (intersections with axis or given values)", "bg": "#fff5f0"}, {"stage": 2, "text": "2. Integrate using the appropriate rule", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "3. Evaluate between the limits", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>This three-step process is identical to Pure 1 — the new functions only change step 2.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Area under y=cosx from 0 to π/2", "bg": "#fff5f0"}],p:1,html:'<p>Evaluate the definite integral.</p>'+tryItMC(function(){return {question:'What is the area under y=cosx between x=0 and x=\u03c0/2?',options:['1','0','\u03c0/2','\u22121'],correct:0,working:'[sinx]\u2080^(\u03c0/2) = sin(\u03c0/2)\u2212sin(0) = 1\u22120 = 1.'};})}
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "Area under y=cosx from 0 to π/2", "bg": "#fff5f0"}],p:1,html:'<p>Evaluate the definite integral.</p>'+tryItMC(function(){return {question:'What is the area under y=cosx between x=0 and x=\u03c0/2?',options:['1','0','\u03c0/2','\u22121'],correct:0,working:'[sinx]\u2080<sup>\u03c0/2</sup> = sin(\u03c0/2)\u2212sin(0) = 1\u22120 = 1.'};})}
   ]},
  {ey:'Checkpoint 9 of 10',ti:'Setting up integrals from context',su:'Reading a problem into an integral',panels:[
    {dtitle:'Translate the physical setup into calculus',boxes:[{"stage": 1, "text": "Rate of flow dV/dt = 3e^(0.5t)  →  Total volume = ∫ dV/dt dt", "bg": "#fff5f0"}],p:1,html:'<p>If you’re given a rate (a derivative), integrating recovers the total quantity — a common applied-context question.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "dV/dt = 6e^(0.2t), find total change from t=0 to 5", "bg": "#fff5f0"}],p:1,html:'<p>What operation finds the total change?</p>'+tryItMC(function(){return {question:'Given dV/dt=6e^(0.2t), how do you find the total change in V from t=0 to t=5?',options:['\u222b\u2080\u2075 6e^(0.2t) dt','Differentiate 6e^(0.2t)','Evaluate 6e^(0.2\u00d75)','Multiply 6\u00d75'],correct:0,working:'Integrating the rate of change over the time interval gives the total change in the quantity.'};})}
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "dV/dt = 6e^(0.2t), find total change from t=0 to 5", "bg": "#fff5f0"}],p:1,html:'<p>What operation finds the total change?</p>'+tryItMC(function(){return {question:'Given dV/dt=6e<sup>0.2t</sup>, how do you find the total change in V from t=0 to t=5?',options:['\u222b\u2080\u2075 6e<sup>0.2t</sup> dt','Differentiate 6e<sup>0.2t</sup>','Evaluate 6e<sup>1</sup>','Multiply 6\u00d75'],correct:0,working:'Integrating the rate of change over the time interval gives the total change in the quantity.'};})}
   ]},
  {ey:'Checkpoint 10 of 10',ti:'Bringing it together',su:'Consolidating Paper 2 Integration — and the whole AS course',panels:[
    {dtitle:'The Paper 2 Integration toolkit',boxes:[{"stage": 1, "text": "e^(kx), 1/x → ln|x|, sin(kx), cos(kx)", "bg": "#fff5f0"}, {"stage": 2, "text": "Definite integrals and areas with new functions", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Recognising integrals, applied rate problems", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>You’ve now covered every core AS Pure Mathematics topic across both papers — a genuinely significant achievement a full year ahead of schedule.</p>'},

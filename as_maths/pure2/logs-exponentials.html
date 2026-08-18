@@ -184,7 +184,23 @@ document.addEventListener('click',function(e){
   }
 });
 function g(){return document.getElementById('dg');}
-function T(x,y,txt,c,sz,a,bold){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function T(x,y,txt,c,sz,a,bold){
+  c=c||'#241A17';sz=sz||12;a=a||'middle';
+  // Supports inline superscripts written as ^(...) or ^X (single char) —
+  // rendered as real SVG superscripts via baseline-shift, not literal carets.
+  var parts=String(txt).split(/\^(\([^)]*\)|\S)/);
+  var tspans='';
+  for(var i=0;i<parts.length;i++){
+    if(!parts[i])continue;
+    if(i%2===1){
+      var exp=parts[i].replace(/^\(|\)$/g,'');
+      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+exp+'</tspan>';
+    }else{
+      tspans+='<tspan>'+parts[i]+'</tspan>';
+    }
+  }
+  return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+tspans+'</text>';
+}
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
@@ -233,12 +249,12 @@ var Q=[
    {dtitle:'Check',boxes:[{"stage": 1, "text": "Solve 5ˣ=12", "bg": "#fff5f0"}],p:1,html:'<p>Take logs of both sides.</p>'+tryItMC(function(){return {question:'Which expression correctly solves 5\u02e3=12?',options:['x = log12/log5','x = log5/log12','x = 12/5','x = log(12\u22125)'],correct:0,working:'Taking logs: x log5=log12, so x=log12/log5.'};})}
   ]},
  {ey:'Checkpoint 6 of 10',ti:'The number e and natural logs',su:'ln(x) = logₑ(x)',panels:[
-   {dtitle:'e ≈ 2.71828...',boxes:[{"stage": 1, "text": "ln(x) means log base e", "bg": "#fff5f0"}, {"stage": 2, "text": "ln(eˣ) = x  and  e^(ln x) = x", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>e is a special irrational constant that appears naturally in calculus — ln and e^x are inverse functions of each other.</p>'},
+   {dtitle:'e ≈ 2.71828...',boxes:[{"stage": 1, "text": "ln(x) means log base e", "bg": "#fff5f0"}, {"stage": 2, "text": "ln(eˣ) = x  and  e^(ln x) = x", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>e is a special irrational constant that appears naturally in calculus — ln and e<sup>x</sup> are inverse functions of each other.</p>'},
    {dtitle:'Check',boxes:[{"stage": 1, "text": "Simplify ln(e⁵)", "bg": "#fff5f0"}],p:1,html:'<p>Use the inverse relationship.</p>'+tryItMC(function(){return {question:'What is ln(e\u2075)?',options:['5','e\u2075','1','5e'],correct:0,working:'ln and e are inverses, so ln(e\u2075)=5.'};})}
   ]},
- {ey:'Checkpoint 7 of 10',ti:'Exponential growth and decay',su:'y = Ae^(kt)',panels:[
+ {ey:'Checkpoint 7 of 10',ti:'Exponential growth and decay',su:'Modelling with base e',panels:[
    {dtitle:'Modelling with exponentials',boxes:[{"stage": 1, "text": "y = Ae^(kt)", "text2": "A = initial value, k>0 growth, k<0 decay", "bg": "#fff5f0"}],p:1,html:'<p>This models population growth, radioactive decay, compound interest — any quantity whose rate of change is proportional to its size.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "y=100e^(−0.1t)", "bg": "#fff5f0"}],p:1,html:'<p>Interpret the model.</p>'+tryItMC(function(){return {question:'For y=100e^(\u22120.1t), what does this model represent?',options:['Exponential decay from an initial value of 100','Exponential growth from 100','Linear decay','A value that never changes'],correct:0,working:'The negative exponent (k=\u22120.1) means decay; the initial value (t=0) is 100.'};})}
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "y=100e^(−0.1t)", "bg": "#fff5f0"}],p:1,html:'<p>Interpret the model.</p>'+tryItMC(function(){return {question:'For y=100e<sup>\u22120.1t</sup>, what does this model represent?',options:['Exponential decay from an initial value of 100','Exponential growth from 100','Linear decay','A value that never changes'],correct:0,working:'The negative exponent (k=\u22120.1) means decay; the initial value (t=0) is 100.'};})}
   ]},
  {ey:'Checkpoint 8 of 10',ti:'Linearising exponential data',su:'Using logs to find unknown constants',panels:[
    {dtitle:'y = Abˣ  →  log y = log A + x log b',boxes:[{"stage": 1, "text": "Taking logs turns an exponential relationship into a STRAIGHT LINE", "bg": "#fff5f0"}, {"stage": 2, "text": "Plot log y against x — gradient = log b, intercept = log A", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>This technique lets you find unknown constants A and b from experimental data by plotting a straight-line graph.</p>'},
