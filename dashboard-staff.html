@@ -3352,8 +3352,10 @@
 
   window.unlockTopicReview = async function(topicId) {
     if (!confirm('Unlock this walkthrough? This clears the previous reviews and resets the reviewer count to 0 — do this after uploading an improved version.')) return;
-    await supabase.from('walkthrough_reviews').delete().eq('topic_id', topicId);
-    await supabase.from('topics').update({ locked: false, claude_updated: false, claude_updated_at: null }).eq('id', topicId);
+    const { error: delError } = await supabase.from('walkthrough_reviews').delete().eq('topic_id', topicId);
+    if (delError) { console.error('Unlock delete failed:', delError); alert('⚠ Unlock failed while clearing reviews: ' + delError.message); return; }
+    const { error: updError } = await supabase.from('topics').update({ locked: false, claude_updated: false, claude_updated_at: null }).eq('id', topicId);
+    if (updError) { console.error('Unlock update failed:', updError); alert('⚠ Unlock failed while resetting topic status: ' + updError.message); return; }
     const t = allTopics.find(t => t.id === topicId);
     if (t) { t.locked = false; t.claude_updated = false; }
     allReviews = allReviews.filter(r => r.topic_id !== topicId);
@@ -3362,7 +3364,12 @@
 
   // ── Mark a locked (2+ reviewed) walkthrough as updated by Claude ──
   window.markUpdatedByClaude = async function(topicId) {
-    await supabase.from('topics').update({ claude_updated: true, claude_updated_at: new Date().toISOString() }).eq('id', topicId);
+    const { error } = await supabase.from('topics').update({ claude_updated: true, claude_updated_at: new Date().toISOString() }).eq('id', topicId);
+    if (error) {
+      console.error('Mark Updated by Claude failed:', error);
+      alert('⚠ Could not mark as updated: ' + error.message);
+      return;
+    }
     const t = allTopics.find(t => t.id === topicId);
     if (t) t.claude_updated = true;
     window.renderReviewTab();
@@ -4429,3 +4436,4 @@
 
 </body>
 </html>
+
