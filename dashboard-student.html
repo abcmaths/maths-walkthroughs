@@ -9,6 +9,25 @@
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
     header { background: #C0272D; color: white; padding: 0 12px 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .header-toggles { display: flex; align-items: center; gap: 10px; overflow-x: auto; flex: 1 1 auto; min-width: 0; scrollbar-width: none; -ms-overflow-style: none; }
+    .flyout-wrap { position: relative; display: inline-block; }
+    .flyout-trigger { white-space: nowrap; }
+    .flyout-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      background: #fff;
+      border: 1.5px solid #eee;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      padding: 6px;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 50;
+      min-width: 160px;
+    }
+    .flyout-panel.open { display: flex; }
+    .flyout-panel button { text-align: left; white-space: nowrap; }
     .header-toggles::-webkit-scrollbar { display: none; }
     .subtabs-row { background: #fff; border-bottom: 1px solid #eee; padding: 8px 20px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; display:none; }
     .subtabs-row::-webkit-scrollbar { display: none; }
@@ -169,18 +188,28 @@
   </div>
   <div class="header-toggles">
     <div class="subject-toggle">
-      <button id="toggle-english">✏️ English</button>
-      <button id="toggle-maths" class="active">📐 Maths</button>
-      <button id="toggle-addmaths" style="display:none">➕ Add Maths</button>
+      <div class="flyout-wrap" id="flyout-maths-wrap">
+        <button id="trigger-maths" class="flyout-trigger active" onclick="toggleFlyout('maths')">📐 Maths ▾</button>
+        <div class="flyout-panel" id="flyout-panel-maths">
+          <button id="toggle-maths" class="active">Core Maths</button>
+          <button id="toggle-addmaths" style="display:none">Add Maths</button>
+          <button id="toggle-asmaths" style="display:none">AS Maths</button>
+          <button id="toggle-deepdive">Deep Dive</button>
+        </div>
+      </div>
+      <div class="flyout-wrap" id="flyout-english-wrap">
+        <button id="trigger-english" class="flyout-trigger" onclick="toggleFlyout('english')">✏️ English ▾</button>
+        <div class="flyout-panel" id="flyout-panel-english">
+          <button id="toggle-english">Core English</button>
+          <button id="toggle-phonics" style="display:none">Phonics</button>
+        </div>
+      </div>
       <button id="toggle-science">🔬 Science</button>
       <button id="toggle-crs" style="display:none">✝️ CRS</button>
       <button id="toggle-gov" style="display:none">🏛️ Government</button>
       <button id="toggle-digitaltech">💻 Digital Tech</button>
       <button id="toggle-bridge" style="display:none">🌉 Bridge</button>
-      <button id="toggle-phonics" style="display:none">🔤 Phonics</button>
       <button id="toggle-extension" style="display:none">⭐ Extension</button>
-      <button id="toggle-deepdive">🪜 Deep Dive</button>
-      <button id="toggle-asmaths" style="display:none">📘 AS Maths</button>
     </div>
   </div>
   <div class="header-account">
@@ -1280,7 +1309,7 @@
           return;
         }
         // Hide all standard curriculum tabs
-        ['toggle-maths','toggle-english','toggle-science','toggle-crs','toggle-gov','toggle-digitaltech','toggle-addmaths']
+        ['toggle-maths','toggle-english','toggle-science','toggle-crs','toggle-gov','toggle-digitaltech','toggle-addmaths','trigger-maths','trigger-english']
           .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
         // Also hide the subject progress overview panels — these are a separate
         // section from the tab bar and weren't covered by the toggle-hiding above
@@ -1542,6 +1571,35 @@
     return t.year_group === yearGroup;
   }
 
+  // ── Flyout menus (Maths / English) ──
+  const FLYOUT_GROUPS = {
+    maths: ['maths', 'as_maths', 'deepdive_maths'],
+    english: ['english', 'phonics'],
+  };
+  window.toggleFlyout = function(group) {
+    document.querySelectorAll('.flyout-panel').forEach(p => {
+      if (p.id !== 'flyout-panel-' + group) p.classList.remove('open');
+    });
+    const panel = document.getElementById('flyout-panel-' + group);
+    if (panel) panel.classList.toggle('open');
+  };
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.flyout-wrap')) {
+      document.querySelectorAll('.flyout-panel').forEach(p => p.classList.remove('open'));
+    }
+  });
+  document.querySelectorAll('.flyout-panel button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.flyout-panel').forEach(p => p.classList.remove('open'));
+    });
+  });
+  function updateFlyoutTriggers(subject) {
+    const mathsTrigger = document.getElementById('trigger-maths');
+    const englishTrigger = document.getElementById('trigger-english');
+    if (mathsTrigger) mathsTrigger.classList.toggle('active', FLYOUT_GROUPS.maths.includes(subject));
+    if (englishTrigger) englishTrigger.classList.toggle('active', FLYOUT_GROUPS.english.includes(subject));
+  }
+
   window.switchSubject = function(subject) {
     currentSubject = subject;
     const isMaths   = subject === 'maths';
@@ -1555,6 +1613,7 @@
 
     // Main toggle active state
     document.getElementById('toggle-maths').classList.toggle('active', isMaths);
+    updateFlyoutTriggers(subject);
     const engBt = document.getElementById('toggle-english');
     if (engBt) engBt.classList.toggle('active', subject === 'english');
     document.getElementById('toggle-science').classList.toggle('active', isSciGrp);
