@@ -8,7 +8,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; }
     header { background: #C0272D; color: white; padding: 0 12px 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .header-toggles { display: flex; align-items: center; gap: 10px; overflow-x: auto; flex: 1 1 auto; min-width: 0; scrollbar-width: none; -ms-overflow-style: none; }
+    .header-toggles { display: flex; align-items: center; gap: 10px; flex: 1 1 auto; min-width: 0; }
     .flyout-wrap { position: relative; display: inline-block; }
     .flyout-trigger { white-space: nowrap; }
     .flyout-panel {
@@ -24,10 +24,33 @@
       flex-direction: column;
       gap: 4px;
       z-index: 50;
-      min-width: 160px;
+      min-width: 180px;
     }
     .flyout-panel.open { display: flex; }
-    .flyout-panel button { text-align: left; white-space: nowrap; }
+    .flyout-panel button, .flyout-panel .flyout-item-label { text-align: left; white-space: nowrap; }
+    .flyout-panel button { background: #fff !important; color: #333 !important; border: 1px solid transparent; padding: 9px 12px; border-radius: 5px; }
+    .flyout-panel button:hover:not(:disabled) { background: #f8f0ee !important; }
+    .flyout-panel button.active { background: #C0272D !important; color: #fff !important; }
+    .flyout-panel.level1 { z-index: 60; }
+    .flyout-item.has-sub { position: relative; }
+    .flyout-item-label {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      background: transparent; border: none; padding: 9px 12px; cursor: pointer;
+      font-size: inherit; font-family: inherit; color: #333; border-radius: 5px;
+    }
+    .flyout-item-label:hover { background: #f8f0ee; }
+    .flyout-item-label .arrow { color: #C0272D; font-weight: 700; }
+    .flyout-panel.level2 {
+      display: none;
+      position: absolute;
+      top: -6px;
+      left: calc(100% + 6px);
+      min-width: 170px;
+    }
+    .flyout-panel.level2.open { display: flex; }
+    @media (max-width: 480px) {
+      .flyout-panel.level2 { left: 0; top: 100%; margin-top: 6px; position: static; box-shadow: none; border-color: #eee; margin-left: 10px; }
+    }
     .header-toggles::-webkit-scrollbar { display: none; }
     .subtabs-row { background: #fff; border-bottom: 1px solid #eee; padding: 8px 20px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; display:none; }
     .subtabs-row::-webkit-scrollbar { display: none; }
@@ -188,28 +211,33 @@
   </div>
   <div class="header-toggles">
     <div class="subject-toggle">
-      <div class="flyout-wrap" id="flyout-maths-wrap">
-        <button id="trigger-maths" class="flyout-trigger active" onclick="toggleFlyout('maths')">📐 Maths ▾</button>
-        <div class="flyout-panel" id="flyout-panel-maths">
-          <button id="toggle-maths" class="active">Core Maths</button>
-          <button id="toggle-addmaths" style="display:none">Add Maths</button>
-          <button id="toggle-asmaths" style="display:none">AS Maths</button>
-          <button id="toggle-deepdive">Deep Dive</button>
+      <div class="flyout-wrap" id="subjects-menu-wrap">
+        <button id="subjects-trigger" class="flyout-trigger active" onclick="toggleFlyout('subjects')">📚 Subjects ▾</button>
+        <div class="flyout-panel level1" id="flyout-panel-subjects">
+          <div class="flyout-item has-sub" data-sub="maths">
+            <span class="flyout-item-label" onclick="toggleSubmenu(event,'maths')">📐 Maths <span class="arrow">▸</span></span>
+            <div class="flyout-panel level2" id="flyout-sub-maths">
+              <button id="toggle-maths" class="active">Core Maths</button>
+              <button id="toggle-addmaths" style="display:none">Add Maths</button>
+              <button id="toggle-asmaths" style="display:none">AS Maths</button>
+              <button id="toggle-deepdive">Deep Dive</button>
+            </div>
+          </div>
+          <div class="flyout-item has-sub" data-sub="english">
+            <span class="flyout-item-label" onclick="toggleSubmenu(event,'english')">✏️ English <span class="arrow">▸</span></span>
+            <div class="flyout-panel level2" id="flyout-sub-english">
+              <button id="toggle-english">Core English</button>
+              <button id="toggle-phonics" style="display:none">Phonics</button>
+            </div>
+          </div>
+          <button id="toggle-science" class="flyout-item">🔬 Science</button>
+          <button id="toggle-crs" class="flyout-item" style="display:none">✝️ CRS</button>
+          <button id="toggle-gov" class="flyout-item" style="display:none">🏛️ Government</button>
+          <button id="toggle-digitaltech" class="flyout-item">💻 Digital Tech</button>
+          <button id="toggle-bridge" class="flyout-item" style="display:none">🌉 Bridge</button>
+          <button id="toggle-extension" class="flyout-item" style="display:none">⭐ Extension</button>
         </div>
       </div>
-      <div class="flyout-wrap" id="flyout-english-wrap">
-        <button id="trigger-english" class="flyout-trigger" onclick="toggleFlyout('english')">✏️ English ▾</button>
-        <div class="flyout-panel" id="flyout-panel-english">
-          <button id="toggle-english">Core English</button>
-          <button id="toggle-phonics" style="display:none">Phonics</button>
-        </div>
-      </div>
-      <button id="toggle-science">🔬 Science</button>
-      <button id="toggle-crs" style="display:none">✝️ CRS</button>
-      <button id="toggle-gov" style="display:none">🏛️ Government</button>
-      <button id="toggle-digitaltech">💻 Digital Tech</button>
-      <button id="toggle-bridge" style="display:none">🌉 Bridge</button>
-      <button id="toggle-extension" style="display:none">⭐ Extension</button>
     </div>
   </div>
   <div class="header-account">
@@ -1571,17 +1599,25 @@
     return t.year_group === yearGroup;
   }
 
-  // ── Flyout menus (Maths / English) ──
+  // ── Nested flyout menu (Subjects ▾ → Maths ▸ / English ▸ / flat items) ──
   const FLYOUT_GROUPS = {
     maths: ['maths', 'as_maths', 'deepdive_maths'],
     english: ['english', 'phonics'],
   };
   window.toggleFlyout = function(group) {
-    document.querySelectorAll('.flyout-panel').forEach(p => {
-      if (p.id !== 'flyout-panel-' + group) p.classList.remove('open');
-    });
+    // Only one thing at this level right now (the top-level 'subjects' panel),
+    // but kept as a named function in case more top-level menus are added later.
     const panel = document.getElementById('flyout-panel-' + group);
-    if (panel) panel.classList.toggle('open');
+    const isOpening = panel && !panel.classList.contains('open');
+    document.querySelectorAll('.flyout-panel').forEach(p => p.classList.remove('open'));
+    if (panel && isOpening) panel.classList.add('open');
+  };
+  window.toggleSubmenu = function(e, sub) {
+    e.stopPropagation();
+    const panel = document.getElementById('flyout-sub-' + sub);
+    const isOpening = panel && !panel.classList.contains('open');
+    document.querySelectorAll('.flyout-panel.level2').forEach(p => p.classList.remove('open'));
+    if (panel && isOpening) panel.classList.add('open');
   };
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.flyout-wrap')) {
@@ -1594,10 +1630,8 @@
     });
   });
   function updateFlyoutTriggers(subject) {
-    const mathsTrigger = document.getElementById('trigger-maths');
-    const englishTrigger = document.getElementById('trigger-english');
-    if (mathsTrigger) mathsTrigger.classList.toggle('active', FLYOUT_GROUPS.maths.includes(subject));
-    if (englishTrigger) englishTrigger.classList.toggle('active', FLYOUT_GROUPS.english.includes(subject));
+    const subjectsTrigger = document.getElementById('subjects-trigger');
+    if (subjectsTrigger) subjectsTrigger.classList.add('active');
   }
 
   window.switchSubject = function(subject) {
