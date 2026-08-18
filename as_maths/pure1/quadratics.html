@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) { window.location.href = '../../login.html'; }
+  else {
+    const { data: prof } = await _lc.from('profiles').select('full_name').eq('id', session.user.id).maybeSingle();
+    window.__studentFirstName = prof && prof.full_name ? prof.full_name.split(' ')[0] : 'there';
+    document.addEventListener('DOMContentLoaded', function() {
+      var el = document.getElementById('greet');
+      if (el) el.textContent = 'Hi ' + window.__studentFirstName + ' — let\'s work through this one together.';
+    });
+  }
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quadratics · AS Level Pure Mathematics 1</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.greet{font-size:14px;color:var(--gold);font-weight:600;margin-bottom:10px;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.pnl p{font-size:16px;line-height:1.6;margin:0 0 10px;}
+.pnl .as-flag{background:#FFF3E0;border-left:4px solid var(--gold);padding:8px 12px;font-size:14px;color:#7A5A18;margin:10px 0;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:14px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;line-height:1.55;margin-bottom:10px;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;}
+.mc-opt{text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:4px;padding:10px 14px;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold);}
+.mc-opt:disabled{cursor:default;}
+.mc-correct{background:#e8f8ee;border-color:#1a7a3a!important;}
+.mc-wrong{background:#fde8e8;border-color:#a01820!important;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk{margin-top:10px;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.try-new{margin-top:10px;font-size:12px;font-weight:600;padding:6px 12px;border-radius:3px;border:none;background:#888;color:#fff;cursor:pointer;font-family:inherit;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <div class="ht">Quadratics — AS Pure 1</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Checkpoints</div></div>
+  <div class="main">
+    <div id="greet" class="greet">Hi there — let's work through this one together.</div>
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 280"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Check your understanding</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<button class="try-new" data-tryid="'+id+'">New question</button></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=shuffleMC(entry.genFn());entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+  }
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');
+    allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){
+      el.classList.add('mc-correct');
+      fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;
+    }else{
+      el.classList.add('mc-wrong');
+      allBtns[o.correct].classList.add('mc-correct');
+      fb.className='try-fb er';fb.textContent='Not quite — the correct answer is highlighted above.';
+    }
+  }
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,24,'Completing the square: 2x\u00b2 + 8x + 3','#C0272D',15,'middle',true));
+  if(p>=1){o.push(R(40,44,400,40,'#fff5f0','#C0272D',1.5));o.push(T(240,68,'Step 1 \u2014 factor out the coefficient of x\u00b2','#241A17',13));}
+  if(p>=2){o.push(T(240,104,'2x\u00b2 + 8x + 3  =  2(x\u00b2 + 4x) + 3','#1a5a8a',15,'middle',true));}
+  if(p>=3){o.push(R(40,124,400,40,'#fff5f0','#C0272D',1.5));o.push(T(240,148,'Step 2 \u2014 complete the square inside the bracket','#241A17',13));}
+  if(p>=4){o.push(T(240,184,'2(x + 2)\u00b2 \u2212 8 + 3  =  2(x + 2)\u00b2 \u2212 5','#1a5a8a',15,'middle',true));}
+  if(p>=5){o.push(R(90,200,300,42,'#e8f8ee','#1a7a3a',2));o.push(T(240,226,'Completed square form','#1a7a3a',18,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,24,'From completed square to the vertex','#C0272D',15,'middle',true));
+  if(p>=1){o.push(R(40,44,400,44,'#fff5f0','#C0272D',1.5));o.push(T(240,64,'a(x + p)\u00b2 + q  has vertex at (\u2212p, q)','#241A17',14,'middle',true));o.push(T(240,82,'because (x+p)\u00b2 \u2265 0 always, so the minimum is q','#888',11));}
+  if(p>=2){o.push(T(240,116,'For 2(x + 2)\u00b2 \u2212 5:','#241A17',13));o.push(T(240,138,'p = 2,  q = \u22125','#1a5a8a',14,'middle',true));}
+  if(p>=3){o.push(R(120,154,240,42,'#e8f8ee','#1a7a3a',2));o.push(T(240,180,'Vertex = (\u22122, \u22125)','#1a7a3a',17,'middle',true));}
+  if(p>=4){o.push(T(240,212,'Since a = 2 > 0, this is a minimum point','#888',12));}
+  s.innerHTML=o.join('');}
+
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'AS-Level vs GCSE: what\u2019s different?','#C0272D',15,'middle',true));
+  if(p>=1){o.push(R(40,40,400,50,'#e8f4ff','#1a5a8a',1.5));o.push(T(240,58,'GCSE: usually a = 1',' #1a5a8a',13,'middle',true));o.push(T(240,78,'e.g. x\u00b2 + 6x + 5  \u2192  (x+3)\u00b2 \u2212 4','#241A17',12));}
+  if(p>=2){o.push(R(40,100,400,50,'#fff5f0','#C0272D',1.5));o.push(T(240,118,'AS Level: a \u2260 1','#C0272D',13,'middle',true));o.push(T(240,138,'You MUST factor a out first \u2014 forgetting this is the #1 error','#241A17',12));}
+  if(p>=3){o.push(T(240,172,'Common mistake: 2x\u00b2+8x+3 \u2192 2(x+4)\u00b2 + 3','#a01820',12));o.push(T(240,192,'(forgot to multiply the \u22128 back through by 2)','#888',11));}
+  s.innerHTML=o.join('');}
+
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'The discriminant: b\u00b2 \u2212 4ac','#C0272D',15,'middle',true));
+  if(p>=1){o.push(R(40,40,400,44,'#fff5f0','#C0272D',1.5));o.push(T(240,60,'For ax\u00b2+bx+c=0, the quadratic formula is','#241A17',13));o.push(T(240,78,'x = (\u2212b \u00b1 \u221a(b\u00b2\u22124ac)) / 2a','#1a5a8a',13,'middle',true));}
+  if(p>=2){o.push(T(240,110,'The part under the root, b\u00b2\u22124ac, is the discriminant.','#241A17',13));o.push(T(240,130,'Its sign tells you how many real roots exist \u2014 before you solve anything.','#888',11));}
+  if(p>=3){o.push(R(30,148,130,70,'#e8f8ee','#1a7a3a',1.5));o.push(T(95,168,'> 0','#1a7a3a',15,'middle',true));o.push(T(95,188,'2 real roots','#241A17',11));o.push(T(95,204,'(graph crosses x-axis twice)','#888',9));
+    o.push(R(175,148,130,70,'#fff8e1','#C8922A',1.5));o.push(T(240,168,'= 0','#C8922A',15,'middle',true));o.push(T(240,188,'1 repeated root','#241A17',11));o.push(T(240,204,'(graph touches x-axis)','#888',9));
+    o.push(R(320,148,130,70,'#fde8e8','#a01820',1.5));o.push(T(385,168,'< 0','#a01820',15,'middle',true));o.push(T(385,188,'No real roots','#241A17',11));o.push(T(385,204,'(graph misses x-axis)','#888',9));}
+  s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,22,'Worked example: 3x\u00b2 \u2212 2x + 5 = 0','#C0272D',15,'middle',true));
+  if(p>=1){o.push(R(40,40,400,40,'#fff5f0','#C0272D',1.5));o.push(T(240,64,'a=3, b=\u22122, c=5','#241A17',14,'middle',true));}
+  if(p>=2){o.push(T(240,100,'b\u00b2 \u2212 4ac = (\u22122)\u00b2 \u2212 4(3)(5)','#1a5a8a',14,'middle',true));}
+  if(p>=3){o.push(T(240,130,'= 4 \u2212 60 = \u221256','#1a5a8a',15,'middle',true));}
+  if(p>=4){o.push(R(120,148,240,44,'#fde8e8','#a01820',2));o.push(T(240,175,'\u221256 < 0  \u2192  no real roots','#a01820',15,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Sketching from completed-square form','#C0272D',15,'middle',true));
+  if(p>=1){o.push(T(240,44,'y = (x \u2212 3)\u00b2 \u2212 4','#241A17',14,'middle',true));}
+  if(p>=2){
+    o.push(L(60,220,420,220,'#888',1.5));o.push(L(60,220,60,60,'#888',1.5));
+    o.push(T(430,224,'x','#888',11));o.push(T(56,50,'y','#888',11));
+    var pts=[];for(var xv=-1;xv<=7;xv+=0.25){var yv=(xv-3)*(xv-3)-4;var px=60+(xv+1)*45;var py=220-yv*14;if(py>60&&py<220)pts.push(px+','+py);}
+    o.push('<polyline points="'+pts.join(' ')+'" fill="none" stroke="#C0272D" stroke-width="2.5"/>');
+  }
+  if(p>=3){o.push(C(60+4*45,220-(-4)*14,4,'#1a7a3a','#1a7a3a'));o.push(T(60+4*45,220-(-4)*14-12,'Vertex (3, \u22124)','#1a7a3a',11,'middle',true));}
+  if(p>=4){o.push(C(60+1*45,220,4,'#1a5a8a','#1a5a8a'));o.push(C(60+5*45,220,4,'#1a5a8a','#1a5a8a'));o.push(T(240,240,'Roots at x=1 and x=5 (where curve crosses the x-axis)','#1a5a8a',11,'middle',false));}
+  s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Solving quadratic inequalities','#C0272D',15,'middle',true));
+  if(p>=1){o.push(T(240,44,'Solve x\u00b2 \u2212 2x \u2212 8 > 0','#241A17',14,'middle',true));}
+  if(p>=2){o.push(R(40,58,400,40,'#fff5f0','#C0272D',1.5));o.push(T(240,82,'Factorise first: (x\u22124)(x+2) > 0','#1a5a8a',13,'middle',true));}
+  if(p>=3){
+    o.push(L(60,180,420,180,'#888',1.5));
+    o.push(C(160,180,4,'#a01820','#a01820'));o.push(T(160,200,'x=\u22122','#241A17',11));
+    o.push(C(320,180,4,'#a01820','#a01820'));o.push(T(320,200,'x=4','#241A17',11));
+    o.push('<line x1="60" y1="180" x2="150" y2="180" stroke="#1a7a3a" stroke-width="4"/>');
+    o.push('<line x1="330" y1="180" x2="420" y2="180" stroke="#1a7a3a" stroke-width="4"/>');
+    o.push(T(240,150,'Positive outside the roots (graph is above the x-axis there)','#241A17',11,'middle',false));
+  }
+  if(p>=4){o.push(R(110,206,260,40,'#e8f8ee','#1a7a3a',2));o.push(T(240,231,'x < \u22122  or  x > 4','#1a7a3a',15,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Disguised quadratics (function of a function)','#C0272D',14,'middle',true));
+  if(p>=1){o.push(T(240,44,'Solve x\u2074 \u2212 5x\u00b2 + 4 = 0','#241A17',14,'middle',true));}
+  if(p>=2){o.push(R(30,58,420,40,'#fff5f0','#C0272D',1.5));o.push(T(240,82,'Spot the pattern: let u = x\u00b2, so u\u00b2 = x\u2074','#1a5a8a',13,'middle',true));}
+  if(p>=3){o.push(T(240,116,'This becomes: u\u00b2 \u2212 5u + 4 = 0','#241A17',14,'middle',true));o.push(T(240,136,'Factorise: (u\u22121)(u\u22124) = 0  \u2192  u = 1 or u = 4','#1a5a8a',13,'middle',true));}
+  if(p>=4){o.push(R(70,152,340,50,'#e8f8ee','#1a7a3a',2));o.push(T(240,172,'x\u00b2 = 1  \u2192  x = \u00b11','#1a7a3a',14,'middle',true));o.push(T(240,192,'x\u00b2 = 4  \u2192  x = \u00b12','#1a7a3a',14,'middle',true));}
+  if(p>=5){o.push(T(240,222,'Always substitute back to x \u2014 forgetting this loses easy marks','#888',11));}
+  s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Line meets curve: using the discriminant','#C0272D',14,'middle',true));
+  if(p>=1){o.push(T(240,44,'Find k so that y = 2x + k is tangent to y = x\u00b2','#241A17',13,'middle',true));}
+  if(p>=2){o.push(R(30,58,420,40,'#fff5f0','#C0272D',1.5));o.push(T(240,82,'Set equal: x\u00b2 = 2x + k  \u2192  x\u00b2 \u2212 2x \u2212 k = 0','#1a5a8a',13,'middle',true));}
+  if(p>=3){o.push(T(240,114,'Tangent means exactly ONE solution \u2192 discriminant = 0','#241A17',13,'middle',true));}
+  if(p>=4){o.push(T(240,144,'b\u00b2\u22124ac = (\u22122)\u00b2 \u2212 4(1)(\u2212k) = 4+4k = 0','#1a5a8a',13,'middle',true));}
+  if(p>=5){o.push(R(140,162,200,42,'#e8f8ee','#1a7a3a',2));o.push(T(240,188,'k = \u22121','#1a7a3a',18,'middle',true));}
+  s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Bringing it together','#C0272D',16,'middle',true));
+  if(p>=1){o.push(R(30,38,420,44,'#fff5f0','#C0272D',1.5));o.push(T(240,58,'1. Complete the square \u2192 vertex form','#241A17',13));o.push(T(240,76,'2. Discriminant \u2192 how many roots exist','#241A17',13));}
+  if(p>=2){o.push(R(30,86,420,44,'#e8f4ff','#1a5a8a',1.5));o.push(T(240,106,'3. Sketch using vertex + roots','#241A17',13));o.push(T(240,124,'4. Inequalities \u2192 read the sketch, don\u2019t guess','#241A17',13));}
+  if(p>=3){o.push(R(30,134,420,44,'#fff8e1','#C8922A',1.5));o.push(T(240,154,'5. Disguised quadratics \u2192 substitute u, solve, substitute back','#241A17',12));o.push(T(240,172,'6. Line meets curve \u2192 set equal, use discriminant','#241A17',12));}
+  if(p>=4){o.push(R(90,190,300,44,'#e8f8ee','#1a7a3a',2));o.push(T(240,216,'Ready for AS-P1-02: Functions','#1a7a3a',15,'middle',true));}
+  s.innerHTML=o.join('');}
+
+var Q=[
+ {ey:'Checkpoint 1 of 10',ti:'Completing the square',su:'Rewriting ax\u00b2+bx+c in completed-square form',
+  panels:[
+   {d:dQ1,p:1,html:'<p>A quadratic ax\u00b2 + bx + c can be rewritten in <b>completed-square form</b> a(x+p)\u00b2 + q. This form reveals the vertex of the graph directly, without needing calculus.</p>'},
+   {d:dQ1,p:2,html:'<p>Start by factoring out the coefficient of x\u00b2 from the first two terms only.</p>'},
+   {d:dQ1,p:3,html:'<p>Now complete the square inside the bracket: halve the coefficient of x, square it, add and subtract it.</p>'},
+   {d:dQ1,p:4,html:'<p>Multiply the correction term back through by the factor you took out \u2014 this is the step AS students most often forget.</p>'},
+   {d:dQ1,p:5,html:'<p>2x\u00b2 + 8x + 3 in completed square form is <b>2(x+2)\u00b2 \u2212 5</b>.</p>'
+     +tryItMC(function(){
+       var b=pick([4,6,8]),aVal=2;var pVal=b/(2*aVal);
+       return {question:'Complete the square for '+aVal+'x\u00b2 + '+b+'x + 1. What is the value inside the bracket, (x + p)?',
+         options:['(x + '+pVal+')','(x + '+b+')','(x + '+(b/2)+')','(x \u2212 '+pVal+')'],
+         correct:0,
+         working:'p = b \u00f7 (2a) = '+b+' \u00f7 (2\u00d7'+aVal+') = '+pVal+', so the bracket is (x + '+pVal+').'};
+     })}
+  ]},
+ {ey:'Checkpoint 2 of 10',ti:'Finding the vertex',su:'Using completed-square form to locate the turning point',
+  panels:[
+   {d:dQ2,p:1,html:'<p>Once in the form a(x+p)\u00b2 + q, the vertex sits at (\u2212p, q) \u2014 because a squared term is never negative, so the graph\u2019s minimum (or maximum) value is q.</p>'},
+   {d:dQ2,p:2,html:'<p>Identify p and q from 2(x+2)\u00b2 \u2212 5.</p>'},
+   {d:dQ2,p:3,html:'<p>Vertex = (\u22122, \u22125). Note the sign flip on p \u2014 a very common slip.</p>'},
+   {d:dQ2,p:4,html:'<p>Since a > 0 here, the parabola opens upward, so this is a <b>minimum</b> point, not a maximum.</p>'
+     +tryItMC(function(){
+       var pVal=pick([1,2,3,4]),qVal=pick([-6,-4,-2,3,5]);
+       return {question:'For y = 3(x + '+pVal+')\u00b2 + '+qVal+', what is the vertex?',
+         options:['('+(-pVal)+', '+qVal+')','('+pVal+', '+qVal+')','('+(-pVal)+', '+(-qVal)+')','('+qVal+', '+(-pVal)+')'],
+         correct:0,
+         working:'Vertex of a(x+p)\u00b2+q is (\u2212p, q) = ('+(-pVal)+', '+qVal+').'};
+     })}
+  ]},
+ {ey:'Checkpoint 3 of 10',ti:'AS depth: the a \u2260 1 trap',su:'Where this goes beyond GCSE',
+  panels:[
+   {d:dQ3,p:1,html:'<p>At GCSE, most completing-the-square questions use a = 1, so you just halve b and square it.</p>'},
+   {d:dQ3,p:2,html:'<p>At AS Level, a is very often not 1. You must factor it out of the whole x\u00b2 and x terms before completing the square \u2014 this is the key jump in difficulty.</p>'},
+   {d:dQ3,p:3,html:'<p>The most common AS-level error: forgetting to multiply the correction term back through by a before combining with the constant.</p>'
+     +tryItMC(function(){
+       return {question:'A student completes the square for 3x\u00b2 + 12x + 5 and gets 3(x+2)\u00b2 + 5. What went wrong?',
+         options:[
+           'They forgot to multiply the \u221212 correction by 3 before adding the +5',
+           'Nothing \u2014 this is correct',
+           'They should not have factored out the 3 at all',
+           'The bracket should be (x\u22122)\u00b2 instead'],
+         correct:0,
+         working:'3x\u00b2+12x+5 = 3(x\u00b2+4x)+5 = 3[(x+2)\u00b2\u22124]+5 = 3(x+2)\u00b2\u221212+5 = 3(x+2)\u00b2\u22127. The \u221212 (which is \u22124\u00d73) was dropped.'};
+     })}
+  ]},
+ {ey:'Checkpoint 4 of 10',ti:'The discriminant',su:'Predicting the number of roots without solving',
+  panels:[
+   {d:dQ4,p:1,html:'<p>The quadratic formula solves ax\u00b2+bx+c=0. The expression under the square root, b\u00b2\u22124ac, is called the <b>discriminant</b>.</p>'},
+   {d:dQ4,p:2,html:'<p>You don\u2019t need to solve the equation to know how many roots it has \u2014 the sign of the discriminant tells you immediately.</p>'},
+   {d:dQ4,p:3,html:'<p>Three cases: positive gives 2 real roots, zero gives 1 repeated root, negative gives no real roots.</p>'
+     +tryItMC(function(){
+       var opts=[
+        {t:'2 distinct real roots',v:'>0'},{t:'1 repeated root',v:'=0'},{t:'No real roots',v:'<0'}];
+       var picked=pick(opts);
+       return {question:'If the discriminant of a quadratic equals '+(picked.v==='>0'?'12':picked.v==='=0'?'0':'\u22127')+', how many real roots does it have?',
+         options:['2 distinct real roots','1 repeated root','No real roots','Cannot be determined'],
+         correct: picked.v==='>0'?0:picked.v==='=0'?1:2,
+         working:'The discriminant here is '+(picked.v==='>0'?'positive':picked.v==='=0'?'zero':'negative')+', so the equation has '+picked.t.toLowerCase()+'.'};
+     })}
+  ]},
+ {ey:'Checkpoint 5 of 10',ti:'Applying the discriminant',su:'A full worked example',
+  panels:[
+   {d:dQ5,p:1,html:'<p>Worked example: how many real roots does 3x\u00b2 \u2212 2x + 5 = 0 have?</p>'},
+   {d:dQ5,p:2,html:'<p>Substitute a=3, b=\u22122, c=5 into b\u00b2\u22124ac.</p>'},
+   {d:dQ5,p:3,html:'<p>b\u00b2\u22124ac = 4 \u2212 60 = \u221256.</p>'},
+   {d:dQ5,p:4,html:'<p>Since \u221256 < 0, this equation has <b>no real roots</b> \u2014 its graph never crosses the x-axis.</p>'
+     +tryItMC(function(){
+       var aVal=pick([1,2]),bVal=pick([2,4,6]),cVal=pick([5,7,9]);
+       var disc=bVal*bVal-4*aVal*cVal;
+       return {question:'How many real roots does '+aVal+'x\u00b2 + '+bVal+'x + '+cVal+' = 0 have?',
+         options:['2 distinct real roots','1 repeated root','No real roots'],
+         correct: disc>0?0:disc===0?1:2,
+         working:'Discriminant = '+bVal+'\u00b2 \u2212 4('+aVal+')('+cVal+') = '+disc+', which is '+(disc>0?'positive \u2192 2 roots.':disc===0?'zero \u2192 1 repeated root.':'negative \u2192 no real roots.')};
+     })}
+  ]},
+ {ey:'Checkpoint 6 of 10',ti:'Sketching from vertex form',su:'Turning algebra into a graph',
+  panels:[
+   {d:dQ6,p:1,html:'<p>Once you know the completed-square form, sketching the graph is straightforward \u2014 no table of values needed.</p>'},
+   {d:dQ6,p:2,html:'<p>y = (x\u22123)\u00b2 \u2212 4 is an upward parabola (a=1&gt;0).</p>'},
+   {d:dQ6,p:3,html:'<p>The vertex is at (3, \u22124) \u2014 read directly from the completed-square form.</p>'},
+   {d:dQ6,p:4,html:'<p>The roots (where the curve crosses the x-axis) are at x=1 and x=5, found by setting y=0.</p>'
+     +tryItMC(function(){
+       return {question:'For y = (x\u22125)\u00b2 \u2212 9, what are the coordinates of the vertex?',
+         options:['(5, \u22129)','(\u22125, 9)','(5, 9)','(\u22125, \u22129)'],
+         correct:0,
+         working:'Vertex of (x+p)\u00b2+q is (\u2212p, q). Here p=\u22125, q=\u22129, so vertex = (5, \u22129).'};
+     })}
+  ]},
+ {ey:'Checkpoint 7 of 10',ti:'Quadratic inequalities',su:'Using the graph to read off the solution',
+  panels:[
+   {d:dQ7,p:1,html:'<p>Quadratic inequalities are best solved by sketching, not by treating them like linear inequalities.</p>'},
+   {d:dQ7,p:2,html:'<p>Solve x\u00b2\u22122x\u22128 &gt; 0. Factorise first: (x\u22124)(x+2) &gt; 0.</p>'},
+   {d:dQ7,p:3,html:'<p>The graph is an upward parabola crossing at x=\u22122 and x=4. It\u2019s <b>positive</b> (above the x-axis) outside the roots.</p>'},
+   {d:dQ7,p:4,html:'<p>So the solution is x &lt; \u22122 or x &gt; 4 \u2014 written as two separate regions, not a single chain of inequalities.</p>'
+     +tryItMC(function(){
+       return {question:'What is the solution to (x\u22121)(x\u22125) &lt; 0?',
+         options:['1 < x < 5','x < 1 or x > 5','x < 1 and x < 5','x > 5 only'],
+         correct:0,
+         working:'The parabola is negative (below the x-axis) BETWEEN its roots, so the solution is 1 < x < 5.'};
+     })}
+  ]},
+ {ey:'Checkpoint 8 of 10',ti:'Disguised quadratics',su:'Spotting a quadratic hiding in a higher-power equation',
+  panels:[
+   {d:dQ8,p:1,html:'<p>Some equations aren\u2019t written as quadratics but behave like one after a substitution.</p>'},
+   {d:dQ8,p:2,html:'<p>x\u2074 \u2212 5x\u00b2 + 4 = 0 looks like a quartic, but let u = x\u00b2 and it becomes quadratic in u.</p>'},
+   {d:dQ8,p:3,html:'<p>u\u00b2 \u2212 5u + 4 = 0 factorises to (u\u22121)(u\u22124)=0, giving u=1 or u=4.</p>'},
+   {d:dQ8,p:4,html:'<p>Substitute back: x\u00b2=1 gives x=\u00b11; x\u00b2=4 gives x=\u00b12.</p>'},
+   {d:dQ8,p:5,html:'<p>Always substitute back to the original variable \u2014 leaving the answer in terms of u is a very common AS mistake.</p>'
+     +tryItMC(function(){
+       return {question:'To solve x\u2074 \u2212 13x\u00b2 + 36 = 0, what substitution turns this into a quadratic?',
+         options:['u = x\u00b2','u = x\u2074','u = \u221ax','u = 1/x'],
+         correct:0,
+         working:'Since x\u2074 = (x\u00b2)\u00b2, letting u = x\u00b2 turns the equation into u\u00b2 \u2212 13u + 36 = 0.'};
+     })}
+  ]},
+ {ey:'Checkpoint 9 of 10',ti:'Line meets curve',su:'Tangency and intersection using the discriminant',
+  panels:[
+   {d:dQ9,p:1,html:'<p>To find where a line meets a curve, set the two equations equal and solve \u2014 this creates a quadratic.</p>'},
+   {d:dQ9,p:2,html:'<p>Find k so that y=2x+k is tangent to y=x\u00b2. Setting equal: x\u00b2 = 2x+k, so x\u00b2\u22122x\u2212k=0.</p>'},
+   {d:dQ9,p:3,html:'<p>Tangent means the line touches the curve at exactly one point \u2014 so the discriminant must equal zero.</p>'},
+   {d:dQ9,p:4,html:'<p>b\u00b2\u22124ac = 4+4k = 0.</p>'},
+   {d:dQ9,p:5,html:'<p>Solving gives k = \u22121.</p>'
+     +tryItMC(function(){
+       return {question:'A line y=x+k meets the curve y=x\u00b2+3 at exactly one point. Which condition finds k?',
+         options:['Discriminant of x\u00b2\u2212x+(3\u2212k)=0 equals zero','Discriminant is greater than zero','Discriminant is less than zero','Set x=0 and solve for k'],
+         correct:0,
+         working:'Setting the equations equal: x+k=x\u00b2+3 \u2192 x\u00b2\u2212x+(3\u2212k)=0. Exactly one intersection means discriminant = 0.'};
+     })}
+  ]},
+ {ey:'Checkpoint 10 of 10',ti:'Bringing it together',su:'Consolidating the whole Quadratics topic',
+  panels:[
+   {d:dQ10,p:1,html:'<p>You\u2019ve now covered the full AS Quadratics toolkit: completing the square, the discriminant, and what makes AS harder than GCSE.</p>'},
+   {d:dQ10,p:2,html:'<p>...and sketching, inequalities, disguised quadratics, and line-meets-curve problems \u2014 all built from the same two ideas: completed-square form and the discriminant.</p>'},
+   {d:dQ10,p:3,html:'<p>Every one of these question types reduces to the same core skills. If you can complete the square and read the discriminant confidently, the rest follows.</p>'
+     +tryItMC(function(){
+       return {question:'Which single skill underpins BOTH sketching a quadratic AND solving a quadratic inequality?',
+         options:['Finding the vertex and roots from completed-square form','Long division of polynomials','Differentiation','The binomial expansion'],
+         correct:0,
+         working:'Both sketching and solving inequalities rely on knowing the vertex and roots \u2014 both come from completed-square form.'};
+     })},
+   {d:dQ10,p:4,html:'<p>Nice work \u2014 Quadratics is complete. Next up: Functions (AS-P1-02).</p>'}
+  ]}
+];
+
+var qi=0,pi=0;
+function render(){
+  var qq=Q[qi],pp=qq.panels[pi];
+  document.getElementById('ey').textContent=qq.ey;
+  document.getElementById('ti').textContent=qq.ti;
+  document.getElementById('su').textContent=qq.su;
+  pp.d(pp.p);
+  var pn=document.getElementById('pn');
+  pn.innerHTML=pp.html;
+  pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
+  document.getElementById('pb').disabled=(qi===0&&pi===0);
+  document.getElementById('nb').textContent=(pi===qq.panels.length-1&&qi===Q.length-1)?'Done':'Next \u2192';
+  var dt=document.getElementById('dt');
+  dt.innerHTML=qq.panels.map(function(_,i){return '<div class="dot '+(i<pi?'dn':i===pi?'on':'')+'"></div>';}).join('');
+  var sb=document.getElementById('sb');
+  sb.innerHTML='<div class="sb-lbl">Checkpoints</div>'+Q.map(function(q,i){
+    return '<button class="qb'+(i===qi?' on':'')+'" data-qi="'+i+'"><span class="qn">'+q.ey+'</span>'+q.ti+'</button>';
+  }).join('');
+}
+document.getElementById('nb').addEventListener('click',function(){
+  var qq=Q[qi];
+  if(pi<qq.panels.length-1){pi++;}
+  else if(qi<Q.length-1){qi++;pi=0;}
+  render();
+});
+document.getElementById('pb').addEventListener('click',function(){
+  if(pi>0){pi--;}
+  else if(qi>0){qi--;pi=Q[qi].panels.length-1;}
+  render();
+});
+document.getElementById('sb').addEventListener('click',function(e){
+  var b=e.target.closest('.qb');if(!b)return;
+  qi=parseInt(b.getAttribute('data-qi'),10);pi=0;render();
+});
+render();
+</script>
+</body>
+</html>
