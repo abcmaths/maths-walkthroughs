@@ -259,6 +259,7 @@
             <option value="english" data-fixed-year="">Core English</option>
             <option value="bridge_english" data-fixed-year="">Bridge English</option>
             <option value="ext_english" data-fixed-year="">Extension English</option>
+            <option value="phonics" data-fixed-year="">Phonics</option>
           </optgroup>
           <optgroup label="🔬 Science">
             <option value="science" data-fixed-year="">KS3 Science (Combined)</option>
@@ -270,7 +271,6 @@
           <option value="crs">✝️ CRS</option>
           <option value="government">🏛️ Government</option>
           <option value="digitaltech">💻 Digital Tech</option>
-          <option value="phonics">🔤 Phonics</option>
         </select>
         <select id="topics-filter-year" onchange="renderTopicsTab()">
           <option value="7">Year 7</option>
@@ -686,22 +686,31 @@
         <div class="filter-bar" style="margin-bottom:16px">
           <select id="review-filter-subject" onchange="renderReviewTab()">
             <option value="">All Subjects</option>
-            <option value="english">✏️ English</option>
-            <option value="maths">📐 Maths</option>
-            <option value="science">🔬 Science</option>
-            <option value="physics">⚡ Physics</option>
-            <option value="chemistry">⚗️ Chemistry</option>
-            <option value="biology">🌿 Biology</option>
+            <optgroup label="📐 Maths">
+              <option value="maths" data-fixed-year="">Core Maths</option>
+              <option value="maths" data-fixed-year="13">Add Maths</option>
+              <option value="maths" data-fixed-year="14">Further Maths</option>
+              <option value="as_maths" data-fixed-year="13">AS Maths</option>
+              <option value="bridge_maths" data-fixed-year="">Bridge Maths</option>
+              <option value="ext_maths" data-fixed-year="">Extension Maths</option>
+              <option value="deepdive_maths" data-fixed-year="">Deep Dive: Maths</option>
+            </optgroup>
+            <optgroup label="✏️ English">
+              <option value="english" data-fixed-year="">Core English</option>
+              <option value="bridge_english" data-fixed-year="">Bridge English</option>
+              <option value="ext_english" data-fixed-year="">Extension English</option>
+              <option value="phonics" data-fixed-year="">Phonics</option>
+            </optgroup>
+            <optgroup label="🔬 Science">
+              <option value="science" data-fixed-year="">KS3 Science (Combined)</option>
+              <option value="bridge_science" data-fixed-year="">Bridge Science</option>
+              <option value="physics" data-fixed-year="">Physics</option>
+              <option value="chemistry" data-fixed-year="">Chemistry</option>
+              <option value="biology" data-fixed-year="">Biology</option>
+            </optgroup>
             <option value="crs">✝️ CRS</option>
             <option value="government">🏛️ Government</option>
             <option value="digitaltech">💻 Digital Tech</option>
-            <option value="bridge_maths">🌉 Bridge Maths</option>
-            <option value="bridge_science">🌉 Bridge Science</option>
-            <option value="bridge_english">🌉 Bridge English</option>
-            <option value="phonics">🔤 Phonics</option>
-            <option value="ext_maths">📐 Extension Maths</option>
-            <option value="ext_english">✏️ Extension English</option>
-            <option value="deepdive_maths">🪜 Deep Dive: Maths</option>
           </select>
           <select id="review-filter-year" onchange="renderReviewTab()">
             <option value="">All Year Groups</option>
@@ -711,8 +720,7 @@
             <option value="10" id="review-opt-y10">Year 10</option>
             <option value="11" id="review-opt-y11">Year 11</option>
             <option value="12" id="review-opt-y12">Year 12</option>
-            <option value="13" id="review-opt-y13">Add Maths</option>
-          <option value="14">Further Maths</option>
+            <option value="13" id="review-opt-y13">Year 13</option>
           </select>
           <select id="review-filter-status" onchange="renderReviewTab()">
             <option value="">All statuses</option>
@@ -2575,35 +2583,46 @@
   }
 
   window.renderReviewTab = function() {
-    const subjectFilter = document.getElementById('review-filter-subject').value;
+    const subjectSelectEl = document.getElementById('review-filter-subject');
+    const subjectFilter = subjectSelectEl.value;
+    const selectedOpt = subjectSelectEl.options[subjectSelectEl.selectedIndex];
+    const fixedYear = selectedOpt ? selectedOpt.getAttribute('data-fixed-year') : '';
     const statusFilter = document.getElementById('review-filter-status').value;
+    const yearSelectEl = document.getElementById('review-filter-year');
 
-    // Show/hide year options based on which subject ranges apply:
-    //   Science (combined): Y7-9 only
-    //   Physics/Chemistry/Biology: Y10-12 only
-    //   Maths / All: all years except Y13 shows only for Maths
-    const isSciCombined = subjectFilter === 'science';
-    const isSciSubject  = ['physics', 'chemistry', 'biology'].includes(subjectFilter);
-    const isMathsOnly   = subjectFilter === 'maths';
+    if (fixedYear) {
+      // Add Maths / Further Maths / AS Maths pin a specific year via the option
+      // itself — hide the year picker and force the filter to that year.
+      yearSelectEl.style.display = 'none';
+      yearSelectEl.value = fixedYear;
+    } else {
+      yearSelectEl.style.display = '';
 
-    document.getElementById('review-opt-y7').style.display  = isSciSubject ? 'none' : '';
-    document.getElementById('review-opt-y8').style.display  = isSciSubject ? 'none' : '';
-    document.getElementById('review-opt-y9').style.display  = isSciSubject ? 'none' : '';
-    document.getElementById('review-opt-y10').style.display = isSciCombined ? 'none' : '';
-    document.getElementById('review-opt-y11').style.display = isSciCombined ? 'none' : '';
-    document.getElementById('review-opt-y12').style.display = isSciCombined ? 'none' : '';
-    document.getElementById('review-opt-y13').style.display = (isMathsOnly || !subjectFilter) ? '' : 'none';
+      // Show/hide year options based on which subject ranges apply:
+      //   Science (combined): Y7-9 only
+      //   Physics/Chemistry/Biology: Y10-12 only
+      const isSciCombined = subjectFilter === 'science';
+      const isSciSubject  = ['physics', 'chemistry', 'biology'].includes(subjectFilter);
 
-    // Reset year filter if current selection is now invalid
-    const curYear = document.getElementById('review-filter-year').value;
-    const hiddenYears = {
-      science:   ['10','11','12','13'],
-      physics:   ['7','8','9','13'],
-      chemistry: ['7','8','9','13'],
-      biology:   ['7','8','9','13'],
-    };
-    if (subjectFilter && hiddenYears[subjectFilter]?.includes(curYear)) {
-      document.getElementById('review-filter-year').value = '';
+      document.getElementById('review-opt-y7').style.display  = isSciSubject ? 'none' : '';
+      document.getElementById('review-opt-y8').style.display  = isSciSubject ? 'none' : '';
+      document.getElementById('review-opt-y9').style.display  = isSciSubject ? 'none' : '';
+      document.getElementById('review-opt-y10').style.display = isSciCombined ? 'none' : '';
+      document.getElementById('review-opt-y11').style.display = isSciCombined ? 'none' : '';
+      document.getElementById('review-opt-y12').style.display = isSciCombined ? 'none' : '';
+      document.getElementById('review-opt-y13').style.display = subjectFilter && subjectFilter !== 'maths' ? 'none' : '';
+
+      // Reset year filter if current selection is now invalid
+      const curYear = document.getElementById('review-filter-year').value;
+      const hiddenYears = {
+        science:   ['10','11','12','13'],
+        physics:   ['7','8','9','13'],
+        chemistry: ['7','8','9','13'],
+        biology:   ['7','8','9','13'],
+      };
+      if (subjectFilter && hiddenYears[subjectFilter]?.includes(curYear)) {
+        document.getElementById('review-filter-year').value = '';
+      }
     }
     const yearFilter = document.getElementById('review-filter-year').value;
 
