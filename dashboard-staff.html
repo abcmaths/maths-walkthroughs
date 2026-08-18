@@ -988,8 +988,12 @@
             <select id="cu-school" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;background:white"></select>
           </div>
           <div>
-            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Full Name</label>
-            <input type="text" id="cu-name" placeholder="e.g. Amara Okafor" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Last Name</label>
+            <input type="text" id="cu-last-name" placeholder="e.g. Okafor" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">First Name</label>
+            <input type="text" id="cu-first-name" placeholder="e.g. Amara" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem">
           </div>
           <div>
             <label style="display:block;font-size:0.82rem;font-weight:600;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Email</label>
@@ -1036,7 +1040,7 @@
         </div>
         <p style="font-size:0.85rem;color:#666;margin-bottom:16px">
           CSV must have these column headers:<br>
-          <code style="background:#f5f5f5;padding:2px 6px;border-radius:3px">email, full_name, year_group, password</code>
+          <code style="background:#f5f5f5;padding:2px 6px;border-radius:3px">email, last_name, first_name, year_group, password</code>
         </p>
         <a href="#" onclick="downloadTemplate();return false;" style="font-size:0.85rem;color:#C0272D;font-weight:600;text-decoration:underline;display:inline-block;margin-bottom:20px">↓ Download CSV template</a>
         <div class="import-zone" id="drop-zone" onclick="document.getElementById('csv-input').click()">
@@ -1150,8 +1154,12 @@
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
       <div>
-        <label style="display:block;font-size:0.8rem;font-weight:600;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px">Full Name</label>
-        <input type="text" id="edit-name" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;box-sizing:border-box">
+        <label style="display:block;font-size:0.8rem;font-weight:600;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px">Last Name</label>
+        <input type="text" id="edit-last-name" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;box-sizing:border-box">
+      </div>
+      <div>
+        <label style="display:block;font-size:0.8rem;font-weight:600;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px">First Name</label>
+        <input type="text" id="edit-first-name" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:5px;font-size:0.9rem;box-sizing:border-box">
       </div>
       <div>
         <label style="display:block;font-size:0.8rem;font-weight:600;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px">Role</label>
@@ -1347,7 +1355,7 @@
     mySchoolId = profile.school_id;
 
     const [students, teachers, topics, progress] = await Promise.all([
-      loadAllPaginated('profiles', '*', q => q.eq('role', 'student').eq('active', true).eq('school_id', mySchoolId).order('full_name')),
+      loadAllPaginated('profiles', '*', q => q.eq('role', 'student').eq('active', true).eq('school_id', mySchoolId).order('last_name').order('first_name')),
       loadAllPaginated('profiles', '*', q => q.in('role', ['teacher', 'admin']).eq('school_id', mySchoolId)),
       loadAllPaginated('topics', '*', q => q.order('year_group').order('topic_code')),
       loadAllPaginated('walkthrough_progress', '*', q => q.eq('school_id', mySchoolId))
@@ -1450,7 +1458,7 @@
                         .sort((a,b) => new Date(b.last_visited_at) - new Date(a.last_visited_at))[0];
       const lastDate = lastP ? new Date(lastP.last_visited_at).toLocaleDateString('en-GB') : '—';
       return `<tr>
-        <td><strong>${s.full_name}</strong></td>
+        <td><strong>${s.last_name}, ${s.first_name}</strong></td>
         <td>Year ${s.year_group || '—'}</td>
         <td>${s.form_class || '—'}</td>
         <td>${done} / ${yrTopics.length}</td>
@@ -1894,7 +1902,7 @@
 
   // ── CSV template ──
   window.downloadTemplate = function() {
-    const csv = 'email,full_name,year_group,password\njohn.doe@abc.edu,John Doe,7,Welcome123\njane.smith@abc.edu,Jane Smith,10,Welcome123';
+    const csv = 'email,last_name,first_name,year_group,password\njohn.doe@abc.edu,Doe,John,7,Welcome123\njane.smith@abc.edu,Smith,Jane,10,Welcome123';
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     a.download = 'abc_students_template.csv';
@@ -1910,17 +1918,18 @@
     reader.onload = e => {
       const lines = e.target.result.split('\n').map(l => l.trim()).filter(Boolean);
       const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-      const missing = ['email','full_name','year_group','password'].filter(r => !headers.includes(r));
+      const missing = ['email','last_name','first_name','year_group','password'].filter(r => !headers.includes(r));
       if (missing.length > 0) { showMsg('import-msg','error','Missing columns: '+missing.join(', ')); return; }
       parsedRows = lines.slice(1).map(line => {
         const vals = line.split(',').map(v => v.trim());
         const row = {};
         headers.forEach((h,i) => { row[h] = vals[i] || ''; });
+        row.full_name = (row.first_name || '') + ' ' + (row.last_name || '');
         return row;
-      }).filter(r => r.email && r.full_name);
+      }).filter(r => r.email && r.last_name && r.first_name);
       document.getElementById('preview-count').textContent = parsedRows.length;
       document.getElementById('preview-tbody').innerHTML = parsedRows.map((r,i) => `
-        <tr><td>${i+1}</td><td>${r.email}</td><td>${r.full_name}</td><td>Year ${r.year_group}</td>
+        <tr><td>${i+1}</td><td>${r.email}</td><td>${r.last_name}, ${r.first_name}</td><td>Year ${r.year_group}</td>
         <td><span class="badge badge-grey">Pending</span></td></tr>`).join('');
       document.getElementById('preview-section').style.display = 'block';
     };
@@ -1949,11 +1958,11 @@
       try {
         const { data, error } = await supabase.auth.signUp({
           email: row.email, password: row.password,
-          options: { data: { full_name: row.full_name, role: 'student', school_id: schoolId } }
+          options: { data: { full_name: row.full_name, first_name: row.first_name, last_name: row.last_name, role: 'student', school_id: schoolId } }
         });
         if (error) throw new Error(error.message);
         if (data.user) {
-          await supabase.from('profiles').update({ year_group: parseInt(row.year_group) || null, school_id: schoolId }).eq('id', data.user.id);
+          await supabase.from('profiles').update({ first_name: row.first_name, last_name: row.last_name, year_group: parseInt(row.year_group) || null, school_id: schoolId }).eq('id', data.user.id);
         }
         log.innerHTML += `<div class="ok">✓ ${row.full_name} (${row.email})</div>`;
         ok++;
@@ -3401,7 +3410,8 @@
       .from('user_emails')
       .select('*')
       .eq('school_id', mySchoolId)
-      .order('full_name');
+      .order('last_name')
+      .order('first_name');
     allUsersWithEmail = data || [];
 
     // user_emails view doesn't carry the `active` column — fetch and merge from profiles
@@ -3452,7 +3462,7 @@
       const rowStyle = isActive ? '' : 'opacity:0.5;background:#FAFAFA';
       const nameSafe = u.full_name.replace(/'/g,"\\'");
       return `<tr style="${rowStyle}">
-        <td><strong>${u.full_name}</strong>${!isActive ? ' <span style="font-size:0.68rem;padding:1px 6px;border-radius:8px;font-weight:700;background:#EEEEEE;color:#888">ARCHIVED</span>' : ''}</td>
+        <td><strong>${u.last_name}, ${u.first_name}</strong>${!isActive ? ' <span style="font-size:0.68rem;padding:1px 6px;border-radius:8px;font-weight:700;background:#EEEEEE;color:#888">ARCHIVED</span>' : ''}</td>
         <td style="font-size:0.82rem;color:#666">${u.email || '—'}</td>
         <td><span class="badge ${roleBadge}">${u.role}</span></td>
         <td>${u.year_group ? 'Year ' + u.year_group : '—'}${extMaths ? `<br><span style="font-size:0.72rem;padding:1px 6px;border-radius:8px;font-weight:600;background:#FFF3E0;color:#C8922A">➕ ${extMathsLabel}</span>` : ''}${asMaths ? `<br><span style="font-size:0.72rem;padding:1px 6px;border-radius:8px;font-weight:600;background:#E3F2FD;color:#1565C0">📘 AS Maths</span>` : ''}</td>
@@ -3613,7 +3623,7 @@
 
     tbody.innerHTML = rows.map(s => `
       <tr>
-        <td><strong>${s.full_name}</strong></td>
+        <td><strong>${s.last_name}, ${s.first_name}</strong></td>
         <td style="font-size:0.82rem;color:#666">${s.email}</td>
         <td>${s.year_group ? 'Year ' + s.year_group : '—'}</td>
         <td>${s.diagnostic_completed ? '<span class="badge badge-green">Completed</span>' : '<span class="badge badge-grey">Not yet</span>'}</td>
@@ -3727,7 +3737,7 @@
 
       tbody.innerHTML = rows.map(s => `
         <tr>
-          <td><strong>${s.full_name}</strong></td>
+          <td><strong>${s.last_name}, ${s.first_name}</strong></td>
           <td style="font-size:0.82rem;color:#666">${s.email}</td>
           <td>${s.year_group ? 'Year ' + s.year_group : '—'}</td>
           <td>${s[completedField] ? '<span class="badge badge-green">Completed</span>' : '<span class="badge badge-grey">Not yet</span>'}</td>
@@ -3840,7 +3850,7 @@
 
     tbody.innerHTML = rows.map(s => `
       <tr>
-        <td><strong>${s.full_name}</strong></td>
+        <td><strong>${s.last_name}, ${s.first_name}</strong></td>
         <td style="font-size:0.82rem;color:#666">${s.email}</td>
         <td>${s.year_group ? 'Year ' + s.year_group : '—'}</td>
         <td>${s.diagnostic_y11_completed ? '<span class="badge badge-green">Completed</span>' : '<span class="badge badge-grey">Not yet</span>'}</td>
@@ -3951,7 +3961,7 @@
 
     tbody.innerHTML = rows.map(s => `
       <tr>
-        <td><strong>${s.full_name}</strong></td>
+        <td><strong>${s.last_name}, ${s.first_name}</strong></td>
         <td style="font-size:0.82rem;color:#666">${s.email}</td>
         <td>${s.year_group ? 'Year ' + s.year_group : '—'}</td>
         <td>${s.diagnostic_y12_completed ? '<span class="badge badge-green">Completed</span>' : '<span class="badge badge-grey">Not yet</span>'}</td>
@@ -4059,7 +4069,7 @@
 
     tbody.innerHTML = rows.map(s => `
       <tr>
-        <td><strong>${s.full_name}</strong></td>
+        <td><strong>${s.last_name}, ${s.first_name}</strong></td>
         <td style="font-size:0.82rem;color:#666">${s.email}</td>
         <td>${s.year_group ? 'Year ' + s.year_group : '—'}</td>
         <td>${s.diagnostic_y10_completed ? '<span class="badge badge-green">Completed</span>' : '<span class="badge badge-grey">Not yet</span>'}</td>
@@ -4108,7 +4118,9 @@
 
   window.openEditUser = function(id, name, role, year, form, stream, simplifiedView, summerOnly, extendedMaths, asMaths) {
     _editUserId = id;
-    document.getElementById('edit-name').value   = name;
+    const u = allUsersWithEmail.find(x => x.id === id) || {};
+    document.getElementById('edit-last-name').value  = u.last_name || '';
+    document.getElementById('edit-first-name').value = u.first_name || '';
     document.getElementById('edit-role').value   = role;
     document.getElementById('edit-year').value   = year;
     document.getElementById('edit-form').value   = form;
@@ -4138,19 +4150,22 @@
   window.saveEditUser = async function() {
     const btn  = document.getElementById('edit-save-btn');
     const msg  = document.getElementById('edit-msg');
-    const name = document.getElementById('edit-name').value.trim();
+    const lastName  = document.getElementById('edit-last-name').value.trim();
+    const firstName = document.getElementById('edit-first-name').value.trim();
     const role = document.getElementById('edit-role').value;
     const year = document.getElementById('edit-year').value;
     const form = document.getElementById('edit-form').value.trim();
 
-    if (!name) { msg.style.color = '#C0272D'; msg.textContent = 'Name is required.'; return; }
+    if (!lastName || !firstName) { msg.style.color = '#C0272D'; msg.textContent = 'Last name and first name are required.'; return; }
 
     btn.disabled = true;
     btn.textContent = 'Saving…';
 
     const stream = document.getElementById('edit-stream') ? document.getElementById('edit-stream').value : 'science';
     const update = {
-      full_name:  name,
+      last_name:  lastName,
+      first_name: firstName,
+      full_name:  firstName + ' ' + lastName,
       role,
       year_group: year ? parseInt(year) : null,
       form_class: form || null,
@@ -4176,7 +4191,9 @@
     // Update local data
     const user = allUsersWithEmail.find(u => u.id === _editUserId);
     if (user) {
-      user.full_name  = name;
+      user.last_name  = lastName;
+      user.first_name = firstName;
+      user.full_name  = update.full_name;
       user.role       = role;
       user.year_group = year ? parseInt(year) : null;
       user.form_class = form || null;
@@ -4184,7 +4201,9 @@
     }
     const student = allStudents.find(s => s.id === _editUserId);
     if (student) {
-      student.full_name  = name;
+      student.last_name  = lastName;
+      student.first_name = firstName;
+      student.full_name  = update.full_name;
       student.role       = role;
       student.year_group = year ? parseInt(year) : null;
       student.form_class = form || null;
@@ -4211,7 +4230,9 @@
   };
 
   window.createIndividualUser = async function() {
-    const name     = document.getElementById('cu-name').value.trim();
+    const lastName  = document.getElementById('cu-last-name').value.trim();
+    const firstName = document.getElementById('cu-first-name').value.trim();
+    const name     = firstName + ' ' + lastName;
     const email    = document.getElementById('cu-email').value.trim();
     const password = document.getElementById('cu-password').value.trim();
     const role     = document.getElementById('cu-role').value;
@@ -4221,8 +4242,8 @@
     const msg      = document.getElementById('cu-msg');
     const btn      = document.querySelector('#tab-import .btn');
 
-    if (!name || !email || !password) {
-      showMsg('cu-msg', 'error', 'Please fill in name, email and password.');
+    if (!lastName || !firstName || !email || !password) {
+      showMsg('cu-msg', 'error', 'Please fill in last name, first name, email and password.');
       return;
     }
     if (!schoolId) {
@@ -4236,7 +4257,7 @@
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: name, role, school_id: schoolId } }
+      options: { data: { full_name: name, first_name: firstName, last_name: lastName, role, school_id: schoolId } }
     });
 
     if (error) {
@@ -4247,7 +4268,7 @@
     }
 
     if (data.user) {
-      const update = { full_name: name, role, school_id: schoolId };
+      const update = { full_name: name, first_name: firstName, last_name: lastName, role, school_id: schoolId };
       if (role === 'student') {
         update.year_group  = year;
         update.form_class  = form || null;
@@ -4260,7 +4281,8 @@
     btn.textContent = 'Create User';
 
     // Clear form
-    document.getElementById('cu-name').value  = '';
+    document.getElementById('cu-last-name').value  = '';
+    document.getElementById('cu-first-name').value = '';
     document.getElementById('cu-email').value = '';
     document.getElementById('cu-form').value  = '';
     document.getElementById('cu-password').value = 'ABC2026';
