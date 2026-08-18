@@ -189,6 +189,16 @@ function g(){return document.getElementById('dg');}
 function T(x,y,txt,c,sz,a,bold){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function C(cx,cy,r,fill,stroke){fill=fill||'#1a7a3a';stroke=stroke||fill;return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1"/>';}
+// Mixed normal/superscript text — real tspan superscripts render far larger and
+// clearer than tiny unicode superscript glyphs (\u00b2, \u2074) at small font sizes.
+function TX(x,y,parts,c,sz,a,bold){c=c||'#241A17';sz=sz||13;a=a||'middle';
+  var inner=parts.map(function(part){
+    if(part.sup) return '<tspan baseline-shift="super" font-size="72%">'+part.t+'</tspan>';
+    return '<tspan>'+part.t+'</tspan>';
+  }).join('');
+  return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+inner+'</text>';
+}
 
 function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o.push(T(240,24,'Completing the square: 2x\u00b2 + 8x + 3','#C0272D',15,'middle',true));
@@ -200,11 +210,16 @@ function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   s.innerHTML=o.join('');}
 
 function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,24,'From completed square to the vertex','#C0272D',15,'middle',true));
-  if(p>=1){o.push(R(40,44,400,44,'#fff5f0','#C0272D',1.5));o.push(T(240,64,'a(x + p)\u00b2 + q  has vertex at (\u2212p, q)','#241A17',14,'middle',true));o.push(T(240,82,'because (x+p)\u00b2 \u2265 0 always, so the minimum is q','#888',11));}
-  if(p>=2){o.push(T(240,116,'For 2(x + 2)\u00b2 \u2212 5:','#241A17',13));o.push(T(240,138,'p = 2,  q = \u22125','#1a5a8a',14,'middle',true));}
-  if(p>=3){o.push(R(120,154,240,42,'#e8f8ee','#1a7a3a',2));o.push(T(240,180,'Vertex = (\u22122, \u22125)','#1a7a3a',17,'middle',true));}
-  if(p>=4){o.push(T(240,212,'Since a = 2 > 0, this is a minimum point','#888',12));}
+  o.push(T(240,18,'From completed square to the vertex','#C0272D',14,'middle',true));
+  if(p>=1){o.push(T(240,38,'a(x + p)\u00b2 + q  has vertex at (\u2212p, q)','#241A17',13,'middle',true));o.push(T(240,54,'because (x+p)\u00b2 \u2265 0 always, so the minimum is q','#888',10));}
+  if(p>=2){o.push(T(240,76,'For 2(x + 2)\u00b2 \u2212 5:  p = 2, q = \u22125','#1a5a8a',13,'middle',true));}
+  if(p>=3){
+    o.push(L(70,200,420,200,'#888',1.5));o.push(L(70,200,70,100,'#888',1.5));
+    o.push(T(430,204,'x','#888',10));o.push(T(66,96,'y','#888',10));
+    var pts=[];for(var xv=-5;xv<=1;xv+=0.2){var yv=2*(xv+2)*(xv+2)-5;var px=70+(xv+5)*45;var py=200-yv*6;pts.push(px+','+py);}
+    o.push('<polyline points="'+pts.join(' ')+'" fill="none" stroke="#1a5a8a" stroke-width="2.5"/>');
+  }
+  if(p>=4){o.push(C(70+3*45,230,4,'#1a7a3a'));o.push(T(70+3*45,248,'Vertex (\u22122, \u22125) \u2014 minimum since a=2>0','#1a7a3a',11,'middle',true));}
   s.innerHTML=o.join('');}
 
 function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
@@ -215,12 +230,25 @@ function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   s.innerHTML=o.join('');}
 
 function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,22,'The discriminant: b\u00b2 \u2212 4ac','#C0272D',15,'middle',true));
-  if(p>=1){o.push(R(40,40,400,44,'#fff5f0','#C0272D',1.5));o.push(T(240,60,'For ax\u00b2+bx+c=0, the quadratic formula is','#241A17',13));o.push(T(240,78,'x = (\u2212b \u00b1 \u221a(b\u00b2\u22124ac)) / 2a','#1a5a8a',13,'middle',true));}
-  if(p>=2){o.push(T(240,110,'The part under the root, b\u00b2\u22124ac, is the discriminant.','#241A17',13));o.push(T(240,130,'Its sign tells you how many real roots exist \u2014 before you solve anything.','#888',11));}
-  if(p>=3){o.push(R(30,148,130,70,'#e8f8ee','#1a7a3a',1.5));o.push(T(95,168,'> 0','#1a7a3a',15,'middle',true));o.push(T(95,188,'2 real roots','#241A17',11));o.push(T(95,204,'(graph crosses x-axis twice)','#888',9));
-    o.push(R(175,148,130,70,'#fff8e1','#C8922A',1.5));o.push(T(240,168,'= 0','#C8922A',15,'middle',true));o.push(T(240,188,'1 repeated root','#241A17',11));o.push(T(240,204,'(graph touches x-axis)','#888',9));
-    o.push(R(320,148,130,70,'#fde8e8','#a01820',1.5));o.push(T(385,168,'< 0','#a01820',15,'middle',true));o.push(T(385,188,'No real roots','#241A17',11));o.push(T(385,204,'(graph misses x-axis)','#888',9));}
+  o.push(T(240,20,'The discriminant: b\u00b2 \u2212 4ac','#C0272D',14,'middle',true));
+  if(p>=1){
+    o.push(R(90,32,300,52,'#fff5f0','#C0272D',1.5));
+    o.push(TX(150,60,[{t:'x = '}],'#241A17',13,'middle',false));
+    o.push(TX(255,52,[{t:'\u2212b \u00b1 \u221a(b'},{t:'2',sup:true},{t:'\u22124ac)'}],'#1a5a8a',14,'middle',true));
+    o.push(L(200,60,320,60,'#1a5a8a',2));
+    o.push(T(255,74,'2a','#1a5a8a',14,'middle',true));
+    o.push(T(240,100,'the quadratic formula, for ax\u00b2+bx+c=0','#888',10));
+  }
+  if(p>=2){
+    o.push(R(30,110,420,60,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(240,128,'Where does it come from? Complete the square on ax\u00b2+bx+c=0:','#1a5a8a',12,'middle',true));
+    o.push(T(240,146,'a(x + b/2a)\u00b2 \u2212 b\u00b2/4a + c = 0  \u2192  rearrange for x','#241A17',12,'middle',false));
+    o.push(T(240,162,'\u2014 same method as Checkpoint 1, just done in general','#888',10,'middle',false));
+  }
+  if(p>=3){o.push(T(240,192,'The part under the root, b\u00b2\u22124ac, is the discriminant \u2014 its sign tells you how many real roots exist, before you solve anything.','#241A17',11,'middle',false));}
+  if(p>=4){o.push(R(20,204,140,50,'#e8f8ee','#1a7a3a',1.5));o.push(T(90,222,'> 0','#1a7a3a',14,'middle',true));o.push(T(90,240,'2 real roots','#241A17',10));
+    o.push(R(170,204,140,50,'#fff8e1','#C8922A',1.5));o.push(T(240,222,'= 0','#C8922A',14,'middle',true));o.push(T(240,240,'1 repeated root','#241A17',10));
+    o.push(R(320,204,140,50,'#fde8e8','#a01820',1.5));o.push(T(390,222,'< 0','#a01820',14,'middle',true));o.push(T(390,240,'No real roots','#241A17',10));}
   s.innerHTML=o.join('');}
 
 function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
@@ -232,49 +260,69 @@ function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   s.innerHTML=o.join('');}
 
 function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,20,'Sketching from completed-square form','#C0272D',15,'middle',true));
-  if(p>=1){o.push(T(240,44,'y = (x \u2212 3)\u00b2 \u2212 4','#241A17',14,'middle',true));}
+  o.push(T(240,18,'Sketching from completed-square form','#C0272D',14,'middle',true));
+  if(p>=1){o.push(T(240,38,'y = (x \u2212 3)\u00b2 \u2212 4','#241A17',13,'middle',true));}
   if(p>=2){
-    o.push(L(60,220,420,220,'#888',1.5));o.push(L(60,220,60,60,'#888',1.5));
-    o.push(T(430,224,'x','#888',11));o.push(T(56,50,'y','#888',11));
-    var pts=[];for(var xv=-1;xv<=7;xv+=0.25){var yv=(xv-3)*(xv-3)-4;var px=60+(xv+1)*45;var py=220-yv*14;if(py>60&&py<220)pts.push(px+','+py);}
+    o.push(L(60,200,420,200,'#888',1.5));o.push(L(60,200,60,60,'#888',1.5));
+    o.push(T(430,204,'x','#888',10));o.push(T(56,56,'y','#888',10));
+    // scale=14 was too steep for this axis (put the vertex off-canvas); scale=8 keeps
+    // the full curve, including the vertex, inside the viewBox.
+    var pts=[];for(var xv=-1;xv<=7;xv+=0.2){var yv=(xv-3)*(xv-3)-4;var px=60+(xv+1)*45;var py=200-yv*8;pts.push(px+','+py);}
     o.push('<polyline points="'+pts.join(' ')+'" fill="none" stroke="#C0272D" stroke-width="2.5"/>');
   }
-  if(p>=3){o.push(C(60+4*45,220-(-4)*14,4,'#1a7a3a','#1a7a3a'));o.push(T(60+4*45,220-(-4)*14-12,'Vertex (3, \u22124)','#1a7a3a',11,'middle',true));}
-  if(p>=4){o.push(C(60+1*45,220,4,'#1a5a8a','#1a5a8a'));o.push(C(60+5*45,220,4,'#1a5a8a','#1a5a8a'));o.push(T(240,240,'Roots at x=1 and x=5 (where curve crosses the x-axis)','#1a5a8a',11,'middle',false));}
+  if(p>=3){o.push(C(60+4*45,232,4,'#1a7a3a'));o.push(T(60+4*45,250,'Vertex (3, \u22124)','#1a7a3a',11,'middle',true));}
+  if(p>=4){o.push(C(60+1*45,200,4,'#1a5a8a'));o.push(C(60+5*45,200,4,'#1a5a8a'));o.push(T(240,258,'Roots at x=1 and x=5 (where curve crosses the x-axis)','#1a5a8a',10,'middle',false));}
   s.innerHTML=o.join('');}
 
 function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,20,'Solving quadratic inequalities','#C0272D',15,'middle',true));
-  if(p>=1){o.push(T(240,44,'Solve x\u00b2 \u2212 2x \u2212 8 > 0','#241A17',14,'middle',true));}
-  if(p>=2){o.push(R(40,58,400,40,'#fff5f0','#C0272D',1.5));o.push(T(240,82,'Factorise first: (x\u22124)(x+2) > 0','#1a5a8a',13,'middle',true));}
+  o.push(T(240,18,'Solving quadratic inequalities','#C0272D',14,'middle',true));
+  if(p>=1){o.push(T(240,36,'Solve x\u00b2 \u2212 2x \u2212 8 > 0','#241A17',13,'middle',true));}
+  if(p>=2){o.push(T(240,54,'Factorise first: (x\u22124)(x+2) > 0','#1a5a8a',12,'middle',true));}
   if(p>=3){
-    o.push(L(60,180,420,180,'#888',1.5));
-    o.push(C(160,180,4,'#a01820','#a01820'));o.push(T(160,200,'x=\u22122','#241A17',11));
-    o.push(C(320,180,4,'#a01820','#a01820'));o.push(T(320,200,'x=4','#241A17',11));
-    o.push('<line x1="60" y1="180" x2="150" y2="180" stroke="#1a7a3a" stroke-width="4"/>');
-    o.push('<line x1="330" y1="180" x2="420" y2="180" stroke="#1a7a3a" stroke-width="4"/>');
-    o.push(T(240,150,'Positive outside the roots (graph is above the x-axis there)','#241A17',11,'middle',false));
+    o.push(L(60,190,420,190,'#888',1.5));o.push(L(60,190,60,80,'#888',1.5));
+    o.push(T(430,194,'x','#888',10));o.push(T(56,76,'y','#888',10));
+    // y=x^2-2x-8, roots at x=-2,4, vertex (1,-9). Split into three coloured segments:
+    // green where the curve is above the x-axis (outside the roots, the ">0" solution)
+    // and a muted colour between the roots where it's negative.
+    function ptsFor(x0,x1){var pts=[];for(var xv=x0;xv<=x1;xv+=0.2){var yv=xv*xv-2*xv-8;var px=60+(xv+4)*36;var py=190-yv*5;pts.push(px+','+py);}return pts.join(' ');}
+    o.push('<polyline points="'+ptsFor(-4,-2)+'" fill="none" stroke="#1a7a3a" stroke-width="2.5"/>');
+    o.push('<polyline points="'+ptsFor(-2,4)+'" fill="none" stroke="#C8922A" stroke-width="2" stroke-dasharray="4,3"/>');
+    o.push('<polyline points="'+ptsFor(4,6)+'" fill="none" stroke="#1a7a3a" stroke-width="2.5"/>');
+    o.push(C(60+2*36,190,4,'#a01820'));o.push(T(60+2*36,206,'x=\u22122','#241A17',10));
+    o.push(C(60+8*36,190,4,'#a01820'));o.push(T(60+8*36,206,'x=4','#241A17',10));
   }
-  if(p>=4){o.push(R(110,206,260,40,'#e8f8ee','#1a7a3a',2));o.push(T(240,231,'x < \u22122  or  x > 4','#1a7a3a',15,'middle',true));}
+  if(p>=4){o.push(R(90,214,300,40,'#e8f8ee','#1a7a3a',2));o.push(T(240,238,'x < \u22122  or  x > 4  (curve above axis, in green)','#1a7a3a',12,'middle',true));}
   s.innerHTML=o.join('');}
 
 function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o.push(T(240,20,'Disguised quadratics (function of a function)','#C0272D',14,'middle',true));
-  if(p>=1){o.push(T(240,44,'Solve x\u2074 \u2212 5x\u00b2 + 4 = 0','#241A17',14,'middle',true));}
-  if(p>=2){o.push(R(30,58,420,40,'#fff5f0','#C0272D',1.5));o.push(T(240,82,'Spot the pattern: let u = x\u00b2, so u\u00b2 = x\u2074','#1a5a8a',13,'middle',true));}
-  if(p>=3){o.push(T(240,116,'This becomes: u\u00b2 \u2212 5u + 4 = 0','#241A17',14,'middle',true));o.push(T(240,136,'Factorise: (u\u22121)(u\u22124) = 0  \u2192  u = 1 or u = 4','#1a5a8a',13,'middle',true));}
-  if(p>=4){o.push(R(70,152,340,50,'#e8f8ee','#1a7a3a',2));o.push(T(240,172,'x\u00b2 = 1  \u2192  x = \u00b11','#1a7a3a',14,'middle',true));o.push(T(240,192,'x\u00b2 = 4  \u2192  x = \u00b12','#1a7a3a',14,'middle',true));}
+  if(p>=1){o.push(TX(240,44,[{t:'Solve x'},{t:'4',sup:true},{t:' \u2212 5x'},{t:'2',sup:true},{t:' + 4 = 0'}],'#241A17',15,'middle',true));}
+  if(p>=2){o.push(R(30,58,420,40,'#fff5f0','#C0272D',1.5));o.push(TX(240,82,[{t:'Spot the pattern: let u = x'},{t:'2',sup:true},{t:', so u'},{t:'2',sup:true},{t:' = x'},{t:'4',sup:true}],'#1a5a8a',14,'middle',true));}
+  if(p>=3){o.push(TX(240,116,[{t:'This becomes: u'},{t:'2',sup:true},{t:' \u2212 5u + 4 = 0'}],'#241A17',15,'middle',true));o.push(T(240,136,'Factorise: (u\u22121)(u\u22124) = 0  \u2192  u = 1 or u = 4','#1a5a8a',13,'middle',true));}
+  if(p>=4){o.push(R(70,152,340,50,'#e8f8ee','#1a7a3a',2));o.push(TX(240,172,[{t:'x'},{t:'2',sup:true},{t:' = 1  \u2192  x = \u00b11'}],'#1a7a3a',15,'middle',true));o.push(TX(240,192,[{t:'x'},{t:'2',sup:true},{t:' = 4  \u2192  x = \u00b12'}],'#1a7a3a',15,'middle',true));}
   if(p>=5){o.push(T(240,222,'Always substitute back to x \u2014 forgetting this loses easy marks','#888',11));}
   s.innerHTML=o.join('');}
 
 function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,20,'Line meets curve: using the discriminant','#C0272D',14,'middle',true));
-  if(p>=1){o.push(T(240,44,'Find k so that y = 2x + k is tangent to y = x\u00b2','#241A17',13,'middle',true));}
-  if(p>=2){o.push(R(30,58,420,40,'#fff5f0','#C0272D',1.5));o.push(T(240,82,'Set equal: x\u00b2 = 2x + k  \u2192  x\u00b2 \u2212 2x \u2212 k = 0','#1a5a8a',13,'middle',true));}
-  if(p>=3){o.push(T(240,114,'Tangent means exactly ONE solution \u2192 discriminant = 0','#241A17',13,'middle',true));}
-  if(p>=4){o.push(T(240,144,'b\u00b2\u22124ac = (\u22122)\u00b2 \u2212 4(1)(\u2212k) = 4+4k = 0','#1a5a8a',13,'middle',true));}
-  if(p>=5){o.push(R(140,162,200,42,'#e8f8ee','#1a7a3a',2));o.push(T(240,188,'k = \u22121','#1a7a3a',18,'middle',true));}
+  o.push(T(240,16,'Line meets curve: using the discriminant','#C0272D',13,'middle',true));
+  if(p>=1){o.push(T(240,32,'Find k so that y = 2x + k is tangent to y = x\u00b2','#241A17',12,'middle',true));}
+  if(p>=2){
+    o.push(L(70,200,420,200,'#888',1.5));o.push(L(70,200,70,60,'#888',1.5));
+    o.push(T(430,204,'x','#888',10));o.push(T(66,56,'y','#888',10));
+    var pts=[];for(var xv=-2;xv<=4;xv+=0.2){var yv=xv*xv;var px=70+(xv+2)*50;var py=200-yv*10;pts.push(px+','+py);}
+    o.push('<polyline points="'+pts.join(' ')+'" fill="none" stroke="#1a5a8a" stroke-width="2.5"/>');
+    o.push(T(240,214,'Set equal: x\u00b2 = 2x + k  \u2192  x\u00b2 \u2212 2x \u2212 k = 0','#1a5a8a',11,'middle',true));
+  }
+  if(p>=3){o.push(T(240,228,'Tangent means exactly ONE solution \u2192 discriminant = 0','#241A17',11,'middle',true));}
+  if(p>=4){
+    // once k=-1 is known, draw the actual tangent line y=2x-1, touching y=x^2 at (1,1)
+    var x0=-2,x1=4;var y0=2*x0-1,y1=2*x1-1;
+    var px0=70+(x0+2)*50, py0=200-y0*10, px1=70+(x1+2)*50, py1=200-y1*10;
+    o.push(L(px0,py0,px1,py1,'#C0272D',2));
+    o.push(C(70+(1+2)*50,200-1*10,4,'#C0272D'));
+    o.push(T(70+(1+2)*50,200-1*10-14,'Touches at (1,1)','#C0272D',10,'middle',true));
+    o.push(T(240,244,'b\u00b2\u22124ac = 4+4k = 0  \u2192  k = \u22121','#1a5a8a',12,'middle',true));
+  }
   s.innerHTML=o.join('');}
 
 function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
@@ -334,8 +382,9 @@ var Q=[
  {ey:'Checkpoint 4 of 10',ti:'The discriminant',su:'Predicting the number of roots without solving',
   panels:[
    {d:dQ4,p:1,html:'<p>The quadratic formula solves ax\u00b2+bx+c=0. The expression under the square root, b\u00b2\u22124ac, is called the <b>discriminant</b>.</p>'},
-   {d:dQ4,p:2,html:'<p>You don\u2019t need to solve the equation to know how many roots it has \u2014 the sign of the discriminant tells you immediately.</p>'},
-   {d:dQ4,p:3,html:'<p>Three cases: positive gives 2 real roots, zero gives 1 repeated root, negative gives no real roots.</p>'
+   {d:dQ4,p:2,html:'<p>Where does the formula come from? Apply exactly the same completing-the-square method from Checkpoint 1, but to the general equation ax\u00b2+bx+c=0 instead of specific numbers \u2014 rearranging for x gives the formula.</p>'},
+   {d:dQ4,p:3,html:'<p>You don\u2019t need to solve the equation to know how many roots it has \u2014 the sign of the discriminant tells you immediately.</p>'},
+   {d:dQ4,p:4,html:'<p>Three cases: positive gives 2 real roots, zero gives 1 repeated root, negative gives no real roots.</p>'
      +tryItMC(function(){
        var opts=[
         {t:'2 distinct real roots',v:'>0'},{t:'1 repeated root',v:'=0'},{t:'No real roots',v:'<0'}];
@@ -421,10 +470,21 @@ var Q=[
    {d:dQ10,p:2,html:'<p>...and sketching, inequalities, disguised quadratics, and line-meets-curve problems \u2014 all built from the same two ideas: completed-square form and the discriminant.</p>'},
    {d:dQ10,p:3,html:'<p>Every one of these question types reduces to the same core skills. If you can complete the square and read the discriminant confidently, the rest follows.</p>'
      +tryItMC(function(){
-       return {question:'Which single skill underpins BOTH sketching a quadratic AND solving a quadratic inequality?',
-         options:['Finding the vertex and roots from completed-square form','Long division of polynomials','Differentiation','The binomial expansion'],
-         correct:0,
-         working:'Both sketching and solving inequalities rely on knowing the vertex and roots \u2014 both come from completed-square form.'};
+       var bank=[
+         {question:'Which single skill underpins BOTH sketching a quadratic AND solving a quadratic inequality?',
+          options:['Finding the vertex and roots from completed-square form','Substituting u=x\u00b2 for a disguised quadratic','Checking the discriminant\u2019s sign','Factorising to find the roots directly'],
+          correct:0,
+          working:'Both sketching and solving inequalities rely on knowing the vertex and roots \u2014 both come from completed-square form.'},
+         {question:'A tangent line meets a curve at exactly one point. Which tool from this topic confirms that?',
+          options:['The discriminant equalling zero','Completing the square on the curve\u2019s equation','Substituting u for the disguised variable','Reading the vertex off the sketch'],
+          correct:0,
+          working:'Exactly one intersection means the resulting quadratic has a repeated root \u2014 discriminant = 0.'},
+         {question:'You\u2019re asked to solve x\u2076 \u2212 9x\u00b3 + 8 = 0. Which technique from this topic applies?',
+          options:['Substitute u = x\u00b3 to turn it into a quadratic in u','Complete the square directly on x\u2076','Sketch the graph and read off the roots','Use the discriminant on the original equation'],
+          correct:0,
+          working:'x\u2076 = (x\u00b3)\u00b2, so letting u = x\u00b3 turns it into a quadratic in u \u2014 same idea as Checkpoint 8, just a different power.'}
+       ];
+       return pick(bank);
      })},
    {d:dQ10,p:4,html:'<p>Nice work \u2014 Quadratics is complete. Next up: Functions (AS-P1-02).</p>'}
   ]}
