@@ -3279,11 +3279,24 @@
     const currentTopic = allTopics.find(t => t.id === currentReviewTopicId);
     const lockThreshold = (currentTopic && currentTopic.subject === 'as_maths') ? 1 : 2;
     if (reviewerIds.size >= lockThreshold) {
-      await supabase.from('topics').update({ locked: true }).eq('id', currentReviewTopicId);
-      if (currentTopic) currentTopic.locked = true;
+      const { error: lockError } = await supabase.from('topics').update({ locked: true }).eq('id', currentReviewTopicId);
+      if (lockError) {
+        console.error('Auto-lock failed:', lockError);
+        msg.style.color = '#C0272D';
+        msg.textContent = '⚠ Review saved, but auto-lock failed: ' + lockError.message;
+      } else if (currentTopic) {
+        currentTopic.locked = true;
+      }
     }
 
     window.renderReviewTab();
+
+    if (msg.textContent && msg.textContent.startsWith('⚠')) {
+      btn.disabled = false;
+      btn.textContent = 'Submit Review';
+      setTimeout(closeReviewModal, 2500);
+      return;
+    }
 
     msg.style.color = '#2e7d32';
     msg.textContent = '✓ Review submitted!';
