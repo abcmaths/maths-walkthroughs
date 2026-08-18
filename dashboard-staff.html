@@ -3068,9 +3068,11 @@
 
   function getDominantRating(ratings) {
     if (!ratings || ratings.length === 0) return null;
-    const counts = { good: 0, needs_improvement: 0, not_good: 0 };
-    ratings.forEach(r => { if (counts[r] !== undefined) counts[r]++; });
-    return Object.entries(counts).sort((a,b) => b[1]-a[1])[0][0];
+    // Worst-case, not majority-vote: any flagged question should surface the topic for action,
+    // not get buried because most other questions were rated fine.
+    if (ratings.includes('not_good')) return 'not_good';
+    if (ratings.includes('needs_improvement')) return 'needs_improvement';
+    return 'good';
   }
 
   window.openReviewModal = async function(topicId, topicCode, topicName, subject) {
@@ -3272,12 +3274,13 @@
     // Reload reviews
     await loadReviews();
 
-    // Auto-lock: once 2+ distinct staff have reviewed this topic, lock it for further review
+    // Auto-lock: AS Maths locks after 1 review; everything else needs 2+ distinct staff reviewers
     const reviewerIds = new Set(allReviews.filter(r => r.topic_id === currentReviewTopicId).map(r => r.reviewer_id));
-    if (reviewerIds.size >= 2) {
+    const currentTopic = allTopics.find(t => t.id === currentReviewTopicId);
+    const lockThreshold = (currentTopic && currentTopic.subject === 'as_maths') ? 1 : 2;
+    if (reviewerIds.size >= lockThreshold) {
       await supabase.from('topics').update({ locked: true }).eq('id', currentReviewTopicId);
-      const t = allTopics.find(t => t.id === currentReviewTopicId);
-      if (t) t.locked = true;
+      if (currentTopic) currentTopic.locked = true;
     }
 
     window.renderReviewTab();
