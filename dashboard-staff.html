@@ -246,22 +246,31 @@
     <div class="tab-panel" id="tab-topics">
       <div class="filter-bar">
         <select id="topics-filter-subject" onchange="renderTopicsTab()">
-          <option value="english">✏️ English</option>
-          <option value="maths">📐 Maths</option>
-          <option value="science">🔬 Science</option>
-          <option value="physics">⚡ Physics</option>
-          <option value="chemistry">⚗️ Chemistry</option>
-          <option value="biology">🌿 Biology</option>
-                <option value="crs">✝️ CRS</option>
-                <option value="government">🏛️ Government</option>
-                <option value="digitaltech">💻 Digital Tech</option>
-                <option value="bridge_maths">📐 Bridge Maths</option>
-                <option value="bridge_science">🔬 Bridge Science</option>
-                <option value="bridge_english">✏️ Bridge English</option>
-                <option value="phonics">🔤 Phonics</option>
-                <option value="ext_maths">📐 Extension Maths</option>
-                <option value="ext_english">✏️ Extension English</option>
-                <option value="deepdive_maths">🪜 Deep Dive: Maths</option>
+          <optgroup label="📐 Maths">
+            <option value="maths" data-fixed-year="">Core Maths</option>
+            <option value="maths" data-fixed-year="13">Add Maths</option>
+            <option value="maths" data-fixed-year="14">Further Maths</option>
+            <option value="as_maths" data-fixed-year="13">AS Maths</option>
+            <option value="bridge_maths" data-fixed-year="">Bridge Maths</option>
+            <option value="ext_maths" data-fixed-year="">Extension Maths</option>
+            <option value="deepdive_maths" data-fixed-year="">Deep Dive: Maths</option>
+          </optgroup>
+          <optgroup label="✏️ English">
+            <option value="english" data-fixed-year="">Core English</option>
+            <option value="bridge_english" data-fixed-year="">Bridge English</option>
+            <option value="ext_english" data-fixed-year="">Extension English</option>
+          </optgroup>
+          <optgroup label="🔬 Science">
+            <option value="science" data-fixed-year="">KS3 Science (Combined)</option>
+            <option value="bridge_science" data-fixed-year="">Bridge Science</option>
+            <option value="physics" data-fixed-year="">Physics</option>
+            <option value="chemistry" data-fixed-year="">Chemistry</option>
+            <option value="biology" data-fixed-year="">Biology</option>
+          </optgroup>
+          <option value="crs">✝️ CRS</option>
+          <option value="government">🏛️ Government</option>
+          <option value="digitaltech">💻 Digital Tech</option>
+          <option value="phonics">🔤 Phonics</option>
         </select>
         <select id="topics-filter-year" onchange="renderTopicsTab()">
           <option value="7">Year 7</option>
@@ -270,8 +279,7 @@
           <option value="10">Year 10</option>
           <option value="11">Year 11</option>
           <option value="12">Year 12</option>
-          <option value="13">Add Maths</option>
-          <option value="14">Further Maths</option>
+          <option value="13">Year 13</option>
         </select>
       </div>
       <div id="topics-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;"></div>
@@ -4014,7 +4022,10 @@
   const YEAR_AGNOSTIC_SUBJECTS = ['phonics', 'ext_maths', 'ext_english'];
 
   window.renderTopicsTab = function() {
-    const subject = document.getElementById('topics-filter-subject').value;
+    const subjectSelectEl = document.getElementById('topics-filter-subject');
+    const subject = subjectSelectEl.value;
+    const selectedOpt = subjectSelectEl.options[subjectSelectEl.selectedIndex];
+    const fixedYear = selectedOpt ? selectedOpt.getAttribute('data-fixed-year') : '';
     const yearSelectEl = document.getElementById('topics-filter-year');
 
     // Deep Dive subjects render as a chain/ladder, not a flat card grid, and aren't year-filtered.
@@ -4024,22 +4035,15 @@
       return;
     }
 
-    const yr      = parseInt(document.getElementById('topics-filter-year').value) || 13;
     const isYearAgnostic = YEAR_AGNOSTIC_SUBJECTS.includes(subject);
+    // Add Maths / Further Maths / AS Maths pin a specific year via data-fixed-year on
+    // the <option> itself, rather than exposing 13/14 as fake entries in the year picker.
+    const yr = fixedYear ? parseInt(fixedYear) : (parseInt(yearSelectEl.value) || 13);
+    const hideYearPicker = isYearAgnostic || !!fixedYear;
     const filtered = allTopics.filter(t => (isYearAgnostic || t.year_group === yr) && (t.subject || 'maths') === subject);
     const grid = document.getElementById('topics-grid');
     grid.style.display = 'grid';
-    yearSelectEl.style.display = isYearAgnostic ? 'none' : '';
-
-    // Hide Add Maths / Further Maths when any non-Maths subject is selected
-    const addMathsOpt = document.querySelector('#topics-filter-year option[value="13"]');
-    const furtherMathsOpt = document.querySelector('#topics-filter-year option[value="14"]');
-    if (addMathsOpt) addMathsOpt.style.display = subject === 'maths' ? '' : 'none';
-    if (furtherMathsOpt) furtherMathsOpt.style.display = subject === 'maths' ? '' : 'none';
-    if (subject !== 'maths' && !isYearAgnostic && (yr === 13 || yr === 14)) {
-      document.getElementById('topics-filter-year').value = '10';
-      window.renderTopicsTab(); return;
-    }
+    yearSelectEl.style.display = hideYearPicker ? 'none' : '';
 
     if (filtered.length === 0) {
       grid.innerHTML = '<div style="color:#aaa;padding:32px;font-style:italic">No topics found for this year group.</div>';
