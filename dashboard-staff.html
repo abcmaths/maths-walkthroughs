@@ -149,70 +149,148 @@
     }
   </style>
   <script>
-    // Reads a <select> (with optional <optgroup>s) and builds a nested flyout
-    // beside it that drives the same select — so existing onchange logic,
-    // data-fixed-year attributes, and render functions all keep working untouched.
-    function buildNestedFlyout(selectId) {
-      const sel = document.getElementById(selectId);
-      if (!sel || sel.dataset.flyoutBuilt) return;
-      sel.dataset.flyoutBuilt = '1';
-      sel.style.display = 'none';
+    // ── 3-level nested flyout: Family ▸ Variant ▸ Year ──
+    // Progressively enhances the existing subject+year <select> pair. The two
+    // selects remain the source of truth for renderTopicsTab()/renderReviewTab()
+    // — this only builds a nicer UI on top and drives their values + change event.
+    const SUBJECT_TREE = [
+      { label: '📐 Maths', variants: [
+        { label: 'Core Maths', subject: 'maths', years: [7,8,9,10,11,12] },
+        { label: 'Add Maths', subject: 'maths', fixedYear: 13 },
+        { label: 'Further Maths', subject: 'maths', fixedYear: 14 },
+        { label: 'AS Maths', subject: 'as_maths', fixedYear: 13 },
+        { label: 'Bridge Maths', subject: 'bridge_maths' },
+        { label: 'Extension Maths', subject: 'ext_maths' },
+        { label: 'Deep Dive: Maths', subject: 'deepdive_maths' },
+      ]},
+      { label: '✏️ English', variants: [
+        { label: 'Core English', subject: 'english', years: [7,8,9,10,11,12] },
+        { label: 'Bridge English', subject: 'bridge_english' },
+        { label: 'Extension English', subject: 'ext_english' },
+        { label: 'Phonics', subject: 'phonics' },
+      ]},
+      { label: '🔬 Science', variants: [
+        { label: 'KS3 Science (Combined)', subject: 'science', years: [7,8,9] },
+        { label: 'Bridge Science', subject: 'bridge_science' },
+        { label: 'Physics', subject: 'physics', years: [10,11,12] },
+        { label: 'Chemistry', subject: 'chemistry', years: [10,11,12] },
+        { label: 'Biology', subject: 'biology', years: [10,11,12] },
+      ]},
+      { label: '✝️ CRS', subject: 'crs', years: [7,8,9,10,11,12] },
+      { label: '🏛️ Government', subject: 'government', years: [10,11,12] },
+      { label: '💻 Digital Tech', subject: 'digitaltech', years: [7,8,9,10,11,12] },
+    ];
 
-      const wrapId = selectId + '-flyout';
+    // Finds (or falls back to) the matching <option> in the subject select for
+    // a given subject value + fixed-year, so onchange/data-fixed-year logic
+    // downstream keeps working exactly as before.
+    function findSubjectOption(subjectSelect, subjectVal, fixedYear) {
+      const opts = Array.from(subjectSelect.options);
+      let match = opts.find(o => o.value === subjectVal && (o.getAttribute('data-fixed-year') || '') === String(fixedYear || ''));
+      if (!match) match = opts.find(o => o.value === subjectVal);
+      return match;
+    }
+
+    function buildSubjectYearFlyout(subjectSelectId, yearSelectId) {
+      const subjectSelect = document.getElementById(subjectSelectId);
+      const yearSelect = document.getElementById(yearSelectId);
+      if (!subjectSelect || subjectSelect.dataset.treeBuilt) return;
+      subjectSelect.dataset.treeBuilt = '1';
+      subjectSelect.style.display = 'none';
+      if (yearSelect) yearSelect.style.display = 'none';
+
       const wrap = document.createElement('div');
       wrap.className = 'nflyout-wrap';
-      wrap.id = wrapId;
       const trigger = document.createElement('button');
       trigger.type = 'button';
       trigger.className = 'nflyout-trigger';
-      trigger.textContent = (sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].textContent : 'Select') + ' ▾';
+      trigger.textContent = 'All Subjects ▾';
       const panel = document.createElement('div');
       panel.className = 'nflyout-panel';
 
-      function makeLeaf(opt, idx) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'nflyout-item' + (idx === sel.selectedIndex ? ' sel' : '');
-        btn.textContent = opt.textContent;
-        btn.addEventListener('click', () => {
-          sel.selectedIndex = idx;
-          sel.dispatchEvent(new Event('change'));
-          trigger.textContent = opt.textContent + ' ▾';
-          wrap.querySelectorAll('.nflyout-item').forEach(b => b.classList.remove('sel'));
-          btn.classList.add('sel');
-          closeAllFlyouts();
-        });
-        return btn;
+      function selectLeaf(subjectVal, year, fixedYear, labelPath) {
+        const opt = findSubjectOption(subjectSelect, subjectVal, fixedYear);
+        if (opt) subjectSelect.selectedIndex = Array.prototype.indexOf.call(subjectSelect.options, opt);
+        if (yearSelect && year) yearSelect.value = String(year);
+        subjectSelect.dispatchEvent(new Event('change'));
+        // renderTopicsTab/renderReviewTab may un-hide the native year select
+        // as part of their existing logic — force it back off, since the
+        // flyout now owns year selection entirely.
+        if (yearSelect) yearSelect.style.display = 'none';
+        trigger.textContent = labelPath + ' ▾';
+        closeAllFlyouts();
       }
 
-      Array.from(sel.children).forEach(child => {
-        if (child.tagName === 'OPTGROUP') {
+      function buildYearMenu(subjectVal, years, parentLabel) {
+        const sub = document.createElement('div');
+        sub.className = 'nflyout-sub';
+        years.forEach(yr => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'nflyout-item';
+          btn.textContent = 'Year ' + yr;
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectLeaf(subjectVal, yr, '', parentLabel + ' — Year ' + yr);
+          });
+          sub.appendChild(btn);
+        });
+        return sub;
+      }
+
+      function buildVariantRow(variant) {
+        if (variant.years) {
           const row = document.createElement('div');
           row.className = 'nflyout-item has-sub';
           const label = document.createElement('span');
-          label.textContent = child.label;
+          label.textContent = variant.label;
           const arrow = document.createElement('span');
-          arrow.className = 'arrow';
-          arrow.textContent = '▸';
-          row.appendChild(label);
-          row.appendChild(arrow);
+          arrow.className = 'arrow'; arrow.textContent = '▸';
+          row.appendChild(label); row.appendChild(arrow);
+          const yearMenu = buildYearMenu(variant.subject, variant.years, variant.label);
+          row.appendChild(yearMenu);
+          row.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const wasOpen = yearMenu.classList.contains('open');
+            document.querySelectorAll('.nflyout-sub').forEach(s => { if (s !== yearMenu) s.classList.remove('open'); });
+            yearMenu.classList.toggle('open', !wasOpen);
+          });
+          return row;
+        } else {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'nflyout-item';
+          btn.textContent = variant.label;
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectLeaf(variant.subject, null, variant.fixedYear || '', variant.label);
+          });
+          return btn;
+        }
+      }
+
+      SUBJECT_TREE.forEach(family => {
+        if (family.variants) {
+          const row = document.createElement('div');
+          row.className = 'nflyout-item has-sub';
+          const label = document.createElement('span');
+          label.textContent = family.label;
+          const arrow = document.createElement('span');
+          arrow.className = 'arrow'; arrow.textContent = '▸';
+          row.appendChild(label); row.appendChild(arrow);
           const sub = document.createElement('div');
           sub.className = 'nflyout-sub';
-          Array.from(child.children).forEach(opt => {
-            const idx = Array.prototype.indexOf.call(sel.options, opt);
-            sub.appendChild(makeLeaf(opt, idx));
-          });
+          family.variants.forEach(v => sub.appendChild(buildVariantRow(v)));
           row.appendChild(sub);
           row.addEventListener('click', (e) => {
             e.stopPropagation();
             const wasOpen = sub.classList.contains('open');
-            wrap.querySelectorAll('.nflyout-sub').forEach(s => s.classList.remove('open'));
-            if (!wasOpen) sub.classList.add('open');
+            document.querySelectorAll('.nflyout-sub').forEach(s => { if (s !== sub) s.classList.remove('open'); });
+            sub.classList.toggle('open', !wasOpen);
           });
           panel.appendChild(row);
-        } else if (child.tagName === 'OPTION') {
-          const idx = Array.prototype.indexOf.call(sel.options, child);
-          panel.appendChild(makeLeaf(child, idx));
+        } else {
+          panel.appendChild(buildVariantRow(family));
         }
       });
 
@@ -225,14 +303,7 @@
 
       wrap.appendChild(trigger);
       wrap.appendChild(panel);
-      sel.parentNode.insertBefore(wrap, sel);
-
-      // Keep the visible trigger label in sync if something else changes
-      // the select's value programmatically (e.g. auto-reset logic).
-      sel.addEventListener('change', () => {
-        const opt = sel.options[sel.selectedIndex];
-        if (opt) trigger.textContent = opt.textContent + ' ▾';
-      });
+      subjectSelect.parentNode.insertBefore(wrap, subjectSelect);
     }
     function closeAllFlyouts() {
       document.querySelectorAll('.nflyout-panel, .nflyout-sub').forEach(p => p.classList.remove('open'));
@@ -241,8 +312,8 @@
       if (!e.target.closest('.nflyout-wrap')) closeAllFlyouts();
     });
     document.addEventListener('DOMContentLoaded', () => {
-      buildNestedFlyout('topics-filter-subject');
-      buildNestedFlyout('review-filter-subject');
+      buildSubjectYearFlyout('topics-filter-subject', 'topics-filter-year');
+      buildSubjectYearFlyout('review-filter-subject', 'review-filter-year');
     });
   </script>
 </head>
