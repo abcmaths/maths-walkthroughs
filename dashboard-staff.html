@@ -956,6 +956,10 @@
           Takes Add Maths / Further Maths (Y10–11 Add Maths, automatically becomes Further Maths at Y12 rollover)
         </label>
         <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.9rem;cursor:pointer">
+          <input type="checkbox" id="edit-as-maths" style="width:16px;height:16px;cursor:pointer">
+          AS Maths (restricted — individually granted, additive to normal year-group maths)
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.9rem;cursor:pointer">
           <input type="checkbox" id="edit-simplified-view" style="width:16px;height:16px;cursor:pointer">
           Simplified view (Maths + English only — hides Science, Digital Tech, CRS, Government until fully enrolled)
         </label>
@@ -2471,6 +2475,11 @@
     ],
   };
 
+  // AS Maths — restricted subject, gated by profile.as_maths_enabled per student.
+  const AS_MATHS_WALKTHROUGH_FILES = {
+    // 'AS-P1-01': 'as_maths/pure1/quadratics.html',
+  };
+
   const DEEPDIVE_MATHS_WALKTHROUGH_FILES = {
     'TCH-ALG-01': 'deepdive/maths/algebra/hcf-to-algebra.html',
     'TCH-NUM-01': 'deepdive/maths/algebra/squares-and-roots.html',
@@ -3177,6 +3186,7 @@
       const lastSignIn = u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString('en-GB') : 'Never';
       const extMaths = (allStudents.find(s=>s.id===u.id)||{}).takes_extended_maths;
       const extMathsLabel = Number(u.year_group) === 12 ? 'Further Maths' : 'Add Maths';
+      const asMaths = (allStudents.find(s=>s.id===u.id)||{}).as_maths_enabled;
       const isActive = u.active !== false;
       const rowStyle = isActive ? '' : 'opacity:0.5;background:#FAFAFA';
       const nameSafe = u.full_name.replace(/'/g,"\\'");
@@ -3184,13 +3194,13 @@
         <td><strong>${u.full_name}</strong>${!isActive ? ' <span style="font-size:0.68rem;padding:1px 6px;border-radius:8px;font-weight:700;background:#EEEEEE;color:#888">ARCHIVED</span>' : ''}</td>
         <td style="font-size:0.82rem;color:#666">${u.email || '—'}</td>
         <td><span class="badge ${roleBadge}">${u.role}</span></td>
-        <td>${u.year_group ? 'Year ' + u.year_group : '—'}${extMaths ? `<br><span style="font-size:0.72rem;padding:1px 6px;border-radius:8px;font-weight:600;background:#FFF3E0;color:#C8922A">➕ ${extMathsLabel}</span>` : ''}</td>
+        <td>${u.year_group ? 'Year ' + u.year_group : '—'}${extMaths ? `<br><span style="font-size:0.72rem;padding:1px 6px;border-radius:8px;font-weight:600;background:#FFF3E0;color:#C8922A">➕ ${extMathsLabel}</span>` : ''}${asMaths ? `<br><span style="font-size:0.72rem;padding:1px 6px;border-radius:8px;font-weight:600;background:#E3F2FD;color:#1565C0">📘 AS Maths</span>` : ''}</td>
         <td>${u.form_class || '—'}</td>
         <td><span style="font-size:0.78rem;padding:2px 8px;border-radius:10px;font-weight:600;background:${u.stream==='arts'?'#F3E5F5':u.stream==='both'?'#E8F5E9':'#E3F2FD'};color:${u.stream==='arts'?'#6B1F1F':u.stream==='both'?'#2E7D32':'#1565C0'}">${u.stream||'science'}</span></td>
         <td style="font-size:0.82rem;color:#888">${lastSignIn}</td>
         <td>
           ${u.role === 'student' ? `<button class="btn-link" onclick="openStudentModal('${u.id}')">View</button>` : ''}
-          <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${nameSafe}','${u.role}','${u.year_group||''}','${u.form_class||''}','${u.stream||'science'}',${(allStudents.find(s=>s.id===u.id)||{}).simplified_view===true},${(allStudents.find(s=>s.id===u.id)||{}).summer_only===true},${extMaths===true})">Edit</button>
+          <button class="btn-link" style="color:#555" onclick="openEditUser('${u.id}','${nameSafe}','${u.role}','${u.year_group||''}','${u.form_class||''}','${u.stream||'science'}',${(allStudents.find(s=>s.id===u.id)||{}).simplified_view===true},${(allStudents.find(s=>s.id===u.id)||{}).summer_only===true},${extMaths===true},${asMaths===true})">Edit</button>
           <button class="btn-link" style="color:#1565C0" onclick="resetUserPassword('${u.id}','${nameSafe}')">Reset Password</button>
           ${isActive
             ? `<button class="btn-link" style="color:#C0272D" onclick="archiveUser('${u.id}','${nameSafe}')">Archive</button>`
@@ -3835,7 +3845,7 @@
 
   let _editUserId = null;
 
-  window.openEditUser = function(id, name, role, year, form, stream, simplifiedView, summerOnly, extendedMaths) {
+  window.openEditUser = function(id, name, role, year, form, stream, simplifiedView, summerOnly, extendedMaths, asMaths) {
     _editUserId = id;
     document.getElementById('edit-name').value   = name;
     document.getElementById('edit-role').value   = role;
@@ -3843,6 +3853,7 @@
     document.getElementById('edit-form').value   = form;
     document.getElementById('edit-stream').value = stream || 'science';
     document.getElementById('edit-extended-maths').checked = !!extendedMaths;
+    document.getElementById('edit-as-maths').checked = !!asMaths;
     document.getElementById('edit-simplified-view').checked = !!simplifiedView;
     document.getElementById('edit-summer-only').checked = !!summerOnly;
     document.getElementById('edit-access-row').style.display = role === 'student' ? '' : 'none';
@@ -3888,6 +3899,7 @@
       update.simplified_view = document.getElementById('edit-simplified-view').checked;
       update.summer_only = document.getElementById('edit-summer-only').checked;
       update.takes_extended_maths = document.getElementById('edit-extended-maths').checked;
+      update.as_maths_enabled = document.getElementById('edit-as-maths').checked;
     }
 
     const { error } = await supabase.from('profiles').update(update).eq('id', _editUserId);

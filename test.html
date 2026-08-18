@@ -133,6 +133,7 @@
         <option value="phonics" id="subj-phonics" style="display:none">🔤 Phonics</option>
         <option value="ext_maths" id="subj-ext_maths" style="display:none">⭐📐 Extension Maths</option>
         <option value="ext_english" id="subj-ext_english" style="display:none">⭐✏️ Extension English</option>
+        <option value="as_maths" id="subj-as_maths" style="display:none">📘 AS Maths</option>
       </select>
     </div>
 
@@ -869,6 +870,11 @@ const BIOLOGY_WALKTHROUGH_FILES = {
     'PHO-12': 'phonics/PHO-12.html',
   };
 
+  // AS Maths — restricted subject, gated by profile.as_maths_enabled per student.
+  const AS_MATHS_WALKTHROUGH_FILES = {
+    // 'AS-P1-01': 'as_maths/pure1/quadratics.html',
+  };
+
   const EXT_MTH_WALKTHROUGH_FILES = {
     'EXT-MTH-01': 'ext_mth/EXT-MTH-01.html',
     'EXT-MTH-02': 'ext_mth/EXT-MTH-02.html',
@@ -951,7 +957,8 @@ const BIOLOGY_WALKTHROUGH_FILES = {
   // ── Extract tryIt/tryItMC generators from a walkthrough HTML file ──
   async function extractGenerators(topicCode, subject) {
     let file;
-    if (subject === 'english')          file = ENGLISH_WALKTHROUGH_FILES[topicCode];
+    if (subject === 'as_maths')         file = AS_MATHS_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'english')          file = ENGLISH_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'science')     file = SCIENCE_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'physics')     file = PHYSICS_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'chemistry')   file = CHEMISTRY_WALKTHROUGH_FILES[topicCode];
@@ -1073,7 +1080,7 @@ const BIOLOGY_WALKTHROUGH_FILES = {
   let mySchoolId = null;
   if (session) {
     const { data: prof } = await supabase
-      .from('profiles').select('school_id, stream, phonics_support, extension, bridge_maths_number, bridge_maths_fractions, bridge_maths_algebra, bridge_maths_geometry, bridge_maths_data, bridge_english_comprehension, bridge_english_writing, simplified_view, summer_only').eq('id', session.user.id).maybeSingle();
+      .from('profiles').select('school_id, stream, phonics_support, extension, bridge_maths_number, bridge_maths_fractions, bridge_maths_algebra, bridge_maths_geometry, bridge_maths_data, bridge_english_comprehension, bridge_english_writing, simplified_view, summer_only, as_maths_enabled').eq('id', session.user.id).maybeSingle();
     userStream = prof?.stream || 'science';
     mySchoolId = prof?.school_id || null;
     const isArts = userStream === 'arts';
@@ -1098,6 +1105,8 @@ const BIOLOGY_WALKTHROUGH_FILES = {
       document.getElementById('subj-bridge_english').style.display = needsBridgeEnglish ? '' : 'none';
       document.getElementById('subj-phonics').style.display        = prof.phonics_support ? '' : 'none';
       document.getElementById('subj-ext_maths').style.display      = prof.extension ? '' : 'none';
+      // AS Maths: restricted subject, individually granted per student — additive to normal maths
+      document.getElementById('subj-as_maths').style.display       = prof.as_maths_enabled ? '' : 'none';
       document.getElementById('subj-ext_english').style.display    = prof.extension ? '' : 'none';
     }
 
@@ -1118,7 +1127,7 @@ const BIOLOGY_WALKTHROUGH_FILES = {
 
   // ── Load topics by year group + subject ──
   window.loadTopics = async function() {
-    const ARTS_SUBJECTS = ['crs', 'bridge_maths', 'bridge_english', 'phonics', 'ext_maths', 'ext_english', 'furthermaths', 'addmaths'];
+    const ARTS_SUBJECTS = ['crs', 'bridge_maths', 'bridge_english', 'phonics', 'ext_maths', 'ext_english', 'furthermaths', 'addmaths', 'as_maths'];
     const isArtsSubject = ARTS_SUBJECTS.includes(selectedSubject);
     const ENGLISH_AGNOSTIC_RE = /^ENG-(GRAM|VOC)-\d+$/;
 
@@ -1163,7 +1172,7 @@ const BIOLOGY_WALKTHROUGH_FILES = {
   // ── Subject selection ──
   window.selectSubject = function(subject) {
     selectedSubject = subject;
-    const ARTS_SUBJECTS = ['crs', 'bridge_maths', 'bridge_english', 'phonics', 'ext_maths', 'ext_english', 'furthermaths', 'addmaths'];
+    const ARTS_SUBJECTS = ['crs', 'bridge_maths', 'bridge_english', 'phonics', 'ext_maths', 'ext_english', 'furthermaths', 'addmaths', 'as_maths'];
     const isArtsSubject = ARTS_SUBJECTS.includes(subject);
 
     // Sync the dropdown to the selected subject (needed when this is called

@@ -180,6 +180,7 @@
       <button id="toggle-phonics" style="display:none">🔤 Phonics</button>
       <button id="toggle-extension" style="display:none">⭐ Extension</button>
       <button id="toggle-deepdive">🪜 Deep Dive</button>
+      <button id="toggle-asmaths" style="display:none">📘 AS Maths</button>
     </div>
   </div>
   <div class="header-account">
@@ -1008,6 +1009,12 @@
 
 
   // Resolve walkthrough file for any subject/topic_code combination
+  // AS Maths — restricted subject, gated by profile.as_maths_enabled (per-student flag,
+  // not year_group). Content not yet built — add file paths here as walkthroughs are authored.
+  const AS_MATHS_WALKTHROUGH_FILES = {
+    // 'AS-P1-01': 'as_maths/pure1/quadratics.html',
+  };
+
   const DEEPDIVE_MATHS_WALKTHROUGH_FILES = {
     'TCH-ALG-01': 'deepdive/maths/algebra/hcf-to-algebra.html',
     'TCH-NUM-01': 'deepdive/maths/algebra/squares-and-roots.html',
@@ -1032,7 +1039,8 @@
 
   function getWalkthroughFile(subject, topicCode) {
     let file;
-    if (subject === 'english')   file = ENGLISH_WALKTHROUGH_FILES[topicCode];
+    if (subject === 'as_maths')  file = AS_MATHS_WALKTHROUGH_FILES[topicCode];
+    else if (subject === 'english')   file = ENGLISH_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'science')   file = SCIENCE_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'physics')   file = PHYSICS_WALKTHROUGH_FILES[topicCode];
     else if (subject === 'chemistry') file = CHEMISTRY_WALKTHROUGH_FILES[topicCode];
@@ -1200,6 +1208,11 @@
           addMathsBt.style.display = 'none';
         }
       }
+
+      // Show AS Maths tab only for the specific student(s) flagged for it —
+      // additive access, does not affect their standard year-group maths.
+      const asMathsBt = document.getElementById('toggle-asmaths');
+      if (asMathsBt) asMathsBt.style.display = profile.as_maths_enabled ? '' : 'none';
 
       // Show/hide tabs based on stream
       const isArtsTrack    = stream === 'arts';
@@ -1524,6 +1537,7 @@
   // Checkpoint students, who have their own separate ENG7/8/9-GRAM/VOC-xx codes.
   function topicMatchesYear(t, subject, yearGroup) {
     if (ARTS_SUBJECTS.includes(subject)) return true;
+    if (subject === 'as_maths') return true; // fixed-year content, gated by student flag not year_group
     if (subject === 'english' && yearGroup >= 10 && /^ENG-(GRAM|VOC)-\d+$/.test(t.topic_code)) return true;
     return t.year_group === yearGroup;
   }
@@ -1537,6 +1551,7 @@
     const isPhonicsGrp = PHONICS_SUBJECTS.includes(subject);
     const isExtGrp = EXTENSION_SUBJECTS.includes(subject);
     const isDeepDiveGrp = DEEPDIVE_SUBJECTS.includes(subject);
+    const isAsMathsGrp = subject === 'as_maths';
 
     // Main toggle active state
     document.getElementById('toggle-maths').classList.toggle('active', isMaths);
@@ -1557,6 +1572,8 @@
     if (extBt) extBt.classList.toggle('active', isExtGrp);
     const deepDiveBt = document.getElementById('toggle-deepdive');
     if (deepDiveBt) deepDiveBt.classList.toggle('active', isDeepDiveGrp);
+    const asMathsBt2 = document.getElementById('toggle-asmaths');
+    if (asMathsBt2) asMathsBt2.classList.toggle('active', isAsMathsGrp);
 
     // Show/hide science sub-tabs
     document.getElementById('science-subtabs').classList.toggle('visible', isSciGrp);
@@ -1580,12 +1597,12 @@
     });
 
     // Header subtitle
-    const subtitles = { maths: 'ABC Learning Portal', english: 'English Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal', digitaltech: 'Digital Technologies Portal', bridge_maths: 'Bridge Maths', bridge_science: 'Bridge Science', bridge_english: 'Bridge English', phonics: 'Phonics Support', ext_maths: 'Extension Maths', ext_english: 'Extension English', deepdive_maths: 'Deep Dive: Maths' };
+    const subtitles = { maths: 'ABC Learning Portal', english: 'English Portal', science: 'Science Portal', physics: 'Physics Portal', chemistry: 'Chemistry Portal', biology: 'Biology Portal', crs: 'CRS Portal', government: 'Government Portal', digitaltech: 'Digital Technologies Portal', bridge_maths: 'Bridge Maths', bridge_science: 'Bridge Science', bridge_english: 'Bridge English', phonics: 'Phonics Support', ext_maths: 'Extension Maths', ext_english: 'Extension English', deepdive_maths: 'Deep Dive: Maths', as_maths: 'AS Level Maths' };
     document.getElementById('header-subtitle').textContent = subtitles[subject] || 'Portal';
 
     // Year selector: hide Add Maths (Y13) when not in Maths; hide entirely for arts/bridge/phonics/extension/deepdive
     const yearSelector = document.querySelector('.year-selector') || document.getElementById('year-selector');
-    if (yearSelector) yearSelector.style.display = (isArtsGrp || isBridgeGrp || isPhonicsGrp || isExtGrp || isDeepDiveGrp) ? 'none' : '';
+    if (yearSelector) yearSelector.style.display = (isArtsGrp || isBridgeGrp || isPhonicsGrp || isExtGrp || isDeepDiveGrp || isAsMathsGrp) ? 'none' : '';
     const addMathsOpt = document.querySelector('#year-select option[value="13"]');
     const furtherMathsOpt = document.querySelector('#year-select option[value="14"]');
     if (addMathsOpt) addMathsOpt.style.display = isMaths ? '' : 'none';
@@ -1850,6 +1867,10 @@
   if (document.getElementById('toggle-extension'))
     document.getElementById('toggle-extension').addEventListener('click', () => {
       if (!EXTENSION_SUBJECTS.includes(currentSubject)) window.switchSubject('ext_maths');
+    });
+  if (document.getElementById('toggle-asmaths'))
+    document.getElementById('toggle-asmaths').addEventListener('click', () => {
+      window.switchSubject('as_maths');
     });
   if (document.getElementById('toggle-deepdive'))
     document.getElementById('toggle-deepdive').addEventListener('click', () => {
