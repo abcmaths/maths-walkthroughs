@@ -255,7 +255,12 @@
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const wasOpen = yearMenu.classList.contains('open');
-            document.querySelectorAll('.nflyout-sub').forEach(s => { if (s !== yearMenu) s.classList.remove('open'); });
+            // Close unrelated submenus, but never close an ancestor of yearMenu —
+            // doing so would hide yearMenu itself via the parent's display:none,
+            // even though yearMenu's own 'open' class was just set.
+            document.querySelectorAll('.nflyout-sub').forEach(s => {
+              if (s !== yearMenu && !s.contains(yearMenu)) s.classList.remove('open');
+            });
             yearMenu.classList.toggle('open', !wasOpen);
           });
           outer.appendChild(btn);
@@ -292,7 +297,9 @@
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const wasOpen = sub.classList.contains('open');
-            document.querySelectorAll('.nflyout-sub').forEach(s => { if (s !== sub) s.classList.remove('open'); });
+            document.querySelectorAll('.nflyout-sub').forEach(s => {
+              if (s !== sub && !s.contains(sub)) s.classList.remove('open');
+            });
             sub.classList.toggle('open', !wasOpen);
           });
           outer.appendChild(btn);
