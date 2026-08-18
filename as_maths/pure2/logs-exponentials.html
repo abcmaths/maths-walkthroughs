@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) { window.location.href = '../../login.html'; }
+  else {
+    const { data: prof } = await _lc.from('profiles').select('full_name').eq('id', session.user.id).maybeSingle();
+    window.__studentFirstName = prof && prof.full_name ? prof.full_name.split(' ')[0] : 'there';
+    document.addEventListener('DOMContentLoaded', function() {
+      var el = document.getElementById('greet');
+      if (el) el.textContent = 'Hi ' + window.__studentFirstName + ' — let\'s work through this one together.';
+      var wname = document.getElementById('welcome-name');
+      if (wname) wname.textContent = 'Well done, ' + window.__studentFirstName + '!';
+      var seenKey = 'as_maths_welcome_seen_v1';
+      if (!localStorage.getItem(seenKey)) {
+        var overlay = document.getElementById('welcome-overlay');
+        if (overlay) overlay.style.display = 'flex';
+      }
+      var goBtn = document.getElementById('welcome-go-btn');
+      if (goBtn) goBtn.addEventListener('click', function() {
+        localStorage.setItem(seenKey, '1');
+        document.getElementById('welcome-overlay').style.display = 'none';
+      });
+    });
+  }
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logs & Exponentials · AS Level Pure 2</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF9F2;--ink:#241A17;--line:#E8D9A8;--gold:#D4AF37;--gold-dark:#9C7A1E;--gold-light:#F5E7B8;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gold-dark) 100%);color:#fff;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.25);}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.as-badge{background:var(--gold);color:var(--dark);font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;letter-spacing:.06em;box-shadow:0 0 10px rgba(212,175,55,.6);}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--gold);color:var(--gold-dark);}
+.qb.on{background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;border-color:var(--gold);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.greet{font-size:14px;color:var(--gold-dark);font-weight:600;margin-bottom:10px;}
+.resume-banner{background:linear-gradient(120deg,var(--gold-light),#fff);border:1.5px solid var(--gold);border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(212,175,55,.25);}
+.resume-banner .txt{font-size:13.5px;color:var(--dark);font-weight:600;}
+.resume-banner .btns{display:flex;gap:8px;}
+.resume-banner button{font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:5px;border:1.5px solid var(--gold-dark);background:#fff;color:var(--gold-dark);cursor:pointer;font-family:inherit;}
+.resume-banner button.primary{background:var(--gold-dark);color:#fff;}
+.stage{background:#fff;border:1.5px solid var(--line);border-radius:6px;overflow:hidden;width:100%;max-width:760px;box-shadow:0 2px 14px rgba(212,175,55,.12);}
+.cvs{background:linear-gradient(#fff,#fdf7e8);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1.5px solid var(--line);min-height:160px;}
+.pnl p{font-size:16px;line-height:1.6;margin:0 0 10px;}
+.pnl .as-flag{background:var(--gold-light);border-left:4px solid var(--gold-dark);padding:8px 12px;font-size:14px;color:#7A5A18;margin:10px 0;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1.5px solid var(--gold-dark);background:#fff;color:var(--gold-dark);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;border-color:transparent;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{filter:brightness(1.08);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fffdf5;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:14px;box-shadow:0 0 0 3px rgba(212,175,55,.08);}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dark);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;line-height:1.55;margin-bottom:10px;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;}
+.mc-opt{text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:4px;padding:10px 14px;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold-dark);}
+.mc-opt:disabled{cursor:default;}
+.mc-correct{background:#e8f8ee;border-color:#1a7a3a!important;}
+.mc-wrong{background:#fde8e8;border-color:#a01820!important;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk{margin-top:10px;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.try-new{margin-top:10px;font-size:12px;font-weight:600;padding:6px 12px;border-radius:3px;border:none;background:#888;color:#fff;cursor:pointer;font-family:inherit;}
+.welcome-overlay{position:fixed;inset:0;background:rgba(36,26,23,.72);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.welcome-card{background:#fff;border-radius:12px;max-width:480px;width:100%;padding:0;box-shadow:0 20px 60px rgba(0,0,0,.4);overflow:hidden;}
+.welcome-hero{background:linear-gradient(120deg,var(--dark),var(--red) 50%,var(--gold-dark));padding:28px 26px 22px;color:#fff;text-align:center;}
+.welcome-hero .trophy{font-size:38px;margin-bottom:6px;}
+.welcome-hero h2{font-family:Georgia,serif;font-size:21px;margin:0 0 4px;}
+.welcome-hero .sub{font-size:12.5px;opacity:.9;letter-spacing:.03em;}
+.welcome-body{padding:22px 26px 26px;}
+.welcome-body p{font-size:14.5px;line-height:1.65;color:#3a2a24;margin:0 0 12px;}
+.welcome-body .note{background:var(--gold-light);border-left:4px solid var(--gold-dark);padding:9px 12px;font-size:13.5px;color:#6b4f0f;margin:14px 0;border-radius:0 4px 4px 0;}
+.welcome-go{width:100%;margin-top:6px;background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;border:none;padding:13px;border-radius:6px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+.welcome-go:hover{filter:brightness(1.08);}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <div class="ht">📘 Logs & Exponentials <span class="as-badge">AS LEVEL</span></div>
+  <div style="width:80px"></div>
+</header>
+<div id="welcome-overlay" class="welcome-overlay" style="display:none">
+  <div class="welcome-card">
+    <div class="welcome-hero">
+      <div class="trophy">🏆</div>
+      <h2 id="welcome-name">Well done!</h2>
+      <div class="sub">AS LEVEL MATHEMATICS · Pure 2</div>
+    </div>
+    <div class="welcome-body">
+      <p id="welcome-msg-1">You've landed here because you achieved an A* grade in Maths in Year 10. Your teacher has recommended you sit AS Level in the summer of Year 11.</p>
+      <p>Each topic should take at least a couple of hours — go slowly, work through every checkpoint, and take notes as you go.</p>
+      <div class="note">💡 Ask your Maths teacher if you're not sure about anything. This is meant to stretch you, not stress you.</div>
+      <button class="welcome-go" id="welcome-go-btn">Let's begin →</button>
+    </div>
+  </div>
+</div>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Checkpoints</div></div>
+  <div class="main">
+    <div id="greet" class="greet">Hi there — let's work through this one together.</div>
+    <div id="resume-banner" style="display:none"></div>
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 280"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Check your understanding</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<button class="try-new" data-tryid="'+id+'">New question</button></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=shuffleMC(entry.genFn());entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+  }
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');
+    allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){
+      el.classList.add('mc-correct');
+      fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;
+    }else{
+      el.classList.add('mc-wrong');
+      allBtns[o.correct].classList.add('mc-correct');
+      fb.className='try-fb er';fb.textContent='Not quite — the correct answer is highlighted above.';
+    }
+  }
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
+
+// Generic progressive-reveal diagram: renders a title plus a stack of boxes,
+// each appearing once the panel's stage (p) reaches that box's stage number.
+function drawGeneric(title, boxes, p){
+  var s=g(); s.setAttribute('viewBox','0 0 480 260'); var o=[];
+  o.push(T(240,22,title,'#C0272D',15,'middle',true));
+  var y=42;
+  boxes.forEach(function(b){
+    if(p>=b.stage){
+      var h=b.h||44;
+      o.push(R(20,y,440,h,b.bg||'#fff5f0',b.stroke||'#C0272D',1.5));
+      if(b.text2){
+        o.push(T(240,y+h*0.42+5,b.text,b.color||'#241A17',b.size||13,'middle',b.bold!==false));
+        o.push(T(240,y+h*0.78+3,b.text2,b.color2||'#888',b.size2||11,'middle',false));
+      }else{
+        o.push(T(240,y+h/2+5,b.text,b.color||'#241A17',b.size||14,'middle',b.bold!==false));
+      }
+      y+=h+8;
+    }
+  });
+  s.innerHTML=o.join('');
+}
+
+var Q=[
+ {ey:'Checkpoint 1 of 10',ti:'What is a logarithm?',su:'The inverse of an exponential',panels:[
+   {dtitle:'logₐ(x) = y  means  aʸ = x',boxes:[{"stage": 1, "text": "log₂(8) = 3, because 2³ = 8", "bg": "#fff5f0"}],p:1,html:'<p>A logarithm answers: "what power do I raise the base to, to get this number?" This is completely new AS-level content — no GCSE equivalent.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "log₅(25) = ?", "bg": "#fff5f0"}],p:1,html:'<p>Think in terms of powers.</p>'+tryItMC(function(){return {question:'What is log\u2085(25)?',options:['2','5','25','10'],correct:0,working:'5\u00b2=25, so log\u2085(25)=2.'};})}
+  ]},
+ {ey:'Checkpoint 2 of 10',ti:'The laws of logarithms',su:'Product, quotient, and power laws',panels:[
+   {dtitle:'Three key laws',boxes:[{"stage": 1, "text": "log(ab) = log a + log b", "bg": "#fff5f0"}, {"stage": 2, "text": "log(a/b) = log a − log b", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "log(aⁿ) = n log a", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>These mirror the laws of indices — multiplication becomes addition, division becomes subtraction, powers become multiplication.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "Simplify log(x³) using the laws", "bg": "#fff5f0"}],p:1,html:'<p>Apply the power law.</p>'+tryItMC(function(){return {question:'Using log laws, log(x\u00b3) simplifies to:',options:['3 log x','log(3x)','x log 3','(log x)\u00b3'],correct:0,working:'Power law: log(x\u207f)=n log x, so log(x\u00b3)=3 log x.'};})}
+  ]},
+ {ey:'Checkpoint 3 of 10',ti:'Solving simple log equations',su:'Converting between log and index form',panels:[
+   {dtitle:'Rewrite as an exponential to solve',boxes:[{"stage": 1, "text": "log₃(x) = 4", "bg": "#fff5f0"}, {"stage": 2, "text": "x = 3⁴ = 81", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Convert the log equation into index form to isolate x directly.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "log₂(x) = 5", "bg": "#fff5f0"}],p:1,html:'<p>Convert to index form.</p>'+tryItMC(function(){return {question:'Solve log\u2082(x)=5.',options:['x=32','x=10','x=25','x=7'],correct:0,working:'x=2\u2075=32.'};})}
+  ]},
+ {ey:'Checkpoint 4 of 10',ti:'Solving equations using log laws',su:'Combining several logs into one',panels:[
+   {dtitle:'Combine logs first, then convert',boxes:[{"stage": 1, "text": "log₂(x) + log₂(x−2) = 3", "bg": "#fff5f0"}, {"stage": 2, "text": "log₂[x(x−2)] = 3 → x(x−2) = 8", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "x²−2x−8=0 → (x−4)(x+2)=0", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>x=−2 must be REJECTED — you can’t take log of a negative number. Always check solutions against the original domain.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "Which solution is valid?", "bg": "#fff5f0"}],p:1,html:'<p>Check against the domain restriction.</p>'+tryItMC(function(){return {question:'For log\u2082(x)+log\u2082(x\u22122)=3, solutions are x=4 or x=\u22122. Which is valid?',options:['x=4 only','x=\u22122 only','Both','Neither'],correct:0,working:'x=\u22122 makes log\u2082(x) undefined (log of a negative number), so only x=4 is valid.'};})}
+  ]},
+ {ey:'Checkpoint 5 of 10',ti:'Solving exponential equations',su:'Using logs to bring down the power',panels:[
+   {dtitle:'Take logs of both sides',boxes:[{"stage": 1, "text": "3ˣ = 20", "bg": "#fff5f0"}, {"stage": 2, "text": "x log3 = log20 → x = log20/log3", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Taking logs of both sides lets you use the power law to bring the unknown exponent down where you can solve for it.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "Solve 5ˣ=12", "bg": "#fff5f0"}],p:1,html:'<p>Take logs of both sides.</p>'+tryItMC(function(){return {question:'Which expression correctly solves 5\u02e3=12?',options:['x = log12/log5','x = log5/log12','x = 12/5','x = log(12\u22125)'],correct:0,working:'Taking logs: x log5=log12, so x=log12/log5.'};})}
+  ]},
+ {ey:'Checkpoint 6 of 10',ti:'The number e and natural logs',su:'ln(x) = logₑ(x)',panels:[
+   {dtitle:'e ≈ 2.71828...',boxes:[{"stage": 1, "text": "ln(x) means log base e", "bg": "#fff5f0"}, {"stage": 2, "text": "ln(eˣ) = x  and  e^(ln x) = x", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>e is a special irrational constant that appears naturally in calculus — ln and e^x are inverse functions of each other.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "Simplify ln(e⁵)", "bg": "#fff5f0"}],p:1,html:'<p>Use the inverse relationship.</p>'+tryItMC(function(){return {question:'What is ln(e\u2075)?',options:['5','e\u2075','1','5e'],correct:0,working:'ln and e are inverses, so ln(e\u2075)=5.'};})}
+  ]},
+ {ey:'Checkpoint 7 of 10',ti:'Exponential growth and decay',su:'y = Ae^(kt)',panels:[
+   {dtitle:'Modelling with exponentials',boxes:[{"stage": 1, "text": "y = Ae^(kt)", "text2": "A = initial value, k>0 growth, k<0 decay", "bg": "#fff5f0"}],p:1,html:'<p>This models population growth, radioactive decay, compound interest — any quantity whose rate of change is proportional to its size.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "y=100e^(−0.1t)", "bg": "#fff5f0"}],p:1,html:'<p>Interpret the model.</p>'+tryItMC(function(){return {question:'For y=100e^(\u22120.1t), what does this model represent?',options:['Exponential decay from an initial value of 100','Exponential growth from 100','Linear decay','A value that never changes'],correct:0,working:'The negative exponent (k=\u22120.1) means decay; the initial value (t=0) is 100.'};})}
+  ]},
+ {ey:'Checkpoint 8 of 10',ti:'Linearising exponential data',su:'Using logs to find unknown constants',panels:[
+   {dtitle:'y = Abˣ  →  log y = log A + x log b',boxes:[{"stage": 1, "text": "Taking logs turns an exponential relationship into a STRAIGHT LINE", "bg": "#fff5f0"}, {"stage": 2, "text": "Plot log y against x — gradient = log b, intercept = log A", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>This technique lets you find unknown constants A and b from experimental data by plotting a straight-line graph.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "log y = 2 + 3x (straight line form)", "bg": "#fff5f0"}],p:1,html:'<p>Identify A and b.</p>'+tryItMC(function(){return {question:'If log\u2081\u2080y=2+3x models y=Ab\u02e3, what is A?',options:['100','2','3','1000'],correct:0,working:'Intercept = log A = 2, so A=10\u00b2=100.'};})}
+  ]},
+ {ey:'Checkpoint 9 of 10',ti:'Change of base',su:'Converting between log bases',panels:[
+   {dtitle:'logₐ(x) = log(x)/log(a)',boxes:[{"stage": 1, "text": "Use any convenient base (usually 10 or e) on a calculator", "bg": "#fff5f0"}],p:1,html:'<p>Most calculators only have log (base 10) and ln (base e) buttons — the change of base formula lets you evaluate any base.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "log₇(50) using change of base", "bg": "#fff5f0"}],p:1,html:'<p>Apply the change of base formula.</p>'+tryItMC(function(){return {question:'Which expression equals log\u2087(50)?',options:['ln(50)/ln(7)','ln(7)/ln(50)','ln(50)\u00d7ln(7)','ln(50\u22127)'],correct:0,working:'Change of base: log\u2090(x)=ln(x)/ln(a), so log\u2087(50)=ln(50)/ln(7).'};})}
+  ]},
+ {ey:'Checkpoint 10 of 10',ti:'Bringing it together',su:'Consolidating Logs & Exponentials',panels:[
+   {dtitle:'The Logs & Exponentials toolkit',boxes:[{"stage": 1, "text": "Log laws, solving log and exponential equations", "bg": "#fff5f0"}, {"stage": 2, "text": "e, ln(x), growth/decay models", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Linearising data, change of base", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>This topic has no GCSE equivalent — it’s genuinely new mathematics, and forms the basis of natural-log differentiation/integration later in A2.</p>'},
+   {dtitle:'Ready for AS-P2-03',boxes:[{"stage": 1, "text": "Next: Trigonometry (Paper 2)", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:1,html:'<p>Nice work — Logs & Exponentials is complete. Next up: Paper 2 Trigonometry.</p>'}
+  ]}
+];
+
+var qi=0,pi=0;
+var PROGRESS_KEY='as_maths_progress_AS-P2-02';
+function saveProgress(){
+  try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify({qi:qi,pi:pi})); }catch(e){}
+}
+function render(){
+  var qq=Q[qi],pp=qq.panels[pi];
+  document.getElementById('ey').textContent=qq.ey;
+  document.getElementById('ti').textContent=qq.ti;
+  document.getElementById('su').textContent=qq.su;
+  drawGeneric(pp.dtitle, pp.boxes, pp.p);
+  var pn=document.getElementById('pn');
+  pn.innerHTML=pp.html;
+  pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
+  document.getElementById('pb').disabled=(qi===0&&pi===0);
+  document.getElementById('nb').textContent=(pi===qq.panels.length-1&&qi===Q.length-1)?'Done':'Next \u2192';
+  var dt=document.getElementById('dt');
+  dt.innerHTML=qq.panels.map(function(_,i){return '<div class="dot '+(i<pi?'dn':i===pi?'on':'')+'"></div>';}).join('');
+  var sb=document.getElementById('sb');
+  sb.innerHTML='<div class="sb-lbl">Checkpoints</div>'+Q.map(function(q,i){
+    return '<button class="qb'+(i===qi?' on':'')+'" data-qi="'+i+'"><span class="qn">'+q.ey+'</span>'+q.ti+'</button>';
+  }).join('');
+  saveProgress();
+}
+document.getElementById('nb').addEventListener('click',function(){
+  var qq=Q[qi];
+  if(pi<qq.panels.length-1){pi++;}
+  else if(qi<Q.length-1){qi++;pi=0;}
+  render();
+});
+document.getElementById('pb').addEventListener('click',function(){
+  if(pi>0){pi--;}
+  else if(qi>0){qi--;pi=Q[qi].panels.length-1;}
+  render();
+});
+document.getElementById('sb').addEventListener('click',function(e){
+  var b=e.target.closest('.qb');if(!b)return;
+  qi=parseInt(b.getAttribute('data-qi'),10);pi=0;render();
+});
+
+(function initResume(){
+  var saved=null;
+  try{ saved=JSON.parse(localStorage.getItem(PROGRESS_KEY)||'null'); }catch(e){}
+  if(saved && (saved.qi>0 || saved.pi>0) && Q[saved.qi]){
+    var banner=document.getElementById('resume-banner');
+    var cpName=Q[saved.qi].ti;
+    banner.style.display='block';
+    banner.className='resume-banner';
+    banner.innerHTML='<div class="txt">📍 You were partway through <b>'+cpName+'</b> last time.</div>'
+      +'<div class="btns">'
+      +'<button id="resume-restart">Start from beginning</button>'
+      +'<button id="resume-continue" class="primary">Continue where I left off</button>'
+      +'</div>';
+    document.getElementById('resume-continue').addEventListener('click',function(){
+      qi=saved.qi; pi=saved.pi; banner.style.display='none'; render();
+    });
+    document.getElementById('resume-restart').addEventListener('click',function(){
+      qi=0; pi=0; banner.style.display='none'; render();
+    });
+  }
+})();
+
+render();
+</script>
+</body>
+</html>

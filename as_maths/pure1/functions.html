@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) { window.location.href = '../../login.html'; }
+  else {
+    const { data: prof } = await _lc.from('profiles').select('full_name').eq('id', session.user.id).maybeSingle();
+    window.__studentFirstName = prof && prof.full_name ? prof.full_name.split(' ')[0] : 'there';
+    document.addEventListener('DOMContentLoaded', function() {
+      var el = document.getElementById('greet');
+      if (el) el.textContent = 'Hi ' + window.__studentFirstName + ' — let\'s work through this one together.';
+      var wname = document.getElementById('welcome-name');
+      if (wname) wname.textContent = 'Well done, ' + window.__studentFirstName + '!';
+      var seenKey = 'as_maths_welcome_seen_v1';
+      if (!localStorage.getItem(seenKey)) {
+        var overlay = document.getElementById('welcome-overlay');
+        if (overlay) overlay.style.display = 'flex';
+      }
+      var goBtn = document.getElementById('welcome-go-btn');
+      if (goBtn) goBtn.addEventListener('click', function() {
+        localStorage.setItem(seenKey, '1');
+        document.getElementById('welcome-overlay').style.display = 'none';
+      });
+    });
+  }
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Functions · AS Level Pure 1</title>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF9F2;--ink:#241A17;--line:#E8D9A8;--gold:#D4AF37;--gold-dark:#9C7A1E;--gold-light:#F5E7B8;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gold-dark) 100%);color:#fff;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.25);}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.as-badge{background:var(--gold);color:var(--dark);font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;letter-spacing:.06em;box-shadow:0 0 10px rgba(212,175,55,.6);}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--gold);color:var(--gold-dark);}
+.qb.on{background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;border-color:var(--gold);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.greet{font-size:14px;color:var(--gold-dark);font-weight:600;margin-bottom:10px;}
+.resume-banner{background:linear-gradient(120deg,var(--gold-light),#fff);border:1.5px solid var(--gold);border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(212,175,55,.25);}
+.resume-banner .txt{font-size:13.5px;color:var(--dark);font-weight:600;}
+.resume-banner .btns{display:flex;gap:8px;}
+.resume-banner button{font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:5px;border:1.5px solid var(--gold-dark);background:#fff;color:var(--gold-dark);cursor:pointer;font-family:inherit;}
+.resume-banner button.primary{background:var(--gold-dark);color:#fff;}
+.stage{background:#fff;border:1.5px solid var(--line);border-radius:6px;overflow:hidden;width:100%;max-width:760px;box-shadow:0 2px 14px rgba(212,175,55,.12);}
+.cvs{background:linear-gradient(#fff,#fdf7e8);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1.5px solid var(--line);min-height:160px;}
+.pnl p{font-size:16px;line-height:1.6;margin:0 0 10px;}
+.pnl .as-flag{background:var(--gold-light);border-left:4px solid var(--gold-dark);padding:8px 12px;font-size:14px;color:#7A5A18;margin:10px 0;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1.5px solid var(--gold-dark);background:#fff;color:var(--gold-dark);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;border-color:transparent;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{filter:brightness(1.08);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fffdf5;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:14px;box-shadow:0 0 0 3px rgba(212,175,55,.08);}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dark);font-weight:700;margin-bottom:10px;}
+.try-q{font-size:15px;line-height:1.55;margin-bottom:10px;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;}
+.mc-opt{text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:4px;padding:10px 14px;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
+.mc-opt:hover:not(:disabled){border-color:var(--gold-dark);}
+.mc-opt:disabled{cursor:default;}
+.mc-correct{background:#e8f8ee;border-color:#1a7a3a!important;}
+.mc-wrong{background:#fde8e8;border-color:#a01820!important;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.try-fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.try-fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk{margin-top:10px;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+.try-new{margin-top:10px;font-size:12px;font-weight:600;padding:6px 12px;border-radius:3px;border:none;background:#888;color:#fff;cursor:pointer;font-family:inherit;}
+.welcome-overlay{position:fixed;inset:0;background:rgba(36,26,23,.72);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.welcome-card{background:#fff;border-radius:12px;max-width:480px;width:100%;padding:0;box-shadow:0 20px 60px rgba(0,0,0,.4);overflow:hidden;}
+.welcome-hero{background:linear-gradient(120deg,var(--dark),var(--red) 50%,var(--gold-dark));padding:28px 26px 22px;color:#fff;text-align:center;}
+.welcome-hero .trophy{font-size:38px;margin-bottom:6px;}
+.welcome-hero h2{font-family:Georgia,serif;font-size:21px;margin:0 0 4px;}
+.welcome-hero .sub{font-size:12.5px;opacity:.9;letter-spacing:.03em;}
+.welcome-body{padding:22px 26px 26px;}
+.welcome-body p{font-size:14.5px;line-height:1.65;color:#3a2a24;margin:0 0 12px;}
+.welcome-body .note{background:var(--gold-light);border-left:4px solid var(--gold-dark);padding:9px 12px;font-size:13.5px;color:#6b4f0f;margin:14px 0;border-radius:0 4px 4px 0;}
+.welcome-go{width:100%;margin-top:6px;background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;border:none;padding:13px;border-radius:6px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+.welcome-go:hover{filter:brightness(1.08);}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../../dashboard-student.html" class="back">&larr; Dashboard</a>
+  <div class="ht">📐 Functions <span class="as-badge">AS LEVEL</span></div>
+  <div style="width:80px"></div>
+</header>
+<div id="welcome-overlay" class="welcome-overlay" style="display:none">
+  <div class="welcome-card">
+    <div class="welcome-hero">
+      <div class="trophy">🏆</div>
+      <h2 id="welcome-name">Well done!</h2>
+      <div class="sub">AS LEVEL MATHEMATICS · Pure 1</div>
+    </div>
+    <div class="welcome-body">
+      <p id="welcome-msg-1">You've landed here because you achieved an A* grade in Maths in Year 10. Your teacher has recommended you sit AS Level in the summer of Year 11.</p>
+      <p>Each topic should take at least a couple of hours — go slowly, work through every checkpoint, and take notes as you go.</p>
+      <div class="note">💡 Ask your Maths teacher if you're not sure about anything. This is meant to stretch you, not stress you.</div>
+      <button class="welcome-go" id="welcome-go-btn">Let's begin →</button>
+    </div>
+  </div>
+</div>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Checkpoints</div></div>
+  <div class="main">
+    <div id="greet" class="greet">Hi there — let's work through this one together.</div>
+    <div id="resume-banner" style="display:none"></div>
+    <div style="width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;">
+      <div id="ey" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;"></div>
+      <h1 id="ti" style="font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;"></h1>
+      <div id="su" style="font-size:14px;color:#6b5750;"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 280"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+var ST={};
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn};return buildTryMC(id,o);}
+function buildTryMC(id,o){
+  var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
+  return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Check your understanding</div><div class="try-q">'+o.question+'</div>'
+    +'<div class="mc-opts">'+opts+'</div>'
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
+    +'<button class="try-new" data-tryid="'+id+'">New question</button></div>';
+}
+document.addEventListener('click',function(e){
+  var el=e.target;
+  if(el.classList.contains('try-new')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
+    var o=shuffleMC(entry.genFn());entry.o=o;
+    var wrap=el.closest('.try');if(!wrap)return;
+    var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
+    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+  }
+  if(el.classList.contains('mc-opt')){
+    if(el.disabled)return;
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var idx=parseInt(el.getAttribute('data-idx'),10);
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;
+    var allBtns=document.querySelectorAll('.mc-opt[data-tryid="'+id+'"]');
+    allBtns.forEach(function(b){b.disabled=true;});
+    if(idx===o.correct){
+      el.classList.add('mc-correct');
+      fb.className='try-fb ok';fb.innerHTML='&#10003; Correct! &nbsp;'+o.working;
+    }else{
+      el.classList.add('mc-wrong');
+      allBtns[o.correct].classList.add('mc-correct');
+      fb.className='try-fb er';fb.textContent='Not quite — the correct answer is highlighted above.';
+    }
+  }
+});
+function g(){return document.getElementById('dg');}
+function T(x,y,txt,c,sz,a,bold){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+txt+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
+function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
+
+// Generic progressive-reveal diagram: renders a title plus a stack of boxes,
+// each appearing once the panel's stage (p) reaches that box's stage number.
+function drawGeneric(title, boxes, p){
+  var s=g(); s.setAttribute('viewBox','0 0 480 260'); var o=[];
+  o.push(T(240,22,title,'#C0272D',15,'middle',true));
+  var y=42;
+  boxes.forEach(function(b){
+    if(p>=b.stage){
+      var h=b.h||44;
+      o.push(R(20,y,440,h,b.bg||'#fff5f0',b.stroke||'#C0272D',1.5));
+      if(b.text2){
+        o.push(T(240,y+h*0.42+5,b.text,b.color||'#241A17',b.size||13,'middle',b.bold!==false));
+        o.push(T(240,y+h*0.78+3,b.text2,b.color2||'#888',b.size2||11,'middle',false));
+      }else{
+        o.push(T(240,y+h/2+5,b.text,b.color||'#241A17',b.size||14,'middle',b.bold!==false));
+      }
+      y+=h+8;
+    }
+  });
+  s.innerHTML=o.join('');
+}
+
+var Q=[
+ {ey:'Checkpoint 1 of 10',ti:'Domain and range',su:'What functions are allowed to take in and give out',panels:[
+   {dtitle:'What is a function?',boxes:[{"stage": 1, "text": "A function f(x) takes an input x and gives exactly one output", "bg": "#fff5f0"}],p:1,html:'<p>A <b>function</b> assigns exactly one output to every input. The <b>domain</b> is the set of allowed inputs; the <b>range</b> is the set of possible outputs.</p>'},
+   {dtitle:'Example: f(x) = x², domain x ≥ 0',boxes:[{"stage": 1, "text": "f(x) = x²", "bg": "#fff5f0"}, {"stage": 2, "text": "Domain: x ≥ 0", "text2": "restricted so the function has an inverse later", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Range: f(x) ≥ 0", "text2": "squares of non-negative numbers are non-negative", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>Restricting the domain to x ≥ 0 is a very common AS-level device — it’s what allows x² to have an inverse (√x), since the full x² graph is not one-to-one.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "f(x) = 1/(x−3)", "bg": "#fff5f0"}],p:1,html:'<p>Some domains are restricted by the function itself — you can never divide by zero.</p>'+tryItMC(function(){return {question:'For f(x) = 1/(x\u22123), which value must be excluded from the domain?',options:['x = 3','x = 0','x = -3','x = 1'],correct:0,working:'Division by zero is undefined, and the denominator is zero when x = 3.'};})}
+  ]},
+ {ey:'Checkpoint 2 of 10',ti:'Composite functions',su:'Applying one function then another',panels:[
+   {dtitle:'fg(x) means f(g(x))',boxes:[{"stage": 1, "text": "fg(x) = f(g(x))", "text2": "apply g first, then apply f to the result", "bg": "#fff5f0"}],p:1,html:'<p>The notation fg(x) (or f∘g(x)) means: first apply g to x, then apply f to that result. Order matters — fg(x) is usually different from gf(x).</p>'},
+   {dtitle:'Worked example',boxes:[{"stage": 1, "text": "f(x) = 2x+1, g(x) = x²", "bg": "#fff5f0"}, {"stage": 2, "text": "fg(x) = f(x²) = 2x²+1", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "gf(x) = g(2x+1) = (2x+1)²", "bg": "#fde8e8", "stroke": "#a01820"}],p:3,html:'<p>Notice fg(x) ≠ gf(x) here — confirming composite functions are not commutative in general.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "f(x)=x+3, g(x)=2x", "bg": "#fff5f0"}],p:1,html:'<p>Find gf(x) by substituting f(x) into g.</p>'+tryItMC(function(){return {question:'If f(x)=x+3 and g(x)=2x, what is gf(x)?',options:['2x+6','2x+3','2x\u00b2+6','x+6'],correct:0,working:'gf(x)=g(f(x))=g(x+3)=2(x+3)=2x+6.'};})}
+  ]},
+ {ey:'Checkpoint 3 of 10',ti:'Inverse functions',su:'Undoing a function',panels:[
+   {dtitle:'f⁻¹(x) undoes f(x)',boxes:[{"stage": 1, "text": "f⁻¹(f(x)) = x", "bg": "#fff5f0"}, {"stage": 2, "text": "Only one-to-one functions have an inverse", "bg": "#fde8e8", "stroke": "#a01820"}],p:2,html:'<p>The inverse function reverses what f does. A function only has an inverse over a domain where it’s <b>one-to-one</b> (passes the horizontal line test).</p>'},
+   {dtitle:'Finding f⁻¹(x): swap and rearrange',boxes:[{"stage": 1, "text": "f(x) = 3x − 2", "bg": "#fff5f0"}, {"stage": 2, "text": "y = 3x − 2  →  x = 3y − 2", "text2": "swap x and y", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "f⁻¹(x) = (x+2)/3", "text2": "rearrange to make y the subject", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>Method: write y = f(x), swap x and y, then rearrange to make y the subject again.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "f(x) = 4x + 5", "bg": "#fff5f0"}],p:1,html:'<p>Apply the swap-and-rearrange method.</p>'+tryItMC(function(){return {question:'What is f\u207b\u00b9(x) for f(x) = 4x + 5?',options:['(x\u22125)/4','(x+5)/4','4x\u22125','(x\u22124)/5'],correct:0,working:'y=4x+5 \u2192 x=4y+5 \u2192 y=(x\u22125)/4.'};})}
+  ]},
+ {ey:'Checkpoint 4 of 10',ti:'Graphing inverses',su:'The reflection relationship',panels:[
+   {dtitle:'y = f⁻¹(x) is a reflection of y = f(x)',boxes:[{"stage": 1, "text": "Reflect in the line y = x", "bg": "#fff5f0"}, {"stage": 2, "text": "Domain of f⁻¹ = Range of f", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Range of f⁻¹ = Domain of f", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>The graph of f⁻¹ is always the reflection of f in the line y = x. This also means domain and range swap between a function and its inverse.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "f has domain x≥1, range f(x)≥3", "bg": "#fff5f0"}],p:1,html:'<p>Apply the domain/range swap rule.</p>'+tryItMC(function(){return {question:'If f has domain x\u22651 and range f(x)\u22653, what is the domain of f\u207b\u00b9?',options:['x\u22653','x\u22651','x\u22650','all real x'],correct:0,working:'Domain of f\u207b\u00b9 = range of f = x\u22653.'};})}
+  ]},
+ {ey:'Checkpoint 5 of 10',ti:'Transformations: translations',su:'Shifting graphs horizontally and vertically',panels:[
+   {dtitle:'y = f(x) + a and y = f(x + a)',boxes:[{"stage": 1, "text": "y = f(x) + a", "text2": "vertical shift, up by a", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 2, "text": "y = f(x + a)", "text2": "horizontal shift, LEFT by a (counter-intuitive sign)", "bg": "#fde8e8", "stroke": "#a01820"}],p:2,html:'<p>Vertical shifts behave as expected. Horizontal shifts are the classic AS trap: y=f(x+a) shifts LEFT by a, not right — the sign flips versus intuition.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "y = f(x−5)", "bg": "#fff5f0"}],p:1,html:'<p>Apply the horizontal shift rule carefully.</p>'+tryItMC(function(){return {question:'The graph y=f(x\u22125) is obtained from y=f(x) by a shift of:',options:['5 units right','5 units left','5 units up','5 units down'],correct:0,working:'y=f(x\u2212a) shifts RIGHT by a (here a=5 gives a shift of 5 right \u2014 note this is the one case where the sign matches intuition, since x\u22125 = x+(\u22125)).'};})}
+  ]},
+ {ey:'Checkpoint 6 of 10',ti:'Transformations: stretches',su:'Scaling graphs',panels:[
+   {dtitle:'y = a·f(x) and y = f(ax)',boxes:[{"stage": 1, "text": "y = a·f(x)", "text2": "vertical stretch, scale factor a", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 2, "text": "y = f(ax)", "text2": "horizontal stretch, scale factor 1/a", "bg": "#fde8e8", "stroke": "#a01820"}],p:2,html:'<p>Vertical stretch by a multiplies y-values by a. Horizontal stretch y=f(ax) squashes the graph by factor 1/a — again the reciprocal is the AS-level subtlety.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "y = f(3x)", "bg": "#fff5f0"}],p:1,html:'<p>Apply the horizontal stretch rule.</p>'+tryItMC(function(){return {question:'y=f(3x) is obtained from y=f(x) by a horizontal stretch of scale factor:',options:['1/3','3','\u22123','9'],correct:0,working:'y=f(ax) has horizontal scale factor 1/a; here a=3 gives scale factor 1/3.'};})}
+  ]},
+ {ey:'Checkpoint 7 of 10',ti:'Combining transformations',su:'Order matters',panels:[
+   {dtitle:'Multiple transformations applied in sequence',boxes:[{"stage": 1, "text": "y = 2f(x−3) + 1", "bg": "#fff5f0"}, {"stage": 2, "text": "Step 1: shift right 3 (inside bracket first)", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Step 2: stretch vertically ×2, then up 1", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>When several transformations combine, apply transformations INSIDE the function argument first (working from the inside out), then outside ones.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "y = f(2x) + 5", "bg": "#fff5f0"}],p:1,html:'<p>Identify both transformations and their order.</p>'+tryItMC(function(){return {question:'y = f(2x) + 5 is: horizontal stretch factor \u00bd, then...?',options:['a vertical shift up 5','a vertical stretch by 5','a horizontal shift of 5','a reflection'],correct:0,working:'The +5 outside the function is a vertical shift up by 5, applied after the horizontal stretch.'};})}
+  ]},
+ {ey:'Checkpoint 8 of 10',ti:'Modulus function',su:'|x| and its graph',panels:[
+   {dtitle:'The modulus (absolute value) function',boxes:[{"stage": 1, "text": "|x| = x if x≥0, |x| = −x if x<0", "bg": "#fff5f0"}, {"stage": 2, "text": "y=|f(x)|: reflect any part below the x-axis upward", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>|x| strips the sign, always giving a non-negative result. Graphically, y=|f(x)| takes any part of y=f(x) below the x-axis and reflects it above.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "Solve |x−4| = 6", "bg": "#fff5f0"}],p:1,html:'<p>Modulus equations split into two cases.</p>'+tryItMC(function(){return {question:'What are the solutions to |x\u22124| = 6?',options:['x=10 or x=\u22122','x=10 only','x=\u22122 only','x=6 or x=\u22126'],correct:0,working:'x\u22124=6 gives x=10; x\u22124=\u22126 gives x=\u22122.'};})}
+  ]},
+ {ey:'Checkpoint 9 of 10',ti:'Piecewise functions',su:'Functions defined in parts',panels:[
+   {dtitle:'Different rules on different intervals',boxes:[{"stage": 1, "text": "f(x) = x² for x<2, f(x) = 3x−2 for x≥2", "bg": "#fff5f0"}, {"stage": 2, "text": "Check the rule matches your input’s interval before evaluating", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>A piecewise function uses different formulas on different parts of the domain. Always check which interval your x-value falls into first.</p>'},
+   {dtitle:'Check',boxes:[{"stage": 1, "text": "f(1)=? and f(3)=? for the function above", "bg": "#fff5f0"}],p:1,html:'<p>Match each input to the right piece.</p>'+tryItMC(function(){return {question:'For f(x)=x\u00b2 (x<2), f(x)=3x\u22122 (x\u22652), what is f(3)?',options:['7','9','6','11'],correct:0,working:'Since 3\u22652, use f(x)=3x\u22122: f(3)=3(3)\u22122=7.'};})}
+  ]},
+ {ey:'Checkpoint 10 of 10',ti:'Bringing it together',su:'Consolidating Functions',panels:[
+   {dtitle:'The Functions toolkit',boxes:[{"stage": 1, "text": "Domain/range, composite fg(x), inverse f⁻¹(x)", "bg": "#fff5f0"}, {"stage": 2, "text": "Translations, stretches, combined transformations", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Modulus |f(x)| and piecewise definitions", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>Functions underpins almost every later AS topic — transformations reappear constantly in trigonometry and calculus graphs.</p>'},
+   {dtitle:'Ready for AS-P1-03',boxes:[{"stage": 1, "text": "Next: Coordinate Geometry", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:1,html:'<p>Nice work — Functions is complete. Next up: Coordinate Geometry.</p>'}
+  ]}
+];
+
+var qi=0,pi=0;
+var PROGRESS_KEY='as_maths_progress_AS-P1-02';
+function saveProgress(){
+  try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify({qi:qi,pi:pi})); }catch(e){}
+}
+function render(){
+  var qq=Q[qi],pp=qq.panels[pi];
+  document.getElementById('ey').textContent=qq.ey;
+  document.getElementById('ti').textContent=qq.ti;
+  document.getElementById('su').textContent=qq.su;
+  drawGeneric(pp.dtitle, pp.boxes, pp.p);
+  var pn=document.getElementById('pn');
+  pn.innerHTML=pp.html;
+  pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
+  document.getElementById('pb').disabled=(qi===0&&pi===0);
+  document.getElementById('nb').textContent=(pi===qq.panels.length-1&&qi===Q.length-1)?'Done':'Next \u2192';
+  var dt=document.getElementById('dt');
+  dt.innerHTML=qq.panels.map(function(_,i){return '<div class="dot '+(i<pi?'dn':i===pi?'on':'')+'"></div>';}).join('');
+  var sb=document.getElementById('sb');
+  sb.innerHTML='<div class="sb-lbl">Checkpoints</div>'+Q.map(function(q,i){
+    return '<button class="qb'+(i===qi?' on':'')+'" data-qi="'+i+'"><span class="qn">'+q.ey+'</span>'+q.ti+'</button>';
+  }).join('');
+  saveProgress();
+}
+document.getElementById('nb').addEventListener('click',function(){
+  var qq=Q[qi];
+  if(pi<qq.panels.length-1){pi++;}
+  else if(qi<Q.length-1){qi++;pi=0;}
+  render();
+});
+document.getElementById('pb').addEventListener('click',function(){
+  if(pi>0){pi--;}
+  else if(qi>0){qi--;pi=Q[qi].panels.length-1;}
+  render();
+});
+document.getElementById('sb').addEventListener('click',function(e){
+  var b=e.target.closest('.qb');if(!b)return;
+  qi=parseInt(b.getAttribute('data-qi'),10);pi=0;render();
+});
+
+(function initResume(){
+  var saved=null;
+  try{ saved=JSON.parse(localStorage.getItem(PROGRESS_KEY)||'null'); }catch(e){}
+  if(saved && (saved.qi>0 || saved.pi>0) && Q[saved.qi]){
+    var banner=document.getElementById('resume-banner');
+    var cpName=Q[saved.qi].ti;
+    banner.style.display='block';
+    banner.className='resume-banner';
+    banner.innerHTML='<div class="txt">📍 You were partway through <b>'+cpName+'</b> last time.</div>'
+      +'<div class="btns">'
+      +'<button id="resume-restart">Start from beginning</button>'
+      +'<button id="resume-continue" class="primary">Continue where I left off</button>'
+      +'</div>';
+    document.getElementById('resume-continue').addEventListener('click',function(){
+      qi=saved.qi; pi=saved.pi; banner.style.display='none'; render();
+    });
+    document.getElementById('resume-restart').addEventListener('click',function(){
+      qi=0; pi=0; banner.style.display='none'; render();
+    });
+  }
+})();
+
+render();
+</script>
+</body>
+</html>
