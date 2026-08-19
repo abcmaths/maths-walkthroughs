@@ -186,8 +186,6 @@ document.addEventListener('click',function(e){
 function g(){return document.getElementById('dg');}
 function T(x,y,txt,c,sz,a,bold){
   c=c||'#241A17';sz=sz||12;a=a||'middle';
-  // Supports inline superscripts written as ^(...) or ^X (single char) —
-  // rendered as real SVG superscripts via baseline-shift, not literal carets.
   var parts=String(txt).split(/\^(\([^)]*\)|\S)/);
   var tspans='';
   for(var i=0;i<parts.length;i++){
@@ -204,72 +202,423 @@ function T(x,y,txt,c,sz,a,bold){
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
+function OC(cx,cy,r,stroke){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="#fff" stroke="'+(stroke||'#a01820')+'" stroke-width="2"/>';}
 
-// Generic progressive-reveal diagram: renders a title plus a stack of boxes,
-// each appearing once the panel's stage (p) reaches that box's stage number.
-function drawGeneric(title, boxes, p){
-  var s=g(); s.setAttribute('viewBox','0 0 480 260'); var o=[];
-  o.push(T(240,22,title,'#C0272D',15,'middle',true));
-  var y=42;
-  boxes.forEach(function(b){
-    if(p>=b.stage){
-      var h=b.h||44;
-      o.push(R(20,y,440,h,b.bg||'#fff5f0',b.stroke||'#C0272D',1.5));
-      if(b.text2){
-        o.push(T(240,y+h*0.42+5,b.text,b.color||'#241A17',b.size||13,'middle',b.bold!==false));
-        o.push(T(240,y+h*0.78+3,b.text2,b.color2||'#888',b.size2||11,'middle',false));
-      }else{
-        o.push(T(240,y+h/2+5,b.text,b.color||'#241A17',b.size||14,'middle',b.bold!==false));
-      }
-      y+=h+8;
-    }
-  });
-  s.innerHTML=o.join('');
+// Shared number-line drawer used by several checkpoints (domain/range restrictions).
+function numberLine(y,x0,x1){
+  var o=[];
+  o.push(L(50,y,430,y,'#888',1.5));
+  for(var i=x0;i<=x1;i++){
+    var px=50+(i-x0)*(380/(x1-x0));
+    o.push(L(px,y-4,px,y+4,'#888',1));
+    o.push(T(px,y+18,String(i),'#888',10));
+  }
+  return o;
 }
+function nlPx(v,x0,x1){ return 50+(v-x0)*(380/(x1-x0)); }
+
+// ── Checkpoint 1: Domain and range ──────────────────────────────────────
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,18,'Domain and range','#C0272D',14,'middle',true));
+  if(p>=1){o.push(T(240,40,'A function assigns exactly one output to every input.','#241A17',12,'middle',false));
+    o.push(T(240,58,'Domain = allowed inputs.   Range = possible outputs.','#1a5a8a',13,'middle',true));}
+  if(p>=2){
+    o.push.apply(o,numberLine(110,-3,7));
+    var x0=50+(0-(-3))*(380/10);
+    o.push('<line x1="'+x0+'" y1="110" x2="410" y2="110" stroke="#1a7a3a" stroke-width="4"/>');
+    o.push(C(x0,110,5,'#1a7a3a'));
+    o.push(T(240,145,'f(x) = x\u00b2, domain restricted to x \u2265 0','#1a7a3a',11,'middle',true));
+    o.push(T(240,160,'(so it has an inverse later \u2014 the full x\u00b2 graph doesn\u2019t)','#888',10,'middle',false));
+  }
+  if(p>=3){
+    o.push.apply(o,numberLine(210,-2,8));
+    var xEx=nlPx(3,-2,8);
+    o.push(L(50,210,xEx-5,210,'#a01820',4));
+    o.push(L(xEx+5,210,430,210,'#a01820',4));
+    o.push(OC(xEx,210,5,'#a01820'));
+    o.push(T(xEx,196,'x=3 excluded','#a01820',11,'middle',true));
+    o.push(T(240,246,'f(x) = 1/(x\u22123): the denominator can\u2019t be zero','#a01820',11,'middle',false));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 2: Composite functions ───────────────────────────────────
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,18,'fg(x) means f(g(x))','#C0272D',14,'middle',true));
+  if(p>=1){
+    o.push(T(70,50,'x','#241A17',15,'middle',true));
+    o.push(R(100,32,80,36,'#e8f4ff','#1a5a8a',1.5));o.push(T(140,55,'g','#1a5a8a',16,'middle',true));
+    o.push(L(80,50,100,50,'#888',1.5));o.push(T(90,44,'\u2192','#888',13));
+    o.push(T(215,50,'g(x)','#241A17',13,'middle',true));
+    o.push(L(180,50,200,50,'#888',1.5));o.push(T(190,44,'\u2192','#888',13));
+    o.push(R(250,32,80,36,'#fde8e8','#a01820',1.5));o.push(T(290,55,'f','#a01820',16,'middle',true));
+    o.push(L(230,50,250,50,'#888',1.5));o.push(T(240,44,'\u2192','#888',13));
+    o.push(T(370,50,'f(g(x))','#241A17',13,'middle',true));
+    o.push(L(330,50,350,50,'#888',1.5));o.push(T(340,44,'\u2192','#888',13));
+    o.push(T(240,84,'Apply g first, then apply f to the result. Order matters:','#241A17',12,'middle',false));
+    o.push(T(240,100,'fg(x) is usually different from gf(x).','#1a5a8a',12,'middle',true));
+  }
+  if(p>=2){
+    o.push(R(20,116,440,42,'#fff5f0','#C0272D',1.5));
+    o.push(T(240,140,'f(x) = 2x+1,  g(x) = x\u00b2','#241A17',13,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(20,164,440,40,'#e8f4ff','#1a5a8a',1.5));
+    o.push(T(240,188,'fg(x) = f(x\u00b2) = 2x\u00b2+1','#1a5a8a',13,'middle',true));
+  }
+  if(p>=4){
+    o.push(R(20,210,440,40,'#fde8e8','#a01820',1.5));
+    o.push(T(240,234,'gf(x) = g(2x+1) = (2x+1)\u00b2  \u2014  different!','#a01820',13,'middle',true));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 3: Inverse functions — the horizontal line test, built up ──
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,16,'Which functions have an inverse?','#C0272D',13,'middle',true));
+  if(p>=1){
+    // many-to-one: y = x^2, drawn small, LEFT half of canvas
+    o.push(T(120,32,'y = x\u00b2  (many-to-one)','#a01820',11,'middle',true));
+    o.push(L(40,140,200,140,'#888',1));o.push(L(120,60,120,190,'#888',1));
+    var pts=[];for(var xv=-3;xv<=3;xv+=0.2){var yv=xv*xv;var px=120+xv*22;var py=140-yv*13;if(py>60)pts.push(px+','+py);}
+    o.push('<polyline points="'+pts.join(' ')+'" fill="none" stroke="#a01820" stroke-width="2.5"/>');
+  }
+  if(p>=2){
+    // the horizontal test line crossing it TWICE
+    o.push(L(45,105,195,105,'#241A17',2,'4,3'));
+    o.push(C(120-Math.sqrt(35)*22/6.08,105,4,'#241A17'));
+    o.push(C(120+Math.sqrt(35)*22/6.08,105,4,'#241A17'));
+    o.push(T(120,205,'Crosses TWICE \u2192 many-to-one \u2192 NO inverse','#a01820',10,'middle',true));
+    // one-to-one: y = x^3, RIGHT half
+    o.push(T(360,32,'y = x\u00b3  (one-to-one)','#1a7a3a',11,'middle',true));
+    o.push(L(280,140,440,140,'#888',1));o.push(L(360,60,360,190,'#888',1));
+    var pts2=[];for(var xv2=-1.7;xv2<=1.7;xv2+=0.1){var yv2=xv2*xv2*xv2;var px2=360+xv2*45;var py2=140-yv2*35;if(py2>60&&py2<190)pts2.push(px2+','+py2);}
+    o.push('<polyline points="'+pts2.join(' ')+'" fill="none" stroke="#1a7a3a" stroke-width="2.5"/>');
+    o.push(L(285,105,435,105,'#241A17',2,'4,3'));
+    o.push(C(360+Math.cbrt(35/35)*45*0.44,105,4,'#241A17'));
+    o.push(T(360,205,'Crosses ONCE \u2192 one-to-one \u2192 HAS an inverse','#1a7a3a',10,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(30,216,420,36,'#fff8e1','#C8922A',1.5));
+    o.push(T(240,232,'The Horizontal Line Test: if any horizontal line crosses the graph','#7A5A18',11,'middle',true));
+    o.push(T(240,248,'more than once, there\u2019s no inverse (unless you restrict the domain).','#7A5A18',11,'middle',false));
+  }
+  if(p>=4){
+    o.push(R(20,86,440,120,'#fff','none',0)); // spacer, no-op box (kept for layout consistency)
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 3, panel 5: the swap-and-rearrange method (separate function
+// so the horizontal-line-test diagram above isn't disturbed when advancing) ──
+function dQ3b(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'Finding f\u207b\u00b9(x): swap and rearrange','#C0272D',14,'middle',true));
+  if(p>=1){o.push(R(30,38,420,40,'#fff5f0','#C0272D',1.5));o.push(T(240,62,'f(x) = 3x \u2212 2','#241A17',14,'middle',true));}
+  if(p>=2){o.push(R(30,88,420,44,'#e8f4ff','#1a5a8a',1.5));o.push(T(240,108,'y = 3x \u2212 2   \u2192   x = 3y \u2212 2','#1a5a8a',13,'middle',true));o.push(T(240,126,'swap x and y','#888',10,'middle',false));}
+  if(p>=3){o.push(R(30,142,420,44,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,164,'f\u207b\u00b9(x) = (x+2)/3','#1a7a3a',15,'middle',true));o.push(T(240,180,'rearrange to make y the subject','#888',10,'middle',false));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 4: y=f⁻¹(x) is the reflection of y=f(x) in y=x ────────────
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,16,'The reflection relationship','#C0272D',13,'middle',true));
+  if(p>=1){o.push(T(240,32,'The graph of f\u207b\u00b9 is the reflection of f in the line y = x.','#241A17',12,'middle',false));}
+  if(p>=2){
+    o.push(L(60,220,420,50,'#888',1));o.push(L(60,220,420,220,'#888',1));o.push(L(60,220,60,50,'#888',1));
+    o.push(L(60,220,420,50,'#C8922A',1.5,'3,3'));o.push(T(400,55,'y=x','#C8922A',10));
+    // f(x) = 2x (line through origin, slope 2), and its inverse x/2
+    o.push(L(80,210,200,80,'#1a5a8a',2.5));o.push(T(210,75,'y=f(x)','#1a5a8a',11,'middle',true));
+    o.push(L(80,192,340,120,'#a01820',2.5));o.push(T(350,116,'y=f\u207b\u00b9(x)','#a01820',11,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(30,226,420,28,'#fff8e1','#C8922A',1.2));
+    o.push(T(240,244,'Domain of f\u207b\u00b9 = Range of f.   Range of f\u207b\u00b9 = Domain of f.','#7A5A18',11,'middle',true));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 5: Translations ──────────────────────────────────────────
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,16,'Vertical vs horizontal shifts','#C0272D',13,'middle',true));
+  function base(offx){var pts=[];for(var xv=-2;xv<=2;xv+=0.2){var yv=xv*xv;pts.push((offx+xv*30)+','+(0-yv*12));}return pts;}
+  if(p>=1){
+    o.push(L(30,140,150,140,'#ccc',1));
+    var p1=base(90).map(function(pt){var parts=pt.split(',');return parts[0]+','+(140+parseFloat(parts[1]));});
+    o.push('<polyline points="'+p1.join(' ')+'" fill="none" stroke="#888" stroke-width="2"/>');
+    var p2=base(90).map(function(pt){var parts=pt.split(',');return parts[0]+','+(100+parseFloat(parts[1]));});
+    o.push('<polyline points="'+p2.join(' ')+'" fill="none" stroke="#1a5a8a" stroke-width="2.5"/>');
+    o.push(T(90,60,'y=f(x)+3','#1a5a8a',11,'middle',true));
+    o.push(T(90,158,'y=f(x)','#888',10,'middle',false));
+    o.push(T(90,182,'UP by 3 \u2014 matches intuition','#1a5a8a',10,'middle',false));
+  }
+  if(p>=2){
+    o.push(L(330,140,450,140,'#ccc',1));
+    var p3=base(390).map(function(pt){var parts=pt.split(',');return parts[0]+','+(140+parseFloat(parts[1]));});
+    o.push('<polyline points="'+p3.join(' ')+'" fill="none" stroke="#888" stroke-width="2"/>');
+    var p4=base(360).map(function(pt){var parts=pt.split(',');return parts[0]+','+(140+parseFloat(parts[1]));});
+    o.push('<polyline points="'+p4.join(' ')+'" fill="none" stroke="#a01820" stroke-width="2.5"/>');
+    o.push(T(360,60,'y=f(x+3)','#a01820',11,'middle',true));
+    o.push(T(390,158,'y=f(x)','#888',10,'middle',false));
+    o.push(T(375,182,'LEFT by 3 \u2014 sign flips!','#a01820',10,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(30,196,420,50,'#fff8e1','#C8922A',1.5));
+    o.push(T(240,214,'y = f(x) + a  \u2192  vertical shift, UP by a','#7A5A18',12,'middle',true));
+    o.push(T(240,234,'y = f(x + a)  \u2192  horizontal shift, LEFT by a (the AS trap)','#7A5A18',12,'middle',true));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 6: Stretches ──────────────────────────────────────────────
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,16,'Vertical vs horizontal stretches','#C0272D',13,'middle',true));
+  function base2(offx,offy,xs,ys){var pts=[];for(var xv=-2;xv<=2;xv+=0.2){var yv=xv*xv;pts.push((offx+xv*30*xs)+','+(offy-yv*12*ys));}return pts;}
+  if(p>=1){
+    o.push(L(30,190,150,190,'#ccc',1));
+    o.push('<polyline points="'+base2(90,190,1,1).join(' ')+'" fill="none" stroke="#888" stroke-width="2"/>');
+    o.push('<polyline points="'+base2(90,190,1,2).join(' ')+'" fill="none" stroke="#1a5a8a" stroke-width="2.5"/>');
+    o.push(T(90,60,'y=2f(x)','#1a5a8a',11,'middle',true));
+    o.push(T(90,204,'y=f(x)','#888',10,'middle',false));
+    o.push(T(90,228,'Vertical \u00d72 \u2014 taller','#1a5a8a',10,'middle',false));
+  }
+  if(p>=2){
+    o.push(L(330,190,450,190,'#ccc',1));
+    o.push('<polyline points="'+base2(390,190,1,1).join(' ')+'" fill="none" stroke="#888" stroke-width="2"/>');
+    o.push('<polyline points="'+base2(390,190,0.5,1).join(' ')+'" fill="none" stroke="#a01820" stroke-width="2.5"/>');
+    o.push(T(390,60,'y=f(2x)','#a01820',11,'middle',true));
+    o.push(T(390,204,'y=f(x)','#888',10,'middle',false));
+    o.push(T(390,228,'Horizontal \u00d7\u00bd \u2014 squashed','#a01820',10,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(30,236,420,20,'#fff8e1','#C8922A',1));
+    o.push(T(240,250,'y=a\u00b7f(x): vertical \u00d7a.   y=f(ax): horizontal \u00d71/a (reciprocal!)','#7A5A18',10.5,'middle',true));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 7: Combining transformations ───────────────────────────────
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,16,'y = 2f(x\u22123) + 1, step by step','#C0272D',13,'middle',true));
+  function baseAt(offx,offy,shiftX,scaleY,shiftY){var pts=[];for(var xv=-2;xv<=2;xv+=0.2){var yv=xv*xv;var xxv=xv+shiftX;pts.push((offx+xxv*22)+','+(offy-(yv*scaleY+shiftY)*10));}return pts;}
+  if(p>=1){
+    o.push(L(20,150,150,150,'#ccc',1));
+    o.push('<polyline points="'+baseAt(85,150,0,1,0).join(' ')+'" fill="none" stroke="#888" stroke-width="2"/>');
+    o.push(T(85,190,'Start: y=f(x)','#888',10,'middle',false));
+  }
+  if(p>=2){
+    o.push(L(170,150,300,150,'#ccc',1));
+    o.push('<polyline points="'+baseAt(235,150,-3,1,0).join(' ')+'" fill="none" stroke="#1a5a8a" stroke-width="2.5"/>');
+    o.push(T(235,190,'Step 1: shift right 3','#1a5a8a',10,'middle',true));
+  }
+  if(p>=3){
+    o.push(L(320,150,450,150,'#ccc',1));
+    o.push('<polyline points="'+baseAt(385,150,-3,2,-1).join(' ')+'" fill="none" stroke="#a01820" stroke-width="2.5"/>');
+    o.push(T(385,190,'Step 2: \u00d72, then up 1','#a01820',10,'middle',true));
+  }
+  if(p>=4){
+    o.push(R(30,206,420,46,'#fff8e1','#C8922A',1.5));
+    o.push(T(240,226,'Apply transformations INSIDE the bracket first','#7A5A18',12,'middle',true));
+    o.push(T(240,244,'(working from the inside out), then outside ones.','#7A5A18',11,'middle',false));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 8: Modulus function ────────────────────────────────────────
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,16,'The modulus function: |x|','#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(L(240,60,240,150,'#ccc',1));o.push(L(120,150,360,150,'#888',1));
+    o.push(L(240,80,300,150,'#1a5a8a',2.5));o.push(L(240,80,180,150,'#1a5a8a',2.5));
+    o.push(T(240,66,'y=|x|','#1a5a8a',11,'middle',true));
+    o.push(T(240,168,'Always \u2265 0 \u2014 the V shape','#888',10,'middle',false));
+  }
+  if(p>=2){
+    // y=f(x) with a dip below the axis, then y=|f(x)| reflecting that part up
+    o.push(L(30,190,180,190,'#ccc',1));
+    var below=[];for(var xv=-2;xv<=2;xv+=0.2){var yv=xv*xv-1.5;below.push((105+xv*30)+','+(190-yv*20));}
+    o.push('<polyline points="'+below.join(' ')+'" fill="none" stroke="#a01820" stroke-width="2.5"/>');
+    o.push(T(105,60,'y=f(x)','#a01820',11,'middle',true));
+    o.push(T(105,208,'dips below the axis','#a01820',10,'middle',false));
+    o.push(L(300,190,450,190,'#ccc',1));
+    var refl=[];for(var xv2=-2;xv2<=2;xv2+=0.2){var yv2=Math.abs(xv2*xv2-1.5);refl.push((375+xv2*30)+','+(190-yv2*20));}
+    o.push('<polyline points="'+refl.join(' ')+'" fill="none" stroke="#1a7a3a" stroke-width="2.5"/>');
+    o.push(T(375,60,'y=|f(x)|','#1a7a3a',11,'middle',true));
+    o.push(T(375,208,'reflected UP above axis','#1a7a3a',10,'middle',true));
+  }
+  if(p>=3){
+    o.push(R(30,222,420,30,'#fff8e1','#C8922A',1.2));
+    o.push(T(240,240,'|a| = a if a\u22650, and |a| = \u2212a if a<0','#7A5A18',12,'middle',true));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 9: Piecewise functions ─────────────────────────────────────
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,16,'f(x) = x\u00b2 for x<2,  3x\u22122 for x\u22652','#C0272D',12.5,'middle',true));
+  if(p>=1){
+    o.push(L(60,200,420,200,'#888',1.5));o.push(L(60,200,60,50,'#888',1.5));
+    o.push(T(430,204,'x','#888',10));o.push(T(56,46,'y','#888',10));
+    var pts=[];for(var xv=-1;xv<2;xv+=0.15){var yv=xv*xv;pts.push((150+xv*45)+','+(200-yv*14));}
+    o.push('<polyline points="'+pts.join(' ')+'" fill="none" stroke="#1a5a8a" stroke-width="2.5"/>');
+    o.push(OC(150+2*45,200-4*14,4,'#1a5a8a'));
+    o.push(T(180,80,'x\u00b2 (x<2)','#1a5a8a',11,'middle',true));
+  }
+  if(p>=2){
+    var pts2=[];for(var xv2=2;xv2<=5;xv2+=0.2){var yv2=3*xv2-2;pts2.push((150+xv2*45)+','+(200-yv2*14));}
+    o.push('<polyline points="'+pts2.join(' ')+'" fill="none" stroke="#a01820" stroke-width="2.5"/>');
+    o.push(C(150+2*45,200-4*14,4,'#a01820'));
+    o.push(T(330,90,'3x\u22122 (x\u22652)','#a01820',11,'middle',true));
+    o.push(T(240,224,'Open circle = not included.  Filled circle = included.','#888',10,'middle',false));
+  }
+  if(p>=3){
+    o.push(R(30,236,420,20,'#fff8e1','#C8922A',1));
+    o.push(T(240,250,'Always check which interval your x-value falls into before evaluating.','#7A5A18',10.5,'middle',true));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 10: Consolidation ──────────────────────────────────────────
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'The Functions toolkit','#C0272D',16,'middle',true));
+  if(p>=1){o.push(R(30,38,420,44,'#fff5f0','#C0272D',1.5));o.push(T(240,58,'Domain/range, composite fg(x), inverse f\u207b\u00b9(x)','#241A17',12));o.push(T(240,76,'\u2014 and the horizontal line test that decides if f\u207b\u00b9 exists','#888',10));}
+  if(p>=2){o.push(R(30,86,420,44,'#e8f4ff','#1a5a8a',1.5));o.push(T(240,106,'Translations, stretches, combined transformations','#241A17',12));o.push(T(240,124,'\u2014 remember: inside the bracket first, and reciprocal scale factors','#888',10));}
+  if(p>=3){o.push(R(30,134,420,44,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,154,'Modulus |f(x)| and piecewise definitions','#241A17',12));o.push(T(240,172,'\u2014 both about checking WHICH rule applies before evaluating','#888',10));}
+  if(p>=4){o.push(R(90,190,300,44,'#fff8e1','#C8922A',2));o.push(T(240,216,'Ready for AS-P1-03: Coordinate Geometry','#7A5A18',14,'middle',true));}
+  s.innerHTML=o.join('');}
 
 var Q=[
  {ey:'Checkpoint 1 of 10',ti:'Domain and range',su:'What functions are allowed to take in and give out',panels:[
-   {dtitle:'What is a function?',boxes:[{"stage": 1, "text": "A function f(x) takes an input x and gives exactly one output", "bg": "#fff5f0"}],p:1,html:'<p>A <b>function</b> assigns exactly one output to every input. The <b>domain</b> is the set of allowed inputs; the <b>range</b> is the set of possible outputs.</p>'},
-   {dtitle:'Example: f(x) = x², domain x ≥ 0',boxes:[{"stage": 1, "text": "f(x) = x²", "bg": "#fff5f0"}, {"stage": 2, "text": "Domain: x ≥ 0", "text2": "restricted so the function has an inverse later", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Range: f(x) ≥ 0", "text2": "squares of non-negative numbers are non-negative", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>Restricting the domain to x ≥ 0 is a very common AS-level device — it’s what allows x² to have an inverse (√x), since the full x² graph is not one-to-one.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "f(x) = 1/(x−3)", "bg": "#fff5f0"}],p:1,html:'<p>Some domains are restricted by the function itself — you can never divide by zero.</p>'+tryItMC(function(){return {question:'For f(x) = 1/(x\u22123), which value must be excluded from the domain?',options:['x = 3','x = 0','x = -3','x = 1'],correct:0,working:'Division by zero is undefined, and the denominator is zero when x = 3.'};})}
+   {d:dQ1,p:1,html:'<p>A <b>function</b> assigns exactly one output to every input. The <b>domain</b> is the set of allowed inputs; the <b>range</b> is the set of possible outputs.</p>'},
+   {d:dQ1,p:2,html:'<p>Restricting the domain to x \u2265 0 is a very common AS-level device \u2014 it\u2019s what allows x\u00b2 to have an inverse (\u221ax) later, since the full x\u00b2 graph is not one-to-one.</p>'},
+   {d:dQ1,p:3,html:'<p>Some domains are restricted by the function itself \u2014 you can never divide by zero, so x=3 must be excluded here.</p>'
+     +tryItMC(function(){
+       var a=pick([2,3,4,5]);
+       return {question:'For f(x) = 1/(x\u2212'+a+'), which value must be excluded from the domain?',
+         options:['x = '+a,'x = 0','x = \u2212'+a,'x = 1'],
+         correct:0,
+         working:'Division by zero is undefined, and the denominator is zero when x = '+a+'.'};
+     })}
   ]},
  {ey:'Checkpoint 2 of 10',ti:'Composite functions',su:'Applying one function then another',panels:[
-   {dtitle:'fg(x) means f(g(x))',boxes:[{"stage": 1, "text": "fg(x) = f(g(x))", "text2": "apply g first, then apply f to the result", "bg": "#fff5f0"}],p:1,html:'<p>The notation fg(x) (or f∘g(x)) means: first apply g to x, then apply f to that result. Order matters — fg(x) is usually different from gf(x).</p>'},
-   {dtitle:'Worked example',boxes:[{"stage": 1, "text": "f(x) = 2x+1, g(x) = x²", "bg": "#fff5f0"}, {"stage": 2, "text": "fg(x) = f(x²) = 2x²+1", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "gf(x) = g(2x+1) = (2x+1)²", "bg": "#fde8e8", "stroke": "#a01820"}],p:3,html:'<p>Notice fg(x) ≠ gf(x) here — confirming composite functions are not commutative in general.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "f(x)=x+3, g(x)=2x", "bg": "#fff5f0"}],p:1,html:'<p>Find gf(x) by substituting f(x) into g.</p>'+tryItMC(function(){return {question:'If f(x)=x+3 and g(x)=2x, what is gf(x)?',options:['2x+6','2x+3','2x\u00b2+6','x+6'],correct:0,working:'gf(x)=g(f(x))=g(x+3)=2(x+3)=2x+6.'};})}
+   {d:dQ2,p:1,html:'<p>The notation fg(x) (or f\u2218g(x)) means: first apply g to x, then apply f to that result. Order matters \u2014 fg(x) is usually different from gf(x).</p>'},
+   {d:dQ2,p:2,html:'<p>Worked example: f(x) = 2x+1, g(x) = x\u00b2.</p>'},
+   {d:dQ2,p:3,html:'<p>fg(x) = f(x\u00b2) = 2x\u00b2+1 \u2014 substitute g(x) into f.</p>'},
+   {d:dQ2,p:4,html:'<p>gf(x) = g(2x+1) = (2x+1)\u00b2 \u2014 notice this is NOT the same as fg(x). Composite functions are not commutative in general.</p>'
+     +tryItMC(function(){
+       var a=pick([1,2,3]),b=pick([2,3,4]);
+       return {question:'If f(x)=x+'+a+' and g(x)='+b+'x, what is gf(x)?',
+         options:[b+'x+'+(a*b),b+'x+'+a,b+'x\u00b2+'+(a*b),'x+'+(a*b)],
+         correct:0,
+         working:'gf(x)=g(f(x))=g(x+'+a+')='+b+'(x+'+a+')='+b+'x+'+(a*b)+'.'};
+     })}
   ]},
- {ey:'Checkpoint 3 of 10',ti:'Inverse functions',su:'Undoing a function',panels:[
-   {dtitle:'f⁻¹(x) undoes f(x)',boxes:[{"stage": 1, "text": "f⁻¹(f(x)) = x", "bg": "#fff5f0"}, {"stage": 2, "text": "Only one-to-one functions have an inverse", "bg": "#fde8e8", "stroke": "#a01820"}],p:2,html:'<p>The inverse function reverses what f does. A function only has an inverse over a domain where it’s <b>one-to-one</b> (passes the horizontal line test).</p>'},
-   {dtitle:'Finding f⁻¹(x): swap and rearrange',boxes:[{"stage": 1, "text": "f(x) = 3x − 2", "bg": "#fff5f0"}, {"stage": 2, "text": "y = 3x − 2  →  x = 3y − 2", "text2": "swap x and y", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "f⁻¹(x) = (x+2)/3", "text2": "rearrange to make y the subject", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>Method: write y = f(x), swap x and y, then rearrange to make y the subject again.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "f(x) = 4x + 5", "bg": "#fff5f0"}],p:1,html:'<p>Apply the swap-and-rearrange method.</p>'+tryItMC(function(){return {question:'What is f\u207b\u00b9(x) for f(x) = 4x + 5?',options:['(x\u22125)/4','(x+5)/4','4x\u22125','(x\u22124)/5'],correct:0,working:'y=4x+5 \u2192 x=4y+5 \u2192 y=(x\u22125)/4.'};})}
+ {ey:'Checkpoint 3 of 10',ti:'Inverse functions',su:'Undoing a function \u2014 and which ones you can undo',panels:[
+   {d:dQ3,p:1,html:'<p>Not every function has an inverse. Compare y=x\u00b2 on the left \u2014 could this be undone uniquely?</p>'},
+   {d:dQ3,p:2,html:'<p>Draw a horizontal line across each graph. On y=x\u00b2 it crosses <b>twice</b> \u2014 two different x-values give the same output, so you can\u2019t undo it uniquely. On y=x\u00b3 it only ever crosses <b>once</b>.</p>'},
+   {d:dQ3,p:3,html:'<p>This is the <b>Horizontal Line Test</b>: a function only has an inverse where it\u2019s <b>one-to-one</b> (any horizontal line meets the graph at most once). It\u2019s why x\u00b2 needed its domain restricted to x\u22650 back in Checkpoint 1 \u2014 that restriction makes it one-to-one.</p>'},
+   {d:dQ3b,p:1,html:'<p>Once you know f is one-to-one, finding f\u207b\u00b9(x) uses a simple method: write y=f(x).</p>'},
+   {d:dQ3b,p:2,html:'<p>Swap x and y.</p>'},
+   {d:dQ3b,p:3,html:'<p>Rearrange to make y the subject again \u2014 that\u2019s f\u207b\u00b9(x).</p>'
+     +tryItMC(function(){
+       var a=pick([2,3,4]),b=pick([1,3,5,7]);
+       return {question:'What is f\u207b\u00b9(x) for f(x) = '+a+'x + '+b+'?',
+         options:['(x\u2212'+b+')/'+a,'(x+'+b+')/'+a,a+'x\u2212'+b,'(x\u2212'+a+')/'+b],
+         correct:0,
+         working:'y='+a+'x+'+b+' \u2192 x='+a+'y+'+b+' \u2192 y=(x\u2212'+b+')/'+a+'.'};
+     })}
   ]},
  {ey:'Checkpoint 4 of 10',ti:'Graphing inverses',su:'The reflection relationship',panels:[
-   {dtitle:'y = f⁻¹(x) is a reflection of y = f(x)',boxes:[{"stage": 1, "text": "Reflect in the line y = x", "bg": "#fff5f0"}, {"stage": 2, "text": "Domain of f⁻¹ = Range of f", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Range of f⁻¹ = Domain of f", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>The graph of f⁻¹ is always the reflection of f in the line y = x. This also means domain and range swap between a function and its inverse.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "f has domain x≥1, range f(x)≥3", "bg": "#fff5f0"}],p:1,html:'<p>Apply the domain/range swap rule.</p>'+tryItMC(function(){return {question:'If f has domain x\u22651 and range f(x)\u22653, what is the domain of f\u207b\u00b9?',options:['x\u22653','x\u22651','x\u22650','all real x'],correct:0,working:'Domain of f\u207b\u00b9 = range of f = x\u22653.'};})}
+   {d:dQ4,p:1,html:'<p>Once you have f\u207b\u00b9 algebraically, its graph has a simple visual relationship to f\u2019s.</p>'},
+   {d:dQ4,p:2,html:'<p>The graph of f\u207b\u00b9 is always the reflection of f in the line y = x \u2014 every point (a,b) on f becomes (b,a) on f\u207b\u00b9.</p>'},
+   {d:dQ4,p:3,html:'<p>This reflection also means domain and range swap between a function and its inverse.</p>'
+     +tryItMC(function(){
+       var a=pick([1,2,3]),b=pick([2,3,4,5]);
+       return {question:'If f has domain x\u2265'+a+' and range f(x)\u2265'+b+', what is the domain of f\u207b\u00b9?',
+         options:['x\u2265'+b,'x\u2265'+a,'x\u22650','all real x'],
+         correct:0,
+         working:'Domain of f\u207b\u00b9 = range of f = x\u2265'+b+'.'};
+     })}
   ]},
  {ey:'Checkpoint 5 of 10',ti:'Transformations: translations',su:'Shifting graphs horizontally and vertically',panels:[
-   {dtitle:'y = f(x) + a and y = f(x + a)',boxes:[{"stage": 1, "text": "y = f(x) + a", "text2": "vertical shift, up by a", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 2, "text": "y = f(x + a)", "text2": "horizontal shift, LEFT by a (counter-intuitive sign)", "bg": "#fde8e8", "stroke": "#a01820"}],p:2,html:'<p>Vertical shifts behave as expected. Horizontal shifts are the classic AS trap: y=f(x+a) shifts LEFT by a, not right — the sign flips versus intuition.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "y = f(x−5)", "bg": "#fff5f0"}],p:1,html:'<p>Apply the horizontal shift rule carefully.</p>'+tryItMC(function(){return {question:'The graph y=f(x\u22125) is obtained from y=f(x) by a shift of:',options:['5 units right','5 units left','5 units up','5 units down'],correct:0,working:'y=f(x\u2212a) shifts RIGHT by a (here a=5 gives a shift of 5 right \u2014 note this is the one case where the sign matches intuition, since x\u22125 = x+(\u22125)).'};})}
+   {d:dQ5,p:1,html:'<p>Vertical shifts behave exactly as you\u2019d expect: y=f(x)+a moves the whole graph UP by a.</p>'},
+   {d:dQ5,p:2,html:'<p>Horizontal shifts are the classic AS trap: y=f(x+a) shifts the graph LEFT by a, not right \u2014 the sign flips versus intuition.</p>'},
+   {d:dQ5,p:3,html:'<p>Rule of thumb: anything added OUTSIDE f() affects y (behaves intuitively); anything added INSIDE the brackets affects x (sign flips).</p>'
+     +tryItMC(function(){
+       var a=pick([2,3,4,5,6]);
+       var dir=pick(['plus','minus']);
+       var expr = dir==='plus' ? 'x+'+a : 'x\u2212'+a;
+       return {question:'The graph y=f('+expr+') is obtained from y=f(x) by a shift of:',
+         options:[a+' units '+(dir==='plus'?'left':'right'),a+' units '+(dir==='plus'?'right':'left'),a+' units up',a+' units down'],
+         correct:0,
+         working:'y=f(x+a) shifts LEFT by a; y=f(x\u2212a) shifts RIGHT by a. Here that gives a shift of '+a+' units '+(dir==='plus'?'left':'right')+'.'};
+     })}
   ]},
  {ey:'Checkpoint 6 of 10',ti:'Transformations: stretches',su:'Scaling graphs',panels:[
-   {dtitle:'y = a·f(x) and y = f(ax)',boxes:[{"stage": 1, "text": "y = a·f(x)", "text2": "vertical stretch, scale factor a", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 2, "text": "y = f(ax)", "text2": "horizontal stretch, scale factor 1/a", "bg": "#fde8e8", "stroke": "#a01820"}],p:2,html:'<p>Vertical stretch by a multiplies y-values by a. Horizontal stretch y=f(ax) squashes the graph by factor 1/a — again the reciprocal is the AS-level subtlety.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "y = f(3x)", "bg": "#fff5f0"}],p:1,html:'<p>Apply the horizontal stretch rule.</p>'+tryItMC(function(){return {question:'y=f(3x) is obtained from y=f(x) by a horizontal stretch of scale factor:',options:['1/3','3','\u22123','9'],correct:0,working:'y=f(ax) has horizontal scale factor 1/a; here a=3 gives scale factor 1/3.'};})}
+   {d:dQ6,p:1,html:'<p>Vertical stretch by a multiplies every y-value by a: y=a\u00b7f(x) makes the graph taller (or shorter if 0&lt;a&lt;1).</p>'},
+   {d:dQ6,p:2,html:'<p>Horizontal stretch y=f(ax) squashes the graph by factor 1/a \u2014 again the reciprocal is the AS-level subtlety.</p>'},
+   {d:dQ6,p:3,html:'<p>Easy way to remember: transformations OUTSIDE f() act on y directly; transformations INSIDE act on x with the reciprocal/opposite effect.</p>'
+     +tryItMC(function(){
+       var a=pick([2,3,4,5]);
+       return {question:'y=f('+a+'x) is obtained from y=f(x) by a horizontal stretch of scale factor:',
+         options:['1/'+a,String(a),'\u2212'+a,String(a*a)],
+         correct:0,
+         working:'y=f(ax) has horizontal scale factor 1/a; here a='+a+' gives scale factor 1/'+a+'.'};
+     })}
   ]},
  {ey:'Checkpoint 7 of 10',ti:'Combining transformations',su:'Order matters',panels:[
-   {dtitle:'Multiple transformations applied in sequence',boxes:[{"stage": 1, "text": "y = 2f(x−3) + 1", "bg": "#fff5f0"}, {"stage": 2, "text": "Step 1: shift right 3 (inside bracket first)", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Step 2: stretch vertically ×2, then up 1", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>When several transformations combine, apply transformations INSIDE the function argument first (working from the inside out), then outside ones.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "y = f(2x) + 5", "bg": "#fff5f0"}],p:1,html:'<p>Identify both transformations and their order.</p>'+tryItMC(function(){return {question:'y = f(2x) + 5 is: horizontal stretch factor \u00bd, then...?',options:['a vertical shift up 5','a vertical stretch by 5','a horizontal shift of 5','a reflection'],correct:0,working:'The +5 outside the function is a vertical shift up by 5, applied after the horizontal stretch.'};})}
+   {d:dQ7,p:1,html:'<p>When several transformations combine, order matters. Start from y=f(x).</p>'},
+   {d:dQ7,p:2,html:'<p>Apply transformations INSIDE the function argument first \u2014 here, shift right 3.</p>'},
+   {d:dQ7,p:3,html:'<p>Then apply the OUTSIDE transformations \u2014 stretch vertically \u00d72, then shift up 1.</p>'},
+   {d:dQ7,p:4,html:'<p>Working from the inside out avoids one of the most common AS errors: applying the transformations in the wrong order.</p>'
+     +tryItMC(function(){
+       var m=pick([2,3,4]),c=pick([1,3,5]);
+       return {question:'y = f('+m+'x) + '+c+' is: horizontal stretch factor 1/'+m+', then...?',
+         options:['a vertical shift up '+c,'a vertical stretch by '+c,'a horizontal shift of '+c,'a reflection'],
+         correct:0,
+         working:'The +'+c+' outside the function is a vertical shift up by '+c+', applied after the horizontal stretch.'};
+     })}
   ]},
  {ey:'Checkpoint 8 of 10',ti:'Modulus function',su:'|x| and its graph',panels:[
-   {dtitle:'The modulus (absolute value) function',boxes:[{"stage": 1, "text": "|x| = x if x≥0, |x| = −x if x<0", "bg": "#fff5f0"}, {"stage": 2, "text": "y=|f(x)|: reflect any part below the x-axis upward", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>|x| strips the sign, always giving a non-negative result. Graphically, y=|f(x)| takes any part of y=f(x) below the x-axis and reflects it above.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Solve |x−4| = 6", "bg": "#fff5f0"}],p:1,html:'<p>Modulus equations split into two cases.</p>'+tryItMC(function(){return {question:'What are the solutions to |x\u22124| = 6?',options:['x=10 or x=\u22122','x=10 only','x=\u22122 only','x=6 or x=\u22126'],correct:0,working:'x\u22124=6 gives x=10; x\u22124=\u22126 gives x=\u22122.'};})}
+   {d:dQ8,p:1,html:'<p>|x| strips the sign, always giving a non-negative result \u2014 graphically, a V-shape with its point at the origin.</p>'},
+   {d:dQ8,p:2,html:'<p>More generally, y=|f(x)| takes any part of y=f(x) that dips below the x-axis and reflects it upward \u2014 everything above the axis stays where it is.</p>'},
+   {d:dQ8,p:3,html:'<p>Modulus equations split into two cases, since |a|=b means a=b OR a=\u2212b.</p>'
+     +tryItMC(function(){
+       var a=pick([2,3,4,5]),b=pick([4,6,8,10]);
+       return {question:'What are the solutions to |x\u2212'+a+'| = '+b+'?',
+         options:['x='+(a+b)+' or x='+(a-b),'x='+(a+b)+' only','x='+(a-b)+' only','x='+b+' or x=\u2212'+b],
+         correct:0,
+         working:'x\u2212'+a+'='+b+' gives x='+(a+b)+'; x\u2212'+a+'=\u2212'+b+' gives x='+(a-b)+'.'};
+     })}
   ]},
  {ey:'Checkpoint 9 of 10',ti:'Piecewise functions',su:'Functions defined in parts',panels:[
-   {dtitle:'Different rules on different intervals',boxes:[{"stage": 1, "text": "f(x) = x² for x<2, f(x) = 3x−2 for x≥2", "bg": "#fff5f0"}, {"stage": 2, "text": "Check the rule matches your input’s interval before evaluating", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>A piecewise function uses different formulas on different parts of the domain. Always check which interval your x-value falls into first.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "f(1)=? and f(3)=? for the function above", "bg": "#fff5f0"}],p:1,html:'<p>Match each input to the right piece.</p>'+tryItMC(function(){return {question:'For f(x)=x\u00b2 (x<2), f(x)=3x\u22122 (x\u22652), what is f(3)?',options:['7','9','6','11'],correct:0,working:'Since 3\u22652, use f(x)=3x\u22122: f(3)=3(3)\u22122=7.'};})}
+   {d:dQ9,p:1,html:'<p>A piecewise function uses different formulas on different parts of the domain \u2014 here, x\u00b2 handles everything below x=2.</p>'},
+   {d:dQ9,p:2,html:'<p>...and a different rule, 3x\u22122, takes over from x=2 onward. The open circle shows x=2 is NOT included in the first piece; the filled circle shows it IS included in the second.</p>'},
+   {d:dQ9,p:3,html:'<p>Always check which interval your x-value falls into before evaluating \u2014 using the wrong piece is the most common error here.</p>'
+     +tryItMC(function(){
+       var xv=pick([3,4,5]);
+       var ans=3*xv-2;
+       return {question:'For f(x)=x\u00b2 (x<2), f(x)=3x\u22122 (x\u22652), what is f('+xv+')?',
+         options:[String(ans),String(ans+2),String(ans-2),String(xv*xv)],
+         correct:0,
+         working:'Since '+xv+'\u22652, use f(x)=3x\u22122: f('+xv+')=3('+xv+')\u22122='+ans+'.'};
+     })}
   ]},
  {ey:'Checkpoint 10 of 10',ti:'Bringing it together',su:'Consolidating Functions',panels:[
-   {dtitle:'The Functions toolkit',boxes:[{"stage": 1, "text": "Domain/range, composite fg(x), inverse f⁻¹(x)", "bg": "#fff5f0"}, {"stage": 2, "text": "Translations, stretches, combined transformations", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Modulus |f(x)| and piecewise definitions", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>Functions underpins almost every later AS topic — transformations reappear constantly in trigonometry and calculus graphs.</p>'},
-   {dtitle:'Ready for AS-P1-03',boxes:[{"stage": 1, "text": "Next: Coordinate Geometry", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:1,html:'<p>Nice work — Functions is complete. Next up: Coordinate Geometry.</p>'}
+   {d:dQ10,p:1,html:'<p>You\u2019ve now covered domain/range, composite functions, and inverses \u2014 including the horizontal line test that decides whether f\u207b\u00b9 even exists.</p>'},
+   {d:dQ10,p:2,html:'<p>...and translations, stretches, and combining transformations \u2014 all of which reappear constantly in trigonometry and calculus graphs later in the course.</p>'},
+   {d:dQ10,p:3,html:'<p>Modulus and piecewise functions both come down to the same habit: check which rule genuinely applies before you evaluate or sketch anything.</p>'
+     +tryItMC(function(){
+       var bank=[
+         {question:'f(x) = (2x+1)/(x\u22124), x\u22604. State a value that must be excluded from the domain, and explain why.',
+          options:['x=4, since the denominator would be zero','x=0, since the numerator would be zero','x=\u00bd, since that makes the numerator zero','No value needs to be excluded'],
+          correct:0,
+          working:'The denominator x\u22124 cannot equal zero, so x=4 must be excluded from the domain.'},
+         {question:'The function f(x) = (x\u22123)\u00b2 + 2 has domain x\u22653. Find the range of f\u207b\u00b9.',
+          options:['f\u207b\u00b9(x) \u2265 3, since range of f\u207b\u00b9 = domain of f','f\u207b\u00b9(x) \u2265 2, since range of f\u207b\u00b9 = range of f','f\u207b\u00b9(x) \u2264 3','all real f\u207b\u00b9(x)'],
+          correct:0,
+          working:'Range of f\u207b\u00b9 = Domain of f = x\u22653.'},
+         {question:'g(x) = 2|x\u22121| \u2212 3. What is the minimum value of g(x), and at what x does it occur?',
+          options:['Minimum \u22123 at x=1','Minimum 1 at x=\u22123','Minimum \u22123 at x=0','Minimum 0 at x=1'],
+          correct:0,
+          working:'|x\u22121| has minimum 0 at x=1, so g(x)=2(0)\u22123=\u22123 at x=1.'},
+         {question:'f(x)=x\u00b2\u22124x+7 for x\u22652, g(x)=x+1. Find fg(3).',
+          options:['7','19','13','10'],
+          correct:0,
+          working:'g(3)=3+1=4. fg(3)=f(4)=4\u00b2\u22124(4)+7=16\u221216+7=7.'}
+       ];
+       return pick(bank);
+     })},
+   {d:dQ10,p:4,html:'<p>Nice work \u2014 Functions is complete. Next up: Coordinate Geometry.</p>'}
   ]}
 ];
 
@@ -283,7 +632,7 @@ function render(){
   document.getElementById('ey').textContent=qq.ey;
   document.getElementById('ti').textContent=qq.ti;
   document.getElementById('su').textContent=qq.su;
-  drawGeneric(pp.dtitle, pp.boxes, pp.p);
+  pp.d(pp.p);
   var pn=document.getElementById('pn');
   pn.innerHTML=pp.html;
   pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
