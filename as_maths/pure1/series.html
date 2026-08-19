@@ -12,6 +12,12 @@
   else {
     const { data: prof } = await _lc.from('profiles').select('full_name').eq('id', session.user.id).maybeSingle();
     window.__studentFirstName = prof && prof.full_name ? prof.full_name.split(' ')[0] : 'there';
+    // For the optional "Take the test" link on the final checkpoint. 759 is the
+    // known id for AS-P1-06/Series as a fallback if this lookup ever fails —
+    // looking it up live is safer than hardcoding it as the only source.
+    _lc.from('topics').select('id').eq('topic_code','AS-P1-06').eq('subject','as_maths').maybeSingle()
+      .then(function(r){ window.__testTopicId = (r.data && r.data.id) ? r.data.id : 759; })
+      .catch(function(){ window.__testTopicId = 759; });
     document.addEventListener('DOMContentLoaded', function() {
       var el = document.getElementById('greet');
       if (el) el.textContent = 'Hi ' + window.__studentFirstName + ' — let\'s work through this one together.';
@@ -99,6 +105,21 @@ header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gol
 .welcome-go{width:100%;margin-top:6px;background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;border:none;padding:13px;border-radius:6px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
 .welcome-go:hover{filter:brightness(1.08);}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+@keyframes popIn{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes drawIn{to{stroke-dashoffset:0}}
+.an-pop{animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both;transform-box:fill-box;transform-origin:center;}
+.an-fade{animation:fadeUp .5s ease-out both;}
+.an-draw{animation:drawIn 1.1s ease-out forwards;}
+.reader-row{width:100%;max-width:760px;display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.reader-btn{font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:5px;border:1.5px solid var(--gold-dark);background:#fff;color:var(--gold-dark);cursor:pointer;font-family:inherit;}
+.reader-btn.active{background:var(--gold-dark);color:#fff;}
+.reader-btn:disabled{opacity:.4;cursor:default;}
+.reader-status{font-size:11.5px;color:#6b5750;}
+.reader-voice{font-size:12px;padding:6px 8px;border:1.5px solid var(--line);border-radius:5px;background:#fff;font-family:inherit;}
+.test-link-row{margin-top:16px;text-align:center;}
+.test-link-btn{display:inline-block;background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;padding:11px 24px;border-radius:6px;text-decoration:none;font-weight:700;font-size:14px;}
+.test-link-btn:hover{filter:brightness(1.08);}
 </style>
 </head>
 <body>
@@ -136,6 +157,13 @@ header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gol
       <div class="cvs"><svg id="dg" viewBox="0 0 480 280"></svg></div>
       <div class="pnl fi" id="pn"></div>
     </div>
+    <div class="reader-row">
+      <button class="reader-btn" id="readBtn">🔊 Read this step</button>
+      <button class="reader-btn" id="autoBtn">▶ Auto-play checkpoint</button>
+      <button class="reader-btn" id="stopReadBtn" style="display:none">■ Stop</button>
+      <select class="reader-voice" id="voiceSel"></select>
+      <span class="reader-status" id="readerStatus"></span>
+    </div>
     <div class="ctrl">
       <button class="btn" id="pb">&larr; Back</button>
       <div class="dots" id="dt"></div>
@@ -162,9 +190,9 @@ document.addEventListener('click',function(e){
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
     var o=shuffleMC(entry.genFn());entry.o=o;
-    var wrap=el.closest('.try');if(!wrap)return;
+    var wrapEl=el.closest('.try');if(!wrapEl)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
-    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+    wrapEl.parentNode.replaceChild(tmp.firstChild,wrapEl);ST[id]={o:o,genFn:entry.genFn};return;
   }
   if(el.classList.contains('mc-opt')){
     if(el.disabled)return;
@@ -184,89 +212,383 @@ document.addEventListener('click',function(e){
   }
 });
 function g(){return document.getElementById('dg');}
+function xesc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function T(x,y,txt,c,sz,a,bold){
   c=c||'#241A17';sz=sz||12;a=a||'middle';
-  // Supports inline superscripts written as ^(...) or ^X (single char) —
-  // rendered as real SVG superscripts via baseline-shift, not literal carets.
   var parts=String(txt).split(/\^(\([^)]*\)|\S)/);
   var tspans='';
   for(var i=0;i<parts.length;i++){
     if(!parts[i])continue;
     if(i%2===1){
       var exp=parts[i].replace(/^\(|\)$/g,'');
-      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+exp+'</tspan>';
+      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+xesc(exp)+'</tspan>';
     }else{
-      tspans+='<tspan>'+parts[i]+'</tspan>';
+      tspans+='<tspan>'+xesc(parts[i])+'</tspan>';
     }
   }
   return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+tspans+'</text>';
 }
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
-function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
-
-// Generic progressive-reveal diagram: renders a title plus a stack of boxes,
-// each appearing once the panel's stage (p) reaches that box's stage number.
-function drawGeneric(title, boxes, p){
-  var s=g(); s.setAttribute('viewBox','0 0 480 260'); var o=[];
-  o.push(T(240,22,title,'#C0272D',15,'middle',true));
-  var y=42;
-  boxes.forEach(function(b){
-    if(p>=b.stage){
-      var h=b.h||44;
-      o.push(R(20,y,440,h,b.bg||'#fff5f0',b.stroke||'#C0272D',1.5));
-      if(b.text2){
-        o.push(T(240,y+h*0.42+5,b.text,b.color||'#241A17',b.size||13,'middle',b.bold!==false));
-        o.push(T(240,y+h*0.78+3,b.text2,b.color2||'#888',b.size2||11,'middle',false));
-      }else{
-        o.push(T(240,y+h/2+5,b.text,b.color||'#241A17',b.size||14,'middle',b.bold!==false));
-      }
-      y+=h+8;
-    }
-  });
-  s.innerHTML=o.join('');
+function C(cx,cy,r,fill,stroke,sw){stroke=stroke||fill;return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;}
+function fracSimplify(n,d){var v=gcd(n,d);return [n/v,d/v];}
+function wrap(animate, cls, html){ return '<g class="'+(animate?cls:'')+'">'+html+'</g>'; }
+function drawLine(x1,y1,x2,y2,color,w,animate){
+  if(animate) return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+w+'" stroke-dasharray="500" stroke-dashoffset="500" class="an-draw"/>';
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+w+'"/>';
 }
+function nCr(n,r){ if(r<0||r>n) return 0; var res=1; for(var i=0;i<r;i++){ res=res*(n-i)/(i+1); } return Math.round(res); }
+
+// ── Checkpoint 1: Binomial expansion basics ────────────────────────────────
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Where the coefficients of (1+x)\u207f come from','#C0272D',13,'middle',true));
+  var rows=[[1],[1,1],[1,2,1],[1,3,3,1],[1,4,6,4,1]];
+  if(p>=1){
+    // Pascal's triangle, built row by row up to n=2
+    for(var ri=0;ri<3;ri++){
+      var row=rows[ri];
+      for(var ci=0;ci<row.length;ci++){
+        var xpos=240-(row.length-1)*20+ci*40;
+        var ypos=40+ri*36;
+        o.push(wrap(p===1,'an-pop',C(xpos,ypos,15,'#e8f4ff','#1a5a8a',1.5)+T(xpos,ypos+4,String(row[ci]),'#1a5a8a',12,'middle',true)));
+      }
+    }
+  }
+  if(p>=2){
+    for(var ri2=3;ri2<5;ri2++){
+      var row2=rows[ri2];
+      for(var ci2=0;ci2<row2.length;ci2++){
+        var xpos2=240-(row2.length-1)*20+ci2*40;
+        var ypos2=40+ri2*36;
+        o.push(wrap(p===2,'an-pop',C(xpos2,ypos2,15,'#e8f4ff','#1a5a8a',1.5)+T(xpos2,ypos2+4,String(row2[ci2]),'#1a5a8a',12,'middle',true)));
+      }
+    }
+    o.push(wrap(p===2,'an-fade',T(240,213,'Each number is the sum of the two above it.','#241A17',10.5,'middle',false)));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(30,224,420,30,'#fff8e1','#C8922A',1.2)+T(240,243,'Row n gives the coefficients of (1+x)\u207f, e.g. row 4: 1, 4, 6, 4, 1','#7A5A18',11,'middle',true)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 2: The full binomial expansion ──────────────────────────────
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'(a+b)\u207f term by term','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,40,'Each term has the coefficient from Pascal\u2019s triangle (or \u207fC\u1d63),','#241A17',12,'middle',false)+T(240,58,'with the powers of a and b always adding up to n.','#241A17',12,'middle',false)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,90,'For n=4: a\u2074, a\u00b3b, a\u00b2b\u00b2, ab\u00b3, b\u2074 \u2014 powers of a count DOWN from 4,','#1a5a8a',11.5,'middle',true)+T(240,108,'powers of b count UP from 0, always summing to 4.','#1a5a8a',11.5,'middle',true)));}
+  if(p>=3){o.push(wrap(p===3,'an-pop',R(20,130,440,34,'#e8f8ee','#1a7a3a',2)+T(240,152,'(a+b)\u2074 = a\u2074+4a\u00b3b+6a\u00b2b\u00b2+4ab\u00b3+b\u2074','#1a7a3a',13,'middle',true)));}
+  if(p>=4){o.push(wrap(p===4,'an-fade',T(240,182,'coefficients 1,4,6,4,1 \u2014 exactly row 4 of Pascal\u2019s triangle, from Checkpoint 1.','#888',10,'middle',false)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 3: Finding a specific term ──────────────────────────────────
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'You don\u2019t need the whole expansion for one term','#C0272D',12.5,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,40,'Every term in (a+b)\u207f has the same shape:','#241A17',12,'middle',false)));}
+  if(p>=2){o.push(wrap(p===2,'an-pop',R(30,54,420,34,'#fff5f0','#C0272D',1.5)+T(240,76,'term = \u207fC\u1d63 \u00b7 a\u207f\u207b\u02b3 \u00b7 b\u02b3','#C0272D',14,'middle',true)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,108,'Pick the r that matches the power of b you want \u2014','#241A17',11.5,'middle',false)+T(240,124,'then plug straight into the formula, no need to expand everything else.','#241A17',11.5,'middle',false)));}
+  if(p>=4){o.push(wrap(p===4,'an-pop',R(30,140,420,60,'#e8f8ee','#1a7a3a',2)+T(240,158,'e.g. term in x\u00b3 of (1+x)\u2077: r=3','#1a7a3a',12,'middle',true)+T(240,176,'\u2077C\u2083 \u00b7 1\u2074 \u00b7 x\u00b3 = 35x\u00b3','#1a7a3a',13,'middle',true)+T(240,192,'(\u2077C\u2083 = 35)','#888',9.5,'middle',false)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 4: Arithmetic progressions ──────────────────────────────────
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Same amount added each time','#C0272D',13,'middle',true));
+  var terms=[3,7,11,15,19];
+  if(p>=1){
+    for(var i=0;i<terms.length;i++){
+      o.push(wrap(p===1,'an-pop',C(60+i*90,100,20,'#e8f4ff','#1a5a8a',1.5)+T(60+i*90,105,String(terms[i]),'#1a5a8a',13,'middle',true)));
+    }
+  }
+  if(p>=2){
+    for(var i2=0;i2<terms.length-1;i2++){
+      o.push(wrap(p===2,'an-fade',L(60+i2*90+22,100,60+(i2+1)*90-22,100,'#C8922A',2)+T(60+i2*90+45,88,'+4','#C8922A',11,'middle',true)));
+    }
+    o.push(wrap(p===2,'an-fade',T(240,140,'Same difference (+4) every step \u2014 an arithmetic progression.','#241A17',11.5,'middle',false)));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(60,160,360,64,'#fff8e1','#C8922A',1.2)
+      +T(240,180,'a = first term,  d = common difference','#7A5A18',11.5,'middle',true)
+      +T(240,198,'nth term:  u\u2099 = a + (n\u22121)d','#7A5A18',13,'middle',true)
+      +T(240,214,'here: a=3, d=4 \u2192 u\u2099 = 3+4(n\u22121)','#888',10,'middle',false)
+    ));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 5: Sum of an arithmetic series ──────────────────────────────
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'The "reverse and add" trick','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,36,'S = a + (a+d) + (a+2d) + ... + l   (l = last term)','#241A17',12,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,64,'Write it again, backwards:','#241A17',11.5,'middle',false)+T(240,82,'S = l + (l\u2212d) + (l\u22122d) + ... + a','#241A17',12,'middle',true)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,110,'Add the two lines \u2014 every pair sums to the SAME thing, (a+l):','#241A17',11.5,'middle',false)+T(240,128,'2S = n \u00d7 (a + l)   (n pairs, all equal to a+l)','#1a5a8a',12.5,'middle',true)));}
+  if(p>=4){o.push(wrap(p===4,'an-pop',R(30,144,420,34,'#e8f8ee','#1a7a3a',2)+T(240,166,'S\u2099 = \u2079\u2044\u2082(a + l) = \u2079\u2044\u2082(2a + (n\u22121)d)','#1a7a3a',13,'middle',true)));}
+  if(p>=5){o.push(wrap(p===5,'an-fade',T(240,196,'both versions are useful \u2014 use whichever you\u2019re given (l, or d and n).','#888',10,'middle',false)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 6: Geometric progressions ───────────────────────────────────
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Same factor multiplied each time','#C0272D',13,'middle',true));
+  var terms=[2,6,18,54];
+  if(p>=1){
+    for(var i=0;i<terms.length;i++){
+      var rad=14+i*7;
+      o.push(wrap(p===1,'an-pop',C(60+i*120,110,rad,'#e8f4ff','#1a5a8a',1.5)+T(60+i*120,115,String(terms[i]),'#1a5a8a',12,'middle',true)));
+    }
+  }
+  if(p>=2){
+    for(var i2=0;i2<terms.length-1;i2++){
+      o.push(wrap(p===2,'an-fade',L(60+i2*120+30,110,60+(i2+1)*120-40,110,'#C8922A',2)+T(60+i2*120+55,95,'\u00d73','#C8922A',11,'middle',true)));
+    }
+    o.push(wrap(p===2,'an-fade',T(240,155,'Same ratio (\u00d73) every step, and the terms grow \u2014 a geometric progression.','#241A17',11,'middle',false)));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(60,170,360,64,'#fff8e1','#C8922A',1.2)
+      +T(240,190,'a = first term,  r = common ratio','#7A5A18',11.5,'middle',true)
+      +T(240,208,'nth term:  u\u2099 = ar\u207f\u207b\u00b9','#7A5A18',13,'middle',true)
+      +T(240,224,'here: a=2, r=3 \u2192 u\u2099 = 2\u00d73\u207f\u207b\u00b9','#888',10,'middle',false)
+    ));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 7: Sum of a geometric series ────────────────────────────────
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'The "S minus rS" trick','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,36,'S = a + ar + ar\u00b2 + ... + ar\u207f\u207b\u00b9','#241A17',13,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,64,'Multiply the WHOLE thing by r:','#241A17',11.5,'middle',false)+T(240,82,'rS = ar + ar\u00b2 + ... + ar\u207f','#241A17',13,'middle',true)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,110,'Subtract \u2014 almost everything cancels, leaving just the ends:','#241A17',11.5,'middle',false)+T(240,128,'S \u2212 rS = a \u2212 ar\u207f','#1a5a8a',13,'middle',true)));}
+  if(p>=4){o.push(wrap(p===4,'an-pop',R(30,144,420,34,'#e8f8ee','#1a7a3a',2)+T(240,166,'S(1\u2212r) = a(1\u2212r\u207f)  \u2192  S\u2099 = a(1\u2212r\u207f)\u2044(1\u2212r)','#1a7a3a',13,'middle',true)));}
+  if(p>=5){o.push(wrap(p===5,'an-fade',T(240,196,'works for any r \u2260 1, whether the terms grow or shrink.','#888',10,'middle',false)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 8: Sum to infinity ───────────────────────────────────────────
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'What happens as n gets huge, when |r|<1','#C0272D',13,'middle',true));
+  var terms=[8,4,2,1,0.5,0.25];
+  if(p>=1){
+    for(var i=0;i<terms.length;i++){
+      var rad=6+terms[i]*2.2;
+      o.push(wrap(p===1,'an-pop',C(50+i*75,110,rad,'#e8f4ff','#1a5a8a',1.5)));
+    }
+    o.push(wrap(p===1,'an-fade',T(240,150,'a=8, r=\u00bd: the terms shrink toward 0, never quite reaching it.','#241A17',11,'middle',false)));
+  }
+  if(p>=2){
+    o.push(wrap(p===2,'an-fade',T(240,180,'In S\u2099=a(1\u2212r\u207f)\u2044(1\u2212r), as n\u2192\u221e, r\u207f\u21920 (since |r|<1) \u2014','#1a5a8a',11.5,'middle',true)+T(240,198,'so the (1\u2212r\u207f) part just becomes 1.','#1a5a8a',11.5,'middle',true)));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(90,208,300,36,'#e8f8ee','#1a7a3a',2)+T(240,230,'S\u221e = a\u2044(1\u2212r)   (only valid for |r|<1)','#1a7a3a',13,'middle',true)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 9: Mixed AP/GP problems ─────────────────────────────────────
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,16,'Two conditions, two unknowns \u2014 simultaneous equations','#C0272D',12.5,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,40,'Given: 2nd term = 6, 5th term = 48, and it\u2019s geometric.','#241A17',12,'middle',false)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,68,'Write each condition using u\u2099=ar\u207f\u207b\u00b9:','#241A17',11.5,'middle',false)+T(240,86,'ar = 6   and   ar\u2074 = 48','#1a5a8a',13,'middle',true)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,114,'Divide the equations \u2014 the a cancels out:','#241A17',11.5,'middle',false)+T(240,132,'ar\u2074 \u2044 ar = 48\u20446  \u2192  r\u00b3 = 8  \u2192  r = 2','#1a5a8a',12.5,'middle',true)));}
+  if(p>=4){o.push(wrap(p===4,'an-pop',R(60,148,360,34,'#e8f8ee','#1a7a3a',2)+T(240,170,'Substitute back: a(2)=6  \u2192  a=3','#1a7a3a',13,'middle',true)));}
+  if(p>=5){o.push(wrap(p===5,'an-fade',T(240,200,'This divide-to-cancel-a trick works for any two GP terms given.','#888',10,'middle',false)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 10: Consolidation ───────────────────────────────────────────
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'The Series toolkit','#C0272D',16,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',R(30,38,420,44,'#fff5f0','#C0272D',1.5)+T(240,58,'Binomial coefficients come from Pascal\u2019s triangle (or \u207fC\u1d63) \u2014','#241A17',11)+T(240,76,'find any single term without expanding everything.','#888',9.5)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',R(30,86,420,44,'#e8f4ff','#1a5a8a',1.5)+T(240,106,'AP sum comes from reversing and adding; GP sum comes from','#241A17',11)+T(240,124,'subtracting S and rS \u2014 both are genuine derivations, not facts to memorise.','#888',9.5)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',R(30,134,420,44,'#e8f8ee','#1a7a3a',1.5)+T(240,154,'Sum to infinity only exists when |r|<1, since r\u207f\u21920.','#241A17',11)+T(240,172,'Mixed AP/GP problems reduce to simultaneous equations.','#888',9.5)));}
+  if(p>=4){o.push(wrap(p===4,'an-pop',R(90,190,300,44,'#fff8e1','#C8922A',2)+T(240,216,'Ready for AS-P1-07: Differentiation','#7A5A18',14,'middle',true)));}
+  s.innerHTML=o.join('');}
 
 var Q=[
- {ey:'Checkpoint 1 of 10',ti:'Binomial expansion basics',su:'Expanding (1+x)ⁿ',panels:[
-   {dtitle:'Pascal’s triangle / binomial coefficients',boxes:[{"stage": 1, "text": "(a+b)ⁿ = sum of terms with coefficients nCr", "bg": "#fff5f0"}, {"stage": 2, "text": "nCr = n! / (r!(n−r)!)", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>The binomial expansion generalises expanding brackets like (1+x)² to any positive integer power n.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Find 5C2", "bg": "#fff5f0"}],p:1,html:'<p>Apply the formula.</p>'+tryItMC(function(){return {question:'What is 5C2?',options:['10','20','5','15'],correct:0,working:'5C2 = 5!/(2!3!) = (5\u00d74)/2 = 10.'};})}
+ {ey:'Checkpoint 1 of 10',ti:'Binomial expansion basics',su:'Expanding (1+x)\u207f',panels:[
+   {d:dQ1,p:1,html:'<p>Pascal\u2019s triangle: each row starts and ends with 1.</p>',
+    speak:'Pascal\u2019s triangle: each row starts and ends with 1.'},
+   {d:dQ1,p:2,html:'<p>Every other entry is the sum of the two numbers directly above it.</p>',
+    speak:'Every other entry is the sum of the two numbers directly above it.'},
+   {d:dQ1,p:3,html:'<p>Row n of the triangle gives exactly the coefficients you need to expand (1+x)\u207f.</p>'
+     +tryItMC(function(){
+       var n=pick([3,4,5,6]);
+       var row=[];for(var r=0;r<=n;r++){row.push(nCr(n,r));}
+       var wrong1=row.slice().reverse().join(',');
+       return {question:'What are the coefficients in the expansion of (1+x)'+'^('+n+')'+'?',
+         options:[row.join(', '), row.map(function(v){return v+1;}).join(', '), row.slice(0,row.length-1).join(', '), '1, '+n+', 1'],
+         correct:0,
+         working:'These are row '+n+' of Pascal\u2019s triangle: '+row.join(', ')+'.'};
+     }),
+    speak:'Row n of the triangle gives exactly the coefficients you need to expand 1 plus x to the power n. Now it\u2019s your turn.'}
   ]},
- {ey:'Checkpoint 2 of 10',ti:'The full binomial expansion',su:'(a+b)ⁿ term by term',panels:[
-   {dtitle:'(a+b)ⁿ expansion',boxes:[{"stage": 1, "text": "(a+b)ⁿ = aⁿ + nC1 aⁿ⁻¹b + nC2 aⁿ⁻²b² + ... + bⁿ", "bg": "#fff5f0"}, {"stage": 2, "text": "Powers of a decrease, powers of b increase", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Each term’s coefficient is the binomial coefficient nCr, with a and b powers always summing to n.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Expand (x+2)³", "bg": "#fff5f0"}],p:1,html:'<p>Find the coefficient of x².</p>'+tryItMC(function(){return {question:'In the expansion of (x+2)\u00b3, what is the coefficient of x\u00b2?',options:['6','3','8','12'],correct:0,working:'3C1 \u00d7 x\u00b2 \u00d7 2\u00b9 = 3\u00d72 = 6.'};})}
+ {ey:'Checkpoint 2 of 10',ti:'The full binomial expansion',su:'(a+b)\u207f term by term',panels:[
+   {d:dQ2,p:1,html:'<p>Each term in the expansion has a Pascal\u2019s-triangle coefficient, and powers of a and b that always add up to n.</p>',
+    speak:'Each term in the expansion has a Pascal\u2019s-triangle coefficient, and powers of a and b that always add up to n.'},
+   {d:dQ2,p:2,html:'<p>For n=4: powers of a count down from 4 while powers of b count up from 0.</p>',
+    speak:'For n equals 4: powers of a count down from 4 while powers of b count up from 0.'},
+   {d:dQ2,p:3,html:'<p>Putting the coefficients and powers together gives the full expansion.</p>',
+    speak:'Putting the coefficients and powers together gives the full expansion.'},
+   {d:dQ2,p:4,html:'<p>The coefficients are exactly row 4 of Pascal\u2019s triangle from Checkpoint 1.</p>'
+     +tryItMC(function(){
+       var n=pick([3,4,5]);
+       var row=[];for(var r=0;r<=n;r++){row.push(nCr(n,r));}
+       var terms=row.map(function(c,i){
+         var aPow=n-i, bPow=i;
+         var aStr = aPow===0?'':(aPow===1?'a':'a^('+aPow+')');
+         var bStr = bPow===0?'':(bPow===1?'b':'b^('+bPow+')');
+         var coefStr = c===1?'':String(c);
+         return coefStr+aStr+bStr;
+       });
+       return {question:'What is the expansion of (a+b)'+'^('+n+')'+'?',
+         options:[terms.join('+'), terms.slice().reverse().join('+').replace(/a/g,'X').replace(/b/g,'a').replace(/X/g,'b'), terms.map(function(t){return t.replace(/\d+/,'');}).join('+'), 'a^('+n+')+b^('+n+')'],
+         correct:0,
+         working:'Coefficients from row '+n+' of Pascal\u2019s triangle, with powers of a counting down and powers of b counting up.'};
+     }),
+    speak:'The coefficients are exactly row 4 of Pascal\u2019s triangle from Checkpoint 1. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 3 of 10',ti:'Finding a specific term',su:'Without expanding everything',panels:[
-   {dtitle:'General term: nCr aⁿ⁻ʳ bʳ',boxes:[{"stage": 1, "text": "Identify which r gives the term you want", "bg": "#fff5f0"}, {"stage": 2, "text": "Substitute directly — no need to expand the whole thing", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>A common AS exam trick: find just ONE term (e.g. the x⁴ term) rather than the entire expansion, saving time.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Term in x³ of (x+1)⁵", "bg": "#fff5f0"}],p:1,html:'<p>Identify r and substitute.</p>'+tryItMC(function(){return {question:'What is the coefficient of x\u00b3 in the expansion of (x+1)\u2075?',options:['10','5','20','1'],correct:0,working:'Term is 5C2 x\u00b3(1)\u00b2 = 10x\u00b3, coefficient 10.'};})}
+   {d:dQ3,p:1,html:'<p>Every term in (a+b)\u207f follows the same pattern.</p>',
+    speak:'Every term in the expansion follows the same pattern.'},
+   {d:dQ3,p:2,html:'<p>The general term formula lets you jump straight to any one term.</p>',
+    speak:'The general term formula lets you jump straight to any one term.'},
+   {d:dQ3,p:3,html:'<p>Pick the r that matches the power of b you want, then substitute \u2014 no need to expand the rest.</p>',
+    speak:'Pick the r that matches the power of b you want, then substitute \u2014 no need to expand the rest.'},
+   {d:dQ3,p:4,html:'<p>Worked example: the term in x\u00b3 of (1+x)\u2077.</p>'
+     +tryItMC(function(){
+       var n=pick([6,7,8,9]),r=pick([2,3,4]);
+       var coef=nCr(n,r);
+       return {question:'What is the coefficient of x'+'^('+r+')'+' in the expansion of (1+x)'+'^('+n+')'+'?',
+         options:[String(coef), String(n*r), String(nCr(n,r-1)), String(nCr(n,n-r+1))],
+         correct:0,
+         working:'Coefficient = \u207fC\u1d63 = '+n+'C'+r+' = '+coef+'.'};
+     }),
+    speak:'Worked example. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 4 of 10',ti:'Arithmetic progressions',su:'Constant common difference',panels:[
-   {dtitle:'nth term and common difference',boxes:[{"stage": 1, "text": "uₙ = a + (n−1)d", "text2": "a = first term, d = common difference", "bg": "#fff5f0"}],p:1,html:'<p>An arithmetic progression adds the same amount d each time — the pattern behind many real sequences.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "a=3, d=4, find u₁₀", "bg": "#fff5f0"}],p:1,html:'<p>Apply the nth term formula.</p>'+tryItMC(function(){return {question:'For an AP with a=3, d=4, what is u\u2081\u2080?',options:['39','43','36','40'],correct:0,working:'u\u2081\u2080=3+(10\u22121)(4)=3+36=39.'};})}
+   {d:dQ4,p:1,html:'<p>A sequence of terms.</p>',
+    speak:'A sequence of terms.'},
+   {d:dQ4,p:2,html:'<p>The SAME amount is added each step \u2014 this is what makes it an arithmetic progression.</p>',
+    speak:'The same amount is added each step \u2014 this is what makes it an arithmetic progression.'},
+   {d:dQ4,p:3,html:'<p>That gives the formula for any term, using the first term a and common difference d.</p>'
+     +tryItMC(function(){
+       var a=pick([2,5,-3,10]),d=pick([3,4,-2,6]),n=pick([8,10,12]);
+       var un=a+(n-1)*d;
+       return {question:'An AP has a='+a+' and d='+d+'. What is the '+n+'th term?',
+         options:[String(un), String(a+n*d), String(a*n), String(a+d*n)],
+         correct:0,
+         working:'u\u2099 = a+(n\u22121)d = '+a+'+'+(n-1)+'('+d+') = '+un+'.'};
+     }),
+    speak:'That gives the formula for any term, using the first term a and common difference d. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 5 of 10',ti:'Sum of an arithmetic series',su:'Sn = n/2 (2a + (n−1)d)',panels:[
-   {dtitle:'Sum formula',boxes:[{"stage": 1, "text": "Sn = n/2 [2a + (n−1)d]", "text2": "or equivalently n/2 (first + last term)", "bg": "#fff5f0"}],p:1,html:'<p>This formula pairs the first and last terms, which always sum to the same value — the classic Gauss trick.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "a=2, d=3, n=10", "bg": "#fff5f0"}],p:1,html:'<p>Apply the sum formula.</p>'+tryItMC(function(){return {question:'For an AP a=2, d=3, n=10, what is S\u2081\u2080?',options:['155','145','165','150'],correct:0,working:'S=5[2(2)+9(3)]=5[4+27]=5(31)=155.'};})}
+   {d:dQ5,p:1,html:'<p>Write out the sum, ending at the last term l.</p>',
+    speak:'Write out the sum, ending at the last term, l.'},
+   {d:dQ5,p:2,html:'<p>Now write the SAME sum backwards, from l down to a.</p>',
+    speak:'Now write the same sum backwards, from l down to a.'},
+   {d:dQ5,p:3,html:'<p>Add the two versions together, term by term \u2014 every pair adds up to exactly the same thing, (a+l).</p>',
+    speak:'Add the two versions together, term by term \u2014 every pair adds up to exactly the same thing, a plus l.'},
+   {d:dQ5,p:4,html:'<p>Since there are n such pairs, dividing by 2 gives the sum formula.</p>'
+     +tryItMC(function(){
+       var a=pick([1,2,3,5]),d=pick([2,3,4]),n=pick([10,12,15,20]);
+       var Sn=n/2*(2*a+(n-1)*d);
+       return {question:'Find the sum of the first '+n+' terms of an AP with a='+a+', d='+d+'.',
+         options:[String(Sn), String(n*(a+d)), String((a+(n-1)*d)), String(n/2*(a+d))],
+         correct:0,
+         working:'S\u2099 = n/2(2a+(n\u22121)d) = '+n+'/2(2('+a+')+'+(n-1)+'('+d+')) = '+Sn+'.'};
+     }),
+    speak:'Since there are n such pairs, dividing by 2 gives the sum formula. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 6 of 10',ti:'Geometric progressions',su:'Constant common ratio',panels:[
-   {dtitle:'nth term of a GP',boxes:[{"stage": 1, "text": "uₙ = arⁿ⁻¹", "text2": "a = first term, r = common ratio", "bg": "#fff5f0"}],p:1,html:'<p>A geometric progression multiplies by the same ratio r each time, rather than adding a constant.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "a=2, r=3, find u₅", "bg": "#fff5f0"}],p:1,html:'<p>Apply the nth term formula.</p>'+tryItMC(function(){return {question:'For a GP with a=2, r=3, what is u\u2085?',options:['162','54','486','18'],correct:0,working:'u\u2085=2\u00d73\u2074=2\u00d781=162.'};})}
+   {d:dQ6,p:1,html:'<p>A sequence of terms, growing in size.</p>',
+    speak:'A sequence of terms, growing in size.'},
+   {d:dQ6,p:2,html:'<p>The SAME factor is multiplied each step \u2014 this is what makes it a geometric progression.</p>',
+    speak:'The same factor is multiplied each step \u2014 this is what makes it a geometric progression.'},
+   {d:dQ6,p:3,html:'<p>That gives the formula for any term, using the first term a and common ratio r.</p>'
+     +tryItMC(function(){
+       var a=pick([1,2,3]),r=pick([2,3,4]),n=pick([4,5,6]);
+       var un=a*Math.pow(r,n-1);
+       return {question:'A GP has a='+a+' and r='+r+'. What is the '+n+'th term?',
+         options:[String(un), String(a*r*n), String(a+r*(n-1)), String(Math.pow(r,n))],
+         correct:0,
+         working:'u\u2099 = ar\u207f\u207b\u00b9 = '+a+'\u00d7'+r+'^'+(n-1)+' = '+un+'.'};
+     }),
+    speak:'That gives the formula for any term, using the first term a and common ratio r. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 7 of 10',ti:'Sum of a geometric series',su:'Sn = a(1−rⁿ)/(1−r)',panels:[
-   {dtitle:'Sum formula',boxes:[{"stage": 1, "text": "Sn = a(1−rⁿ)/(1−r)  for r≠1", "bg": "#fff5f0"}],p:1,html:'<p>Derived by a clever subtraction trick (Sn − rSn). Works for any r except r=1.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "a=3, r=2, n=4", "bg": "#fff5f0"}],p:1,html:'<p>Apply the sum formula.</p>'+tryItMC(function(){return {question:'For a GP with a=3, r=2, n=4, what is S\u2084?',options:['45','24','48','42'],correct:0,working:'S=3(1\u22122\u2074)/(1\u22122)=3(\u221215)/(\u22121)=45.'};})}
+   {d:dQ7,p:1,html:'<p>Write out the sum of the first n terms.</p>',
+    speak:'Write out the sum of the first n terms.'},
+   {d:dQ7,p:2,html:'<p>Multiply the WHOLE sum by r \u2014 this shifts every term along by one position.</p>',
+    speak:'Multiply the whole sum by r \u2014 this shifts every term along by one position.'},
+   {d:dQ7,p:3,html:'<p>Subtract: almost every term cancels out, leaving only the very first and very last.</p>',
+    speak:'Subtract: almost every term cancels out, leaving only the very first and very last.'},
+   {d:dQ7,p:4,html:'<p>Factorise both sides to reach the sum formula.</p>'
+     +tryItMC(function(){
+       var a=pick([1,2,3]),r=pick([2,3,-2]),n=pick([4,5,6]);
+       var Sn=(a*(1-Math.pow(r,n)))/(1-r);
+       return {question:'Find the sum of the first '+n+' terms of a GP with a='+a+', r='+r+'.',
+         options:[String(Sn), String(a*Math.pow(r,n)), String(a*n*r), String((a*(1+Math.pow(r,n)))/(1-r))],
+         correct:0,
+         working:'S\u2099 = a(1\u2212r\u207f)/(1\u2212r) = '+a+'(1\u2212('+r+')^'+n+')/(1\u2212('+r+')) = '+Sn+'.'};
+     }),
+    speak:'Factorise both sides to reach the sum formula. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 8 of 10',ti:'Sum to infinity',su:'When |r|<1',panels:[
-   {dtitle:'S∞ = a/(1−r)',boxes:[{"stage": 1, "text": "Only valid when |r| < 1 (convergent)", "bg": "#fff5f0"}, {"stage": 2, "text": "As n→∞, rⁿ→0, leaving just a/(1−r)", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>If |r|≥1 the series diverges (grows forever or oscillates) and has no sum to infinity.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "a=8, r=½", "bg": "#fff5f0"}],p:1,html:'<p>Apply the sum-to-infinity formula.</p>'+tryItMC(function(){return {question:'For a GP with a=8, r=\u00bd, what is S\u221e?',options:['16','8','4','12'],correct:0,working:'S\u221e=8/(1\u2212\u00bd)=8/0.5=16.'};})}
+   {d:dQ8,p:1,html:'<p>When |r|<1, each successive term is smaller than the last \u2014 the terms shrink toward zero without ever quite reaching it.</p>',
+    speak:'When the absolute value of r is less than 1, each successive term is smaller than the last \u2014 the terms shrink toward zero without ever quite reaching it.'},
+   {d:dQ8,p:2,html:'<p>In the sum formula, as n grows without bound, r\u207f itself shrinks to 0 \u2014 so that part of the formula simply vanishes.</p>',
+    speak:'In the sum formula, as n grows without bound, r to the power n itself shrinks to 0 \u2014 so that part of the formula simply vanishes.'},
+   {d:dQ8,p:3,html:'<p>What\u2019s left is the sum to infinity \u2014 but only when |r|<1; otherwise the terms never shrink, and there\u2019s no finite total.</p>'
+     +tryItMC(function(){
+       var a=pick([4,6,8,12]),r=pick([0.5,0.25,0.2,0.4]);
+       var Sinf=(a/(1-r)).toFixed(2).replace(/\.00$/,'').replace(/0$/,'');
+       return {question:'Find the sum to infinity of a GP with a='+a+' and r='+r+'.',
+         options:[Sinf, String(a), String((a*r).toFixed(2)), String((a/r).toFixed(2))],
+         correct:0,
+         working:'S\u221e = a/(1\u2212r) = '+a+'/(1\u2212'+r+') = '+Sinf+'.'};
+     }),
+    speak:'What\u2019s left is the sum to infinity \u2014 but only when the absolute value of r is less than 1. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 9 of 10',ti:'Mixed AP/GP problems',su:'Setting up simultaneous equations',panels:[
-   {dtitle:'Using two pieces of given information',boxes:[{"stage": 1, "text": "e.g. u₂=6 and u₅=48 for a GP", "bg": "#fff5f0"}, {"stage": 2, "text": "Divide the equations to eliminate a, solve for r first", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>When given two terms rather than a and r directly, dividing one equation by the other often eliminates a cleanly.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "u₁=4, u₃=36 for a GP", "bg": "#fff5f0"}],p:1,html:'<p>Find r² first.</p>'+tryItMC(function(){return {question:'For a GP, u\u2081=4 and u\u2083=36. What is r\u00b2?',options:['9','6','3','12'],correct:0,working:'u\u2083=u\u2081r\u00b2 \u2192 36=4r\u00b2 \u2192 r\u00b2=9.'};})}
+   {d:dQ9,p:1,html:'<p>Some problems give you two pieces of information about a progression, not the first term and common ratio directly.</p>',
+    speak:'Some problems give you two pieces of information about a progression, not the first term and common ratio directly.'},
+   {d:dQ9,p:2,html:'<p>Write each piece of information as an equation using u\u2099=ar\u207f\u207b\u00b9.</p>',
+    speak:'Write each piece of information as an equation using the nth term formula.'},
+   {d:dQ9,p:3,html:'<p>Divide one equation by the other \u2014 the unknown a cancels out, leaving just r.</p>',
+    speak:'Divide one equation by the other \u2014 the unknown a cancels out, leaving just r.'},
+   {d:dQ9,p:4,html:'<p>Substitute r back into either original equation to find a.</p>'
+     +tryItMC(function(){
+       var a=pick([2,3,4]),r=pick([2,3]);
+       var u2=a*r, u4=a*Math.pow(r,3);
+       return {question:'A GP has 2nd term '+u2+' and 4th term '+u4+'. What is r?',
+         options:[String(r), String(r*r), String(u4/u2), String(Math.sqrt(u4-u2))].filter(function(v,i,arr){return arr.indexOf(v)===i;}).slice(0,4),
+         correct:0,
+         working:'u\u2084/u\u2082 = ar\u00b3/ar = r\u00b2 = '+(u4/u2)+' \u2192 r = '+r+'.'};
+     }),
+    speak:'Substitute r back into either original equation to find a. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 10 of 10',ti:'Bringing it together',su:'Consolidating Series',panels:[
-   {dtitle:'The Series toolkit',boxes:[{"stage": 1, "text": "Binomial expansion, general term", "bg": "#fff5f0"}, {"stage": 2, "text": "AP: nth term, sum formula", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "GP: nth term, sum formula, sum to infinity", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>Series questions often combine both AP and GP knowledge in one problem — always identify which type you’re dealing with first.</p>'},
-   {dtitle:'Ready for AS-P1-07',boxes:[{"stage": 1, "text": "Next: Differentiation", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:1,html:'<p>Nice work — Series is complete. Next up: Differentiation.</p>'}
+   {d:dQ10,p:1,html:'<p>Binomial coefficients come from Pascal\u2019s triangle, and the general term formula lets you find any single term without expanding everything.</p>',
+    speak:'Binomial coefficients come from Pascal\u2019s triangle, and the general term formula lets you find any single term without expanding everything.'},
+   {d:dQ10,p:2,html:'<p>AP and GP sum formulas both come from genuine derivations \u2014 reverse-and-add, and S minus rS \u2014 not facts to memorise blindly.</p>',
+    speak:'AP and GP sum formulas both come from genuine derivations \u2014 reverse-and-add, and S minus r S \u2014 not facts to memorise blindly.'},
+   {d:dQ10,p:3,html:'<p>Sum to infinity only exists for |r|<1, and mixed AP/GP problems reduce to simultaneous equations.</p>'
+     +tryItMC(function(){
+       var bank=[
+         {question:'Find the coefficient of x\u2074 in the expansion of (2+x)\u2076.',
+          options:['60','15','96','240'],
+          correct:0,
+          working:'Term = \u2076C\u2084(2)\u00b2x\u2074 = 15\u00d74x\u2074 = 60x\u2074, so the coefficient is 60.'},
+         {question:'The 3rd term of an AP is 11 and the 7th term is 27. Find the common difference d.',
+          options:['4','5','16/4','8'],
+          correct:0,
+          working:'u\u2087\u2212u\u2083 = 4d = 27\u221211 = 16, so d = 4.'},
+         {question:'A GP has first term 5 and sum to infinity 20. Find r.',
+          options:['0.75','0.25','4','0.2'],
+          correct:0,
+          working:'S\u221e=a/(1\u2212r) \u2192 20=5/(1\u2212r) \u2192 1\u2212r=0.25 \u2192 r=0.75.'},
+         {question:'Find the sum of the first 10 terms of the AP 4, 7, 10, 13, ...',
+          options:['175','130','85','220'],
+          correct:0,
+          working:'a=4, d=3, n=10: S\u2081\u2080=10/2(2(4)+9(3))=5(8+27)=5(35)=175.'}
+       ];
+       return pick(bank);
+     }),
+    speak:'Sum to infinity only exists for small r, and mixed AP/GP problems reduce to simultaneous equations. Now it\u2019s your turn.'},
+   {d:dQ10,p:4,html:'<p>Nice work \u2014 Series is complete. Next up: Differentiation.</p>',
+    speak:'Nice work \u2014 Series is complete. Next up: Differentiation.'}
   ]}
 ];
 
@@ -276,13 +598,17 @@ function saveProgress(){
   try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify({qi:qi,pi:pi})); }catch(e){}
 }
 function render(){
+  if (typeof stopReading === 'function') stopReading();
   var qq=Q[qi],pp=qq.panels[pi];
   document.getElementById('ey').textContent=qq.ey;
   document.getElementById('ti').textContent=qq.ti;
   document.getElementById('su').textContent=qq.su;
-  drawGeneric(pp.dtitle, pp.boxes, pp.p);
+  pp.d(pp.p);
   var pn=document.getElementById('pn');
   pn.innerHTML=pp.html;
+  if (qi===Q.length-1 && pi===qq.panels.length-1) {
+    pn.innerHTML += '<div class="test-link-row"><a class="test-link-btn" href="test.html?topic='+(window.__testTopicId||759)+'">\ud83d\udcdd Optional: take the test on this topic</a></div>';
+  }
   pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
   document.getElementById('pb').disabled=(qi===0&&pi===0);
   document.getElementById('nb').textContent=(pi===qq.panels.length-1&&qi===Q.length-1)?'Done':'Next \u2192';
@@ -331,6 +657,112 @@ document.getElementById('sb').addEventListener('click',function(e){
     });
   }
 })();
+
+// ── Auto-reader ──────────────────────────────────────────────────────────
+var voiceSelEl = document.getElementById('voiceSel');
+var readerStatusEl = document.getElementById('readerStatus');
+var readBtnEl = document.getElementById('readBtn');
+var autoBtnEl = document.getElementById('autoBtn');
+var stopBtnEl = document.getElementById('stopReadBtn');
+var autoPlaying = false;
+var userPickedVoice = false;
+
+function populateVoices(){
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  voiceSelEl.innerHTML = '<option value="">Default voice</option>' + voices.map(function(v,i){return '<option value="'+i+'">'+v.name+' ('+v.lang+')</option>';}).join('');
+}
+if (window.speechSynthesis) {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+voiceSelEl.addEventListener('change', function(){ userPickedVoice = (voiceSelEl.value !== ''); });
+function currentVoice(){
+  if (!userPickedVoice) return null;
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  return voices[parseInt(voiceSelEl.value,10)] || null;
+}
+function hasInteractiveQuestion(pp){ return pp.html.indexOf('data-tryid')>-1; }
+
+function stopReading(){
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  autoPlaying = false;
+  readBtnEl.disabled = false; autoBtnEl.disabled = false;
+  stopBtnEl.style.display = 'none';
+  readerStatusEl.textContent = '';
+  window.__activeUtterance = null;
+}
+
+function speakPanel(pp, onDone){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech isn\u2019t supported on this browser.'; if(onDone) onDone(); return; }
+  if (!pp.speak) { if(onDone) onDone(); return; }
+  var u = new SpeechSynthesisUtterance(pp.speak);
+  var v = currentVoice();
+  if (v) u.voice = v;
+  u.rate = 0.95;
+  u.onend = function(){ window.__activeUtterance = null; if (onDone) onDone(); };
+  u.onerror = function(ev){
+    window.__activeUtterance = null;
+    readerStatusEl.textContent = 'Couldn\u2019t play audio (' + (ev && ev.error ? ev.error : 'unknown error') + '). Check the device isn\u2019t muted and try again.';
+    if (onDone) onDone();
+  };
+  window.__activeUtterance = u;
+  speechSynthesis.speak(u);
+  setTimeout(function(){
+    if (window.__activeUtterance === u && !speechSynthesis.speaking && !speechSynthesis.pending) {
+      readerStatusEl.textContent = 'No audio started \u2014 try tapping the button again, or check the device isn\u2019t on silent/muted.';
+    }
+  }, 600);
+}
+
+readBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  readerStatusEl.textContent = 'Reading\u2026';
+  var pp = Q[qi].panels[pi];
+  speakPanel(pp, function(){
+    readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+  });
+});
+
+autoBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  autoPlaying = true;
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  autoStep();
+});
+
+function autoStep(){
+  if (!autoPlaying) return;
+  var qq = Q[qi], pp = qq.panels[pi];
+  readerStatusEl.textContent = 'Reading step '+(pi+1)+' of '+qq.panels.length+'\u2026';
+  speakPanel(pp, function(){
+    if (!autoPlaying) return;
+    if (hasInteractiveQuestion(pp)) {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Your turn \u2014 try the question below.';
+      return;
+    }
+    if (pi < qq.panels.length-1) {
+      pi++;
+      var pn=document.getElementById('pn'); qq.panels[pi].d(qq.panels[pi].p);
+      pn.innerHTML=qq.panels[pi].html;
+      pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
+      var dt=document.getElementById('dt');
+      dt.innerHTML=qq.panels.map(function(_,i){return '<div class="dot '+(i<pi?'dn':i===pi?'on':'')+'"></div>';}).join('');
+      saveProgress();
+      autoStep();
+    } else {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Checkpoint narrated.';
+    }
+  });
+}
+
+stopBtnEl.addEventListener('click', stopReading);
 
 render();
 </script>
