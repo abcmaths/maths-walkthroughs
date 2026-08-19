@@ -213,24 +213,30 @@ document.addEventListener('click',function(e){
   }
 });
 function g(){return document.getElementById('dg');}
+function xesc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function T(x,y,txt,c,sz,a,bold){
   c=c||'#241A17';sz=sz||12;a=a||'middle';
+  // Split on ^-superscript markers first, THEN escape each resulting piece —
+  // any literal <, >, or & in diagram text (e.g. "a<0") must be escaped or it
+  // breaks the SVG's XML, since this string is inserted directly, not via
+  // textContent. A previous version skipped this and silently produced
+  // invalid SVG wherever a comparison symbol appeared in diagram text.
   var parts=String(txt).split(/\^(\([^)]*\)|\S)/);
   var tspans='';
   for(var i=0;i<parts.length;i++){
     if(!parts[i])continue;
     if(i%2===1){
       var exp=parts[i].replace(/^\(|\)$/g,'');
-      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+exp+'</tspan>';
+      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+xesc(exp)+'</tspan>';
     }else{
-      tspans+='<tspan>'+parts[i]+'</tspan>';
+      tspans+='<tspan>'+xesc(parts[i])+'</tspan>';
     }
   }
   return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+tspans+'</text>';
 }
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
-function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
+function C(cx,cy,r,fill,stroke,sw){stroke=stroke||fill;return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
 function OC(cx,cy,r,stroke){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="#fff" stroke="'+(stroke||'#a01820')+'" stroke-width="2"/>';}
 // Wraps a group of elements with an entrance animation class. Only pass
 // animate=true when p equals the EXACT panel that first introduces this
@@ -317,31 +323,25 @@ function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
 function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o.push(T(240,16,'Which functions have an inverse?','#C0272D',13,'middle',true));
   if(p>=1){
-    // many-to-one: y = x^2, drawn small, LEFT half of canvas
-    o.push(T(120,32,'y = x\u00b2  (many-to-one)','#a01820',11,'middle',true));
+    o.push(wrap(p===1,'an-fade',T(120,32,'y = x\u00b2  (many-to-one)','#a01820',11,'middle',true)));
     o.push(L(40,140,200,140,'#888',1));o.push(L(120,60,120,190,'#888',1));
     var pts=[];for(var xv=-3;xv<=3;xv+=0.2){var yv=xv*xv;var px=120+xv*22;var py=140-yv*13;if(py>60)pts.push(px+','+py);}
-    o.push('<polyline points="'+pts.join(' ')+'" fill="none" stroke="#a01820" stroke-width="2.5"/>');
+    o.push(drawCurve(pts.join(' '),'#a01820',2.5,p===1));
   }
   if(p>=2){
-    // the horizontal test line crossing it TWICE
-    o.push(L(45,105,195,105,'#241A17',2,'4,3'));
-    o.push(C(120-Math.sqrt(35)*22/6.08,105,4,'#241A17'));
-    o.push(C(120+Math.sqrt(35)*22/6.08,105,4,'#241A17'));
-    o.push(T(120,205,'Crosses TWICE \u2192 many-to-one \u2192 NO inverse','#a01820',10,'middle',true));
-    // one-to-one: y = x^3, RIGHT half
-    o.push(T(360,32,'y = x\u00b3  (one-to-one)','#1a7a3a',11,'middle',true));
+    o.push(wrap(p===2,'an-fade',L(45,105,195,105,'#241A17',2,'4,3')));
+    o.push(wrap(p===2,'an-pop',C(120-Math.sqrt(35)*22/6.08,105,4,'#241A17')+C(120+Math.sqrt(35)*22/6.08,105,4,'#241A17')));
+    o.push(wrap(p===2,'an-fade',T(120,205,'Crosses TWICE \u2192 many-to-one \u2192 NO inverse','#a01820',10,'middle',true)));
+    o.push(wrap(p===2,'an-fade',T(360,32,'y = x\u00b3  (one-to-one)','#1a7a3a',11,'middle',true)));
     o.push(L(280,140,440,140,'#888',1));o.push(L(360,60,360,190,'#888',1));
     var pts2=[];for(var xv2=-1.7;xv2<=1.7;xv2+=0.1){var yv2=xv2*xv2*xv2;var px2=360+xv2*45;var py2=140-yv2*35;if(py2>60&&py2<190)pts2.push(px2+','+py2);}
-    o.push('<polyline points="'+pts2.join(' ')+'" fill="none" stroke="#1a7a3a" stroke-width="2.5"/>');
-    o.push(L(285,105,435,105,'#241A17',2,'4,3'));
-    o.push(C(360+Math.cbrt(35/35)*45*0.44,105,4,'#241A17'));
-    o.push(T(360,205,'Crosses ONCE \u2192 one-to-one \u2192 HAS an inverse','#1a7a3a',10,'middle',true));
+    o.push(drawCurve(pts2.join(' '),'#1a7a3a',2.5,p===2));
+    o.push(wrap(p===2,'an-fade',L(285,105,435,105,'#241A17',2,'4,3')));
+    o.push(wrap(p===2,'an-pop',C(360+Math.cbrt(35/35)*45*0.44,105,4,'#241A17')));
+    o.push(wrap(p===2,'an-fade',T(360,205,'Crosses ONCE \u2192 one-to-one \u2192 HAS an inverse','#1a7a3a',10,'middle',true)));
   }
   if(p>=3){
-    o.push(R(30,216,420,36,'#fff8e1','#C8922A',1.5));
-    o.push(T(240,232,'The Horizontal Line Test: if any horizontal line crosses the graph','#7A5A18',11,'middle',true));
-    o.push(T(240,248,'more than once, there\u2019s no inverse (unless you restrict the domain).','#7A5A18',11,'middle',false));
+    o.push(wrap(p===3,'an-fade',R(30,216,420,36,'#fff8e1','#C8922A',1.5)+T(240,232,'The Horizontal Line Test: if any horizontal line crosses the graph','#7A5A18',11,'middle',true)+T(240,248,'more than once, there\u2019s no inverse (unless you restrict the domain).','#7A5A18',11,'middle',false)));
   }
   if(p>=4){
     o.push(R(20,86,440,120,'#fff','none',0)); // spacer, no-op box (kept for layout consistency)
@@ -361,37 +361,28 @@ function dQ3b(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
 function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o.push(T(240,16,'The reflection relationship','#C0272D',13,'middle',true));
   if(p>=1){o.push(T(240,32,'The graph of f\u207b\u00b9 is the reflection of f in the line y = x.','#241A17',12,'middle',false));}
+  // Shared origin/scale for BOTH axes is what makes this a genuine reflection:
+  // reflecting data point (a,b) to (b,a) and re-applying the same px()/py()
+  // mapping is mathematically guaranteed to mirror it across the drawn y=x line.
+  var ox=70, oy=220, sc=30;
+  function px(v){return ox+v*sc;}
+  function py(v){return oy-v*sc;}
+  var fx0=0.3, fx1=2.0;
   if(p>=2){
-    // Shared origin/scale for BOTH axes is what makes this a genuine reflection:
-    // reflecting data point (a,b) to (b,a) and re-applying the same px()/py()
-    // mapping is mathematically guaranteed to mirror it across the drawn y=x
-    // line — unlike the old version, which just eyeballed two pixel positions
-    // that only vaguely looked diagonal and weren't actually mirror images.
-    var ox=70, oy=220, sc=30;
-    function px(v){return ox+v*sc;}
-    function py(v){return oy-v*sc;}
     o.push(L(ox,oy,ox,50,'#888',1));o.push(L(ox,oy,450,oy,'#888',1));
-    o.push(L(px(0),py(0),px(5.6),py(5.6),'#C8922A',1.5,'3,3'));
-    o.push(T(px(5.6)+14,py(5.6)-2,'y=x','#C8922A',10));
-    // f(x) = 2x
-    var fx0=0.3, fx1=2.0;
-    o.push(L(px(fx0),py(2*fx0),px(fx1),py(2*fx1),'#1a5a8a',2.5));
-    o.push(T(px(fx1)+10,py(2*fx1)-8,'y=f(x)','#1a5a8a',11,'middle',true));
-    // f\u207b\u00b9(x) = x/2 \u2014 literally the (x,y)\u2192(y,x) swap of f's own points, so it's a true mirror image
-    o.push(L(px(2*fx0),py(fx0),px(2*fx1),py(fx1),'#a01820',2.5));
-    o.push(T(px(2*fx1)+10,py(fx1)+16,'y=f\u207b\u00b9(x)','#a01820',11,'middle',true));
-    // One explicit reflected point pair, joined by a dotted connector, so the
-    // (a,b)\u2192(b,a) rule in the text below is visible, not just stated.
-    var ax=1.5, ay=2*ax;
-    o.push(C(px(ax),py(ay),4,'#1a5a8a'));
-    o.push(C(px(ay),py(ax),4,'#a01820'));
-    o.push(L(px(ax),py(ay),px(ay),py(ax),'#888',1,'2,2'));
-    o.push(T(px(ax)-8,py(ay)-8,'(1.5, 3)','#1a5a8a',9,'end',false));
-    o.push(T(px(ay)+8,py(ax)+16,'(3, 1.5)','#a01820',9,'start',false));
+    o.push(wrap(p===2,'an-fade',L(px(0),py(0),px(5.6),py(5.6),'#C8922A',1.5,'3,3')+T(px(5.6)+14,py(5.6)-2,'y=x','#C8922A',10)));
+    o.push(drawLine(px(fx0),py(2*fx0),px(fx1),py(2*fx1),'#1a5a8a',2.5,p===2));
+    o.push(wrap(p===2,'an-fade',T(px(fx1)+10,py(2*fx1)-8,'y=f(x)','#1a5a8a',11,'middle',true)));
   }
   if(p>=3){
-    o.push(R(30,226,420,28,'#fff8e1','#C8922A',1.2));
-    o.push(T(240,244,'Domain of f\u207b\u00b9 = Range of f.   Range of f\u207b\u00b9 = Domain of f.','#7A5A18',11,'middle',true));
+    // Watch f reflect into f⁻¹ — literally the (x,y)→(y,x) swap of f's own points.
+    o.push(drawLine(px(2*fx0),py(fx0),px(2*fx1),py(fx1),'#a01820',2.5,p===3));
+    o.push(wrap(p===3,'an-fade',T(px(2*fx1)+10,py(fx1)+16,'y=f\u207b\u00b9(x)','#a01820',11,'middle',true)));
+    var ax=1.5, ay=2*ax;
+    o.push(wrap(p===3,'an-pop',C(px(ax),py(ay),4,'#1a5a8a')+C(px(ay),py(ax),4,'#a01820')+L(px(ax),py(ay),px(ay),py(ax),'#888',1,'2,2')+T(px(ax)-8,py(ay)-8,'(1.5, 3)','#1a5a8a',9,'end',false)+T(px(ay)+8,py(ax)+16,'(3, 1.5)','#a01820',9,'start',false)));
+  }
+  if(p>=4){
+    o.push(wrap(p===4,'an-fade',R(30,226,420,28,'#fff8e1','#C8922A',1.2)+T(240,244,'Domain of f\u207b\u00b9 = Range of f.   Range of f\u207b\u00b9 = Domain of f.','#7A5A18',11,'middle',true)));
   }
   s.innerHTML=o.join('');}
 
@@ -404,25 +395,19 @@ function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
     var p1=base(90).map(function(pt){var parts=pt.split(',');return parts[0]+','+(140+parseFloat(parts[1]));});
     o.push('<polyline points="'+p1.join(' ')+'" fill="none" stroke="#888" stroke-width="2"/>');
     var p2=base(90).map(function(pt){var parts=pt.split(',');return parts[0]+','+(100+parseFloat(parts[1]));});
-    o.push('<polyline points="'+p2.join(' ')+'" fill="none" stroke="#1a5a8a" stroke-width="2.5"/>');
-    o.push(T(90,60,'y=f(x)+3','#1a5a8a',11,'middle',true));
-    o.push(T(90,158,'y=f(x)','#888',10,'middle',false));
-    o.push(T(90,182,'UP by 3 \u2014 matches intuition','#1a5a8a',10,'middle',false));
+    o.push(drawCurve(p2.join(' '),'#1a5a8a',2.5,p===1));
+    o.push(wrap(p===1,'an-fade',T(90,60,'y=f(x)+3','#1a5a8a',11,'middle',true)+T(90,158,'y=f(x)','#888',10,'middle',false)+T(90,182,'UP by 3 \u2014 matches intuition','#1a5a8a',10,'middle',false)));
   }
   if(p>=2){
     o.push(L(330,140,450,140,'#ccc',1));
     var p3=base(390).map(function(pt){var parts=pt.split(',');return parts[0]+','+(140+parseFloat(parts[1]));});
     o.push('<polyline points="'+p3.join(' ')+'" fill="none" stroke="#888" stroke-width="2"/>');
     var p4=base(360).map(function(pt){var parts=pt.split(',');return parts[0]+','+(140+parseFloat(parts[1]));});
-    o.push('<polyline points="'+p4.join(' ')+'" fill="none" stroke="#a01820" stroke-width="2.5"/>');
-    o.push(T(360,60,'y=f(x+3)','#a01820',11,'middle',true));
-    o.push(T(390,158,'y=f(x)','#888',10,'middle',false));
-    o.push(T(375,182,'LEFT by 3 \u2014 sign flips!','#a01820',10,'middle',true));
+    o.push(drawCurve(p4.join(' '),'#a01820',2.5,p===2));
+    o.push(wrap(p===2,'an-fade',T(360,60,'y=f(x+3)','#a01820',11,'middle',true)+T(390,158,'y=f(x)','#888',10,'middle',false)+T(375,182,'LEFT by 3 \u2014 sign flips!','#a01820',10,'middle',true)));
   }
   if(p>=3){
-    o.push(R(30,196,420,50,'#fff8e1','#C8922A',1.5));
-    o.push(T(240,214,'y = f(x) + a  \u2192  vertical shift, UP by a','#7A5A18',12,'middle',true));
-    o.push(T(240,234,'y = f(x + a)  \u2192  horizontal shift, LEFT by a (the AS trap)','#7A5A18',12,'middle',true));
+    o.push(wrap(p===3,'an-fade',R(30,196,420,50,'#fff8e1','#C8922A',1.5)+T(240,214,'y = f(x) + a  \u2192  vertical shift, UP by a','#7A5A18',12,'middle',true)+T(240,234,'y = f(x + a)  \u2192  horizontal shift, LEFT by a (the AS trap)','#7A5A18',12,'middle',true)));
   }
   s.innerHTML=o.join('');}
 
@@ -433,22 +418,17 @@ function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   if(p>=1){
     o.push(L(30,190,150,190,'#ccc',1));
     o.push('<polyline points="'+base2(90,190,1,1).join(' ')+'" fill="none" stroke="#888" stroke-width="2"/>');
-    o.push('<polyline points="'+base2(90,190,1,2).join(' ')+'" fill="none" stroke="#1a5a8a" stroke-width="2.5"/>');
-    o.push(T(90,60,'y=2f(x)','#1a5a8a',11,'middle',true));
-    o.push(T(90,204,'y=f(x)','#888',10,'middle',false));
-    o.push(T(90,228,'Vertical \u00d72 \u2014 taller','#1a5a8a',10,'middle',false));
+    o.push(drawCurve(base2(90,190,1,2).join(' '),'#1a5a8a',2.5,p===1));
+    o.push(wrap(p===1,'an-fade',T(90,60,'y=2f(x)','#1a5a8a',11,'middle',true)+T(90,204,'y=f(x)','#888',10,'middle',false)+T(90,228,'Vertical \u00d72 \u2014 taller','#1a5a8a',10,'middle',false)));
   }
   if(p>=2){
     o.push(L(330,190,450,190,'#ccc',1));
     o.push('<polyline points="'+base2(390,190,1,1).join(' ')+'" fill="none" stroke="#888" stroke-width="2"/>');
-    o.push('<polyline points="'+base2(390,190,0.5,1).join(' ')+'" fill="none" stroke="#a01820" stroke-width="2.5"/>');
-    o.push(T(390,60,'y=f(2x)','#a01820',11,'middle',true));
-    o.push(T(390,204,'y=f(x)','#888',10,'middle',false));
-    o.push(T(390,228,'Horizontal \u00d7\u00bd \u2014 squashed','#a01820',10,'middle',true));
+    o.push(drawCurve(base2(390,190,0.5,1).join(' '),'#a01820',2.5,p===2));
+    o.push(wrap(p===2,'an-fade',T(390,60,'y=f(2x)','#a01820',11,'middle',true)+T(390,204,'y=f(x)','#888',10,'middle',false)+T(390,228,'Horizontal \u00d7\u00bd \u2014 squashed','#a01820',10,'middle',true)));
   }
   if(p>=3){
-    o.push(R(30,236,420,20,'#fff8e1','#C8922A',1));
-    o.push(T(240,250,'y=a\u00b7f(x): vertical \u00d7a.   y=f(ax): horizontal \u00d71/a (reciprocal!)','#7A5A18',10.5,'middle',true));
+    o.push(wrap(p===3,'an-fade',R(30,236,420,20,'#fff8e1','#C8922A',1)+T(240,250,'y=a\u00b7f(x): vertical \u00d7a.   y=f(ax): horizontal \u00d71/a (reciprocal!)','#7A5A18',10.5,'middle',true)));
   }
   s.innerHTML=o.join('');}
 
@@ -458,23 +438,21 @@ function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   function baseAt(offx,offy,shiftX,scaleY,shiftY){var pts=[];for(var xv=-2;xv<=2;xv+=0.2){var yv=xv*xv;var xxv=xv+shiftX;pts.push((offx+xxv*22)+','+(offy-(yv*scaleY+shiftY)*10));}return pts;}
   if(p>=1){
     o.push(L(20,150,150,150,'#ccc',1));
-    o.push('<polyline points="'+baseAt(85,150,0,1,0).join(' ')+'" fill="none" stroke="#888" stroke-width="2"/>');
-    o.push(T(85,190,'Start: y=f(x)','#888',10,'middle',false));
+    o.push(drawCurve(baseAt(85,150,0,1,0).join(' '),'#888',2,p===1));
+    o.push(wrap(p===1,'an-fade',T(85,190,'Start: y=f(x)','#888',10,'middle',false)));
   }
   if(p>=2){
     o.push(L(170,150,300,150,'#ccc',1));
-    o.push('<polyline points="'+baseAt(235,150,-3,1,0).join(' ')+'" fill="none" stroke="#1a5a8a" stroke-width="2.5"/>');
-    o.push(T(235,190,'Step 1: shift right 3','#1a5a8a',10,'middle',true));
+    o.push(drawCurve(baseAt(235,150,-3,1,0).join(' '),'#1a5a8a',2.5,p===2));
+    o.push(wrap(p===2,'an-fade',T(235,190,'Step 1: shift right 3','#1a5a8a',10,'middle',true)));
   }
   if(p>=3){
     o.push(L(320,150,450,150,'#ccc',1));
-    o.push('<polyline points="'+baseAt(385,150,-3,2,-1).join(' ')+'" fill="none" stroke="#a01820" stroke-width="2.5"/>');
-    o.push(T(385,190,'Step 2: \u00d72, then up 1','#a01820',10,'middle',true));
+    o.push(drawCurve(baseAt(385,150,-3,2,-1).join(' '),'#a01820',2.5,p===3));
+    o.push(wrap(p===3,'an-fade',T(385,190,'Step 2: \u00d72, then up 1','#a01820',10,'middle',true)));
   }
   if(p>=4){
-    o.push(R(30,206,420,46,'#fff8e1','#C8922A',1.5));
-    o.push(T(240,226,'Apply transformations INSIDE the bracket first','#7A5A18',12,'middle',true));
-    o.push(T(240,244,'(working from the inside out), then outside ones.','#7A5A18',11,'middle',false));
+    o.push(wrap(p===4,'an-fade',R(30,206,420,46,'#fff8e1','#C8922A',1.5)+T(240,226,'Apply transformations INSIDE the bracket first','#7A5A18',12,'middle',true)+T(240,244,'(working from the inside out), then outside ones.','#7A5A18',11,'middle',false)));
   }
   s.innerHTML=o.join('');}
 
@@ -483,26 +461,22 @@ function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o.push(T(240,16,'The modulus function: |x|','#C0272D',13,'middle',true));
   if(p>=1){
     o.push(L(240,60,240,150,'#ccc',1));o.push(L(120,150,360,150,'#888',1));
-    o.push(L(240,80,300,150,'#1a5a8a',2.5));o.push(L(240,80,180,150,'#1a5a8a',2.5));
-    o.push(T(240,66,'y=|x|','#1a5a8a',11,'middle',true));
-    o.push(T(240,168,'Always \u2265 0 \u2014 the V shape','#888',10,'middle',false));
+    o.push(wrap(p===1,'an-draw',L(240,80,300,150,'#1a5a8a',2.5)+L(240,80,180,150,'#1a5a8a',2.5)));
+    o.push(wrap(p===1,'an-fade',T(240,66,'y=|x|','#1a5a8a',11,'middle',true)+T(240,168,'Always \u2265 0 \u2014 the V shape','#888',10,'middle',false)));
   }
   if(p>=2){
     // y=f(x) with a dip below the axis, then y=|f(x)| reflecting that part up
     o.push(L(30,190,180,190,'#ccc',1));
     var below=[];for(var xv=-2;xv<=2;xv+=0.2){var yv=xv*xv-1.5;below.push((105+xv*30)+','+(190-yv*20));}
-    o.push('<polyline points="'+below.join(' ')+'" fill="none" stroke="#a01820" stroke-width="2.5"/>');
-    o.push(T(105,60,'y=f(x)','#a01820',11,'middle',true));
-    o.push(T(105,208,'dips below the axis','#a01820',10,'middle',false));
+    o.push(drawCurve(below.join(' '),'#a01820',2.5,p===2));
+    o.push(wrap(p===2,'an-fade',T(105,60,'y=f(x)','#a01820',11,'middle',true)+T(105,208,'dips below the axis','#a01820',10,'middle',false)));
     o.push(L(300,190,450,190,'#ccc',1));
     var refl=[];for(var xv2=-2;xv2<=2;xv2+=0.2){var yv2=Math.abs(xv2*xv2-1.5);refl.push((375+xv2*30)+','+(190-yv2*20));}
-    o.push('<polyline points="'+refl.join(' ')+'" fill="none" stroke="#1a7a3a" stroke-width="2.5"/>');
-    o.push(T(375,60,'y=|f(x)|','#1a7a3a',11,'middle',true));
-    o.push(T(375,208,'reflected UP above axis','#1a7a3a',10,'middle',true));
+    o.push(drawCurve(refl.join(' '),'#1a7a3a',2.5,p===2));
+    o.push(wrap(p===2,'an-fade',T(375,60,'y=|f(x)|','#1a7a3a',11,'middle',true)+T(375,208,'reflected UP above axis','#1a7a3a',10,'middle',true)));
   }
   if(p>=3){
-    o.push(R(30,222,420,30,'#fff8e1','#C8922A',1.2));
-    o.push(T(240,240,'|a| = a if a\u22650, and |a| = \u2212a if a<0','#7A5A18',12,'middle',true));
+    o.push(wrap(p===3,'an-fade',R(30,222,420,30,'#fff8e1','#C8922A',1.2)+T(240,240,'|a| = a if a\u22650, and |a| = \u2212a if a<0','#7A5A18',12,'middle',true)));
   }
   s.innerHTML=o.join('');}
 
@@ -513,20 +487,18 @@ function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
     o.push(L(60,200,420,200,'#888',1.5));o.push(L(60,200,60,50,'#888',1.5));
     o.push(T(430,204,'x','#888',10));o.push(T(56,46,'y','#888',10));
     var pts=[];for(var xv=-1;xv<2;xv+=0.15){var yv=xv*xv;pts.push((150+xv*45)+','+(200-yv*14));}
-    o.push('<polyline points="'+pts.join(' ')+'" fill="none" stroke="#1a5a8a" stroke-width="2.5"/>');
-    o.push(OC(150+2*45,200-4*14,4,'#1a5a8a'));
-    o.push(T(180,80,'x\u00b2 (x<2)','#1a5a8a',11,'middle',true));
+    o.push(drawCurve(pts.join(' '),'#1a5a8a',2.5,p===1));
+    o.push(wrap(p===1,'an-pop',OC(150+2*45,200-4*14,4,'#1a5a8a')));
+    o.push(wrap(p===1,'an-fade',T(180,80,'x\u00b2 (x<2)','#1a5a8a',11,'middle',true)));
   }
   if(p>=2){
     var pts2=[];for(var xv2=2;xv2<=5;xv2+=0.2){var yv2=3*xv2-2;pts2.push((150+xv2*45)+','+(200-yv2*14));}
-    o.push('<polyline points="'+pts2.join(' ')+'" fill="none" stroke="#a01820" stroke-width="2.5"/>');
-    o.push(C(150+2*45,200-4*14,4,'#a01820'));
-    o.push(T(330,90,'3x\u22122 (x\u22652)','#a01820',11,'middle',true));
-    o.push(T(240,224,'Open circle = not included.  Filled circle = included.','#888',10,'middle',false));
+    o.push(drawCurve(pts2.join(' '),'#a01820',2.5,p===2));
+    o.push(wrap(p===2,'an-pop',C(150+2*45,200-4*14,4,'#a01820')));
+    o.push(wrap(p===2,'an-fade',T(330,90,'3x\u22122 (x\u22652)','#a01820',11,'middle',true)+T(240,224,'Open circle = not included.  Filled circle = included.','#888',10,'middle',false)));
   }
   if(p>=3){
-    o.push(R(30,236,420,20,'#fff8e1','#C8922A',1));
-    o.push(T(240,250,'Always check which interval your x-value falls into before evaluating.','#7A5A18',10.5,'middle',true));
+    o.push(wrap(p===3,'an-fade',R(30,236,420,20,'#fff8e1','#C8922A',1)+T(240,250,'Always check which interval your x-value falls into before evaluating.','#7A5A18',10.5,'middle',true)));
   }
   s.innerHTML=o.join('');}
 
@@ -596,9 +568,11 @@ var Q=[
  {ey:'Checkpoint 4 of 10',ti:'Graphing inverses',su:'The reflection relationship',panels:[
    {d:dQ4,p:1,html:'<p>Once you have f\u207b\u00b9 algebraically, its graph has a simple visual relationship to f\u2019s.</p>',
     speak:'Once you have f inverse algebraically, its graph has a simple visual relationship to f\u2019s.'},
-   {d:dQ4,p:2,html:'<p>The graph of f\u207b\u00b9 is always the reflection of f in the line y = x \u2014 every point (a,b) on f becomes (b,a) on f\u207b\u00b9.</p>',
-    speak:'The graph of f inverse is always the reflection of f in the line y equals x \u2014 every point, a comma b, on f becomes b comma a, on f inverse.'},
-   {d:dQ4,p:3,html:'<p>This reflection also means domain and range swap between a function and its inverse.</p>'
+   {d:dQ4,p:2,html:'<p>Here\u2019s y=f(x), together with the line y=x for reference.</p>',
+    speak:'Here\u2019s y equals f of x, together with the line y equals x for reference.'},
+   {d:dQ4,p:3,html:'<p>Watch f\u207b\u00b9 appear as the mirror image of f in that line \u2014 every point (a,b) on f becomes (b,a) on f\u207b\u00b9.</p>',
+    speak:'Watch f inverse appear as the mirror image of f in that line \u2014 every point, a comma b, on f becomes b comma a, on f inverse.'},
+   {d:dQ4,p:4,html:'<p>This reflection also means domain and range swap between a function and its inverse.</p>'
      +tryItMC(function(){
        var a=pick([1,2,3]),b=pick([2,3,4,5]);
        return {question:'If f has domain x\u2265'+a+' and range f(x)\u2265'+b+', what is the domain of f\u207b\u00b9?',
