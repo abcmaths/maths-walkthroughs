@@ -360,6 +360,7 @@
   <div class="nav-tab" id="nav-tab-schools" onclick="showTab('schools')">Schools</div>
   <div class="nav-tab" onclick="showTab('deepdive')">Deep Dive Progress</div>
   <div class="nav-tab" onclick="showTab('games')">Games</div>
+  <div class="nav-tab" onclick="showTab('leaderboard')">Leaderboard</div>
 </div>
 
 <main>
@@ -1142,10 +1143,19 @@
         </select>
         <div id="games-tab-content" style="font-size:0.9rem;color:#888">Loading…</div>
       </div>
+    </div>
+
+    <!-- TEST LEADERBOARD -->
+    <div class="tab-panel" id="tab-leaderboard">
       <div class="section">
         <div class="section-title" style="margin-bottom:6px">Student Leaderboard</div>
-        <p style="font-size:0.85rem;color:#888;margin-bottom:14px">Top students ranked by combined score across all games (respects the subject filter above).</p>
-        <div id="student-leaderboard-content" style="font-size:0.9rem;color:#888">Loading…</div>
+        <p style="font-size:0.85rem;color:#888;margin-bottom:14px">Ranked by test performance — average percentage across completed tests (minimum 3 tests to qualify, so one lucky attempt can't top the table).</p>
+        <select id="lb-filter-year" onchange="renderLeaderboardTab()" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:5px;font-size:0.85rem;margin-bottom:16px">
+          <option value="">All Years</option>
+          <option value="7">Year 7</option><option value="8">Year 8</option><option value="9">Year 9</option>
+          <option value="10">Year 10</option><option value="11">Year 11</option><option value="12">Year 12</option>
+        </select>
+        <div id="leaderboard-tab-content" style="font-size:0.9rem;color:#888">Loading…</div>
       </div>
     </div>
 
@@ -1826,7 +1836,7 @@
     if (name === 'reviews' && !isAbcSchool) { name = 'overview'; }
     if ((name === 'import' || name === 'schools') && !isSuperAdmin) { name = 'overview'; }
     if (name === 'schools') { renderSchoolsTable(); }
-    const names = ['overview','progress','tests','topics','users','diagnostic','reviews','import','schools','deepdive','games'];
+    const names = ['overview','progress','tests','topics','users','diagnostic','reviews','import','schools','deepdive','games','leaderboard'];
     document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
@@ -1836,6 +1846,7 @@
     if (name === 'diagnostic') window.switchDiagYear();
     if (name === 'reviews')  window.renderReviewTab();
     if (name === 'games')    window.renderGamesTab();
+    if (name === 'leaderboard') window.renderLeaderboardTab();
     if (name === 'deepdive') window.renderDeepDiveProgressTab();
   };
 
@@ -1891,32 +1902,49 @@
     });
     html += '</tbody></table></div>';
     el.innerHTML = html;
+  };
 
-    // Aggregate leaderboard across the currently filtered games: total score per
-    // student, summed across every game_leaderboard row for those game_codes.
-    const lbEl = document.getElementById('student-leaderboard-content');
-    if (lbEl) {
-      const filteredCodes = new Set(filteredGames.map(g => g.game_code));
-      const relevant = (lb || []).filter(r => filteredCodes.has(r.game_code));
-      const byStudent = {};
-      relevant.forEach(r => {
-        const key = r.full_name || 'Unknown';
-        if (!byStudent[key]) byStudent[key] = { name: key, total: 0, games: new Set() };
-        byStudent[key].total += (r.score || 0);
-        byStudent[key].games.add(r.game_code);
-      });
-      const ranked = Object.values(byStudent).sort((a,b) => b.total - a.total).slice(0, 20);
-      if (!ranked.length) {
-        lbEl.innerHTML = '<p style="color:#888">No leaderboard data for this subject yet.</p>';
-      } else {
-        let lh = '<div class="tbl-wrap"><table><thead><tr><th>Rank</th><th>Student</th><th>Total Score</th><th>Games Played</th></tr></thead><tbody>';
-        ranked.forEach((s,i) => {
-          lh += `<tr><td>${i+1}</td><td>${s.name}</td><td>${s.total}</td><td>${s.games.size}</td></tr>`;
-        });
-        lh += '</tbody></table></div>';
-        lbEl.innerHTML = lh;
-      }
+  // ── Test-based Student Leaderboard ──
+  // Ranks students by average test percentage (min 3 tests, so a single lucky
+  // attempt can't top the table). Pulls from the same allTestResults used by the
+  // Test Results tab, which already excludes staff QA attempts (role !== 'student').
+  window.renderLeaderboardTab = async function() {
+    const el = document.getElementById('leaderboard-tab-content');
+    el.innerHTML = 'Loading…';
+    if (!allTestResults) { await loadTestResults(); }
+
+    const yearFilter = document.getElementById('lb-filter-year').value;
+    const rows = (allTestResults || []).filter(r =>
+      !yearFilter || String(r.profiles?.year_group) === yearFilter
+    );
+
+    const byStudent = {};
+    rows.forEach(r => {
+      const key = r.student_id;
+      if (!byStudent[key]) byStudent[key] = { name: r.profiles?.full_name || 'Unknown', year: r.profiles?.year_group, sumPct: 0, count: 0, best: 0 };
+      byStudent[key].sumPct += (r.percentage || 0);
+      byStudent[key].count  += 1;
+      byStudent[key].best    = Math.max(byStudent[key].best, r.percentage || 0);
+    });
+
+    const MIN_TESTS = 3;
+    const ranked = Object.values(byStudent)
+      .filter(s => s.count >= MIN_TESTS)
+      .map(s => ({ ...s, avg: Math.round(s.sumPct / s.count) }))
+      .sort((a,b) => b.avg - a.avg || b.count - a.count)
+      .slice(0, 30);
+
+    if (!ranked.length) {
+      el.innerHTML = '<p style="color:#888">No students have completed at least ' + MIN_TESTS + ' tests yet.</p>';
+      return;
     }
+
+    let html = '<div class="tbl-wrap"><table><thead><tr><th>Rank</th><th>Student</th><th>Year</th><th>Avg %</th><th>Best %</th><th>Tests Taken</th></tr></thead><tbody>';
+    ranked.forEach((s,i) => {
+      html += `<tr><td>${i+1}</td><td>${s.name}</td><td>${s.year || '—'}</td><td>${s.avg}%</td><td>${s.best}%</td><td>${s.count}</td></tr>`;
+    });
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
   };
 
   // ── Diagnostic year switcher ──

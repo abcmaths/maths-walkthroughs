@@ -23,6 +23,12 @@
     /* Subject select */
     #subject-select { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 5px; font-size: 0.95rem; color: #333; background: white; }
     #subject-select:focus { outline: none; border-color: var(--accent); }
+    /* Anti-cheat: question text can't be selected/copied so it can't be pasted into
+       a search engine or AI tool. Answer input stays selectable (needed to edit it). */
+    #test-screen, .q-text, .q-counter, .hints, .mc-options { user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
+    #test-screen .answer-input { user-select: text; -webkit-user-select: text; }
+    .tab-warning-banner { display: none; background: #fde8e8; color: #a01f24; font-size: 0.85rem; font-weight: 600; padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; text-align: center; }
+    .tab-warning-banner.show { display: block; }
 
     /* Setup screen */
     .setup-card { background: white; border-radius: 10px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; }
@@ -175,6 +181,7 @@
 
   <!-- Test screen -->
   <div class="test-card" id="test-screen">
+    <div class="tab-warning-banner" id="tab-warning-banner">⚠ Please stay on this tab during the test — switching away has been noted.</div>
     <div class="progress-bar-wrap">
       <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
     </div>
@@ -268,6 +275,25 @@
   let startTime    = null;
   let selectedTopicId = null;
   let selectedTopicName = '';
+  let tabSwitchCount = 0;
+
+  // ── Anti-cheat: block copying question text out to a search engine / AI tool,
+  // and flag if the student switches tab/window away from the test mid-question. ──
+  const testScreenEl = document.getElementById('test-screen');
+  ['copy', 'cut', 'contextmenu'].forEach(evt => {
+    testScreenEl.addEventListener(evt, e => {
+      // Still allow copy/cut from the numeric answer input itself.
+      if (e.target && e.target.id === 'answer-input') return;
+      e.preventDefault();
+    });
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && testScreenEl.style.display !== 'none') {
+      tabSwitchCount++;
+      const banner = document.getElementById('tab-warning-banner');
+      if (banner) banner.classList.add('show');
+    }
+  });
 
   // ── Question generators — loaded dynamically from walkthrough files ──
   // Map topic_code -> array of generator functions
@@ -1640,7 +1666,7 @@ const BIOLOGY_WALKTHROUGH_FILES = {
 
     // Save to Supabase
     if (session) {
-      const { error: saveErr } = await supabase.from('test_results').insert({
+      const resultRow = {
         student_id:      session.user.id,
         topic_id:        selectedTopicId,
         school_id:       mySchoolId,
@@ -1649,8 +1675,17 @@ const BIOLOGY_WALKTHROUGH_FILES = {
         max_score:       maxScore,
         grade,
         time_taken_secs: timeTaken,
-        completed_at:    new Date().toISOString()
-      });
+        completed_at:    new Date().toISOString(),
+        tab_switches:    tabSwitchCount
+      };
+      let { error: saveErr } = await supabase.from('test_results').insert(resultRow);
+      if (saveErr) {
+        // tab_switches column may not exist yet on older schemas — retry without it
+        // so a missing column never blocks a genuine result from being saved.
+        delete resultRow.tab_switches;
+        const retry = await supabase.from('test_results').insert(resultRow);
+        saveErr = retry.error;
+      }
       if (saveErr) {
         console.error('test_results save failed:', saveErr);
       }
