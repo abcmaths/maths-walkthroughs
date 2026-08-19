@@ -12,6 +12,13 @@
   else {
     const { data: prof } = await _lc.from('profiles').select('full_name').eq('id', session.user.id).maybeSingle();
     window.__studentFirstName = prof && prof.full_name ? prof.full_name.split(' ')[0] : 'there';
+    // For the optional "Take the test" link on the final checkpoint. 755 is the
+    // known id for AS-P1-02/Functions as a fallback if this lookup ever fails —
+    // looking it up live is safer than hardcoding it as the only source, in case
+    // topic ids are ever regenerated.
+    _lc.from('topics').select('id').eq('topic_code','AS-P1-02').eq('subject','as_maths').maybeSingle()
+      .then(function(r){ window.__testTopicId = (r.data && r.data.id) ? r.data.id : 755; })
+      .catch(function(){ window.__testTopicId = 755; });
     document.addEventListener('DOMContentLoaded', function() {
       var el = document.getElementById('greet');
       if (el) el.textContent = 'Hi ' + window.__studentFirstName + ' — let\'s work through this one together.';
@@ -99,6 +106,21 @@ header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gol
 .welcome-go{width:100%;margin-top:6px;background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;border:none;padding:13px;border-radius:6px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
 .welcome-go:hover{filter:brightness(1.08);}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+@keyframes popIn{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes drawIn{to{stroke-dashoffset:0}}
+.an-pop{animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both;transform-box:fill-box;transform-origin:center;}
+.an-fade{animation:fadeUp .5s ease-out both;}
+.an-draw{animation:drawIn 1.1s ease-out forwards;}
+.reader-row{width:100%;max-width:760px;display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.reader-btn{font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:5px;border:1.5px solid var(--gold-dark);background:#fff;color:var(--gold-dark);cursor:pointer;font-family:inherit;}
+.reader-btn.active{background:var(--gold-dark);color:#fff;}
+.reader-btn:disabled{opacity:.4;cursor:default;}
+.reader-status{font-size:11.5px;color:#6b5750;}
+.reader-voice{font-size:12px;padding:6px 8px;border:1.5px solid var(--line);border-radius:5px;background:#fff;font-family:inherit;}
+.test-link-row{margin-top:16px;text-align:center;}
+.test-link-btn{display:inline-block;background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;padding:11px 24px;border-radius:6px;text-decoration:none;font-weight:700;font-size:14px;}
+.test-link-btn:hover{filter:brightness(1.08);}
 </style>
 </head>
 <body>
@@ -135,6 +157,13 @@ header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gol
     <div class="stage">
       <div class="cvs"><svg id="dg" viewBox="0 0 480 280"></svg></div>
       <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="reader-row">
+      <button class="reader-btn" id="readBtn">🔊 Read this step</button>
+      <button class="reader-btn" id="autoBtn">▶ Auto-play checkpoint</button>
+      <button class="reader-btn" id="stopReadBtn" style="display:none">■ Stop</button>
+      <select class="reader-voice" id="voiceSel"></select>
+      <span class="reader-status" id="readerStatus"></span>
     </div>
     <div class="ctrl">
       <button class="btn" id="pb">&larr; Back</button>
@@ -203,6 +232,19 @@ function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D'
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
 function OC(cx,cy,r,stroke){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="#fff" stroke="'+(stroke||'#a01820')+'" stroke-width="2"/>';}
+// Wraps a group of elements with an entrance animation class. Only pass
+// animate=true when p equals the EXACT panel that first introduces this
+// content — never p>=N — so the animation plays once and never replays when
+// the same content is simply still present on a later panel.
+function wrap(animate, cls, html){ return '<g class="'+(animate?cls:'')+'">'+html+'</g>'; }
+function drawCurve(points, color, w, animate){
+  if(animate) return '<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="'+w+'" stroke-dasharray="1400" stroke-dashoffset="1400" class="an-draw"/>';
+  return '<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="'+w+'"/>';
+}
+function drawLine(x1,y1,x2,y2,color,w,animate){
+  if(animate) return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+w+'" stroke-dasharray="500" stroke-dashoffset="500" class="an-draw"/>';
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+w+'"/>';
+}
 
 // Shared number-line drawer used by several checkpoints (domain/range restrictions).
 function numberLine(y,x0,x1){
@@ -320,11 +362,32 @@ function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o.push(T(240,16,'The reflection relationship','#C0272D',13,'middle',true));
   if(p>=1){o.push(T(240,32,'The graph of f\u207b\u00b9 is the reflection of f in the line y = x.','#241A17',12,'middle',false));}
   if(p>=2){
-    o.push(L(60,220,420,50,'#888',1));o.push(L(60,220,420,220,'#888',1));o.push(L(60,220,60,50,'#888',1));
-    o.push(L(60,220,420,50,'#C8922A',1.5,'3,3'));o.push(T(400,55,'y=x','#C8922A',10));
-    // f(x) = 2x (line through origin, slope 2), and its inverse x/2
-    o.push(L(80,210,200,80,'#1a5a8a',2.5));o.push(T(210,75,'y=f(x)','#1a5a8a',11,'middle',true));
-    o.push(L(80,192,340,120,'#a01820',2.5));o.push(T(350,116,'y=f\u207b\u00b9(x)','#a01820',11,'middle',true));
+    // Shared origin/scale for BOTH axes is what makes this a genuine reflection:
+    // reflecting data point (a,b) to (b,a) and re-applying the same px()/py()
+    // mapping is mathematically guaranteed to mirror it across the drawn y=x
+    // line — unlike the old version, which just eyeballed two pixel positions
+    // that only vaguely looked diagonal and weren't actually mirror images.
+    var ox=70, oy=220, sc=30;
+    function px(v){return ox+v*sc;}
+    function py(v){return oy-v*sc;}
+    o.push(L(ox,oy,ox,50,'#888',1));o.push(L(ox,oy,450,oy,'#888',1));
+    o.push(L(px(0),py(0),px(5.6),py(5.6),'#C8922A',1.5,'3,3'));
+    o.push(T(px(5.6)+14,py(5.6)-2,'y=x','#C8922A',10));
+    // f(x) = 2x
+    var fx0=0.3, fx1=2.0;
+    o.push(L(px(fx0),py(2*fx0),px(fx1),py(2*fx1),'#1a5a8a',2.5));
+    o.push(T(px(fx1)+10,py(2*fx1)-8,'y=f(x)','#1a5a8a',11,'middle',true));
+    // f\u207b\u00b9(x) = x/2 \u2014 literally the (x,y)\u2192(y,x) swap of f's own points, so it's a true mirror image
+    o.push(L(px(2*fx0),py(fx0),px(2*fx1),py(fx1),'#a01820',2.5));
+    o.push(T(px(2*fx1)+10,py(fx1)+16,'y=f\u207b\u00b9(x)','#a01820',11,'middle',true));
+    // One explicit reflected point pair, joined by a dotted connector, so the
+    // (a,b)\u2192(b,a) rule in the text below is visible, not just stated.
+    var ax=1.5, ay=2*ax;
+    o.push(C(px(ax),py(ay),4,'#1a5a8a'));
+    o.push(C(px(ay),py(ax),4,'#a01820'));
+    o.push(L(px(ax),py(ay),px(ay),py(ax),'#888',1,'2,2'));
+    o.push(T(px(ax)-8,py(ay)-8,'(1.5, 3)','#1a5a8a',9,'end',false));
+    o.push(T(px(ay)+8,py(ax)+16,'(3, 1.5)','#a01820',9,'start',false));
   }
   if(p>=3){
     o.push(R(30,226,420,28,'#fff8e1','#C8922A',1.2));
@@ -478,8 +541,10 @@ function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
 
 var Q=[
  {ey:'Checkpoint 1 of 10',ti:'Domain and range',su:'What functions are allowed to take in and give out',panels:[
-   {d:dQ1,p:1,html:'<p>A <b>function</b> assigns exactly one output to every input. The <b>domain</b> is the set of allowed inputs; the <b>range</b> is the set of possible outputs.</p>'},
-   {d:dQ1,p:2,html:'<p>Restricting the domain to x \u2265 0 is a very common AS-level device \u2014 it\u2019s what allows x\u00b2 to have an inverse (\u221ax) later, since the full x\u00b2 graph is not one-to-one.</p>'},
+   {d:dQ1,p:1,html:'<p>A <b>function</b> assigns exactly one output to every input. The <b>domain</b> is the set of allowed inputs; the <b>range</b> is the set of possible outputs.</p>',
+    speak:'A function assigns exactly one output to every input. The domain is the set of allowed inputs; the range is the set of possible outputs.'},
+   {d:dQ1,p:2,html:'<p>Restricting the domain to x \u2265 0 is a very common AS-level device \u2014 it\u2019s what allows x\u00b2 to have an inverse (\u221ax) later, since the full x\u00b2 graph is not one-to-one.</p>',
+    speak:'Restricting the domain to x greater than or equal to 0 is a very common AS-level device \u2014 it\u2019s what allows x squared to have an inverse, square root of x, later, since the full x squared graph is not one-to-one.'},
    {d:dQ1,p:3,html:'<p>Some domains are restricted by the function itself \u2014 you can never divide by zero, so x=3 must be excluded here.</p>'
      +tryItMC(function(){
        var a=pick([2,3,4,5]);
@@ -487,12 +552,16 @@ var Q=[
          options:['x = '+a,'x = 0','x = \u2212'+a,'x = 1'],
          correct:0,
          working:'Division by zero is undefined, and the denominator is zero when x = '+a+'.'};
-     })}
+     }),
+    speak:'Some domains are restricted by the function itself \u2014 you can never divide by zero. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 2 of 10',ti:'Composite functions',su:'Applying one function then another',panels:[
-   {d:dQ2,p:1,html:'<p>The notation fg(x) (or f\u2218g(x)) means: first apply g to x, then apply f to that result. Order matters \u2014 fg(x) is usually different from gf(x).</p>'},
-   {d:dQ2,p:2,html:'<p>Worked example: f(x) = 2x+1, g(x) = x\u00b2.</p>'},
-   {d:dQ2,p:3,html:'<p>fg(x) = f(x\u00b2) = 2x\u00b2+1 \u2014 substitute g(x) into f.</p>'},
+   {d:dQ2,p:1,html:'<p>The notation fg(x) (or f\u2218g(x)) means: first apply g to x, then apply f to that result. Order matters \u2014 fg(x) is usually different from gf(x).</p>',
+    speak:'The notation f g of x means: first apply g to x, then apply f to that result. Order matters \u2014 f g of x is usually different from g f of x.'},
+   {d:dQ2,p:2,html:'<p>Worked example: f(x) = 2x+1, g(x) = x\u00b2.</p>',
+    speak:'Worked example: f of x equals 2x plus 1, g of x equals x squared.'},
+   {d:dQ2,p:3,html:'<p>fg(x) = f(x\u00b2) = 2x\u00b2+1 \u2014 substitute g(x) into f.</p>',
+    speak:'f g of x equals f of x squared, equals 2 x squared plus 1 \u2014 substitute g of x into f.'},
    {d:dQ2,p:4,html:'<p>gf(x) = g(2x+1) = (2x+1)\u00b2 \u2014 notice this is NOT the same as fg(x). Composite functions are not commutative in general.</p>'
      +tryItMC(function(){
        var a=pick([1,2,3]),b=pick([2,3,4]);
@@ -500,14 +569,20 @@ var Q=[
          options:[b+'x+'+(a*b),b+'x+'+a,b+'x\u00b2+'+(a*b),'x+'+(a*b)],
          correct:0,
          working:'gf(x)=g(f(x))=g(x+'+a+')='+b+'(x+'+a+')='+b+'x+'+(a*b)+'.'};
-     })}
+     }),
+    speak:'g f of x equals g of 2x plus 1, equals 2x plus 1 all squared \u2014 notice this is NOT the same as f g of x. Composite functions are not commutative in general. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 3 of 10',ti:'Inverse functions',su:'Undoing a function \u2014 and which ones you can undo',panels:[
-   {d:dQ3,p:1,html:'<p>Not every function has an inverse. Compare y=x\u00b2 on the left \u2014 could this be undone uniquely?</p>'},
-   {d:dQ3,p:2,html:'<p>Draw a horizontal line across each graph. On y=x\u00b2 it crosses <b>twice</b> \u2014 two different x-values give the same output, so you can\u2019t undo it uniquely. On y=x\u00b3 it only ever crosses <b>once</b>.</p>'},
-   {d:dQ3,p:3,html:'<p>This is the <b>Horizontal Line Test</b>: a function only has an inverse where it\u2019s <b>one-to-one</b> (any horizontal line meets the graph at most once). It\u2019s why x\u00b2 needed its domain restricted to x\u22650 back in Checkpoint 1 \u2014 that restriction makes it one-to-one.</p>'},
-   {d:dQ3b,p:1,html:'<p>Once you know f is one-to-one, finding f\u207b\u00b9(x) uses a simple method: write y=f(x).</p>'},
-   {d:dQ3b,p:2,html:'<p>Swap x and y.</p>'},
+   {d:dQ3,p:1,html:'<p>Not every function has an inverse. Compare y=x\u00b2 on the left \u2014 could this be undone uniquely?</p>',
+    speak:'Not every function has an inverse. Compare y equals x squared on the left \u2014 could this be undone uniquely?'},
+   {d:dQ3,p:2,html:'<p>Draw a horizontal line across each graph. On y=x\u00b2 it crosses <b>twice</b> \u2014 two different x-values give the same output, so you can\u2019t undo it uniquely. On y=x\u00b3 it only ever crosses <b>once</b>.</p>',
+    speak:'Draw a horizontal line across each graph. On y equals x squared it crosses twice \u2014 two different x-values give the same output, so you can\u2019t undo it uniquely. On y equals x cubed it only ever crosses once.'},
+   {d:dQ3,p:3,html:'<p>This is the <b>Horizontal Line Test</b>: a function only has an inverse where it\u2019s <b>one-to-one</b> (any horizontal line meets the graph at most once). It\u2019s why x\u00b2 needed its domain restricted to x\u22650 back in Checkpoint 1 \u2014 that restriction makes it one-to-one.</p>',
+    speak:'This is the Horizontal Line Test: a function only has an inverse where it\u2019s one-to-one \u2014 any horizontal line meets the graph at most once. It\u2019s why x squared needed its domain restricted to x greater than or equal to 0 back in Checkpoint 1 \u2014 that restriction makes it one-to-one.'},
+   {d:dQ3b,p:1,html:'<p>Once you know f is one-to-one, finding f\u207b\u00b9(x) uses a simple method: write y=f(x).</p>',
+    speak:'Once you know f is one-to-one, finding f inverse of x uses a simple method: write y equals f of x.'},
+   {d:dQ3b,p:2,html:'<p>Swap x and y.</p>',
+    speak:'Swap x and y.'},
    {d:dQ3b,p:3,html:'<p>Rearrange to make y the subject again \u2014 that\u2019s f\u207b\u00b9(x).</p>'
      +tryItMC(function(){
        var a=pick([2,3,4]),b=pick([1,3,5,7]);
@@ -515,11 +590,14 @@ var Q=[
          options:['(x\u2212'+b+')/'+a,'(x+'+b+')/'+a,a+'x\u2212'+b,'(x\u2212'+a+')/'+b],
          correct:0,
          working:'y='+a+'x+'+b+' \u2192 x='+a+'y+'+b+' \u2192 y=(x\u2212'+b+')/'+a+'.'};
-     })}
+     }),
+    speak:'Rearrange to make y the subject again \u2014 that\u2019s f inverse of x. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 4 of 10',ti:'Graphing inverses',su:'The reflection relationship',panels:[
-   {d:dQ4,p:1,html:'<p>Once you have f\u207b\u00b9 algebraically, its graph has a simple visual relationship to f\u2019s.</p>'},
-   {d:dQ4,p:2,html:'<p>The graph of f\u207b\u00b9 is always the reflection of f in the line y = x \u2014 every point (a,b) on f becomes (b,a) on f\u207b\u00b9.</p>'},
+   {d:dQ4,p:1,html:'<p>Once you have f\u207b\u00b9 algebraically, its graph has a simple visual relationship to f\u2019s.</p>',
+    speak:'Once you have f inverse algebraically, its graph has a simple visual relationship to f\u2019s.'},
+   {d:dQ4,p:2,html:'<p>The graph of f\u207b\u00b9 is always the reflection of f in the line y = x \u2014 every point (a,b) on f becomes (b,a) on f\u207b\u00b9.</p>',
+    speak:'The graph of f inverse is always the reflection of f in the line y equals x \u2014 every point, a comma b, on f becomes b comma a, on f inverse.'},
    {d:dQ4,p:3,html:'<p>This reflection also means domain and range swap between a function and its inverse.</p>'
      +tryItMC(function(){
        var a=pick([1,2,3]),b=pick([2,3,4,5]);
@@ -527,11 +605,14 @@ var Q=[
          options:['x\u2265'+b,'x\u2265'+a,'x\u22650','all real x'],
          correct:0,
          working:'Domain of f\u207b\u00b9 = range of f = x\u2265'+b+'.'};
-     })}
+     }),
+    speak:'This reflection also means domain and range swap between a function and its inverse. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 5 of 10',ti:'Transformations: translations',su:'Shifting graphs horizontally and vertically',panels:[
-   {d:dQ5,p:1,html:'<p>Vertical shifts behave exactly as you\u2019d expect: y=f(x)+a moves the whole graph UP by a.</p>'},
-   {d:dQ5,p:2,html:'<p>Horizontal shifts are the classic AS trap: y=f(x+a) shifts the graph LEFT by a, not right \u2014 the sign flips versus intuition.</p>'},
+   {d:dQ5,p:1,html:'<p>Vertical shifts behave exactly as you\u2019d expect: y=f(x)+a moves the whole graph UP by a.</p>',
+    speak:'Vertical shifts behave exactly as you\u2019d expect: y equals f of x, plus a, moves the whole graph UP by a.'},
+   {d:dQ5,p:2,html:'<p>Horizontal shifts are the classic AS trap: y=f(x+a) shifts the graph LEFT by a, not right \u2014 the sign flips versus intuition.</p>',
+    speak:'Horizontal shifts are the classic AS trap: y equals f of x plus a, shifts the graph LEFT by a, not right \u2014 the sign flips versus intuition.'},
    {d:dQ5,p:3,html:'<p>Rule of thumb: anything added OUTSIDE f() affects y (behaves intuitively); anything added INSIDE the brackets affects x (sign flips).</p>'
      +tryItMC(function(){
        var a=pick([2,3,4,5,6]);
@@ -541,11 +622,14 @@ var Q=[
          options:[a+' units '+(dir==='plus'?'left':'right'),a+' units '+(dir==='plus'?'right':'left'),a+' units up',a+' units down'],
          correct:0,
          working:'y=f(x+a) shifts LEFT by a; y=f(x\u2212a) shifts RIGHT by a. Here that gives a shift of '+a+' units '+(dir==='plus'?'left':'right')+'.'};
-     })}
+     }),
+    speak:'Rule of thumb: anything added OUTSIDE the function affects y and behaves intuitively; anything added INSIDE the brackets affects x, and the sign flips. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 6 of 10',ti:'Transformations: stretches',su:'Scaling graphs',panels:[
-   {d:dQ6,p:1,html:'<p>Vertical stretch by a multiplies every y-value by a: y=a\u00b7f(x) makes the graph taller (or shorter if 0&lt;a&lt;1).</p>'},
-   {d:dQ6,p:2,html:'<p>Horizontal stretch y=f(ax) squashes the graph by factor 1/a \u2014 again the reciprocal is the AS-level subtlety.</p>'},
+   {d:dQ6,p:1,html:'<p>Vertical stretch by a multiplies every y-value by a: y=a\u00b7f(x) makes the graph taller (or shorter if 0&lt;a&lt;1).</p>',
+    speak:'Vertical stretch by a multiplies every y-value by a: y equals a times f of x, makes the graph taller, or shorter if a is between 0 and 1.'},
+   {d:dQ6,p:2,html:'<p>Horizontal stretch y=f(ax) squashes the graph by factor 1/a \u2014 again the reciprocal is the AS-level subtlety.</p>',
+    speak:'Horizontal stretch, y equals f of a x, squashes the graph by factor 1 over a \u2014 again the reciprocal is the AS-level subtlety.'},
    {d:dQ6,p:3,html:'<p>Easy way to remember: transformations OUTSIDE f() act on y directly; transformations INSIDE act on x with the reciprocal/opposite effect.</p>'
      +tryItMC(function(){
        var a=pick([2,3,4,5]);
@@ -553,12 +637,16 @@ var Q=[
          options:['1/'+a,String(a),'\u2212'+a,String(a*a)],
          correct:0,
          working:'y=f(ax) has horizontal scale factor 1/a; here a='+a+' gives scale factor 1/'+a+'.'};
-     })}
+     }),
+    speak:'Easy way to remember: transformations OUTSIDE the function act on y directly; transformations INSIDE act on x with the reciprocal or opposite effect. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 7 of 10',ti:'Combining transformations',su:'Order matters',panels:[
-   {d:dQ7,p:1,html:'<p>When several transformations combine, order matters. Start from y=f(x).</p>'},
-   {d:dQ7,p:2,html:'<p>Apply transformations INSIDE the function argument first \u2014 here, shift right 3.</p>'},
-   {d:dQ7,p:3,html:'<p>Then apply the OUTSIDE transformations \u2014 stretch vertically \u00d72, then shift up 1.</p>'},
+   {d:dQ7,p:1,html:'<p>When several transformations combine, order matters. Start from y=f(x).</p>',
+    speak:'When several transformations combine, order matters. Start from y equals f of x.'},
+   {d:dQ7,p:2,html:'<p>Apply transformations INSIDE the function argument first \u2014 here, shift right 3.</p>',
+    speak:'Apply transformations INSIDE the function argument first \u2014 here, shift right 3.'},
+   {d:dQ7,p:3,html:'<p>Then apply the OUTSIDE transformations \u2014 stretch vertically \u00d72, then shift up 1.</p>',
+    speak:'Then apply the OUTSIDE transformations \u2014 stretch vertically by 2, then shift up 1.'},
    {d:dQ7,p:4,html:'<p>Working from the inside out avoids one of the most common AS errors: applying the transformations in the wrong order.</p>'
      +tryItMC(function(){
        var m=pick([2,3,4]),c=pick([1,3,5]);
@@ -566,11 +654,14 @@ var Q=[
          options:['a vertical shift up '+c,'a vertical stretch by '+c,'a horizontal shift of '+c,'a reflection'],
          correct:0,
          working:'The +'+c+' outside the function is a vertical shift up by '+c+', applied after the horizontal stretch.'};
-     })}
+     }),
+    speak:'Working from the inside out avoids one of the most common AS errors: applying the transformations in the wrong order. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 8 of 10',ti:'Modulus function',su:'|x| and its graph',panels:[
-   {d:dQ8,p:1,html:'<p>|x| strips the sign, always giving a non-negative result \u2014 graphically, a V-shape with its point at the origin.</p>'},
-   {d:dQ8,p:2,html:'<p>More generally, y=|f(x)| takes any part of y=f(x) that dips below the x-axis and reflects it upward \u2014 everything above the axis stays where it is.</p>'},
+   {d:dQ8,p:1,html:'<p>|x| strips the sign, always giving a non-negative result \u2014 graphically, a V-shape with its point at the origin.</p>',
+    speak:'The modulus of x strips the sign, always giving a non-negative result \u2014 graphically, a V-shape with its point at the origin.'},
+   {d:dQ8,p:2,html:'<p>More generally, y=|f(x)| takes any part of y=f(x) that dips below the x-axis and reflects it upward \u2014 everything above the axis stays where it is.</p>',
+    speak:'More generally, y equals the modulus of f of x, takes any part of y equals f of x that dips below the x-axis and reflects it upward \u2014 everything above the axis stays where it is.'},
    {d:dQ8,p:3,html:'<p>Modulus equations split into two cases, since |a|=b means a=b OR a=\u2212b.</p>'
      +tryItMC(function(){
        var a=pick([2,3,4,5]),b=pick([4,6,8,10]);
@@ -578,11 +669,14 @@ var Q=[
          options:['x='+(a+b)+' or x='+(a-b),'x='+(a+b)+' only','x='+(a-b)+' only','x='+b+' or x=\u2212'+b],
          correct:0,
          working:'x\u2212'+a+'='+b+' gives x='+(a+b)+'; x\u2212'+a+'=\u2212'+b+' gives x='+(a-b)+'.'};
-     })}
+     }),
+    speak:'Modulus equations split into two cases, since the modulus of a equals b means a equals b, or a equals minus b. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 9 of 10',ti:'Piecewise functions',su:'Functions defined in parts',panels:[
-   {d:dQ9,p:1,html:'<p>A piecewise function uses different formulas on different parts of the domain \u2014 here, x\u00b2 handles everything below x=2.</p>'},
-   {d:dQ9,p:2,html:'<p>...and a different rule, 3x\u22122, takes over from x=2 onward. The open circle shows x=2 is NOT included in the first piece; the filled circle shows it IS included in the second.</p>'},
+   {d:dQ9,p:1,html:'<p>A piecewise function uses different formulas on different parts of the domain \u2014 here, x\u00b2 handles everything below x=2.</p>',
+    speak:'A piecewise function uses different formulas on different parts of the domain \u2014 here, x squared handles everything below x equals 2.'},
+   {d:dQ9,p:2,html:'<p>...and a different rule, 3x\u22122, takes over from x=2 onward. The open circle shows x=2 is NOT included in the first piece; the filled circle shows it IS included in the second.</p>',
+    speak:'And a different rule, 3x minus 2, takes over from x equals 2 onward. The open circle shows x equals 2 is NOT included in the first piece; the filled circle shows it IS included in the second.'},
    {d:dQ9,p:3,html:'<p>Always check which interval your x-value falls into before evaluating \u2014 using the wrong piece is the most common error here.</p>'
      +tryItMC(function(){
        var xv=pick([3,4,5]);
@@ -591,11 +685,14 @@ var Q=[
          options:[String(ans),String(ans+2),String(ans-2),String(xv*xv)],
          correct:0,
          working:'Since '+xv+'\u22652, use f(x)=3x\u22122: f('+xv+')=3('+xv+')\u22122='+ans+'.'};
-     })}
+     }),
+    speak:'Always check which interval your x-value falls into before evaluating \u2014 using the wrong piece is the most common error here. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 10 of 10',ti:'Bringing it together',su:'Consolidating Functions',panels:[
-   {d:dQ10,p:1,html:'<p>You\u2019ve now covered domain/range, composite functions, and inverses \u2014 including the horizontal line test that decides whether f\u207b\u00b9 even exists.</p>'},
-   {d:dQ10,p:2,html:'<p>...and translations, stretches, and combining transformations \u2014 all of which reappear constantly in trigonometry and calculus graphs later in the course.</p>'},
+   {d:dQ10,p:1,html:'<p>You\u2019ve now covered domain/range, composite functions, and inverses \u2014 including the horizontal line test that decides whether f\u207b\u00b9 even exists.</p>',
+    speak:'You\u2019ve now covered domain and range, composite functions, and inverses \u2014 including the horizontal line test that decides whether f inverse even exists.'},
+   {d:dQ10,p:2,html:'<p>...and translations, stretches, and combining transformations \u2014 all of which reappear constantly in trigonometry and calculus graphs later in the course.</p>',
+    speak:'And translations, stretches, and combining transformations \u2014 all of which reappear constantly in trigonometry and calculus graphs later in the course.'},
    {d:dQ10,p:3,html:'<p>Modulus and piecewise functions both come down to the same habit: check which rule genuinely applies before you evaluate or sketch anything.</p>'
      +tryItMC(function(){
        var bank=[
@@ -617,8 +714,10 @@ var Q=[
           working:'g(3)=3+1=4. fg(3)=f(4)=4\u00b2\u22124(4)+7=16\u221216+7=7.'}
        ];
        return pick(bank);
-     })},
-   {d:dQ10,p:4,html:'<p>Nice work \u2014 Functions is complete. Next up: Coordinate Geometry.</p>'}
+     }),
+    speak:'Modulus and piecewise functions both come down to the same habit: check which rule genuinely applies before you evaluate or sketch anything. Now it\u2019s your turn.'},
+   {d:dQ10,p:4,html:'<p>Nice work \u2014 Functions is complete. Next up: Coordinate Geometry.</p>',
+    speak:'Nice work \u2014 Functions is complete. Next up: Coordinate Geometry.'}
   ]}
 ];
 
@@ -628,6 +727,7 @@ function saveProgress(){
   try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify({qi:qi,pi:pi})); }catch(e){}
 }
 function render(){
+  if (typeof stopReading === 'function') stopReading(); // manual navigation interrupts narration
   var qq=Q[qi],pp=qq.panels[pi];
   document.getElementById('ey').textContent=qq.ey;
   document.getElementById('ti').textContent=qq.ti;
@@ -635,6 +735,9 @@ function render(){
   pp.d(pp.p);
   var pn=document.getElementById('pn');
   pn.innerHTML=pp.html;
+  if (qi===Q.length-1 && pi===qq.panels.length-1) {
+    pn.innerHTML += '<div class="test-link-row"><a class="test-link-btn" href="test.html?topic='+(window.__testTopicId||755)+'">\ud83d\udcdd Optional: take the test on this topic</a></div>';
+  }
   pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
   document.getElementById('pb').disabled=(qi===0&&pi===0);
   document.getElementById('nb').textContent=(pi===qq.panels.length-1&&qi===Q.length-1)?'Done':'Next \u2192';
@@ -683,6 +786,122 @@ document.getElementById('sb').addEventListener('click',function(e){
     });
   }
 })();
+
+// ── Auto-reader ──────────────────────────────────────────────────────────
+// "Read this step" speaks just the current panel once. "Auto-play checkpoint"
+// chains through every panel of the current checkpoint, stopping (rather than
+// talking over) any panel containing the interactive Your Turn question.
+var voiceSelEl = document.getElementById('voiceSel');
+var readerStatusEl = document.getElementById('readerStatus');
+var readBtnEl = document.getElementById('readBtn');
+var autoBtnEl = document.getElementById('autoBtn');
+var stopBtnEl = document.getElementById('stopReadBtn');
+var autoPlaying = false;
+var userPickedVoice = false; // only true once the student manually changes the dropdown
+
+function populateVoices(){
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  voiceSelEl.innerHTML = '<option value="">Default voice</option>' + voices.map(function(v,i){return '<option value="'+i+'">'+v.name+' ('+v.lang+')</option>';}).join('');
+}
+if (window.speechSynthesis) {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+voiceSelEl.addEventListener('change', function(){ userPickedVoice = (voiceSelEl.value !== ''); });
+function currentVoice(){
+  // iOS Safari has a well-documented bug: assigning utterance.voice to a Voice
+  // object fetched before the voice list is fully ready causes speak() to fail
+  // completely silently. Safest default: don't set a voice at all unless the
+  // student has explicitly chosen one — that uses the browser's own reliable default.
+  if (!userPickedVoice) return null;
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  return voices[parseInt(voiceSelEl.value,10)] || null;
+}
+function hasInteractiveQuestion(pp){ return pp.html.indexOf('data-tryid')>-1; }
+
+function stopReading(){
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  autoPlaying = false;
+  readBtnEl.disabled = false; autoBtnEl.disabled = false;
+  stopBtnEl.style.display = 'none';
+  readerStatusEl.textContent = '';
+  window.__activeUtterance = null;
+}
+
+// WebKit (Safari/iOS) can garbage-collect an utterance mid-speech if nothing
+// keeps a strong reference to it, silently killing the audio. window.__activeUtterance
+// keeps it alive until it's actually done.
+function speakPanel(pp, onDone){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech isn\u2019t supported on this browser.'; if(onDone) onDone(); return; }
+  if (!pp.speak) { if(onDone) onDone(); return; }
+  var u = new SpeechSynthesisUtterance(pp.speak);
+  var v = currentVoice();
+  if (v) u.voice = v;
+  u.rate = 0.95;
+  u.onend = function(){ window.__activeUtterance = null; if (onDone) onDone(); };
+  u.onerror = function(ev){
+    window.__activeUtterance = null;
+    readerStatusEl.textContent = 'Couldn\u2019t play audio (' + (ev && ev.error ? ev.error : 'unknown error') + '). Check the device isn\u2019t muted and try again.';
+    if (onDone) onDone();
+  };
+  window.__activeUtterance = u;
+  speechSynthesis.speak(u);
+  setTimeout(function(){
+    if (window.__activeUtterance === u && !speechSynthesis.speaking && !speechSynthesis.pending) {
+      readerStatusEl.textContent = 'No audio started \u2014 try tapping the button again, or check the device isn\u2019t on silent/muted.';
+    }
+  }, 600);
+}
+
+readBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  readerStatusEl.textContent = 'Reading\u2026';
+  var pp = Q[qi].panels[pi];
+  speakPanel(pp, function(){
+    readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+  });
+});
+
+autoBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  autoPlaying = true;
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  autoStep();
+});
+
+function autoStep(){
+  if (!autoPlaying) return;
+  var qq = Q[qi], pp = qq.panels[pi];
+  readerStatusEl.textContent = 'Reading step '+(pi+1)+' of '+qq.panels.length+'\u2026';
+  speakPanel(pp, function(){
+    if (!autoPlaying) return;
+    if (hasInteractiveQuestion(pp)) {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Your turn \u2014 try the question below.';
+      return;
+    }
+    if (pi < qq.panels.length-1) {
+      pi++;
+      var pn=document.getElementById('pn'); qq.panels[pi].d(qq.panels[pi].p);
+      pn.innerHTML=qq.panels[pi].html;
+      pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
+      var dt=document.getElementById('dt');
+      dt.innerHTML=qq.panels.map(function(_,i){return '<div class="dot '+(i<pi?'dn':i===pi?'on':'')+'"></div>';}).join('');
+      saveProgress();
+      autoStep();
+    } else {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Checkpoint narrated.';
+    }
+  });
+}
+
+stopBtnEl.addEventListener('click', stopReading);
 
 render();
 </script>
