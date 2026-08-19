@@ -238,6 +238,14 @@ function OC(cx,cy,r,stroke){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fi
 function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;}
 function fracSimplify(n,d){var v=gcd(n,d);return [n/v,d/v];}
 function wrap(animate, cls, html){ return '<g class="'+(animate?cls:'')+'">'+html+'</g>'; }
+// Draws a genuine stacked fraction: numerator, a horizontal bar, denominator —
+// "as on paper" rather than flat inline text with a slash.
+function fracEq(cx,cy,num,den,color,sz,hw){
+  hw=hw||24;
+  return T(cx,cy-6,num,color,sz,'middle',true)
+       + L(cx-hw,cy,cx+hw,cy,color,1.3)
+       + T(cx,cy+sz+3,den,color,sz,'middle',true);
+}
 function drawCurve(points, color, w, animate){
   if(animate) return '<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="'+w+'" stroke-dasharray="1400" stroke-dashoffset="1400" class="an-draw"/>';
   return '<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="'+w+'"/>';
@@ -283,7 +291,14 @@ function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
     o.push(wrap(p===3,'an-draw',L(px(ax_),py(ay_),px(bx_),py(by_),'#1a5a8a',2.5)));
   }
   if(p>=4){
-    o.push(wrap(p===4,'an-fade',R(30,222,420,32,'#fff8e1','#C8922A',1.2)+T(240,238,'gradient m = \u0394y \u2044 \u0394x = (y\u2082\u2212y\u2081) \u2044 (x\u2082\u2212x\u2081)','#7A5A18',11.5,'middle',true)+T(240,250,'the SAME right-triangle gives distance too, via Pythagoras','#7A5A18',9.5,'middle',false)));
+    o.push(wrap(p===4,'an-fade',
+      R(20,196,400,60,'#fff8e1','#C8922A',1.2)
+      +T(50,222,'m =','#7A5A18',13,'start',true)
+      +fracEq(100,220,'\u0394y','\u0394x','#7A5A18',12,16)
+      +T(140,222,'=','#7A5A18',13,'start',true)
+      +fracEq(230,220,'y\u2082 \u2212 y\u2081','x\u2082 \u2212 x\u2081','#7A5A18',12,42)
+      +T(240,248,'the SAME right-triangle gives distance too, via Pythagoras','#7A5A18',9.5,'middle',false)
+    ));
   }
   s.innerHTML=o.join('');}
 
@@ -300,11 +315,28 @@ function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
     o.push(wrap(p===1,'an-draw',L(px(ax_),py(ay_),px(bx_),py(by_),'#888',1.5,'3,3')));
   }
   if(p>=2){
-    var mx=(ax_+bx_)/2, my=(ay_+by_)/2;
-    o.push(wrap(p===2,'an-pop',C(px(mx),py(my),5,'#1a7a3a')+T(px(mx)+10,py(my)+14,'M \u2014 exactly halfway','#1a7a3a',11,'start',true)));
+    o.push(wrap(p===2,'an-fade',
+      R(30,150,420,64,'#e8f4ff','#1a5a8a',1.5)
+      +T(240,170,'Worked example: P(2, 1), Q(6, 5)','#1a5a8a',12,'middle',true)
+      +T(240,190,'Average the x-coordinates:  (2 + 6) \u00f7 2 = 4','#1a5a8a',12,'middle',false)
+      +T(240,208,'Average the y-coordinates:  (1 + 5) \u00f7 2 = 3','#1a5a8a',12,'middle',false)
+    ));
   }
   if(p>=3){
-    o.push(wrap(p===3,'an-fade',R(30,222,420,32,'#fff8e1','#C8922A',1.2)+T(240,240,'midpoint M = ( (x\u2081+x\u2082)\u20442 , (y\u2081+y\u2082)\u20442 )','#7A5A18',12,'middle',true)+T(240,252,'literally the average of the two x-values, and the average of the two y-values','#7A5A18',9,'middle',false)));
+    var mx=(ax_+bx_)/2, my=(ay_+by_)/2;
+    o.push(wrap(p===3,'an-pop',C(px(mx),py(my),5,'#1a7a3a')+T(px(mx)+10,py(my)+14,'M(4, 3) \u2014 exactly halfway','#1a7a3a',11,'start',true)));
+  }
+  if(p>=4){
+    o.push(wrap(p===4,'an-fade',
+      R(20,196,440,58,'#fff8e1','#C8922A',1.2)
+      +T(70,222,'M =','#7A5A18',13,'start',true)
+      +T(115,222,'(','#7A5A18',15,'start',false)
+      +fracEq(160,220,'x\u2081 + x\u2082','2','#7A5A18',11,32)
+      +T(196,222,',','#7A5A18',15,'start',false)
+      +fracEq(240,220,'y\u2081 + y\u2082','2','#7A5A18',11,32)
+      +T(276,222,')','#7A5A18',15,'start',false)
+      +T(240,246,'literally the average of the x-values, and the average of the y-values','#7A5A18',9.5,'middle',false)
+    ));
   }
   s.innerHTML=o.join('');}
 
@@ -327,7 +359,13 @@ function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
     o.push(wrap(p===3,'an-fade',R(30,180,420,32,'#e8f4ff','#1a5a8a',1.5)+T(240,198,'point\u2013gradient form: y \u2212 y\u2081 = m(x \u2212 x\u2081)','#1a5a8a',13,'middle',true)+T(240,210,'\u2014 rearranged straight from the gradient formula in Checkpoint 1','#888',9,'middle',false)));
   }
   if(p>=4){
-    o.push(wrap(p===4,'an-pop',R(90,220,300,34,'#e8f8ee','#1a7a3a',2)+T(240,242,'y \u2212 1 = 3(x \u2212 2)  \u2192  y = 3x \u2212 5','#1a7a3a',13,'middle',true)));
+    o.push(wrap(p===4,'an-pop',R(60,216,360,50,'#e8f8ee','#1a7a3a',2)
+      +T(240,234,'y \u2212 1 = 3(x \u2212 2)','#1a7a3a',13,'middle',true)
+      +T(240,254,'y \u2212 1 = 3x \u2212 6','#1a7a3a',13,'middle',true)
+    ));
+  }
+  if(p>=5){
+    o.push(wrap(p===5,'an-pop',R(120,214,240,34,'#fff8e1','#C8922A',2)+T(240,236,'y = 3x \u2212 5','#7A5A18',15,'middle',true)));
   }
   s.innerHTML=o.join('');}
 
@@ -345,6 +383,13 @@ function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
     o.push(drawLine(310,180,430,120,'#1a5a8a',2.5,p===2));
     o.push(drawLine(340,90,400,210,'#a01820',2.5,p===2));
     o.push(wrap(p===2,'an-fade',T(370,50,'Perpendicular: gradients multiply to \u22121','#241A17',11,'middle',true)));
+    o.push(wrap(p===2,'an-fade',T(245,90,'Why?','#1a5a8a',11,'middle',true)
+      +T(245,110,'Rotating a','#1a5a8a',9.5,'middle',false)
+      +T(245,124,'direction (a,b)','#1a5a8a',9.5,'middle',false)
+      +T(245,138,'by 90\u00b0 gives','#1a5a8a',9.5,'middle',false)
+      +T(245,152,'(\u2212b, a).','#1a5a8a',9.5,'middle',false)
+      +T(245,172,'e.g. \u00be \u2192 \u2212\u2074\u2044\u2083','#1a5a8a',9.5,'middle',true)
+      +T(245,188,'\u00be\u00d7(\u2212\u2074\u2044\u2083)=\u22121 \u2713','#1a5a8a',9.5,'middle',true)));
   }
   if(p>=3){
     o.push(wrap(p===3,'an-fade',R(30,226,420,28,'#fff8e1','#C8922A',1.2)+T(240,244,'m\u2081 \u00d7 m\u2082 = \u22121, so m\u2082 = \u22121\u2044m\u2081 \u2014 flip and negate the gradient','#7A5A18',12,'middle',true)));
@@ -365,6 +410,7 @@ function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   }
   if(p>=3){
     o.push(drawCircle(cx,cy,r,'#1a5a8a',2,p===3));
+    o.push(wrap(p===3,'an-fade',T(240,42,'As (x, y) moves around, always staying distance r from the centre,','#241A17',10.5,'middle',false)+T(240,58,'it traces out the whole circle.','#241A17',10.5,'middle',false)));
   }
   if(p>=4){
     o.push(wrap(p===4,'an-fade',R(30,226,420,28,'#fff8e1','#C8922A',1.2)+T(240,244,'distance from (a,b) to (x,y) = r  \u2192  (x\u2212a)\u00b2+(y\u2212b)\u00b2 = r\u00b2 (Checkpoint 1\u2019s formula, squared)','#7A5A18',10.5,'middle',true)));
@@ -376,17 +422,15 @@ function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o.push(T(240,16,'From expanded form back to centre\u2013radius form','#C0272D',13,'middle',true));
   if(p>=1){o.push(wrap(p===1,'an-fade',T(240,36,'x\u00b2 + y\u00b2 \u2212 4x + 2y \u2212 4 = 0','#241A17',14,'middle',true)+T(240,54,'Circles are sometimes given expanded like this instead.','#888',10,'middle',false)));}
   if(p>=2){o.push(wrap(p===2,'an-fade',R(30,66,420,44,'#e8f4ff','#1a5a8a',1.5)+T(240,86,'Group the x-terms and y-terms, complete the square in EACH','#1a5a8a',12,'middle',true)+T(240,102,'\u2014 exactly the AS Maths method from the Quadratics topic','#888',9,'middle',false)));}
-  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,132,'(x\u00b2\u22124x) + (y\u00b2+2y) \u2212 4 = 0','#241A17',13,'middle',true)+T(240,150,'\u2192 (x\u22122)\u00b2\u22124 + (y+1)\u00b2\u22121 \u2212 4 = 0','#241A17',13,'middle',true)));}
-  if(p>=4){o.push(wrap(p===4,'an-pop',R(60,164,360,40,'#e8f8ee','#1a7a3a',2)+T(240,188,'(x\u22122)\u00b2 + (y+1)\u00b2 = 9  \u2192  centre (2,\u22121), r = 3','#1a7a3a',13,'middle',true)));}
-  if(p>=5){
-    var cx=240, cy=228, r=0; // tiny inline confirmation sketch isn't needed; keep layout simple
-  }
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,130,'Step 1 \u2014 group: (x\u00b2\u22124x) + (y\u00b2+2y) \u2212 4 = 0','#241A17',12.5,'middle',true)));}
+  if(p>=4){o.push(wrap(p===4,'an-fade',T(240,152,'Step 2 \u2014 complete the square in each bracket:','#241A17',12.5,'middle',true)+T(240,170,'(x\u22122)\u00b2\u22124 + (y+1)\u00b2\u22121 \u2212 4 = 0','#241A17',13,'middle',true)));}
+  if(p>=5){o.push(wrap(p===5,'an-pop',R(60,182,360,40,'#e8f8ee','#1a7a3a',2)+T(240,206,'Step 3 \u2014 simplify: (x\u22122)\u00b2+(y+1)\u00b2=9 \u2192 centre (2,\u22121), r=3','#1a7a3a',12,'middle',true)));}
   s.innerHTML=o.join('');}
 
 // ── Checkpoint 7: Tangents to a circle ─────────────────────────────────────
 function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,16,'The key fact: tangent \u22a5 radius, at the point of contact','#C0272D',12.5,'middle',true));
-  var cx=200, cy=170, r=60;
+  o.push(T(240,14,'The key fact: tangent \u22a5 radius, at the point of contact','#C0272D',12,'middle',true));
+  var cx=150, cy=110, r=48;
   var px_=cx+r*0.6, py_=cy-r*0.8; // point on circle at (3,4)-direction
   if(p>=1){
     o.push(drawCircle(cx,cy,r,'#1a5a8a',2,p===1));
@@ -400,33 +444,65 @@ function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
     // tangent line perpendicular to the radius, drawn through the point
     var dx=px_-cx, dy=py_-cy; var len=Math.sqrt(dx*dx+dy*dy);
     var tx=-dy/len, ty=dx/len; // perpendicular direction
-    o.push(drawLine(px_-tx*70,py_-ty*70,px_+tx*70,py_+ty*70,'#1a7a3a',2.5,p===3));
-    o.push(wrap(p===3,'an-fade',T(px_+tx*70+10,py_+ty*70,'tangent','#1a7a3a',11,'start',true)));
+    o.push(drawLine(px_-tx*55,py_-ty*55,px_+tx*55,py_+ty*55,'#1a7a3a',2.5,p===3));
+    o.push(wrap(p===3,'an-fade',T(px_+tx*55+10,py_+ty*55,'tangent','#1a7a3a',11,'start',true)));
   }
   if(p>=4){
-    o.push(wrap(p===4,'an-fade',R(20,220,440,32,'#fff8e1','#C8922A',1.2)+T(240,238,'find the radius gradient, then use the perpendicular rule (m\u2081m\u2082=\u22121) from Checkpoint 4','#7A5A18',10.5,'middle',true)));
+    o.push(wrap(p===4,'an-fade',R(230,60,220,90,'#fff8e1','#C8922A',1.2)
+      +T(340,80,'Method','#7A5A18',12,'middle',true)
+      +T(340,98,'1. Find the radius','#7A5A18',10,'middle',false)
+      +T(340,112,'gradient','#7A5A18',10,'middle',false)
+      +T(340,130,'2. Perpendicular rule','#7A5A18',10,'middle',false)
+      +T(340,144,'(m\u2081m\u2082=\u22121, Chp 4)','#7A5A18',10,'middle',false)
+    ));
+  }
+  if(p>=5){
+    o.push(wrap(p===5,'an-pop',R(20,190,440,60,'#e8f4ff','#1a5a8a',1.5)
+      +T(240,208,'Example: centre (0,0), tangent at (3,4).','#1a5a8a',11.5,'middle',true)
+      +T(240,226,'Radius gradient = \u2074\u2044\u2083.   Tangent gradient = \u22121\u00f7(\u2074\u2044\u2083) = \u2212\u00be.','#1a5a8a',11,'middle',false)
+      +T(240,242,'Equation: y \u2212 4 = \u2212\u00be(x \u2212 3)','#1a5a8a',11.5,'middle',true)
+    ));
   }
   s.innerHTML=o.join('');}
 
 // ── Checkpoint 8: Line meets circle ────────────────────────────────────────
 function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  o.push(T(240,16,'Substitute the line into the circle equation','#C0272D',13,'middle',true));
-  var cx=110, cy=150, r=55;
+  o.push(T(240,12,'Substitute the line into the circle equation','#C0272D',12,'middle',true));
+  var cx=110, cy=110, r=42;
+  function onC(ang){ return {x:cx+r*Math.cos(ang), y:cy+r*Math.sin(ang)}; }
   if(p>=1){
+    // Two points chosen ON the circle first, then the line is drawn through them —
+    // this guarantees the marked intersections are exactly on the circle, unlike
+    // the previous version which picked an arbitrary line and guessed where it
+    // crossed (the dots were never actually on the circle at all).
+    var p1=onC(-0.5), p2=onC(2.6);
+    var ext=0.35; // extend the drawn line a little past each point
+    var ex1={x:p1.x-(p2.x-p1.x)*ext, y:p1.y-(p2.y-p1.y)*ext};
+    var ex2={x:p2.x+(p2.x-p1.x)*ext, y:p2.y+(p2.y-p1.y)*ext};
     o.push(drawCircle(cx,cy,r,'#1a5a8a',2,p===1));
-    o.push(drawLine(cx-90,cy+70,cx+90,cy-70,'#a01820',2.5,p===1));
-    o.push(wrap(p===1,'an-pop',C(cx-30,cy+20,3.5,'#a01820')+C(cx+34,cy-30,3.5,'#a01820')));
-    o.push(wrap(p===1,'an-fade',T(cx,cy+95,'2 intersections \u2192 discriminant > 0','#a01820',10,'middle',true)));
+    o.push(drawLine(ex1.x,ex1.y,ex2.x,ex2.y,'#a01820',2.5,p===1));
+    o.push(wrap(p===1,'an-pop',C(p1.x,p1.y,3.5,'#a01820')+C(p2.x,p2.y,3.5,'#a01820')));
+    o.push(wrap(p===1,'an-fade',T(cx,cy+r+22,'2 intersections \u2192 discriminant > 0','#a01820',9.5,'middle',true)));
   }
   if(p>=2){
     var cx2=350;
+    var tAng=-0.9; // angle of the point of tangency
+    var tp={x:cx2+r*Math.cos(tAng), y:cy+r*Math.sin(tAng)};
+    var perpAng=tAng+Math.PI/2; // tangent direction is perpendicular to the radius
+    var td={x:Math.cos(perpAng), y:Math.sin(perpAng)};
     o.push(drawCircle(cx2,cy,r,'#1a5a8a',2,p===2));
-    o.push(drawLine(cx2-90,cy+90-r,cx2+90,cy-90+r,'#C8922A',2.5,p===2));
-    o.push(wrap(p===2,'an-pop',C(cx2,cy-r,3.5,'#C8922A')));
-    o.push(wrap(p===2,'an-fade',T(cx2,cy+95,'Tangent (1 point) \u2192 discriminant = 0','#C8922A',10,'middle',true)));
+    o.push(drawLine(tp.x-td.x*50,tp.y-td.y*50,tp.x+td.x*50,tp.y+td.y*50,'#C8922A',2.5,p===2));
+    o.push(wrap(p===2,'an-pop',C(tp.x,tp.y,3.5,'#C8922A')));
+    o.push(wrap(p===2,'an-fade',T(cx2,cy+r+22,'Tangent (1 point) \u2192 discriminant = 0','#C8922A',9.5,'middle',true)));
   }
   if(p>=3){
-    o.push(wrap(p===3,'an-fade',R(20,220,440,32,'#fff8e1','#C8922A',1.2)+T(240,238,'Substituting the line\u2019s equation into the circle\u2019s always gives a quadratic \u2014 read its discriminant just like in the Quadratics topic','#7A5A18',10,'middle',true)));
+    o.push(wrap(p===3,'an-fade',T(240,192,'Substituting the line\u2019s equation into the circle\u2019s always gives a quadratic.','#241A17',10.5,'middle',false)));
+  }
+  if(p>=4){
+    o.push(wrap(p===4,'an-pop',R(20,202,440,50,'#e8f4ff','#1a5a8a',1.5)
+      +T(240,218,'e.g. y=x+1 meets x\u00b2+y\u00b2=8: x\u00b2+(x+1)\u00b2=8 \u2192 2x\u00b2+2x\u22127=0','#1a5a8a',10.5,'middle',true)
+      +T(240,236,'discriminant = 2\u00b2\u22124(2)(\u22127) = 60 > 0  \u2192  2 real intersections','#1a5a8a',10.5,'middle',true)
+    ));
   }
   s.innerHTML=o.join('');}
 
@@ -436,20 +512,28 @@ function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var ox=70, oy=200, sc=45;
   function px(v){return ox+v*sc;} function py(v){return oy-v*sc;}
   var ax_=0, ay_=0, bx_=4, by_=0;
+  // A genuine circle through both (0,0) and (4,0): centre (2,1.5), r=2.5 —
+  // verified: distance from (2,1.5) to each point is \u221a(4+2.25)=2.5.
+  var ccx=2, ccy=1.5, cr=2.5;
   if(p>=1){
     o.push(axes(ox,oy,380,170,sc));
+    o.push('<circle cx="'+px(ccx)+'" cy="'+py(ccy)+'" r="'+(cr*sc)+'" fill="none" stroke="#ccc" stroke-width="1.5"/>');
     o.push(wrap(p===1,'an-pop',C(px(ax_),py(ay_),4,'#1a5a8a')+T(px(ax_),py(ay_)+16,'(0,0)','#1a5a8a',10,'middle',false)));
     o.push(wrap(p===1,'an-pop',C(px(bx_),py(by_),4,'#a01820')+T(px(bx_),py(by_)+16,'(4,0)','#a01820',10,'middle',false)));
     o.push(wrap(p===1,'an-draw',L(px(ax_),py(ay_),px(bx_),py(by_),'#888',2)));
-    o.push(wrap(p===1,'an-fade',T(240,38,'Both points sit on the SAME circle \u2014 a chord.','#241A17',12,'middle',false)));
+    o.push(wrap(p===1,'an-fade',T(240,40,'Both points sit on the SAME circle \u2014 a chord.','#241A17',12,'middle',false)));
   }
   if(p>=2){
     var mx=(ax_+bx_)/2;
-    o.push(wrap(p===2,'an-pop',C(px(mx),py(ay_),4,'#1a7a3a')+T(px(mx),py(ay_)+32,'midpoint (2,0)','#1a7a3a',10,'middle',true)));
-    o.push(drawLine(px(mx),py(-1.5),px(mx),py(1.5),'#1a7a3a',2.5,p===2));
+    o.push(wrap(p===2,'an-pop',C(px(mx),py(ay_),4,'#1a7a3a')+T(px(mx)-10,py(ay_)+16,'midpoint (2,0)','#1a7a3a',10,'end',true)));
+    o.push(drawLine(px(mx),py(-1),px(mx),py(3.2),'#1a7a3a',2.5,p===2));
   }
   if(p>=3){
-    o.push(wrap(p===3,'an-fade',R(20,214,440,38,'#fff8e1','#C8922A',1.2)+T(240,232,'The centre lies on this perpendicular bisector \u2014 find the midpoint (Checkpoint 2)','#7A5A18',11,'middle',true)+T(240,246,'and the perpendicular gradient (Checkpoint 4) to get its equation.','#7A5A18',10,'middle',false)));
+    o.push(wrap(p===3,'an-fade',T(240,236,'The centre lies on this perpendicular bisector.','#241A17',10.5,'middle',false)));
+  }
+  if(p>=4){
+    o.push(wrap(p===4,'an-pop',C(px(ccx),py(ccy),4,'#a01820')+T(px(ccx)+10,py(ccy)-8,'centre (2, 1.5)','#a01820',10,'start',true)));
+    o.push(wrap(p===4,'an-fade',T(240,252,'\u2014 exactly on the line, at whatever height the actual radius puts it.','#888',9.5,'middle',false)));
   }
   s.innerHTML=o.join('');}
 
@@ -485,9 +569,11 @@ var Q=[
  {ey:'Checkpoint 2 of 10',ti:'Midpoint',su:'The point exactly between two coordinates',panels:[
    {d:dQ2,p:1,html:'<p>Two points, P and Q, joined by a line segment.</p>',
     speak:'Two points, P and Q, joined by a line segment.'},
-   {d:dQ2,p:2,html:'<p>The midpoint M sits exactly halfway along that segment.</p>',
-    speak:'The midpoint, M, sits exactly halfway along that segment.'},
-   {d:dQ2,p:3,html:'<p>To get there, just average the x-coordinates, and separately average the y-coordinates \u2014 no more complicated than that.</p>'
+   {d:dQ2,p:2,html:'<p>Worked example: average the x-coordinates, then separately average the y-coordinates.</p>',
+    speak:'Worked example: average the x-coordinates, then separately average the y-coordinates.'},
+   {d:dQ2,p:3,html:'<p>That gives the midpoint M \u2014 exactly halfway along the segment.</p>',
+    speak:'That gives the midpoint, M \u2014 exactly halfway along the segment.'},
+   {d:dQ2,p:4,html:'<p>Written generally, for any two points.</p>'
      +tryItMC(function(){
        var x1=pick([-4,-2,0,2]),y1=pick([-3,1,5]),x2=x1+pick([2,4,6]),y2=y1+pick([2,4,-6]);
        var mx=(x1+x2)/2, my=(y1+y2)/2;
@@ -505,7 +591,9 @@ var Q=[
     speak:'But often you\u2019re given a gradient and just one point, not the intercept.'},
    {d:dQ3,p:3,html:'<p>Rearranging the Checkpoint 1 gradient formula, m=(y\u2212y\u2081)/(x\u2212x\u2081), for any point (x,y) on the line gives point\u2013gradient form.</p>',
     speak:'Rearranging the Checkpoint 1 gradient formula for any point on the line gives point-gradient form: y minus y one equals m, times, x minus x one.'},
-   {d:dQ3,p:4,html:'<p>Worked example: gradient 3, through (2,1).</p>'
+   {d:dQ3,p:4,html:'<p>Substitute and expand the bracket, line by line.</p>',
+    speak:'Substitute and expand the bracket, line by line.'},
+   {d:dQ3,p:5,html:'<p>Then simplify to reach the final equation.</p>'
      +tryItMC(function(){
        var m=pick([2,3,4,5]),x1=pick([1,2,3]),y1=pick([1,2,4]);
        var c=y1-m*x1;
@@ -514,7 +602,7 @@ var Q=[
          correct:0,
          working:'y\u2212'+y1+'='+m+'(x\u2212'+x1+') \u2192 y='+m+'x'+(c>=0?'+':'')+c+'.'};
      }),
-    speak:'Worked example: gradient 3, through the point 2, 1. Now it\u2019s your turn.'}
+    speak:'Then simplify to reach the final equation. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 4 of 10',ti:'Parallel and perpendicular lines',su:'Gradient relationships',panels:[
    {d:dQ4,p:1,html:'<p>Parallel lines never meet \u2014 visually, and algebraically, they have exactly the SAME gradient.</p>',
@@ -554,9 +642,11 @@ var Q=[
     speak:'Circles are sometimes given in expanded form instead of centre-radius form.'},
    {d:dQ6,p:2,html:'<p>Group the x-terms and y-terms separately, and complete the square in each \u2014 exactly the same method from the Quadratics topic.</p>',
     speak:'Group the x-terms and y-terms separately, and complete the square in each \u2014 exactly the same method from the Quadratics topic.'},
-   {d:dQ6,p:3,html:'<p>Working it through step by step.</p>',
-    speak:'Working it through step by step.'},
-   {d:dQ6,p:4,html:'<p>That leaves it in centre-radius form, ready to read off directly.</p>'
+   {d:dQ6,p:3,html:'<p>Step 1: group the x-terms together and the y-terms together.</p>',
+    speak:'Step 1: group the x-terms together and the y-terms together.'},
+   {d:dQ6,p:4,html:'<p>Step 2: complete the square inside each bracket separately.</p>',
+    speak:'Step 2: complete the square inside each bracket separately.'},
+   {d:dQ6,p:5,html:'<p>Step 3: collect the constants together \u2014 that leaves it in centre-radius form, ready to read off directly.</p>'
      +tryItMC(function(){
        var a=pick([1,2,3]),b=pick([1,2,-3]),r=pick([3,4,5]);
        var c = a*a+b*b-r*r; // constant such that (x-a)^2+(y-b)^2-r^2 = x^2+y^2-2ax-2by+c = 0
@@ -565,7 +655,7 @@ var Q=[
          correct:0,
          working:'Complete the square in x and y: (x\u2212'+a+')\u00b2+(y\u2212'+b+')\u00b2='+(r*r)+', so centre ('+a+','+b+'), r='+r+'.'};
      }),
-    speak:'That leaves it in centre-radius form, ready to read off directly. Now it\u2019s your turn.'}
+    speak:'Step 3: collect the constants together \u2014 that leaves it in centre-radius form, ready to read off directly. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 7 of 10',ti:'Tangents to a circle',su:'Perpendicular to the radius',panels:[
    {d:dQ7,p:1,html:'<p>A circle, with its centre marked.</p>',
@@ -574,7 +664,9 @@ var Q=[
     speak:'Draw the radius to any point on the circle \u2014 this is the point of contact for the tangent there.'},
    {d:dQ7,p:3,html:'<p>The tangent line at that point is always perpendicular to this radius \u2014 the single fact this whole checkpoint rests on.</p>',
     speak:'The tangent line at that point is always perpendicular to this radius \u2014 the single fact this whole checkpoint rests on.'},
-   {d:dQ7,p:4,html:'<p>So finding a tangent is two steps: find the radius\u2019s gradient, then flip and negate it (Checkpoint 4) for the tangent\u2019s gradient.</p>'
+   {d:dQ7,p:4,html:'<p>So finding a tangent is two steps: find the radius\u2019s gradient, then flip and negate it (Checkpoint 4) for the tangent\u2019s gradient.</p>',
+    speak:'So finding a tangent is two steps: find the radius\u2019s gradient, then flip and negate it for the tangent\u2019s gradient.'},
+   {d:dQ7,p:5,html:'<p>Worked example, line by line.</p>'
      +tryItMC(function(){
        var cx=0, cy=0, px_=pick([3,4,6]), py_=pick([4,3,8]);
        var rad=fracSimplify(py_-cy,px_-cx);
@@ -584,14 +676,16 @@ var Q=[
          correct:0,
          working:'Radius gradient = '+rad[0]+'/'+rad[1]+'. Tangent gradient = \u22121\u00f7('+rad[0]+'/'+rad[1]+') = '+tang[0]+'/'+tang[1]+'.'};
      }),
-    speak:'Finding a tangent is two steps: find the radius\u2019s gradient, then flip and negate it for the tangent\u2019s gradient. Now it\u2019s your turn.'}
+    speak:'Worked example, line by line. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 8 of 10',ti:'Line meets circle',su:'Intersection and tangency conditions',panels:[
    {d:dQ8,p:1,html:'<p>A line crossing a circle at two distinct points \u2014 substituting the line into the circle\u2019s equation gives a quadratic with a positive discriminant.</p>',
     speak:'A line crossing a circle at two distinct points \u2014 substituting the line into the circle\u2019s equation gives a quadratic with a positive discriminant.'},
    {d:dQ8,p:2,html:'<p>A tangent touches at exactly one point \u2014 same substitution, but now the discriminant is exactly zero, a repeated root.</p>',
     speak:'A tangent touches at exactly one point \u2014 same substitution, but now the discriminant is exactly zero, a repeated root.'},
-   {d:dQ8,p:3,html:'<p>This is the exact same discriminant idea from the Quadratics topic, just applied to a line-meets-circle problem instead of a standalone equation.</p>'
+   {d:dQ8,p:3,html:'<p>This is the exact same discriminant idea from the Quadratics topic, just applied to a line-meets-circle problem instead of a standalone equation.</p>',
+    speak:'This is the exact same discriminant idea from the Quadratics topic, just applied to a line meeting a circle instead of a standalone equation.'},
+   {d:dQ8,p:4,html:'<p>Here\u2019s the actual substitution and discriminant working, line by line.</p>'
      +tryItMC(function(){
        var cases=[
          {sign:'exactly 0',correct:'The line is a tangent to the circle \u2014 exactly one point of contact',wrong:['The line misses the circle entirely','The line passes through the centre','The line intersects at 2 distinct points']},
@@ -611,7 +705,9 @@ var Q=[
     speak:'If two points both lie on the same circle, the segment joining them is called a chord.'},
    {d:dQ9,p:2,html:'<p>Find its midpoint (Checkpoint 2), then draw the line through that midpoint perpendicular to the chord (Checkpoint 4).</p>',
     speak:'Find its midpoint from Checkpoint 2, then draw the line through that midpoint perpendicular to the chord, using Checkpoint 4.'},
-   {d:dQ9,p:3,html:'<p>Every point on this perpendicular bisector is equidistant from both original points \u2014 which is exactly why the circle\u2019s centre must lie on it.</p>'
+   {d:dQ9,p:3,html:'<p>Every point on this perpendicular bisector is equidistant from both original points \u2014 which is exactly why the circle\u2019s centre must lie on it.</p>',
+    speak:'Every point on this perpendicular bisector is equidistant from both original points \u2014 which is exactly why the circle\u2019s centre must lie on it.'},
+   {d:dQ9,p:4,html:'<p>Here, this particular circle\u2019s actual centre sits at (2, 1.5) \u2014 not on the chord itself, but exactly on the bisector line, as guaranteed.</p>'
      +tryItMC(function(){
        var x1=0, y1=0, x2=pick([4,6,8]), y2=0;
        var mx=(x1+x2)/2;
@@ -620,7 +716,7 @@ var Q=[
          correct:0,
          working:'Midpoint ('+mx+',0); the chord is horizontal, so its perpendicular bisector is the vertical line x='+mx+'.'};
      }),
-    speak:'Every point on this perpendicular bisector is equidistant from both original points \u2014 which is exactly why the circle\u2019s centre must lie on it. Now it\u2019s your turn.'}
+    speak:'Here, this particular circle\u2019s actual centre sits at 2, 1.5 \u2014 not on the chord itself, but exactly on the bisector line, as guaranteed. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 10 of 10',ti:'Bringing it together',su:'Consolidating Coordinate Geometry',panels:[
    {d:dQ10,p:1,html:'<p>Gradient, distance, and midpoint all come from the same right-triangle \u2014 and the equation of a line builds directly on the gradient formula.</p>',
