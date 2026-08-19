@@ -12,6 +12,12 @@
   else {
     const { data: prof } = await _lc.from('profiles').select('full_name').eq('id', session.user.id).maybeSingle();
     window.__studentFirstName = prof && prof.full_name ? prof.full_name.split(' ')[0] : 'there';
+    // For the optional "Take the test" link on the final checkpoint. 761 is the
+    // known id for AS-P1-08/Integration as a fallback if this lookup ever
+    // fails — looking it up live is safer than hardcoding it as the only source.
+    _lc.from('topics').select('id').eq('topic_code','AS-P1-08').eq('subject','as_maths').maybeSingle()
+      .then(function(r){ window.__testTopicId = (r.data && r.data.id) ? r.data.id : 761; })
+      .catch(function(){ window.__testTopicId = 761; });
     document.addEventListener('DOMContentLoaded', function() {
       var el = document.getElementById('greet');
       if (el) el.textContent = 'Hi ' + window.__studentFirstName + ' — let\'s work through this one together.';
@@ -99,6 +105,21 @@ header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gol
 .welcome-go{width:100%;margin-top:6px;background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;border:none;padding:13px;border-radius:6px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
 .welcome-go:hover{filter:brightness(1.08);}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+@keyframes popIn{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes drawIn{to{stroke-dashoffset:0}}
+.an-pop{animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both;transform-box:fill-box;transform-origin:center;}
+.an-fade{animation:fadeUp .5s ease-out both;}
+.an-draw{animation:drawIn 1.1s ease-out forwards;}
+.reader-row{width:100%;max-width:760px;display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.reader-btn{font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:5px;border:1.5px solid var(--gold-dark);background:#fff;color:var(--gold-dark);cursor:pointer;font-family:inherit;}
+.reader-btn.active{background:var(--gold-dark);color:#fff;}
+.reader-btn:disabled{opacity:.4;cursor:default;}
+.reader-status{font-size:11.5px;color:#6b5750;}
+.reader-voice{font-size:12px;padding:6px 8px;border:1.5px solid var(--line);border-radius:5px;background:#fff;font-family:inherit;}
+.test-link-row{margin-top:16px;text-align:center;}
+.test-link-btn{display:inline-block;background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;padding:11px 24px;border-radius:6px;text-decoration:none;font-weight:700;font-size:14px;}
+.test-link-btn:hover{filter:brightness(1.08);}
 </style>
 </head>
 <body>
@@ -136,6 +157,13 @@ header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gol
       <div class="cvs"><svg id="dg" viewBox="0 0 480 280"></svg></div>
       <div class="pnl fi" id="pn"></div>
     </div>
+    <div class="reader-row">
+      <button class="reader-btn" id="readBtn">🔊 Read this step</button>
+      <button class="reader-btn" id="autoBtn">▶ Auto-play checkpoint</button>
+      <button class="reader-btn" id="stopReadBtn" style="display:none">■ Stop</button>
+      <select class="reader-voice" id="voiceSel"></select>
+      <span class="reader-status" id="readerStatus"></span>
+    </div>
     <div class="ctrl">
       <button class="btn" id="pb">&larr; Back</button>
       <div class="dots" id="dt"></div>
@@ -162,9 +190,9 @@ document.addEventListener('click',function(e){
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
     var o=shuffleMC(entry.genFn());entry.o=o;
-    var wrap=el.closest('.try');if(!wrap)return;
+    var wrapEl=el.closest('.try');if(!wrapEl)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
-    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+    wrapEl.parentNode.replaceChild(tmp.firstChild,wrapEl);ST[id]={o:o,genFn:entry.genFn};return;
   }
   if(el.classList.contains('mc-opt')){
     if(el.disabled)return;
@@ -184,89 +212,434 @@ document.addEventListener('click',function(e){
   }
 });
 function g(){return document.getElementById('dg');}
+function xesc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function T(x,y,txt,c,sz,a,bold){
   c=c||'#241A17';sz=sz||12;a=a||'middle';
-  // Supports inline superscripts written as ^(...) or ^X (single char) —
-  // rendered as real SVG superscripts via baseline-shift, not literal carets.
   var parts=String(txt).split(/\^(\([^)]*\)|\S)/);
   var tspans='';
   for(var i=0;i<parts.length;i++){
     if(!parts[i])continue;
     if(i%2===1){
       var exp=parts[i].replace(/^\(|\)$/g,'');
-      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+exp+'</tspan>';
+      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+xesc(exp)+'</tspan>';
     }else{
-      tspans+='<tspan>'+parts[i]+'</tspan>';
+      tspans+='<tspan>'+xesc(parts[i])+'</tspan>';
     }
   }
   return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+tspans+'</text>';
 }
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
-function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
-
-// Generic progressive-reveal diagram: renders a title plus a stack of boxes,
-// each appearing once the panel's stage (p) reaches that box's stage number.
-function drawGeneric(title, boxes, p){
-  var s=g(); s.setAttribute('viewBox','0 0 480 260'); var o=[];
-  o.push(T(240,22,title,'#C0272D',15,'middle',true));
-  var y=42;
-  boxes.forEach(function(b){
-    if(p>=b.stage){
-      var h=b.h||44;
-      o.push(R(20,y,440,h,b.bg||'#fff5f0',b.stroke||'#C0272D',1.5));
-      if(b.text2){
-        o.push(T(240,y+h*0.42+5,b.text,b.color||'#241A17',b.size||13,'middle',b.bold!==false));
-        o.push(T(240,y+h*0.78+3,b.text2,b.color2||'#888',b.size2||11,'middle',false));
-      }else{
-        o.push(T(240,y+h/2+5,b.text,b.color||'#241A17',b.size||14,'middle',b.bold!==false));
-      }
-      y+=h+8;
-    }
-  });
-  s.innerHTML=o.join('');
+function C(cx,cy,r,fill,stroke,sw){stroke=stroke||fill;return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;}
+function fracSimplify(n,d){var v=gcd(n,d);return [n/v,d/v];}
+function wrap(animate, cls, html){ return '<g class="'+(animate?cls:'')+'">'+html+'</g>'; }
+function drawCurve(points, color, w, animate){
+  if(animate) return '<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="'+w+'" stroke-dasharray="1400" stroke-dashoffset="1400" class="an-draw"/>';
+  return '<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="'+w+'"/>';
 }
+function drawLine(x1,y1,x2,y2,color,w,animate){
+  if(animate) return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+w+'" stroke-dasharray="500" stroke-dashoffset="500" class="an-draw"/>';
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+w+'"/>';
+}
+
+// Shared curve-plotting area (kept conservative so nothing runs off-canvas —
+// the exact bug class caught earlier in the Circular Measure rebuild).
+var IOX=55, IOY=210, IXS=60, IYS=22;
+function ipx(v){return IOX+v*IXS;} function ipy(v){return IOY-v*IYS;}
+function iCurvePts(fn,x0,x1,step){
+  var pts=[];
+  for(var xv=x0;xv<=x1+1e-9;xv+=step){
+    var yv=fn(xv);
+    if(yv===null||Math.abs(ipy(yv)-IOY)>200) continue;
+    pts.push(ipx(xv)+','+ipy(yv));
+  }
+  return pts.join(' ');
+}
+function iAxes(x0,x1,ylo,yhi){
+  var o=[];
+  o.push(L(ipx(x0)-6,IOY,ipx(x1)+6,IOY,'#bbb',1));
+  o.push(L(IOX,IOY-yhi*IYS-6,IOX,IOY-ylo*IYS+6,'#bbb',1));
+  return o.join('');
+}
+
+// ── Checkpoint 1: Integration as reverse differentiation ──────────────────
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Undoing the derivative','#C0272D',13,'middle',true));
+  if(p>=1){
+    o.push(wrap(p===1,'an-fade',R(60,40,360,44,'#e8f4ff','#1a5a8a',1.5)+T(240,60,'differentiate','#1a5a8a',12,'middle',true)+T(240,78,'x\u00b3   \u2192   3x\u00b2','#1a5a8a',15,'middle',true)));
+  }
+  if(p>=2){
+    o.push(wrap(p===2,'an-fade',T(240,104,'Integration asks the OPPOSITE question:','#241A17',12,'middle',false)+T(240,122,'given 3x\u00b2, what did we differentiate to get it?','#241A17',12,'middle',false)));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(60,136,360,44,'#fde8e8','#a01820',1.5)+T(240,156,'integrate (reverse)','#a01820',12,'middle',true)+T(240,174,'3x\u00b2   \u2192   x\u00b3','#a01820',15,'middle',true)));
+  }
+  if(p>=4){
+    o.push(wrap(p===4,'an-fade',T(240,202,'But x\u00b3+5 differentiates to 3x\u00b2 too \u2014 and so does x\u00b3\u221212, or x\u00b3 plus ANY constant.','#241A17',11,'middle',false)+T(240,220,'Reversing loses the constant \u2014 Checkpoint 2 deals with that.','#888',9.5,'middle',false)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 2: The power rule for integration ───────────────────────────
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Reversing the power rule','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,40,'Differentiating x\u207f\u207a\u00b9 gives (n+1)x\u207f \u2014 the power rule, run forwards.','#241A17',12,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,68,'So integrating x\u207f must undo that \u2014 divide by the NEW power instead of multiplying.','#241A17',12,'middle',false)));}
+  if(p>=3){o.push(wrap(p===3,'an-pop',R(50,84,380,50,'#e8f8ee','#1a7a3a',2)+T(240,106,'\u222bx\u207f dx = x\u207f\u207a\u00b9\u2044(n+1) + c','#1a7a3a',15,'middle',true)+T(240,124,'add 1 to the power, then divide by the NEW power','#888',9.5,'middle',false)));}
+  if(p>=4){o.push(wrap(p===4,'an-fade',R(30,140,420,46,'#fff8e1','#C8922A',1.2)+T(240,158,'the \u201c+c\u201d matters \u2014 every integral has a whole family of possible','#7A5A18',11,'middle',true)+T(240,176,'antiderivatives, differing only by a constant.','#7A5A18',11,'middle',true)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 3: Integrating polynomials ──────────────────────────────────
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Term by term, same as differentiation','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'\u222b(6x\u00b2 + 4x \u2212 3) dx','#241A17',14,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,66,'Apply the power rule to EACH term separately \u2014 a lone number','#241A17',11,'middle',false)+T(240,84,'like \u22123 integrates to \u22123x (think of it as \u22123x\u2070).','#241A17',11,'middle',false)));}
+  if(p>=3){
+    o.push(wrap(p===3,'an-fade',
+      T(240,112,'6x\u00b2 \u2192 2x\u00b3','#1a5a8a',12.5,'middle',true)
+      +T(240,130,'4x \u2192 2x\u00b2','#1a5a8a',12.5,'middle',true)
+      +T(240,148,'\u22123 \u2192 \u22123x','#1a5a8a',12.5,'middle',true)
+    ));
+  }
+  if(p>=4){
+    o.push(wrap(p===4,'an-pop',R(50,162,380,34,'#e8f8ee','#1a7a3a',2)+T(240,184,'\u222b(6x\u00b2+4x\u22123)dx = 2x\u00b3+2x\u00b2\u22123x + c','#1a7a3a',13.5,'middle',true)));
+  }
+  if(p>=5){
+    o.push(wrap(p===5,'an-fade',T(240,214,'ONE +c for the whole expression, not one per term.','#888',10,'middle',false)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 4: Finding c using a point ──────────────────────────────────
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Pinning down which curve, from the whole family','#C0272D',12.5,'middle',true));
+  var fns=[function(x){return x*x-1.5;},function(x){return x*x;},function(x){return x*x+1.5;}];
+  var cols=['#a01820','#1a5a8a','#1a7a3a'];
+  var labels=['c=\u22121.5','c=0','c=+1.5'];
+  if(p>=1){
+    o.push(iAxes(-1.6,1.6,-2,4));
+    for(var i=0;i<3;i++){
+      o.push(drawCurve(iCurvePts(fns[i],-1.6,1.6,0.1),cols[i],2,p===1));
+    }
+    o.push(wrap(p===1,'an-fade',T(240,40,'dy\u2044dx=2x integrates to y=x\u00b2+c \u2014 a WHOLE FAMILY of curves, one per c.','#241A17',10.5,'middle',false)));
+  }
+  if(p>=2){
+    o.push(wrap(p===2,'an-pop',C(ipx(1),ipy(1*1+1.5),4,'#C8922A')+T(ipx(1)+8,ipy(1*1+1.5)-8,'(1, 2.5)','#C8922A',10,'start',true)));
+    o.push(wrap(p===2,'an-fade',T(240,244,'Given a point the curve passes through, only ONE member of the family fits.','#241A17',10,'middle',false)));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(40,200,400,28,'#e8f8ee','#1a7a3a',2)+T(240,218,'2.5 = (1)\u00b2 + c  \u2192  c = 1.5','#1a7a3a',13,'middle',true)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 5: Definite integrals ────────────────────────────────────────
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Evaluating between two limits','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'A definite integral has numbers on the \u222b sign: \u2229\u2081\u00b3 2x dx','#241A17',13,'middle',true)+T(240,56,'\u2014 no +c needed, since it cancels out.','#888',10,'middle',false)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,86,'Integrate as normal, giving [x\u00b2] evaluated between the limits.','#241A17',12,'middle',false)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,114,'Substitute the TOP limit, then subtract the result','#241A17',11.5,'middle',false)+T(240,132,'of substituting the BOTTOM limit:','#241A17',11.5,'middle',false)));}
+  if(p>=4){
+    o.push(wrap(p===4,'an-pop',R(50,146,380,50,'#e8f8ee','#1a7a3a',2)
+      +T(240,166,'[x\u00b2] from 1 to 3 = (3)\u00b2 \u2212 (1)\u00b2','#1a7a3a',13,'middle',true)
+      +T(240,184,'= 9 \u2212 1 = 8','#1a7a3a',13,'middle',true)
+    ));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 6: Area under a curve ────────────────────────────────────────
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,12,'Approximating area with rectangles \u2014 then shrinking them','#C0272D',12,'middle',true));
+  var fn=function(x){return 0.4*x*x+0.5;};
+  if(p>=1){
+    o.push(iAxes(-0.3,3.5,0,5));
+    var n=4, w=3/n;
+    for(var i=0;i<n;i++){
+      var x0=i*w, x1_=(i+1)*w, h=fn(x0);
+      o.push(wrap(p===1,'an-fade',R(ipx(x0),ipy(h),ipx(x1_)-ipx(x0),IOY-ipy(h),'#e8f4ff','#1a5a8a',1)));
+    }
+    o.push(drawCurve(iCurvePts(fn,-0.3,3.5,0.1),'#888',2,p===1));
+    o.push(wrap(p===1,'an-fade',T(240,40,'4 wide rectangles: a rough estimate of the area under the curve.','#1a5a8a',10.5,'middle',false)));
+  }
+  if(p>=2){
+    var n2=12, w2=3/n2;
+    for(var i2=0;i2<n2;i2++){
+      var x0b=i2*w2, x1b=(i2+1)*w2, hb=fn(x0b);
+      o.push(wrap(p===2,'an-fade',R(ipx(x0b),ipy(hb),ipx(x1b)-ipx(x0b),IOY-ipy(hb),'#e8f4ff','#1a5a8a',0.5)));
+    }
+    o.push(drawCurve(iCurvePts(fn,-0.3,3.5,0.1),'#888',2,false));
+    o.push(wrap(p===2,'an-fade',T(240,225,'More, narrower rectangles \u2014 a noticeably closer fit to the curve.','#1a5a8a',10.5,'middle',false)));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(30,232,420,24,'#fff8e1','#C8922A',1.2)+T(240,248,'As rectangles \u2192 infinitely thin, the estimate becomes EXACT: the definite integral.','#7A5A18',10.5,'middle',true)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 7: Area between a curve and a line ──────────────────────────
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Subtracting two regions','#C0272D',13,'middle',true));
+  var fn=function(x){return 4-0.5*(x-2)*(x-2);};
+  var line=function(x){return 1;};
+  if(p>=1){
+    o.push(iAxes(-0.3,4.3,0,5));
+    o.push(drawCurve(iCurvePts(fn,-0.3,4.3,0.1),'#1a5a8a',2.5,p===1));
+    o.push(wrap(p===1,'an-fade',T(ipx(4.3)+8,ipy(fn(4.3)),'y=f(x)','#1a5a8a',10,'start',true)));
+  }
+  if(p>=2){
+    o.push(drawLine(ipx(-0.3),ipy(1),ipx(4.3),ipy(1),'#a01820',2,p===2));
+    o.push(wrap(p===2,'an-fade',T(ipx(4.3)+8,ipy(1),'y=1','#a01820',10,'start',true)));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-fade',T(240,40,'The shaded region between them has area = \u222b(top \u2212 bottom) dx.','#241A17',11,'middle',false)));
+  }
+  if(p>=4){
+    o.push(wrap(p===4,'an-pop',R(30,196,420,44,'#e8f8ee','#1a7a3a',2)
+      +T(240,214,'Area = \u222b(f(x) \u2212 line) dx, between where they cross \u2014','#1a7a3a',11.5,'middle',true)
+      +T(240,232,'find those x-values first by setting f(x) = line.','#1a7a3a',11.5,'middle',true)
+    ));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 8: Integrating fractional and negative powers ──────────────
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Rewrite first, exactly like differentiation','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'\u222b(\u221ax + 2\u2044x\u00b3) dx','#241A17',14,'middle',true)+T(240,56,'The power rule needs powers of x, written as such.','#888',10.5,'middle',false)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',R(30,70,420,40,'#e8f4ff','#1a5a8a',1.5)+T(240,94,'Rewrite: \u221ax = x^(\u00bd)   and   2\u2044x\u00b3 = 2x\u207b\u00b3','#1a5a8a',13,'middle',true)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,130,'Now apply \u222bx\u207f dx = x\u207f\u207a\u00b9\u2044(n+1) exactly as before.','#241A17',11.5,'middle',false)));}
+  if(p>=4){
+    o.push(wrap(p===4,'an-pop',R(30,144,420,50,'#e8f8ee','#1a7a3a',2)
+      +T(240,164,'x^(\u00bd) \u2192 \u2154x^(\u00b3\u2044\u00b2)','#1a7a3a',13,'middle',true)
+      +T(240,182,'2x\u207b\u00b3 \u2192 \u2212x\u207b\u00b2','#1a7a3a',13,'middle',true)
+    ));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 9: Finding the original function ────────────────────────────
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Reverse-engineering a curve\u2019s equation','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'Given: dy\u2044dx = 6x\u00b2\u22124, and the curve passes through (1, 3).','#241A17',12,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,66,'Integrate the gradient function to get the family of possible curves.','#241A17',11.5,'middle',false)));}
+  if(p>=3){o.push(wrap(p===3,'an-pop',R(60,80,360,34,'#e8f4ff','#1a5a8a',1.5)+T(240,102,'y = 2x\u00b3 \u2212 4x + c','#1a5a8a',13,'middle',true)));}
+  if(p>=4){o.push(wrap(p===4,'an-fade',T(240,134,'Use the given point (1,3) to pin down c \u2014 exactly Checkpoint 4\u2019s method.','#241A17',11.5,'middle',false)));}
+  if(p>=5){
+    o.push(wrap(p===5,'an-pop',R(60,148,360,34,'#e8f8ee','#1a7a3a',2)+T(240,170,'3 = 2\u22124+c  \u2192  c = 5,  so y = 2x\u00b3\u22124x+5','#1a7a3a',12.5,'middle',true)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 10: Consolidation ───────────────────────────────────────────
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'The Integration toolkit \u2014 and the end of Pure 1','#C0272D',14,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',R(30,38,420,44,'#fff5f0','#C0272D',1.5)+T(240,58,'Integration reverses differentiation \u2014 always add +c, since','#241A17',11)+T(240,76,'reversing loses the original constant term.','#888',9.5)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',R(30,86,420,44,'#e8f4ff','#1a5a8a',1.5)+T(240,106,'Definite integrals evaluate between limits (no +c needed); area is','#241A17',11)+T(240,124,'the limit of ever-narrower rectangles, made exact.','#888',9.5)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',R(30,134,420,44,'#e8f8ee','#1a7a3a',1.5)+T(240,154,'Area between curves subtracts top minus bottom; finding a curve from','#241A17',11)+T(240,172,'its gradient combines integration with a given point, as in Checkpoint 4.','#888',9.5)));}
+  if(p>=4){o.push(wrap(p===4,'an-pop',R(60,190,360,44,'#fff8e1','#C8922A',2)+T(240,216,'That completes AS Pure 1 \u2014 well done.','#7A5A18',14,'middle',true)));}
+  s.innerHTML=o.join('');}
 
 var Q=[
  {ey:'Checkpoint 1 of 10',ti:'Integration as reverse differentiation',su:'Undoing the derivative',panels:[
-   {dtitle:'Integration reverses differentiation',boxes:[{"stage": 1, "text": "If dy/dx = 2x, then y = x² + c", "bg": "#fff5f0"}, {"stage": 2, "text": "The +c is essential — any constant differentiates to 0", "bg": "#fde8e8", "stroke": "#a01820"}],p:2,html:'<p>Since a constant vanishes when differentiated, integration can never recover it — we always add an unknown constant c.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Why is +c needed?", "bg": "#fff5f0"}],p:1,html:'<p>Recall why the constant of integration matters.</p>'+tryItMC(function(){return {question:'Why must every indefinite integral include a constant +c?',options:['Because constants differentiate to zero, so infinitely many antiderivatives exist','Because it makes the answer look more complete','It\u2019s just a convention with no mathematical reason','Because c always equals zero in AS Level'],correct:0,working:'Any constant added to a function doesn\u2019t change its derivative, so we can\u2019t know which constant the original had.'};})}
+   {d:dQ1,p:1,html:'<p>Differentiating x\u00b3 gives 3x\u00b2 \u2014 familiar territory.</p>',
+    speak:'Differentiating x cubed gives 3x squared \u2014 familiar territory.'},
+   {d:dQ1,p:2,html:'<p>Integration asks the opposite question: given 3x\u00b2, what did we differentiate to get it?</p>',
+    speak:'Integration asks the opposite question: given 3x squared, what did we differentiate to get it?'},
+   {d:dQ1,p:3,html:'<p>Reversing the process recovers x\u00b3.</p>',
+    speak:'Reversing the process recovers x cubed.'},
+   {d:dQ1,p:4,html:'<p>But x\u00b3+5 also differentiates to 3x\u00b2, and so does x\u00b3 plus ANY constant \u2014 reversing loses that information.</p>'
+     +tryItMC(function(){
+       var bank=[
+         {question:'Why does integration always need a "+c"?',
+          options:['Because any constant added to a function disappears when you differentiate it','Because integration is only approximate','Because c always equals zero','Because the power rule requires it'],
+          working:'Differentiating x\u00b3, x\u00b3+5, and x\u00b3\u221212 all give 3x\u00b2 \u2014 the constant is lost, so reversing can\u2019t know which one you started with.'},
+         {question:'f(x)=x\u00b2+7 and g(x)=x\u00b2\u22123 have the same derivative, 2x. What does this tell you about reversing differentiation?',
+          options:['Reversing alone can\u2019t recover the original constant \u2014 you need extra information, like a point','f(x) and g(x) must actually be the same function','One of the two derivatives must be wrong','Differentiation is not reversible at all'],
+          working:'Since differentiating removes any constant term, integration by itself can only recover the family of curves x\u00b2+c \u2014 pinning down the exact one needs a given point (Checkpoint 4).'},
+         {question:'If \u222bf\u2019(x)dx = F(x)+c, what does varying c actually change about the graph of F(x)+c?',
+          options:['It shifts the whole graph vertically, without changing its shape','It stretches the graph horizontally','It changes the gradient at every point','It reflects the graph in the x-axis'],
+          working:'Adding a constant to a function shifts every y-value by the same amount \u2014 a vertical translation \u2014 which is exactly why all members of the family share the same derivative.'}
+       ];
+       var picked=pick(bank);
+       return {question:picked.question, options:picked.options, correct:0, working:picked.working};
+     }),
+    speak:'Reversing loses the constant \u2014 Checkpoint 2 deals with that. Now it\u2019s your turn.'}
   ]},
- {ey:'Checkpoint 2 of 10',ti:'The power rule for integration',su:'∫xⁿ dx = xⁿ⁺¹/(n+1) + c',panels:[
-   {dtitle:'Raise the power, then divide by the new power',boxes:[{"stage": 1, "text": "∫xⁿ dx = xⁿ⁺¹/(n+1) + c   (n ≠ −1)", "bg": "#fff5f0"}],p:1,html:'<p>This is exactly the reverse of the differentiation power rule — add 1 to the power, then divide by the new power.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Integrate x⁴", "bg": "#fff5f0"}],p:1,html:'<p>Apply the power rule for integration.</p>'+tryItMC(function(){return {question:'What is \u222bx\u2074 dx?',options:['x\u2075/5 + c','x\u00b3/3 + c','4x\u00b3 + c','x\u2075 + c'],correct:0,working:'Raise power to 5, divide by 5: x\u2075/5 + c.'};})}
+ {ey:'Checkpoint 2 of 10',ti:'The power rule for integration',su:'\u222bx\u207f dx = x\u207f\u207a\u00b9/(n+1) + c',panels:[
+   {d:dQ2,p:1,html:'<p>Differentiating x\u207f\u207a\u00b9 gives (n+1)x\u207f \u2014 the power rule, run forwards.</p>',
+    speak:'Differentiating x to the n plus 1 gives n plus 1, times x to the n \u2014 the power rule, run forwards.'},
+   {d:dQ2,p:2,html:'<p>So integrating x\u207f must undo that \u2014 divide by the new power instead of multiplying by it.</p>',
+    speak:'So integrating x to the n must undo that \u2014 divide by the new power instead of multiplying by it.'},
+   {d:dQ2,p:3,html:'<p>That gives the power rule for integration.</p>',
+    speak:'That gives the power rule for integration.'},
+   {d:dQ2,p:4,html:'<p>And never forget the +c.</p>'
+     +tryItMC(function(){
+       var n=pick([2,3,4,5,6]);
+       return {question:'What is \u222bx'+'^('+n+')'+' dx?',
+         options:['x'+'^('+(n+1)+')'+'\u2044'+(n+1)+' + c', 'x'+'^('+(n+1)+')'+' + c', n+'x'+'^('+(n-1)+')'+' + c', 'x'+'^('+n+')'+'\u2044'+n+' + c'],
+         correct:0,
+         working:'Add 1 to the power ('+n+'\u2192'+(n+1)+'), then divide by the new power: x'+'^('+(n+1)+')'+'\u2044'+(n+1)+' + c.'};
+     }),
+    speak:'And never forget the plus c. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 3 of 10',ti:'Integrating polynomials',su:'Term by term, same as differentiation',panels:[
-   {dtitle:'Integrate each term separately',boxes:[{"stage": 1, "text": "∫(6x² − 4x + 3) dx", "bg": "#fff5f0"}, {"stage": 2, "text": "= 2x³ − 2x² + 3x + c", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Just like differentiation, integrate a polynomial term by term — but only add ONE +c at the very end.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "∫(3x²+2x) dx", "bg": "#fff5f0"}],p:1,html:'<p>Integrate term by term.</p>'+tryItMC(function(){return {question:'What is \u222b(3x\u00b2+2x) dx?',options:['x\u00b3+x\u00b2+c','x\u00b3+2x\u00b2+c','3x\u00b3+x\u00b2+c','x\u00b3+x+c'],correct:0,working:'\u222b3x\u00b2dx=x\u00b3, \u222b2xdx=x\u00b2. Total: x\u00b3+x\u00b2+c.'};})}
+   {d:dQ3,p:1,html:'<p>\u222b(6x\u00b2 + 4x \u2212 3) dx \u2014 a polynomial with several terms.</p>',
+    speak:'The integral of 6x squared plus 4x minus 3 \u2014 a polynomial with several terms.'},
+   {d:dQ3,p:2,html:'<p>Apply the power rule to EACH term separately \u2014 a lone number like \u22123 integrates to \u22123x (think of it as \u22123x\u2070).</p>',
+    speak:'Apply the power rule to each term separately \u2014 a lone number like minus 3 integrates to minus 3x, thinking of it as minus 3 x to the power 0.'},
+   {d:dQ3,p:3,html:'<p>Working through each term.</p>',
+    speak:'Working through each term.'},
+   {d:dQ3,p:4,html:'<p>Combine the integrated terms.</p>'
+     +tryItMC(function(){
+       var a=pick([2,3,4]),b=pick([2,4,6]),c=pick([1,3,5]);
+       return {question:'Find \u222b('+a+'x\u00b2 + '+b+'x \u2212 '+c+') dx.',
+         options:[(a/3).toFixed(2).replace(/\.00$/,'').replace(/0$/,'')+'x\u00b3 + '+(b/2)+'x\u00b2 \u2212 '+c+'x + c', a+'x\u00b3 + '+b+'x\u00b2 \u2212 '+c+'x + c', (a*3)+'x + '+(b*2)+' + c', (a/3).toFixed(2).replace(/\.00$/,'').replace(/0$/,'')+'x\u00b3 + '+(b/2)+'x\u00b2 + c'],
+         correct:0,
+         working:a+'x\u00b2\u2192'+(a/3).toFixed(2).replace(/\.00$/,'').replace(/0$/,'')+'x\u00b3, '+b+'x\u2192'+(b/2)+'x\u00b2, \u2212'+c+'\u2192\u2212'+c+'x, plus one +c overall.'};
+     }),
+    speak:'Combine the integrated terms. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 4 of 10',ti:'Finding c using a point',su:'Using given information to pin down the constant',panels:[
-   {dtitle:'Substitute a known point to solve for c',boxes:[{"stage": 1, "text": "dy/dx = 2x, curve passes through (1,4)", "bg": "#fff5f0"}, {"stage": 2, "text": "y = x² + c, substitute: 4 = 1 + c → c = 3", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Once you know one point the curve passes through, substitute to solve for the specific value of c.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "dy/dx=3x², passes through (2,10)", "bg": "#fff5f0"}],p:1,html:'<p>Integrate, then substitute the point.</p>'+tryItMC(function(){return {question:'dy/dx=3x\u00b2, curve passes through (2,10). What is c?',options:['2','8','\u22128','10'],correct:0,working:'y=x\u00b3+c. At (2,10): 10=8+c \u2192 c=2.'};})}
+   {d:dQ4,p:1,html:'<p>Integrating dy\u2044dx=2x gives y=x\u00b2+c \u2014 a WHOLE FAMILY of curves, one for every value of c.</p>',
+    speak:'Integrating dy dx equals 2x gives y equals x squared plus c \u2014 a whole family of curves, one for every value of c.'},
+   {d:dQ4,p:2,html:'<p>Given a specific point the curve passes through, only ONE member of that family actually fits.</p>',
+    speak:'Given a specific point the curve passes through, only one member of that family actually fits.'},
+   {d:dQ4,p:3,html:'<p>Substitute the point into y=x\u00b2+c and solve for c.</p>'
+     +tryItMC(function(){
+       var a=pick([2,3]),x1=pick([1,2]),y1=pick([5,8,10]);
+       var c=y1-a*Math.pow(x1,2);
+       return {question:'A curve has dy\u2044dx='+(2*a)+'x and passes through ('+x1+','+y1+'). Find y.',
+         options:['y='+a+'x\u00b2'+(c>=0?'+':'')+c, 'y='+(2*a)+'x\u00b2'+(c>=0?'+':'')+c, 'y='+a+'x\u00b2', 'y='+a+'x'+(c>=0?'+':'')+c],
+         correct:0,
+         working:'Integrate: y='+a+'x\u00b2+c. Substitute ('+x1+','+y1+'): '+y1+'='+a+'('+x1+')\u00b2+c \u2192 c='+c+'. So y='+a+'x\u00b2'+(c>=0?'+':'')+c+'.'};
+     }),
+    speak:'Substitute the point into the general family and solve for c. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 5 of 10',ti:'Definite integrals',su:'Evaluating between two limits',panels:[
-   {dtitle:'∫ from a to b',boxes:[{"stage": 1, "text": "∫ₐᵇ f(x) dx = [F(x)]ₐᵇ = F(b) − F(a)", "bg": "#fff5f0"}, {"stage": 2, "text": "No +c needed — it cancels out", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>A definite integral gives a NUMBER, not a function — the constant of integration cancels when you subtract F(a) from F(b).</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "∫₁³ 2x dx", "bg": "#fff5f0"}],p:1,html:'<p>Evaluate the definite integral.</p>'+tryItMC(function(){return {question:'What is \u222b\u2081\u00b3 2x dx?',options:['8','9','6','4'],correct:0,working:'[x\u00b2]\u2081\u00b3 = 9 \u2212 1 = 8.'};})}
+   {d:dQ5,p:1,html:'<p>A definite integral has numbers on the \u222b sign \u2014 no +c needed, since it cancels out.</p>',
+    speak:'A definite integral has numbers on the integral sign \u2014 no plus c needed, since it cancels out.'},
+   {d:dQ5,p:2,html:'<p>Integrate exactly as normal first.</p>',
+    speak:'Integrate exactly as normal first.'},
+   {d:dQ5,p:3,html:'<p>Then substitute the TOP limit, and subtract the result of substituting the BOTTOM limit.</p>',
+    speak:'Then substitute the top limit, and subtract the result of substituting the bottom limit.'},
+   {d:dQ5,p:4,html:'<p>Worked example.</p>'
+     +tryItMC(function(){
+       var lo=pick([0,1,2]),hi=lo+pick([2,3,4]);
+       var val=hi*hi-lo*lo;
+       return {question:'Evaluate \u2229 (from '+lo+' to '+hi+') of 2x dx.',
+         options:[String(val), String(hi-lo), String(hi*hi), String(2*(hi-lo))],
+         correct:0,
+         working:'[x\u00b2] from '+lo+' to '+hi+' = '+hi+'\u00b2 \u2212 '+lo+'\u00b2 = '+val+'.'};
+     }),
+    speak:'Worked example. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 6 of 10',ti:'Area under a curve',su:'The geometric meaning of a definite integral',panels:[
-   {dtitle:'∫ₐᵇ f(x) dx = area between curve and x-axis',boxes:[{"stage": 1, "text": "Positive area above the x-axis", "bg": "#e8f8ee", "stroke": "#1a7a3a"}, {"stage": 2, "text": "Negative \"area\" below the x-axis (still counts, but flips sign)", "bg": "#fde8e8", "stroke": "#a01820"}],p:2,html:'<p>If a curve dips below the x-axis, the integral there is negative — for a true (positive) area, take the modulus of that portion.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "∫ₐᵇ f(x) dx = −5", "bg": "#fff5f0"}],p:1,html:'<p>Interpret a negative definite integral.</p>'+tryItMC(function(){return {question:'If \u222b\u2090\u1d47 f(x) dx = \u22125, what does this tell you?',options:['The curve lies entirely below the x-axis on [a,b]','You made an arithmetic error \u2014 areas can\u2019t be negative','The function is decreasing','The curve doesn\u2019t exist on this interval'],correct:0,working:'A negative definite integral means the curve is below the x-axis over that interval (or more area is below than above).'};})}
+   {d:dQ6,p:1,html:'<p>Approximate the area under a curve using a handful of wide rectangles.</p>',
+    speak:'Approximate the area under a curve using a handful of wide rectangles.'},
+   {d:dQ6,p:2,html:'<p>Use more, narrower rectangles \u2014 the fit gets noticeably closer to the true curve.</p>',
+    speak:'Use more, narrower rectangles \u2014 the fit gets noticeably closer to the true curve.'},
+   {d:dQ6,p:3,html:'<p>As the rectangles get infinitely thin, the estimate becomes exact \u2014 that limit IS the definite integral.</p>'
+     +tryItMC(function(){
+       var bank=[
+         {question:'What is the geometric meaning of \u2229(from a to b) of f(x) dx?',
+          options:['The area between the curve y=f(x) and the x-axis, from x=a to x=b','The gradient of f(x) at x=a','The length of the curve from a to b','The average value of a and b'],
+          working:'A definite integral is the limit of a sum of ever-narrower rectangle areas \u2014 exactly the area under the curve between the limits.'},
+         {question:'As the number of approximating rectangles under a curve increases (getting narrower), what happens to the accuracy of the area estimate?',
+          options:['It improves, approaching the exact area in the limit','It gets worse, since more rectangles means more error accumulates','It stays exactly the same','It only improves for straight-line graphs'],
+          working:'Narrower rectangles hug the curve\u2019s shape more closely; as their width shrinks toward zero, the total area of all the rectangles converges to the exact value \u2014 the definite integral.'}
+       ];
+       var picked=pick(bank);
+       return {question:picked.question, options:picked.options, correct:0, working:picked.working};
+     }),
+    speak:'As the rectangles get infinitely thin, the estimate becomes exact \u2014 that limit is the definite integral. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 7 of 10',ti:'Area between a curve and a line',su:'Subtracting two regions',panels:[
-   {dtitle:'Area between curve and line = ∫(curve − line) dx',boxes:[{"stage": 1, "text": "Find intersection points first (these become your limits)", "bg": "#fff5f0"}, {"stage": 2, "text": "Integrate (top function − bottom function)", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Always subtract the lower function from the upper function BEFORE integrating — this avoids sign errors.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Curve y=x², line y=4", "bg": "#fff5f0"}],p:1,html:'<p>Which function is on top between the intersections?</p>'+tryItMC(function(){return {question:'For the region between y=x\u00b2 and y=4 (between their intersections), which expression finds the area?',options:['\u222b(4\u2212x\u00b2) dx','\u222b(x\u00b2\u22124) dx','\u222bx\u00b2 dx \u2212 4','\u222b4 dx + \u222bx\u00b2 dx'],correct:0,working:'The line y=4 is above the parabola between the intersections, so integrate (top\u2212bottom) = (4\u2212x\u00b2).'};})}
+   {d:dQ7,p:1,html:'<p>A curve, y=f(x).</p>',
+    speak:'A curve, y equals f of x.'},
+   {d:dQ7,p:2,html:'<p>And a line crossing through it.</p>',
+    speak:'And a line crossing through it.'},
+   {d:dQ7,p:3,html:'<p>The region trapped between them has area equal to the integral of (top function minus bottom function).</p>',
+    speak:'The region trapped between them has area equal to the integral of the top function minus the bottom function.'},
+   {d:dQ7,p:4,html:'<p>First find where they cross, by setting the two equal \u2014 those become your integration limits.</p>'
+     +tryItMC(function(){
+       var bank=[
+         {question:'To find the area between a curve and a line, what must you do FIRST?',
+          options:['Find where they intersect, to get the limits of integration','Differentiate both','Just integrate the curve alone','Add the two equations together'],
+          working:'The intersection points give the x-values where the shaded region starts and ends \u2014 these become the limits of the definite integral.'},
+         {question:'y=x\u00b2 and y=4 intersect where x=\u22122 and x=2. What are the limits of integration for the area between them?',
+          options:['\u22122 and 2','0 and 4','\u22124 and 4','0 and 2'],
+          working:'The area is bounded exactly between the intersection points, so the integral runs from x=\u22122 to x=2.'}
+       ];
+       var picked=pick(bank);
+       return {question:picked.question, options:picked.options, correct:0, working:picked.working};
+     }),
+    speak:'First find where they cross, by setting the two equal \u2014 those become your integration limits. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 8 of 10',ti:'Integrating fractional and negative powers',su:'Applying the same rule beyond positive integers',panels:[
-   {dtitle:'Rewrite first, then integrate',boxes:[{"stage": 1, "text": "∫√x dx = ∫x^(½) dx = (2/3)x^(3/2) + c", "bg": "#fff5f0"}],p:1,html:'<p>Same power rule, just applied to a fractional power — always rewrite roots as index form first.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "∫1/x² dx", "bg": "#fff5f0"}],p:1,html:'<p>Rewrite as a negative power first.</p>'+tryItMC(function(){return {question:'What is \u222b1/x\u00b2 dx?',options:['\u22121/x + c','1/x + c','\u22122/x\u00b3 + c','ln(x\u00b2) + c'],correct:0,working:'1/x\u00b2=x\u207b\u00b2. \u222bx\u207b\u00b2dx = x\u207b\u00b9/(\u22121)+c = \u22121/x+c.'};})}
+   {d:dQ8,p:1,html:'<p>\u222b(\u221ax + 2\u2044x\u00b3) dx \u2014 the power rule needs powers of x, written as such.</p>',
+    speak:'The integral of square root of x plus 2 over x cubed \u2014 the power rule needs powers of x, written as such.'},
+   {d:dQ8,p:2,html:'<p>Rewrite each: \u221ax = x to the power \u00bd, and 2\u2044x\u00b3 = 2x to the power \u22123.</p>',
+    speak:'Rewrite each: square root of x equals x to the power one half, and 2 over x cubed equals 2x to the power minus 3.'},
+   {d:dQ8,p:3,html:'<p>Now apply the power rule exactly as before.</p>',
+    speak:'Now apply the power rule exactly as before.'},
+   {d:dQ8,p:4,html:'<p>Integrating each rewritten term.</p>'
+     +tryItMC(function(){
+       var cases=[
+         {q:'\u221ax dx (i.e. x^(\u00bd) dx)', a:'\u2154x^(\u00b3\u2044\u00b2) + c', wrong:['\u00bdx^(\u2212\u00bd) + c','x^(\u00b3\u2044\u00b2) + c','\u00bdx^(\u00b3\u2044\u00b2) + c'], work:'Add 1 to the power: \u00bd+1=\u00b3\u2044\u2082. Divide by the new power: x^(\u00b3\u2044\u00b2)\u00f7(\u00b3\u2044\u2082) = \u2154x^(\u00b3\u2044\u00b2).'},
+         {q:'x\u207b\u00b2 dx', a:'\u2212x\u207b\u00b9 + c', wrong:['\u2212\u00bdx\u207b\u00b9 + c','x\u207b\u00b9 + c','\u22122x\u207b\u00b3 + c'], work:'Add 1 to the power: \u22122+1=\u22121. Divide by the new power: x\u207b\u00b9\u00f7(\u22121) = \u2212x\u207b\u00b9.'},
+         {q:'4x\u207b\u2075 dx', a:'\u2212x\u207b\u2074 + c', wrong:['\u2212\u00bdx\u207b\u2074 + c','\u221220x\u207b\u2076 + c','x\u207b\u2074 + c'], work:'Add 1 to the power: \u22125+1=\u22124. Divide by the new power: 4x\u207b\u2074\u00f7(\u22124) = \u2212x\u207b\u2074.'}
+       ];
+       var picked=pick(cases);
+       return {question:'Find \u222b'+picked.q+'.', options:[picked.a].concat(picked.wrong), correct:0, working:picked.work};
+     }),
+    speak:'Integrating each rewritten term. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 9 of 10',ti:'Finding the original function',su:'Reversing engineering an equation of a curve',panels:[
-   {dtitle:'From gradient function to curve equation',boxes:[{"stage": 1, "text": "Given dy/dx and one point, find y = f(x) completely", "bg": "#fff5f0"}, {"stage": 2, "text": "Integrate, then substitute the point to find c", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>This combines everything: the power rule for integration plus using a given point to pin down c — a very common exam question type.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "dy/dx=4x³−2, through (1,3)", "bg": "#fff5f0"}],p:1,html:'<p>Find the full equation of the curve.</p>'+tryItMC(function(){return {question:'dy/dx=4x\u00b3\u22122, curve passes through (1,3). What is y?',options:['x\u2074\u22122x+4','x\u2074\u22122x+3','x\u2074+2x\u22124','4x\u2074\u22122x+1'],correct:0,working:'y=x\u2074\u22122x+c. At(1,3):3=1\u22122+c\u2192c=4. So y=x\u2074\u22122x+4.'};})}
+   {d:dQ9,p:1,html:'<p>Given a curve\u2019s gradient function, dy\u2044dx, and one point it passes through.</p>',
+    speak:'Given a curve\u2019s gradient function, dy dx, and one point it passes through.'},
+   {d:dQ9,p:2,html:'<p>Integrate the gradient function to recover the family of possible curves.</p>',
+    speak:'Integrate the gradient function to recover the family of possible curves.'},
+   {d:dQ9,p:3,html:'<p>That gives the general antiderivative, still with an unknown c.</p>',
+    speak:'That gives the general antiderivative, still with an unknown c.'},
+   {d:dQ9,p:4,html:'<p>Use the given point to pin down c \u2014 exactly Checkpoint 4\u2019s method, just with a more complicated gradient function.</p>',
+    speak:'Use the given point to pin down c \u2014 exactly Checkpoint 4\u2019s method, just with a more complicated gradient function.'},
+   {d:dQ9,p:5,html:'<p>That gives the specific equation of the curve.</p>'
+     +tryItMC(function(){
+       var a=pick([2,3]),b=pick([2,4]);
+       var Fx=function(x){return (a/3)*Math.pow(x,3)-(b/2)*Math.pow(x,2);};
+       var x1=pick([1,2]);
+       var y1=Fx(x1)+5;
+       return {question:'A curve has dy\u2044dx='+a+'x\u00b2\u2212'+b+'x and passes through ('+x1+','+y1+'). What is c?',
+         options:['5', String(y1), '0', String(-5)],
+         correct:0,
+         working:'Integrating gives y='+(a/3).toFixed(2).replace(/\.00$/,'')+'x\u00b3\u2212'+(b/2)+'x\u00b2+c. Substituting the point gives c=5.'};
+     }),
+    speak:'That gives the specific equation of the curve. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 10 of 10',ti:'Bringing it together',su:'Consolidating Integration — and Pure 1',panels:[
-   {dtitle:'The Integration toolkit',boxes:[{"stage": 1, "text": "Power rule, term-by-term, finding c", "bg": "#fff5f0"}, {"stage": 2, "text": "Definite integrals, area under curves", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Area between curve and line, reconstructing equations", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>Congratulations — you’ve completed all 8 Pure Mathematics 1 topics. Integration and Differentiation together form the calculus core examined throughout AS and A2.</p>'},
-   {dtitle:'Pure 1 complete!',boxes:[{"stage": 1, "text": "🏆 On to Pure 2", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:1,html:'<p>Excellent work — you’ve finished Pure Mathematics 1. Pure 2 builds on this with logarithms, exponentials, and more advanced trigonometry.</p>'}
+   {d:dQ10,p:1,html:'<p>Integration reverses differentiation \u2014 always add +c, since reversing loses the original constant term.</p>',
+    speak:'Integration reverses differentiation \u2014 always add plus c, since reversing loses the original constant term.'},
+   {d:dQ10,p:2,html:'<p>Definite integrals evaluate between limits with no +c needed; the area under a curve is the limit of ever-narrower rectangles, made exact.</p>',
+    speak:'Definite integrals evaluate between limits with no plus c needed; the area under a curve is the limit of ever-narrower rectangles, made exact.'},
+   {d:dQ10,p:3,html:'<p>Area between two curves subtracts top minus bottom; finding a curve from its gradient combines integration with a given point.</p>'
+     +tryItMC(function(){
+       var bank=[
+         {question:'Find \u2229 (from 0 to 2) of (3x\u00b2+1) dx.',
+          options:['10','9','12','8'],
+          correct:0,
+          working:'[x\u00b3+x] from 0 to 2 = (8+2)\u2212(0+0) = 10.'},
+         {question:'A curve has dy\u2044dx=4x\u22123 and passes through (2,5). Find the equation of the curve.',
+          options:['y=2x\u00b2\u22123x+3','y=2x\u00b2\u22123x+5','y=4x\u00b2\u22123x','y=2x\u00b2\u22123x'],
+          correct:0,
+          working:'Integrating: y=2x\u00b2\u22123x+c. Substituting (2,5): 5=8\u22126+c \u2192 c=3. So y=2x\u00b2\u22123x+3.'},
+         {question:'Find the area enclosed between y=x\u00b2 and y=4 (between their intersection points).',
+          options:['32/3','16/3','8','4'],
+          correct:0,
+          working:'Intersections at x=\u00b12. Area=\u2229(from \u22122 to 2) of (4\u2212x\u00b2)dx = [4x\u2212x\u00b3/3] from \u22122 to 2 = (8\u22128/3)\u2212(\u22128+8/3) = 32/3.'},
+         {question:'Find \u222b(3\u221ax) dx.',
+          options:['2x^(\u00b3\u2044\u00b2)+c','\u00b3\u2044\u2082x^(\u00b9\u2044\u00b2)+c','3x^(\u00b3\u2044\u00b2)+c','\u2154x^(\u00b3\u2044\u00b2)+c'],
+          correct:0,
+          working:'3x^(\u00bd) integrates to 3\u00f7(\u00b3\u2044\u2082)x^(\u00b3\u2044\u00b2) = 2x^(\u00b3\u2044\u00b2)+c.'}
+       ];
+       return pick(bank);
+     }),
+    speak:'Area between two curves subtracts top minus bottom; finding a curve from its gradient combines integration with a given point. Now it\u2019s your turn.'},
+   {d:dQ10,p:4,html:'<p>That completes AS Pure 1 \u2014 well done getting through all eight topics.</p>',
+    speak:'That completes AS Pure 1 \u2014 well done getting through all eight topics.'}
   ]}
 ];
 
@@ -276,13 +649,17 @@ function saveProgress(){
   try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify({qi:qi,pi:pi})); }catch(e){}
 }
 function render(){
+  if (typeof stopReading === 'function') stopReading();
   var qq=Q[qi],pp=qq.panels[pi];
   document.getElementById('ey').textContent=qq.ey;
   document.getElementById('ti').textContent=qq.ti;
   document.getElementById('su').textContent=qq.su;
-  drawGeneric(pp.dtitle, pp.boxes, pp.p);
+  pp.d(pp.p);
   var pn=document.getElementById('pn');
   pn.innerHTML=pp.html;
+  if (qi===Q.length-1 && pi===qq.panels.length-1) {
+    pn.innerHTML += '<div class="test-link-row"><a class="test-link-btn" href="test.html?topic='+(window.__testTopicId||761)+'">\ud83d\udcdd Optional: take the test on this topic</a></div>';
+  }
   pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
   document.getElementById('pb').disabled=(qi===0&&pi===0);
   document.getElementById('nb').textContent=(pi===qq.panels.length-1&&qi===Q.length-1)?'Done':'Next \u2192';
@@ -331,6 +708,112 @@ document.getElementById('sb').addEventListener('click',function(e){
     });
   }
 })();
+
+// ── Auto-reader ──────────────────────────────────────────────────────────
+var voiceSelEl = document.getElementById('voiceSel');
+var readerStatusEl = document.getElementById('readerStatus');
+var readBtnEl = document.getElementById('readBtn');
+var autoBtnEl = document.getElementById('autoBtn');
+var stopBtnEl = document.getElementById('stopReadBtn');
+var autoPlaying = false;
+var userPickedVoice = false;
+
+function populateVoices(){
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  voiceSelEl.innerHTML = '<option value="">Default voice</option>' + voices.map(function(v,i){return '<option value="'+i+'">'+v.name+' ('+v.lang+')</option>';}).join('');
+}
+if (window.speechSynthesis) {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+voiceSelEl.addEventListener('change', function(){ userPickedVoice = (voiceSelEl.value !== ''); });
+function currentVoice(){
+  if (!userPickedVoice) return null;
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  return voices[parseInt(voiceSelEl.value,10)] || null;
+}
+function hasInteractiveQuestion(pp){ return pp.html.indexOf('data-tryid')>-1; }
+
+function stopReading(){
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  autoPlaying = false;
+  readBtnEl.disabled = false; autoBtnEl.disabled = false;
+  stopBtnEl.style.display = 'none';
+  readerStatusEl.textContent = '';
+  window.__activeUtterance = null;
+}
+
+function speakPanel(pp, onDone){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech isn\u2019t supported on this browser.'; if(onDone) onDone(); return; }
+  if (!pp.speak) { if(onDone) onDone(); return; }
+  var u = new SpeechSynthesisUtterance(pp.speak);
+  var v = currentVoice();
+  if (v) u.voice = v;
+  u.rate = 0.95;
+  u.onend = function(){ window.__activeUtterance = null; if (onDone) onDone(); };
+  u.onerror = function(ev){
+    window.__activeUtterance = null;
+    readerStatusEl.textContent = 'Couldn\u2019t play audio (' + (ev && ev.error ? ev.error : 'unknown error') + '). Check the device isn\u2019t muted and try again.';
+    if (onDone) onDone();
+  };
+  window.__activeUtterance = u;
+  speechSynthesis.speak(u);
+  setTimeout(function(){
+    if (window.__activeUtterance === u && !speechSynthesis.speaking && !speechSynthesis.pending) {
+      readerStatusEl.textContent = 'No audio started \u2014 try tapping the button again, or check the device isn\u2019t on silent/muted.';
+    }
+  }, 600);
+}
+
+readBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  readerStatusEl.textContent = 'Reading\u2026';
+  var pp = Q[qi].panels[pi];
+  speakPanel(pp, function(){
+    readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+  });
+});
+
+autoBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  autoPlaying = true;
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  autoStep();
+});
+
+function autoStep(){
+  if (!autoPlaying) return;
+  var qq = Q[qi], pp = qq.panels[pi];
+  readerStatusEl.textContent = 'Reading step '+(pi+1)+' of '+qq.panels.length+'\u2026';
+  speakPanel(pp, function(){
+    if (!autoPlaying) return;
+    if (hasInteractiveQuestion(pp)) {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Your turn \u2014 try the question below.';
+      return;
+    }
+    if (pi < qq.panels.length-1) {
+      pi++;
+      var pn=document.getElementById('pn'); qq.panels[pi].d(qq.panels[pi].p);
+      pn.innerHTML=qq.panels[pi].html;
+      pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
+      var dt=document.getElementById('dt');
+      dt.innerHTML=qq.panels.map(function(_,i){return '<div class="dot '+(i<pi?'dn':i===pi?'on':'')+'"></div>';}).join('');
+      saveProgress();
+      autoStep();
+    } else {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Checkpoint narrated.';
+    }
+  });
+}
+
+stopBtnEl.addEventListener('click', stopReading);
 
 render();
 </script>
