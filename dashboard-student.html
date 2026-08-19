@@ -322,6 +322,18 @@
       <div id="diag-results-y12-note" style="font-size:0.88rem; color:#666; line-height:1.5;"></div>
     </div>
 
+    <div id="leaderboard-card" style="background:#fff; border-radius:10px; padding:20px; margin-bottom:20px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <div style="font-weight:700; color:#333; font-size:1rem;">🏆 Leaderboard</div>
+        <div class="subject-toggle" style="background:#f0f0f0;">
+          <button id="lb-scope-year" class="active" style="color:#666" onclick="window.setLeaderboardScope('year')">My Year</button>
+          <button id="lb-scope-school" style="color:#666" onclick="window.setLeaderboardScope('school')">Whole School</button>
+        </div>
+      </div>
+      <p style="font-size:0.82rem;color:#888;margin-bottom:12px">Ranked by average test score (minimum 3 tests taken).</p>
+      <div id="leaderboard-card-content" style="font-size:0.9rem;color:#888">Loading…</div>
+    </div>
+
     <div class="subject-progress-row" id="subject-progress-row">
       <div class="subject-panel maths-panel" id="maths-panel">
         <div class="subject-panel-title">📐 Maths Progress<span class="subject-panel-soon-badge" id="maths-soon-badge" style="display:none">Coming Soon</span></div>
@@ -1164,6 +1176,71 @@
     document.getElementById('error-section').style.display = 'block';
   }
 
+  // ── Leaderboard (own year by default) ──
+  // Ranked by average test %, minimum 3 tests so one lucky attempt can't top the
+  // table. Names are first name + last initial only for privacy. Own row highlighted.
+  let leaderboardScope = 'year';
+  window.setLeaderboardScope = function(scope) {
+    leaderboardScope = scope;
+    document.getElementById('lb-scope-year').classList.toggle('active', scope === 'year');
+    document.getElementById('lb-scope-school').classList.toggle('active', scope === 'school');
+    window.renderLeaderboardCard();
+  };
+
+  window.renderLeaderboardCard = async function() {
+    const el = document.getElementById('leaderboard-card-content');
+    if (!el) return;
+    el.innerHTML = 'Loading…';
+
+    let query = supabase
+      .from('test_results')
+      .select('student_id, percentage, profiles!inner(full_name, first_name, last_name, year_group, role, school_id)')
+      .eq('profiles.role', 'student')
+      .eq('profiles.school_id', myStudentSchoolId);
+    if (leaderboardScope === 'year') query = query.eq('profiles.year_group', myYearGroup);
+
+    const { data, error } = await query;
+    if (error || !data) { el.innerHTML = '<p style="color:#888">Leaderboard unavailable right now.</p>'; return; }
+
+    const byStudent = {};
+    data.forEach(r => {
+      const key = r.student_id;
+      if (!byStudent[key]) {
+        const first = r.profiles?.first_name || (r.profiles?.full_name || '').split(' ')[0] || 'Student';
+        const lastInitial = r.profiles?.last_name ? (r.profiles.last_name[0] + '.') : '';
+        byStudent[key] = { name: (first + ' ' + lastInitial).trim(), sumPct: 0, count: 0 };
+      }
+      byStudent[key].sumPct += (r.percentage || 0);
+      byStudent[key].count  += 1;
+    });
+
+    const MIN_TESTS = 3;
+    const ranked = Object.entries(byStudent)
+      .filter(([,s]) => s.count >= MIN_TESTS)
+      .map(([id,s]) => ({ id, name: s.name, avg: Math.round(s.sumPct / s.count), count: s.count }))
+      .sort((a,b) => b.avg - a.avg || b.count - a.count)
+      .slice(0, 15);
+
+    if (!ranked.length) {
+      el.innerHTML = '<p style="color:#888">No one has completed 3+ tests yet — take some tests to appear here!</p>';
+      return;
+    }
+
+    const medal = i => i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1) + '.';
+    let html = '<div style="display:flex;flex-direction:column;gap:6px;">';
+    ranked.forEach((s,i) => {
+      const isMe = s.id === userId;
+      html += `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:6px;${isMe ? 'background:#fde8e8;border:1px solid #C0272D33;' : 'background:#fafafa;'}">
+        <span style="width:26px;text-align:center;font-weight:700;color:#C0272D">${medal(i)}</span>
+        <span style="flex:1;font-weight:${isMe ? '700' : '600'};color:#333;">${s.name}${isMe ? ' (You)' : ''}</span>
+        <span style="font-weight:700;color:#333;">${s.avg}%</span>
+        <span style="font-size:0.75rem;color:#999;">${s.count} tests</span>
+      </div>`;
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  };
+
   async function applySchoolBranding(schoolId) {
     try {
       const { data: school } = await supabase
@@ -1511,6 +1588,8 @@
       // Set default selector and render
       document.getElementById('year-select').value = 'own';
       window.renderTopics();
+
+      window.renderLeaderboardCard();
 
       document.getElementById('loading').style.display  = 'none';
       document.getElementById('dashboard').style.display = 'block';
