@@ -2062,15 +2062,19 @@
   async function loadTestResults() {
     const { data } = await supabase
       .from('test_results')
-      .select('*, profiles(full_name, year_group, role), topics(topic_name, year_group)')
+      .select('*, profiles(full_name, year_group, role, active), topics(topic_name, year_group)')
       .eq('school_id', mySchoolId)
       .order('completed_at', { ascending: false });
     // Staff can take tests from their own dashboard for QA/preview purposes (see
     // "Take a Test" header button) — those attempts write to test_results under the
     // staff member's own profile, so they're excluded here to keep reporting/stats
     // student-only. profiles.role may be missing on very old rows; keep those rather
-    // than silently dropping legitimate historic student data.
-    allTestResults = (data || []).filter(r => !r.profiles || r.profiles.role === 'student' || !r.profiles.role);
+    // than silently dropping legitimate historic student data. Archived (active===false)
+    // students are also excluded from reporting/leaderboards.
+    allTestResults = (data || []).filter(r =>
+      (!r.profiles || r.profiles.role === 'student' || !r.profiles.role) &&
+      (r.profiles?.active !== false)
+    );
   }
 
   window.renderTestsTab = function() {
