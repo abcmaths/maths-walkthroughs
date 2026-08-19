@@ -648,15 +648,27 @@ function stopReading(){
   readBtnEl.disabled = false; autoBtnEl.disabled = false;
   stopBtnEl.style.display = 'none';
   readerStatusEl.textContent = '';
+  window.__activeUtterance = null;
 }
 
+// WebKit (Safari/iOS) has a well-known bug: if nothing keeps a strong reference
+// to a SpeechSynthesisUtterance, it can be garbage-collected mid-speech, which
+// silently kills the audio with no error and no onend firing. Assigning it to
+// window.__activeUtterance keeps it alive until it's actually done.
 function speakPanel(pp, onDone){
-  if (!window.speechSynthesis || !pp.speak) { if(onDone) onDone(); return; }
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech isn\u2019t supported on this browser.'; if(onDone) onDone(); return; }
+  if (!pp.speak) { if(onDone) onDone(); return; }
   var u = new SpeechSynthesisUtterance(pp.speak);
-  u.voice = currentVoice();
+  var v = currentVoice();
+  if (v) u.voice = v;
   u.rate = 0.95;
-  u.onend = function(){ if (onDone) onDone(); };
-  u.onerror = function(){ if (onDone) onDone(); };
+  u.onend = function(){ window.__activeUtterance = null; if (onDone) onDone(); };
+  u.onerror = function(ev){
+    window.__activeUtterance = null;
+    readerStatusEl.textContent = 'Couldn\u2019t play audio (' + (ev && ev.error ? ev.error : 'unknown error') + '). Check the device isn\u2019t muted and try again.';
+    if (onDone) onDone();
+  };
+  window.__activeUtterance = u;
   speechSynthesis.speak(u);
 }
 
