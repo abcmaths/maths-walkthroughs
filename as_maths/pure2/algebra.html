@@ -12,6 +12,11 @@
   else {
     const { data: prof } = await _lc.from('profiles').select('full_name').eq('id', session.user.id).maybeSingle();
     window.__studentFirstName = prof && prof.full_name ? prof.full_name.split(' ')[0] : 'there';
+    // For the optional "Take the test" link on the final checkpoint. Looked up
+    // live since this is a newly-built topic with no previously-known id.
+    _lc.from('topics').select('id').eq('topic_code','AS-P2-01').eq('subject','as_maths').maybeSingle()
+      .then(function(r){ window.__testTopicId = (r.data && r.data.id) ? r.data.id : null; })
+      .catch(function(){ window.__testTopicId = null; });
     document.addEventListener('DOMContentLoaded', function() {
       var el = document.getElementById('greet');
       if (el) el.textContent = 'Hi ' + window.__studentFirstName + ' — let\'s work through this one together.';
@@ -99,6 +104,21 @@ header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gol
 .welcome-go{width:100%;margin-top:6px;background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;border:none;padding:13px;border-radius:6px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
 .welcome-go:hover{filter:brightness(1.08);}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+@keyframes popIn{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes drawIn{to{stroke-dashoffset:0}}
+.an-pop{animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both;transform-box:fill-box;transform-origin:center;}
+.an-fade{animation:fadeUp .5s ease-out both;}
+.an-draw{animation:drawIn 1.1s ease-out forwards;}
+.reader-row{width:100%;max-width:760px;display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.reader-btn{font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:5px;border:1.5px solid var(--gold-dark);background:#fff;color:var(--gold-dark);cursor:pointer;font-family:inherit;}
+.reader-btn.active{background:var(--gold-dark);color:#fff;}
+.reader-btn:disabled{opacity:.4;cursor:default;}
+.reader-status{font-size:11.5px;color:#6b5750;}
+.reader-voice{font-size:12px;padding:6px 8px;border:1.5px solid var(--line);border-radius:5px;background:#fff;font-family:inherit;}
+.test-link-row{margin-top:16px;text-align:center;}
+.test-link-btn{display:inline-block;background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;padding:11px 24px;border-radius:6px;text-decoration:none;font-weight:700;font-size:14px;}
+.test-link-btn:hover{filter:brightness(1.08);}
 </style>
 </head>
 <body>
@@ -136,6 +156,13 @@ header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gol
       <div class="cvs"><svg id="dg" viewBox="0 0 480 280"></svg></div>
       <div class="pnl fi" id="pn"></div>
     </div>
+    <div class="reader-row">
+      <button class="reader-btn" id="readBtn">🔊 Read this step</button>
+      <button class="reader-btn" id="autoBtn">▶ Auto-play checkpoint</button>
+      <button class="reader-btn" id="stopReadBtn" style="display:none">■ Stop</button>
+      <select class="reader-voice" id="voiceSel"></select>
+      <span class="reader-status" id="readerStatus"></span>
+    </div>
     <div class="ctrl">
       <button class="btn" id="pb">&larr; Back</button>
       <div class="dots" id="dt"></div>
@@ -162,9 +189,9 @@ document.addEventListener('click',function(e){
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
     var o=shuffleMC(entry.genFn());entry.o=o;
-    var wrap=el.closest('.try');if(!wrap)return;
+    var wrapEl=el.closest('.try');if(!wrapEl)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
-    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+    wrapEl.parentNode.replaceChild(tmp.firstChild,wrapEl);ST[id]={o:o,genFn:entry.genFn};return;
   }
   if(el.classList.contains('mc-opt')){
     if(el.disabled)return;
@@ -184,89 +211,399 @@ document.addEventListener('click',function(e){
   }
 });
 function g(){return document.getElementById('dg');}
+function xesc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function T(x,y,txt,c,sz,a,bold){
   c=c||'#241A17';sz=sz||12;a=a||'middle';
-  // Supports inline superscripts written as ^(...) or ^X (single char) —
-  // rendered as real SVG superscripts via baseline-shift, not literal carets.
   var parts=String(txt).split(/\^(\([^)]*\)|\S)/);
   var tspans='';
   for(var i=0;i<parts.length;i++){
     if(!parts[i])continue;
     if(i%2===1){
       var exp=parts[i].replace(/^\(|\)$/g,'');
-      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+exp+'</tspan>';
+      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+xesc(exp)+'</tspan>';
     }else{
-      tspans+='<tspan>'+parts[i]+'</tspan>';
+      tspans+='<tspan>'+xesc(parts[i])+'</tspan>';
     }
   }
   return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+tspans+'</text>';
 }
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
-function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
-
-// Generic progressive-reveal diagram: renders a title plus a stack of boxes,
-// each appearing once the panel's stage (p) reaches that box's stage number.
-function drawGeneric(title, boxes, p){
-  var s=g(); s.setAttribute('viewBox','0 0 480 260'); var o=[];
-  o.push(T(240,22,title,'#C0272D',15,'middle',true));
-  var y=42;
-  boxes.forEach(function(b){
-    if(p>=b.stage){
-      var h=b.h||44;
-      o.push(R(20,y,440,h,b.bg||'#fff5f0',b.stroke||'#C0272D',1.5));
-      if(b.text2){
-        o.push(T(240,y+h*0.42+5,b.text,b.color||'#241A17',b.size||13,'middle',b.bold!==false));
-        o.push(T(240,y+h*0.78+3,b.text2,b.color2||'#888',b.size2||11,'middle',false));
-      }else{
-        o.push(T(240,y+h/2+5,b.text,b.color||'#241A17',b.size||14,'middle',b.bold!==false));
-      }
-      y+=h+8;
-    }
-  });
-  s.innerHTML=o.join('');
+function C(cx,cy,r,fill,stroke,sw){stroke=stroke||fill;return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;}
+function fracSimplify(n,d){var v=gcd(n,d);return [n/v,d/v];}
+function wrap(animate, cls, html){ return '<g class="'+(animate?cls:'')+'">'+html+'</g>'; }
+function drawCurve(points, color, w, animate){
+  if(animate) return '<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="'+w+'" stroke-dasharray="1400" stroke-dashoffset="1400" class="an-draw"/>';
+  return '<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="'+w+'"/>';
 }
+function drawLine(x1,y1,x2,y2,color,w,animate){
+  if(animate) return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+w+'" stroke-dasharray="500" stroke-dashoffset="500" class="an-draw"/>';
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+w+'"/>';
+}
+var AOX=210, AOY=200, AXS=45, AYS=22;
+function apx(v){return AOX+v*AXS;} function apy(v){return AOY-v*AYS;}
+function aCurvePts(fn,x0,x1,step){
+  var pts=[];
+  for(var xv=x0;xv<=x1+1e-9;xv+=step){
+    var yv=fn(xv);
+    if(yv===null||Math.abs(apy(yv)-AOY)>190) continue;
+    pts.push(apx(xv)+','+apy(yv));
+  }
+  return pts.join(' ');
+}
+function aAxes(x0,x1,ylo,yhi){
+  var o=[];
+  o.push(L(apx(x0)-6,AOY,apx(x1)+6,AOY,'#bbb',1));
+  o.push(L(AOX,AOY-yhi*AYS-6,AOX,AOY-ylo*AYS+6,'#bbb',1));
+  return o.join('');
+}
+
+// ── Checkpoint 1: The modulus function revisited ───────────────────────────
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'|x| strips the sign \u2014 solving needs BOTH cases','#C0272D',12.5,'middle',true));
+  if(p>=1){
+    o.push(aAxes(-3.5,3.5,0,4));
+    o.push(drawLine(apx(0),apy(0),apx(3.5),apy(3.5),'#1a5a8a',2.5,p===1));
+    o.push(drawLine(apx(0),apy(0),apx(-3.5),apy(3.5),'#1a5a8a',2.5,p===1));
+    o.push(wrap(p===1,'an-fade',T(apx(2.5),apy(2.5)-10,'y=|x|','#1a5a8a',11,'start',true)));
+  }
+  if(p>=2){
+    o.push(drawLine(apx(-3.5),apy(2),apx(3.5),apy(2),'#C8922A',2,p===2));
+    o.push(wrap(p===2,'an-pop',C(apx(2),apy(2),4,'#a01820')+C(apx(-2),apy(2),4,'#a01820')));
+    o.push(wrap(p===2,'an-fade',T(240,40,'|x|=2 crosses y=2 at TWO points: x=2 AND x=\u22122.','#241A17',11,'middle',false)));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(60,196,360,44,'#e8f8ee','#1a7a3a',2)
+      +T(240,214,'|x| = k  means  x = k  OR  x = \u2212k','#1a7a3a',13,'middle',true)
+      +T(240,232,'always solve BOTH cases \u2014 losing one loses half the answer.','#888',9.5,'middle',false)
+    ));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 2: Modulus inequalities ──────────────────────────────────────
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'|f(x)| < k vs |f(x)| > k \u2014 read it off the V-graph','#C0272D',12.5,'middle',true));
+  if(p>=1){
+    o.push(aAxes(-3.5,3.5,0,4));
+    o.push(L(apx(0),apy(0),apx(3.5),apy(3.5),'#888',2));
+    o.push(L(apx(0),apy(0),apx(-3.5),apy(3.5),'#888',2));
+    o.push(drawLine(apx(-3.5),apy(2),apx(3.5),apy(2),'#C8922A',2,p===1));
+    o.push(wrap(p===1,'an-fade',T(240,40,'Where is |x| BELOW the line y=2? Between the two crossing points.','#1a5a8a',11,'middle',false)));
+  }
+  if(p>=2){
+    o.push(wrap(p===2,'an-fade','<path d="M '+apx(-2)+' '+apy(2)+' L '+apx(0)+' '+apy(0)+' L '+apx(2)+' '+apy(2)+' Z" fill="#e8f4ff" stroke="none"/>'));
+    o.push(wrap(p===2,'an-pop',C(apx(2),apy(2),4,'#a01820')+C(apx(-2),apy(2),4,'#a01820')));
+    o.push(wrap(p===2,'an-fade',T(240,225,'|x|<2 means \u22122<x<2 \u2014 a single connected region, BETWEEN the two solutions.','#1a5a8a',10.5,'middle',false)));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(40,236,400,20,'#fff8e1','#C8922A',1)+T(240,250,'|x|>2 means x<\u22122 OR x>2 \u2014 OUTSIDE the two solutions, two separate regions.','#7A5A18',10,'middle',true)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 3: Polynomial division ───────────────────────────────────────
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Dividing a polynomial by (x \u2212 a)','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,40,'Divide x\u00b3 \u2212 2x\u00b2 \u2212 5x + 6 by (x \u2212 1) \u2014 same idea as long division of numbers.</p>'.replace('</p>',''),'#241A17',12,'middle',true)));}
+  if(p>=2){
+    o.push(wrap(p===2,'an-fade',R(40,52,400,120,'#f5f5f5','#888',1)
+      +T(240,70,'x\u00b2 \u2212 x \u2212 6','#888',11,'middle',false)
+      +L(65,80,455,80,'#241A17',1.5)
+      +T(250,96,'x \u2212 1 \u2502 x\u00b3 \u2212 2x\u00b2 \u2212 5x + 6','#241A17',12,'middle',false)
+      +T(250,116,'\u2212(x\u00b3 \u2212 x\u00b2)','#a01820',11,'middle',false)
+      +T(250,134,'\u2212x\u00b2 \u2212 5x','#241A17',11,'middle',false)
+      +T(250,152,'\u2212(\u2212x\u00b2 + x)','#a01820',11,'middle',false)
+      +T(250,168,'\u22126x + 6  \u2192  \u2212(\u22126x+6) \u2192 remainder 0','#241A17',10.5,'middle',false)
+    ));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(60,196,360,34,'#e8f8ee','#1a7a3a',2)+T(240,218,'x\u00b3\u22122x\u00b2\u22125x+6 = (x\u22121)(x\u00b2\u2212x\u22126)','#1a7a3a',13,'middle',true)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 4: The remainder theorem ─────────────────────────────────────
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'A shortcut: skip the division entirely','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'Dividing f(x) by (x\u2212a) always leaves a CONSTANT remainder.','#241A17',12,'middle',false)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,66,'Write f(x) = (x\u2212a)\u00b7Q(x) + R. Substitute x=a:','#241A17',11.5,'middle',false)+T(240,84,'f(a) = (a\u2212a)\u00b7Q(a) + R = 0 + R = R.','#1a5a8a',13,'middle',true)));}
+  if(p>=3){o.push(wrap(p===3,'an-pop',R(60,98,360,34,'#e8f8ee','#1a7a3a',2)+T(240,120,'The remainder when dividing by (x\u2212a) is simply f(a).','#1a7a3a',12.5,'middle',true)));}
+  if(p>=4){o.push(wrap(p===4,'an-fade',T(240,150,'Example: f(x)=x\u00b3\u22124x+1, divided by (x\u22122).','#241A17',11.5,'middle',false)+T(240,168,'Remainder = f(2) = 8\u22128+1 = 1 \u2014 no division needed.','#1a5a8a',12,'middle',true)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 5: The factor theorem ────────────────────────────────────────
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'The special case: remainder exactly zero','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,40,'From Checkpoint 4: remainder when dividing by (x\u2212a) is f(a).','#241A17',12,'middle',false)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,68,'If f(a) happens to equal exactly 0, there\u2019s NO remainder \u2014','#241A17',11.5,'middle',false)+T(240,86,'meaning (x\u2212a) divides in EXACTLY.','#241A17',11.5,'middle',false)));}
+  if(p>=3){o.push(wrap(p===3,'an-pop',R(60,100,360,34,'#e8f8ee','#1a7a3a',2)+T(240,122,'f(a) = 0   \u27fa   (x\u2212a) is a factor of f(x)','#1a7a3a',13,'middle',true)));}
+  if(p>=4){o.push(wrap(p===4,'an-fade',T(240,152,'This is how you find a first factor of a cubic: try values of a','#241A17',11.5,'middle',false)+T(240,170,'(usually factors of the constant term) until f(a)=0.','#241A17',11.5,'middle',false)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 6: Fully factorising a cubic ─────────────────────────────────
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Combining the factor theorem with division','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'f(x) = x\u00b3\u22122x\u00b2\u22125x+6. Try a few values to find a root.','#241A17',12,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,66,'f(1) = 1\u22122\u22125+6 = 0  \u2192  (x\u22121) is a factor (Checkpoint 5).','#1a5a8a',12,'middle',true)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,94,'Divide f(x) by (x\u22121) (Checkpoint 3): quotient x\u00b2\u2212x\u22126.','#241A17',11.5,'middle',false)));}
+  if(p>=4){o.push(wrap(p===4,'an-fade',T(240,122,'Factorise the quotient like any quadratic:','#241A17',11.5,'middle',false)+T(240,140,'x\u00b2\u2212x\u22126 = (x\u22123)(x+2).','#1a5a8a',13,'middle',true)));}
+  if(p>=5){o.push(wrap(p===5,'an-pop',R(50,154,380,34,'#e8f8ee','#1a7a3a',2)+T(240,176,'x\u00b3\u22122x\u00b2\u22125x+6 = (x\u22121)(x\u22123)(x+2)','#1a7a3a',13,'middle',true)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 7: Simplifying algebraic fractions ──────────────────────────
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Factorise BEFORE you try to cancel','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,40,'(x\u00b2\u22124) \u2044 (x\u00b2+x\u22126)','#241A17',15,'middle',true)+T(240,58,'You canNOT cancel the x\u00b2 terms directly \u2014 factorise first.','#888',10.5,'middle',false)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,90,'Numerator: x\u00b2\u22124 = (x\u22122)(x+2)','#1a5a8a',13,'middle',true)+T(240,108,'Denominator: x\u00b2+x\u22126 = (x+3)(x\u22122)','#1a5a8a',13,'middle',true)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,138,'Now a common factor, (x\u22122), is visible in both \u2014','#241A17',11.5,'middle',false)+T(240,156,'cancel it, since (x\u22122)\u2044(x\u22122)=1 (provided x\u22602).','#241A17',11.5,'middle',false)));}
+  if(p>=4){o.push(wrap(p===4,'an-pop',R(90,168,300,34,'#e8f8ee','#1a7a3a',2)+T(240,190,'= (x+2) \u2044 (x+3),  x\u2260 2','#1a7a3a',14,'middle',true)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 8: Solving cubic equations ───────────────────────────────────
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'From factorised form to every root','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'Solve x\u00b3\u22122x\u00b2\u22125x+6=0.','#241A17',13,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,66,'Factorise first, exactly as in Checkpoint 6:','#241A17',11.5,'middle',false)+T(240,84,'(x\u22121)(x\u22123)(x+2) = 0.','#1a5a8a',13,'middle',true)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,112,'A product is zero only if ONE of the factors is zero \u2014','#241A17',11.5,'middle',false)+T(240,130,'so set each bracket to zero in turn.','#241A17',11.5,'middle',false)));}
+  if(p>=4){
+    o.push(wrap(p===4,'an-pop',R(60,144,360,34,'#e8f8ee','#1a7a3a',2)+T(240,166,'x = 1,  x = 3,  or  x = \u22122','#1a7a3a',14,'middle',true)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 9: Algebraic long division with remainder ──────────────────
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'When it doesn\u2019t divide exactly','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'Divide x\u00b3 + 2x \u2212 5 by (x \u2212 1).','#241A17',13,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,66,'f(1) = 1+2\u22125 = \u22122 \u2014 NOT zero, so (x\u22121) is not a factor;','#1a5a8a',11.5,'middle',false)+T(240,84,'the remainder theorem (Checkpoint 4) tells us this in advance.','#1a5a8a',11.5,'middle',false)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,112,'Divide anyway: quotient x\u00b2+x+3, remainder \u22122.','#241A17',11.5,'middle',false)));}
+  if(p>=4){
+    o.push(wrap(p===4,'an-pop',R(50,126,380,44,'#e8f8ee','#1a7a3a',2)
+      +T(240,146,'x\u00b3+2x\u22125 = (x\u22121)(x\u00b2+x+3) \u2212 2','#1a7a3a',12.5,'middle',true)
+      +T(240,162,'quotient, PLUS the leftover remainder','#888',9.5,'middle',false)
+    ));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 10: Consolidation ───────────────────────────────────────────
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'The Paper 2 Algebra toolkit','#C0272D',16,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',R(30,38,420,44,'#fff5f0','#C0272D',1.5)+T(240,58,'|x|=k always needs both x=k and x=\u2212k; inequalities read directly','#241A17',11)+T(240,76,'off the V-shaped graph.','#888',9.5)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',R(30,86,420,44,'#e8f4ff','#1a5a8a',1.5)+T(240,106,'The remainder when dividing by (x\u2212a) is always f(a) \u2014 and when','#241A17',11)+T(240,124,'f(a)=0, that\u2019s the factor theorem, the key to factorising cubics.','#888',9.5)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',R(30,134,420,44,'#e8f8ee','#1a7a3a',1.5)+T(240,154,'Simplifying fractions always means factorise first, then cancel \u2014','#241A17',11)+T(240,172,'and solving cubics is just factorising, then setting each factor to 0.','#888',9.5)));}
+  if(p>=4){o.push(wrap(p===4,'an-pop',R(60,190,360,44,'#fff8e1','#C8922A',2)+T(240,216,'Ready for AS-P2-02: Logarithmic & Exponential Functions','#7A5A18',13,'middle',true)));}
+  s.innerHTML=o.join('');}
 
 var Q=[
  {ey:'Checkpoint 1 of 10',ti:'The modulus function revisited',su:'|x| in equations and inequalities',panels:[
-   {dtitle:'|f(x)| = k means f(x)=k OR f(x)=−k',boxes:[{"stage": 1, "text": "|2x−1| = 5", "bg": "#fff5f0"}, {"stage": 2, "text": "2x−1=5 or 2x−1=−5", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Paper 2 pushes modulus further than Paper 1 — into inequalities and equations combining modulus with other algebra.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Solve |2x−1|=5", "bg": "#fff5f0"}],p:1,html:'<p>Split into two cases.</p>'+tryItMC(function(){return {question:'What are the solutions to |2x\u22121|=5?',options:['x=3 or x=\u22122','x=3 only','x=2 or x=\u22123','x=6 or x=\u22124'],correct:0,working:'2x\u22121=5\u2192x=3; 2x\u22121=\u22125\u2192x=\u22122.'};})}
+   {d:dQ1,p:1,html:'<p>y=|x| strips the sign of whatever\u2019s inside \u2014 a V-shape, always \u2265 0.</p>',
+    speak:'y equals the modulus of x strips the sign of whatever\u2019s inside \u2014 a V-shape, always greater than or equal to 0.'},
+   {d:dQ1,p:2,html:'<p>Solving |x|=2 means finding every x where the V-graph hits height 2 \u2014 that happens at TWO points.</p>',
+    speak:'Solving the modulus of x equals 2 means finding every x where the V-graph hits height 2 \u2014 that happens at two points.'},
+   {d:dQ1,p:3,html:'<p>Always solve both cases when a modulus equation appears.</p>'
+     +tryItMC(function(){
+       var a=pick([2,3,4,5]),k=pick([3,5,7]);
+       return {question:'Solve |x\u2212'+a+'|='+k+'.',
+         options:['x='+(a+k)+' or x='+(a-k), 'x='+(a+k)+' only', 'x='+k+' or x=\u2212'+k, 'x='+(a-k)+' only'],
+         correct:0,
+         working:'x\u2212'+a+'='+k+' gives x='+(a+k)+'; x\u2212'+a+'=\u2212'+k+' gives x='+(a-k)+'.'};
+     }),
+    speak:'Always solve both cases when a modulus equation appears. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 2 of 10',ti:'Modulus inequalities',su:'|f(x)| < k and |f(x)| > k',panels:[
-   {dtitle:'Two different patterns',boxes:[{"stage": 1, "text": "|x| < k  →  −k < x < k", "bg": "#e8f8ee", "stroke": "#1a7a3a"}, {"stage": 2, "text": "|x| > k  →  x < −k  OR  x > k", "bg": "#fde8e8", "stroke": "#a01820"}],p:2,html:'<p>Less-than gives a single connected interval; greater-than splits into two separate regions — easy to mix up under exam pressure.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Solve |x−3| < 4", "bg": "#fff5f0"}],p:1,html:'<p>Apply the less-than pattern.</p>'+tryItMC(function(){return {question:'Solve |x\u22123| < 4.',options:['\u22121 < x < 7','x < 7','x > \u22121','x < \u22121 or x > 7'],correct:0,working:'\u22124 < x\u22123 < 4 \u2192 \u22121 < x < 7.'};})}
+   {d:dQ2,p:1,html:'<p>The V-graph of |x|, with a horizontal test line at height k.</p>',
+    speak:'The V-graph of the modulus of x, with a horizontal test line at height k.'},
+   {d:dQ2,p:2,html:'<p>|x|<k is exactly where the graph is BELOW that line \u2014 a single connected region between the two crossing points.</p>',
+    speak:'The modulus of x less than k is exactly where the graph is below that line \u2014 a single connected region between the two crossing points.'},
+   {d:dQ2,p:3,html:'<p>|x|>k is the opposite: OUTSIDE the two crossing points, two separate regions.</p>'
+     +tryItMC(function(){
+       var k=pick([2,3,4,5]);
+       var dir=pick(['<','>']);
+       return {question:'Solve |x|'+dir+k+'.',
+         options: dir==='<' ? ['\u2212'+k+' < x < '+k, 'x<\u2212'+k+' or x>'+k, 'x>'+k+' only', 'x=\u00b1'+k] : ['x<\u2212'+k+' or x>'+k, '\u2212'+k+' < x < '+k, 'x>'+k+' only', 'x=\u00b1'+k],
+         correct:0,
+         working: dir==='<' ? '|x|<'+k+' is the region BETWEEN the two crossings: \u2212'+k+'<x<'+k+'.' : '|x|>'+k+' is the region OUTSIDE the two crossings: x<\u2212'+k+' or x>'+k+'.'};
+     }),
+    speak:'The modulus of x greater than k is the opposite: outside the two crossing points, two separate regions. Now it\u2019s your turn.'}
   ]},
- {ey:'Checkpoint 3 of 10',ti:'Polynomial division',su:'Dividing by (x − a)',panels:[
-   {dtitle:'Long division of polynomials',boxes:[{"stage": 1, "text": "Divide x³+2x²−5x−6 by (x−2)", "bg": "#fff5f0"}, {"stage": 2, "text": "Result: x²+4x+3, remainder 0", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Works exactly like long division of numbers — divide, multiply, subtract, bring down, repeat.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "x³+2x²−5x−6 ÷ (x−2) has quotient degree...", "bg": "#fff5f0"}],p:1,html:'<p>Think about how the degree changes.</p>'+tryItMC(function(){return {question:'Dividing a degree-3 polynomial by (x\u2212a) gives a quotient of degree:',options:['2','3','1','4'],correct:0,working:'Dividing by a linear factor reduces the degree by exactly 1.'};})}
+ {ey:'Checkpoint 3 of 10',ti:'Polynomial division',su:'Dividing by (x \u2212 a)',panels:[
+   {d:dQ3,p:1,html:'<p>Divide x\u00b3\u22122x\u00b2\u22125x+6 by (x\u22121) \u2014 the same process as long division of numbers, one degree at a time.</p>',
+    speak:'Divide x cubed minus 2x squared minus 5x plus 6 by x minus 1 \u2014 the same process as long division of numbers, one degree at a time.'},
+   {d:dQ3,p:2,html:'<p>At each step: divide the leading terms, multiply back, subtract, bring down the next term.</p>',
+    speak:'At each step: divide the leading terms, multiply back, subtract, bring down the next term.'},
+   {d:dQ3,p:3,html:'<p>Here the remainder comes out as exactly 0, so (x\u22121) divides in perfectly.</p>'
+     +tryItMC(function(){
+       var a=pick([1,2,3]),b=pick([2,3]);
+       return {question:'Dividing a cubic by (x\u2212'+a+') gives quotient x\u00b2+x'+(b>=0?'+':'')+b+' with remainder 0. What can you conclude?',
+         options:['(x\u2212'+a+') is a factor of the cubic','The cubic has no real roots','The quotient must be wrong','x='+a+' is not a root'],
+         correct:0,
+         working:'A remainder of 0 means the division was exact \u2014 by the factor theorem, (x\u2212'+a+') is a genuine factor.'};
+     }),
+    speak:'Here the remainder comes out as exactly 0, so this divides in perfectly. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 4 of 10',ti:'The remainder theorem',su:'Finding remainders without dividing',panels:[
-   {dtitle:'Remainder of f(x)÷(x−a) is f(a)',boxes:[{"stage": 1, "text": "No need to do full division — just evaluate f(a)", "bg": "#fff5f0"}],p:1,html:'<p>A huge time-saver: substituting x=a into f(x) directly gives the remainder when dividing by (x−a).</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "f(x)=x³−4x+1, divide by (x−2)", "bg": "#fff5f0"}],p:1,html:'<p>Evaluate f(2).</p>'+tryItMC(function(){return {question:'f(x)=x\u00b3\u22124x+1. What is the remainder when divided by (x\u22122)?',options:['1','0','\u22121','8'],correct:0,working:'f(2)=8\u22128+1=1.'};})}
+   {d:dQ4,p:1,html:'<p>Dividing any polynomial f(x) by (x\u2212a) always leaves a constant remainder.</p>',
+    speak:'Dividing any polynomial f of x by x minus a always leaves a constant remainder.'},
+   {d:dQ4,p:2,html:'<p>Writing f(x)=(x\u2212a)Q(x)+R and substituting x=a makes the whole first term vanish, leaving R=f(a).</p>',
+    speak:'Writing f of x equals x minus a, times Q of x, plus R, and substituting x equals a makes the whole first term vanish, leaving R equals f of a.'},
+   {d:dQ4,p:3,html:'<p>So the remainder is just f(a) \u2014 no division required at all.</p>',
+    speak:'So the remainder is just f of a \u2014 no division required at all.'},
+   {d:dQ4,p:4,html:'<p>Worked example.</p>'
+     +tryItMC(function(){
+       var a=pick([1,2,3]),b=pick([2,3,4]),c=pick([1,3,5]);
+       var val=Math.pow(a,3)-b*a+c;
+       // Build wrong options from a candidate pool and de-duplicate against the
+       // correct value and each other — with small integers, "-val" or "a" can
+       // sometimes coincide with val itself (e.g. when val=0), which silently
+       // produced two identical answer choices.
+       var candidates=[a, -val, b+c, val+2, val-2, val+5, a+1];
+       var opts=[val];
+       for(var i=0;i<candidates.length && opts.length<4;i++){
+         if(opts.indexOf(candidates[i])===-1) opts.push(candidates[i]);
+       }
+       return {question:'Find the remainder when x\u00b3\u2212'+b+'x+'+c+' is divided by (x\u2212'+a+').',
+         options:opts.map(String),
+         correct:0,
+         working:'Remainder = f('+a+') = ('+a+')\u00b3\u2212'+b+'('+a+')+'+c+' = '+val+'.'};
+     }),
+    speak:'Worked example. Now it\u2019s your turn.'}
   ]},
- {ey:'Checkpoint 5 of 10',ti:'The factor theorem',su:'f(a)=0 means (x−a) is a factor',panels:[
-   {dtitle:'Special case of the remainder theorem',boxes:[{"stage": 1, "text": "If f(a) = 0, then (x−a) is a factor of f(x)", "bg": "#fff5f0"}, {"stage": 2, "text": "Test likely factors of the constant term", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Trial values based on factors of the constant term (±1, ±2, ±3...) to find the first factor, then divide to reduce the polynomial.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "f(x)=x³−7x+6, test x=1", "bg": "#fff5f0"}],p:1,html:'<p>Check if (x−1) is a factor.</p>'+tryItMC(function(){return {question:'f(x)=x\u00b3\u22127x+6. Is (x\u22121) a factor?',options:['Yes, since f(1)=0','No, since f(1)=6','Yes, since f(1)=1','Cannot tell without dividing'],correct:0,working:'f(1)=1\u22127+6=0, so (x\u22121) is a factor by the factor theorem.'};})}
+ {ey:'Checkpoint 5 of 10',ti:'The factor theorem',su:'f(a)=0 means (x\u2212a) is a factor',panels:[
+   {d:dQ5,p:1,html:'<p>From Checkpoint 4: the remainder when dividing by (x\u2212a) is f(a).</p>',
+    speak:'From Checkpoint 4: the remainder when dividing by x minus a is f of a.'},
+   {d:dQ5,p:2,html:'<p>If f(a) happens to be exactly 0, there\u2019s no remainder at all \u2014 the division is exact.</p>',
+    speak:'If f of a happens to be exactly 0, there\u2019s no remainder at all \u2014 the division is exact.'},
+   {d:dQ5,p:3,html:'<p>That\u2019s the factor theorem: f(a)=0 if and only if (x\u2212a) is a genuine factor.</p>',
+    speak:'That\u2019s the factor theorem: f of a equals 0 if and only if x minus a is a genuine factor.'},
+   {d:dQ5,p:4,html:'<p>This is exactly how you START factorising a cubic \u2014 test values of a until you find one that makes f(a)=0.</p>'
+     +tryItMC(function(){
+       var a=pick([1,2,-1,3]);
+       var b=pick([1,2]);
+       // build a cubic that has (x-a) as a factor: (x-a)(x^2+bx+1)
+       var c0=-a, c1=b-a*b, c2=1-a*b, c3=-a; // not needed exactly, just present a plausible check question
+       return {question:'If f('+a+')=0 for a polynomial f(x), what can you conclude?',
+         options:['(x\u2212'+a+') is a factor of f(x)','f(x) has no other roots','f(x) is always positive','x='+a+' is the only solution'],
+         correct:0,
+         working:'By the factor theorem, f('+a+')=0 means (x\u2212'+a+') divides f(x) exactly \u2014 it\u2019s a factor.'};
+     }),
+    speak:'This is exactly how you start factorising a cubic \u2014 test values of a until you find one that makes f(a)=0. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 6 of 10',ti:'Fully factorising a cubic',su:'Combining factor theorem and division',panels:[
-   {dtitle:'Three-step method',boxes:[{"stage": 1, "text": "1. Find one factor using the factor theorem", "bg": "#fff5f0"}, {"stage": 2, "text": "2. Divide to get a quadratic", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "3. Factorise the quadratic normally", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>This three-step process turns any factorisable cubic into three linear factors, reusing your GCSE quadratic factorising skills at the final step.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "After finding (x−1), quotient is x²−x−6", "bg": "#fff5f0"}],p:1,html:'<p>Factorise the resulting quadratic.</p>'+tryItMC(function(){return {question:'The quotient x\u00b2\u2212x\u22126 factorises as:',options:['(x\u22123)(x+2)','(x+3)(x\u22122)','(x\u22126)(x+1)','(x\u22121)(x+6)'],correct:0,working:'Need factors of \u22126 that sum to \u22121: \u22123 and 2. (x\u22123)(x+2).'};})}
+   {d:dQ6,p:1,html:'<p>f(x)=x\u00b3\u22122x\u00b2\u22125x+6. Try small values to find a root.</p>',
+    speak:'f of x equals x cubed minus 2x squared minus 5x plus 6. Try small values to find a root.'},
+   {d:dQ6,p:2,html:'<p>f(1)=0, so (x\u22121) is a factor by the factor theorem.</p>',
+    speak:'f of 1 equals 0, so x minus 1 is a factor by the factor theorem.'},
+   {d:dQ6,p:3,html:'<p>Divide by (x\u22121) to get a quadratic quotient.</p>',
+    speak:'Divide by x minus 1 to get a quadratic quotient.'},
+   {d:dQ6,p:4,html:'<p>Factorise that quadratic like any other.</p>',
+    speak:'Factorise that quadratic like any other.'},
+   {d:dQ6,p:5,html:'<p>Combine all three factors for the full factorisation.</p>'
+     +tryItMC(function(){
+       var rootSets=[[1,-2,3],[1,2,-3],[2,-1,-4],[1,-1,5],[2,3,-1],[-2,1,4]];
+       var roots=pick(rootSets);
+       function fmt(r){ return r>=0 ? '(x\u2212'+r+')' : '(x+'+(-r)+')'; }
+       var correct=roots.map(fmt).join('');
+       // build one plausible wrong answer: flip the sign of one root's bracket
+       var wrongRoots=roots.slice(); wrongRoots[0]=-wrongRoots[0];
+       var wrong1=wrongRoots.map(fmt).join('');
+       var wrongRoots2=roots.slice(); wrongRoots2[1]=-wrongRoots2[1];
+       var wrong2=wrongRoots2.map(fmt).join('');
+       var wrongRoots3=[roots[0],roots[2],roots[1]].map(function(v,i){return i===1?-v:v;});
+       var wrong3=wrongRoots3.map(fmt).join('');
+       // expand the cubic from the correct roots to state the question accurately
+       var sum=roots[0]+roots[1]+roots[2];
+       var sumPairs=roots[0]*roots[1]+roots[0]*roots[2]+roots[1]*roots[2];
+       var prod=roots[0]*roots[1]*roots[2];
+       var b=-sum, c=sumPairs, d=-prod;
+       var cubicStr='x\u00b3'+(b>=0?'+':'')+(b!==0?b+'x\u00b2':'')+(c>=0?'+':'')+(c!==0?c+'x':'')+(d>=0?'+':'')+d;
+       return {question:cubicStr+' factorises fully as:',
+         options:[correct,wrong1,wrong2,wrong3],
+         correct:0,
+         working:'The roots are x='+roots.join(', ')+', giving the factorisation '+correct+'.'};
+     }),
+    speak:'Combine all three factors for the full factorisation. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 7 of 10',ti:'Simplifying algebraic fractions',su:'Factorising before cancelling',panels:[
-   {dtitle:'Factorise top and bottom, then cancel common factors',boxes:[{"stage": 1, "text": "(x²−4)/(x²+5x+6)", "bg": "#fff5f0"}, {"stage": 2, "text": "= (x−2)(x+2) / (x+2)(x+3) = (x−2)/(x+3)", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Never cancel terms that aren’t full factors — always factorise completely first.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Simplify (x²−9)/(x+3)", "bg": "#fff5f0"}],p:1,html:'<p>Factorise the numerator first.</p>'+tryItMC(function(){return {question:'Simplify (x\u00b2\u22129)/(x+3).',options:['x\u22123','x+3','x\u00b2\u22123','x\u22129'],correct:0,working:'x\u00b2\u22129=(x\u22123)(x+3). Dividing by (x+3) leaves x\u22123.'};})}
+   {d:dQ7,p:1,html:'<p>(x\u00b2\u22124)\u2044(x\u00b2+x\u22126) \u2014 you can\u2019t cancel the x\u00b2 terms directly; factorise first.</p>',
+    speak:'x squared minus 4, over x squared plus x minus 6 \u2014 you can\u2019t cancel the x squared terms directly; factorise first.'},
+   {d:dQ7,p:2,html:'<p>Factorise the numerator and denominator separately.</p>',
+    speak:'Factorise the numerator and denominator separately.'},
+   {d:dQ7,p:3,html:'<p>A common factor, (x\u22122), now appears in both \u2014 cancel it.</p>',
+    speak:'A common factor, x minus 2, now appears in both \u2014 cancel it.'},
+   {d:dQ7,p:4,html:'<p>What\u2019s left is the simplified fraction.</p>'
+     +tryItMC(function(){
+       var a=pick([2,3,4]),b=pick([2,3]);
+       // (x^2-a^2)/(x^2+(a-b)x-ab) = (x-a)(x+a)/((x+b)(x-a)) after choosing appropriate second factor... keep simple, use fixed pattern
+       return {question:'Simplify (x\u00b2\u2212'+(a*a)+')\u2044(x\u00b2+'+(b-a)+'x\u2212'+(a*b)+').',
+         options:['(x+'+a+')\u2044(x+'+b+')','(x\u2212'+a+')\u2044(x+'+b+')','(x+'+a+')\u2044(x\u2212'+b+')','x+'+a],
+         correct:0,
+         working:'Numerator: (x\u2212'+a+')(x+'+a+'). Denominator: (x+'+b+')(x\u2212'+a+'). Cancel (x\u2212'+a+') to leave (x+'+a+')\u2044(x+'+b+').'};
+     }),
+    speak:'What\u2019s left is the simplified fraction. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 8 of 10',ti:'Solving cubic equations',su:'Using the factor theorem to solve = 0',panels:[
-   {dtitle:'Fully factorise, then set each factor to zero',boxes:[{"stage": 1, "text": "(x−1)(x−3)(x+2)=0 → x=1, 3, or −2", "bg": "#fff5f0"}],p:1,html:'<p>Once fully factorised into linear factors, a cubic equation gives up to three real roots.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "x³−6x²+11x−6=0 has factor (x−1)", "bg": "#fff5f0"}],p:1,html:'<p>Think about the full factorisation.</p>'+tryItMC(function(){return {question:'x\u00b3\u22126x\u00b2+11x\u22126=0 has (x\u22121) as one factor. What are ALL the roots?',options:['1, 2, 3','1, \u22122, \u22123','1, 2, \u22123','1 only'],correct:0,working:'Dividing gives x\u00b2\u22125x+6=(x\u22122)(x\u22123), so roots are 1, 2, 3.'};})}
+   {d:dQ8,p:1,html:'<p>Solve x\u00b3\u22122x\u00b2\u22125x+6=0.</p>',
+    speak:'Solve x cubed minus 2x squared minus 5x plus 6 equals 0.'},
+   {d:dQ8,p:2,html:'<p>Factorise first, exactly as in Checkpoint 6.</p>',
+    speak:'Factorise first, exactly as in Checkpoint 6.'},
+   {d:dQ8,p:3,html:'<p>A product is zero only when one of its factors is zero \u2014 set each bracket to zero in turn.</p>',
+    speak:'A product is zero only when one of its factors is zero \u2014 set each bracket to zero in turn.'},
+   {d:dQ8,p:4,html:'<p>That gives all three roots.</p>'
+     +tryItMC(function(){
+       var r1=pick([1,2,3]),r2=pick([-1,-2,-3]),r3=pick([4,5,6]);
+       return {question:'(x\u2212'+r1+')(x'+(r2>=0?'\u2212'+r2:'+'+Math.abs(r2))+')(x\u2212'+r3+')=0. What are the roots?',
+         options:['x='+r1+', '+r2+', '+r3, 'x='+r1+' only', 'x=\u2212'+r1+', \u2212'+r2+', \u2212'+r3, 'x='+(r1+r2+r3)],
+         correct:0,
+         working:'Each bracket set to zero gives x='+r1+', x='+r2+', and x='+r3+'.'};
+     }),
+    speak:'That gives all three roots. Now it\u2019s your turn.'}
   ]},
- {ey:'Checkpoint 9 of 10',ti:'Algebraic long division with remainder',su:'When division isn’t exact',panels:[
-   {dtitle:'f(x) = (x−a)Q(x) + R',boxes:[{"stage": 1, "text": "Quotient × divisor + remainder = original polynomial", "bg": "#fff5f0"}],p:1,html:'<p>Even when the remainder isn’t zero, this identity always holds — useful for checking your division.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "f(x)÷(x−2) gives quotient x+3, remainder 5", "bg": "#fff5f0"}],p:1,html:'<p>Reconstruct f(x).</p>'+tryItMC(function(){return {question:'If f(x)\u00f7(x\u22122) gives quotient x+3 remainder 5, what is f(x)?',options:['(x\u22122)(x+3)+5','(x+2)(x+3)+5','(x\u22122)(x+3)\u22125','x+3+5'],correct:0,working:'f(x) = divisor\u00d7quotient + remainder = (x\u22122)(x+3)+5.'};})}
+ {ey:'Checkpoint 9 of 10',ti:'Algebraic long division with remainder',su:'When division isn\u2019t exact',panels:[
+   {d:dQ9,p:1,html:'<p>Divide x\u00b3+2x\u22125 by (x\u22121).</p>',
+    speak:'Divide x cubed plus 2x minus 5 by x minus 1.'},
+   {d:dQ9,p:2,html:'<p>f(1)=\u22122, not zero \u2014 the remainder theorem tells us in advance that (x\u22121) is NOT a factor.</p>',
+    speak:'f of 1 equals minus 2, not zero \u2014 the remainder theorem tells us in advance that x minus 1 is not a factor.'},
+   {d:dQ9,p:3,html:'<p>Divide anyway \u2014 the process still works, it just leaves a genuine remainder.</p>',
+    speak:'Divide anyway \u2014 the process still works, it just leaves a genuine remainder.'},
+   {d:dQ9,p:4,html:'<p>Express the result as quotient plus leftover remainder.</p>'
+     +tryItMC(function(){
+       var a=pick([1,2,3]);
+       var rem = Math.pow(a,3)+2*a-5;
+       return {question:'When x\u00b3+2x\u22125 is divided by (x\u2212'+a+'), what is the remainder?',
+         options:[String(rem), '0', String(a), String(-rem)],
+         correct:0,
+         working:'By the remainder theorem, remainder = f('+a+') = '+a+'\u00b3+2('+a+')\u22125 = '+rem+'.'};
+     }),
+    speak:'Express the result as quotient plus leftover remainder. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 10 of 10',ti:'Bringing it together',su:'Consolidating Paper 2 Algebra',panels:[
-   {dtitle:'The Paper 2 Algebra toolkit',boxes:[{"stage": 1, "text": "Modulus equations and inequalities", "bg": "#fff5f0"}, {"stage": 2, "text": "Polynomial division, remainder & factor theorems", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Factorising and solving cubics, algebraic fractions", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>The factor theorem is the single most useful idea here — it turns unsolvable-looking cubics into three simple linear equations.</p>'},
-   {dtitle:'Ready for AS-P2-02',boxes:[{"stage": 1, "text": "Next: Logarithms & Exponentials", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:1,html:'<p>Nice work — Paper 2 Algebra is complete. Next up: Logarithmic and Exponential Functions.</p>'}
+   {d:dQ10,p:1,html:'<p>|x|=k always needs both x=k and x=\u2212k; inequalities read directly off the V-shaped graph.</p>',
+    speak:'The modulus of x equals k always needs both x equals k and x equals minus k; inequalities read directly off the V-shaped graph.'},
+   {d:dQ10,p:2,html:'<p>The remainder when dividing by (x\u2212a) is always f(a) \u2014 and when f(a)=0, that\u2019s the factor theorem, the key to factorising cubics.</p>',
+    speak:'The remainder when dividing by x minus a is always f of a \u2014 and when f of a equals 0, that\u2019s the factor theorem, the key to factorising cubics.'},
+   {d:dQ10,p:3,html:'<p>Simplifying fractions always means factorise first, then cancel; solving cubics is just factorising, then setting each factor to zero.</p>'
+     +tryItMC(function(){
+       var bank=[
+         {question:'Show that (x\u22122) is a factor of f(x)=x\u00b3\u22123x\u00b2\u2212x+... actually find f(2) for f(x)=x\u00b3\u22123x\u00b2\u2212x+6.',
+          options:['0, so (x\u22122) is a factor','2, so (x\u22122) is not a factor','\u22122, so (x\u22122) is not a factor','6, so (x\u22122) is not a factor'],
+          correct:0,
+          working:'f(2)=8\u221212\u22122+6=0, so by the factor theorem (x\u22122) is a factor.'},
+         {question:'Solve |2x\u22121|=7.',
+          options:['x=4 or x=\u22123','x=4 only','x=3 or x=\u22124','x=7 or x=\u22127'],
+          correct:0,
+          working:'2x\u22121=7 gives x=4. 2x\u22121=\u22127 gives x=\u22123.'},
+         {question:'Simplify (x\u00b2\u22129)\u2044(x\u00b2\u22122x\u22123).',
+          options:['(x+3)\u2044(x+1)','(x\u22123)\u2044(x+1)','(x+3)\u2044(x\u22121)','x+3'],
+          correct:0,
+          working:'Numerator: (x\u22123)(x+3). Denominator: (x\u22123)(x+1). Cancel (x\u22123) to leave (x+3)\u2044(x+1).'},
+         {question:'Find all roots of x\u00b3\u22127x+6=0.',
+          options:['x=1, 2, \u22123','x=1, \u22122, 3','x=\u22121, 2, 3','x=1, 2, 3'],
+          correct:0,
+          working:'f(1)=0 gives factor (x\u22121); dividing gives x\u00b2+x\u22126=(x+3)(x\u22122). Roots: x=1, \u22123, 2.'}
+       ];
+       return pick(bank);
+     }),
+    speak:'Simplifying fractions always means factorise first, then cancel; solving cubics is just factorising, then setting each factor to zero. Now it\u2019s your turn.'},
+   {d:dQ10,p:4,html:'<p>Nice work \u2014 Paper 2 Algebra is complete. Next up: Logarithmic and Exponential Functions.</p>',
+    speak:'Nice work \u2014 Paper 2 Algebra is complete. Next up: Logarithmic and Exponential Functions.'}
   ]}
 ];
 
@@ -276,13 +613,17 @@ function saveProgress(){
   try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify({qi:qi,pi:pi})); }catch(e){}
 }
 function render(){
+  if (typeof stopReading === 'function') stopReading();
   var qq=Q[qi],pp=qq.panels[pi];
   document.getElementById('ey').textContent=qq.ey;
   document.getElementById('ti').textContent=qq.ti;
   document.getElementById('su').textContent=qq.su;
-  drawGeneric(pp.dtitle, pp.boxes, pp.p);
+  pp.d(pp.p);
   var pn=document.getElementById('pn');
   pn.innerHTML=pp.html;
+  if (qi===Q.length-1 && pi===qq.panels.length-1 && window.__testTopicId) {
+    pn.innerHTML += '<div class="test-link-row"><a class="test-link-btn" href="test.html?topic='+window.__testTopicId+'">\ud83d\udcdd Optional: take the test on this topic</a></div>';
+  }
   pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
   document.getElementById('pb').disabled=(qi===0&&pi===0);
   document.getElementById('nb').textContent=(pi===qq.panels.length-1&&qi===Q.length-1)?'Done':'Next \u2192';
@@ -331,6 +672,112 @@ document.getElementById('sb').addEventListener('click',function(e){
     });
   }
 })();
+
+// ── Auto-reader ──────────────────────────────────────────────────────────
+var voiceSelEl = document.getElementById('voiceSel');
+var readerStatusEl = document.getElementById('readerStatus');
+var readBtnEl = document.getElementById('readBtn');
+var autoBtnEl = document.getElementById('autoBtn');
+var stopBtnEl = document.getElementById('stopReadBtn');
+var autoPlaying = false;
+var userPickedVoice = false;
+
+function populateVoices(){
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  voiceSelEl.innerHTML = '<option value="">Default voice</option>' + voices.map(function(v,i){return '<option value="'+i+'">'+v.name+' ('+v.lang+')</option>';}).join('');
+}
+if (window.speechSynthesis) {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+voiceSelEl.addEventListener('change', function(){ userPickedVoice = (voiceSelEl.value !== ''); });
+function currentVoice(){
+  if (!userPickedVoice) return null;
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  return voices[parseInt(voiceSelEl.value,10)] || null;
+}
+function hasInteractiveQuestion(pp){ return pp.html.indexOf('data-tryid')>-1; }
+
+function stopReading(){
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  autoPlaying = false;
+  readBtnEl.disabled = false; autoBtnEl.disabled = false;
+  stopBtnEl.style.display = 'none';
+  readerStatusEl.textContent = '';
+  window.__activeUtterance = null;
+}
+
+function speakPanel(pp, onDone){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech isn\u2019t supported on this browser.'; if(onDone) onDone(); return; }
+  if (!pp.speak) { if(onDone) onDone(); return; }
+  var u = new SpeechSynthesisUtterance(pp.speak);
+  var v = currentVoice();
+  if (v) u.voice = v;
+  u.rate = 0.95;
+  u.onend = function(){ window.__activeUtterance = null; if (onDone) onDone(); };
+  u.onerror = function(ev){
+    window.__activeUtterance = null;
+    readerStatusEl.textContent = 'Couldn\u2019t play audio (' + (ev && ev.error ? ev.error : 'unknown error') + '). Check the device isn\u2019t muted and try again.';
+    if (onDone) onDone();
+  };
+  window.__activeUtterance = u;
+  speechSynthesis.speak(u);
+  setTimeout(function(){
+    if (window.__activeUtterance === u && !speechSynthesis.speaking && !speechSynthesis.pending) {
+      readerStatusEl.textContent = 'No audio started \u2014 try tapping the button again, or check the device isn\u2019t on silent/muted.';
+    }
+  }, 600);
+}
+
+readBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  readerStatusEl.textContent = 'Reading\u2026';
+  var pp = Q[qi].panels[pi];
+  speakPanel(pp, function(){
+    readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+  });
+});
+
+autoBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  autoPlaying = true;
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  autoStep();
+});
+
+function autoStep(){
+  if (!autoPlaying) return;
+  var qq = Q[qi], pp = qq.panels[pi];
+  readerStatusEl.textContent = 'Reading step '+(pi+1)+' of '+qq.panels.length+'\u2026';
+  speakPanel(pp, function(){
+    if (!autoPlaying) return;
+    if (hasInteractiveQuestion(pp)) {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Your turn \u2014 try the question below.';
+      return;
+    }
+    if (pi < qq.panels.length-1) {
+      pi++;
+      var pn=document.getElementById('pn'); qq.panels[pi].d(qq.panels[pi].p);
+      pn.innerHTML=qq.panels[pi].html;
+      pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
+      var dt=document.getElementById('dt');
+      dt.innerHTML=qq.panels.map(function(_,i){return '<div class="dot '+(i<pi?'dn':i===pi?'on':'')+'"></div>';}).join('');
+      saveProgress();
+      autoStep();
+    } else {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Checkpoint narrated.';
+    }
+  });
+}
+
+stopBtnEl.addEventListener('click', stopReading);
 
 render();
 </script>
