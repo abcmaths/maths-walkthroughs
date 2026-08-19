@@ -627,18 +627,26 @@ var readBtnEl = document.getElementById('readBtn');
 var autoBtnEl = document.getElementById('autoBtn');
 var stopBtnEl = document.getElementById('stopReadBtn');
 var autoPlaying = false;
+var userPickedVoice = false; // only true once the student manually changes the dropdown
 
 function populateVoices(){
   var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
-  voiceSelEl.innerHTML = voices.map(function(v,i){return '<option value="'+i+'">'+v.name+' ('+v.lang+')</option>';}).join('');
+  voiceSelEl.innerHTML = '<option value="">Default voice</option>' + voices.map(function(v,i){return '<option value="'+i+'">'+v.name+' ('+v.lang+')</option>';}).join('');
 }
 if (window.speechSynthesis) {
   populateVoices();
   speechSynthesis.onvoiceschanged = populateVoices;
 }
+voiceSelEl.addEventListener('change', function(){ userPickedVoice = (voiceSelEl.value !== ''); });
 function currentVoice(){
+  // iOS Safari has a well-documented bug: assigning utterance.voice to a Voice
+  // object fetched before the voice list is fully ready causes speak() to fail
+  // completely silently (no error, no sound). Safest default: don't set a voice
+  // at all unless the student has explicitly chosen one from the dropdown —
+  // leaving it unset uses the browser's own default voice, which is reliable.
+  if (!userPickedVoice) return null;
   var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
-  return voices[parseInt(voiceSelEl.value||0,10)] || voices[0];
+  return voices[parseInt(voiceSelEl.value,10)] || null;
 }
 function hasInteractiveQuestion(pp){ return pp.html.indexOf('data-tryid')>-1; }
 
@@ -660,7 +668,7 @@ function speakPanel(pp, onDone){
   if (!pp.speak) { if(onDone) onDone(); return; }
   var u = new SpeechSynthesisUtterance(pp.speak);
   var v = currentVoice();
-  if (v) u.voice = v;
+  if (v) u.voice = v; // otherwise leave unset — see currentVoice() comment above
   u.rate = 0.95;
   u.onend = function(){ window.__activeUtterance = null; if (onDone) onDone(); };
   u.onerror = function(ev){
@@ -670,6 +678,14 @@ function speakPanel(pp, onDone){
   };
   window.__activeUtterance = u;
   speechSynthesis.speak(u);
+  // Diagnostic: if speechSynthesis never actually enters the "speaking" state
+  // shortly after we called speak(), something silently rejected it — surface
+  // that instead of leaving the student staring at an unexplained silence.
+  setTimeout(function(){
+    if (window.__activeUtterance === u && !speechSynthesis.speaking && !speechSynthesis.pending) {
+      readerStatusEl.textContent = 'No audio started \u2014 try tapping the button again, or check the device isn\u2019t on silent/muted.';
+    }
+  }, 600);
 }
 
 readBtnEl.addEventListener('click', function(){
