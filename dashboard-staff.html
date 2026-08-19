@@ -343,6 +343,7 @@
   <div class="header-right">
     <span class="user-name" id="header-name"></span>
     <a class="btn-outline" id="view-as-student-btn" href="dashboard-student.html?preview=1" style="display:none;text-decoration:none;font-size:0.82rem;padding:6px 12px;margin-right:8px">👁 View as Student</a>
+    <a class="btn-outline" href="test.html" target="_blank" style="text-decoration:none;font-size:0.82rem;padding:6px 12px;margin-right:8px">📝 Take a Test</a>
     <button class="btn-signout" onclick="signOut()">Sign out</button>
   </div>
 </header>
@@ -1141,6 +1142,11 @@
         </select>
         <div id="games-tab-content" style="font-size:0.9rem;color:#888">Loading…</div>
       </div>
+      <div class="section">
+        <div class="section-title" style="margin-bottom:6px">Student Leaderboard</div>
+        <p style="font-size:0.85rem;color:#888;margin-bottom:14px">Top students ranked by combined score across all games (respects the subject filter above).</p>
+        <div id="student-leaderboard-content" style="font-size:0.9rem;color:#888">Loading…</div>
+      </div>
     </div>
 
 </main>
@@ -1885,6 +1891,32 @@
     });
     html += '</tbody></table></div>';
     el.innerHTML = html;
+
+    // Aggregate leaderboard across the currently filtered games: total score per
+    // student, summed across every game_leaderboard row for those game_codes.
+    const lbEl = document.getElementById('student-leaderboard-content');
+    if (lbEl) {
+      const filteredCodes = new Set(filteredGames.map(g => g.game_code));
+      const relevant = (lb || []).filter(r => filteredCodes.has(r.game_code));
+      const byStudent = {};
+      relevant.forEach(r => {
+        const key = r.full_name || 'Unknown';
+        if (!byStudent[key]) byStudent[key] = { name: key, total: 0, games: new Set() };
+        byStudent[key].total += (r.score || 0);
+        byStudent[key].games.add(r.game_code);
+      });
+      const ranked = Object.values(byStudent).sort((a,b) => b.total - a.total).slice(0, 20);
+      if (!ranked.length) {
+        lbEl.innerHTML = '<p style="color:#888">No leaderboard data for this subject yet.</p>';
+      } else {
+        let lh = '<div class="tbl-wrap"><table><thead><tr><th>Rank</th><th>Student</th><th>Total Score</th><th>Games Played</th></tr></thead><tbody>';
+        ranked.forEach((s,i) => {
+          lh += `<tr><td>${i+1}</td><td>${s.name}</td><td>${s.total}</td><td>${s.games.size}</td></tr>`;
+        });
+        lh += '</tbody></table></div>';
+        lbEl.innerHTML = lh;
+      }
+    }
   };
 
   // ── Diagnostic year switcher ──
@@ -2002,10 +2034,15 @@
   async function loadTestResults() {
     const { data } = await supabase
       .from('test_results')
-      .select('*, profiles(full_name, year_group), topics(topic_name, year_group)')
+      .select('*, profiles(full_name, year_group, role), topics(topic_name, year_group)')
       .eq('school_id', mySchoolId)
       .order('completed_at', { ascending: false });
-    allTestResults = data || [];
+    // Staff can take tests from their own dashboard for QA/preview purposes (see
+    // "Take a Test" header button) — those attempts write to test_results under the
+    // staff member's own profile, so they're excluded here to keep reporting/stats
+    // student-only. profiles.role may be missing on very old rows; keep those rather
+    // than silently dropping legitimate historic student data.
+    allTestResults = (data || []).filter(r => !r.profiles || r.profiles.role === 'student' || !r.profiles.role);
   }
 
   window.renderTestsTab = function() {
