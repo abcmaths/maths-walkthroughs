@@ -275,25 +275,81 @@
   let startTime    = null;
   let selectedTopicId = null;
   let selectedTopicName = '';
-  let tabSwitchCount = 0;
+  let violationCount = 0;
+  const MAX_VIOLATIONS = 5; // auto-submit after this many, so a determined student can't just ignore warnings forever
 
-  // ── Anti-cheat: block copying question text out to a search engine / AI tool,
-  // and flag if the student switches tab/window away from the test mid-question. ──
+  // ── Anti-cheat / lockdown ──
+  // Blocks the easy routes: copying question text out, opening devtools, printing/
+  // saving the page, and leaving the tab or fullscreen mid-test. Not bulletproof
+  // (a second device or a phone camera can't be stopped from here) but it removes
+  // the casual "highlight → paste into AI" and "highlight → search" shortcuts.
   const testScreenEl = document.getElementById('test-screen');
+
+  function flagViolation(reason) {
+    if (testScreenEl.style.display === 'none') return; // only during an active test
+    violationCount++;
+    const banner = document.getElementById('tab-warning-banner');
+    if (banner) {
+      banner.classList.add('show');
+      banner.textContent = '⚠ ' + reason + ' — this has been logged (' + violationCount + '/' + MAX_VIOLATIONS + ').';
+    }
+    if (violationCount >= MAX_VIOLATIONS && typeof submitTest === 'function') {
+      alert('Too many lockdown violations — this test is being submitted automatically.');
+      submitTest();
+    }
+  }
+
   ['copy', 'cut', 'contextmenu'].forEach(evt => {
     testScreenEl.addEventListener(evt, e => {
       // Still allow copy/cut from the numeric answer input itself.
       if (e.target && e.target.id === 'answer-input') return;
       e.preventDefault();
+      if (evt !== 'contextmenu') flagViolation('Copying question content isn\'t allowed');
     });
   });
+
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && testScreenEl.style.display !== 'none') {
-      tabSwitchCount++;
-      const banner = document.getElementById('tab-warning-banner');
-      if (banner) banner.classList.add('show');
+      flagViolation('You switched away from the test tab');
     }
   });
+
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && testScreenEl.style.display !== 'none') {
+      flagViolation('You exited fullscreen — please re-enter to continue');
+    }
+  });
+
+  // Block devtools / view-source / print / save shortcuts during an active test.
+  document.addEventListener('keydown', e => {
+    if (testScreenEl.style.display === 'none') return;
+    const k = e.key;
+    const blocked =
+      k === 'F12' ||
+      (e.ctrlKey || e.metaKey) && ['u','s','p'].includes(k.toLowerCase()) ||
+      (e.ctrlKey || e.metaKey) && e.shiftKey && ['i','j','c'].includes(k.toLowerCase());
+    if (blocked) {
+      e.preventDefault();
+      flagViolation('That shortcut is disabled during the test');
+    }
+  });
+
+  async function enterLockdown() {
+    try {
+      if (document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (e) {
+      // Fullscreen can be blocked by the browser/OS — fail open rather than blocking the test.
+      console.warn('Fullscreen request failed', e);
+    }
+  }
+
+  function exitLockdown() {
+    try {
+      if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+    } catch (e) {}
+  }
 
   // ── Question generators — loaded dynamically from walkthrough files ──
   // Map topic_code -> array of generator functions
@@ -1403,10 +1459,13 @@ const BIOLOGY_WALKTHROUGH_FILES = {
     answers   = [];
     secondsLeft = 1800;
     startTime = Date.now();
+    violationCount = 0;
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('test-screen').style.display = 'block';
     document.getElementById('timer').style.display = 'block';
+
+    await enterLockdown();
 
     startTimer();
     showQuestion();
@@ -1655,6 +1714,7 @@ const BIOLOGY_WALKTHROUGH_FILES = {
     clearInterval(timerInterval);
     document.getElementById('timer').style.display = 'none';
     document.getElementById('test-screen').style.display = 'none';
+    exitLockdown();
 
     const score    = answers.filter(a => a.correct).length;
     const maxScore = questions.length;
@@ -1676,7 +1736,10 @@ const BIOLOGY_WALKTHROUGH_FILES = {
         grade,
         time_taken_secs: timeTaken,
         completed_at:    new Date().toISOString(),
-        tab_switches:    tabSwitchCount
+        // Kept the column name tab_switches for the SQL you already have, but the
+        // value now covers every lockdown violation (tab switches, fullscreen exits,
+        // blocked shortcuts, copy/cut attempts) — not just tab switches.
+        tab_switches:    violationCount
       };
       let { error: saveErr } = await supabase.from('test_results').insert(resultRow);
       if (saveErr) {

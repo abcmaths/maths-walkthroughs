@@ -1194,13 +1194,17 @@
 
     let query = supabase
       .from('test_results')
-      .select('student_id, percentage, profiles!inner(full_name, first_name, last_name, year_group, role, school_id)')
+      .select('student_id, percentage, profiles!inner(full_name, first_name, last_name, year_group, role, school_id, active)')
       .eq('profiles.role', 'student')
       .eq('profiles.school_id', myStudentSchoolId);
     if (leaderboardScope === 'year') query = query.eq('profiles.year_group', myYearGroup);
 
-    const { data, error } = await query;
-    if (error || !data) { el.innerHTML = '<p style="color:#888">Leaderboard unavailable right now.</p>'; return; }
+    const { data: rawData, error } = await query;
+    // Filter archived students client-side rather than via .eq('profiles.active', true) —
+    // active defaults to null/undefined (meaning active) on many existing rows, and a
+    // strict eq(true) filter would wrongly exclude those. Only exclude active === false.
+    const data = (rawData || []).filter(r => r.profiles?.active !== false);
+    if (error) { el.innerHTML = '<p style="color:#888">Leaderboard unavailable right now.</p>'; return; }
 
     const byStudent = {};
     data.forEach(r => {
