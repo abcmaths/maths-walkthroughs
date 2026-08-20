@@ -70,6 +70,12 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
 .try-q{font-size:15px;margin:8px 0 10px;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+.reader-row{width:100%;max-width:760px;display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.reader-btn{font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:5px;border:1.5px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.reader-btn.active{background:var(--gold);color:#fff;}
+.reader-btn:disabled{opacity:.4;cursor:default;}
+.reader-status{font-size:11.5px;color:#6b5750;}
+.reader-voice{font-size:12px;padding:6px 8px;border:1.5px solid var(--line);border-radius:5px;background:#fff;font-family:inherit;}
 
 </style>
 
@@ -133,6 +139,13 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
     <div class="stage">
       <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
       <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="reader-row">
+      <button class="reader-btn" id="readBtn">🔊 Read this step</button>
+      <button class="reader-btn" id="autoBtn">▶ Auto-play question</button>
+      <button class="reader-btn" id="stopReadBtn" style="display:none">■ Stop</button>
+      <select class="reader-voice" id="voiceSel"></select>
+      <span class="reader-status" id="readerStatus"></span>
     </div>
     <div class="ctrl">
       <button class="btn" id="pb">&larr; Back</button>
@@ -420,81 +433,194 @@ function dQ10(p){
 
 var QS=[
   {ey:'Q1 \u00b7 Year 7 \u00b7 Algebra',ti:'Writing Algebraic Expressions',su:'n bags each contain 5 apples. Write an expression for the total.',steps:[
-    {lb:'The picture',dr:dQ1,ht:'<p>Each bag holds the <b>same</b> number of apples. The number of bags is unknown \u2014 we call it <b>n</b>.</p>'},
-    {lb:'Build the expression',dr:dQ1,ht:'<div class="fm">Total = 5 \u00d7 n = 5n</div><p>In algebra we drop the \u00d7 sign: 5n means 5 multiplied by n.</p>'},
-    {lb:'Key rules',dr:dQ1,ht:'<p>\u2022 Write the number <b>before</b> the letter: 5n not n5.<br>\u2022 1n is just n (coefficient 1 is invisible).<br>\u2022 Letters represent unknown quantities.</p>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var c=rInt(2,9),things=rPick([['boxes','pencils'],['jars','sweets'],['packets','cards'],['bags','coins']]);return{question:'Each '+things[0]+' holds <b>'+c+'</b> '+things[1]+'. There are <b>n</b> '+things[0]+'. What is the coefficient (the number in front of n) in the expression for the total?',hints:['Total = '+c+' \u00d7 n','Write as a single term'],ans:c,tol:0,unit:'(coefficient)',working:c+' \u00d7 n = '+c+'n. Coefficient = '+c};})},
+    {lb:'The picture',dr:dQ1,ht:'<p>Each bag holds the <b>same</b> number of apples. The number of bags is unknown \u2014 we call it <b>n</b>.</p>',speak:'Each bag holds the same number of apples. The number of bags is unknown \u2014 we call it n.'},
+    {lb:'Build the expression',dr:dQ1,ht:'<div class="fm">Total = 5 \u00d7 n = 5n</div><p>In algebra we drop the \u00d7 sign: 5n means 5 multiplied by n.</p>',speak:'Total equals 5 times n, which we write as 5n. In algebra we drop the times sign: 5n means 5 multiplied by n.'},
+    {lb:'Key rules',dr:dQ1,ht:'<p>\u2022 Write the number <b>before</b> the letter: 5n not n5.<br>\u2022 1n is just n (coefficient 1 is invisible).<br>\u2022 Letters represent unknown quantities.</p>',speak:'Three key rules: write the number before the letter, 5n not n5. 1n is just written as n, since a coefficient of 1 is invisible. And letters represent unknown quantities.'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var c=rInt(2,9),things=rPick([['boxes','pencils'],['jars','sweets'],['packets','cards'],['bags','coins']]);return{question:'Each '+things[0]+' holds <b>'+c+'</b> '+things[1]+'. There are <b>n</b> '+things[0]+'. What is the coefficient (the number in front of n) in the expression for the total?',hints:['Total = '+c+' \u00d7 n','Write as a single term'],ans:c,tol:0,unit:'(coefficient)',working:c+' \u00d7 n = '+c+'n. Coefficient = '+c};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
   ]},
   {ey:'Q2 \u00b7 Year 7 \u00b7 Algebra',ti:'Substitution',su:'Evaluate 3x + 4 when x = 5.',steps:[
-    {lb:'What is this expression?',dr:dQ2,ht:'<p><b>3x + 4</b> is an algebraic expression. <b>3x</b> means 3 multiplied by the unknown x, and then we add 4. To work out its value, we need to know what x is \u2014 this is called <b>substitution</b>.</p>'},
-    {lb:'BIDMAS reminder',dr:dQ2,ht:'<p><b>BIDMAS</b> tells us the order to calculate: <b>B</b>rackets, <b>I</b>ndices, <b>D</b>ivision, <b>M</b>ultiplication, <b>A</b>ddition, <b>S</b>ubtraction. Multiplication always comes before addition.</p>'},
-    {lb:'What is substitution?',dr:dQ2,ht:'<p><b>Substitution</b> means replacing the letter with its value, then calculating using BIDMAS.</p>'},
-    {lb:'Replace x with 5',dr:dQ2,ht:'<div class="fm">3x + 4 = 3 \u00d7 5 + 4</div>'},
-    {lb:'Calculate',dr:dQ2,ht:'<div class="fm">= 15 + 4 = 19</div><p>Multiplication first (3 \u00d7 5 = 15), then addition (15 + 4 = 19).</p>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var a=rInt(2,6),b=rInt(1,9),x=rInt(1,8),ans=a*x+b;return{question:'Evaluate <b>'+a+'x + '+b+'</b> when <b>x = '+x+'</b>.',hints:['Replace x with '+x,'Calculate '+a+' \u00d7 '+x+' first (='+a*x+')','Then add '+b],ans:ans,tol:0,unit:'',working:a+' \u00d7 '+x+' + '+b+' = '+a*x+' + '+b+' = '+ans};})},
+    {lb:'What is this expression?',dr:dQ2,ht:'<p><b>3x + 4</b> is an algebraic expression. <b>3x</b> means 3 multiplied by the unknown x, and then we add 4. To work out its value, we need to know what x is \u2014 this is called <b>substitution</b>.</p>',speak:'3x plus 4 is an algebraic expression. 3x means 3 multiplied by the unknown x, and then we add 4. To work out its value, we need to know what x is \u2014 this is called substitution.'},
+    {lb:'BIDMAS reminder',dr:dQ2,ht:'<p><b>BIDMAS</b> tells us the order to calculate: <b>B</b>rackets, <b>I</b>ndices, <b>D</b>ivision, <b>M</b>ultiplication, <b>A</b>ddition, <b>S</b>ubtraction. Multiplication always comes before addition.</p>',speak:'BIDMAS tells us the order to calculate: brackets, indices, division, multiplication, addition, subtraction. Multiplication always comes before addition.'},
+    {lb:'What is substitution?',dr:dQ2,ht:'<p><b>Substitution</b> means replacing the letter with its value, then calculating using BIDMAS.</p>',speak:'Substitution means replacing the letter with its value, then calculating using BIDMAS.'},
+    {lb:'Replace x with 5',dr:dQ2,ht:'<div class="fm">3x + 4 = 3 \u00d7 5 + 4</div>',speak:'Replace x with 5: 3x plus 4 becomes 3 times 5, plus 4.'},
+    {lb:'Calculate',dr:dQ2,ht:'<div class="fm">= 15 + 4 = 19</div><p>Multiplication first (3 \u00d7 5 = 15), then addition (15 + 4 = 19).</p>',speak:'That equals 15 plus 4, which is 19. Multiplication first, 3 times 5 is 15, then addition, 15 plus 4 is 19.'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var a=rInt(2,6),b=rInt(1,9),x=rInt(1,8),ans=a*x+b;return{question:'Evaluate <b>'+a+'x + '+b+'</b> when <b>x = '+x+'</b>.',hints:['Replace x with '+x,'Calculate '+a+' \u00d7 '+x+' first (='+a*x+')','Then add '+b],ans:ans,tol:0,unit:'',working:a+' \u00d7 '+x+' + '+b+' = '+a*x+' + '+b+' = '+ans};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
   ]},
   {ey:'Q3 \u00b7 Year 7 \u00b7 Algebra',ti:'Simplifying Expressions',su:'Simplify 3x + 2y + 5x + y.',steps:[
-    {lb:'Like terms',dr:dQ3,ht:'<p><b>Like terms</b> (the same) share the same letter. For example, 3x and 5x are like terms; 2y and y are like terms. Only like terms can be added or subtracted together.</p>'},
-    {lb:'Group by type',dr:dQ3,ht:'<p>x-terms: 3x and 5x<br>y-terms: 2y and y (= 1y)</p>'},
-    {lb:'Collect',dr:dQ3,ht:'<div class="fm">3x + 5x = 8x</div><div class="fm">2y + y = 3y</div>'},
-    {lb:'Result',dr:dQ3,ht:'<div class="fm">3x + 2y + 5x + y = 8x + 3y</div>'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var a=rInt(2,7),b=rInt(2,6),c=rInt(1,5),d=rInt(1,5),rx=a+c,ry=b+d;return{question:'Simplify <b>'+a+'x + '+b+'y + '+c+'x + '+d+'y</b>. Enter the coefficient of x only (we will check the y coefficient in Show working).',hints:['Collect x terms: '+a+'x + '+c+'x = '+rx+'x','Collect y terms: '+b+'y + '+d+'y = '+ry+'y','Full answer: '+rx+'x + '+ry+'y'],ans:rx,tol:0,unit:'(x coefficient)',working:'Full answer: '+rx+'x + '+ry+'y  (x coeff = '+rx+', y coeff = '+ry+')'};})},
+    {lb:'Like terms',dr:dQ3,ht:'<p><b>Like terms</b> (the same) share the same letter. For example, 3x and 5x are like terms; 2y and y are like terms. Only like terms can be added or subtracted together.</p>',speak:'Like terms share the same letter. For example, 3x and 5x are like terms; 2y and y are like terms. Only like terms can be added or subtracted together.'},
+    {lb:'Group by type',dr:dQ3,ht:'<p>x-terms: 3x and 5x<br>y-terms: 2y and y (= 1y)</p>',speak:'Group by type: the x-terms are 3x and 5x. The y-terms are 2y and y, which is the same as 1y.'},
+    {lb:'Collect',dr:dQ3,ht:'<div class="fm">3x + 5x = 8x</div><div class="fm">2y + y = 3y</div>',speak:'Collect each group: 3x plus 5x equals 8x. 2y plus y equals 3y.'},
+    {lb:'Result',dr:dQ3,ht:'<div class="fm">3x + 2y + 5x + y = 8x + 3y</div>',speak:'So 3x plus 2y plus 5x plus y simplifies to 8x plus 3y.'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var a=rInt(2,7),b=rInt(2,6),c=rInt(1,5),d=rInt(1,5),rx=a+c,ry=b+d;return{question:'Simplify <b>'+a+'x + '+b+'y + '+c+'x + '+d+'y</b>. Enter the coefficient of x only (we will check the y coefficient in Show working).',hints:['Collect x terms: '+a+'x + '+c+'x = '+rx+'x','Collect y terms: '+b+'y + '+d+'y = '+ry+'y','Full answer: '+rx+'x + '+ry+'y'],ans:rx,tol:0,unit:'(x coefficient)',working:'Full answer: '+rx+'x + '+ry+'y  (x coeff = '+rx+', y coeff = '+ry+')'};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
   ]},
   {ey:'Q4 \u00b7 Year 7 \u00b7 Algebra',ti:'Expanding Single Brackets',su:'Expand 3(x + 4).',steps:[
-    {lb:'Rectangle method',dr:dQ4,ht:'<p>Multiply everything <b>inside</b> the bracket by the number <b>outside</b>. The rectangle shows the two areas.</p>'},
-    {lb:'Multiply each term',dr:dQ4,ht:'<div class="fm">3 \u00d7 x = 3x</div><div class="fm">3 \u00d7 4 = 12</div>'},
-    {lb:'Result',dr:dQ4,ht:'<div class="fm">3(x + 4) = 3x + 12</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var a=rInt(2,6),b=rInt(1,9);return{question:'Expand <b>'+a+'(x + '+b+')</b>. What is the constant term?',hints:['Multiply '+a+' by x: '+a+'x','Multiply '+a+' by '+b+': ?'],ans:a*b,tol:0,unit:'',working:a+'(x + '+b+') = '+a+'x + '+a*b+'. Constant = '+a*b};})},
+    {lb:'Rectangle method',dr:dQ4,ht:'<p>Multiply everything <b>inside</b> the bracket by the number <b>outside</b>. The rectangle shows the two areas.</p>',speak:'Multiply everything inside the bracket by the number outside. The rectangle shows the two areas.'},
+    {lb:'Multiply each term',dr:dQ4,ht:'<div class="fm">3 \u00d7 x = 3x</div><div class="fm">3 \u00d7 4 = 12</div>',speak:'3 times x is 3x. 3 times 4 is 12.'},
+    {lb:'Result',dr:dQ4,ht:'<div class="fm">3(x + 4) = 3x + 12</div>',speak:'So 3 times the bracket, x plus 4, equals 3x plus 12.'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var a=rInt(2,6),b=rInt(1,9);return{question:'Expand <b>'+a+'(x + '+b+')</b>. What is the constant term?',hints:['Multiply '+a+' by x: '+a+'x','Multiply '+a+' by '+b+': ?'],ans:a*b,tol:0,unit:'',working:a+'(x + '+b+') = '+a+'x + '+a*b+'. Constant = '+a*b};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
   ]},
   {ey:'Q5 \u00b7 Year 7 \u00b7 Algebra',ti:'One-Step Equations',su:'Solve x + 6 = 14.',steps:[
-    {lb:'Balance method',dr:dQ5,ht:'<p>An equation is a <b>balance</b>. Do the same to both sides to keep it balanced.</p>'},
-    {lb:'Subtract 6',dr:dQ5,ht:'<div class="fm">x + 6 \u2212 6 = 14 \u2212 6</div>'},
-    {lb:'Solution',dr:dQ5,ht:'<div class="fm">x = 8</div><p>Check: 8 + 6 = 14 \u2713</p>'},
-    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var x=rInt(2,15),b=rInt(1,12),rhs=x+b;return{question:'Solve <b>x + '+b+' = '+rhs+'</b>.',hints:['Subtract '+b+' from both sides','x = '+rhs+' \u2212 '+b],ans:x,tol:0,unit:'',working:'x + '+b+' = '+rhs+' \u2192 x = '+rhs+' \u2212 '+b+' = '+x};})},
+    {lb:'Balance method',dr:dQ5,ht:'<p>An equation is a <b>balance</b>. Do the same to both sides to keep it balanced.</p>',speak:'An equation is a balance. Do the same to both sides to keep it balanced.'},
+    {lb:'Subtract 6',dr:dQ5,ht:'<div class="fm">x + 6 \u2212 6 = 14 \u2212 6</div>',speak:'Subtract 6 from both sides: x plus 6 minus 6, equals 14 minus 6.'},
+    {lb:'Solution',dr:dQ5,ht:'<div class="fm">x = 8</div><p>Check: 8 + 6 = 14 \u2713</p>',speak:'So x equals 8. Check: 8 plus 6 equals 14, correct.'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var x=rInt(2,15),b=rInt(1,12),rhs=x+b;return{question:'Solve <b>x + '+b+' = '+rhs+'</b>.',hints:['Subtract '+b+' from both sides','x = '+rhs+' \u2212 '+b],ans:x,tol:0,unit:'',working:'x + '+b+' = '+rhs+' \u2192 x = '+rhs+' \u2212 '+b+' = '+x};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
   ]},
   {ey:'Q6 \u00b7 Year 7 \u00b7 Algebra',ti:'Two-Step Equations',su:'Solve 2x + 3 = 11.',steps:[
-    {lb:'Balance model',dr:dQ6,ht:'<p>Just like in Question 5, an equation is a <b>balance</b>. The scale stays level as long as both sides are equal \u2014 here, both sides equal 11.</p>'},
-    {lb:'Step 1: subtract 3',dr:dQ6,ht:'<div class="fm">2x + 3 \u2212 3 = 11 \u2212 3  \u2192  2x = 8</div>'},
-    {lb:'Step 2: divide by 2',dr:dQ6,ht:'<div class="fm">2x \u00f7 2 = 8 \u00f7 2  \u2192  x = 4</div>'},
-    {lb:'Check',dr:dQ6,ht:'<div class="fm">2(4) + 3 = 8 + 3 = 11 \u2713</div>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var x=rInt(1,9),a=rPick([2,3,4,5]),b=rInt(1,9),rhs=a*x+b;return{question:'Solve <b>'+a+'x + '+b+' = '+rhs+'</b>.',hints:['Step 1: subtract '+b+' \u2192 '+a+'x = '+(rhs-b),'Step 2: divide by '+a],ans:x,tol:0,unit:'',working:''+a+'x + '+b+' = '+rhs+' \u2192 '+a+'x = '+(rhs-b)+' \u2192 x = '+x};})},
+    {lb:'Balance model',dr:dQ6,ht:'<p>Just like in Question 5, an equation is a <b>balance</b>. The scale stays level as long as both sides are equal \u2014 here, both sides equal 11.</p>',speak:'Just like in Question 5, an equation is a balance. The scale stays level as long as both sides are equal \u2014 here, both sides equal 11.'},
+    {lb:'Step 1: subtract 3',dr:dQ6,ht:'<div class="fm">2x + 3 \u2212 3 = 11 \u2212 3  \u2192  2x = 8</div>',speak:'Step 1: subtract 3 from both sides. 2x plus 3 minus 3, equals 11 minus 3, giving 2x equals 8.'},
+    {lb:'Step 2: divide by 2',dr:dQ6,ht:'<div class="fm">2x \u00f7 2 = 8 \u00f7 2  \u2192  x = 4</div>',speak:'Step 2: divide both sides by 2. 2x divided by 2, equals 8 divided by 2, giving x equals 4.'},
+    {lb:'Check',dr:dQ6,ht:'<div class="fm">2(4) + 3 = 8 + 3 = 11 \u2713</div>',speak:'Check: 2 times 4, plus 3, equals 8 plus 3, which is 11. Correct.'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var x=rInt(1,9),a=rPick([2,3,4,5]),b=rInt(1,9),rhs=a*x+b;return{question:'Solve <b>'+a+'x + '+b+' = '+rhs+'</b>.',hints:['Step 1: subtract '+b+' \u2192 '+a+'x = '+(rhs-b),'Step 2: divide by '+a],ans:x,tol:0,unit:'',working:''+a+'x + '+b+' = '+rhs+' \u2192 '+a+'x = '+(rhs-b)+' \u2192 x = '+x};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
   ]},
   {ey:'Q7 \u00b7 Year 7 \u00b7 Algebra',ti:'Forming Expressions',su:'Write an expression for the cost of 3 adult and 4 child tickets.',steps:[
-    {lb:'Define variables',dr:dQ7,ht:'<p>Let <b>a</b> = cost of one adult ticket. Let <b>c</b> = cost of one child ticket.</p>'},
-    {lb:'Build parts',dr:dQ7,ht:'<div class="fm">3 adults: 3 \u00d7 a = 3a</div><div class="fm">4 children: 4 \u00d7 c = 4c</div>'},
-    {lb:'Combine',dr:dQ7,ht:'<div class="fm">Total = 3a + 4c</div>'},
-    {lb:'Evaluate',dr:dQ7,ht:'<div class="fm">a = \u00a38, c = \u00a35:</div><div class="fm">3(8) + 4(5) = 24 + 20 = \u00a344</div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var na=rInt(2,6),nc=rInt(2,6),a=rInt(4,12),c=rInt(2,8),ans=na*a+nc*c;return{question:''+na+' adult tickets at \u00a3'+a+' each and '+nc+' child tickets at \u00a3'+c+' each. What is the total cost?',hints:['Adults: '+na+' \u00d7 '+a+' = \u00a3'+na*a,'Children: '+nc+' \u00d7 '+c+' = \u00a3'+nc*c,'Add the two amounts'],ans:ans,tol:0,unit:'\u00a3',working:na+' \u00d7 '+a+' + '+nc+' \u00d7 '+c+' = '+na*a+' + '+nc*c+' = \u00a3'+ans};})},
+    {lb:'Define variables',dr:dQ7,ht:'<p>Let <b>a</b> = cost of one adult ticket. Let <b>c</b> = cost of one child ticket.</p>',speak:'Let a equal the cost of one adult ticket. Let c equal the cost of one child ticket.'},
+    {lb:'Build parts',dr:dQ7,ht:'<div class="fm">3 adults: 3 \u00d7 a = 3a</div><div class="fm">4 children: 4 \u00d7 c = 4c</div>',speak:'3 adults costs 3 times a, which is 3a. 4 children costs 4 times c, which is 4c.'},
+    {lb:'Combine',dr:dQ7,ht:'<div class="fm">Total = 3a + 4c</div>',speak:'Combine the two parts: total equals 3a plus 4c.'},
+    {lb:'Evaluate',dr:dQ7,ht:'<div class="fm">a = \u00a38, c = \u00a35:</div><div class="fm">3(8) + 4(5) = 24 + 20 = \u00a344</div>',speak:'If a is 8 pounds and c is 5 pounds: 3 times 8, plus 4 times 5, equals 24 plus 20, which is 44 pounds.'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var na=rInt(2,6),nc=rInt(2,6),a=rInt(4,12),c=rInt(2,8),ans=na*a+nc*c;return{question:''+na+' adult tickets at \u00a3'+a+' each and '+nc+' child tickets at \u00a3'+c+' each. What is the total cost?',hints:['Adults: '+na+' \u00d7 '+a+' = \u00a3'+na*a,'Children: '+nc+' \u00d7 '+c+' = \u00a3'+nc*c,'Add the two amounts'],ans:ans,tol:0,unit:'\u00a3',working:na+' \u00d7 '+a+' + '+nc+' \u00d7 '+c+' = '+na*a+' + '+nc*c+' = \u00a3'+ans};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
   ]},
   {ey:'Q8 \u00b7 Year 7 \u00b7 Algebra',ti:'Simplifying with Negatives',su:'Simplify 5x \u2212 2y \u2212 2x + 4y.',steps:[
-    {lb:'Terms and signs',dr:dQ8,ht:'<p>A <b>term</b> is a single number, letter, or combination of the two (like 5x or \u22122y). Each term carries its own sign. \u22122y means negative 2y \u2014 take the sign with the term when grouping.</p>'},
-    {lb:'Group like terms',dr:dQ8,ht:'<div class="fm">x terms: 5x and \u22122x</div><div class="fm">y terms: \u22122y and +4y</div>'},
-    {lb:'Collect',dr:dQ8,ht:'<div class="fm">5x \u2212 2x = 3x</div><div class="fm">\u22122y + 4y = 2y</div>'},
-    {lb:'Result',dr:dQ8,ht:'<div class="fm">5x \u2212 2y \u2212 2x + 4y = 3x + 2y</div>'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var a=rInt(3,8),b=rInt(1,a-1),c=rInt(1,6),d=rInt(c+1,9),rx=a-b,ry=d-c;return{question:'Simplify <b>'+a+'x \u2212 '+c+'y \u2212 '+b+'x + '+d+'y</b>. What is the coefficient of y?',hints:['x terms: '+a+'x \u2212 '+b+'x = '+rx+'x','y terms: \u2212'+c+'y + '+d+'y'],ans:ry,tol:0,unit:'(y coefficient)',working:''+a+'x\u2212'+b+'x='+rx+'x,  \u2212'+c+'y+'+d+'y='+ry+'y. Answer: '+rx+'x + '+ry+'y'};})},
+    {lb:'Terms and signs',dr:dQ8,ht:'<p>A <b>term</b> is a single number, letter, or combination of the two (like 5x or \u22122y). Each term carries its own sign. \u22122y means negative 2y \u2014 take the sign with the term when grouping.</p>',speak:'A term is a single number, letter, or combination of the two, like 5x or minus 2y. Each term carries its own sign. Minus 2y means negative 2y \u2014 take the sign with the term when grouping.'},
+    {lb:'Group like terms',dr:dQ8,ht:'<div class="fm">x terms: 5x and \u22122x</div><div class="fm">y terms: \u22122y and +4y</div>',speak:'Group like terms: the x terms are 5x and minus 2x. The y terms are minus 2y and plus 4y.'},
+    {lb:'Collect',dr:dQ8,ht:'<div class="fm">5x \u2212 2x = 3x</div><div class="fm">\u22122y + 4y = 2y</div>',speak:'Collect each group: 5x minus 2x equals 3x. Minus 2y plus 4y equals 2y.'},
+    {lb:'Result',dr:dQ8,ht:'<div class="fm">5x \u2212 2y \u2212 2x + 4y = 3x + 2y</div>',speak:'So 5x minus 2y minus 2x plus 4y simplifies to 3x plus 2y.'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var a=rInt(3,8),b=rInt(1,a-1),c=rInt(1,6),d=rInt(c+1,9),rx=a-b,ry=d-c;return{question:'Simplify <b>'+a+'x \u2212 '+c+'y \u2212 '+b+'x + '+d+'y</b>. What is the coefficient of y?',hints:['x terms: '+a+'x \u2212 '+b+'x = '+rx+'x','y terms: \u2212'+c+'y + '+d+'y'],ans:ry,tol:0,unit:'(y coefficient)',working:''+a+'x\u2212'+b+'x='+rx+'x,  \u2212'+c+'y+'+d+'y='+ry+'y. Answer: '+rx+'x + '+ry+'y'};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
   ]},
   {ey:'Q9 \u00b7 Year 7 \u00b7 Algebra',ti:'nth Term of a Sequence',su:'Find the nth term of 1, 3, 5, 7, ...',steps:[
-    {lb:'Spot the pattern',dr:dQ9,ht:'<p>Write out the terms and look at how much they increase each time. Here: 1 \u2192 3 \u2192 5 \u2192 7. Each step goes up by <b>2</b>. We call this the <b>common difference</b>.</p>'},
-    {lb:'Use the common difference',dr:dQ9,ht:'<p>Because the difference is 2, the nth term <b>starts with 2n</b>. But 2n gives 2, 4, 6, 8 \u2014 which is <b>1 too many</b> each time. So we adjust by subtracting 1.</p>'},
-    {lb:'Find the adjustment',dr:dQ9,ht:'<div class="fm">2n \u2192 2, 4, 6, 8, ...</div><div class="fm">Our sequence \u2192 1, 3, 5, 7, ...</div><p>Each value is <b>1 less</b> than 2n, so: nth term = 2n \u2212 1</p>'},
-    {lb:'nth term formula',dr:dQ9,ht:'<div class="fm">nth term = 2n \u2212 1</div><p>Check: n=1 \u2192 2(1)\u22121 = 1 \u2713 &nbsp; n=2 \u2192 2(2)\u22121 = 3 \u2713</p><div class="fm">Term 10 = 2(10) \u2212 1 = 19</div>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var d=rPick([2,3,4,5]),a=rInt(1,8),n=rInt(6,12),adj=a-d,ans=d*n+adj;return{question:'A sequence starts <b>'+a+', '+(a+d)+', '+(a+2*d)+', '+(a+3*d)+', ...</b> What is <b>term '+n+'</b>?',hints:['Common difference = '+d+' (nth term has '+d+'n)','Adjustment = '+(adj>=0?'+':'')+adj+' (check with n=1)','Term '+n+' = '+d+'('+n+') '+(adj>=0?'+':'')+adj],ans:ans,tol:0,unit:'',working:'nth term = '+d+'n '+(adj>=0?'+':'')+adj+'. Term '+n+' = '+d+'('+n+') '+(adj>=0?'+':'')+adj+' = '+ans};})},
+    {lb:'Spot the pattern',dr:dQ9,ht:'<p>Write out the terms and look at how much they increase each time. Here: 1 \u2192 3 \u2192 5 \u2192 7. Each step goes up by <b>2</b>. We call this the <b>common difference</b>.</p>',speak:'Write out the terms and look at how much they increase each time. Here: 1, then 3, then 5, then 7. Each step goes up by 2. We call this the common difference.'},
+    {lb:'Use the common difference',dr:dQ9,ht:'<p>Because the difference is 2, the nth term <b>starts with 2n</b>. But 2n gives 2, 4, 6, 8 \u2014 which is <b>1 too many</b> each time. So we adjust by subtracting 1.</p>',speak:'Because the difference is 2, the nth term starts with 2n. But 2n gives 2, 4, 6, 8 \u2014 which is 1 too many each time. So we adjust by subtracting 1.'},
+    {lb:'Find the adjustment',dr:dQ9,ht:'<div class="fm">2n \u2192 2, 4, 6, 8, ...</div><div class="fm">Our sequence \u2192 1, 3, 5, 7, ...</div><p>Each value is <b>1 less</b> than 2n, so: nth term = 2n \u2212 1</p>',speak:'2n gives 2, 4, 6, 8. Our sequence is 1, 3, 5, 7. Each value is 1 less than 2n, so the nth term is 2n minus 1.'},
+    {lb:'nth term formula',dr:dQ9,ht:'<div class="fm">nth term = 2n \u2212 1</div><p>Check: n=1 \u2192 2(1)\u22121 = 1 \u2713 &nbsp; n=2 \u2192 2(2)\u22121 = 3 \u2713</p><div class="fm">Term 10 = 2(10) \u2212 1 = 19</div>',speak:'The nth term is 2n minus 1. Check: when n is 1, 2 times 1 minus 1 is 1, correct. When n is 2, 2 times 2 minus 1 is 3, correct. Term 10 would be 2 times 10 minus 1, which is 19.'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var d=rPick([2,3,4,5]),a=rInt(1,8),n=rInt(6,12),adj=a-d,ans=d*n+adj;return{question:'A sequence starts <b>'+a+', '+(a+d)+', '+(a+2*d)+', '+(a+3*d)+', ...</b> What is <b>term '+n+'</b>?',hints:['Common difference = '+d+' (nth term has '+d+'n)','Adjustment = '+(adj>=0?'+':'')+adj+' (check with n=1)','Term '+n+' = '+d+'('+n+') '+(adj>=0?'+':'')+adj],ans:ans,tol:0,unit:'',working:'nth term = '+d+'n '+(adj>=0?'+':'')+adj+'. Term '+n+' = '+d+'('+n+') '+(adj>=0?'+':'')+adj+' = '+ans};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
   ]},
   {ey:'Q10 \u00b7 Year 7 \u00b7 Algebra',ti:'Forming and Solving Equations',su:'Amara and Kofi\u2019s ages sum to 31. Kofi is 7 years older. Find their ages.',steps:[
-    {lb:'Define unknowns',dr:dQ10,ht:'<p>Let Amara\u2019s age = x. Then Kofi = x + 7.</p>'},
-    {lb:'Form the equation',dr:dQ10,ht:'<div class="fm">x + (x + 7) = 31</div>'},
-    {lb:'Solve',dr:dQ10,ht:'<div class="fm">2x + 7 = 31  \u2192  2x = 24  \u2192  x = 12</div>'},
-    {lb:'Answer',dr:dQ10,ht:'<div class="fm">Amara = 12, Kofi = 19</div><p>Check: 12 + 19 = 31 \u2713</p>'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var y=rInt(8,20),diff=rInt(2,9),tot=2*y+diff;return{question:'Two friends\u2019 ages sum to <b>'+tot+'</b>. One is <b>'+diff+'</b> years older. What is the <b>younger</b> friend\u2019s age?',hints:['Let younger = x, older = x + '+diff,'x + (x + '+diff+') = '+tot,'2x + '+diff+' = '+tot+' \u2192 2x = '+(tot-diff)],ans:y,tol:0,unit:'years',working:'2x + '+diff+' = '+tot+' \u2192 x = '+y};})},
+    {lb:'Define unknowns',dr:dQ10,ht:'<p>Let Amara\u2019s age = x. Then Kofi = x + 7.</p>',speak:'Let Amara\u2019s age equal x. Then Kofi\u2019s age is x plus 7.'},
+    {lb:'Form the equation',dr:dQ10,ht:'<div class="fm">x + (x + 7) = 31</div>',speak:'Their ages sum to 31, so: x plus, the bracket, x plus 7, equals 31.'},
+    {lb:'Solve',dr:dQ10,ht:'<div class="fm">2x + 7 = 31  \u2192  2x = 24  \u2192  x = 12</div>',speak:'That simplifies to 2x plus 7 equals 31. So 2x equals 24, and x equals 12.'},
+    {lb:'Answer',dr:dQ10,ht:'<div class="fm">Amara = 12, Kofi = 19</div><p>Check: 12 + 19 = 31 \u2713</p>',speak:'So Amara is 12, and Kofi is 19. Check: 12 plus 19 equals 31, correct.'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var y=rInt(8,20),diff=rInt(2,9),tot=2*y+diff;return{question:'Two friends\u2019 ages sum to <b>'+tot+'</b>. One is <b>'+diff+'</b> years older. What is the <b>younger</b> friend\u2019s age?',hints:['Let younger = x, older = x + '+diff,'x + (x + '+diff+') = '+tot,'2x + '+diff+' = '+tot+' \u2192 2x = '+(tot-diff)],ans:y,tol:0,unit:'years',working:'2x + '+diff+' = '+tot+' \u2192 x = '+y};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
   ]},
 ];
 
 var qi=0,si=0;
 function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
 function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
-function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=(si===0);document.getElementById('nb').textContent=(si===q.steps.length-1)?'Restart':'Next \u2192';}
+function render(){if(typeof stopReading==='function')stopReading();bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=(si===0);document.getElementById('nb').textContent=(si===q.steps.length-1)?'Restart':'Next \u2192';}
 document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
 document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=(si===q.steps.length-1)?0:si+1;render();});
+
+// ── Auto-reader ──────────────────────────────────────────────────────────
+// "Read this step" speaks just the current step once. "Auto-play question"
+// chains through every step of the current question, stopping (rather than
+// talking over) any step containing the interactive Your Turn question.
+var voiceSelEl = document.getElementById('voiceSel');
+var readerStatusEl = document.getElementById('readerStatus');
+var readBtnEl = document.getElementById('readBtn');
+var autoBtnEl = document.getElementById('autoBtn');
+var stopBtnEl = document.getElementById('stopReadBtn');
+var autoPlaying = false;
+var userPickedVoice = false; // only true once the student manually changes the dropdown
+
+function populateVoices(){
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  voiceSelEl.innerHTML = '<option value="">Default voice</option>' + voices.map(function(v,i){return '<option value="'+i+'">'+v.name+' ('+v.lang+')</option>';}).join('');
+}
+if (window.speechSynthesis) {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+voiceSelEl.addEventListener('change', function(){ userPickedVoice = (voiceSelEl.value !== ''); });
+function currentVoice(){
+  // iOS Safari silently fails to speak() if given a Voice object fetched before
+  // the voice list is fully ready — safest default is no explicit voice at all
+  // unless the student has deliberately picked one.
+  if (!userPickedVoice) return null;
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  return voices[parseInt(voiceSelEl.value,10)] || null;
+}
+function hasInteractiveQuestion(st){ return st.ht.indexOf('data-tryid')>-1; }
+
+function stopReading(){
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  autoPlaying = false;
+  readBtnEl.disabled = false; autoBtnEl.disabled = false;
+  stopBtnEl.style.display = 'none';
+  readerStatusEl.textContent = '';
+  window.__activeUtterance = null;
+}
+
+// WebKit (Safari/iOS) can garbage-collect an utterance mid-speech if nothing
+// keeps a strong reference to it, silently killing the audio.
+function speakStep(st, onDone){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech isn\u2019t supported on this browser.'; if(onDone) onDone(); return; }
+  if (!st.speak) { if(onDone) onDone(); return; }
+  var u = new SpeechSynthesisUtterance(st.speak);
+  var v = currentVoice();
+  if (v) u.voice = v;
+  u.rate = 0.95;
+  u.onend = function(){ window.__activeUtterance = null; if (onDone) onDone(); };
+  u.onerror = function(ev){
+    window.__activeUtterance = null;
+    readerStatusEl.textContent = 'Couldn\u2019t play audio (' + (ev && ev.error ? ev.error : 'unknown error') + '). Check the device isn\u2019t muted and try again.';
+    if (onDone) onDone();
+  };
+  window.__activeUtterance = u;
+  speechSynthesis.speak(u);
+  setTimeout(function(){
+    if (window.__activeUtterance === u && !speechSynthesis.speaking && !speechSynthesis.pending) {
+      readerStatusEl.textContent = 'No audio started \u2014 try tapping the button again, or check the device isn\u2019t on silent/muted.';
+    }
+  }, 600);
+}
+
+readBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  readerStatusEl.textContent = 'Reading\u2026';
+  var st = QS[qi].steps[si];
+  speakStep(st, function(){
+    readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+  });
+});
+
+autoBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  autoPlaying = true;
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  autoStep();
+});
+
+function autoStep(){
+  if (!autoPlaying) return;
+  var q = QS[qi], st = q.steps[si];
+  readerStatusEl.textContent = 'Reading step '+(si+1)+' of '+q.steps.length+'\u2026';
+  speakStep(st, function(){
+    if (!autoPlaying) return;
+    if (hasInteractiveQuestion(st)) {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Your turn \u2014 try the question below.';
+      return;
+    }
+    if (si < q.steps.length-1) {
+      si++;
+      var p=document.getElementById('pn'); var nst=q.steps[si];
+      p.innerHTML='<div class="sl">'+nst.lb+'</div>'+nst.ht; nst.dr(si);
+      p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+      bDT();
+      autoStep();
+    } else {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Question narrated.';
+    }
+  });
+}
+
+stopBtnEl.addEventListener('click', stopReading);
+
 render();
 
 </script>
