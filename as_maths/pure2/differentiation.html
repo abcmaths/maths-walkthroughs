@@ -12,6 +12,9 @@
   else {
     const { data: prof } = await _lc.from('profiles').select('full_name').eq('id', session.user.id).maybeSingle();
     window.__studentFirstName = prof && prof.full_name ? prof.full_name.split(' ')[0] : 'there';
+    _lc.from('topics').select('id').eq('topic_code','AS-P2-04').eq('subject','as_maths').maybeSingle()
+      .then(function(r){ window.__testTopicId = (r.data && r.data.id) ? r.data.id : null; })
+      .catch(function(){ window.__testTopicId = null; });
     document.addEventListener('DOMContentLoaded', function() {
       var el = document.getElementById('greet');
       if (el) el.textContent = 'Hi ' + window.__studentFirstName + ' — let\'s work through this one together.';
@@ -99,6 +102,21 @@ header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gol
 .welcome-go{width:100%;margin-top:6px;background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;border:none;padding:13px;border-radius:6px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
 .welcome-go:hover{filter:brightness(1.08);}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+@keyframes popIn{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes drawIn{to{stroke-dashoffset:0}}
+.an-pop{animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both;transform-box:fill-box;transform-origin:center;}
+.an-fade{animation:fadeUp .5s ease-out both;}
+.an-draw{animation:drawIn 1.1s ease-out forwards;}
+.reader-row{width:100%;max-width:760px;display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.reader-btn{font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:5px;border:1.5px solid var(--gold-dark);background:#fff;color:var(--gold-dark);cursor:pointer;font-family:inherit;}
+.reader-btn.active{background:var(--gold-dark);color:#fff;}
+.reader-btn:disabled{opacity:.4;cursor:default;}
+.reader-status{font-size:11.5px;color:#6b5750;}
+.reader-voice{font-size:12px;padding:6px 8px;border:1.5px solid var(--line);border-radius:5px;background:#fff;font-family:inherit;}
+.test-link-row{margin-top:16px;text-align:center;}
+.test-link-btn{display:inline-block;background:linear-gradient(120deg,var(--red),var(--gold-dark));color:#fff;padding:11px 24px;border-radius:6px;text-decoration:none;font-weight:700;font-size:14px;}
+.test-link-btn:hover{filter:brightness(1.08);}
 </style>
 </head>
 <body>
@@ -136,6 +154,13 @@ header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gol
       <div class="cvs"><svg id="dg" viewBox="0 0 480 280"></svg></div>
       <div class="pnl fi" id="pn"></div>
     </div>
+    <div class="reader-row">
+      <button class="reader-btn" id="readBtn">🔊 Read this step</button>
+      <button class="reader-btn" id="autoBtn">▶ Auto-play checkpoint</button>
+      <button class="reader-btn" id="stopReadBtn" style="display:none">■ Stop</button>
+      <select class="reader-voice" id="voiceSel"></select>
+      <span class="reader-status" id="readerStatus"></span>
+    </div>
     <div class="ctrl">
       <button class="btn" id="pb">&larr; Back</button>
       <div class="dots" id="dt"></div>
@@ -162,9 +187,9 @@ document.addEventListener('click',function(e){
   if(el.classList.contains('try-new')){
     var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;
     var o=shuffleMC(entry.genFn());entry.o=o;
-    var wrap=el.closest('.try');if(!wrap)return;
+    var wrapEl=el.closest('.try');if(!wrapEl)return;
     var tmp=document.createElement('div');tmp.innerHTML=buildTryMC(id,o);
-    wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;
+    wrapEl.parentNode.replaceChild(tmp.firstChild,wrapEl);ST[id]={o:o,genFn:entry.genFn};return;
   }
   if(el.classList.contains('mc-opt')){
     if(el.disabled)return;
@@ -184,89 +209,392 @@ document.addEventListener('click',function(e){
   }
 });
 function g(){return document.getElementById('dg');}
+function xesc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+// This file deliberately never uses a literal "^" inside T() text — discovered
+// tonight that a caret there triggers this helper's tspan-based superscript
+// split, which renders corrupted output (dropped characters, stray artifacts)
+// when combined with text-anchor="middle". Every exponent uses a pre-composed
+// Unicode superscript character instead.
 function T(x,y,txt,c,sz,a,bold){
   c=c||'#241A17';sz=sz||12;a=a||'middle';
-  // Supports inline superscripts written as ^(...) or ^X (single char) —
-  // rendered as real SVG superscripts via baseline-shift, not literal carets.
   var parts=String(txt).split(/\^(\([^)]*\)|\S)/);
   var tspans='';
   for(var i=0;i<parts.length;i++){
     if(!parts[i])continue;
     if(i%2===1){
       var exp=parts[i].replace(/^\(|\)$/g,'');
-      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+exp+'</tspan>';
+      tspans+='<tspan baseline-shift="super" font-size="'+Math.round(sz*0.7)+'">'+xesc(exp)+'</tspan>';
     }else{
-      tspans+='<tspan>'+parts[i]+'</tspan>';
+      tspans+='<tspan>'+xesc(parts[i])+'</tspan>';
     }
   }
   return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(bold?700:400)+'">'+tspans+'</text>';
 }
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||1.5;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="2"/>';}
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
-function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
-
-// Generic progressive-reveal diagram: renders a title plus a stack of boxes,
-// each appearing once the panel's stage (p) reaches that box's stage number.
-function drawGeneric(title, boxes, p){
-  var s=g(); s.setAttribute('viewBox','0 0 480 260'); var o=[];
-  o.push(T(240,22,title,'#C0272D',15,'middle',true));
-  var y=42;
-  boxes.forEach(function(b){
-    if(p>=b.stage){
-      var h=b.h||44;
-      o.push(R(20,y,440,h,b.bg||'#fff5f0',b.stroke||'#C0272D',1.5));
-      if(b.text2){
-        o.push(T(240,y+h*0.42+5,b.text,b.color||'#241A17',b.size||13,'middle',b.bold!==false));
-        o.push(T(240,y+h*0.78+3,b.text2,b.color2||'#888',b.size2||11,'middle',false));
-      }else{
-        o.push(T(240,y+h/2+5,b.text,b.color||'#241A17',b.size||14,'middle',b.bold!==false));
-      }
-      y+=h+8;
-    }
-  });
-  s.innerHTML=o.join('');
+function C(cx,cy,r,fill,stroke,sw){stroke=stroke||fill;return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;}
+function fracSimplify(n,d){var v=gcd(n,d);return [n/v,d/v];}
+function wrap(animate, cls, html){ return '<g class="'+(animate?cls:'')+'">'+html+'</g>'; }
+function drawCurve(points, color, w, animate){
+  if(animate) return '<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="'+w+'" stroke-dasharray="1400" stroke-dashoffset="1400" class="an-draw"/>';
+  return '<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="'+w+'"/>';
+}
+function drawLine(x1,y1,x2,y2,color,w,animate){
+  if(animate) return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+w+'" stroke-dasharray="500" stroke-dashoffset="500" class="an-draw"/>';
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+w+'"/>';
+}
+// Point-array generator that clips based on actual PIXEL position, not the raw
+// function value — a bug found tonight (value-based clipping silently chopped
+// the peaks off any curve whose amplitude didn't match the assumption baked
+// into the old clip threshold).
+function curvePts(fn,x0,x1,step,ox,oy,xs,ys){
+  var pts=[];
+  for(var xv=x0;xv<=x1+1e-9;xv+=step){
+    var yv=fn(xv);
+    if(yv===null||isNaN(yv)) continue;
+    var py=oy-yv*ys;
+    if(py<-40||py>500) continue;
+    pts.push((ox+xv*xs)+','+py);
+  }
+  return pts.join(' ');
+}
+function axesAt(ox,oy,w,htop,hbot){
+  var o=[];
+  o.push(L(ox-8,oy,ox+w,oy,'#bbb',1));
+  o.push(L(ox,oy-htop,ox,oy+hbot,'#bbb',1));
+  return o.join('');
 }
 
+// ── Checkpoint 1: Differentiating eˣ ────────────────────────────────────────
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'The function that is its own derivative','#C0272D',13,'middle',true));
+  var ox=90,oy=210,xs=55,ys=22;
+  if(p>=1){
+    o.push(axesAt(ox,oy,300,150,10));
+    o.push(drawCurve(curvePts(function(x){return Math.exp(x);},-2.3,2,0.08,ox,oy,xs,ys),'#1a5a8a',2.5,p===1));
+    o.push(wrap(p===1,'an-fade',T(ox+1.5*xs,oy-Math.exp(1.5)*ys-10,'y=e\u02e3','#1a5a8a',11,'middle',true)));
+  }
+  if(p>=2){
+    o.push(wrap(p===2,'an-fade',T(240,40,'Look at the gradient at a few points \u2014 at x=0, gradient=1=e\u2070.','#241A17',10.5,'middle',false)+T(240,58,'At x=1, gradient\u2248e\u00b9\u22482.72 \u2014 the gradient VALUE always matches e\u02e3 itself.','#241A17',10.5,'middle',false)));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(60,224,360,30,'#e8f8ee','#1a7a3a',2)+T(240,244,'dy\u2044dx (e\u02e3) = e\u02e3 \u2014 unique among all functions.','#1a7a3a',13,'middle',true)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 2: Differentiating exponentials (chain rule idea) ──────────
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'What happens with a multiplier inside the exponent?','#C0272D',12.5,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'y = e\u00b3\u02e3 grows 3 times as fast, at every instant, as y=e\u02e3.','#241A17',12,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,66,'That \u201c3 times as fast\u201d is exactly the multiplier that appears out front','#241A17',11,'middle',false)+T(240,84,'when you differentiate \u2014 the derivative picks up a copy of it.','#241A17',11,'middle',false)));}
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(60,98,360,30,'#e8f8ee','#1a7a3a',2)+T(240,118,'dy\u2044dx (e\u1d4f\u02e3) = k e\u1d4f\u02e3','#1a7a3a',14,'middle',true)));
+  }
+  if(p>=4){o.push(wrap(p===4,'an-fade',T(240,146,'Example: y=e\u2075\u02e3 \u2192 dy\u2044dx = 5e\u2075\u02e3.','#1a5a8a',12,'middle',true)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 3: Differentiating ln(x) ────────────────────────────────────
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Using the inverse-function gradient relationship','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'y=lnx and y=e\u02e3 are inverses \u2014 reflections of each other in y=x.','#241A17',12,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,66,'For inverse functions, the gradients at corresponding points are','#241A17',11,'middle',false)+T(240,84,'RECIPROCALS of each other \u2014 the same relationship used for tangents/normals.','#241A17',11,'middle',false)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,112,'If y=lnx then x=e\u02b8. The gradient of e\u02b8 (w.r.t. y) is e\u02b8=x.','#1a5a8a',11.5,'middle',true)+T(240,130,'So the gradient of lnx is the reciprocal: 1\u2044x.','#1a5a8a',11.5,'middle',true)));}
+  if(p>=4){
+    o.push(wrap(p===4,'an-pop',R(90,144,300,30,'#e8f8ee','#1a7a3a',2)+T(240,164,'dy\u2044dx (lnx) = 1\u2044x','#1a7a3a',15,'middle',true)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 4: Differentiating ln(kx) and ln(f(x)) ──────────────────────
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'The multiplier vanishes; a general pattern emerges','#C0272D',12.5,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'ln(kx) = ln k + ln x \u2014 using the log laws from Logs & Exponentials.','#241A17',11.5,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,66,'ln k is just a CONSTANT \u2014 it differentiates to 0.','#241A17',11.5,'middle',false)+T(240,84,'So ln(kx) has exactly the same derivative as ln x.','#1a5a8a',12,'middle',true)));}
+  if(p>=3){o.push(wrap(p===3,'an-pop',R(70,98,340,30,'#e8f8ee','#1a7a3a',2)+T(240,118,'dy\u2044dx (ln(kx)) = 1\u2044x','#1a7a3a',13,'middle',true)));}
+  if(p>=4){o.push(wrap(p===4,'an-fade',T(240,146,'More generally, for any function inside: dy\u2044dx [ln(f(x))] = f\u2032(x)\u2044f(x).','#241A17',11.5,'middle',false)));}
+  if(p>=5){o.push(wrap(p===5,'an-pop',R(60,160,360,30,'#fff8e1','#C8922A',1.2)+T(240,180,'e.g. ln(x\u00b2+1) \u2192 2x \u2044 (x\u00b2+1)','#7A5A18',12.5,'middle',true)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 5: Differentiating sinx and cosx ────────────────────────────
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,12,'The gradient function of sinx IS cosx','#C0272D',13,'middle',true));
+  var ox=60,oy=140,xs=58,ys=55;
+  if(p>=1){
+    o.push(L(ox-6,oy,ox+380,oy,'#bbb',1));o.push(L(ox,oy-70,ox,oy+70,'#bbb',1));
+    o.push(drawCurve(curvePts(Math.sin,0,6.4,0.06,ox,oy,xs,ys),'#1a5a8a',2.5,p===1));
+    o.push(wrap(p===1,'an-fade',T(ox+50,oy-80,'y=sinx','#1a5a8a',11,'start',true)));
+  }
+  if(p>=2){
+    o.push(wrap(p===2,'an-fade',T(240,220,'At x=0, sinx has its STEEPEST gradient (+1). At x=\u03c0\u20442, sinx is FLAT (gradient 0).','#241A17',10,'middle',false)+T(240,238,'That gradient PATTERN (steep, flat, steep-negative, flat...) is exactly cosx.','#241A17',10,'middle',false)));
+  }
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(60,246,360,10,'#fff','none',0)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 6: Differentiating sin(kx) and cos(kx) ──────────────────────
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'The same multiplier pattern as exponentials','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'y=sin(kx) oscillates k times as fast as y=sinx.','#241A17',12,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,66,'Exactly like Checkpoint 2\u2019s exponential case, that speed-up','#241A17',11,'middle',false)+T(240,84,'factor k appears out front of the derivative.','#241A17',11,'middle',false)));}
+  if(p>=3){
+    o.push(wrap(p===3,'an-pop',R(50,98,380,60,'#e8f8ee','#1a7a3a',2)
+      +T(240,118,'dy\u2044dx (sin(kx)) = k cos(kx)','#1a7a3a',13,'middle',true)
+      +T(240,140,'dy\u2044dx (cos(kx)) = \u2212k sin(kx)','#1a7a3a',13,'middle',true)
+    ));
+  }
+  if(p>=4){o.push(wrap(p===4,'an-fade',T(240,174,'Note the MINUS sign for cos \u2014 easy to forget under exam pressure.','#a01820',11,'middle',true)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 7: Stationary points with new functions ─────────────────────
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Same method as Pure 1, new derivatives to plug in','#C0272D',12.5,'middle',true));
+  var ox=60,oy=190,xs=90,ys=60;
+  if(p>=1){
+    o.push(axesAt(ox,oy,80,40,20));
+    o.push(drawCurve(curvePts(function(x){return x*Math.exp(-x);},-0.3,3.3,0.05,ox,oy,xs,ys),'#1a5a8a',2.5,p===1));
+    o.push(wrap(p===1,'an-fade',T(240,40,'y = x e\u207b\u02e3 has a turning point \u2014 find it the usual way.','#1a5a8a',11.5,'middle',false)));
+  }
+  if(p>=2){
+    o.push(wrap(p===2,'an-pop',C(ox+1*xs,oy-Math.exp(-1)*ys,4,'#a01820')));
+    o.push(wrap(p===2,'an-fade',T(240,225,'Set dy\u2044dx=0, exactly as in Pure 1 \u2014 the technique never changes,','#241A17',10.5,'middle',false)+T(240,241,'only the derivatives being used do.','#241A17',10.5,'middle',false)));
+  }
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 8: Tangents and normals with new functions ──────────────────
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Same technique, new derivatives','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'Find the tangent to y=lnx at x=1.','#241A17',13,'middle',true)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,66,'dy\u2044dx=1\u2044x (Checkpoint 3). At x=1, gradient=1\u20441=1.','#1a5a8a',12,'middle',true)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',T(240,94,'At x=1, y=ln1=0. Point (1,0), gradient 1.','#241A17',11.5,'middle',false)));}
+  if(p>=4){
+    o.push(wrap(p===4,'an-pop',R(60,108,360,34,'#e8f8ee','#1a7a3a',2)+T(240,130,'y\u22120=1(x\u22121) \u2192 y=x\u22121','#1a7a3a',13.5,'middle',true)));
+  }
+  if(p>=5){o.push(wrap(p===5,'an-fade',T(240,162,'The normal, as always, uses the perpendicular gradient rule.','#888',10.5,'middle',false)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 9: Rates of change with exponential models ─────────────────
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,14,'Applying calculus to growth and decay','#C0272D',13,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',T(240,38,'P = 200e\u2070\u1d47\u02b3\u1d57\u1d57 models population growth over time t.','#241A17',11.5,'middle',true)+T(240,56,'(Using the AS-P1 exponential growth model.)','#888',9.5,'middle',false)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',T(240,84,'dP\u2044dt = 200 \u00d7 0.3 \u00d7 e\u2070\u1d47\u02b3\u1d57\u1d57 = 60e\u2070\u1d47\u02b3\u1d57\u1d57','#1a5a8a',11.5,'middle',true)+T(240,102,'\u2014 exactly the Checkpoint 2 pattern applied here.','#888',9.5,'middle',false)));}
+  if(p>=3){o.push(wrap(p===3,'an-pop',R(40,116,400,44,'#e8f8ee','#1a7a3a',2)+T(240,136,'Notice dP\u2044dt = 0.3P \u2014 the rate is always proportional','#1a7a3a',11.5,'middle',true)+T(240,152,'to the current population, the defining feature of this model.','#1a7a3a',11,'middle',true)));}
+  s.innerHTML=o.join('');}
+
+// ── Checkpoint 10: Consolidation ───────────────────────────────────────────
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  o.push(T(240,20,'The Paper 2 Differentiation toolkit','#C0272D',13.5,'middle',true));
+  if(p>=1){o.push(wrap(p===1,'an-fade',R(30,38,420,44,'#fff5f0','#C0272D',1.5)+T(240,58,'e\u02e3 is its own derivative; e\u1d4f\u02e3 picks up a factor of k \u2014 the same','#241A17',11)+T(240,76,'multiplier pattern reappears throughout this whole topic.','#888',9.5)));}
+  if(p>=2){o.push(wrap(p===2,'an-fade',R(30,86,420,44,'#e8f4ff','#1a5a8a',1.5)+T(240,106,'lnx differentiates to 1\u2044x via the inverse-gradient relationship;','#241A17',11)+T(240,124,'sinx and cosx differentiate into each other (radians only).','#888',9.5)));}
+  if(p>=3){o.push(wrap(p===3,'an-fade',R(30,134,420,44,'#e8f8ee','#1a7a3a',1.5)+T(240,154,'Stationary points, tangents/normals, and rates of change all use','#241A17',11)+T(240,172,'the exact same Pure 1 techniques \u2014 only the derivatives change.','#888',9.5)));}
+  if(p>=4){o.push(wrap(p===4,'an-pop',R(60,190,360,44,'#fff8e1','#C8922A',2)+T(240,216,'Ready for AS-P2-05: Integration','#7A5A18',14,'middle',true)));}
+  s.innerHTML=o.join('');}
+
 var Q=[
- {ey:'Checkpoint 1 of 10',ti:'Differentiating eˣ',su:'The function that is its own derivative',panels:[
-   {dtitle:'d/dx(eˣ) = eˣ',boxes:[{"stage": 1, "text": "eˣ is unique — it never changes under differentiation", "bg": "#fff5f0"}],p:1,html:'<p>This remarkable property is WHY e is defined the way it is — no other base has this behaviour.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Differentiate y=3eˣ", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule with a constant multiple.</p>'+tryItMC(function(){return {question:'What is dy/dx for y=3e\u02e3?',options:['3e\u02e3','e\u02e3','3xe<sup>x\u22121</sup>','3'],correct:0,working:'Constant multiples carry straight through: d/dx(3e\u02e3)=3e\u02e3.'};})}
+ {ey:'Checkpoint 1 of 10',ti:'Differentiating e\u02e3',su:'The function that is its own derivative',panels:[
+   {d:dQ1,p:1,html:'<p>y=e\u02e3, the exponential curve.</p>',
+    speak:'y equals e to the x, the exponential curve.'},
+   {d:dQ1,p:2,html:'<p>At every point, the gradient VALUE exactly matches the height of the curve at that point.</p>',
+    speak:'At every point, the gradient value exactly matches the height of the curve at that point.'},
+   {d:dQ1,p:3,html:'<p>Which means e\u02e3 is genuinely its own derivative \u2014 unique among all functions.</p>'
+     +tryItMC(function(){
+       var c=pick([2,3,5,7]);
+       return {question:'If y=e\u02e3, what is dy\u2044dx at x=ln'+c+'?',
+         options:[String(c), 'ln'+c, String(c*c), '1'],
+         correct:0,
+         working:'dy\u2044dx=e\u02e3=y itself. At x=ln'+c+', y=e^(ln'+c+')='+c+', so dy\u2044dx='+c+' too.'};
+     }),
+    speak:'Which means e to the x is genuinely its own derivative \u2014 unique among all functions. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 2 of 10',ti:'Differentiating exponentials',su:'Using the chain rule idea informally',panels:[
-   {dtitle:'d/dx(e^(kx)) = ke^(kx)',boxes:[{"stage": 1, "text": "The constant k comes down as a multiplier", "bg": "#fff5f0"}],p:1,html:'<p>A very common AS pattern — differentiating e to a linear power multiplies by that power’s coefficient.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Differentiate y=e^(5x)", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule.</p>'+tryItMC(function(){return {question:'What is dy/dx for y=e<sup>5x</sup>?',options:['5e<sup>5x</sup>','e<sup>5x</sup>','5e\u02e3','e<sup>4x</sup>'],correct:0,working:'d/dx(e<sup>kx</sup>)=ke<sup>kx</sup>, here k=5: 5e<sup>5x</sup>.'};})}
+   {d:dQ2,p:1,html:'<p>y=e\u00b3\u02e3 grows 3 times as fast, at every instant, as y=e\u02e3.</p>',
+    speak:'y equals e to the 3x grows 3 times as fast, at every instant, as y equals e to the x.'},
+   {d:dQ2,p:2,html:'<p>That speed-up factor is exactly what appears out front when you differentiate.</p>',
+    speak:'That speed-up factor is exactly what appears out front when you differentiate.'},
+   {d:dQ2,p:3,html:'<p>The general pattern for any constant multiplier k.</p>',
+    speak:'The general pattern for any constant multiplier, k.'},
+   {d:dQ2,p:4,html:'<p>Worked example.</p>'
+     +tryItMC(function(){
+       var k=pick([2,3,4,5,6]);
+       return {question:'Differentiate y = e^('+k+'x) (i.e. e to the power '+k+'x).',
+         options:[k+'e^('+k+'x)', 'e^('+k+'x)', k+'x e^('+k+'x)', 'e^('+(k+1)+'x)'],
+         correct:0,
+         working:'dy\u2044dx of e^(kx) is k\u00d7e^(kx). With k='+k+', that\u2019s '+k+'e^('+k+'x).'};
+     }),
+    speak:'Worked example. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 3 of 10',ti:'Differentiating ln(x)',su:'d/dx(ln x) = 1/x',panels:[
-   {dtitle:'ln(x) differentiates to a simple fraction',boxes:[{"stage": 1, "text": "d/dx(ln x) = 1/x", "bg": "#fff5f0"}],p:1,html:'<p>Remarkably simple given how complex ln(x) looks — this connects logarithms directly to the reciprocal function.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Differentiate y = 4ln(x)", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule with a constant.</p>'+tryItMC(function(){return {question:'What is dy/dx for y=4ln(x)?',options:['4/x','1/x','4x','4/x\u00b2'],correct:0,working:'d/dx(4lnx)=4\u00d7(1/x)=4/x.'};})}
+   {d:dQ3,p:1,html:'<p>y=lnx and y=e\u02e3 are inverses of each other \u2014 reflections in the line y=x.</p>',
+    speak:'y equals ln x and y equals e to the x are inverses of each other \u2014 reflections in the line y equals x.'},
+   {d:dQ3,p:2,html:'<p>For inverse functions, gradients at corresponding points are RECIPROCALS \u2014 the same relationship used for perpendicular tangents and normals.</p>',
+    speak:'For inverse functions, gradients at corresponding points are reciprocals \u2014 the same relationship used for perpendicular tangents and normals.'},
+   {d:dQ3,p:3,html:'<p>Since the gradient of e\u02e3 (at the corresponding point) is e\u02e3 itself, which equals x, the gradient of lnx must be the reciprocal.</p>',
+    speak:'Since the gradient of e to the x, at the corresponding point, is e to the x itself, which equals x, the gradient of ln x must be the reciprocal.'},
+   {d:dQ3,p:4,html:'<p>That gives the derivative of lnx.</p>'
+     +tryItMC(function(){
+       var xv=pick([2,3,4,5]);
+       var fr=fracSimplify(1,xv);
+       return {question:'If y=lnx, find dy\u2044dx at x='+xv+'.',
+         options:[fr.join('/'), String(xv), 'ln'+xv, String(1/(xv*xv))],
+         correct:0,
+         working:'dy\u2044dx=1\u2044x. At x='+xv+', that\u2019s 1\u2044'+xv+'.'};
+     }),
+    speak:'That gives the derivative of ln x. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 4 of 10',ti:'Differentiating ln(kx) and ln(f(x))',su:'The general logarithmic rule',panels:[
-   {dtitle:'d/dx[ln(f(x))] = f’(x)/f(x)',boxes:[{"stage": 1, "text": "ln(kx): derivative is still 1/x (the k cancels!)", "bg": "#fff5f0"}, {"stage": 2, "text": "ln(x²+1): derivative is 2x/(x²+1)", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Take the derivative of what’s inside, divide by what’s inside — a preview of the full chain rule met formally at A2.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Differentiate ln(3x²)", "bg": "#fff5f0"}],p:1,html:'<p>Apply the general rule.</p>'+tryItMC(function(){return {question:'What is d/dx[ln(3x\u00b2)]?',options:['2/x','6x','1/(3x\u00b2)','6x/(3x\u00b2)'],correct:0,working:'f(x)=3x\u00b2, f\u2019(x)=6x. Derivative = 6x/3x\u00b2 = 2/x.'};})}
+   {d:dQ4,p:1,html:'<p>ln(kx) = ln k + ln x, using the log laws from the Logs & Exponentials topic.</p>',
+    speak:'ln of kx equals ln k plus ln x, using the log laws from the Logarithms and Exponentials topic.'},
+   {d:dQ4,p:2,html:'<p>ln k is just a constant \u2014 it differentiates to 0, so ln(kx) has exactly the same derivative as lnx.</p>',
+    speak:'ln k is just a constant \u2014 it differentiates to 0, so ln of kx has exactly the same derivative as ln x.'},
+   {d:dQ4,p:3,html:'<p>Which is a slightly surprising result: the multiplier k completely vanishes.</p>',
+    speak:'Which is a slightly surprising result: the multiplier k completely vanishes.'},
+   {d:dQ4,p:4,html:'<p>More generally, whatever function sits inside the ln, the derivative follows a "derivative over original" pattern.</p>',
+    speak:'More generally, whatever function sits inside the ln, the derivative follows a derivative-over-original pattern.'},
+   {d:dQ4,p:5,html:'<p>Worked example.</p>'
+     +tryItMC(function(){
+       var choices=[
+         {q:'ln(x\u00b2+1)', a:'2x \u2044 (x\u00b2+1)'},
+         {q:'ln(3x+2)', a:'3 \u2044 (3x+2)'},
+         {q:'ln(x\u00b3)', a:'3x\u00b2 \u2044 x\u00b3'}
+       ];
+       var picked=pick(choices);
+       return {question:'Differentiate y = '+picked.q+'.',
+         options:[picked.a, picked.q.replace('ln(','').replace(')',''), '1\u2044'+picked.q, picked.a.replace('/','\u00d7')].filter(function(v,i,arr){return arr.indexOf(v)===i;}).slice(0,4),
+         correct:0,
+         working:'dy\u2044dx [ln(f(x))] = f\u2032(x)\u2044f(x). Here that gives '+picked.a+'.'};
+     }),
+    speak:'Worked example. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 5 of 10',ti:'Differentiating sinx and cosx',su:'Trig derivatives (radians only)',panels:[
-   {dtitle:'The two basic trig derivatives',boxes:[{"stage": 1, "text": "d/dx(sinx) = cosx", "bg": "#fff5f0"}, {"stage": 2, "text": "d/dx(cosx) = −sinx", "text2": "note the negative sign!", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>These ONLY work when x is in radians — another reason Circular Measure mattered. Note the sign flip differentiating cos.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Differentiate y = 3cosx", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule with a constant.</p>'+tryItMC(function(){return {question:'What is dy/dx for y=3cosx?',options:['\u22123sinx','3sinx','\u22123cosx','3cosx'],correct:0,working:'d/dx(3cosx)=3\u00d7(\u2212sinx)=\u22123sinx.'};})}
+   {d:dQ5,p:1,html:'<p>The curve y=sinx.</p>',
+    speak:'The curve y equals sine x.'},
+   {d:dQ5,p:2,html:'<p>Look at the gradient at a few points: steepest where the curve crosses the axis, flat at each peak and trough. That pattern is exactly cosx.</p>',
+    speak:'Look at the gradient at a few points: steepest where the curve crosses the axis, flat at each peak and trough. That pattern is exactly cosine x.'},
+   {d:dQ5,p:3,html:'<p>These two derivatives, valid only when angles are measured in RADIANS \u2014 an important restriction throughout AS-level calculus.</p>'
+     +tryItMC(function(){
+       var opts=[
+         {q:'sinx', a:'cosx'},
+         {q:'cosx', a:'\u2212sinx'}
+       ];
+       var picked=pick(opts);
+       return {question:'What is dy\u2044dx if y='+picked.q+' (x in radians)?',
+         options:[picked.a, picked.q==='sinx'?'\u2212cosx':'sinx', '\u2212'+picked.q, picked.q].filter(function(v,i,arr){return arr.indexOf(v)===i;}).slice(0,4),
+         correct:0,
+         working:'d\u2044dx('+picked.q+') = '+picked.a+', valid when x is measured in radians.'};
+     }),
+    speak:'These are valid only when angles are measured in radians \u2014 an important restriction throughout AS-level calculus. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 6 of 10',ti:'Differentiating sin(kx) and cos(kx)',su:'The constant multiplier pattern again',panels:[
-   {dtitle:'d/dx[sin(kx)] = k·cos(kx)',boxes:[{"stage": 1, "text": "d/dx[sin(kx)] = k cos(kx)", "bg": "#fff5f0"}, {"stage": 2, "text": "d/dx[cos(kx)] = −k sin(kx)", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>Same pattern as e<sup>kx</sup> — the inner constant k comes out as a multiplier.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "Differentiate y=sin(4x)", "bg": "#fff5f0"}],p:1,html:'<p>Apply the rule.</p>'+tryItMC(function(){return {question:'What is dy/dx for y=sin(4x)?',options:['4cos(4x)','cos(4x)','4sin(4x)','\u22124cos(4x)'],correct:0,working:'d/dx[sin(kx)]=k cos(kx), here k=4: 4cos(4x).'};})}
+   {d:dQ6,p:1,html:'<p>y=sin(kx) oscillates k times as fast as y=sinx.</p>',
+    speak:'y equals sine of kx oscillates k times as fast as y equals sine x.'},
+   {d:dQ6,p:2,html:'<p>Exactly like Checkpoint 2\u2019s exponential case, that speed-up factor k appears out front of the derivative.</p>',
+    speak:'Exactly like Checkpoint 2\u2019s exponential case, that speed-up factor k appears out front of the derivative.'},
+   {d:dQ6,p:3,html:'<p>Both the sin(kx) and cos(kx) versions.</p>',
+    speak:'Both the sine of kx and cosine of kx versions.'},
+   {d:dQ6,p:4,html:'<p>Watch the sign carefully on the cos version \u2014 easy to forget under exam pressure.</p>'
+     +tryItMC(function(){
+       var k=pick([2,3,4,5]);
+       var fn=pick(['sin','cos']);
+       var ans = fn==='sin' ? k+'cos('+k+'x)' : '\u2212'+k+'sin('+k+'x)';
+       var wrong1 = fn==='sin' ? k+'sin('+k+'x)' : k+'cos('+k+'x)';
+       var wrong2 = fn==='sin' ? 'cos('+k+'x)' : '\u2212sin('+k+'x)';
+       return {question:'Differentiate y = '+fn+'('+k+'x).',
+         options:[ans, wrong1, wrong2, fn+'('+k+'x)'],
+         correct:0,
+         working:'d\u2044dx['+fn+'(kx)] follows the pattern with k='+k+', giving '+ans+'.'};
+     }),
+    speak:'Watch the sign carefully on the cosine version \u2014 easy to forget under exam pressure. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 7 of 10',ti:'Stationary points with new functions',su:'Applying the same method as Pure 1',panels:[
-   {dtitle:'Set dy/dx = 0, same method as before',boxes:[{"stage": 1, "text": "y = eˣ − 2x", "bg": "#fff5f0"}, {"stage": 2, "text": "dy/dx = eˣ − 2 = 0 → eˣ = 2 → x = ln2", "bg": "#e8f4ff", "stroke": "#1a5a8a"}],p:2,html:'<p>The method from Pure 1 Differentiation carries over unchanged — only the new derivative rules are different.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "y = 2x − eˣ, find stationary point x", "bg": "#fff5f0"}],p:1,html:'<p>Set dy/dx=0 and solve.</p>'+tryItMC(function(){return {question:'For y=2x\u2212e\u02e3, the x-coordinate of the stationary point satisfies:',options:['e\u02e3=2, so x=ln2','e\u02e3=0','x=2','x=ln(\u22122)'],correct:0,working:'dy/dx=2\u2212e\u02e3=0 \u2192 e\u02e3=2 \u2192 x=ln2.'};})}
+   {d:dQ7,p:1,html:'<p>y=xe\u207b\u02e3 has a turning point \u2014 find it the usual way.</p>',
+    speak:'y equals x, e to the minus x, has a turning point \u2014 find it the usual way.'},
+   {d:dQ7,p:2,html:'<p>Set dy\u2044dx=0, exactly as in Pure 1 \u2014 the technique never changes, only the derivatives being used do.</p>'
+     +tryItMC(function(){
+       var bank=[
+         {question:'What is the FIRST step in finding stationary points of any function, however unfamiliar the function looks?',
+          options:['Differentiate, then set dy\u2044dx=0 and solve','Set y=0 and solve','Find the second derivative first','Sketch the graph and estimate visually'],
+          working:'The method from Pure 1 never changes: differentiate, set the derivative to zero, solve for x \u2014 regardless of which functions are involved.'},
+         {question:'y=xe\u207b\u02e3 has stationary point at x=1. How would you check whether it\u2019s a maximum or minimum?',
+          options:['Find the second derivative and substitute x=1, exactly as in Pure 1','Just look at the y-value','Assume it\u2019s always a maximum for this type of function','Recalculate the first derivative at a different x-value'],
+          working:'The nature test from Pure 1 is unchanged: find d\u00b2y\u2044dx\u00b2, substitute the stationary x-value, and read the sign.'},
+         {question:'For an unfamiliar function like y=x\u00b2lnx, which of these changes when finding stationary points, compared to Pure 1 polynomials?',
+          options:['Only the actual derivative formula used \u2014 the method itself is identical','The whole method needs to be different','You can no longer set dy\u2044dx=0','Stationary points don\u2019t exist for functions like this'],
+          working:'Whatever the function, the method is unchanged: differentiate, set to zero, solve. Only which differentiation rules you apply changes.'}
+       ];
+       var picked=pick(bank);
+       return {question:picked.question, options:picked.options, correct:0, working:picked.working};
+     }),
+    speak:'Set dy dx equal to zero, exactly as in Pure 1 \u2014 the technique never changes, only the derivatives being used do. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 8 of 10',ti:'Tangents and normals with new functions',su:'Same technique, new derivatives',panels:[
-   {dtitle:'Combine the new derivative rules with old methods',boxes:[{"stage": 1, "text": "Find gradient using the appropriate new rule, then use point-gradient form as before", "bg": "#fff5f0"}],p:1,html:'<p>Tangent/normal equations work exactly as in Pure 1 — only the derivative calculation itself uses the new rules.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "y=lnx, tangent gradient at x=e", "bg": "#fff5f0"}],p:1,html:'<p>Find the gradient at x=e.</p>'+tryItMC(function(){return {question:'For y=lnx, what is the gradient of the tangent at x=e?',options:['1/e','e','1','ln(e)'],correct:0,working:'dy/dx=1/x. At x=e: gradient=1/e.'};})}
+   {d:dQ8,p:1,html:'<p>Find the tangent to y=lnx at x=1.</p>',
+    speak:'Find the tangent to y equals ln x at x equals 1.'},
+   {d:dQ8,p:2,html:'<p>Use dy\u2044dx=1\u2044x from Checkpoint 3 to get the gradient there.</p>',
+    speak:'Use dy dx equals 1 over x from Checkpoint 3 to get the gradient there.'},
+   {d:dQ8,p:3,html:'<p>Find the y-coordinate too, to pin down the exact point.</p>',
+    speak:'Find the y-coordinate too, to pin down the exact point.'},
+   {d:dQ8,p:4,html:'<p>Substitute into point\u2013gradient form, exactly as in Coordinate Geometry.</p>'
+     +tryItMC(function(){
+       var xv=pick([2,3,4,5]); // xv=1 excluded: xv and xv² then coincide as "1", causing a duplicate option
+       var correctStr=fracSimplify(1,xv).join('/');
+       var candidates=[String(xv), 'ln'+xv, String(xv*xv), String(xv+1)];
+       var opts=[correctStr];
+       for(var i=0;i<candidates.length && opts.length<4;i++){
+         if(opts.indexOf(candidates[i])===-1) opts.push(candidates[i]);
+       }
+       return {question:'Find the gradient of the tangent to y=lnx at x='+xv+'.',
+         options:opts,
+         correct:0,
+         working:'dy\u2044dx=1\u2044x. At x='+xv+', gradient=1\u2044'+xv+'.'};
+     }),
+    speak:'Substitute into point-gradient form, exactly as in Coordinate Geometry. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 9 of 10',ti:'Rates of change with exponential models',su:'Applying calculus to growth/decay',panels:[
-   {dtitle:'Differentiate the model to find the rate',boxes:[{"stage": 1, "text": "P = 500e^(0.2t)  →  dP/dt = 100e^(0.2t)", "bg": "#fff5f0"}],p:1,html:'<p>Differentiating an exponential growth model gives the instantaneous rate of change at any time t.</p>'},
-   {dtitle:'Check',boxes:[{"stage": 1, "text": "N=200e^(0.05t)", "bg": "#fff5f0"}],p:1,html:'<p>Find dN/dt.</p>'+tryItMC(function(){return {question:'For N=200e<sup>0.05t</sup>, what is dN/dt?',options:['10e<sup>0.05t</sup>','200e<sup>0.05t</sup>','0.05e<sup>0.05t</sup>','10e<sup>0.2t</sup>'],correct:0,working:'dN/dt=200\u00d70.05\u00d7e<sup>0.05t</sup>=10e<sup>0.05t</sup>.'};})}
+   {d:dQ9,p:1,html:'<p>P=200e\u2070\u1d47\u00b3\u1d57 models population growth over time t, using the AS-P1 exponential growth model.</p>',
+    speak:'P equals 200 e to the 0.3 t, models population growth over time t, using the exponential growth model from Pure 1.'},
+   {d:dQ9,p:2,html:'<p>Differentiate using Checkpoint 2\u2019s pattern to find the rate of growth.</p>',
+    speak:'Differentiate using Checkpoint 2\u2019s pattern to find the rate of growth.'},
+   {d:dQ9,p:3,html:'<p>Notice dP\u2044dt always comes out proportional to P itself \u2014 the defining feature of exponential growth.</p>'
+     +tryItMC(function(){
+       var A=pick([100,150,200,300]),k=pick([0.1,0.2,0.3,0.5]);
+       var rate=(A*k);
+       return {question:'P='+A+'e^('+k+'t). What is dP\u2044dt, in terms of P?',
+         options:[k+'P', A+'P', String(rate), k+'t'],
+         correct:0,
+         working:'dP\u2044dt = '+A+'\u00d7'+k+'\u00d7e^('+k+'t) = '+k+'\u00d7('+A+'e^('+k+'t)) = '+k+'P.'};
+     }),
+    speak:'Notice dP dt always comes out proportional to P itself \u2014 the defining feature of exponential growth. Now it\u2019s your turn.'}
   ]},
  {ey:'Checkpoint 10 of 10',ti:'Bringing it together',su:'Consolidating Paper 2 Differentiation',panels:[
-   {dtitle:'The Paper 2 Differentiation toolkit',boxes:[{"stage": 1, "text": "eˣ, e^(kx), ln(x), ln(f(x))", "bg": "#fff5f0"}, {"stage": 2, "text": "sinx, cosx, sin(kx), cos(kx)", "bg": "#e8f4ff", "stroke": "#1a5a8a"}, {"stage": 3, "text": "Stationary points, tangents, rates of change", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:3,html:'<p>These new derivative rules are the building blocks for the full chain, product, and quotient rules met at A2.</p>'},
-   {dtitle:'Ready for AS-P2-05',boxes:[{"stage": 1, "text": "Next: Integration (Paper 2)", "bg": "#e8f8ee", "stroke": "#1a7a3a"}],p:1,html:'<p>Nice work — Paper 2 Differentiation is complete. Next up: Paper 2 Integration.</p>'}
+   {d:dQ10,p:1,html:'<p>e\u02e3 is its own derivative; e^(kx) picks up a factor of k \u2014 the same multiplier pattern reappears throughout this whole topic.</p>',
+    speak:'e to the x is its own derivative; e to the kx picks up a factor of k \u2014 the same multiplier pattern reappears throughout this whole topic.'},
+   {d:dQ10,p:2,html:'<p>lnx differentiates to 1\u2044x via the inverse-gradient relationship; sinx and cosx differentiate into each other, valid only in radians.</p>',
+    speak:'ln x differentiates to 1 over x via the inverse-gradient relationship; sine x and cosine x differentiate into each other, valid only in radians.'},
+   {d:dQ10,p:3,html:'<p>Stationary points, tangents/normals, and rates of change all use the exact same Pure 1 techniques \u2014 only the derivatives change.</p>'
+     +tryItMC(function(){
+       var bank=[
+         {question:'Find the coordinates of the stationary point of y=xe\u207b\u02e3, for x>0.',
+          options:['(1, 1/e)','(0, 0)','(1, e)','(e, 1)'],
+          correct:0,
+          working:'dy\u2044dx = e\u207b\u02e3 \u2212 xe\u207b\u02e3 = e\u207b\u02e3(1\u2212x) = 0 \u2192 x=1. y = 1\u00d7e\u207b\u00b9 = 1\u2044e.'},
+         {question:'Find the gradient of y=3sin(2x) at x=0.',
+          options:['6','3','2','0'],
+          correct:0,
+          working:'dy\u2044dx=6cos(2x). At x=0: 6cos(0)=6\u00d71=6.'},
+         {question:'Find the equation of the tangent to y=e\u02e3 at x=0.',
+          options:['y=x+1','y=x','y=x\u22121','y=2x+1'],
+          correct:0,
+          working:'At x=0: y=e\u2070=1, gradient=e\u2070=1. Tangent: y\u22121=1(x\u22120) \u2192 y=x+1.'},
+         {question:'If f(x)=ln(5x), find f\u2032(x).',
+          options:['1/x','5/x','1/(5x)','5'],
+          correct:0,
+          working:'ln(5x)=ln5+lnx. Derivative of the constant ln5 is 0, leaving just the derivative of lnx: 1/x.'}
+       ];
+       return pick(bank);
+     }),
+    speak:'Stationary points, tangents and normals, and rates of change all use the exact same Pure 1 techniques \u2014 only the derivatives change. Now it\u2019s your turn.'},
+   {d:dQ10,p:4,html:'<p>Nice work \u2014 Paper 2 Differentiation is complete. Next up: Integration (Paper 2).</p>',
+    speak:'Nice work \u2014 Paper 2 Differentiation is complete. Next up: Integration, Paper 2.'}
   ]}
 ];
 
@@ -276,13 +604,17 @@ function saveProgress(){
   try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify({qi:qi,pi:pi})); }catch(e){}
 }
 function render(){
+  if (typeof stopReading === 'function') stopReading();
   var qq=Q[qi],pp=qq.panels[pi];
   document.getElementById('ey').textContent=qq.ey;
   document.getElementById('ti').textContent=qq.ti;
   document.getElementById('su').textContent=qq.su;
-  drawGeneric(pp.dtitle, pp.boxes, pp.p);
+  pp.d(pp.p);
   var pn=document.getElementById('pn');
   pn.innerHTML=pp.html;
+  if (qi===Q.length-1 && pi===qq.panels.length-1 && window.__testTopicId) {
+    pn.innerHTML += '<div class="test-link-row"><a class="test-link-btn" href="test.html?topic='+window.__testTopicId+'">\ud83d\udcdd Optional: take the test on this topic</a></div>';
+  }
   pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
   document.getElementById('pb').disabled=(qi===0&&pi===0);
   document.getElementById('nb').textContent=(pi===qq.panels.length-1&&qi===Q.length-1)?'Done':'Next \u2192';
@@ -331,6 +663,112 @@ document.getElementById('sb').addEventListener('click',function(e){
     });
   }
 })();
+
+// ── Auto-reader ──────────────────────────────────────────────────────────
+var voiceSelEl = document.getElementById('voiceSel');
+var readerStatusEl = document.getElementById('readerStatus');
+var readBtnEl = document.getElementById('readBtn');
+var autoBtnEl = document.getElementById('autoBtn');
+var stopBtnEl = document.getElementById('stopReadBtn');
+var autoPlaying = false;
+var userPickedVoice = false;
+
+function populateVoices(){
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  voiceSelEl.innerHTML = '<option value="">Default voice</option>' + voices.map(function(v,i){return '<option value="'+i+'">'+v.name+' ('+v.lang+')</option>';}).join('');
+}
+if (window.speechSynthesis) {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+voiceSelEl.addEventListener('change', function(){ userPickedVoice = (voiceSelEl.value !== ''); });
+function currentVoice(){
+  if (!userPickedVoice) return null;
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  return voices[parseInt(voiceSelEl.value,10)] || null;
+}
+function hasInteractiveQuestion(pp){ return pp.html.indexOf('data-tryid')>-1; }
+
+function stopReading(){
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  autoPlaying = false;
+  readBtnEl.disabled = false; autoBtnEl.disabled = false;
+  stopBtnEl.style.display = 'none';
+  readerStatusEl.textContent = '';
+  window.__activeUtterance = null;
+}
+
+function speakPanel(pp, onDone){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech isn\u2019t supported on this browser.'; if(onDone) onDone(); return; }
+  if (!pp.speak) { if(onDone) onDone(); return; }
+  var u = new SpeechSynthesisUtterance(pp.speak);
+  var v = currentVoice();
+  if (v) u.voice = v;
+  u.rate = 0.95;
+  u.onend = function(){ window.__activeUtterance = null; if (onDone) onDone(); };
+  u.onerror = function(ev){
+    window.__activeUtterance = null;
+    readerStatusEl.textContent = 'Couldn\u2019t play audio (' + (ev && ev.error ? ev.error : 'unknown error') + '). Check the device isn\u2019t muted and try again.';
+    if (onDone) onDone();
+  };
+  window.__activeUtterance = u;
+  speechSynthesis.speak(u);
+  setTimeout(function(){
+    if (window.__activeUtterance === u && !speechSynthesis.speaking && !speechSynthesis.pending) {
+      readerStatusEl.textContent = 'No audio started \u2014 try tapping the button again, or check the device isn\u2019t on silent/muted.';
+    }
+  }, 600);
+}
+
+readBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  readerStatusEl.textContent = 'Reading\u2026';
+  var pp = Q[qi].panels[pi];
+  speakPanel(pp, function(){
+    readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+  });
+});
+
+autoBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  autoPlaying = true;
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  autoStep();
+});
+
+function autoStep(){
+  if (!autoPlaying) return;
+  var qq = Q[qi], pp = qq.panels[pi];
+  readerStatusEl.textContent = 'Reading step '+(pi+1)+' of '+qq.panels.length+'\u2026';
+  speakPanel(pp, function(){
+    if (!autoPlaying) return;
+    if (hasInteractiveQuestion(pp)) {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Your turn \u2014 try the question below.';
+      return;
+    }
+    if (pi < qq.panels.length-1) {
+      pi++;
+      var pn=document.getElementById('pn'); qq.panels[pi].d(qq.panels[pi].p);
+      pn.innerHTML=qq.panels[pi].html;
+      pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
+      var dt=document.getElementById('dt');
+      dt.innerHTML=qq.panels.map(function(_,i){return '<div class="dot '+(i<pi?'dn':i===pi?'on':'')+'"></div>';}).join('');
+      saveProgress();
+      autoStep();
+    } else {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Checkpoint narrated.';
+    }
+  });
+}
+
+stopBtnEl.addEventListener('click', stopReading);
 
 render();
 </script>
