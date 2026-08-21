@@ -80,6 +80,9 @@ header{background:linear-gradient(120deg,var(--dark) 0%,var(--red) 45%,var(--gol
 .try{background:#fffdf5;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:14px;box-shadow:0 0 0 3px rgba(212,175,55,.08);}
 .try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dark);font-weight:700;margin-bottom:10px;}
 .try-q{font-size:15px;line-height:1.55;margin-bottom:10px;}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.15;font-size:0.92em;margin:0 2px;position:relative;top:0.1em;}
+.frac .fnum{padding:0 3px 1px;border-bottom:1.2px solid currentColor;}
+.frac .fden{padding:1px 3px 0;}
 .mc-opts{display:flex;flex-direction:column;gap:8px;}
 .mc-opt{text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:4px;padding:10px 14px;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s;}
 .mc-opt:hover:not(:disabled){border-color:var(--gold-dark);}
@@ -176,7 +179,7 @@ var ST={};
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function shuffleMC(o){var idxs=o.options.map(function(_,i){return i;});for(var i=idxs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=idxs[i];idxs[i]=idxs[j];idxs[j]=t;}var newOptions=idxs.map(function(i){return o.options[i];});return{question:o.question,options:newOptions,correct:idxs.indexOf(o.correct),working:o.working};}
-function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,genFn:genFn};return buildTryMC(id,o);}
+function tryItMC(genFn){var id='t'+Math.random().toString(36).slice(2);var o=shuffleMC(genFn());ST[id]={o:o,baseO:o,genFn:genFn};return buildTryMC(id,o);}
 function buildTryMC(id,o){
   var opts=(o.options||[]).map(function(opt,i){return '<button class="mc-opt" data-tryid="'+id+'" data-idx="'+i+'">'+opt+'</button>';}).join('');
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">&#10004; Check your understanding</div><div class="try-q">'+o.question+'</div>'
@@ -232,6 +235,17 @@ function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D'
 function L(x1,y1,x2,y2,c,w,d){c=c||'#888';w=w||1.5;return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){stroke=stroke||fill;return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"/>';}
 function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;}
+function frac(num,den){return '<span class="frac"><span class="fnum">'+num+'</span><span class="fden">'+den+'</span></span>';}
+function TW(x,y,txt,c,sz,a,bold,maxChars,lh){
+  maxChars=maxChars||36; lh=lh||(sz*1.45+2);
+  var words=String(txt).split(' '),lines=[],cur='';
+  for(var i=0;i<words.length;i++){
+    var test=cur?cur+' '+words[i]:words[i];
+    if(test.length>maxChars && cur){lines.push(cur);cur=words[i];}else{cur=test;}
+  }
+  if(cur) lines.push(cur);
+  return lines.map(function(line,i){return T(x,y+i*lh,line,c,sz,a,bold);}).join('');
+}
 function wrap(animate, cls, html){ return '<g class="'+(animate?cls:'')+'">'+html+'</g>'; }
 function drawCurve(points, color, w, animate){
   if(animate) return '<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="'+w+'" stroke-dasharray="1400" stroke-dashoffset="1400" class="an-draw"/>';
@@ -432,9 +446,9 @@ function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   s.innerHTML=o.join('');}
 
 // ── Checkpoint 8: Composite shape problems ─────────────────────────────────
-function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 320');var o=[];
   o.push(T(240,16,'Composite regions: add or subtract sector pieces','#C0272D',13,'middle',true));
-  var cx=200, cy=150, R_=90, r_=50, ang=1.3;
+  var cx=200, cy=140, R_=85, r_=48, ang=1.3;
   if(p>=1){
     o.push(wrap(p===1,'an-fade',sectorWedge(cx,cy,R_,0,ang,'#e8f4ff')));
     o.push(drawArc(cx,cy,R_,0,ang,'#1a5a8a',2.5,p===1));
@@ -448,20 +462,20 @@ function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
     o.push(drawLine(cx,cy,cx+r_,cy,'#a01820',1.5,p===2));
     o.push(drawLine(cx,cy,cx+r_*Math.cos(ang),cy+r_*Math.sin(ang),'#a01820',1.5,p===2));
     o.push(wrap(p===2,'an-fade',T(cx+r_+10,cy-r_*0.3,'radius r','#a01820',10,'start',true)));
-    o.push(wrap(p===2,'an-fade',T(240,50,'Cut out a smaller sector, SAME angle, from the middle.','#241A17',11,'middle',false)));
+    o.push(wrap(p===2,'an-fade',TW(240,44,'Cut out a smaller sector, SAME angle, from the middle.','#241A17',11,'middle',false,40)));
   }
   if(p>=3){
-    o.push(wrap(p===3,'an-fade',T(240,225,'What\u2019s left \u2014 the shaded ring-shaped region \u2014 is the difference of the two sector areas.','#241A17',11,'middle',false)));
+    o.push(wrap(p===3,'an-fade',TW(240,254,'What\u2019s left \u2014 the shaded ring-shaped region \u2014 is the difference of the two sector areas.','#241A17',11,'middle',false,44)));
   }
   if(p>=4){
-    o.push(wrap(p===4,'an-pop',R(60,220,360,32,'#e8f8ee','#1a7a3a',2)+T(240,241,'shaded area = \u00bdR\u00b2\u03b8 \u2212 \u00bdr\u00b2\u03b8 = \u00bd\u03b8(R\u00b2\u2212r\u00b2)','#1a7a3a',12.5,'middle',true)));
+    o.push(wrap(p===4,'an-pop',R(50,278,380,36,'#e8f8ee','#1a7a3a',2)+T(240,301,'shaded area = \u00bdR\u00b2\u03b8 \u2212 \u00bdr\u00b2\u03b8 = \u00bd\u03b8(R\u00b2\u2212r\u00b2)','#1a7a3a',12.5,'middle',true)));
   }
   s.innerHTML=o.join('');}
 
 // ── Checkpoint 9: Angles at the centre ─────────────────────────────────────
-function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 320');var o=[];
   o.push(T(240,16,'Two radii always form an isosceles triangle','#C0272D',13,'middle',true));
-  var cx=150, cy=170, r=95, ang=1.05; // ~60deg
+  var cx=140, cy=150, r=85, ang=1.05; // ~60deg
   if(p>=1){
     o.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#ccc" stroke-width="1.2" stroke-dasharray="3,3"/>');
     o.push(L(cx,cy,cx+r,cy,'#1a5a8a',2.5));
@@ -471,13 +485,13 @@ function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   }
   if(p>=2){
     o.push(drawLine(cx+r,cy,cx+r*Math.cos(ang),cy-r*Math.sin(ang),'#C8922A',2.5,p===2));
-    o.push(wrap(p===2,'an-fade',T(300,60,'Two of the triangle\u2019s sides are BOTH radii \u2014 automatically equal length.','#241A17',11,'middle',false)));
+    o.push(wrap(p===2,'an-fade',TW(280,246,'Two of the triangle\u2019s sides are BOTH radii \u2014 automatically equal length.','#241A17',11,'middle',false,34)));
   }
   if(p>=3){
-    o.push(wrap(p===3,'an-fade',T(300,90,'Equal sides \u2192 equal base angles: an isosceles triangle, always \u2014 whatever \u03b8 is.','#241A17',11,'middle',false)));
+    o.push(wrap(p===3,'an-fade',TW(280,246,'Equal sides \u2192 equal base angles: an isosceles triangle, always \u2014 whatever \u03b8 is.','#241A17',11,'middle',false,34)));
   }
   if(p>=4){
-    o.push(wrap(p===4,'an-pop',R(40,214,400,38,'#fff8e1','#C8922A',1.2)+T(240,230,'base angles = (\u03c0\u2212\u03b8)\u00f72 each   (angles in a triangle sum to \u03c0)','#7A5A18',12,'middle',true)+T(240,246,'\u2014 combine with the sine/cosine rule for chord-length problems','#7A5A18',9.5,'middle',false)));
+    o.push(wrap(p===4,'an-pop',R(30,272,420,44,'#fff8e1','#C8922A',1.2)+T(240,291,'base angles = (\u03c0\u2212\u03b8)\u00f72 each   (angles in a triangle sum to \u03c0)','#7A5A18',12,'middle',true)+T(240,308,'\u2014 combine with the sine/cosine rule for chord-length problems','#7A5A18',9.5,'middle',false)));
   }
   s.innerHTML=o.join('');}
 
@@ -503,11 +517,12 @@ var Q=[
        var deg=pick([30,45,60,90,120,270]);
        var num=deg, den=180; var v=gcd(num,den); num/=v; den/=v;
        var piStr = num===1 ? '\u03c0' : num+'\u03c0';
-       var frac = den===1 ? piStr : piStr+'/'+den;
+       var fracHTML = den===1 ? piStr : frac(piStr,den);
+       var fracText = den===1 ? piStr : piStr+'/'+den;
        return {question:'What is '+deg+'\u00b0 in radians?',
-         options:[frac, deg+'\u03c0/360', '2\u03c0/'+deg, deg+'\u00d7\u03c0'],
+         options:[fracHTML, frac(deg+'\u03c0',360), frac('2\u03c0',deg), deg+'\u00d7\u03c0'],
          correct:0,
-         working:deg+' \u00d7 \u03c0\u2044180 = '+frac+'.'};
+         working:deg+' \u00d7 '+frac('\u03c0',180)+' = '+fracHTML+' ('+fracText+').'};
      }),
     speak:'Pi radians equals 180 degrees, giving simple conversion factors both ways. Now it\u2019s your turn.'}
   ]},
@@ -677,9 +692,9 @@ var Q=[
      +tryItMC(function(){
        var bank=[
          {question:'A sector has perimeter 20cm and radius 6cm. Find \u03b8 in radians.',
-          options:['4/3','20/6','8/6','120'],
+          options:[frac(4,3), frac(20,6), frac(7,3), '120'],
           correct:0,
-          working:'Perimeter = 2r+r\u03b8 \u2192 20=12+6\u03b8 \u2192 \u03b8=8/6=4/3 radians.'},
+          working:'Perimeter = 2r+r\u03b8 \u2192 20=12+6\u03b8 \u2192 \u03b8='+frac(8,6)+' = '+frac(4,3)+' radians.'},
          {question:'A sector has area 15cm\u00b2 and angle 1.2 radians. Find its radius.',
           options:['5 cm','12.5 cm','25 cm','2.5 cm'],
           correct:0,
@@ -715,6 +730,14 @@ function render(){
   pp.d(pp.p);
   var pn=document.getElementById('pn');
   pn.innerHTML=pp.html;
+  // pp.html is a static string baked with each try-widget's ORIGINAL question/options.
+  // If the student had clicked "New question" on a previous visit to this panel, ST[id].o
+  // would still hold that newer random draw even though the DOM above was just reset to the
+  // original — reset it back so the visible buttons and the grading/working text always match.
+  Array.prototype.forEach.call(pn.querySelectorAll('.try[data-tryid]'),function(w){
+    var tid=w.getAttribute('data-tryid');
+    if(ST[tid]) ST[tid].o=ST[tid].baseO;
+  });
   if (qi===Q.length-1 && pi===qq.panels.length-1) {
     pn.innerHTML += '<div class="test-link-row"><a class="test-link-btn" href="test.html?topic='+(window.__testTopicId||757)+'">\ud83d\udcdd Optional: take the test on this topic</a></div>';
   }
@@ -858,6 +881,10 @@ function autoStep(){
       pi++;
       var pn=document.getElementById('pn'); qq.panels[pi].d(qq.panels[pi].p);
       pn.innerHTML=qq.panels[pi].html;
+      Array.prototype.forEach.call(pn.querySelectorAll('.try[data-tryid]'),function(w){
+        var tid=w.getAttribute('data-tryid');
+        if(ST[tid]) ST[tid].o=ST[tid].baseO;
+      });
       pn.classList.remove('fi');void pn.offsetWidth;pn.classList.add('fi');
       var dt=document.getElementById('dt');
       dt.innerHTML=qq.panels.map(function(_,i){return '<div class="dot '+(i<pi?'dn':i===pi?'on':'')+'"></div>';}).join('');
