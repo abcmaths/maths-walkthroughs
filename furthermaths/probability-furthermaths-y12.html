@@ -49,7 +49,11 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
 .hl li{margin-bottom:5px;padding-left:18px;position:relative;}
 .hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
-.ar{display:flex;gap:8px;margin-top:6px;}
+.ar{display:flex;gap:8px;margin-top:6px;align-items:center;}
+.fracbox{display:flex;flex-direction:column;align-items:center;}
+.fracbox input{width:64px;text-align:center;padding:6px 4px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;font-size:15px;}
+.fracbox input:focus{border-color:var(--gold);}
+.fracline{width:64px;height:2px;background:var(--ink);margin:4px 0;}
 .ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
 .ar input:focus{border-color:var(--gold);}
 .ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
@@ -93,11 +97,12 @@ function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
 function round2(x){return Math.round(x*100)/100;}
 function round4(x){return Math.round(x*10000)/10000;}
+function gcdV(a,b){a=Math.abs(a);b=Math.abs(b);return b===0?a:gcdV(b,a%b);}
 function fact(n){var r=1;for(var i=2;i<=n;i++)r*=i;return r;}
 function nCr(n,r){if(r<0||r>n)return 0;return fact(n)/(fact(r)*fact(n-r));}
 function tryIt(genFn){var id='t'+Math.random().toString(36).slice(2);var o=genFn();ST[id]={o:o,fn:genFn};return buildTry(id,o);}
-function buildTry(id,o){var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');var ph='Answer'+(o.unit?' ('+o.unit+')':'');return '<div class="try" data-tryid="'+id+'"><div class="try-t">✔ Your Turn <button class="nq-btn" data-tryid="'+id+'">↻ New</button></div><div class="try-q">'+o.question+'</div><ul class="hl">'+(h||'')+'</ul><div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div><div class="try-fb" data-tryid="'+id+'"></div><details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
-document.addEventListener('click',function(e){var el=e.target;if(el.classList.contains('nq-btn')){var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;var o=en.fn();en.o=o;ST[id]={o:o,fn:en.fn};var wrap=document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);wrap.parentNode.replaceChild(tmp.firstChild,wrap);return;}if(el.classList.contains('try-ck')){var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;var o=en.o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}var tol=o.tol!=null?o.tol:0.01;if(Math.abs(v-o.ans)<=tol){fb.className='try-fb ok';fb.innerHTML='✓ Correct!  '+o.working;}else{fb.className='try-fb er';fb.textContent='Not quite — check your working and try again.';}}}); 
+function buildTry(id,o){var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');var ph='Answer'+(o.unit?' ('+o.unit+')':'');var ansBox=o.frac?('<div class="ar"><div class="fracbox"><input type="number" step="any" placeholder="num" class="try-num" data-tryid="'+id+'"/><div class="fracline"></div><input type="number" step="any" placeholder="den" class="try-den" data-tryid="'+id+'"/></div><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'):('<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>');return '<div class="try" data-tryid="'+id+'"><div class="try-t">✔ Your Turn <button class="nq-btn" data-tryid="'+id+'">↻ New</button></div><div class="try-q">'+o.question+'</div><ul class="hl">'+(h||'')+'</ul>'+ansBox+'<div class="try-fb" data-tryid="'+id+'"></div><details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details></div>';}
+document.addEventListener('click',function(e){var el=e.target;if(el.classList.contains('nq-btn')){var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;var o=en.fn();en.o=o;ST[id]={o:o,fn:en.fn};var wrap=document.querySelector('.try[data-tryid="'+id+'"]');if(!wrap)return;var tmp=document.createElement('div');tmp.innerHTML=buildTry(id,o);wrap.parentNode.replaceChild(tmp.firstChild,wrap);return;}if(el.classList.contains('try-ck')){var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;var o=en.o;var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!fb)return;if(o.frac){var ni=document.querySelector('.try-num[data-tryid="'+id+'"]');var di=document.querySelector('.try-den[data-tryid="'+id+'"]');if(!ni||!di)return;var nv=parseFloat(ni.value),dv=parseFloat(di.value);if(isNaN(nv)||isNaN(dv)||dv===0){fb.className='try-fb er';fb.textContent='Enter a valid fraction (numerator and denominator).';return;}var ok=o.fracExact?(nv===o.ansN&&dv===o.ansD):(Math.abs(nv/dv-o.ansN/o.ansD)<1e-6);if(ok){fb.className='try-fb ok';fb.innerHTML='✓ Correct!  '+o.working;}else if(o.fracExact&&Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){fb.className='try-fb er';fb.textContent='That’s an equivalent fraction, but not in the required form — try again.';}else{fb.className='try-fb er';fb.textContent='Not quite — check your working and try again.';}return;}var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');if(!inp)return;var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}var tol=o.tol!=null?o.tol:0.01;if(Math.abs(v-o.ans)<=tol){fb.className='try-fb ok';fb.innerHTML='✓ Correct!  '+o.working;}else{fb.className='try-fb er';fb.textContent='Not quite — check your working and try again.';}}}); 
 function g(){return document.getElementById('dg');}
 function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Georgia,serif" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
@@ -315,9 +320,9 @@ var QS=[
     {lb:'Example: dice',dr:dQ1,ht:'<p>Roll a fair die. P(result \u2264 '+V.p1+') = '+V.p1+'/6 = '+round4(V.p1/6)+'<br>P(result > '+V.p1+') = '+(6-V.p1)+'/6 = '+round4((6-V.p1)/6)+'</p>'},
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
       var k=rnd(1,5);
-      return {question:'Roll a fair die. What is P(result \u2265 '+k+')? Enter as a fraction (e.g. enter 4 for 4/6 then simplify: enter the numerator).',
+      return {question:'Roll a fair die. What is P(result \u2265 '+k+')? Give your answer as a fraction, simplified.',
         hints:['Count outcomes: '+k+', '+(k+1)+'...6','How many values are \u2265 '+k+'?'],
-        ans:(7-k)/6,tol:0.01,unit:'',working:'P(\u2265'+k+') = '+(7-k)+'/6 = '+round4((7-k)/6)};
+        frac:true,fracExact:true,ansN:(7-k)/gcdV(7-k,6),ansD:6/gcdV(7-k,6),working:'P(\u2265'+k+') = '+(7-k)+'/6'+(gcdV(7-k,6)>1?' = '+((7-k)/gcdV(7-k,6))+'/'+(6/gcdV(7-k,6)):'')};
     })}
    ]},
 
