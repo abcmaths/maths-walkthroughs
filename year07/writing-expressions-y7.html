@@ -1,4 +1,4 @@
-<!-- REVIEW STATUS: SPLIT from year07/algebra-y7.html 22 Aug 2026 — needs fresh staff review -->
+<!-- REVIEW STATUS: NEW — built out to full 10-checkpoint depth, 22 Aug 2026, needs staff review -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +14,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Writing Algebraic Expressions · Year 7 · Maths Walkthroughs</title>
+<style>
 <style>
 
 :root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
@@ -98,6 +99,27 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
       <div class="pnl fi" id="pn"></div>
     </div>
     <div class="reader-row">
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Writing Algebraic Expressions &mdash; Year 7</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="reader-row">
       <button class="reader-btn" id="readBtn">🔊 Read this step</button>
       <button class="reader-btn" id="autoBtn">▶ Auto-play question</button>
       <button class="reader-btn" id="stopReadBtn" style="display:none">■ Stop</button>
@@ -149,7 +171,7 @@ function buildTry(id,o){
     ?'<input type="text" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     :'<input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>';
   return '<div class="try" data-tryid="'+id+'">'
-    +'<div class="try-t">\u2714 Your Turn <button class="newq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-t">✔ Your Turn <button class="newq-btn" data-tryid="'+id+'">↻ New</button></div>'
     +'<div class="try-q">'+o.question+'</div>'+ex
     +'<div class="ar">'+inputHtml
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
@@ -174,14 +196,14 @@ function ckById(id){
     if(!parsed){fb.className='try-fb fb er';fb.textContent='Enter an expression, e.g. '+(o.placeholder||'5x + 3y').replace('e.g. ','');return;}
     var ok=true;
     for(var i=0;i<o.vars.length;i++){var vv=o.vars[i];if(parsed[vv]!==o.coeffs[vv])ok=false;}
-    if(ok){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-    else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+    if(ok){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+    else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
     return;
   }
   var v=parseFloat(inp.value);
   if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
-  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-  else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+  else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
 }
 document.addEventListener('click',function(e){
   var btn=e.target;
@@ -194,26 +216,99 @@ function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text 
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#C0272D')+'" stroke-width="'+(w||2)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'#fce8d8')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'"/>';}
-function dQ1(p){
-  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  [90,210,330].forEach(function(cx){
-    o.push(R(cx-32,75,64,76,'#fff8f0','#C0272D',2));
-    o.push(T(cx,168,'bag','#888',11));
-    [[0,-14],[-13,0],[13,0],[-6,15],[6,15]].forEach(function(d){o.push(C(cx+d[0],110+d[1],7,'#ff9a6c','#C0272D',1.5));});
-  });
-  o.push(T(240,46,'n bags, 5 apples each','#888',13));
-  if(p>=1){o.push(R(130,185,220,38,'#fff5f0','#C0272D',2));o.push(T(240,209,'Total = 5 \u00d7 n = 5n','#C0272D',16,'middle',true));}
-  if(p>=2){o.push(R(50,232,380,24,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,249,'5n means 5 \u00d7 n  \u2014  we drop the \u00d7 in algebra','#1a7a3a',12));}
-  s.innerHTML=o.join('');
-}
+
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];[90,210,330].forEach(function(cx){o.push(R(cx-32,75,64,76,'#fff8f0','#C0272D',2));o.push(T(cx,168,'bag','#888',11));[[0,-14],[-13,0],[13,0],[-6,15],[6,15]].forEach(function(d){o.push(C(cx+d[0],110+d[1],7,'#ff9a6c','#C0272D',1.5));});});o.push(T(240,46,'n bags, 5 apples each','#888',13));if(p>=1){o.push(R(130,185,220,38,'#fff5f0','#C0272D',2));o.push(T(240,209,'Total = 5 \u00d7 n = 5n','#C0272D',16,'middle',true));}if(p>=2){o.push(R(50,232,380,24,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,249,'5n means 5 \u00d7 n  \u2014  we drop the \u00d7 in algebra','#1a7a3a',12));}s.innerHTML=o.join('');}
+
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expressions for \u201cmore than\u201d','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Sade is 5 years older than her brother, age x','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'\u201cOlder than\u201d means ADD','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'Sade\\u2019s age = x + 5','#1a7a3a',16,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Combining two operations','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Double a number, then add 3','#241A17',15,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Double x means 2x','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'Then add 3: 2x + 3','#1a7a3a',16,'middle',true));}if(p>=4){o.push(T(240,178,'Work through the words in order, left to right','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expressions with two variables','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'a apples at 30 naira each, b bananas at 20 naira each','#241A17',11,'middle'));}if(p>=2){o.push(R(60,76,160,34,'#fff5f0','#C0272D',1.5));o.push(T(140,98,'Apples: 30a','#C0272D',13,'middle',true));o.push(R(260,76,160,34,'#e8f4ff','#1a5a8a',1.5));o.push(T(340,98,'Bananas: 20b','#1a5a8a',13,'middle',true));}if(p>=3){o.push(R(120,120,240,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'Total cost = 30a + 20b','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expressions for area and perimeter','#C0272D',13,'middle',true));if(p>=1){o.push(R(180,70,120,60,'#fff5f0','#C0272D',2));o.push(T(240,105,'side = s','#C0272D',13,'middle',true));}if(p>=2){o.push(R(60,140,180,34,'#fff5f0','#C0272D',1.5));o.push(T(150,162,'Perimeter = 4s','#C0272D',14,'middle',true));}if(p>=3){o.push(R(260,140,180,34,'#e8f4ff','#1a5a8a',1.5));o.push(T(350,162,'Area = s\u00b2','#1a5a8a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expression from a growing pattern','#C0272D',13,'middle',true));if(p>=1){for(var i=0;i<3;i++){var x0=40+i*140;o.push(L(x0,80,x0+40,80,'#C0272D',3));o.push(L(x0+40,80,x0+40,120,'#C0272D',3));o.push(L(x0,120,x0+40,120,'#C0272D',3));if(i<2)o.push(L(x0+40,100,x0+100,100,'#888',2,'4'));}o.push(T(240,145,'Pattern: 1, 2, 3 squares use 4, 7, 10 matchsticks','#888',10,'middle',false));}if(p>=2){o.push(R(140,160,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,182,'nth pattern: 3n + 1 matchsticks','#1a7a3a',14,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expressions involving division','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'\u20a6x is shared equally among 4 friends','#241A17',15,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'\u201cShared among\u201d means DIVIDE','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'Each friend gets x/4','#1a7a3a',16,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expressions with subtraction','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A number x, reduced by 7','#241A17',16,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'\u201cReduced by\u201d means SUBTRACT','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'x \u2212 7','#1a7a3a',18,'middle',true));}if(p>=4){o.push(T(240,178,'Order matters! \u201c7 less than x\u201d is x\u22127, not 7\u2212x','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Tricky wording: \u201cmore than half of\u201d','#C0272D',12,'middle',true));if(p>=1){o.push(T(240,60,'3 more than half of x','#241A17',18,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Half of x is x/2','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'x/2 + 3','#1a7a3a',18,'middle',true));}if(p>=4){o.push(T(240,178,'Break the sentence into pieces, translate each piece','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Mixed expression-writing practice','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Step 1: identify the unknown and give it a letter','#241A17',12,'middle'));}if(p>=2){o.push(T(240,86,'Step 2: translate each part of the sentence in order','#241A17',12,'middle'));}if(p>=3){o.push(R(80,106,320,40,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,124,'Example: \u201ctriple y, then subtract 2\u201d','#1a7a3a',12,'middle'));o.push(T(240,140,'\u2192 3y \u2212 2','#1a7a3a',13,'middle'));}s.innerHTML=o.join('');}
+
 
 var QS=[
-  {ey:'Q1 \u00b7 Year 7 \u00b7 Algebra',ti:'Writing Algebraic Expressions',su:'n bags each contain 5 apples. Write an expression for the total.',steps:[
+  {ey:'Q1 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Writing Algebraic Expressions',su:'n bags each contain 5 apples. Write an expression for the total.',steps:[
     {lb:'The picture',dr:dQ1,ht:'<p>Each bag holds the <b>same</b> number of apples. The number of bags is unknown \u2014 we call it <b>n</b>.</p>',speak:'Each bag holds the same number of apples. The number of bags is unknown \u2014 we call it n.'},
     {lb:'Build the expression',dr:dQ1,ht:'<div class="fm">Total = 5 \u00d7 n = 5n</div><p>In algebra we drop the \u00d7 sign: 5n means 5 multiplied by n.</p>',speak:'Total equals 5 times n, which we write as 5n. In algebra we drop the times sign: 5n means 5 multiplied by n.'},
     {lb:'Key rules',dr:dQ1,ht:'<p>\u2022 Write the number <b>before</b> the letter: 5n not n5.<br>\u2022 1n is just n (coefficient 1 is invisible).<br>\u2022 Letters represent unknown quantities.</p>',speak:'Three key rules: write the number before the letter, 5n not n5. 1n is just written as n, since a coefficient of 1 is invisible. And letters represent unknown quantities.'},
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var c=rInt(2,9),things=rPick([['boxes','pencils'],['jars','sweets'],['packets','cards'],['bags','coins']]);return{question:'Each '+things[0]+' holds <b>'+c+'</b> '+things[1]+'. There are <b>n</b> '+things[0]+'. Write an expression for the total number of '+things[1]+'.',hints:['Total = '+c+' \u00d7 n','Write the number before the letter, with no \u00d7 sign \u2014 e.g. 5n not n5'],vars:['n'],coeffs:{n:c},placeholder:'e.g. 5n',working:c+' \u00d7 n = '+c+'n'};}),speak:'Now it\u2019s your turn \u2014 write the full expression, not just the coefficient.'},
-  ]}
+  ]},
+  {ey:'Q2 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Expressions for "More Than"',su:'Sade is 5 years older than her brother, age x.',steps:[
+    {lb:'The scenario',dr:dQ2,ht:'<p>Sade is 5 years older than her brother, whose age is x.</p>',speak:'Sade is 5 years older than her brother, whose age is x.'},
+    {lb:'What does "older than" mean?',dr:dQ2,ht:'<p>"Older than" means <b>add</b>.</p>',speak:'Older than means add.'},
+    {lb:'Build the expression',dr:dQ2,ht:'<div class="fm">Sade\u2019s age = x + 5</div>',speak:'Sade\u2019s age equals x plus 5.'},
+    {lb:'Watch the order',dr:dQ2,ht:'<p>For addition, order doesn\u2019t matter: x+5 is the same as 5+x.</p>',speak:'For addition, order doesn\u2019t matter: x plus 5 is the same as 5 plus x.'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var c=rInt(2,10);var names=rPick([['Tunde','Ngozi'],['Emeka','Aisha'],['Bola','Chike']]);return{question:names[0]+' is '+c+' years older than '+names[1]+', whose age is x. Write an expression for '+names[0]+'\u2019s age.',hints:['"Older than" means add'],vars:['x'],coeffs:{x:1},placeholder:'e.g. x + 5',working:'x + '+c};}),speak:'Now it\u2019s your turn \u2014 write an expression for the older person\u2019s age.'},
+  ]},
+  {ey:'Q3 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Combining Two Operations',su:'Double a number, then add 3.',steps:[
+    {lb:'The instruction',dr:dQ3,ht:'<p>Double a number, then add 3.</p>',speak:'Double a number, then add 3.'},
+    {lb:'Double it first',dr:dQ3,ht:'<div class="fm">Double x means 2x</div>',speak:'Doubling x means 2x.'},
+    {lb:'Then add',dr:dQ3,ht:'<div class="fm">Then add 3: 2x + 3</div>',speak:'Then add 3, giving 2x plus 3.'},
+    {lb:'The strategy',dr:dQ3,ht:'<p>Work through the words in order, left to right, building the expression piece by piece.</p>',speak:'Work through the words in order, left to right, building the expression piece by piece.'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var m=rInt(2,6),a=rInt(1,10);return{question:'Multiply a number x by '+m+', then add '+a+'. Write the expression.',hints:['Multiply x by '+m+' first','Then add '+a],vars:['x'],coeffs:{x:m},placeholder:'e.g. 2x + 3',working:m+'x + '+a};}),speak:'Now it\u2019s your turn \u2014 build this two-step expression.'},
+  ]},
+  {ey:'Q4 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Expressions with Two Variables',su:'a apples at 30 naira, b bananas at 20 naira.',steps:[
+    {lb:'The scenario',dr:dQ4,ht:'<p>a apples cost 30 naira each. b bananas cost 20 naira each.</p>',speak:'a apples cost 30 naira each. b bananas cost 20 naira each.'},
+    {lb:'Cost of each fruit',dr:dQ4,ht:'<div class="fm">Apples: 30a &nbsp;&nbsp; Bananas: 20b</div>',speak:'Apples cost 30a. Bananas cost 20b.'},
+    {lb:'Combine for the total',dr:dQ4,ht:'<div class="fm">Total cost = 30a + 20b</div>',speak:'Total cost equals 30a plus 20b.'},
+    {lb:'Two unknowns is fine',dr:dQ4,ht:'<p>An expression can involve more than one letter \u2014 just build each part separately, then add.</p>',speak:'An expression can involve more than one letter \u2014 just build each part separately, then add.'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var p1=rInt(2,9)*10,p2=rInt(2,9)*10;var items=rPick([['pens','x','books','y'],['cups','a','plates','b'],['shirts','p','shorts','q']]);return{question:items[0]+' cost \u20a6'+p1+' each ('+items[1]+' of them), and '+items[2]+' cost \u20a6'+p2+' each ('+items[3]+' of them). Write an expression for the total cost.',hints:['Cost of '+items[0]+': '+p1+items[1],'Cost of '+items[2]+': '+p2+items[3]],vars:[items[1],items[3]],coeffs:(function(){var c={};c[items[1]]=p1;c[items[3]]=p2;return c;})(),placeholder:'e.g. 30'+items[1]+' + 20'+items[3],working:p1+items[1]+' + '+p2+items[3]};}),speak:'Now it\u2019s your turn \u2014 write an expression using both unknowns.'},
+  ]},
+  {ey:'Q5 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Area and Perimeter Expressions',su:'Write expressions for the perimeter and area of a square with side s.',steps:[
+    {lb:'The square',dr:dQ5,ht:'<p>A square has side length s.</p>',speak:'A square has side length s.'},
+    {lb:'Perimeter',dr:dQ5,ht:'<div class="fm">Perimeter = 4s</div><p>Four equal sides added together.</p>',speak:'Perimeter equals 4s \u2014 four equal sides added together.'},
+    {lb:'Area',dr:dQ5,ht:'<div class="fm">Area = s\u00b2</div><p>Side multiplied by itself.</p>',speak:'Area equals s squared \u2014 side multiplied by itself.'},
+    {lb:'Two different expressions',dr:dQ5,ht:'<p>Perimeter and area of the SAME shape use different expressions \u2014 don\u2019t mix them up.</p>',speak:'Perimeter and area of the same shape use different expressions \u2014 don\u2019t mix them up.'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var letter=rPick(['s','x','a']);return{question:'A square has side length '+letter+'. Write an expression for its PERIMETER.',hints:['Perimeter = 4 \u00d7 side'],vars:[letter],coeffs:(function(){var c={};c[letter]=4;return c;})(),placeholder:'e.g. 4'+letter,working:'4'+letter};}),speak:'Now it\u2019s your turn \u2014 write the perimeter expression.'},
+  ]},
+  {ey:'Q6 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Expression from a Growing Pattern',su:'Matchstick squares: 1,2,3 squares use 4,7,10 matchsticks.',steps:[
+    {lb:'Spot the pattern',dr:dQ6,ht:'<p>1 square uses 4 matchsticks. 2 squares use 7. 3 squares use 10 \u2014 each new square adds 3 more.</p>',speak:'1 square uses 4 matchsticks. 2 squares use 7. 3 squares use 10 \u2014 each new square adds 3 more.'},
+    {lb:'Find the pattern rule',dr:dQ6,ht:'<p>The common difference is 3, so the expression involves 3n.</p>',speak:'The common difference is 3, so the expression involves 3 times n.'},
+    {lb:'Adjust to match',dr:dQ6,ht:'<div class="fm">nth pattern: 3n + 1 matchsticks</div>',speak:'The nth pattern uses 3n plus 1 matchsticks.'},
+    {lb:'Check it',dr:dQ6,ht:'<p>For n=1: 3(1)+1=4 \u2713. For n=2: 3(2)+1=7 \u2713.</p>',speak:'Check: for n equals 1, 3 times 1 plus 1 equals 4, correct. For n equals 2, 3 times 2 plus 1 equals 7, correct.'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var start=rInt(3,6),diff=rInt(2,4);return{question:'A pattern starts at '+start+' and increases by '+diff+' each time (term 1 = '+start+', term 2 = '+(start+diff)+', term 3 = '+(start+2*diff)+'...). Write an expression for the nth term.',hints:['Coefficient of n is the common difference: '+diff,'Adjust the constant so n=1 gives '+start],vars:['n'],coeffs:{n:diff},placeholder:'e.g. 3n + 1',working:diff+'n + '+(start-diff)};}),speak:'Now it\u2019s your turn \u2014 find the nth term expression for this pattern.'},
+  ]},
+  {ey:'Q7 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Expressions Involving Division',su:'\u20a6x is shared equally among 4 friends.',steps:[
+    {lb:'The scenario',dr:dQ7,ht:'<p>\u20a6x is shared equally among 4 friends.</p>',speak:'x naira is shared equally among 4 friends.'},
+    {lb:'What does "shared among" mean?',dr:dQ7,ht:'<p>"Shared among" means <b>divide</b>.</p>',speak:'Shared among means divide.'},
+    {lb:'Build the expression',dr:dQ7,ht:'<div class="fm">Each friend gets x/4</div>',speak:'Each friend gets x over 4.'},
+    {lb:'A common phrase',dr:dQ7,ht:'<p>Watch for phrases like "split between", "divided into", "shared equally" \u2014 they all mean division.</p>',speak:'Watch for phrases like split between, divided into, or shared equally \u2014 they all mean division.'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var n=rInt(2,8);var letter=rPick(['x','p','m']);return{question:'\u20a6'+letter+' is shared equally among '+n+' friends. Each friend gets '+letter+' divided by '+n+'. What decimal number is '+letter+' being multiplied by (i.e. what is 1\u00f7'+n+')?',hints:['"Shared among" means divide','1 \u00f7 '+n],ans:1/n,tol:0.01,unit:'',working:'Each friend gets '+letter+'/'+n};}),speak:'Now it\u2019s your turn \u2014 think about what fraction each friend receives, and enter it as a decimal.'},
+  ]},
+  {ey:'Q8 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Expressions with Subtraction',su:'A number x, reduced by 7.',steps:[
+    {lb:'The instruction',dr:dQ8,ht:'<p>A number x, reduced by 7.</p>',speak:'A number x, reduced by 7.'},
+    {lb:'What does "reduced by" mean?',dr:dQ8,ht:'<p>"Reduced by" means <b>subtract</b>.</p>',speak:'Reduced by means subtract.'},
+    {lb:'Build the expression',dr:dQ8,ht:'<div class="fm">x \u2212 7</div>',speak:'x minus 7.'},
+    {lb:'Order matters here!',dr:dQ8,ht:'<p>Unlike addition, subtraction order matters: "7 less than x" is x\u22127, NOT 7\u2212x.</p>',speak:'Unlike addition, subtraction order matters. 7 less than x is x minus 7, not 7 minus x.'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var c=rInt(2,15);var letter=rPick(['x','y','n']);return{question:'A number '+letter+', reduced by '+c+'. Write the expression.',hints:['"Reduced by" means subtract','The unknown comes FIRST'],vars:[letter],coeffs:(function(){var o={};o[letter]=1;return o;})(),placeholder:'e.g. '+letter+' \u2212 7',working:letter+' \u2212 '+c};}),speak:'Now it\u2019s your turn \u2014 write this subtraction expression, being careful about order.'},
+  ]},
+  {ey:'Q9 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Tricky Wording',su:'3 more than half of x.',steps:[
+    {lb:'A trickier sentence',dr:dQ9,ht:'<p>3 more than half of x \u2014 this has two parts to translate.</p>',speak:'3 more than half of x \u2014 this has two parts to translate.'},
+    {lb:'Translate "half of x" first',dr:dQ9,ht:'<div class="fm">Half of x is x/2</div>',speak:'Half of x is x over 2.'},
+    {lb:'Add the "3 more"',dr:dQ9,ht:'<div class="fm">x/2 + 3</div>',speak:'x over 2, plus 3.'},
+    {lb:'Break it into pieces',dr:dQ9,ht:'<p>Break the sentence into smaller pieces, translate each piece, then combine.</p>',speak:'Break the sentence into smaller pieces, translate each piece, then combine.'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var c=rInt(1,10);var letter=rPick(['x','y']);return{question:c+' more than half of '+letter+'. What is the COEFFICIENT of '+letter+' in this expression? (as a decimal)',hints:['Half of '+letter+' is 0.5×'+letter],ans:0.5,tol:0.01,unit:'',working:'The expression is 0.5'+letter+' + '+c+', so the coefficient of '+letter+' is 0.5'};}),speak:'Now it\u2019s your turn \u2014 what is the coefficient of the variable in this expression?'},
+  ]},
+  {ey:'Q10 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Mixed Practice',su:'Combine everything you\u2019ve learned about writing expressions.',steps:[
+    {lb:'Step 1: name the unknown',dr:dQ10,ht:'<p>Identify the unknown quantity and give it a letter.</p>',speak:'Step 1: identify the unknown quantity and give it a letter.'},
+    {lb:'Step 2: translate piece by piece',dr:dQ10,ht:'<p>Translate each part of the sentence in order, left to right.</p>',speak:'Step 2: translate each part of the sentence in order, left to right.'},
+    {lb:'Worked example',dr:dQ10,ht:'<div class="fm">"triple y, then subtract 2" \u2192 3y \u2212 2</div>',speak:'For example: triple y, then subtract 2, translates to 3y minus 2.'},
+    {lb:'Double-check with a number',dr:dQ10,ht:'<p>Try substituting a small number to check your expression makes sense.</p>',speak:'Try substituting a small number to check your expression makes sense.'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var m=rInt(2,5),a=rInt(1,9);var letter=rPick(['x','y','n']);return{question:'Multiply '+letter+' by '+m+', then subtract '+a+'. Write the expression.',hints:['Multiply first, then subtract'],vars:[letter],coeffs:(function(){var o={};o[letter]=m;return o;})(),placeholder:'e.g. 2x \u2212 3',working:m+letter+' \u2212 '+a};}),speak:'Now it\u2019s your turn \u2014 one final mixed expression to write.'},
+  ]},
+
 ];
 
 var qi=0,si=0;
