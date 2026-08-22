@@ -143,16 +143,22 @@ function parseLinearExpr(str,vars){
   str=str.replace(/\s+/g,'').toLowerCase();
   if(str==='')return null;
   var coeffs={};vars.forEach(function(v){coeffs[v]=0;});
-  var re=/([+-]?\d*)([a-z])/g;var m;var matchedAny=false;var idx=0;
+  var constant=0;
+  var re=/([+-]?\d*)([a-z])|([+-]?\d+)(?![a-z])/g;var m;var matchedAny=false;var idx=0;
   while((m=re.exec(str))){
     if(m.index!==idx)return null;
     idx=re.lastIndex;matchedAny=true;
-    var c=m[1],v=m[2];
-    if(vars.indexOf(v)===-1)return null;
-    if(c===''||c==='+')c='1';else if(c==='-')c='-1';
-    coeffs[v]+=parseInt(c,10);
+    if(m[2]){
+      var c=m[1],v=m[2];
+      if(vars.indexOf(v)===-1)return null;
+      if(c===''||c==='+')c='1';else if(c==='-')c='-1';
+      coeffs[v]+=parseInt(c,10);
+    } else if(m[3]!==undefined){
+      constant+=parseInt(m[3],10);
+    }
   }
   if(!matchedAny||idx!==str.length)return null;
+  coeffs._const=constant;
   return coeffs;
 }
 function tryIt(genFn){
@@ -196,6 +202,8 @@ function ckById(id){
     if(!parsed){fb.className='try-fb fb er';fb.textContent='Enter an expression, e.g. '+(o.placeholder||'5x + 3y').replace('e.g. ','');return;}
     var ok=true;
     for(var i=0;i<o.vars.length;i++){var vv=o.vars[i];if(parsed[vv]!==o.coeffs[vv])ok=false;}
+    var expectedConst=(o.constant!=null)?o.constant:0;
+    if(parsed._const!==expectedConst)ok=false;
     if(ok){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
     else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
     return;
@@ -250,14 +258,14 @@ var QS=[
     {lb:'What does "older than" mean?',dr:dQ2,ht:'<p>"Older than" means <b>add</b>.</p>',speak:'Older than means add.'},
     {lb:'Build the expression',dr:dQ2,ht:'<div class="fm">Sade\u2019s age = x + 5</div>',speak:'Sade\u2019s age equals x plus 5.'},
     {lb:'Watch the order',dr:dQ2,ht:'<p>For addition, order doesn\u2019t matter: x+5 is the same as 5+x.</p>',speak:'For addition, order doesn\u2019t matter: x plus 5 is the same as 5 plus x.'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var c=rInt(2,10);var names=rPick([['Tunde','Ngozi'],['Emeka','Aisha'],['Bola','Chike']]);return{question:names[0]+' is '+c+' years older than '+names[1]+', whose age is x. Write an expression for '+names[0]+'\u2019s age.',hints:['"Older than" means add'],vars:['x'],coeffs:{x:1},placeholder:'e.g. x + 5',working:'x + '+c};}),speak:'Now it\u2019s your turn \u2014 write an expression for the older person\u2019s age.'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var c=rInt(2,10);var names=rPick([['Tunde','Ngozi'],['Emeka','Aisha'],['Bola','Chike']]);return{question:names[0]+' is '+c+' years older than '+names[1]+', whose age is x. Write an expression for '+names[0]+'\u2019s age.',hints:['"Older than" means add'],vars:['x'],coeffs:{x:1},constant:c,placeholder:'e.g. x + 5',working:'x + '+c};}),speak:'Now it\u2019s your turn \u2014 write an expression for the older person\u2019s age.'},
   ]},
   {ey:'Q3 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Combining Two Operations',su:'Double a number, then add 3.',steps:[
     {lb:'The instruction',dr:dQ3,ht:'<p>Double a number, then add 3.</p>',speak:'Double a number, then add 3.'},
     {lb:'Double it first',dr:dQ3,ht:'<div class="fm">Double x means 2x</div>',speak:'Doubling x means 2x.'},
     {lb:'Then add',dr:dQ3,ht:'<div class="fm">Then add 3: 2x + 3</div>',speak:'Then add 3, giving 2x plus 3.'},
     {lb:'The strategy',dr:dQ3,ht:'<p>Work through the words in order, left to right, building the expression piece by piece.</p>',speak:'Work through the words in order, left to right, building the expression piece by piece.'},
-    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var m=rInt(2,6),a=rInt(1,10);return{question:'Multiply a number x by '+m+', then add '+a+'. Write the expression.',hints:['Multiply x by '+m+' first','Then add '+a],vars:['x'],coeffs:{x:m},placeholder:'e.g. 2x + 3',working:m+'x + '+a};}),speak:'Now it\u2019s your turn \u2014 build this two-step expression.'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var m=rInt(2,6),a=rInt(1,10);return{question:'Multiply a number x by '+m+', then add '+a+'. Write the expression.',hints:['Multiply x by '+m+' first','Then add '+a],vars:['x'],coeffs:{x:m},constant:a,placeholder:'e.g. 2x + 3',working:m+'x + '+a};}),speak:'Now it\u2019s your turn \u2014 build this two-step expression.'},
   ]},
   {ey:'Q4 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Expressions with Two Variables',su:'a apples at 30 naira, b bananas at 20 naira.',steps:[
     {lb:'The scenario',dr:dQ4,ht:'<p>a apples cost 30 naira each. b bananas cost 20 naira each.</p>',speak:'a apples cost 30 naira each. b bananas cost 20 naira each.'},
@@ -278,7 +286,7 @@ var QS=[
     {lb:'Find the pattern rule',dr:dQ6,ht:'<p>The common difference is 3, so the expression involves 3n.</p>',speak:'The common difference is 3, so the expression involves 3 times n.'},
     {lb:'Adjust to match',dr:dQ6,ht:'<div class="fm">nth pattern: 3n + 1 matchsticks</div>',speak:'The nth pattern uses 3n plus 1 matchsticks.'},
     {lb:'Check it',dr:dQ6,ht:'<p>For n=1: 3(1)+1=4 \u2713. For n=2: 3(2)+1=7 \u2713.</p>',speak:'Check: for n equals 1, 3 times 1 plus 1 equals 4, correct. For n equals 2, 3 times 2 plus 1 equals 7, correct.'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var start=rInt(3,6),diff=rInt(2,4);return{question:'A pattern starts at '+start+' and increases by '+diff+' each time (term 1 = '+start+', term 2 = '+(start+diff)+', term 3 = '+(start+2*diff)+'...). Write an expression for the nth term.',hints:['Coefficient of n is the common difference: '+diff,'Adjust the constant so n=1 gives '+start],vars:['n'],coeffs:{n:diff},placeholder:'e.g. 3n + 1',working:diff+'n + '+(start-diff)};}),speak:'Now it\u2019s your turn \u2014 find the nth term expression for this pattern.'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var start=rInt(3,6),diff=rInt(2,4);return{question:'A pattern starts at '+start+' and increases by '+diff+' each time (term 1 = '+start+', term 2 = '+(start+diff)+', term 3 = '+(start+2*diff)+'...). Write an expression for the nth term.',hints:['Coefficient of n is the common difference: '+diff,'Adjust the constant so n=1 gives '+start],vars:['n'],coeffs:{n:diff},constant:(start-diff),placeholder:'e.g. 3n + 1',working:diff+'n + '+(start-diff)};}),speak:'Now it\u2019s your turn \u2014 find the nth term expression for this pattern.'},
   ]},
   {ey:'Q7 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Expressions Involving Division',su:'\u20a6x is shared equally among 4 friends.',steps:[
     {lb:'The scenario',dr:dQ7,ht:'<p>\u20a6x is shared equally among 4 friends.</p>',speak:'x naira is shared equally among 4 friends.'},
@@ -292,7 +300,7 @@ var QS=[
     {lb:'What does "reduced by" mean?',dr:dQ8,ht:'<p>"Reduced by" means <b>subtract</b>.</p>',speak:'Reduced by means subtract.'},
     {lb:'Build the expression',dr:dQ8,ht:'<div class="fm">x \u2212 7</div>',speak:'x minus 7.'},
     {lb:'Order matters here!',dr:dQ8,ht:'<p>Unlike addition, subtraction order matters: "7 less than x" is x\u22127, NOT 7\u2212x.</p>',speak:'Unlike addition, subtraction order matters. 7 less than x is x minus 7, not 7 minus x.'},
-    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var c=rInt(2,15);var letter=rPick(['x','y','n']);return{question:'A number '+letter+', reduced by '+c+'. Write the expression.',hints:['"Reduced by" means subtract','The unknown comes FIRST'],vars:[letter],coeffs:(function(){var o={};o[letter]=1;return o;})(),placeholder:'e.g. '+letter+' \u2212 7',working:letter+' \u2212 '+c};}),speak:'Now it\u2019s your turn \u2014 write this subtraction expression, being careful about order.'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var c=rInt(2,15);var letter=rPick(['x','y','n']);return{question:'A number '+letter+', reduced by '+c+'. Write the expression.',hints:['"Reduced by" means subtract','The unknown comes FIRST'],vars:[letter],coeffs:(function(){var o={};o[letter]=1;return o;})(),constant:-c,placeholder:'e.g. '+letter+' \u2212 7',working:letter+' \u2212 '+c};}),speak:'Now it\u2019s your turn \u2014 write this subtraction expression, being careful about order.'},
   ]},
   {ey:'Q9 \u00b7 Year 7 \u00b7 Writing Algebraic Expressions',ti:'Tricky Wording',su:'3 more than half of x.',steps:[
     {lb:'A trickier sentence',dr:dQ9,ht:'<p>3 more than half of x \u2014 this has two parts to translate.</p>',speak:'3 more than half of x \u2014 this has two parts to translate.'},
@@ -306,7 +314,7 @@ var QS=[
     {lb:'Step 2: translate piece by piece',dr:dQ10,ht:'<p>Translate each part of the sentence in order, left to right.</p>',speak:'Step 2: translate each part of the sentence in order, left to right.'},
     {lb:'Worked example',dr:dQ10,ht:'<div class="fm">"triple y, then subtract 2" \u2192 3y \u2212 2</div>',speak:'For example: triple y, then subtract 2, translates to 3y minus 2.'},
     {lb:'Double-check with a number',dr:dQ10,ht:'<p>Try substituting a small number to check your expression makes sense.</p>',speak:'Try substituting a small number to check your expression makes sense.'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var m=rInt(2,5),a=rInt(1,9);var letter=rPick(['x','y','n']);return{question:'Multiply '+letter+' by '+m+', then subtract '+a+'. Write the expression.',hints:['Multiply first, then subtract'],vars:[letter],coeffs:(function(){var o={};o[letter]=m;return o;})(),placeholder:'e.g. 2x \u2212 3',working:m+letter+' \u2212 '+a};}),speak:'Now it\u2019s your turn \u2014 one final mixed expression to write.'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var m=rInt(2,5),a=rInt(1,9);var letter=rPick(['x','y','n']);return{question:'Multiply '+letter+' by '+m+', then subtract '+a+'. Write the expression.',hints:['Multiply first, then subtract'],vars:[letter],coeffs:(function(){var o={};o[letter]=m;return o;})(),constant:-a,placeholder:'e.g. 2x \u2212 3',working:m+letter+' \u2212 '+a};}),speak:'Now it\u2019s your turn \u2014 one final mixed expression to write.'},
   ]},
 
 ];
