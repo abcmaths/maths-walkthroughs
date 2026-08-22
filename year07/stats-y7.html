@@ -54,7 +54,11 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
 .hl li{margin-bottom:5px;padding-left:18px;position:relative;}
 .hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
-.ar{display:flex;gap:8px;margin-top:6px;}
+.ar{display:flex;gap:8px;margin-top:6px;align-items:center;}
+.fracbox{display:flex;flex-direction:column;align-items:center;}
+.fracbox input{width:64px;text-align:center;padding:6px 4px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;font-size:15px;}
+.fracbox input:focus{border-color:var(--gold);}
+.fracline{width:64px;height:2px;background:var(--ink);margin:4px 0;}
 .ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
 .ar input:focus{border-color:var(--gold);}
 .ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
@@ -129,14 +133,15 @@ function buildTry(id,o){
   var wk=(h?'<ul class=\"hl\">'+h+'</ul>':'')+'<div class=\"wk-b\">'+o.working+'</div>';
   var ex=o.extraHTML||'';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  var ansBox=o.frac
+    ? '<div class="ar"><div class="fracbox"><input type="number" step="any" placeholder="num" class="try-num" data-tryid="'+id+'"/><div class="fracline"></div><input type="number" step="any" placeholder="den" class="try-den" data-tryid="'+id+'"/></div><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    : '<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>';
   return '<div class="try" data-tryid="'+id+'">'
     +'<div class="try-t">✔ Your Turn'
     +' <button class="newq-btn" data-tryid="'+id+'">↻ New</button></div>'
     +'<div class="try-q">'+o.question+'</div>'
     +ex
-    +'<div class="ar">'
-    +'<input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
-    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +ansBox
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
     +'<details class="wk"><summary>Show working</summary>'
     +'<div class="wk-b">'+o.working+'</div></details>'
@@ -157,9 +162,26 @@ function newQ(id){
 function ckById(id){
   var e=ST[id]; if(!e)return;
   var o=e.o;
-  var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
   var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
-  if(!inp||!fb)return;
+  if(!fb)return;
+  if(o.frac){
+    var ni=document.querySelector('.try-num[data-tryid="'+id+'"]');
+    var di=document.querySelector('.try-den[data-tryid="'+id+'"]');
+    if(!ni||!di)return;
+    var nv=parseFloat(ni.value),dv=parseFloat(di.value);
+    if(isNaN(nv)||isNaN(dv)||dv===0){fb.className='try-fb fb er';fb.textContent='Enter a valid fraction (numerator and denominator).';return;}
+    var ok=o.fracExact?(nv===o.ansN&&dv===o.ansD):(Math.abs(nv/dv-o.ansN/o.ansD)<1e-6);
+    if(ok){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else if(o.fracExact&&Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){
+      fb.className='try-fb fb er';fb.textContent='That\u2019s an equivalent fraction, but not fully simplified \u2014 try again.';
+    }else{
+      fb.className='try-fb fb er';fb.textContent='Not quite — try again.';
+    }
+    return;
+  }
+  var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+  if(!inp)return;
   var v=parseFloat(inp.value);
   if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
   if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
@@ -653,15 +675,14 @@ var QS=[
   var colour = pick(['red','blue','green']);
   var ans = colour === 'red' ? red : colour === 'blue' ? blue : green;
   return {
-    question: 'A bag has ' + red + ' red, ' + blue + ' blue, ' + green + ' green counters. What is the probability of picking a ' + colour + ' counter? Enter as a fraction \u2014 give the numerator.',
+    question: 'A bag has ' + red + ' red, ' + blue + ' blue, ' + green + ' green counters. What is the probability of picking a ' + colour + ' counter? Give your answer as a fraction.',
     hints: [
-      'Total = ' + red + '+' + blue + '+' + green + ' = ' + total,
-      'P(' + colour + ') = ' + ans + '/' + total
+      'Total = ' + red + '+' + blue + '+' + green + ' = ' + total
     ],
-    ans: ans,
-    tol: 0,
-    unit: 'out of ' + total,
-    working: 'P(' + colour + ') = ' + ans + '/' + total + '. Numerator = ' + ans + '.'
+    frac: true,
+    ansN: ans,
+    ansD: total,
+    working: 'P(' + colour + ') = ' + ans + '/' + total
   };
 })}
   ]},
