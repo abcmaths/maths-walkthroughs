@@ -53,7 +53,11 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
 .hl li{margin-bottom:5px;padding-left:18px;position:relative;}
 .hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
-.ar{display:flex;gap:8px;margin-top:6px;}
+.ar{display:flex;gap:8px;margin-top:6px;align-items:center;}
+.fracbox{display:flex;flex-direction:column;align-items:center;}
+.fracbox input{width:64px;text-align:center;padding:6px 4px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;font-size:15px;}
+.fracbox input:focus{border-color:var(--gold);}
+.fracline{width:64px;height:2px;background:var(--ink);margin:4px 0;}
 .ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
 .ar input:focus{border-color:var(--gold);}
 .ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
@@ -104,12 +108,14 @@ function tryIt(genOrObj){
 function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  var ansBox=o.frac
+    ? '<div class="ar"><div class="fracbox"><input type="number" step="any" placeholder="num" class="try-num" data-tryid="'+id+'"/><div class="fracline"></div><input type="number" step="any" placeholder="den" class="try-den" data-tryid="'+id+'"/></div><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    : '<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>';
   return '<div class="try" data-tryid="'+id+'">'
     +'<div class="try-t">\u2714 Your Turn <button class="nq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
     +'<div class="try-q">'+o.question+'</div>'
     +'<ul class="hl">'+(h||'')+'</ul>'
-    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
-    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +ansBox
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
     +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
     +'</div>';
@@ -126,9 +132,20 @@ document.addEventListener('click',function(e){
   if(el.classList.contains('try-ck')){
     var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;
     var o=en.o;
-    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
     var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
-    if(!inp||!fb)return;
+    if(!fb)return;
+    if(o.frac){
+      var ni=document.querySelector('.try-num[data-tryid="'+id+'"]');
+      var di=document.querySelector('.try-den[data-tryid="'+id+'"]');
+      if(!ni||!di)return;
+      var nv=parseFloat(ni.value),dv=parseFloat(di.value);
+      if(isNaN(nv)||isNaN(dv)||dv===0){fb.className='try-fb er';fb.textContent='Enter a valid fraction (numerator and denominator).';return;}
+      if(Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;}
+      else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
+      return;
+    }
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    if(!inp)return;
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
     var tol=o.tol!=null?o.tol:0.5;
@@ -264,7 +281,7 @@ var QS=[
     {lb:'The tree diagram',dr:dQ2,ht:'<p>Each branch shows an outcome. The probability along each branch is written on the branch. Multiply along branches, add outcomes.</p>'},
     {lb:'All outcomes',dr:dQ2,ht:'<div class="fm">HH: 0\u00b725  HT: 0\u00b725  TH: 0\u00b725  TT: 0\u00b725</div>'},
     {lb:'At least one Head',dr:dQ2,ht:'<div class="fm">P(at least 1H) = 1 \u2212 P(TT) = 1 \u2212 0\u00b725 = 0\u00b775</div>'},
-    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var r=rnd(1,5),total=rnd(r+2,10);var dec=Math.round((r*r)/(total*total)*100)/100;return{question:'Bag has '+r+' red from '+total+' total. Two drawn <b>with replacement</b>. Find P(both red) as a decimal (2 d.p.).',hints:['P(1st red) = '+r+'/'+total,'P(2nd red) = '+r+'/'+total+' (replaced)','P(both) = '+r+'/'+total+' \u00d7 '+r+'/'+total+' = '+(r*r)+'/'+(total*total)],ans:dec,tol:0.01,unit:'',working:'('+r+'/'+total+')\u00b2 = '+(r*r)+'/'+(total*total)+' = '+dec};})}
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var r=rnd(1,5),total=rnd(r+2,10);return{question:'Bag has '+r+' red from '+total+' total. Two drawn <b>with replacement</b>. Find P(both red) as a fraction.',hints:['P(1st red) = '+r+'/'+total,'P(2nd red) = '+r+'/'+total+' (replaced)','P(both) = '+r+'/'+total+' \u00d7 '+r+'/'+total],frac:true,ansN:r*r,ansD:total*total,working:'('+r+'/'+total+')\u00b2 = '+(r*r)+'/'+(total*total)};})}
   ]},
   {ey:'Q3 \u00b7 Year 9 \u00b7 Probability',ti:'Independent Events',su:'P(A)=0\u00b74, P(B)=0\u00b73 (independent). Find P(A and B).',steps:[
     {lb:'Multiplication rule',dr:dQ3,ht:'<div class="fm">P(A and B) = P(A) \u00d7 P(B)</div><p>Only applies when A and B are <b>independent</b> (one does not affect the other).</p>'},
@@ -276,7 +293,7 @@ var QS=[
     {lb:'Dependent events',dr:dQ4,ht:'<p>Without replacement: after the 1st draw, the total changes. The probability of the 2nd event <b>depends</b> on the 1st.</p>'},
     {lb:'P(1st red)',dr:dQ4,ht:'<div class="fm">P(1st red) = 3/5</div>'},
     {lb:'P(2nd red | 1st red)',dr:dQ4,ht:'<div class="fm">2 red remain from 4 total: P = 2/4 = 1/2</div><div class="fm">P(both red) = 3/5 \u00d7 1/2 = 3/10</div>'},
-    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var r=rnd(3,6),total=rnd(r+2,10);var dec=Math.round((r*(r-1))/(total*(total-1))*100)/100;return{question:'Bag: <b>'+r+' red</b> from <b>'+total+' total</b>. Two drawn without replacement. Find P(both red) as a decimal (2 d.p.).',hints:['P(1st) = '+r+'/'+total,'P(2nd) = '+(r-1)+'/'+(total-1),'Multiply: '+(r*(r-1))+'/'+(total*(total-1))],ans:dec,tol:0.01,unit:'',working:r+'\u00d7'+(r-1)+' / ('+total+'\u00d7'+(total-1)+') = '+(r*(r-1))+'/'+(total*(total-1))+' = '+dec};})}
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var r=rnd(3,6),total=rnd(r+2,10);return{question:'Bag: <b>'+r+' red</b> from <b>'+total+' total</b>. Two drawn without replacement. Find P(both red) as a fraction.',hints:['P(1st) = '+r+'/'+total,'P(2nd) = '+(r-1)+'/'+(total-1),'Multiply: '+r+'\u00d7'+(r-1)+' over '+total+'\u00d7'+(total-1)],frac:true,ansN:r*(r-1),ansD:total*(total-1),working:r+'\u00d7'+(r-1)+' / ('+total+'\u00d7'+(total-1)+') = '+(r*(r-1))+'/'+(total*(total-1))};})}
   ]},
   {ey:'Q5 \u00b7 Year 9 \u00b7 Probability',ti:'Combined Sample Space Diagrams',su:'Use a grid to find P(sum of two dice = 8).',steps:[
     {lb:'Set up the grid',dr:dQ5,ht:'<p>List one die\'s outcomes across the top, the other\'s down the side, and fill in every combined result.</p>'},
@@ -306,7 +323,7 @@ var QS=[
     {lb:'The shortcut',dr:dQ9,ht:'<p>"At least one" is the opposite of "none at all" \u2014 use the complement rule.</p>'},
     {lb:'Find P(none)',dr:dQ9,ht:'<div class="fm">P(no Heads in 3 flips) = P(TTT) = (1/2)\u00b3 = 1/8</div>'},
     {lb:'Subtract from 1',dr:dQ9,ht:'<div class="fm">P(at least 1 Head) = 1 \u2212 1/8 = 7/8</div>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var flips=rnd(2,5);var denom=Math.pow(2,flips);var dec=Math.round((denom-1)/denom*100)/100;return{question:'A fair coin is flipped '+flips+' times. Find P(at least one Head) as a decimal (2 d.p.).',hints:['P(none) = 1/'+denom,'P(at least 1) = 1 \u2212 P(none)'],ans:dec,tol:0.01,unit:'',working:'1 \u2212 1/'+denom+' = '+(denom-1)+'/'+denom+' = '+dec};})}
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var flips=rnd(2,5);var denom=Math.pow(2,flips);return{question:'A fair coin is flipped '+flips+' times. Find P(at least one Head) as a fraction.',hints:['P(none) = 1/'+denom,'P(at least 1) = 1 \u2212 P(none)'],frac:true,ansN:denom-1,ansD:denom,working:'1 \u2212 1/'+denom+' = '+(denom-1)+'/'+denom};})}
   ]},
   {ey:'Q10 \u00b7 Year 9 \u00b7 Probability',ti:'Mixed Probability Problems',su:'Combine ideas from tree diagrams, Venn diagrams and expected frequency.',steps:[
     {lb:'Step 1: classify the events',dr:dQ10,ht:'<p>Decide: are the events independent, mutually exclusive, or dependent (without replacement)?</p>'},

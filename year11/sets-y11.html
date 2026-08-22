@@ -91,9 +91,11 @@ function bT(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  var ansBox=o.frac
+    ? '<div class="ar"><div class="fracbox"><input type="number" step="any" placeholder="num" class="try-num" data-tryid="'+id+'"/><div class="fracline"></div><input type="number" step="any" placeholder="den" class="try-den" data-tryid="'+id+'"/></div><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    : '<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>';
   return '<div class="try" data-tryid="'+id+'"><div class="try-t">✔ Your Turn</div><div class="try-q">'+o.question+'</div>'
-    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
-    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +ansBox
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
     +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
     +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div></div>';
@@ -101,7 +103,21 @@ function bT(id,o){
 document.addEventListener('click',function(e){
   var el=e.target;
   if(el.classList.contains('try-new')){var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.genFn();entry.o=o;var wrap=el.closest('.try');if(!wrap)return;var tmp=document.createElement('div');tmp.innerHTML=bT(id,o);wrap.parentNode.replaceChild(tmp.firstChild,wrap);ST[id]={o:o,genFn:entry.genFn};return;}
-  if(el.classList.contains('try-ck')){var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');if(!inp||!fb)return;var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}var tol=o.tol!=null?o.tol:0.5;if(Math.abs(v-o.ans)<=tol){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! &nbsp;'+o.working;}else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}  }
+  if(el.classList.contains('try-ck')){
+    var id=el.getAttribute('data-tryid');var entry=ST[id];if(!entry)return;var o=entry.o;
+    var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    if(!fb)return;
+    if(o.frac){
+      var ni=document.querySelector('.try-num[data-tryid="'+id+'"]');
+      var di=document.querySelector('.try-den[data-tryid="'+id+'"]');
+      if(!ni||!di)return;
+      var nv=parseFloat(ni.value),dv=parseFloat(di.value);
+      if(isNaN(nv)||isNaN(dv)||dv===0){fb.className='try-fb fb er';fb.textContent='Enter a valid fraction (numerator and denominator).';return;}
+      if(Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! &nbsp;'+o.working;}
+      else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}
+      return;
+    }
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');if(!inp)return;var v=parseFloat(inp.value);if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}var tol=o.tol!=null?o.tol:0.5;if(Math.abs(v-o.ans)<=tol){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! &nbsp;'+o.working;}else{fb.className='try-fb fb er';fb.textContent='Not quite — check your working and try again.';}  }
 });
 function g(){return document.getElementById('dg');}
 function T(x,y,t,c,sz,a){return '<text x="'+x+'" y="'+y+'" font-size="'+(sz||12)+'" font-family="Arial" fill="'+(c||'#6b5750')+'" text-anchor="'+(a||'middle')+'">'+t+'</text>';}
@@ -318,7 +334,7 @@ var QS=[
     {lb:'P(A)',dr:dQ10,ht:'<div class="fm">P(A) = n(A)/n(ξ) = 20/35 = 4/7</div>'},
     {lb:'P(A∩B) and P(A\')',dr:dQ10,ht:'<div class="fm">P(A∩B) = 6/35</div><div class="fm">P(A\') = (10+5)/35 = 15/35 = 3/7</div>'},
     {lb:'P(A∪B)',dr:dQ10,ht:'<div class="fm">P(A∪B) = 30/35 = 6/7</div>'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var ao=rnd(8,16),both=rnd(4,9),bo=rnd(6,14),nei=rnd(3,8);var tot=ao+both+bo+nei;var nA=ao+both;var dec=Math.round(nA/tot*100)/100;return{question:'Venn: A only='+ao+', A∩B='+both+', B only='+bo+', neither='+nei+'. ξ='+tot+'. Find P(A) as a decimal (2 d.p.).',hints:['n(A) = A only + A∩B = '+ao+'+'+both+' = '+nA],ans:dec,tol:0.01,unit:'',working:'P(A) = '+nA+'/'+tot+' = '+dec};})}
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var ao=rnd(8,16),both=rnd(4,9),bo=rnd(6,14),nei=rnd(3,8);var tot=ao+both+bo+nei;var nA=ao+both;return{question:'Venn: A only='+ao+', A∩B='+both+', B only='+bo+', neither='+nei+'. ξ='+tot+'. Find P(A) as a fraction.',hints:['n(A) = A only + A∩B = '+ao+'+'+both+' = '+nA],frac:true,ansN:nA,ansD:tot,working:'P(A) = '+nA+'/'+tot};})}
   ]}
 ];
 

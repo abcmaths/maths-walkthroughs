@@ -52,7 +52,11 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
 .hl li{margin-bottom:5px;padding-left:18px;position:relative;}
 .hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
-.ar{display:flex;gap:8px;margin-top:6px;}
+.ar{display:flex;gap:8px;margin-top:6px;align-items:center;}
+.fracbox{display:flex;flex-direction:column;align-items:center;}
+.fracbox input{width:64px;text-align:center;padding:6px 4px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;font-size:15px;}
+.fracbox input:focus{border-color:var(--gold);}
+.fracline{width:64px;height:2px;background:var(--ink);margin:4px 0;}
 .ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
 .ar input:focus{border-color:var(--gold);}
 .ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
@@ -110,11 +114,13 @@ function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  var ansBox=o.frac
+    ? '<div class="ar"><div class="fracbox"><input type="number" step="any" placeholder="num" class="try-num" data-tryid="'+id+'"/><div class="fracline"></div><input type="number" step="any" placeholder="den" class="try-den" data-tryid="'+id+'"/></div><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    : '<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>';
   return '<div class="try" data-tryid="'+id+'">'
     +'<div class="try-t">\u2714 Your Turn</div>'
     +'<div class="try-q">'+o.question+'</div>'
-    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
-    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +ansBox
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
     +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
     +'<div style="margin-top:10px;"><button class="ck try-new" data-tryid="'+id+'" style="background:#888;">New question</button></div>'
@@ -139,9 +145,20 @@ document.addEventListener('click',function(e){
     var id=el.getAttribute('data-tryid');
     var entry=ST[id]; if(!entry)return;
     var o=entry.o;
-    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
     var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
-    if(!inp||!fb)return;
+    if(!fb)return;
+    if(o.frac){
+      var ni=document.querySelector('.try-num[data-tryid="'+id+'"]');
+      var di=document.querySelector('.try-den[data-tryid="'+id+'"]');
+      if(!ni||!di)return;
+      var nv=parseFloat(ni.value),dv=parseFloat(di.value);
+      if(isNaN(nv)||isNaN(dv)||dv===0){fb.className='try-fb fb er';fb.textContent='Enter a valid fraction (numerator and denominator).';return;}
+      if(Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;}
+      else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
+      return;
+    }
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    if(!inp)return;
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
     var tol=o.tol!=null?o.tol:0.5;
@@ -563,7 +580,7 @@ var QS=[
     {lb:'Step 1 — Complete the grid',dr:dQ9,ht:'<p>Each cell shows the sum of the two dice. There are 6 × 6 = 36 possible outcomes.</p>'},
     {lb:'Step 2 — P(sum = 7)',dr:dQ9,ht:'<p>Count outcomes where the sum = 7 (highlighted). There are 6 such outcomes.</p><div class="fm">P(sum = 7) = 6/36 = <b>1/6</b></div>'},
     {lb:'Step 3 — P(sum > 9)',dr:dQ9,ht:'<p>Sums greater than 9: 10, 11, 12. Count: (4,6),(5,5),(6,4),(5,6),(6,5),(6,6) = 6 outcomes.</p><div class="fm">P(sum > 9) = 6/36 = <b>1/6</b></div>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var r=rnd(3,7),b=rnd(2,5),g=rnd(1,3),tot=r+b+g;var dec=Math.round(b/tot*100)/100;return{question:'Bag: '+r+' red, '+b+' blue, '+g+' green. Find P(blue) as a decimal (2 d.p.).',hints:['P(blue) = '+b+'/'+tot],ans:dec,tol:0.01,unit:'',working:'P(blue) = '+b+'/'+tot+' = '+dec};})}
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var r=rnd(3,7),b=rnd(2,5),g=rnd(1,3),tot=r+b+g;return{question:'Bag: '+r+' red, '+b+' blue, '+g+' green. Find P(blue) as a fraction.',hints:['P(blue) = '+b+'/'+tot],frac:true,ansN:b,ansD:tot,working:'P(blue) = '+b+'/'+tot};})}
   ]},
   {ey:'Q10 · Tree Diagrams · Extended',ti:'Tree Diagram — Without Replacement',su:'Bag: 4 red, 2 blue. Two drawn without replacement. Find P(both same colour).',lv:'E',steps:[
     {lb:'The problem',dr:dQ10,ht:'<span class="lt le">Extended</span><p>A bag has <b>4 red</b> and <b>2 blue</b> marbles. Two are drawn <b>without replacement</b>. Build a tree diagram — the probabilities on the second branches <b>change</b> after the first draw.</p>'},

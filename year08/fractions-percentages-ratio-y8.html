@@ -54,7 +54,11 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
 .hl li{margin-bottom:5px;padding-left:18px;position:relative;}
 .hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
-.ar{display:flex;gap:8px;margin-top:6px;}
+.ar{display:flex;gap:8px;margin-top:6px;align-items:center;}
+.fracbox{display:flex;flex-direction:column;align-items:center;}
+.fracbox input{width:64px;text-align:center;padding:6px 4px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;font-size:15px;}
+.fracbox input:focus{border-color:var(--gold);}
+.fracline{width:64px;height:2px;background:var(--ink);margin:4px 0;}
 .ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
 .ar input:focus{border-color:var(--gold);}
 .ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
@@ -105,12 +109,14 @@ function tryIt(o){
   var id='t'+Math.random().toString(36).slice(2);ST[id]={o:o};
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  var ansBox=o.frac
+    ? '<div class="ar"><div class="fracbox"><input type="number" step="any" placeholder="num" class="try-num" data-tryid="'+id+'"/><div class="fracline"></div><input type="number" step="any" placeholder="den" class="try-den" data-tryid="'+id+'"/></div><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    : '<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>';
   return '<div class="try" data-tryid="'+id+'">'
     +'<div class="try-t">✔ Your Turn</div>'
     +'<div class="try-q">'+o.question+'</div>'
     +(h?'<ul class="hl">'+h+'</ul>':'')
-    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
-    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +ansBox
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
     +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
     +'<div style="margin-top:10px;"><button class="ck try-new" style="background:#888;">New question</button></div>'
@@ -120,8 +126,20 @@ document.addEventListener('click',function(e){
   if(e.target.classList.contains('try-new')){render();return;}
   if(e.target.classList.contains('try-ck')){
     var id=e.target.getAttribute('data-tryid'),o=ST[id].o;
-    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
     var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+    if(!fb)return;
+    if(o.frac){
+      var ni=document.querySelector('.try-num[data-tryid="'+id+'"]');
+      var di=document.querySelector('.try-den[data-tryid="'+id+'"]');
+      if(!ni||!di)return;
+      var nv=parseFloat(ni.value),dv=parseFloat(di.value);
+      if(isNaN(nv)||isNaN(dv)||dv===0){fb.className='try-fb fb er';fb.textContent='Enter a valid fraction (numerator and denominator).';return;}
+      if(Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+      else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
+      return;
+    }
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    if(!inp)return;
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
     if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
@@ -247,14 +265,14 @@ function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
 
 function yt1(){var n1=rnd(1,4),d1=pick([4,5,6,8]),n2=rnd(1,3),d2=pick([3,4,5]);
   var l=d1*d2/gcd(d1,d2),a=n1*l/d1+n2*l/d2,g2=gcd(a,l);
-  return tryIt({question:'Calculate <b>'+n1+'/'+d1+' + '+n2+'/'+d2+'</b>. Enter the numerator once simplified (the denominator will be '+(l/g2)+').',
+  return tryIt({question:'Calculate <b>'+n1+'/'+d1+' + '+n2+'/'+d2+'</b>. Give your answer as a fraction in its simplest form.',
     hints:['LCM('+d1+','+d2+') = '+l,'Convert both fractions to /'+l],
-    ans:a/g2,tol:0,unit:'(numerator only)',working:n1+'/'+d1+' + '+n2+'/'+d2+' = '+(n1*l/d1)+'/'+(l)+' + '+(n2*l/d2)+'/'+l+' \u2014 Numerator = '+(a/g2)});}
+    frac:true,ansN:a/g2,ansD:l/g2,working:n1+'/'+d1+' + '+n2+'/'+d2+' = '+(n1*l/d1)+'/'+(l)+' + '+(n2*l/d2)+'/'+l+' = '+(a/g2)+'/'+(l/g2)});}
 function yt2(){var n1=rnd(1,5),d1=pick([4,5,6,8]),n2=rnd(1,4),d2=pick([3,4,6]);
   var prod=n1*n2,dprod=d1*d2,g2=gcd(prod,dprod);
-  return tryIt({question:'Calculate <b>'+n1+'/'+d1+' \u00d7 '+n2+'/'+d2+'</b>. Enter the numerator once simplified (the denominator will be '+(dprod/g2)+').',
+  return tryIt({question:'Calculate <b>'+n1+'/'+d1+' \u00d7 '+n2+'/'+d2+'</b>. Give your answer as a fraction in its simplest form.',
     hints:['Multiply numerators: '+n1+'\u00d7'+n2,'Multiply denominators: '+d1+'\u00d7'+d2,'Simplify'],
-    ans:prod/g2,tol:0,unit:'(numerator only)',working:n1+'/'+d1+' \u00d7 '+n2+'/'+d2+' = '+prod+'/'+dprod+' \u2014 Numerator = '+(prod/g2)});}
+    frac:true,ansN:prod/g2,ansD:dprod/g2,working:n1+'/'+d1+' \u00d7 '+n2+'/'+d2+' = '+prod+'/'+dprod+' = '+(prod/g2)+'/'+(dprod/g2)});}
 function yt3(){var pct=pick([10,15,20,25,30,35,40]),amt=rnd(4,20)*10;
   return tryIt({question:'Find <b>'+pct+'%</b> of <b>£'+amt+'</b>.',
     hints:['Multiply: '+pct/100+' × '+amt],

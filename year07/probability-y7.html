@@ -55,7 +55,11 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
 .hl li{margin-bottom:5px;padding-left:18px;position:relative;}
 .hl li::before{content:"\203a";position:absolute;left:0;color:var(--gold);font-weight:700;}
-.ar{display:flex;gap:8px;margin-top:6px;}
+.ar{display:flex;gap:8px;margin-top:6px;align-items:center;}
+.fracbox{display:flex;flex-direction:column;align-items:center;}
+.fracbox input{width:64px;text-align:center;padding:6px 4px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;font-size:15px;}
+.fracbox input:focus{border-color:var(--gold);}
+.fracline{width:64px;height:2px;background:var(--ink);margin:4px 0;}
 .ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
 .ar input:focus{border-color:var(--gold);}
 .ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
@@ -135,11 +139,13 @@ function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ex=o.extraHTML||'';var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  var ansBox=o.frac
+    ? '<div class="ar"><div class="fracbox"><input type="number" step="any" placeholder="num" class="try-num" data-tryid="'+id+'"/><div class="fracline"></div><input type="number" step="any" placeholder="den" class="try-den" data-tryid="'+id+'"/></div><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    : '<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>';
   return '<div class="try" data-tryid="'+id+'">'
     +'<div class="try-t">\u2714 Your Turn <button class="newq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
     +'<div class="try-q">'+o.question+'</div>'+ex
-    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
-    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +ansBox
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
     +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
     +'</div>';
@@ -153,9 +159,20 @@ function newQ(id){
 }
 function ckById(id){
   var e=ST[id];if(!e)return;var o=e.o;
-  var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
   var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
-  if(!inp||!fb)return;var v=parseFloat(inp.value);
+  if(!fb)return;
+  if(o.frac){
+    var ni=document.querySelector('.try-num[data-tryid="'+id+'"]');
+    var di=document.querySelector('.try-den[data-tryid="'+id+'"]');
+    if(!ni||!di)return;
+    var nv=parseFloat(ni.value),dv=parseFloat(di.value);
+    if(isNaN(nv)||isNaN(dv)||dv===0){fb.className='try-fb fb er';fb.textContent='Enter a valid fraction (numerator and denominator).';return;}
+    if(Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
+    else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+    return;
+  }
+  var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+  if(!inp)return;var v=parseFloat(inp.value);
   if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
   if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
   else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
@@ -331,14 +348,14 @@ var QS=[
     {lb:'Find the total',dr:dQ9,ht:'<div class="fm">4 + 3 + 5 = 12 counters</div>'},
     {lb:'Form the fraction',dr:dQ9,ht:'<div class="fm">P(blue) = 3/12</div>'},
     {lb:'Simplify',dr:dQ9,ht:'<div class="fm">3/12 = 1/4</div>'},
-    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var r=rInt(2,8),b=rInt(2,8),gr=rInt(2,8),total=r+b+gr;var dec=Math.round(gr/total*100)/100;return{question:'A bag has '+r+' red, '+b+' blue, '+gr+' green counters. Find P(green) as a decimal (2 d.p.).',hints:['Numerator = number of green counters = '+gr,'P(green) = '+gr+'/'+total],ans:dec,tol:0.01,unit:'',working:'P(green) = '+gr+'/'+total+' = '+dec};})},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var r=rInt(2,8),b=rInt(2,8),gr=rInt(2,8),total=r+b+gr;return{question:'A bag has '+r+' red, '+b+' blue, '+gr+' green counters. Find P(green) as a fraction.',hints:['Numerator = number of green counters = '+gr],frac:true,ansN:gr,ansD:total,working:'P(green) = '+gr+'/'+total};})},
   ]},
   {ey:'Q10 \u00b7 Year 7 \u00b7 Probability Deepened',ti:'Mixed Probability Problems',su:'A fair coin and a fair die are used together. Find P(Heads AND a 6).',steps:[
     {lb:'Find each individual probability',dr:dQ10,ht:'<div class="fm">P(Heads) = 1/2, P(6) = 1/6</div>'},
     {lb:'Independent events rule',dr:dQ10,ht:'<p>For independent events, multiply the probabilities: P(A and B) = P(A) \u00d7 P(B).</p>'},
     {lb:'Multiply',dr:dQ10,ht:'<div class="fm">1/2 \u00d7 1/6 = 1/12</div>'},
     {lb:'Result',dr:dQ10,ht:'<p>P(Heads AND a 6) = 1/12.</p>'},
-    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var d=rPick([2,4,5,6,10]);var dec=Math.round(1/(2*d)*1000)/1000;return{question:'A fair coin is flipped and a fair '+d+'-sided die is rolled. Find P(Heads AND rolling a 1) as a decimal.',hints:['P(Heads) \u00d7 P(rolling a 1) = 1/2 \u00d7 1/'+d],ans:dec,tol:0.001,unit:'',working:'1/2 \u00d7 1/'+d+' = 1/'+(2*d)+' = '+dec};})},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var d=rPick([2,4,5,6,10]);return{question:'A fair coin is flipped and a fair '+d+'-sided die is rolled. Find P(Heads AND rolling a 1) as a fraction.',hints:['P(Heads) \u00d7 P(rolling a 1) = 1/2 \u00d7 1/'+d],frac:true,ansN:1,ansD:2*d,working:'1/2 \u00d7 1/'+d+' = 1/'+(2*d)};})},
   ]},
 
 ];

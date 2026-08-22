@@ -48,7 +48,11 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
 .hl li{margin-bottom:5px;padding-left:18px;position:relative;}
 .hl li::before{content:"\u203a";position:absolute;left:0;color:var(--gold);font-weight:700;}
-.ar{display:flex;gap:8px;margin-top:6px;}
+.ar{display:flex;gap:8px;margin-top:6px;align-items:center;}
+.fracbox{display:flex;flex-direction:column;align-items:center;}
+.fracbox input{width:64px;text-align:center;padding:6px 4px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;font-size:15px;}
+.fracbox input:focus{border-color:var(--gold);}
+.fracline{width:64px;height:2px;background:var(--ink);margin:4px 0;}
 .ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
 .ar input:focus{border-color:var(--gold);}
 .ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
@@ -114,12 +118,14 @@ function tryIt(genFn){
 function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  var ansBox=o.frac
+    ? '<div class="ar"><div class="fracbox"><input type="number" step="any" placeholder="num" class="try-num" data-tryid="'+id+'"/><div class="fracline"></div><input type="number" step="any" placeholder="den" class="try-den" data-tryid="'+id+'"/></div><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    : '<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>';
   return '<div class="try" data-tryid="'+id+'">'
     +'<div class="try-t">\u2714 Your Turn <button class="nq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
     +'<div class="try-q">'+o.question+'</div>'
     +'<ul class="hl">'+(h||'')+'</ul>'
-    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
-    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +ansBox
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
     +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
     +'</div>';
@@ -136,9 +142,20 @@ document.addEventListener('click',function(e){
   if(el.classList.contains('try-ck')){
     var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;
     var o=en.o;
-    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
     var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
-    if(!inp||!fb)return;
+    if(!fb)return;
+    if(o.frac){
+      var ni=document.querySelector('.try-num[data-tryid="'+id+'"]');
+      var di=document.querySelector('.try-den[data-tryid="'+id+'"]');
+      if(!ni||!di)return;
+      var nv=parseFloat(ni.value),dv=parseFloat(di.value);
+      if(isNaN(nv)||isNaN(dv)||dv===0){fb.className='try-fb er';fb.textContent='Enter a valid fraction (numerator and denominator).';return;}
+      if(Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;}
+      else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
+      return;
+    }
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    if(!inp)return;
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
     var tol=o.tol!=null?o.tol:0.5;
@@ -1150,7 +1167,7 @@ function yt6(){tryIt(function(){var m=rnd(2,5),c=rnd(1,8),x=rnd(1,6);var ans=m*x
 function yt7(){tryIt(function(){var m=pick([-3,-2,-1,2,3,4]),c=pick([-3,-2,-1,0,1,2,3]),x=rnd(1,4);var ans=m*x+c;return{question:'y = <b>'+m+'x '+(c>=0?'+':'')+c+'</b>. Find y when x = '+x+'.',hints:['Substitute x='+x],ans:ans,tol:0,unit:'',working:m+'('+x+')+'+(c>=0?c:c)+' = '+ans};});}
 function yt8(){tryIt(function(){var x1=rnd(0,2),y1=rnd(0,4),x2=rnd(4,7),y2=rnd(5,10);var grad=Math.round((y2-y1)/(x2-x1)*10)/10;return{question:'Find the gradient of the line through ('+x1+', '+y1+') and ('+x2+', '+y2+').',hints:['m = (y\u2082\u2212y\u2081)\u00f7(x\u2082\u2212x\u2081)'],ans:grad,tol:0.05,unit:'',working:'('+y2+'\u2212'+y1+')\u00f7('+x2+'\u2212'+x1+') = '+(y2-y1)+'/'+(x2-x1)+' = '+grad};});}
 function yt9(){tryIt(function(){function gcd(a,b){return b===0?a:gcd(b,a%b);}var pairs=[[12,18],[8,12],[15,20],[6,10],[9,15],[4,6],[10,25]];var p=pick(pairs);var h=gcd(p[0],p[1]);return{question:'Find the LCM of <b>'+p[0]+'</b> and <b>'+p[1]+'</b>.',hints:['LCM = product \u00f7 HCF','HCF of '+p[0]+' and '+p[1]+' = '+h],ans:p[0]*p[1]/h,tol:0,unit:'',working:'LCM = '+p[0]+'\u00d7'+p[1]+'\u00f7'+h+' = '+(p[0]*p[1]/h)};});}
-function yt10(){tryIt(function(){var r=rnd(3,6),b=rnd(2,5),t=r+b;var dec=Math.round(r/t*100)/100;return{question:'Bag has <b>'+r+' red</b> and <b>'+b+' blue</b> counters. Find P(red) as a decimal (2 d.p.).',hints:['P(red) = red \u00f7 total'],ans:dec,tol:0.01,unit:'',working:'P(red) = '+r+'/'+t+' = '+dec};});}
+function yt10(){tryIt(function(){var r=rnd(3,6),b=rnd(2,5),t=r+b;return{question:'Bag has <b>'+r+' red</b> and <b>'+b+' blue</b> counters. Find P(red) as a fraction.',hints:['P(red) = red \u00f7 total'],frac:true,ansN:r,ansD:t,working:'P(red) = '+r+'/'+t};});}
 function yt11(){tryIt(function(){var l=rnd(4,12),w=rnd(3,8);return{question:'Rectangle: length <b>'+l+' cm</b>, width <b>'+w+' cm</b>. Find the area.',hints:['Area = length \u00d7 width'],ans:l*w,tol:0,unit:'cm\u00b2',working:l+' \u00d7 '+w+' = '+l*w+' cm\u00b2'};});}
 function yt12(){tryIt(function(){var r=rnd(2,6),h=rnd(4,10);var ans=Math.round(Math.PI*r*r*h*10)/10;return{question:'Cylinder: radius <b>'+r+' cm</b>, height <b>'+h+' cm</b>. Volume (1 d.p.)?',hints:['\u03c0r\u00b2h = \u03c0\u00d7'+r*r+'\u00d7'+h],ans:ans,tol:0.2,unit:'cm\u00b3',working:'\u03c0\u00d7'+(r*r)+'\u00d7'+h+' \u2248 '+ans+' cm\u00b3'};});}
 function yt13(){tryIt(function(){var a=rnd(2,4),b=rnd(1,6),x=rnd(1,8);var ans=a*x+b;return{question:'f(x) = <b>'+a+'x + '+b+'</b>. Find f('+x+').',hints:['Substitute x='+x],ans:ans,tol:0,unit:'',working:a+'\u00d7'+x+'+'+b+' = '+ans};});}

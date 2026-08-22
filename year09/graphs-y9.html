@@ -53,7 +53,11 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
 .hl li{margin-bottom:5px;padding-left:18px;position:relative;}
 .hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
-.ar{display:flex;gap:8px;margin-top:6px;}
+.ar{display:flex;gap:8px;margin-top:6px;align-items:center;}
+.fracbox{display:flex;flex-direction:column;align-items:center;}
+.fracbox input{width:64px;text-align:center;padding:6px 4px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;font-size:15px;}
+.fracbox input:focus{border-color:var(--gold);}
+.fracline{width:64px;height:2px;background:var(--ink);margin:4px 0;}
 .ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
 .ar input:focus{border-color:var(--gold);}
 .ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
@@ -110,12 +114,14 @@ function tryIt(genOrObj){
 function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  var ansBox=o.frac
+    ? '<div class="ar"><div class="fracbox"><input type="number" step="any" placeholder="num" class="try-num" data-tryid="'+id+'"/><div class="fracline"></div><input type="number" step="any" placeholder="den" class="try-den" data-tryid="'+id+'"/></div><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    : '<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>';
   return '<div class="try" data-tryid="'+id+'">'
     +'<div class="try-t">\u2714 Your Turn <button class="nq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
     +'<div class="try-q">'+o.question+'</div>'
     +'<ul class="hl">'+(h||'')+'</ul>'
-    +'<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
-    +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    +ansBox
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
     +'<details class="wk"><summary>Show working</summary><div class="wk-b">'+o.working+'</div></details>'
     +'</div>';
@@ -145,9 +151,20 @@ document.addEventListener('click',function(e){
   if(el.classList.contains('try-ck')){
     var id=el.getAttribute('data-tryid'),en=ST[id];if(!en)return;
     var o=en.o;
-    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
     var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
-    if(!inp||!fb)return;
+    if(!fb)return;
+    if(o.frac){
+      var ni=document.querySelector('.try-num[data-tryid="'+id+'"]');
+      var di=document.querySelector('.try-den[data-tryid="'+id+'"]');
+      if(!ni||!di)return;
+      var nv=parseFloat(ni.value),dv=parseFloat(di.value);
+      if(isNaN(nv)||isNaN(dv)||dv===0){fb.className='try-fb er';fb.textContent='Enter a valid fraction (numerator and denominator).';return;}
+      if(Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){fb.className='try-fb ok';fb.innerHTML='\u2713 Correct! \u00a0'+o.working;}
+      else{fb.className='try-fb er';fb.textContent='Not quite \u2014 check your working and try again.';}
+      return;
+    }
+    var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+    if(!inp)return;
     var v=parseFloat(inp.value);
     if(isNaN(v)){fb.className='try-fb er';fb.textContent='Enter a number.';return;}
     var tol=o.tol!=null?o.tol:0.5;
@@ -393,7 +410,7 @@ var QS=[
     {lb:'Parallel lines',dr:dQ7,ht:'<p>Parallel lines always have the <b>same gradient</b>.</p>'},
     {lb:'Perpendicular lines',dr:dQ7,ht:'<div class="fm">m\u2081 \u00d7 m\u2082 = \u22121</div>'},
     {lb:'Apply the rule',dr:dQ7,ht:'<div class="fm">Gradient 2 \u2192 perpendicular gradient = \u22121/2</div>'},
-    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var m=pick([2,3,4,5,-2,-3]);var dec=Math.round(-1/m*1000)/1000;return{question:'A line has gradient '+m+'. Find the gradient of a line perpendicular to it, as a decimal.',hints:['Perpendicular gradient = \u22121 \u00f7 '+m],ans:dec,tol:0.001,unit:'',working:'\u22121 \u00f7 '+m+' = '+dec};})}
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var m=pick([2,3,4,5,-2,-3]);var aD=Math.abs(m),aN=m>0?-1:1;return{question:'A line has gradient '+m+'. Find the gradient of a line perpendicular to it, as a fraction.',hints:['Perpendicular gradient = \u22121 \u00f7 '+m],frac:true,ansN:aN,ansD:aD,working:'\u22121 \u00f7 '+m+' = '+aN+'/'+aD};})}
   ]},
   {ey:'Q8 \u00b7 Year 9 \u00b7 Graphs',ti:'Solving Equations Graphically',su:'Find where two lines intersect to solve simultaneous equations.',steps:[
     {lb:'Plot both lines',dr:dQ8,ht:'<p>Draw both linear equations on the same axes.</p>'},
