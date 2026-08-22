@@ -1,4 +1,4 @@
-<!-- REVIEW STATUS: SPLIT from year07/algebra-y7.html 22 Aug 2026 — needs fresh staff review -->
+<!-- REVIEW STATUS: NEW — built out to full 10-checkpoint depth, 22 Aug 2026, needs staff review -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +14,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Forming and Solving Equations · Year 7 · Maths Walkthroughs</title>
+<style>
 <style>
 
 :root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
@@ -82,6 +83,27 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 <body>
 <header>
   <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Writing Algebraic Expressions &mdash; Year 7</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="reader-row">
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
   <div class="ht">Forming and Solving Equations &mdash; Year 7</div>
   <div style="width:80px"></div>
 </header>
@@ -121,16 +143,22 @@ function parseLinearExpr(str,vars){
   str=str.replace(/\s+/g,'').toLowerCase();
   if(str==='')return null;
   var coeffs={};vars.forEach(function(v){coeffs[v]=0;});
-  var re=/([+-]?\d*)([a-z])/g;var m;var matchedAny=false;var idx=0;
+  var constant=0;
+  var re=/([+-]?\d*)([a-z])|([+-]?\d+)(?![a-z])/g;var m;var matchedAny=false;var idx=0;
   while((m=re.exec(str))){
     if(m.index!==idx)return null;
     idx=re.lastIndex;matchedAny=true;
-    var c=m[1],v=m[2];
-    if(vars.indexOf(v)===-1)return null;
-    if(c===''||c==='+')c='1';else if(c==='-')c='-1';
-    coeffs[v]+=parseInt(c,10);
+    if(m[2]){
+      var c=m[1],v=m[2];
+      if(vars.indexOf(v)===-1)return null;
+      if(c===''||c==='+')c='1';else if(c==='-')c='-1';
+      coeffs[v]+=parseInt(c,10);
+    } else if(m[3]!==undefined){
+      constant+=parseInt(m[3],10);
+    }
   }
   if(!matchedAny||idx!==str.length)return null;
+  coeffs._const=constant;
   return coeffs;
 }
 function tryIt(genFn){
@@ -149,7 +177,7 @@ function buildTry(id,o){
     ?'<input type="text" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     :'<input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>';
   return '<div class="try" data-tryid="'+id+'">'
-    +'<div class="try-t">\u2714 Your Turn <button class="newq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-t">✔ Your Turn <button class="newq-btn" data-tryid="'+id+'">↻ New</button></div>'
     +'<div class="try-q">'+o.question+'</div>'+ex
     +'<div class="ar">'+inputHtml
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
@@ -174,14 +202,16 @@ function ckById(id){
     if(!parsed){fb.className='try-fb fb er';fb.textContent='Enter an expression, e.g. '+(o.placeholder||'5x + 3y').replace('e.g. ','');return;}
     var ok=true;
     for(var i=0;i<o.vars.length;i++){var vv=o.vars[i];if(parsed[vv]!==o.coeffs[vv])ok=false;}
-    if(ok){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-    else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+    var expectedConst=(o.constant!=null)?o.constant:0;
+    if(parsed._const!==expectedConst)ok=false;
+    if(ok){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+    else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
     return;
   }
   var v=parseFloat(inp.value);
   if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
-  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-  else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+  else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
 }
 document.addEventListener('click',function(e){
   var btn=e.target;
@@ -194,6 +224,7 @@ function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text 
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#C0272D')+'" stroke-width="'+(w||2)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'#fce8d8')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'"/>';}
+
 function dQ1(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o.push(T(110,40,'Amara','#C0272D',14,'middle',true));o.push(T(370,40,'Kofi','#1a5a8a',14,'middle',true));
@@ -206,15 +237,97 @@ function dQ1(p){
   if(p>=3){o.push(R(130,218,220,34,'#e8f8ee','#1a7a3a',2));o.push(T(240,240,'x=12 \u2192 Amara=12, Kofi=19','#1a7a3a',14,'middle',true));}
   s.innerHTML=o.join('');
 }
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Consecutive numbers problem','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Three consecutive numbers sum to 45. Find them.','#241A17',13,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'x + (x+1) + (x+2) = 45','#C0272D',12,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'3x+3=45 \u2192 x=14','#1a7a3a',15,'middle',true));}if(p>=4){o.push(T(240,178,'The numbers are 14, 15, 16','#888',12,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Rectangle perimeter problem','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A rectangle\u2019s length is twice its width. Perimeter = 36. Find the width.','#241A17',11,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'2(x) + 2(2x) = 36','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'6x=36 \u2192 x=6','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Shopping problem','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'3 identical pens plus a \u20a650 pencil cost \u20a6350. Find the pen price.','#241A17',11,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'3x + 50 = 350','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'3x=300 \u2192 x=\u20a6100','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Age problem with multiplication','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A father is 3 times his son\u2019s age. Ages sum to 48. Find the son\u2019s age.','#241A17',11,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'x + 3x = 48','#C0272D',15,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'4x=48 \u2192 x=12','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'A number puzzle','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'I think of a number, double it, add 5. The result is 27.','#241A17',13,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'2x + 5 = 27','#C0272D',15,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'2x=22 \u2192 x=11','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Real life: ticket revenue','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Tickets cost \u20a6x. Selling 40 tickets raised \u20a68,000. Find the price.','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'40x = 8000','#C0272D',15,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'x = \u20a6200','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'A three-part sum problem','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Three numbers: x, x+2, and 2x sum to 30. Find x.','#241A17',13,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'x + (x+2) + 2x = 30','#C0272D',12,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'4x+2=30 \u2192 x=7','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'A common mistake: setting up the equation','#C0272D',12,'middle',true));if(p>=1){o.push(T(240,60,'"5 more than double a number is 17" \u2014 which equation is correct?','#241A17',11,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fde8e8','#C0272D',1.5));o.push(T(240,98,'WRONG: 5 + 2x = x + 17','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'RIGHT: 2x + 5 = 17','#1a7a3a',14,'middle',true));}if(p>=4){o.push(T(240,178,'Translate the WHOLE sentence carefully, piece by piece','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Mixed forming-and-solving practice','#C0272D',12,'middle',true));if(p>=1){o.push(T(240,60,'Step 1: define the unknown with a letter','#241A17',12,'middle'));}if(p>=2){o.push(T(240,86,'Step 2: translate the whole problem into an equation','#241A17',12,'middle'));}if(p>=3){o.push(R(80,106,320,40,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,124,'Step 3: solve the equation as usual','#1a7a3a',12,'middle'));o.push(T(240,140,'Step 4: check it makes sense!','#1a7a3a',12,'middle'));}s.innerHTML=o.join('');}
+
 
 var QS=[
-  {ey:'Q10 \u00b7 Year 7 \u00b7 Algebra',ti:'Forming and Solving Equations',su:'Amara and Kofi\u2019s ages sum to 31. Kofi is 7 years older. Find their ages.',steps:[
+  {ey:'Q1 \u00b7 Year 7 \u00b7 Forming and Solving Equations',ti:'Forming and Solving Equations',su:'Amara and Kofi\u2019s ages sum to 31. Kofi is 7 years older. Find their ages.',steps:[
     {lb:'Define unknowns',dr:dQ1,ht:'<p>Let Amara\u2019s age = x. Then Kofi = x + 7.</p>',speak:'Let Amara\u2019s age equal x. Then Kofi\u2019s age is x plus 7.'},
     {lb:'Form the equation',dr:dQ1,ht:'<div class="fm">x + (x + 7) = 31</div>',speak:'Their ages sum to 31, so: x plus, the bracket, x plus 7, equals 31.'},
     {lb:'Solve',dr:dQ1,ht:'<div class="fm">2x + 7 = 31  \u2192  2x = 24  \u2192  x = 12</div>',speak:'That simplifies to 2x plus 7 equals 31. So 2x equals 24, and x equals 12.'},
     {lb:'Answer',dr:dQ1,ht:'<div class="fm">Amara = 12, Kofi = 19</div><p>Check: 12 + 19 = 31 \u2713</p>',speak:'So Amara is 12, and Kofi is 19. Check: 12 plus 19 equals 31, correct.'},
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var y=rInt(8,20),diff=rInt(2,9),tot=2*y+diff;return{question:'Two friends\u2019 ages sum to <b>'+tot+'</b>. One is <b>'+diff+'</b> years older. What is the <b>younger</b> friend\u2019s age?',hints:['Let younger = x, older = x + '+diff,'x + (x + '+diff+') = '+tot,'2x + '+diff+' = '+tot+' \u2192 2x = '+(tot-diff)],ans:y,tol:0,unit:'years',working:'2x + '+diff+' = '+tot+' \u2192 x = '+y};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
-  ]}
+  ]},
+  {ey:'Q2 \u00b7 Year 7 \u00b7 Forming and Solving Equations',ti:'Consecutive Numbers Problem',su:'Three consecutive numbers sum to 45. Find them.',steps:[
+    {lb:'The problem',dr:dQ2,ht:'<p>Three consecutive numbers sum to 45. Find them.</p>',speak:'Three consecutive numbers sum to 45. Find them.'},
+    {lb:'Set up the equation',dr:dQ2,ht:'<div class="fm">x + (x+1) + (x+2) = 45</div>',speak:'x plus x plus 1, plus x plus 2, equals 45.'},
+    {lb:'Solve',dr:dQ2,ht:'<div class="fm">3x+3=45 \u2192 x=14</div>',speak:'3x plus 3 equals 45, so x equals 14.'},
+    {lb:'The answer',dr:dQ2,ht:'<p>The numbers are 14, 15, 16.</p>',speak:'The three consecutive numbers are 14, 15, and 16.'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var x=rInt(5,40);var tot=3*x+3;return{question:'Three consecutive numbers sum to <b>'+tot+'</b>. Find the SMALLEST of the three.',hints:['x + (x+1) + (x+2) = '+tot,'3x + 3 = '+tot],ans:x,tol:0,unit:'',working:'3x+3='+tot+' \u2192 x='+x};}),speak:'Now it\u2019s your turn \u2014 find the smallest of the three consecutive numbers.'},
+  ]},
+  {ey:'Q3 \u00b7 Year 7 \u00b7 Forming and Solving Equations',ti:'Rectangle Perimeter Problem',su:'A rectangle\u2019s length is twice its width. Perimeter = 36. Find the width.',steps:[
+    {lb:'The problem',dr:dQ3,ht:'<p>A rectangle\u2019s length is twice its width. The perimeter is 36. Find the width.</p>',speak:'A rectangle\u2019s length is twice its width. The perimeter is 36. Find the width.'},
+    {lb:'Set up the equation',dr:dQ3,ht:'<div class="fm">2(x) + 2(2x) = 36</div>',speak:'2 times the width x, plus 2 times the length 2x, equals 36.'},
+    {lb:'Solve',dr:dQ3,ht:'<div class="fm">6x=36 \u2192 x=6</div>',speak:'6x equals 36, so x equals 6.'},
+    {lb:'Geometry problems form equations too',dr:dQ3,ht:'<p>Perimeter and area problems with unknown dimensions are classic equation-forming questions.</p>',speak:'Perimeter and area problems with unknown dimensions are classic equation-forming questions.'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var x=rInt(3,15);var perim=6*x;return{question:'A rectangle\u2019s length is twice its width. The perimeter is '+perim+'. Find the width.',hints:['2(x) + 2(2x) = '+perim,'6x = '+perim],ans:x,tol:0,unit:'',working:'6x='+perim+' \u2192 x='+x};}),speak:'Now it\u2019s your turn \u2014 find the width of this rectangle.'},
+  ]},
+  {ey:'Q4 \u00b7 Year 7 \u00b7 Forming and Solving Equations',ti:'Shopping Problem',su:'3 identical pens plus a \u20a650 pencil cost \u20a6350. Find the pen price.',steps:[
+    {lb:'The problem',dr:dQ4,ht:'<p>3 identical pens plus a \u20a650 pencil cost \u20a6350 in total. Find the price of one pen.</p>',speak:'3 identical pens plus a 50 naira pencil cost 350 naira in total. Find the price of one pen.'},
+    {lb:'Set up the equation',dr:dQ4,ht:'<div class="fm">3x + 50 = 350</div>',speak:'3x plus 50 equals 350.'},
+    {lb:'Solve',dr:dQ4,ht:'<div class="fm">3x=300 \u2192 x=\u20a6100</div>',speak:'3x equals 300, so x equals 100 naira.'},
+    {lb:'A classic shopping pattern',dr:dQ4,ht:'<p>Multiple identical items plus one different item is a very common equation-forming scenario.</p>',speak:'Multiple identical items plus one different item is a very common equation-forming scenario.'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var n=rInt(2,6),extra=rInt(1,5)*50,x=rInt(2,9)*50;var total=n*x+extra;return{question:''+n+' identical pens plus a \u20a6'+extra+' pencil cost \u20a6'+total+'. Find the price of one pen.',hints:[n+'x + '+extra+' = '+total],ans:x,tol:0,unit:'\u20a6',working:n+'x='+(total-extra)+' \u2192 x=\u20a6'+x};}),speak:'Now it\u2019s your turn \u2014 find the price of one pen.'},
+  ]},
+  {ey:'Q5 \u00b7 Year 7 \u00b7 Forming and Solving Equations',ti:'Age Problem with Multiplication',su:'A father is 3 times his son\u2019s age. Ages sum to 48. Find the son\u2019s age.',steps:[
+    {lb:'The problem',dr:dQ5,ht:'<p>A father is 3 times his son\u2019s age. Their ages sum to 48. Find the son\u2019s age.</p>',speak:'A father is 3 times his son\u2019s age. Their ages sum to 48. Find the son\u2019s age.'},
+    {lb:'Set up the equation',dr:dQ5,ht:'<div class="fm">x + 3x = 48</div>',speak:'x plus 3x equals 48.'},
+    {lb:'Solve',dr:dQ5,ht:'<div class="fm">4x=48 \u2192 x=12</div>',speak:'4x equals 48, so x equals 12.'},
+    {lb:'A multiplicative relationship',dr:dQ5,ht:'<p>Unlike "7 years older" (addition), "3 times as old" uses multiplication to relate the two ages.</p>',speak:'Unlike 7 years older, which uses addition, 3 times as old uses multiplication to relate the two ages.'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var mult=rInt(2,5),x=rInt(5,20);var tot=x+mult*x;return{question:'A father is '+mult+' times his son\u2019s age. Their ages sum to '+tot+'. Find the son\u2019s age.',hints:['x + '+mult+'x = '+tot],ans:x,tol:0,unit:'years',working:(1+mult)+'x='+tot+' \u2192 x='+x};}),speak:'Now it\u2019s your turn \u2014 find the son\u2019s age.'},
+  ]},
+  {ey:'Q6 \u00b7 Year 7 \u00b7 Forming and Solving Equations',ti:'A Number Puzzle',su:'I think of a number, double it, add 5. The result is 27.',steps:[
+    {lb:'The puzzle',dr:dQ6,ht:'<p>I think of a number, double it, add 5. The result is 27. What was the number?</p>',speak:'I think of a number, double it, add 5. The result is 27. What was the number?'},
+    {lb:'Translate to an equation',dr:dQ6,ht:'<div class="fm">2x + 5 = 27</div>',speak:'2x plus 5 equals 27.'},
+    {lb:'Solve',dr:dQ6,ht:'<div class="fm">2x=22 \u2192 x=11</div>',speak:'2x equals 22, so x equals 11.'},
+    {lb:'Number puzzles are equations in disguise',dr:dQ6,ht:'<p>"Think of a number" puzzles are just word problems that translate directly into an equation.</p>',speak:'Think of a number puzzles are just word problems that translate directly into an equation.'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var mult=rInt(2,5),add=rInt(1,15),x=rInt(2,20);var result=mult*x+add;return{question:'I think of a number, multiply it by '+mult+', then add '+add+'. The result is '+result+'. What was the number?',hints:[mult+'x + '+add+' = '+result],ans:x,tol:0,unit:'',working:mult+'x='+(result-add)+' \u2192 x='+x};}),speak:'Now it\u2019s your turn \u2014 solve this number puzzle.'},
+  ]},
+  {ey:'Q7 \u00b7 Year 7 \u00b7 Forming and Solving Equations',ti:'Real Life: Ticket Revenue',su:'Tickets cost \u20a6x. Selling 40 tickets raised \u20a68,000. Find the price.',steps:[
+    {lb:'The problem',dr:dQ7,ht:'<p>Tickets cost \u20a6x each. Selling 40 tickets raised \u20a68,000. Find the ticket price.</p>',speak:'Tickets cost x naira each. Selling 40 tickets raised 8,000 naira. Find the ticket price.'},
+    {lb:'Set up the equation',dr:dQ7,ht:'<div class="fm">40x = 8000</div>',speak:'40x equals 8,000.'},
+    {lb:'Solve',dr:dQ7,ht:'<div class="fm">x = \u20a6200</div>',speak:'x equals 200 naira.'},
+    {lb:'Revenue = quantity \u00d7 price',dr:dQ7,ht:'<p>This is one of the simplest but most common real-world equations: total revenue equals quantity times price.</p>',speak:'This is one of the simplest but most common real-world equations: total revenue equals quantity times price.'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var n=rInt(20,60),x=rInt(2,20)*50;var total=n*x;return{question:'Tickets cost \u20a6x each. Selling '+n+' tickets raised \u20a6'+total+'. Find the ticket price.',hints:[n+'x = '+total],ans:x,tol:0,unit:'\u20a6',working:'x = '+total+'\u00f7'+n+' = \u20a6'+x};}),speak:'Now it\u2019s your turn \u2014 find the ticket price.'},
+  ]},
+  {ey:'Q8 \u00b7 Year 7 \u00b7 Forming and Solving Equations',ti:'A Three-Part Sum',su:'Three numbers: x, x+2, and 2x sum to 30. Find x.',steps:[
+    {lb:'The problem',dr:dQ8,ht:'<p>Three numbers: x, x+2, and 2x. Their sum is 30. Find x.</p>',speak:'Three numbers: x, x plus 2, and 2x. Their sum is 30. Find x.'},
+    {lb:'Set up the equation',dr:dQ8,ht:'<div class="fm">x + (x+2) + 2x = 30</div>',speak:'x plus, x plus 2, plus 2x, equals 30.'},
+    {lb:'Solve',dr:dQ8,ht:'<div class="fm">4x+2=30 \u2192 x=7</div>',speak:'4x plus 2 equals 30, so x equals 7.'},
+    {lb:'Combine all the skills',dr:dQ8,ht:'<p>This combines forming an expression, simplifying it, and solving \u2014 everything you\u2019ve learned so far.</p>',speak:'This combines forming an expression, simplifying it, and solving \u2014 everything you\u2019ve learned so far.'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var x=rInt(3,20);var tot=4*x+2;return{question:'Three numbers: x, x+2, and 2x. Their sum is '+tot+'. Find x.',hints:['x + (x+2) + 2x = '+tot,'4x + 2 = '+tot],ans:x,tol:0,unit:'',working:'4x='+(tot-2)+' \u2192 x='+x};}),speak:'Now it\u2019s your turn \u2014 solve for x.'},
+  ]},
+  {ey:'Q9 \u00b7 Year 7 \u00b7 Forming and Solving Equations',ti:'Common Mistake: Setting Up the Equation',su:'"5 more than double a number is 17" \u2014 which equation is correct?',steps:[
+    {lb:'A translation trap',dr:dQ9,ht:'<p>"5 more than double a number is 17" \u2014 which equation is correct? Word order can be misleading.</p>',speak:'5 more than double a number is 17 \u2014 which equation is correct? Word order can be misleading.'},
+    {lb:'The wrong translation',dr:dQ9,ht:'<div class="fm">WRONG: 5 + 2x = x + 17</div><p>This misreads the sentence structure entirely.</p>',speak:'Writing 5 plus 2x equals x plus 17 misreads the sentence structure entirely.'},
+    {lb:'The right translation',dr:dQ9,ht:'<div class="fm">RIGHT: 2x + 5 = 17</div>',speak:'The correct equation is 2x plus 5 equals 17.'},
+    {lb:'Translate piece by piece',dr:dQ9,ht:'<p>Translate the WHOLE sentence carefully, piece by piece: "double a number" is 2x, "5 more than" adds 5, "is 17" means "=17".</p>',speak:'Translate the whole sentence carefully, piece by piece: double a number is 2x, 5 more than adds 5, and is 17 means equals 17.'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var mult=rInt(2,6),add=rInt(1,15),x=rInt(2,15);var result=mult*x+add;return{question:'"'+add+' more than '+mult+' times a number is '+result+'." Solve for the number.',hints:['Translate: '+mult+'x + '+add+' = '+result],ans:x,tol:0,unit:'',working:mult+'x='+(result-add)+' \u2192 x='+x};}),speak:'Now it\u2019s your turn \u2014 translate carefully, then solve.'},
+  ]},
+  {ey:'Q10 \u00b7 Year 7 \u00b7 Forming and Solving Equations',ti:'Mixed Practice',su:'Combine everything you\u2019ve learned about forming and solving equations.',steps:[
+    {lb:'Step 1: define the unknown',dr:dQ10,ht:'<p>Define the unknown with a letter.</p>',speak:'Step 1: define the unknown with a letter.'},
+    {lb:'Step 2: translate the whole problem',dr:dQ10,ht:'<p>Translate the whole problem into an equation, piece by piece.</p>',speak:'Step 2: translate the whole problem into an equation, piece by piece.'},
+    {lb:'Step 3: solve',dr:dQ10,ht:'<p>Solve the equation using the balance method, as usual.</p>',speak:'Step 3: solve the equation using the balance method, as usual.'},
+    {lb:'Step 4: check it makes sense',dr:dQ10,ht:'<p>Check your answer makes sense in the context of the original problem.</p>',speak:'Step 4: check your answer makes sense in the context of the original problem.'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var y=rInt(5,25),diff=rInt(2,10),tot=2*y+diff;return{question:'Two numbers sum to <b>'+tot+'</b>. One is <b>'+diff+'</b> more than the other. Find the SMALLER number.',hints:['x + (x + '+diff+') = '+tot,'2x + '+diff+' = '+tot],ans:y,tol:0,unit:'',working:'2x='+(tot-diff)+' \u2192 x='+y};}),speak:'Now it\u2019s your turn \u2014 one final forming-and-solving question.'},
+  ]},
+
 ];
 
 var qi=0,si=0;
