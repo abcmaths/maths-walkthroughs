@@ -1,4 +1,4 @@
-<!-- REVIEW STATUS: SPLIT from year07/algebra-y7.html 22 Aug 2026 — needs fresh staff review -->
+<!-- REVIEW STATUS: NEW — built out to full 10-checkpoint depth, 22 Aug 2026, needs staff review -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +14,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Expanding Single Brackets · Year 7 · Maths Walkthroughs</title>
+<style>
 <style>
 
 :root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
@@ -82,6 +83,27 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 <body>
 <header>
   <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Writing Algebraic Expressions &mdash; Year 7</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="reader-row">
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
   <div class="ht">Expanding Single Brackets &mdash; Year 7</div>
   <div style="width:80px"></div>
 </header>
@@ -121,16 +143,22 @@ function parseLinearExpr(str,vars){
   str=str.replace(/\s+/g,'').toLowerCase();
   if(str==='')return null;
   var coeffs={};vars.forEach(function(v){coeffs[v]=0;});
-  var re=/([+-]?\d*)([a-z])/g;var m;var matchedAny=false;var idx=0;
+  var constant=0;
+  var re=/([+-]?\d*)([a-z])|([+-]?\d+)(?![a-z])/g;var m;var matchedAny=false;var idx=0;
   while((m=re.exec(str))){
     if(m.index!==idx)return null;
     idx=re.lastIndex;matchedAny=true;
-    var c=m[1],v=m[2];
-    if(vars.indexOf(v)===-1)return null;
-    if(c===''||c==='+')c='1';else if(c==='-')c='-1';
-    coeffs[v]+=parseInt(c,10);
+    if(m[2]){
+      var c=m[1],v=m[2];
+      if(vars.indexOf(v)===-1)return null;
+      if(c===''||c==='+')c='1';else if(c==='-')c='-1';
+      coeffs[v]+=parseInt(c,10);
+    } else if(m[3]!==undefined){
+      constant+=parseInt(m[3],10);
+    }
   }
   if(!matchedAny||idx!==str.length)return null;
+  coeffs._const=constant;
   return coeffs;
 }
 function tryIt(genFn){
@@ -149,7 +177,7 @@ function buildTry(id,o){
     ?'<input type="text" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     :'<input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>';
   return '<div class="try" data-tryid="'+id+'">'
-    +'<div class="try-t">\u2714 Your Turn <button class="newq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-t">✔ Your Turn <button class="newq-btn" data-tryid="'+id+'">↻ New</button></div>'
     +'<div class="try-q">'+o.question+'</div>'+ex
     +'<div class="ar">'+inputHtml
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
@@ -174,14 +202,16 @@ function ckById(id){
     if(!parsed){fb.className='try-fb fb er';fb.textContent='Enter an expression, e.g. '+(o.placeholder||'5x + 3y').replace('e.g. ','');return;}
     var ok=true;
     for(var i=0;i<o.vars.length;i++){var vv=o.vars[i];if(parsed[vv]!==o.coeffs[vv])ok=false;}
-    if(ok){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-    else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+    var expectedConst=(o.constant!=null)?o.constant:0;
+    if(parsed._const!==expectedConst)ok=false;
+    if(ok){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+    else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
     return;
   }
   var v=parseFloat(inp.value);
   if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
-  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-  else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+  else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
 }
 document.addEventListener('click',function(e){
   var btn=e.target;
@@ -194,6 +224,7 @@ function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text 
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#C0272D')+'" stroke-width="'+(w||2)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'#fce8d8')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'"/>';}
+
 function dQ1(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o.push(R(14,8,452,36,'#fff5f0','#C0272D',1.5));
@@ -223,14 +254,96 @@ function dQ1(p){
   }
   s.innerHTML=o.join('');
 }
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expanding with a negative multiplier','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Expand \u22122(x + 3)','#241A17',18,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'\u22122\u00d7x = \u22122x','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'\u22122\u00d73 = \u22126, so \u22122x \u2212 6','#1a7a3a',14,'middle',true));}if(p>=4){o.push(T(240,178,'A negative outside flips the sign of EVERY term inside','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expand, then simplify','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Expand and simplify 2(x + 3) + 4','#241A17',14,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'2(x+3) = 2x+6','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'2x+6+4 = 2x+10','#1a7a3a',14,'middle',true));}if(p>=4){o.push(T(240,178,'Expand FIRST, then collect any remaining like terms','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expanding with subtraction inside','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Expand 5(x \u2212 2)','#241A17',18,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'5\u00d7x = 5x','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'5\u00d7(\u22122) = \u221210, so 5x \u2212 10','#1a7a3a',14,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expanding with a coefficient inside','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Expand 3(2x + 5)','#241A17',18,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'3\u00d72x = 6x','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'3\u00d75 = 15, so 6x + 15','#1a7a3a',14,'middle',true));}if(p>=4){o.push(T(240,178,'Multiply the COEFFICIENTS together: 3\u00d72=6','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Real life: area model','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A rectangle is 4 wide and (x+3) long. Find its area.','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Area = 4 \u00d7 (x+3)','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'= 4x + 12','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expand, then solve','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Solve 2(x + 3) = 16','#241A17',18,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Expand: 2x + 6 = 16','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'2x = 10, x = 5','#1a7a3a',16,'middle',true));}if(p>=4){o.push(T(240,178,'Expand FIRST, then solve like any equation','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'A common mistake','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Expand 4(x + 5)','#241A17',18,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fde8e8','#C0272D',1.5));o.push(T(240,98,'WRONG: 4x + 5','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'RIGHT: 4x + 20','#1a7a3a',14,'middle',true));}if(p>=4){o.push(T(240,178,'The number OUTSIDE must multiply EVERY term inside, not just the first','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expanding a fraction-like bracket','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Expand 6(2x \u2212 1)','#241A17',18,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'6\u00d72x = 12x','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'6\u00d7(\u22121) = \u22126, so 12x \u2212 6','#1a7a3a',14,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Mixed expanding practice','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Step 1: multiply the outside number by EACH term inside','#241A17',12,'middle'));}if(p>=2){o.push(T(240,86,'Step 2: keep the correct signs for each term','#241A17',12,'middle'));}if(p>=3){o.push(R(80,106,320,40,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,124,'Example: 3(x \u2212 4)','#1a7a3a',12,'middle'));o.push(T(240,140,'= 3x \u2212 12','#1a7a3a',13,'middle'));}s.innerHTML=o.join('');}
+
 
 var QS=[
-  {ey:'Q4 \u00b7 Year 7 \u00b7 Algebra',ti:'Expanding Single Brackets',su:'Expand 3(x + 4).',steps:[
+  {ey:'Q1 \u00b7 Year 7 \u00b7 Expanding Single Brackets',ti:'Expanding Single Brackets',su:'Expand 3(x + 4).',steps:[
     {lb:'Rectangle method',dr:dQ1,ht:'<p>Multiply everything <b>inside</b> the bracket by the number <b>outside</b>. The rectangle shows the two areas.</p>',speak:'Multiply everything inside the bracket by the number outside. The rectangle shows the two areas.'},
     {lb:'Multiply each term',dr:dQ1,ht:'<div class="fm">3 \u00d7 x = 3x</div><div class="fm">3 \u00d7 4 = 12</div>',speak:'3 times x is 3x. 3 times 4 is 12.'},
     {lb:'Result',dr:dQ1,ht:'<div class="fm">3(x + 4) = 3x + 12</div>',speak:'So 3 times the bracket, x plus 4, equals 3x plus 12.'},
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var a=rInt(2,6),b=rInt(1,9);return{question:'Expand <b>'+a+'(x + '+b+')</b>. What is the constant term?',hints:['Multiply '+a+' by x: '+a+'x','Multiply '+a+' by '+b+': ?'],ans:a*b,tol:0,unit:'',working:a+'(x + '+b+') = '+a+'x + '+a*b+'. Constant = '+a*b};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
-  ]}
+  ]},
+  {ey:'Q2 \u00b7 Year 7 \u00b7 Expanding Single Brackets',ti:'Expanding with a Negative Multiplier',su:'Expand \u22122(x + 3).',steps:[
+    {lb:'A negative outside',dr:dQ2,ht:'<p>Expand \u22122(x + 3) \u2014 what happens when the number outside is negative?</p>',speak:'Expand negative 2 times the bracket x plus 3 \u2014 what happens when the number outside is negative?'},
+    {lb:'Multiply the x term',dr:dQ2,ht:'<div class="fm">\u22122\u00d7x = \u22122x</div>',speak:'Negative 2 times x is negative 2x.'},
+    {lb:'Multiply the constant',dr:dQ2,ht:'<div class="fm">\u22122\u00d73 = \u22126, so \u22122x \u2212 6</div>',speak:'Negative 2 times 3 is negative 6, giving negative 2x minus 6.'},
+    {lb:'The key rule',dr:dQ2,ht:'<p>A negative outside flips the sign of EVERY term inside the bracket.</p>',speak:'A negative outside flips the sign of every term inside the bracket.'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var a=rInt(2,6),b=rInt(1,9);var ans=-a*b;return{question:'Expand <b>\u2212'+a+'(x + '+b+')</b>. What is the constant term?',hints:['\u2212'+a+'\u00d7'+b+' = ?'],ans:ans,tol:0,unit:'',working:'\u2212'+a+'(x + '+b+') = \u2212'+a+'x '+(ans<0?'\u2212 '+Math.abs(ans):'+ '+ans)};}),speak:'Now it\u2019s your turn \u2014 expand with the negative multiplier.'},
+  ]},
+  {ey:'Q3 \u00b7 Year 7 \u00b7 Expanding Single Brackets',ti:'Expand, Then Simplify',su:'Expand and simplify 2(x + 3) + 4.',steps:[
+    {lb:'Two steps in one question',dr:dQ3,ht:'<p>Expand and simplify 2(x + 3) + 4 \u2014 first expand, then collect any remaining like terms.</p>',speak:'Expand and simplify 2 times the bracket x plus 3, plus 4 \u2014 first expand, then collect any remaining like terms.'},
+    {lb:'Expand the bracket',dr:dQ3,ht:'<div class="fm">2(x+3) = 2x+6</div>',speak:'2 times the bracket x plus 3 equals 2x plus 6.'},
+    {lb:'Add the extra term',dr:dQ3,ht:'<div class="fm">2x+6+4 = 2x+10</div>',speak:'2x plus 6 plus 4 equals 2x plus 10.'},
+    {lb:'The order matters',dr:dQ3,ht:'<p>Expand FIRST, then collect any remaining like terms \u2014 don\u2019t try to simplify inside the bracket before expanding.</p>',speak:'Expand first, then collect any remaining like terms \u2014 don\u2019t try to simplify inside the bracket before expanding.'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var a=rInt(2,6),b=rInt(1,9),c=rInt(1,10);var ans=a*b+c;return{question:'Expand and simplify <b>'+a+'(x + '+b+') + '+c+'</b>. What is the constant term?',hints:['Expand: '+a+'x + '+(a*b),'Then add '+c],ans:ans,tol:0,unit:'',working:a+'x+'+(a*b)+'+'+c+' = '+a+'x+'+ans};}),speak:'Now it\u2019s your turn \u2014 expand first, then simplify.'},
+  ]},
+  {ey:'Q4 \u00b7 Year 7 \u00b7 Expanding Single Brackets',ti:'Expanding with Subtraction Inside',su:'Expand 5(x \u2212 2).',steps:[
+    {lb:'Subtraction inside the bracket',dr:dQ4,ht:'<p>Expand 5(x \u2212 2) \u2014 the same method works with subtraction.</p>',speak:'Expand 5 times the bracket x minus 2 \u2014 the same method works with subtraction.'},
+    {lb:'Multiply the x term',dr:dQ4,ht:'<div class="fm">5\u00d7x = 5x</div>',speak:'5 times x is 5x.'},
+    {lb:'Multiply the constant',dr:dQ4,ht:'<div class="fm">5\u00d7(\u22122) = \u221210, so 5x \u2212 10</div>',speak:'5 times negative 2 is negative 10, giving 5x minus 10.'},
+    {lb:'Keep the sign attached',dr:dQ4,ht:'<p>Think of the minus sign as part of the term \u2014 it\u2019s "negative 2", not a separate subtraction.</p>',speak:'Think of the minus sign as part of the term \u2014 it\u2019s negative 2, not a separate subtraction.'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var a=rInt(2,7),b=rInt(1,9);var ans=-a*b;return{question:'Expand <b>'+a+'(x \u2212 '+b+')</b>. What is the constant term?',hints:[a+'\u00d7(\u2212'+b+') = ?'],ans:ans,tol:0,unit:'',working:a+'(x \u2212 '+b+') = '+a+'x '+(ans<0?'\u2212 '+Math.abs(ans):'+ '+ans)};}),speak:'Now it\u2019s your turn \u2014 expand this bracket with subtraction inside.'},
+  ]},
+  {ey:'Q5 \u00b7 Year 7 \u00b7 Expanding Single Brackets',ti:'Expanding with a Coefficient Inside',su:'Expand 3(2x + 5).',steps:[
+    {lb:'A coefficient already inside',dr:dQ5,ht:'<p>Expand 3(2x + 5) \u2014 the x term already has a coefficient before we even multiply.</p>',speak:'Expand 3 times the bracket 2x plus 5 \u2014 the x term already has a coefficient before we even multiply.'},
+    {lb:'Multiply the coefficients',dr:dQ5,ht:'<div class="fm">3\u00d72x = 6x</div>',speak:'3 times 2x is 6x.'},
+    {lb:'Multiply the constant',dr:dQ5,ht:'<div class="fm">3\u00d75 = 15, so 6x + 15</div>',speak:'3 times 5 is 15, giving 6x plus 15.'},
+    {lb:'Multiply the numbers together',dr:dQ5,ht:'<p>Multiply the COEFFICIENTS together: 3\u00d72=6 \u2014 the letter just comes along for the ride.</p>',speak:'Multiply the coefficients together: 3 times 2 is 6 \u2014 the letter just comes along for the ride.'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var a=rInt(2,6),c=rInt(2,5),b=rInt(1,9);var ans=a*b;return{question:'Expand <b>'+a+'('+c+'x + '+b+')</b>. What is the constant term?',hints:[a+'\u00d7'+b+' = ?'],ans:ans,tol:0,unit:'',working:a+'('+c+'x + '+b+') = '+(a*c)+'x + '+ans};}),speak:'Now it\u2019s your turn \u2014 multiply the coefficients together.'},
+  ]},
+  {ey:'Q6 \u00b7 Year 7 \u00b7 Expanding Single Brackets',ti:'Real Life: Area Model',su:'A rectangle is 4 wide and (x+3) long. Find its area.',steps:[
+    {lb:'The scenario',dr:dQ6,ht:'<p>A rectangle is 4 units wide and (x+3) units long. Find its area.</p>',speak:'A rectangle is 4 units wide and x plus 3 units long. Find its area.'},
+    {lb:'Set up the multiplication',dr:dQ6,ht:'<div class="fm">Area = 4 \u00d7 (x+3)</div>',speak:'Area equals 4 times the bracket x plus 3.'},
+    {lb:'Expand',dr:dQ6,ht:'<div class="fm">= 4x + 12</div>',speak:'That expands to 4x plus 12.'},
+    {lb:'Real geometry uses expanding',dr:dQ6,ht:'<p>Expanding brackets is exactly how area formulas work when one side has an unknown length.</p>',speak:'Expanding brackets is exactly how area formulas work when one side has an unknown length.'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var w=rInt(2,8),b=rInt(1,9);var ans=w*b;return{question:'A rectangle is '+w+' wide and (x+'+b+') long. Find the constant term of its area expression.',hints:['Area = '+w+' \u00d7 (x+'+b+')'],ans:ans,tol:0,unit:'',working:w+'\u00d7(x+'+b+') = '+w+'x + '+ans};}),speak:'Now it\u2019s your turn \u2014 find the area of this rectangle.'},
+  ]},
+  {ey:'Q7 \u00b7 Year 7 \u00b7 Expanding Single Brackets',ti:'Expand, Then Solve',su:'Solve 2(x + 3) = 16.',steps:[
+    {lb:'An equation with a bracket',dr:dQ7,ht:'<p>Solve 2(x + 3) = 16 \u2014 first expand the bracket, then solve as normal.</p>',speak:'Solve 2 times the bracket x plus 3, equals 16 \u2014 first expand the bracket, then solve as normal.'},
+    {lb:'Expand first',dr:dQ7,ht:'<div class="fm">Expand: 2x + 6 = 16</div>',speak:'Expanding gives 2x plus 6 equals 16.'},
+    {lb:'Solve as usual',dr:dQ7,ht:'<div class="fm">2x = 10, x = 5</div>',speak:'2x equals 10, so x equals 5.'},
+    {lb:'The strategy',dr:dQ7,ht:'<p>Expand FIRST, then solve like any two-step equation.</p>',speak:'Expand first, then solve like any two-step equation.'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var x=rInt(2,10),a=rInt(2,6),b=rInt(1,8);var rhs=a*(x+b);return{question:'Solve <b>'+a+'(x + '+b+') = '+rhs+'</b>.',hints:['Expand: '+a+'x + '+(a*b)+' = '+rhs,'Then solve for x'],ans:x,tol:0,unit:'',working:a+'x+'+(a*b)+'='+rhs+' \u2192 '+a+'x='+(rhs-a*b)+' \u2192 x='+x};}),speak:'Now it\u2019s your turn \u2014 expand the bracket, then solve.'},
+  ]},
+  {ey:'Q8 \u00b7 Year 7 \u00b7 Expanding Single Brackets',ti:'A Common Mistake',su:'Expand 4(x + 5) \u2014 avoiding a classic error.',steps:[
+    {lb:'A tempting shortcut',dr:dQ8,ht:'<p>Expand 4(x + 5). It\u2019s tempting to only multiply the FIRST term \u2014 but that\u2019s wrong.</p>',speak:'Expand 4 times the bracket x plus 5. It\u2019s tempting to only multiply the first term \u2014 but that\u2019s wrong.'},
+    {lb:'The wrong way',dr:dQ8,ht:'<div class="fm">WRONG: 4x + 5</div>',speak:'The wrong way: 4x plus 5 \u2014 this only multiplied the x, not the 5.'},
+    {lb:'The right way',dr:dQ8,ht:'<div class="fm">RIGHT: 4x + 20</div>',speak:'The right way: 4x plus 20, since 4 times 5 is 20.'},
+    {lb:'The golden rule',dr:dQ8,ht:'<p>The number OUTSIDE must multiply EVERY term inside, not just the first one.</p>',speak:'The number outside must multiply every term inside, not just the first one.'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var a=rInt(2,7),b=rInt(1,9);var ans=a*b;return{question:'Expand <b>'+a+'(x + '+b+')</b> correctly. What is the constant term? (Don\u2019t forget to multiply BOTH terms!)',hints:['Multiply '+a+' by BOTH x and '+b],ans:ans,tol:0,unit:'',working:a+'(x + '+b+') = '+a+'x + '+ans};}),speak:'Now it\u2019s your turn \u2014 remember to multiply every term inside.'},
+  ]},
+  {ey:'Q9 \u00b7 Year 7 \u00b7 Expanding Single Brackets',ti:'More Expanding Practice',su:'Expand 6(2x \u2212 1).',steps:[
+    {lb:'Combining the skills',dr:dQ9,ht:'<p>Expand 6(2x \u2212 1) \u2014 a coefficient inside AND subtraction, together.</p>',speak:'Expand 6 times the bracket 2x minus 1 \u2014 a coefficient inside and subtraction, together.'},
+    {lb:'Multiply the x term',dr:dQ9,ht:'<div class="fm">6\u00d72x = 12x</div>',speak:'6 times 2x is 12x.'},
+    {lb:'Multiply the constant',dr:dQ9,ht:'<div class="fm">6\u00d7(\u22121) = \u22126, so 12x \u2212 6</div>',speak:'6 times negative 1 is negative 6, giving 12x minus 6.'},
+    {lb:'Combine both skills',dr:dQ9,ht:'<p>Multiply coefficients together, and keep track of negative signs \u2014 both at once.</p>',speak:'Multiply coefficients together, and keep track of negative signs \u2014 both at once.'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var a=rInt(2,7),c=rInt(2,4),b=rInt(1,9);var ans=-a*b;return{question:'Expand <b>'+a+'('+c+'x \u2212 '+b+')</b>. What is the constant term?',hints:[a+'\u00d7(\u2212'+b+') = ?'],ans:ans,tol:0,unit:'',working:a+'('+c+'x \u2212 '+b+') = '+(a*c)+'x '+(ans<0?'\u2212 '+Math.abs(ans):'+ '+ans)};}),speak:'Now it\u2019s your turn \u2014 combine coefficient and subtraction rules.'},
+  ]},
+  {ey:'Q10 \u00b7 Year 7 \u00b7 Expanding Single Brackets',ti:'Mixed Practice',su:'Combine everything you\u2019ve learned about expanding brackets.',steps:[
+    {lb:'Step 1: identify the parts',dr:dQ10,ht:'<p>Identify the number outside, and the terms inside the bracket.</p>',speak:'Step 1: identify the number outside, and the terms inside the bracket.'},
+    {lb:'Step 2: multiply every term',dr:dQ10,ht:'<p>Multiply the outside number by EACH term inside, keeping the correct sign.</p>',speak:'Step 2: multiply the outside number by each term inside, keeping the correct sign.'},
+    {lb:'Worked example',dr:dQ10,ht:'<div class="fm">3(x \u2212 4) = 3x \u2212 12</div>',speak:'For example: 3 times the bracket x minus 4 equals 3x minus 12.'},
+    {lb:'Double-check with a value',dr:dQ10,ht:'<p>Try substituting a number to check the expanded form matches the original.</p>',speak:'Try substituting a number to check the expanded form matches the original.'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var a=rInt(2,8),b=rInt(1,9);var neg=rPick([true,false]);var ans=neg?-a*b:a*b;return{question:'Expand <b>'+a+'(x '+(neg?'\u2212':'+')+' '+b+')</b>. What is the constant term?',hints:[a+'\u00d7'+(neg?'\u2212':'')+b+' = ?'],ans:ans,tol:0,unit:'',working:a+'(x '+(neg?'\u2212':'+')+' '+b+') = '+a+'x '+(ans<0?'\u2212 '+Math.abs(ans):'+ '+ans)};}),speak:'Now it\u2019s your turn \u2014 one final mixed expanding question.'},
+  ]},
+
 ];
 
 var qi=0,si=0;
