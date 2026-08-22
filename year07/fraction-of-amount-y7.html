@@ -1,4 +1,4 @@
-<!-- REVIEW STATUS: SPLIT from year07/number-y7.html 22 Aug 2026 — needs fresh staff review -->
+<!-- REVIEW STATUS: NEW — built out to full 10-checkpoint depth with sound, 22 Aug 2026, needs staff review -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +14,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fraction of an Amount · Year 7 · Maths Walkthroughs</title>
-<style>
 <style>
 :root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -41,6 +40,12 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
 .pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
 .fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.reader-row{width:100%;max-width:760px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.reader-btn{font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:5px;border:1.5px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.reader-btn.active{background:var(--gold);color:#fff;}
+.reader-btn:disabled{opacity:.4;cursor:default;}
+.reader-status{font-size:11.5px;color:#6b5750;}
+.reader-voice{font-size:12px;padding:6px 8px;border:1.5px solid var(--line);border-radius:5px;background:#fff;font-family:inherit;}
 .ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
 .btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
 .btn.p{background:var(--red);color:#fff;}
@@ -71,11 +76,9 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
-
 .newq-btn{float:right;font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
 .newq-btn:hover{background:var(--gold);color:#fff;}
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
-</style>
 </style>
 </head>
 <body>
@@ -96,6 +99,13 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
       <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
       <div class="pnl fi" id="pn"></div>
     </div>
+    <div class="reader-row">
+      <button class="reader-btn" id="readBtn">🔊 Read this step</button>
+      <button class="reader-btn" id="autoBtn">▶ Auto-play question</button>
+      <button class="reader-btn" id="stopReadBtn" style="display:none">■ Stop</button>
+      <select class="reader-voice" id="voiceSel"></select>
+      <span class="reader-status" id="readerStatus"></span>
+    </div>
     <div class="ctrl">
       <button class="btn" id="pb">&larr; Back</button>
       <div class="dots" id="dt"></div>
@@ -109,6 +119,7 @@ var ST={};
 
 function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function rPick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);return b===0?a:gcd(b,a%b);}
 
 function htmlFrac(num,den,col,lbl){
   col=col||'#C0272D';
@@ -130,13 +141,12 @@ function tryIt(genFn){
 
 function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
-  var wk=(h?'<ul class=\"hl\">'+h+'</ul>':'')+'<div class=\"wk-b\">'+o.working+'</div>';
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ex=o.extraHTML||'';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
   var ansBox=o.frac
     ? '<div class="ar"><div class="fracbox"><input type="number" step="any" placeholder="num" class="try-num" data-tryid="'+id+'"/><div class="fracline"></div><input type="number" step="any" placeholder="den" class="try-den" data-tryid="'+id+'"/></div><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
     : '<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>';
-  // Use data-tryid attributes instead of inline onclick with dynamic strings
   return '<div class="try" data-tryid="'+id+'">'
     +'<div class="try-t">✔ Your Turn'
     +' <button class="newq-btn" data-tryid="'+id+'">↻ New</button></div>'
@@ -175,7 +185,7 @@ function ckById(id){
     if(ok){
       fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
     }else if(o.fracExact&&Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){
-      fb.className='try-fb fb er';fb.textContent='That\u2019s an equivalent fraction, but not fully simplified \u2014 try again.';
+      fb.className='try-fb fb er';fb.textContent='That’s an equivalent fraction, but not fully simplified — try again.';
     }else{
       fb.className='try-fb fb er';fb.textContent='Not quite — try again.';
     }
@@ -185,6 +195,14 @@ function ckById(id){
   if(!inp)return;
   var v=parseFloat(inp.value);
   if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+  if(o.range){
+    if(v>o.rangeMin && v<o.rangeMax){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else{
+      fb.className='try-fb fb er';fb.textContent='Not quite — that’s outside the range. Try again.';
+    }
+    return;
+  }
   if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
     fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
   }else{
@@ -192,7 +210,6 @@ function ckById(id){
   }
 }
 
-// Single delegated event listener - no inline onclick needed
 document.addEventListener('click',function(e){
   var btn=e.target;
   if(btn.classList.contains('newq-btn')){
@@ -202,70 +219,221 @@ document.addEventListener('click',function(e){
   }
 });
 
-function svgFrac(x,y,num,den,col,sz){
-  col=col||'#C0272D';sz=sz||14;
-  var hw=Math.max(String(num).length,String(den).length)*sz*0.36+6;
-  return '<text x="'+x+'" y="'+(y-2)+'" font-size="'+sz+'" font-family="Arial" fill="'+col+'" text-anchor="middle" font-weight="700">'+num+'</text>'
-    +'<line x1="'+(x-hw)+'" y1="'+y+'" x2="'+(x+hw)+'" y2="'+y+'" stroke="'+col+'" stroke-width="1.5"/>'
-    +'<text x="'+x+'" y="'+(y+sz+2)+'" font-size="'+sz+'" font-family="Arial" fill="'+col+'" text-anchor="middle">'+den+'</text>';
-}
-
-function fracBar(total,num,den,result){
-  var bx=40,bw=300,bh=32,pw=bw/den,out='';
-  for(var i=0;i<den;i++){
-    var fill=(i<num)?'#C0272D':'#f5e6e6';
-    out+='<rect x="'+(bx+i*pw)+'" y="0" width="'+(pw-2)+'" height="'+bh+'" fill="'+fill+'" stroke="#C0272D" stroke-width="1.5" rx="2"/>';
-    out+='<text x="'+(bx+i*pw+pw/2)+'" y="'+(bh/2+5)+'" font-size="12" font-family="Arial" fill="'+(i<num?'#fff':'#C0272D')+'" text-anchor="middle">'+Math.round(total/den)+'</text>';
-  }
-  // summary label placed clear of the bar itself (to the right), so it never overlaps a box's own number
-  out+='<text x="'+(bx+bw+18)+'" y="'+(bh/2+5)+'" font-size="14" font-family="Arial" fill="#1a7a3a" font-weight="700">= '+result+'</text>';
-  return out;
-}
-
-function pieSlices(cx,cy,r,den,filled){
-  var out='',ang=-90,step=360/den;
-  for(var i=0;i<den;i++){
-    var a0=(ang+i*step)*Math.PI/180,a1=(ang+(i+1)*step)*Math.PI/180;
-    var x0=(cx+r*Math.cos(a0)).toFixed(1),y0=(cy+r*Math.sin(a0)).toFixed(1);
-    var x1=(cx+r*Math.cos(a1)).toFixed(1),y1=(cy+r*Math.sin(a1)).toFixed(1);
-    var large=step>180?1:0;
-    var fill=(i<filled)?'#C0272D':'#fdf1ea';
-    out+='<path d="M '+cx+' '+cy+' L '+x0+' '+y0+' A '+r+' '+r+' 0 '+large+' 1 '+x1+' '+y1+' Z" fill="'+fill+'" stroke="#fff" stroke-width="2"/>';
-  }
-  return out;
-}
-
 function g(){return document.getElementById('dg');}
 function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
 function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" rx="3"/>';}
 function L(x1,y1,x2,y2,c,w){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'"/>';}
-function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];o.push(svgFrac(140,24,3,4,'#C0272D',22));o.push(T(185,32,'of 80','#C0272D',20,'start',true));if(p>=1){
-    o.push(T(150,58,'Share 80 into 4 equal slices','#241A17',12,'middle',false));
-    o.push(T(150,72,'(like sharing a pizza!)','#888',10,'middle',false));
-    o.push(pieSlices(150,150,58,4,0));
-    o.push(T(150,222,'80 ÷ 4 = 20 per slice','#C0272D',13,'middle',true));
-  }if(p>=2){
-    o.push(T(345,58,'Take 3 of those slices','#1a5a8a',12,'middle',false));
-    o.push(pieSlices(345,150,58,4,3));
-    o.push(T(345,222,'3 × 20 = 60','#1a5a8a',13,'middle',true));
-  }if(p>=3){o.push(R(140,232,200,26,'#e8f8ee','#1a7a3a',2));o.push(T(240,250,'¾ of 80 = 60','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||2)+'"/>';}
+function svgFrac(x,y,num,den,col,sz){col=col||'#C0272D';sz=sz||14;var hw=Math.max(String(num).length,String(den).length)*sz*0.36+6;return '<text x="'+x+'" y="'+(y-2)+'" font-size="'+sz+'" font-family="Arial" fill="'+col+'" text-anchor="middle" font-weight="700">'+num+'</text>'+'<line x1="'+(x-hw)+'" y1="'+y+'" x2="'+(x+hw)+'" y2="'+y+'" stroke="'+col+'" stroke-width="1.5"/>'+'<text x="'+x+'" y="'+(y+sz+2)+'" font-size="'+sz+'" font-family="Arial" fill="'+col+'" text-anchor="middle">'+den+'</text>';}
+function pieSlices(cx,cy,r,den,filled){var out='',ang=-90,step=360/den;for(var i=0;i<den;i++){var a0=(ang+i*step)*Math.PI/180,a1=(ang+(i+1)*step)*Math.PI/180;var x0=(cx+r*Math.cos(a0)).toFixed(1),y0=(cy+r*Math.sin(a0)).toFixed(1);var x1=(cx+r*Math.cos(a1)).toFixed(1),y1=(cy+r*Math.sin(a1)).toFixed(1);var large=step>180?1:0;var fill=(i<filled)?'#C0272D':'#fdf1ea';out+='<path d="M '+cx+' '+cy+' L '+x0+' '+y0+' A '+r+' '+r+' 0 '+large+' 1 '+x1+' '+y1+' Z" fill="'+fill+'" stroke="#fff" stroke-width="2"/>';}return out;}
+
+function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];o.push(svgFrac(140,24,3,4,'#C0272D',22));o.push(T(185,32,'of 80','#C0272D',20,'start',true));if(p>=1){o.push(T(150,58,'Share 80 into 4 equal slices','#241A17',12,'middle',false));o.push(T(150,72,'(like sharing a pizza!)','#888',10,'middle',false));o.push(pieSlices(150,150,58,4,0));o.push(T(150,222,'80 \u00f7 4 = 20 per slice','#C0272D',13,'middle',true));}if(p>=2){o.push(T(345,58,'Take 3 of those slices','#1a5a8a',12,'middle',false));o.push(pieSlices(345,150,58,4,3));o.push(T(345,222,'3 \u00d7 20 = 60','#1a5a8a',13,'middle',true));}if(p>=3){o.push(R(140,232,200,26,'#e8f8ee','#1a7a3a',2));o.push(T(240,250,'\u00be of 80 = 60','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Fraction of a money amount','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Find 2/5 of \u20a6150','#241A17',18,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'\u20a6150 \u00f7 5 = \u20a630 per fifth','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'\u20a630 \u00d7 2 = \u20a660','#1a7a3a',16,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Fraction of a bigger amount','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Find 5/8 of 320','#241A17',18,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'320 \u00f7 8 = 40 per eighth','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'40 \u00d7 5 = 200','#1a7a3a',16,'middle',true));}if(p>=4){o.push(T(240,178,'Same method works for any size of number','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Finding the WHOLE from a fraction','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'3/5 of a number is 24. What is the whole number?','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'24 \u00f7 3 = 8 per fifth','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'8 \u00d7 5 = 40 (the whole)','#1a7a3a',15,'middle',true));}if(p>=4){o.push(T(240,178,'This is the REVERSE of finding a fraction of an amount','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Comparing fraction amounts','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Which is more: 1/3 of 90, or 2/5 of 60?','#241A17',12,'middle'));}if(p>=2){o.push(R(60,80,150,36,'#fff5f0','#C0272D',1.5));o.push(T(135,103,'1/3 of 90 = 30','#C0272D',13,'middle',true));o.push(R(270,80,150,36,'#e8f4ff','#1a5a8a',1.5));o.push(T(345,103,'2/5 of 60 = 24','#1a5a8a',13,'middle',true));}if(p>=3){o.push(R(90,128,300,30,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,148,'30 > 24, so 1/3 of 90 is MORE','#1a7a3a',13,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Real life: fraction of an hour','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Find 3/4 of an hour (60 minutes)','#241A17',15,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'60 \u00f7 4 = 15 min per quarter','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'15 \u00d7 3 = 45 minutes','#1a7a3a',16,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Real life: recipe scaling','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A recipe makes 24 cookies. You only want 2/3 of the batch.','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'24 \u00f7 3 = 8 per third','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'8 \u00d7 2 = 16 cookies','#1a7a3a',16,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'A fraction OF a fraction','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Find 1/2 of 2/3','#241A17',18,'middle',true));}if(p>=2){o.push(T(240,90,'\u201cOf\u201d means multiply','#888',11,'middle'));}if(p>=3){o.push(R(140,104,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,126,'1/2 \u00d7 2/3 = 2/6','#C0272D',15,'middle',true));}if(p>=4){o.push(R(140,148,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,170,'2/6 simplifies to 1/3','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Fraction of a distance','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A 40 km journey is 3/8 complete. How far has been travelled?','#241A17',11,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'40 \u00f7 8 = 5 km per eighth','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'5 \u00d7 3 = 15 km','#1a7a3a',16,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Mixed fraction-of-an-amount practice','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Step 1: divide by the denominator','#241A17',12,'middle'));}if(p>=2){o.push(T(240,86,'Step 2: multiply by the numerator','#241A17',12,'middle'));}if(p>=3){o.push(R(80,106,320,40,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,124,'Example: 5/6 of 72','#1a7a3a',13,'middle'));o.push(T(240,140,'72\u00f76=12, 12\u00d75=60','#1a7a3a',13,'middle'));}s.innerHTML=o.join('');}
+
 
 var QS=[
-  {ey:'Q8 · Year 7 · Number',ti:'Fraction of an Amount',su:'Find 3/4 of 80.',steps:[
-    {lb:'The method',dr:dQ1,ht:'<p><b>Divide</b> by the denominator (bottom), then <b>multiply</b> by the numerator (top).</p><p style="margin-top:8px;">'+htmlFrac(3,4,'#C0272D',true)+' of 80 → 80 ÷ 4 × 3</p>'},
-    {lb:'Divide by 4',dr:dQ1,ht:'<div class="fm">80 ÷ 4 = 20 (one quarter)</div>'},
-    {lb:'Multiply by 3',dr:dQ1,ht:'<div class="fm">20 × 3 = 60 (three quarters)</div>'},
-    {lb:'Answer',dr:dQ1,ht:'<div class="fm">3/4 of 80 = 60</div>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var fracs=[[1,2],[1,4],[3,4],[2,5],[3,5],[1,3],[2,3]];var fr=rPick(fracs),nu=fr[0],de=fr[1],base=rInt(2,8)*de,ans=base/de*nu;var bar='<svg viewBox="0 0 200 190" style="width:170px;display:block;margin:8px auto;">'+pieSlices(100,85,72,de,nu)+'<text x="100" y="178" font-size="12" font-family="Arial" fill="#888" text-anchor="middle">'+(base/de)+' per slice</text></svg>';return{question:'Find '+htmlFrac(nu,de,'#C0272D',false)+' of <b>'+base+'</b>.',hints:['Divide '+base+' by '+de+' = '+(base/de),'Then multiply by '+nu],ans:ans,tol:0.05,unit:'',extraHTML:bar,working:base+'÷'+de+'='+(base/de)+'. ×'+nu+'='+ans};})},
-  ]}
+  {ey:'Q1 \u00b7 Year 7 \u00b7 Fraction of an Amount',ti:'Fraction of an Amount',su:'Find 3/4 of 80.',steps:[
+    {lb:'The method',dr:dQ1,ht:'<p><b>Divide</b> by the denominator (bottom), then <b>multiply</b> by the numerator (top).</p><p style="margin-top:8px;">'+htmlFrac(3,4,'#C0272D',true)+' of 80 \u2192 80 \u00f7 4 \u00d7 3</p>',speak:'Divide by the denominator, then multiply by the numerator.'},
+    {lb:'Divide by 4',dr:dQ1,ht:'<div class="fm">80 \u00f7 4 = 20 (one quarter)</div>',speak:'80 divided by 4 equals 20 \u2014 that\u2019s one quarter.'},
+    {lb:'Multiply by 3',dr:dQ1,ht:'<div class="fm">20 \u00d7 3 = 60 (three quarters)</div>',speak:'20 times 3 equals 60 \u2014 that\u2019s three quarters.'},
+    {lb:'Answer',dr:dQ1,ht:'<div class="fm">3/4 of 80 = 60</div>',speak:'So 3 quarters of 80 is 60.'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var fracs=[[1,2],[1,4],[3,4],[2,5],[3,5],[1,3],[2,3]];var fr=rPick(fracs),nu=fr[0],de=fr[1],base=rInt(2,8)*de,ans=base/de*nu;var bar='<svg viewBox="0 0 200 190" style="width:170px;display:block;margin:8px auto;">'+pieSlices(100,85,72,de,nu)+'<text x="100" y="178" font-size="12" font-family="Arial" fill="#888" text-anchor="middle">'+(base/de)+' per slice</text></svg>';return{question:'Find '+htmlFrac(nu,de,'#C0272D',false)+' of <b>'+base+'</b>.',hints:['Divide '+base+' by '+de+' = '+(base/de),'Then multiply by '+nu],ans:ans,tol:0.05,unit:'',extraHTML:bar,working:base+'\u00f7'+de+'='+(base/de)+'. \u00d7'+nu+'='+ans};}),speak:'Now it is your turn \u2014 find this fraction of the amount.'},
+  ]},
+  {ey:'Q2 \u00b7 Year 7 \u00b7 Fraction of an Amount',ti:'Fraction of a Money Amount',su:'Find 2/5 of \u20a6150.',steps:[
+    {lb:'Same method, with money',dr:dQ2,ht:'<p>The exact same divide-then-multiply method works with money amounts.</p>',speak:'The exact same divide-then-multiply method works with money amounts.'},
+    {lb:'Divide by the denominator',dr:dQ2,ht:'<div class="fm">\u20a6150 \u00f7 5 = \u20a630 per fifth</div>',speak:'150 naira divided by 5 gives 30 naira per fifth.'},
+    {lb:'Multiply by the numerator',dr:dQ2,ht:'<div class="fm">\u20a630 \u00d7 2 = \u20a660</div>',speak:'30 naira times 2 gives 60 naira.'},
+    {lb:'The answer',dr:dQ2,ht:'<p>2/5 of \u20a6150 = \u20a660.</p>',speak:'So 2 fifths of 150 naira is 60 naira.'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var fracs=[[1,2],[1,4],[3,4],[2,5],[3,5],[1,5]];var f=rPick(fracs);var base=rInt(2,10)*f[1]*10;var ans=base/f[1]*f[0];return{question:'Find <b>'+f[0]+'/'+f[1]+'</b> of <b>\u20a6'+base+'</b>.',hints:['\u20a6'+base+' \u00f7 '+f[1]+' = \u20a6'+(base/f[1])],ans:ans,tol:0.5,unit:'\u20a6',working:base+'\u00f7'+f[1]+'='+(base/f[1])+'. \u00d7'+f[0]+'=\u20a6'+ans};}),speak:'Now it is your turn \u2014 find this fraction of the money amount.'},
+  ]},
+  {ey:'Q3 \u00b7 Year 7 \u00b7 Fraction of an Amount',ti:'Fraction of a Bigger Amount',su:'Find 5/8 of 320.',steps:[
+    {lb:'It works for any size',dr:dQ3,ht:'<p>The divide-then-multiply method scales to any size of number.</p>',speak:'The divide-then-multiply method scales to any size of number.'},
+    {lb:'Divide by 8',dr:dQ3,ht:'<div class="fm">320 \u00f7 8 = 40 per eighth</div>',speak:'320 divided by 8 gives 40 per eighth.'},
+    {lb:'Multiply by 5',dr:dQ3,ht:'<div class="fm">40 \u00d7 5 = 200</div>',speak:'40 times 5 equals 200.'},
+    {lb:'Confirm the method scales',dr:dQ3,ht:'<p>Same method works for any size of number \u2014 small or large.</p>',speak:'The same method works for any size of number, small or large.'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var fracs=[[3,8],[5,8],[7,8],[5,6],[7,10],[9,10]];var f=rPick(fracs);var base=f[1]*rInt(10,50);var ans=base/f[1]*f[0];return{question:'Find <b>'+f[0]+'/'+f[1]+'</b> of <b>'+base+'</b>.',hints:[base+' \u00f7 '+f[1]+' = '+(base/f[1])],ans:ans,tol:0.5,unit:'',working:base+'\u00f7'+f[1]+'='+(base/f[1])+'. \u00d7'+f[0]+'='+ans};}),speak:'Now it is your turn \u2014 find this fraction of a larger amount.'},
+  ]},
+  {ey:'Q4 \u00b7 Year 7 \u00b7 Fraction of an Amount',ti:'Finding the Whole from a Fraction',su:'3/5 of a number is 24. Find the whole number.',steps:[
+    {lb:'The reverse problem',dr:dQ4,ht:'<p>3/5 of a number is 24. What is the whole number? This works BACKWARDS from what we\u2019ve done so far.</p>',speak:'3 fifths of a number is 24. What is the whole number? This works backwards from what we\u2019ve done so far.'},
+    {lb:'Find one fifth',dr:dQ4,ht:'<div class="fm">24 \u00f7 3 = 8 per fifth</div>',speak:'24 divided by 3 gives 8 per fifth.'},
+    {lb:'Scale up to the whole',dr:dQ4,ht:'<div class="fm">8 \u00d7 5 = 40 (the whole)</div>',speak:'8 times 5 equals 40 \u2014 that\u2019s the whole number.'},
+    {lb:'Why this works',dr:dQ4,ht:'<p>This is the REVERSE of finding a fraction of an amount \u2014 divide by the numerator, multiply by the denominator.</p>',speak:'This is the reverse of finding a fraction of an amount \u2014 divide by the numerator, multiply by the denominator.'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var d=rInt(2,8),n=rInt(1,d-1);var perPart=rInt(2,15);var partVal=perPart*n;var whole=perPart*d;return{question:'<b>'+n+'/'+d+'</b> of a number is <b>'+partVal+'</b>. Find the whole number.',hints:[partVal+' \u00f7 '+n+' = '+perPart+' per part','Then \u00d7 '+d+' for the whole'],ans:whole,tol:0,unit:'',working:partVal+'\u00f7'+n+'='+perPart+'. \u00d7'+d+'='+whole};}),speak:'Now it is your turn \u2014 work backwards to find the whole number.'},
+  ]},
+  {ey:'Q5 \u00b7 Year 7 \u00b7 Fraction of an Amount',ti:'Comparing Fraction Amounts',su:'Which is more: 1/3 of 90, or 2/5 of 60?',steps:[
+    {lb:'The comparison',dr:dQ5,ht:'<p>Which is more: 1/3 of 90, or 2/5 of 60? We need to calculate both first.</p>',speak:'Which is more: 1 third of 90, or 2 fifths of 60? We need to calculate both first.'},
+    {lb:'Calculate the first',dr:dQ5,ht:'<div class="fm">1/3 of 90 = 30</div>',speak:'1 third of 90 is 30.'},
+    {lb:'Calculate the second',dr:dQ5,ht:'<div class="fm">2/5 of 60 = 24</div>',speak:'2 fifths of 60 is 24.'},
+    {lb:'Compare',dr:dQ5,ht:'<p>30 > 24, so 1/3 of 90 is MORE.</p>',speak:'30 is greater than 24, so 1 third of 90 is more.'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var f1=rPick([[1,2],[1,3],[2,3],[1,4],[3,4]]);var f2=rPick([[1,2],[1,3],[2,3],[1,4],[3,4]]);var b1=f1[1]*rInt(4,15),b2=f2[1]*rInt(4,15);var v1=b1/f1[1]*f1[0],v2=b2/f2[1]*f2[0];while(v1===v2){b2=f2[1]*rInt(4,15);v2=b2/f2[1]*f2[0];}var ans=v1>v2?1:2;return{question:'Which is more: '+f1[0]+'/'+f1[1]+' of '+b1+', or '+f2[0]+'/'+f2[1]+' of '+b2+'? Enter 1 for the first, 2 for the second.',hints:['Calculate both amounts first'],ans:ans,tol:0,unit:'',working:f1[0]+'/'+f1[1]+' of '+b1+' = '+v1+'. '+f2[0]+'/'+f2[1]+' of '+b2+' = '+v2};}),speak:'Now it is your turn \u2014 calculate both fraction amounts, then compare.'},
+  ]},
+  {ey:'Q6 \u00b7 Year 7 \u00b7 Fraction of an Amount',ti:'Real Life: Fraction of an Hour',su:'Find 3/4 of an hour in minutes.',steps:[
+    {lb:'A useful real-life skill',dr:dQ6,ht:'<p>Fraction-of-an-amount comes up constantly with time \u2014 an hour has 60 minutes.</p>',speak:'Fraction-of-an-amount comes up constantly with time \u2014 an hour has 60 minutes.'},
+    {lb:'Divide by the denominator',dr:dQ6,ht:'<div class="fm">60 \u00f7 4 = 15 min per quarter</div>',speak:'60 divided by 4 gives 15 minutes per quarter.'},
+    {lb:'Multiply by the numerator',dr:dQ6,ht:'<div class="fm">15 \u00d7 3 = 45 minutes</div>',speak:'15 times 3 equals 45 minutes.'},
+    {lb:'The answer',dr:dQ6,ht:'<p>3/4 of an hour is 45 minutes.</p>',speak:'So 3 quarters of an hour is 45 minutes.'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var fracs=[[1,2],[1,3],[2,3],[1,4],[3,4],[1,6],[5,6]];var f=rPick(fracs);var ans=60/f[1]*f[0];return{question:'Find <b>'+f[0]+'/'+f[1]+'</b> of an hour, in minutes.',hints:['60 \u00f7 '+f[1]+' = '+(60/f[1])],ans:ans,tol:0.5,unit:'minutes',working:'60\u00f7'+f[1]+'='+(60/f[1])+'. \u00d7'+f[0]+'='+ans+' min'};}),speak:'Now it is your turn \u2014 find this fraction of an hour.'},
+  ]},
+  {ey:'Q7 \u00b7 Year 7 \u00b7 Fraction of an Amount',ti:'Real Life: Recipe Scaling',su:'A recipe makes 24 cookies. Find 2/3 of the batch.',steps:[
+    {lb:'The scenario',dr:dQ7,ht:'<p>A recipe makes 24 cookies. You only want 2/3 of the batch.</p>',speak:'A recipe makes 24 cookies. You only want 2 thirds of the batch.'},
+    {lb:'Divide by the denominator',dr:dQ7,ht:'<div class="fm">24 \u00f7 3 = 8 per third</div>',speak:'24 divided by 3 gives 8 per third.'},
+    {lb:'Multiply by the numerator',dr:dQ7,ht:'<div class="fm">8 \u00d7 2 = 16 cookies</div>',speak:'8 times 2 equals 16 cookies.'},
+    {lb:'The answer',dr:dQ7,ht:'<p>2/3 of a 24-cookie batch is 16 cookies.</p>',speak:'So 2 thirds of a 24-cookie batch is 16 cookies.'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var fracs=[[1,2],[1,3],[2,3],[3,4],[1,4],[5,6]];var f=rPick(fracs);var base=f[1]*rInt(3,10);var ans=base/f[1]*f[0];return{question:'A recipe makes <b>'+base+'</b> cupcakes. You want <b>'+f[0]+'/'+f[1]+'</b> of the batch. How many cupcakes is that?',hints:[base+' \u00f7 '+f[1]+' = '+(base/f[1])],ans:ans,tol:0.5,unit:'',working:base+'\u00f7'+f[1]+'='+(base/f[1])+'. \u00d7'+f[0]+'='+ans};}),speak:'Now it is your turn \u2014 scale this recipe using a fraction.'},
+  ]},
+  {ey:'Q8 \u00b7 Year 7 \u00b7 Fraction of an Amount',ti:'A Fraction of a Fraction',su:'Find 1/2 of 2/3.',steps:[
+    {lb:'A different kind of question',dr:dQ8,ht:'<p>Find 1/2 of 2/3 \u2014 here we\u2019re taking a fraction of ANOTHER fraction, not a whole number.</p>',speak:'Find 1 half of 2 thirds \u2014 here we\u2019re taking a fraction of another fraction, not a whole number.'},
+    {lb:'\u201cOf\u201d means multiply',dr:dQ8,ht:'<p>Whenever you see \u201cof\u201d between two fractions, it means <b>multiply</b> them.</p>',speak:'Whenever you see \u201cof\u201d between two fractions, it means multiply them.'},
+    {lb:'Multiply',dr:dQ8,ht:'<div class="fm">1/2 \u00d7 2/3 = 2/6</div>',speak:'One half times 2 thirds equals 2 sixths.'},
+    {lb:'Simplify',dr:dQ8,ht:'<p>2/6 simplifies to 1/3.</p>',speak:'2 sixths simplifies to 1 third.'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var f1=rPick([[1,2],[1,3],[2,3],[1,4],[3,4]]);var f2=rPick([[1,2],[1,3],[2,3],[2,5],[3,5]]);var num=f1[0]*f2[0],den=f1[1]*f2[1];function gcdL(a,b){return b===0?a:gcdL(b,a%b);}var h=gcdL(num,den);return{question:'Find <b>'+f1[0]+'/'+f1[1]+'</b> of <b>'+f2[0]+'/'+f2[1]+'</b>. Give your answer as a fraction in simplest form.',hints:['\u201cOf\u201d means multiply the fractions'],frac:true,fracExact:true,ansN:num/h,ansD:den/h,working:f1[0]+'/'+f1[1]+' \u00d7 '+f2[0]+'/'+f2[1]+' = '+num+'/'+den+' = '+(num/h)+'/'+(den/h)};}),speak:'Now it is your turn \u2014 multiply these two fractions together.'},
+  ]},
+  {ey:'Q9 \u00b7 Year 7 \u00b7 Fraction of an Amount',ti:'Fraction of a Distance',su:'A 40 km journey is 3/8 complete. How far has been travelled?',steps:[
+    {lb:'The scenario',dr:dQ9,ht:'<p>A 40 km journey is 3/8 complete. How far has the traveller gone?</p>',speak:'A 40 kilometre journey is 3 eighths complete. How far has the traveller gone?'},
+    {lb:'Divide by the denominator',dr:dQ9,ht:'<div class="fm">40 \u00f7 8 = 5 km per eighth</div>',speak:'40 divided by 8 gives 5 kilometres per eighth.'},
+    {lb:'Multiply by the numerator',dr:dQ9,ht:'<div class="fm">5 \u00d7 3 = 15 km</div>',speak:'5 times 3 equals 15 kilometres.'},
+    {lb:'The answer',dr:dQ9,ht:'<p>15 km has been travelled.</p>',speak:'So 15 kilometres has been travelled.'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var fracs=[[3,8],[5,8],[1,4],[3,4],[2,5],[3,5]];var f=rPick(fracs);var base=f[1]*rInt(3,20);var ans=base/f[1]*f[0];return{question:'A <b>'+base+' km</b> journey is <b>'+f[0]+'/'+f[1]+'</b> complete. How far has been travelled?',hints:[base+' \u00f7 '+f[1]+' = '+(base/f[1])],ans:ans,tol:0.5,unit:'km',working:base+'\u00f7'+f[1]+'='+(base/f[1])+'. \u00d7'+f[0]+'='+ans+' km'};}),speak:'Now it is your turn \u2014 find how far along the journey has been travelled.'},
+  ]},
+  {ey:'Q10 \u00b7 Year 7 \u00b7 Fraction of an Amount',ti:'Mixed Practice',su:'Combine everything you\u2019ve learned about fractions of amounts.',steps:[
+    {lb:'Step 1: divide',dr:dQ10,ht:'<p>Divide the amount by the denominator.</p>',speak:'Step 1: divide the amount by the denominator.'},
+    {lb:'Step 2: multiply',dr:dQ10,ht:'<p>Multiply the result by the numerator.</p>',speak:'Step 2: multiply the result by the numerator.'},
+    {lb:'Worked example',dr:dQ10,ht:'<div class="fm">5/6 of 72: 72\u00f76=12, 12\u00d75=60</div>',speak:'For example, 5 sixths of 72: 72 divided by 6 is 12, and 12 times 5 is 60.'},
+    {lb:'This works every time',dr:dQ10,ht:'<p>Divide-then-multiply always works, whatever the fraction or amount.</p>',speak:'Divide-then-multiply always works, whatever the fraction or amount.'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var fracs=[[1,2],[1,3],[2,3],[1,4],[3,4],[2,5],[3,5],[5,6]];var f=rPick(fracs);var base=f[1]*rInt(3,20);var ans=base/f[1]*f[0];return{question:'Find <b>'+f[0]+'/'+f[1]+'</b> of <b>'+base+'</b>.',hints:[base+' \u00f7 '+f[1]+' = '+(base/f[1])],ans:ans,tol:0.5,unit:'',working:base+'\u00f7'+f[1]+'='+(base/f[1])+'. \u00d7'+f[0]+'='+ans};}),speak:'Now it is your turn \u2014 one final fraction-of-an-amount question.'},
+  ]},
+
 ];
 
 var qi=0,si=0;
 function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
 function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
-function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=(si===0);document.getElementById('nb').textContent=(si===q.steps.length-1)?'Restart':'Next →';}
+function render(){if(typeof stopReading==='function')stopReading();bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=(si===0);document.getElementById('nb').textContent=(si===q.steps.length-1)?'Restart':'Next →';}
 document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
 document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=(si===q.steps.length-1)?0:si+1;render();});
+
+// ── Auto-reader ───────────────────────────────────────────────────────
+var voiceSelEl = document.getElementById('voiceSel');
+var readerStatusEl = document.getElementById('readerStatus');
+var readBtnEl = document.getElementById('readBtn');
+var autoBtnEl = document.getElementById('autoBtn');
+var stopBtnEl = document.getElementById('stopReadBtn');
+var autoPlaying = false;
+var userPickedVoice = false;
+
+function populateVoices(){
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  voiceSelEl.innerHTML = '<option value="">Default voice</option>' + voices.map(function(v,i){return '<option value="'+i+'">'+v.name+' ('+v.lang+')</option>';}).join('');
+}
+if (window.speechSynthesis) {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+voiceSelEl.addEventListener('change', function(){ userPickedVoice = (voiceSelEl.value !== ''); });
+function currentVoice(){
+  if (!userPickedVoice) return null;
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  return voices[parseInt(voiceSelEl.value,10)] || null;
+}
+function hasInteractiveQuestion(st){ return st.ht.indexOf('data-tryid')>-1; }
+
+function stopReading(){
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  autoPlaying = false;
+  readBtnEl.disabled = false; autoBtnEl.disabled = false;
+  stopBtnEl.style.display = 'none';
+  readerStatusEl.textContent = '';
+  window.__activeUtterance = null;
+}
+
+function speakStep(st, onDone){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech isn’t supported on this browser.'; if(onDone) onDone(); return; }
+  if (!st.speak) { if(onDone) onDone(); return; }
+  var u = new SpeechSynthesisUtterance(st.speak);
+  var v = currentVoice();
+  if (v) u.voice = v;
+  u.rate = 0.95;
+  u.onend = function(){ window.__activeUtterance = null; if (onDone) onDone(); };
+  u.onerror = function(ev){
+    window.__activeUtterance = null;
+    readerStatusEl.textContent = 'Couldn’t play audio (' + (ev && ev.error ? ev.error : 'unknown error') + '). Check the device isn’t muted and try again.';
+    if (onDone) onDone();
+  };
+  window.__activeUtterance = u;
+  speechSynthesis.speak(u);
+  setTimeout(function(){
+    if (window.__activeUtterance === u && !speechSynthesis.speaking && !speechSynthesis.pending) {
+      readerStatusEl.textContent = 'No audio started — try tapping the button again, or check the device isn’t on silent/muted.';
+    }
+  }, 600);
+}
+
+readBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  readerStatusEl.textContent = 'Reading…';
+  var st = QS[qi].steps[si];
+  speakStep(st, function(){
+    readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+  });
+});
+
+autoBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  autoPlaying = true;
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  autoStep();
+});
+
+stopBtnEl.addEventListener('click', stopReading);
+
+function autoStep(){
+  if (!autoPlaying) return;
+  var q = QS[qi], st = q.steps[si];
+  readerStatusEl.textContent = 'Reading step '+(si+1)+' of '+q.steps.length+'…';
+  speakStep(st, function(){
+    if (!autoPlaying) return;
+    if (hasInteractiveQuestion(st)) {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Your turn — try the question below.';
+      return;
+    }
+    if (si < q.steps.length-1) {
+      si++;
+      var p=document.getElementById('pn'); var nst=q.steps[si];
+      p.innerHTML='<div class="sl">'+nst.lb+'</div>'+nst.ht; nst.dr(si);
+      p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+      bDT();
+      autoStep();
+    } else {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Question narrated.';
+    }
+  });
+}
+
+
 render();
 
 </script>
