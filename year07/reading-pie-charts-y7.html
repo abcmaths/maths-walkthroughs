@@ -1,4 +1,4 @@
-<!-- REVIEW STATUS: SPLIT from year07/stats-y7.html 22 Aug 2026 — needs fresh staff review -->
+<!-- REVIEW STATUS: NEW — built out to full 10-checkpoint depth with sound, 22 Aug 2026, needs staff review -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,11 +55,7 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
 .hl li{margin-bottom:5px;padding-left:18px;position:relative;}
 .hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
-.ar{display:flex;gap:8px;margin-top:6px;align-items:center;}
-.fracbox{display:flex;flex-direction:column;align-items:center;}
-.fracbox input{width:64px;text-align:center;padding:6px 4px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;font-size:15px;}
-.fracbox input:focus{border-color:var(--gold);}
-.fracline{width:64px;height:2px;background:var(--ink);margin:4px 0;}
+.ar{display:flex;gap:8px;margin-top:6px;}
 .ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
 .ar input:focus{border-color:var(--gold);}
 .ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
@@ -69,12 +65,17 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
-@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
-
 .newq-btn{float:right;font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
 .newq-btn:hover{background:var(--gold);color:#fff;}
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
 .try-q{font-size:15px;margin:8px 0 10px;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+.reader-row{width:100%;max-width:760px;display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.reader-btn{font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:5px;border:1.5px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.reader-btn.active{background:var(--gold);color:#fff;}
+.reader-btn:disabled{opacity:.4;cursor:default;}
+.reader-status{font-size:11.5px;color:#6b5750;}
+.reader-voice{font-size:12px;padding:6px 8px;border:1.5px solid var(--line);border-radius:5px;background:#fff;font-family:inherit;}
 </style>
 </head>
 <body>
@@ -95,6 +96,13 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
       <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
       <div class="pnl fi" id="pn"></div>
     </div>
+    <div class="reader-row">
+      <button class="reader-btn" id="readBtn">🔊 Read this step</button>
+      <button class="reader-btn" id="autoBtn">▶ Auto-play question</button>
+      <button class="reader-btn" id="stopReadBtn" style="display:none">■ Stop</button>
+      <select class="reader-voice" id="voiceSel"></select>
+      <span class="reader-status" id="readerStatus"></span>
+    </div>
     <div class="ctrl">
       <button class="btn" id="pb">&larr; Back</button>
       <div class="dots" id="dt"></div>
@@ -108,19 +116,9 @@ var ST={};
 
 function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function rPick(arr){return arr[Math.floor(Math.random()*arr.length)];}
-
-function htmlFrac(num,den,col,lbl){
-  col=col||'#C0272D';
-  return '<span style="display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;line-height:1.1;">'
-    +(lbl?'<span style="font-size:10px;color:#888;font-style:italic;line-height:1.2;">numerator</span>':'')
-    +'<span style="font-size:17px;font-weight:700;color:'+col+';border-bottom:2px solid '+col+';padding:0 4px 1px;min-width:18px;text-align:center;">'+num+'</span>'
-    +'<span style="font-size:17px;color:'+col+';padding:1px 4px 0;min-width:18px;text-align:center;">'+den+'</span>'
-    +(lbl?'<span style="font-size:10px;color:#888;font-style:italic;line-height:1.2;">denominator</span>':'')
-    +'</span>';
-}
-
-function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
 function tryIt(genFn){
   if(typeof genFn==='object'){var _o=genFn;genFn=function(){return _o;};}
   var id='t'+Math.random().toString(36).slice(2);
@@ -131,7 +129,7 @@ function tryIt(genFn){
 
 function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
-  var wk=(h?'<ul class=\"hl\">'+h+'</ul>':'')+'<div class=\"wk-b\">'+o.working+'</div>';
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ex=o.extraHTML||'';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
   var ansBox=o.frac
@@ -140,12 +138,10 @@ function buildTry(id,o){
   return '<div class="try" data-tryid="'+id+'">'
     +'<div class="try-t">✔ Your Turn'
     +' <button class="newq-btn" data-tryid="'+id+'">↻ New</button></div>'
-    +'<div class="try-q">'+o.question+'</div>'
-    +ex
+    +'<div class="try-q">'+o.question+'</div>'+ex
     +ansBox
     +'<div class="try-fb" data-tryid="'+id+'"></div>'
-    +'<details class="wk"><summary>Show working</summary>'
-    +'<div class="wk-b">'+o.working+'</div></details>'
+    +'<details class="wk"><summary>Show working</summary>'+wk+'</details>'
     +'</div>';
 }
 
@@ -175,7 +171,7 @@ function ckById(id){
     if(ok){
       fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
     }else if(o.fracExact&&Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){
-      fb.className='try-fb fb er';fb.textContent='That\u2019s an equivalent fraction, but not fully simplified \u2014 try again.';
+      fb.className='try-fb fb er';fb.textContent='That’s an equivalent fraction, but not fully simplified — try again.';
     }else{
       fb.className='try-fb fb er';fb.textContent='Not quite — try again.';
     }
@@ -185,6 +181,14 @@ function ckById(id){
   if(!inp)return;
   var v=parseFloat(inp.value);
   if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+  if(o.range){
+    if(v>o.rangeMin && v<o.rangeMax){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else{
+      fb.className='try-fb fb er';fb.textContent='Not quite — that’s outside the range. Try again.';
+    }
+    return;
+  }
   if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
     fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
   }else{
@@ -202,11 +206,10 @@ document.addEventListener('click',function(e){
 });
 
 function g(){return document.getElementById('dg');}
-function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
-function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
-function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||1.5)+'" rx="2"/>';}
-
-/* Q1 Tally chart */
+function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial,sans-serif" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
+function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#C0272D')+'" stroke-width="'+(w||2)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'#fce8d8')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'"/>';}
 function dQ1(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   var cx=180,cy=130,r=100;
@@ -239,11 +242,30 @@ if(p>=1){
   s.innerHTML=o.join('');
 }
 
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Sector as a fraction','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A sector has angle 90\u00b0. What fraction of the pie is it?','#241A17',13,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'90\u00b0 \u00f7 360\u00b0','#C0272D',15,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'= 1/4 of the pie','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Sector as a percentage','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A sector has angle 72\u00b0. What percentage is it?','#241A17',15,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'72\u00f7360 \u00d7 100','#C0272D',15,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'= 20%','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'From angle to number of people','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'60 people surveyed. A sector has angle 60\u00b0. How many people?','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'(60\u00f7360) \u00d7 60','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'= 10 people','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Comparing two sectors','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Sector A = 100\u00b0, Sector B = 140\u00b0. Which is bigger?','#241A17',14,'middle',true));}if(p>=2){o.push(R(60,80,150,34,'#fff5f0','#C0272D',1.5));o.push(T(135,102,'A = 100\u00b0','#C0272D',14,'middle',true));o.push(R(270,80,150,34,'#e8f4ff','#1a5a8a',1.5));o.push(T(345,102,'B = 140\u00b0','#1a5a8a',14,'middle',true));}if(p>=3){o.push(R(90,126,300,30,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,146,'B is bigger \u2014 140\u00b0 > 100\u00b0','#1a7a3a',13,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Real life: household budget','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A family budget pie chart: Rent sector = 180\u00b0. What fraction of income is rent?','#241A17',11,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'180\u00f7360','#C0272D',15,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'= 1/2 of income','#1a7a3a',16,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Working backwards: find the total','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A sector of 45\u00b0 represents 10 people. Find the total surveyed.','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'45\u00b0 is 1/8 of 360\u00b0','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'10 \u00d7 8 = 80 total','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Common mistake: angles must sum to 360','#C0272D',12,'middle',true));if(p>=1){o.push(T(240,60,'Sectors: 90\u00b0, 120\u00b0, 100\u00b0. Is a 4th sector of 60\u00b0 correct?','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'90+120+100 = 310','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'360\u2212310 = 50\u00b0, NOT 60\u00b0','#1a7a3a',13,'middle',true));}if(p>=4){o.push(T(240,178,'ALL sectors in a pie chart must add up to exactly 360\u00b0','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Proportions at a glance','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A pie chart lets you see proportions without doing any maths','#241A17',12,'middle'));}if(p>=2){o.push(T(240,86,'A sector taking up half the circle = 50% of the data, instantly','#888',11,'middle'));}if(p>=3){o.push(R(80,102,320,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,124,'This is why pie charts are used for proportions','#1a7a3a',12,'middle'));}s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Mixed pie chart practice','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Step 1: find the fraction/proportion (angle\u00f7360)','#241A17',12,'middle'));}if(p>=2){o.push(T(240,86,'Step 2: multiply by the total, or by 100 for a percentage','#241A17',12,'middle'));}if(p>=3){o.push(R(80,106,320,40,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,124,'Example: 120\u00b0 sector, 90 total','#1a7a3a',12,'middle'));o.push(T(240,140,'(120/360)\u00d790 = 30 people','#1a7a3a',12,'middle'));}s.innerHTML=o.join('');}
+
+
 var QS=[
-  {ey:'Q3 \u00b7 Year 7 \u00b7 Statistics',ti:'Reading Pie Charts',su:'30 students chose a sport. Football:12, Cricket:8, Tennis:6, Other:4. Find the angle for Football.',steps:[
-    {lb:'Pie charts',dr:dQ1,ht:'<p>A <b>pie chart</b> shows data as slices of a circle. The whole circle = 360\u00b0, representing 100% of the data.</p>'},
-    {lb:'Calculate the angle',dr:dQ1,ht:'<div class="fm">Angle = (frequency \u00f7 total) \u00d7 360</div><div class="fm">Football: (12 \u00f7 30) \u00d7 360 = 144\u00b0</div>'},
-    {lb:'Read the chart',dr:dQ1,ht:'<p>Each slice is labelled with its frequency. The Football slice is the largest (nearly half the circle).</p>'},
+  {ey:'Q1 \u00b7 Year 7 \u00b7 Reading Pie Charts',ti:'Reading Pie Charts',su:'30 students chose a sport. Football:12, Cricket:8, Tennis:6, Other:4. Find the angle for Football.',steps:[
+    {lb:'Pie charts',dr:dQ1,ht:'<p>A <b>pie chart</b> shows data as slices of a circle. The whole circle = 360\u00b0, representing 100% of the data.</p>',speak:'A pie chart shows data as slices of a circle. The whole circle is 360 degrees, representing 100% of the data.'},
+    {lb:'Calculate the angle',dr:dQ1,ht:'<div class="fm">Angle = (frequency \u00f7 total) \u00d7 360</div><div class="fm">Football: (12 \u00f7 30) \u00d7 360 = 144\u00b0</div>',speak:'Angle equals frequency divided by total, times 360. Football: 12 divided by 30, times 360, equals 144 degrees.'},
+    {lb:'Read the chart',dr:dQ1,ht:'<p>Each slice is labelled with its frequency. The Football slice is the largest (nearly half the circle).</p>',speak:'Each slice is labelled with its frequency. The football slice is the largest, nearly half the circle.'},
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
   var total = pick([24, 30, 36, 40, 45, 60]);
   var freq = rnd(2, total - 2);
@@ -253,24 +275,200 @@ var QS=[
   return {
     question: 'In the pie chart, what angle represents ' + sports + ' (' + freq + ' students out of ' + total + ')?',
     hints: [
-      'Angle = (' + freq + ' ÷ ' + total + ') × 360',
-      '= ' + ratio + ' × 360'
+      'Angle = (' + freq + ' \u00f7 ' + total + ') \u00d7 360',
+      '= ' + ratio + ' \u00d7 360'
     ],
     ans: ans,
     tol: 0.5,
-    unit: '°',
-    working: '(' + freq + '/' + total + ') × 360 = ' + ans + '°'
+    unit: '\u00b0',
+    working: '(' + freq + '/' + total + ') \u00d7 360 = ' + ans + '\u00b0'
   };
-})}
-  ]}
+}),speak:'Now it\u2019s your turn \u2014 find the angle for this sport.'},
+  ]},
+  {ey:'Q2 \u00b7 Year 7 \u00b7 Reading Pie Charts',ti:'Sector as a Fraction',su:'A sector has angle 90\u00b0. What fraction of the pie is it?',steps:[
+    {lb:'The problem',dr:dQ2,ht:'<p>A sector has angle 90\u00b0. What fraction of the pie is it?</p>',speak:'A sector has angle 90 degrees. What fraction of the pie is it?'},
+    {lb:'Divide by 360',dr:dQ2,ht:'<div class="fm">90\u00b0 \u00f7 360\u00b0</div>',speak:'90 degrees divided by 360 degrees.'},
+    {lb:'Simplify',dr:dQ2,ht:'<div class="fm">= 1/4 of the pie</div>',speak:'That simplifies to 1 quarter of the pie.'},
+    {lb:'Angle over 360 is always the fraction',dr:dQ2,ht:'<p>Any sector\u2019s fraction of the whole pie is always its angle divided by 360.</p>',speak:'Any sector\u2019s fraction of the whole pie is always its angle divided by 360.'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var angles=[[90,4],[180,2],[120,3],[60,6],[45,8],[72,5]];var a=rPick(angles);return{question:'A sector has angle '+a[0]+'\u00b0. What fraction of the pie is it? (Enter the denominator, e.g. 4 for a quarter)',hints:['360\u00f7'+a[0]],ans:a[1],tol:0,unit:'',working:'360\u00f7'+a[0]+' = '+a[1]+', so 1/'+a[1]};}),speak:'Now it\u2019s your turn \u2014 find what fraction this sector represents.'},
+  ]},
+  {ey:'Q3 \u00b7 Year 7 \u00b7 Reading Pie Charts',ti:'Sector as a Percentage',su:'A sector has angle 72\u00b0. What percentage is it?',steps:[
+    {lb:'The problem',dr:dQ3,ht:'<p>A sector has angle 72\u00b0. What percentage of the pie is it?</p>',speak:'A sector has angle 72 degrees. What percentage of the pie is it?'},
+    {lb:'The formula',dr:dQ3,ht:'<div class="fm">72\u00f7360 \u00d7 100</div>',speak:'72 divided by 360, times 100.'},
+    {lb:'Calculate',dr:dQ3,ht:'<div class="fm">= 20%</div>',speak:'That equals 20%.'},
+    {lb:'Angles and percentages connect',dr:dQ3,ht:'<p>Since the whole pie is 360\u00b0 = 100%, you can convert any angle to a percentage using this method.</p>',speak:'Since the whole pie is 360 degrees, which equals 100%, you can convert any angle to a percentage using this method.'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var pcts=[10,20,25,50,75,5];var pct=rPick(pcts);var angle=pct/100*360;return{question:'A sector has angle '+angle+'\u00b0. What percentage of the pie is it?',hints:[angle+'\u00f7360 \u00d7 100'],ans:pct,tol:0.5,unit:'%',working:angle+'\u00f7360\u00d7100 = '+pct+'%'};}),speak:'Now it\u2019s your turn \u2014 convert this angle to a percentage.'},
+  ]},
+  {ey:'Q4 \u00b7 Year 7 \u00b7 Reading Pie Charts',ti:'From Angle to Number of People',su:'60 people surveyed. A sector has angle 60\u00b0. How many people?',steps:[
+    {lb:'The problem',dr:dQ4,ht:'<p>60 people were surveyed. A sector has angle 60\u00b0. How many people does it represent?</p>',speak:'60 people were surveyed. A sector has angle 60 degrees. How many people does it represent?'},
+    {lb:'Find the fraction, then apply it',dr:dQ4,ht:'<div class="fm">(60\u00f7360) \u00d7 60</div>',speak:'60 divided by 360, times 60.'},
+    {lb:'Calculate',dr:dQ4,ht:'<div class="fm">= 10 people</div>',speak:'That equals 10 people.'},
+    {lb:'This is the reverse of Q1',dr:dQ4,ht:'<p>Here we go from angle to number of people \u2014 the reverse of finding the angle from a frequency.</p>',speak:'Here we go from angle to number of people \u2014 the reverse of finding the angle from a frequency.'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var total=pick([24,36,48,60,72,90]);var angle=pick([30,45,60,90,120]);var ans=Math.round((angle/360)*total);return{question:total+' people surveyed. A sector has angle '+angle+'\u00b0. How many people does it represent?',hints:['('+angle+'\u00f7360) \u00d7 '+total],ans:ans,tol:0.5,unit:'',working:'('+angle+'/360)\u00d7'+total+' = '+ans};}),speak:'Now it\u2019s your turn \u2014 find how many people this sector represents.'},
+  ]},
+  {ey:'Q5 \u00b7 Year 7 \u00b7 Reading Pie Charts',ti:'Comparing Two Sectors',su:'Sector A = 100\u00b0, Sector B = 140\u00b0. Which is bigger?',steps:[
+    {lb:'The comparison',dr:dQ5,ht:'<p>Sector A = 100\u00b0, Sector B = 140\u00b0. Which is bigger?</p>',speak:'Sector A is 100 degrees, Sector B is 140 degrees. Which is bigger?'},
+    {lb:'Compare the angles',dr:dQ5,ht:'<p>A = 100\u00b0, B = 140\u00b0.</p>',speak:'A is 100 degrees, B is 140 degrees.'},
+    {lb:'The answer',dr:dQ5,ht:'<div class="fm">B is bigger \u2014 140\u00b0 > 100\u00b0</div>',speak:'B is bigger, since 140 degrees is greater than 100 degrees.'},
+    {lb:'Bigger angle = bigger slice',dr:dQ5,ht:'<p>The larger the angle, the larger the slice \u2014 and the larger the proportion of data it represents.</p>',speak:'The larger the angle, the larger the slice, and the larger the proportion of data it represents.'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var a=rInt(20,170),b=rInt(20,170);while(a===b)b=rInt(20,170);var ans=a>b?1:2;return{question:'Sector A = '+a+'\u00b0, Sector B = '+b+'\u00b0. Which is bigger? Enter 1 for A, 2 for B.',hints:['Compare the two angles'],ans:ans,tol:0,unit:'',working:(a>b?'A ('+a+'\u00b0)':'B ('+b+'\u00b0)')+' is bigger'};}),speak:'Now it\u2019s your turn \u2014 which sector is bigger?'},
+  ]},
+  {ey:'Q6 \u00b7 Year 7 \u00b7 Reading Pie Charts',ti:'Real Life: Household Budget',su:'A family budget pie chart: Rent sector = 180\u00b0. Find the fraction of income.',steps:[
+    {lb:'The scenario',dr:dQ6,ht:'<p>A family budget pie chart shows Rent as a sector of 180\u00b0. What fraction of income is rent?</p>',speak:'A family budget pie chart shows rent as a sector of 180 degrees. What fraction of income is rent?'},
+    {lb:'Divide by 360',dr:dQ6,ht:'<div class="fm">180\u00f7360</div>',speak:'180 divided by 360.'},
+    {lb:'Simplify',dr:dQ6,ht:'<div class="fm">= 1/2 of income</div>',speak:'That simplifies to 1 half of income.'},
+    {lb:'Budgets often use pie charts',dr:dQ6,ht:'<p>Household budgets, company spending, and election results are all commonly shown as pie charts.</p>',speak:'Household budgets, company spending, and election results are all commonly shown as pie charts.'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var angles=[[90,4],[120,3],[60,6],[45,8],[180,2]];var a=rPick(angles);return{question:'A budget pie chart shows Food as a sector of '+a[0]+'\u00b0. What fraction of the budget is Food? (Enter the denominator)',hints:['360\u00f7'+a[0]],ans:a[1],tol:0,unit:'',working:'360\u00f7'+a[0]+' = '+a[1]};}),speak:'Now it\u2019s your turn \u2014 find this fraction of the budget.'},
+  ]},
+  {ey:'Q7 \u00b7 Year 7 \u00b7 Reading Pie Charts',ti:'Working Backwards: Find the Total',su:'A sector of 45\u00b0 represents 10 people. Find the total surveyed.',steps:[
+    {lb:'Working backwards',dr:dQ7,ht:'<p>A sector of 45\u00b0 represents 10 people. Find the total number surveyed.</p>',speak:'A sector of 45 degrees represents 10 people. Find the total number surveyed.'},
+    {lb:'Find what fraction this is',dr:dQ7,ht:'<div class="fm">45\u00b0 is 1/8 of 360\u00b0</div>',speak:'45 degrees is 1 eighth of 360 degrees.'},
+    {lb:'Scale up',dr:dQ7,ht:'<div class="fm">10 \u00d7 8 = 80 total</div>',speak:'10 times 8 equals 80 total.'},
+    {lb:'The reverse process',dr:dQ7,ht:'<p>If 1/8 of the total is 10 people, the WHOLE total must be 8 times bigger.</p>',speak:'If 1 eighth of the total is 10 people, the whole total must be 8 times bigger.'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var fraction=pick([2,3,4,5,6,8]);var partVal=rInt(3,20);var total=partVal*fraction;var angle=Math.round(360/fraction);return{question:'A sector of '+angle+'\u00b0 represents '+partVal+' people. Find the TOTAL number surveyed.',hints:[angle+'\u00b0 is 1/'+fraction+' of 360\u00b0','So multiply '+partVal+' by '+fraction],ans:total,tol:1,unit:'',working:partVal+'\u00d7'+fraction+' = '+total};}),speak:'Now it\u2019s your turn \u2014 work backwards to find the total.'},
+  ]},
+  {ey:'Q8 \u00b7 Year 7 \u00b7 Reading Pie Charts',ti:'Common Mistake: Angles Must Sum to 360',su:'Sectors: 90\u00b0, 120\u00b0, 100\u00b0. Is a 4th sector of 60\u00b0 correct?',steps:[
+    {lb:'A verification trap',dr:dQ8,ht:'<p>Sectors: 90\u00b0, 120\u00b0, 100\u00b0. Is a 4th sector of 60\u00b0 correct?</p>',speak:'Sectors: 90 degrees, 120 degrees, 100 degrees. Is a 4th sector of 60 degrees correct?'},
+    {lb:'Add the known sectors',dr:dQ8,ht:'<div class="fm">90+120+100 = 310</div>',speak:'90 plus 120 plus 100 equals 310.'},
+    {lb:'Find the true remainder',dr:dQ8,ht:'<div class="fm">360\u2212310 = 50\u00b0, NOT 60\u00b0</div>',speak:'360 minus 310 equals 50 degrees, not 60 degrees.'},
+    {lb:'The essential rule',dr:dQ8,ht:'<p>ALL sectors in a pie chart must add up to exactly 360\u00b0 \u2014 always a useful check.</p>',speak:'All sectors in a pie chart must add up to exactly 360 degrees \u2014 always a useful check.'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var a=rInt(60,150),b=rInt(60,150),c=rInt(30,100);var ans=360-a-b-c;return{question:'Three sectors of a pie chart are '+a+'\u00b0, '+b+'\u00b0, and '+c+'\u00b0. Find the FOURTH sector\u2019s angle.',hints:['Add the three known angles','Subtract from 360'],ans:ans,tol:0,unit:'\u00b0',working:'360\u2212('+a+'+'+b+'+'+c+') = '+ans+'\u00b0'};}),speak:'Now it\u2019s your turn \u2014 find the missing sector angle.'},
+  ]},
+  {ey:'Q9 \u00b7 Year 7 \u00b7 Reading Pie Charts',ti:'Proportions at a Glance',su:'Understanding why pie charts are used for showing proportions.',steps:[
+    {lb:'The big advantage',dr:dQ9,ht:'<p>A pie chart lets you see proportions without doing any maths \u2014 just by looking at the size of each slice.</p>',speak:'A pie chart lets you see proportions without doing any maths \u2014 just by looking at the size of each slice.'},
+    {lb:'Half the circle = half the data',dr:dQ9,ht:'<p>A sector taking up half the circle instantly tells you it represents 50% of the data.</p>',speak:'A sector taking up half the circle instantly tells you it represents 50% of the data.'},
+    {lb:'Why pie charts are chosen',dr:dQ9,ht:'<p>This is why pie charts are used specifically for showing proportions, rather than exact counts.</p>',speak:'This is why pie charts are used specifically for showing proportions, rather than exact counts.'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var fractions=[[180,'half',0.5],[90,'quarter',0.25],[120,'third',0.333]];var f=rPick(fractions);var total=pick([40,60,80,100]);var ans=Math.round(f[2]*total);return{question:'A sector representing a '+f[1]+' of the pie has angle '+f[0]+'\u00b0. If '+total+' people were surveyed, how many does this sector represent?',hints:['This sector is a '+f[1]+' of the total'],ans:ans,tol:1,unit:'',working:f[1]+' of '+total+' = '+ans};}),speak:'Now it\u2019s your turn \u2014 use the proportion to find the number of people.'},
+  ]},
+  {ey:'Q10 \u00b7 Year 7 \u00b7 Reading Pie Charts',ti:'Mixed Practice',su:'Combine everything you\u2019ve learned about reading pie charts.',steps:[
+    {lb:'Step 1: find the proportion',dr:dQ10,ht:'<p>Find the fraction or proportion: angle divided by 360.</p>',speak:'Step 1: find the fraction or proportion \u2014 angle divided by 360.'},
+    {lb:'Step 2: apply it',dr:dQ10,ht:'<p>Multiply by the total (for a count) or by 100 (for a percentage).</p>',speak:'Step 2: multiply by the total for a count, or by 100 for a percentage.'},
+    {lb:'Worked example',dr:dQ10,ht:'<div class="fm">120\u00b0 sector, 90 total: (120/360)\u00d790 = 30 people</div>',speak:'For example: a 120 degree sector out of a 90-person total: 120 over 360, times 90, equals 30 people.'},
+    {lb:'Check your work sums to 360',dr:dQ10,ht:'<p>If you\u2019re working with multiple sectors, always check they sum to exactly 360\u00b0.</p>',speak:'If you\u2019re working with multiple sectors, always check they sum to exactly 360 degrees.'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var total=pick([30,40,50,60,80]);var angle=pick([36,45,60,90,120,144]);var ans=Math.round((angle/360)*total);return{question:total+' people surveyed. A sector has angle '+angle+'\u00b0. How many people does it represent?',hints:['('+angle+'\u00f7360) \u00d7 '+total],ans:ans,tol:1,unit:'',working:'('+angle+'/360)\u00d7'+total+' = '+ans};}),speak:'Now it\u2019s your turn \u2014 one final pie chart question.'},
+  ]},
+
 ];
 
 var qi=0,si=0;
 function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
 function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
-function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=(si===0);document.getElementById('nb').textContent=(si===q.steps.length-1)?'Restart':'Next →';}
+function render(){if(typeof stopReading==='function')stopReading();bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=(si===0);document.getElementById('nb').textContent=(si===q.steps.length-1)?'Restart':'Next →';}
 document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
 document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=(si===q.steps.length-1)?0:si+1;render();});
+
+// ── Auto-reader ──────────────────────────────────────────────────────────
+// "Read this step" speaks just the current step once. "Auto-play question"
+// chains through every step of the current question, stopping (rather than
+// talking over) any step containing the interactive Your Turn question.
+var voiceSelEl = document.getElementById('voiceSel');
+var readerStatusEl = document.getElementById('readerStatus');
+var readBtnEl = document.getElementById('readBtn');
+var autoBtnEl = document.getElementById('autoBtn');
+var stopBtnEl = document.getElementById('stopReadBtn');
+var autoPlaying = false;
+var userPickedVoice = false; // only true once the student manually changes the dropdown
+
+function populateVoices(){
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  voiceSelEl.innerHTML = '<option value="">Default voice</option>' + voices.map(function(v,i){return '<option value="'+i+'">'+v.name+' ('+v.lang+')</option>';}).join('');
+}
+if (window.speechSynthesis) {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+voiceSelEl.addEventListener('change', function(){ userPickedVoice = (voiceSelEl.value !== ''); });
+function currentVoice(){
+  // iOS Safari silently fails to speak() if given a Voice object fetched before
+  // the voice list is fully ready — safest default is no explicit voice at all
+  // unless the student has deliberately picked one.
+  if (!userPickedVoice) return null;
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  return voices[parseInt(voiceSelEl.value,10)] || null;
+}
+function hasInteractiveQuestion(st){ return st.ht.indexOf('data-tryid')>-1; }
+
+function stopReading(){
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  autoPlaying = false;
+  readBtnEl.disabled = false; autoBtnEl.disabled = false;
+  stopBtnEl.style.display = 'none';
+  readerStatusEl.textContent = '';
+  window.__activeUtterance = null;
+}
+
+// WebKit (Safari/iOS) can garbage-collect an utterance mid-speech if nothing
+// keeps a strong reference to it, silently killing the audio.
+function speakStep(st, onDone){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech isn\u2019t supported on this browser.'; if(onDone) onDone(); return; }
+  if (!st.speak) { if(onDone) onDone(); return; }
+  var u = new SpeechSynthesisUtterance(st.speak);
+  var v = currentVoice();
+  if (v) u.voice = v;
+  u.rate = 0.95;
+  u.onend = function(){ window.__activeUtterance = null; if (onDone) onDone(); };
+  u.onerror = function(ev){
+    window.__activeUtterance = null;
+    readerStatusEl.textContent = 'Couldn\u2019t play audio (' + (ev && ev.error ? ev.error : 'unknown error') + '). Check the device isn\u2019t muted and try again.';
+    if (onDone) onDone();
+  };
+  window.__activeUtterance = u;
+  speechSynthesis.speak(u);
+  setTimeout(function(){
+    if (window.__activeUtterance === u && !speechSynthesis.speaking && !speechSynthesis.pending) {
+      readerStatusEl.textContent = 'No audio started \u2014 try tapping the button again, or check the device isn\u2019t on silent/muted.';
+    }
+  }, 600);
+}
+
+readBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  readerStatusEl.textContent = 'Reading\u2026';
+  var st = QS[qi].steps[si];
+  speakStep(st, function(){
+    readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+  });
+});
+
+autoBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  autoPlaying = true;
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  autoStep();
+});
+
+function autoStep(){
+  if (!autoPlaying) return;
+  var q = QS[qi], st = q.steps[si];
+  readerStatusEl.textContent = 'Reading step '+(si+1)+' of '+q.steps.length+'\u2026';
+  speakStep(st, function(){
+    if (!autoPlaying) return;
+    if (hasInteractiveQuestion(st)) {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Your turn \u2014 try the question below.';
+      return;
+    }
+    if (si < q.steps.length-1) {
+      si++;
+      var p=document.getElementById('pn'); var nst=q.steps[si];
+      p.innerHTML='<div class="sl">'+nst.lb+'</div>'+nst.ht; nst.dr(si);
+      p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+      bDT();
+      autoStep();
+    } else {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Question narrated.';
+    }
+  });
+}
+
+stopBtnEl.addEventListener('click', stopReading);
+
 render();
 
 </script>
