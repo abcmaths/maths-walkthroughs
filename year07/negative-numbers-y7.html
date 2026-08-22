@@ -1,4 +1,4 @@
-<!-- REVIEW STATUS: SPLIT from year07/number-y7.html 22 Aug 2026 — needs fresh staff review -->
+<!-- REVIEW STATUS: NEW — built out to full 10-checkpoint depth with sound, 22 Aug 2026, needs staff review -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +14,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Negative Numbers · Year 7 · Maths Walkthroughs</title>
-<style>
 <style>
 :root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -41,6 +40,12 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
 .pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
 .fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.reader-row{width:100%;max-width:760px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.reader-btn{font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:5px;border:1.5px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.reader-btn.active{background:var(--gold);color:#fff;}
+.reader-btn:disabled{opacity:.4;cursor:default;}
+.reader-status{font-size:11.5px;color:#6b5750;}
+.reader-voice{font-size:12px;padding:6px 8px;border:1.5px solid var(--line);border-radius:5px;background:#fff;font-family:inherit;}
 .ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
 .btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
 .btn.p{background:var(--red);color:#fff;}
@@ -71,11 +76,9 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 .wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
 .wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
 @media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
-
 .newq-btn{float:right;font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
 .newq-btn:hover{background:var(--gold);color:#fff;}
 .try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
-</style>
 </style>
 </head>
 <body>
@@ -96,6 +99,13 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
       <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
       <div class="pnl fi" id="pn"></div>
     </div>
+    <div class="reader-row">
+      <button class="reader-btn" id="readBtn">🔊 Read this step</button>
+      <button class="reader-btn" id="autoBtn">▶ Auto-play question</button>
+      <button class="reader-btn" id="stopReadBtn" style="display:none">■ Stop</button>
+      <select class="reader-voice" id="voiceSel"></select>
+      <span class="reader-status" id="readerStatus"></span>
+    </div>
     <div class="ctrl">
       <button class="btn" id="pb">&larr; Back</button>
       <div class="dots" id="dt"></div>
@@ -109,6 +119,7 @@ var ST={};
 
 function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function rPick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);return b===0?a:gcd(b,a%b);}
 
 function htmlFrac(num,den,col,lbl){
   col=col||'#C0272D';
@@ -130,13 +141,12 @@ function tryIt(genFn){
 
 function buildTry(id,o){
   var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
-  var wk=(h?'<ul class=\"hl\">'+h+'</ul>':'')+'<div class=\"wk-b\">'+o.working+'</div>';
+  var wk=(h?'<ul class="hl">'+h+'</ul>':'')+'<div class="wk-b">'+o.working+'</div>';
   var ex=o.extraHTML||'';
   var ph='Answer'+(o.unit?' ('+o.unit+')':'');
   var ansBox=o.frac
     ? '<div class="ar"><div class="fracbox"><input type="number" step="any" placeholder="num" class="try-num" data-tryid="'+id+'"/><div class="fracline"></div><input type="number" step="any" placeholder="den" class="try-den" data-tryid="'+id+'"/></div><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
     : '<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>';
-  // Use data-tryid attributes instead of inline onclick with dynamic strings
   return '<div class="try" data-tryid="'+id+'">'
     +'<div class="try-t">✔ Your Turn'
     +' <button class="newq-btn" data-tryid="'+id+'">↻ New</button></div>'
@@ -175,7 +185,7 @@ function ckById(id){
     if(ok){
       fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
     }else if(o.fracExact&&Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){
-      fb.className='try-fb fb er';fb.textContent='That\u2019s an equivalent fraction, but not fully simplified \u2014 try again.';
+      fb.className='try-fb fb er';fb.textContent='That’s an equivalent fraction, but not fully simplified — try again.';
     }else{
       fb.className='try-fb fb er';fb.textContent='Not quite — try again.';
     }
@@ -185,6 +195,14 @@ function ckById(id){
   if(!inp)return;
   var v=parseFloat(inp.value);
   if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+  if(o.range){
+    if(v>o.rangeMin && v<o.rangeMax){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else{
+      fb.className='try-fb fb er';fb.textContent='Not quite — that’s outside the range. Try again.';
+    }
+    return;
+  }
   if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
     fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
   }else{
@@ -192,7 +210,6 @@ function ckById(id){
   }
 }
 
-// Single delegated event listener - no inline onclick needed
 document.addEventListener('click',function(e){
   var btn=e.target;
   if(btn.classList.contains('newq-btn')){
@@ -202,120 +219,221 @@ document.addEventListener('click',function(e){
   }
 });
 
-function svgFrac(x,y,num,den,col,sz){
-  col=col||'#C0272D';sz=sz||14;
-  var hw=Math.max(String(num).length,String(den).length)*sz*0.36+6;
-  return '<text x="'+x+'" y="'+(y-2)+'" font-size="'+sz+'" font-family="Arial" fill="'+col+'" text-anchor="middle" font-weight="700">'+num+'</text>'
-    +'<line x1="'+(x-hw)+'" y1="'+y+'" x2="'+(x+hw)+'" y2="'+y+'" stroke="'+col+'" stroke-width="1.5"/>'
-    +'<text x="'+x+'" y="'+(y+sz+2)+'" font-size="'+sz+'" font-family="Arial" fill="'+col+'" text-anchor="middle">'+den+'</text>';
-}
-
-function fracBar(total,num,den,result){
-  var bx=40,bw=300,bh=32,pw=bw/den,out='';
-  for(var i=0;i<den;i++){
-    var fill=(i<num)?'#C0272D':'#f5e6e6';
-    out+='<rect x="'+(bx+i*pw)+'" y="0" width="'+(pw-2)+'" height="'+bh+'" fill="'+fill+'" stroke="#C0272D" stroke-width="1.5" rx="2"/>';
-    out+='<text x="'+(bx+i*pw+pw/2)+'" y="'+(bh/2+5)+'" font-size="12" font-family="Arial" fill="'+(i<num?'#fff':'#C0272D')+'" text-anchor="middle">'+Math.round(total/den)+'</text>';
-  }
-  // summary label placed clear of the bar itself (to the right), so it never overlaps a box's own number
-  out+='<text x="'+(bx+bw+18)+'" y="'+(bh/2+5)+'" font-size="14" font-family="Arial" fill="#1a7a3a" font-weight="700">= '+result+'</text>';
-  return out;
-}
-
-function pieSlices(cx,cy,r,den,filled){
-  var out='',ang=-90,step=360/den;
-  for(var i=0;i<den;i++){
-    var a0=(ang+i*step)*Math.PI/180,a1=(ang+(i+1)*step)*Math.PI/180;
-    var x0=(cx+r*Math.cos(a0)).toFixed(1),y0=(cy+r*Math.sin(a0)).toFixed(1);
-    var x1=(cx+r*Math.cos(a1)).toFixed(1),y1=(cy+r*Math.sin(a1)).toFixed(1);
-    var large=step>180?1:0;
-    var fill=(i<filled)?'#C0272D':'#fdf1ea';
-    out+='<path d="M '+cx+' '+cy+' L '+x0+' '+y0+' A '+r+' '+r+' 0 '+large+' 1 '+x1+' '+y1+' Z" fill="'+fill+'" stroke="#fff" stroke-width="2"/>';
-  }
-  return out;
-}
-
 function g(){return document.getElementById('dg');}
 function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
 function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'" rx="3"/>';}
 function L(x1,y1,x2,y2,c,w){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'"/>';}
-function dQ1(p){var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
-  var ox=40,oy=100,sc=28;
-  // axis from -9 to 9
-  o.push(L(ox-8,oy,ox+18*sc+8,oy,'#333',2));
-  for(var i=-9;i<=9;i++){
-    o.push(L(ox+(i+9)*sc,oy-5,ox+(i+9)*sc,oy+5,'#555',1));
-    if(i%3===0)o.push(T(ox+(i+9)*sc,oy+16,i,'#555',10));
-  }
-  o.push(T(ox+18*sc+14,oy+3,'→','#333',12,'start'));
-  // problem box always visible
-  o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));
-  o.push(T(240,32,'−7 + 12  on the number line','#C0272D',15,'middle',true));
-  if(p>=1){
-    // start dot at -7
-    var sx=ox+((-7)+9)*sc;
-    o.push('<circle cx="'+sx+'" cy="'+oy+'" r="7" fill="#C0272D" stroke="#fff" stroke-width="2"/>');
-    o.push(T(sx,oy-16,'start: −7','#C0272D',10,'middle',true));
-  }
-  if(p>=2){
-    // arrow jumping 12 right
-    var sx=ox+((-7)+9)*sc, ex=ox+(5+9)*sc;
-    o.push('<path d="M '+sx+' '+(oy-10)+' Q '+((sx+ex)/2)+' '+(oy-44)+' '+ex+' '+(oy-10)+'" fill="none" stroke="#C8922A" stroke-width="2.5" marker-end="url(#arr)"/>');
-    o.push(T((sx+ex)/2,oy-50,'+ 12','#C8922A',12,'middle',true));
-  }
-  if(p>=3){
-    var ex=ox+(5+9)*sc;
-    o.push('<circle cx="'+ex+'" cy="'+oy+'" r="7" fill="#1a7a3a" stroke="#fff" stroke-width="2"/>');
-    o.push(T(ex,oy-16,'answer: 5','#1a7a3a',10,'middle',true));
-    o.push(R(130,130,220,36,'#e8f8ee','#1a7a3a',2));
-    o.push(T(240,152,'−7 + 12 = 5','#1a7a3a',17,'middle',true));
-  }
-  if(p>=4){
-    o.push(T(240,196,'Adding positive → move RIGHT','#C8922A',11,'middle',false));
-    o.push(T(240,212,'Subtracting → move LEFT','#1a5a8a',11,'middle',false));
-  }
-  if(p>=5){
-    o.push(T(240,232,'Now try subtracting: −3 − 5','#1a5a8a',12,'middle',true));
-    // second number line beneath, dedicated to the subtraction example
-    var oy2=280,sc2=28,ox2=ox;
-    o.push(L(ox2-8,oy2,ox2+18*sc2+8,oy2,'#333',2));
-    for(var j=-9;j<=9;j++){o.push(L(ox2+(j+9)*sc2,oy2-5,ox2+(j+9)*sc2,oy2+5,'#555',1));if(j%3===0)o.push(T(ox2+(j+9)*sc2,oy2+16,j,'#555',10));}
-    var sx2=ox2+((-3)+9)*sc2, ex2=ox2+((-8)+9)*sc2;
-    o.push('<circle cx="'+sx2+'" cy="'+oy2+'" r="7" fill="#1a5a8a" stroke="#fff" stroke-width="2"/>');
-    o.push(T(sx2,oy2-16,'start: −3','#1a5a8a',10,'middle',true));
-    o.push('<path d="M '+sx2+' '+(oy2-10)+' Q '+((sx2+ex2)/2)+' '+(oy2-44)+' '+ex2+' '+(oy2-10)+'" fill="none" stroke="#C0272D" stroke-width="2.5" marker-end="url(#arr)"/>');
-    o.push(T((sx2+ex2)/2,oy2-50,'− 5 (move left)','#C0272D',12,'middle',true));
-    o.push('<circle cx="'+ex2+'" cy="'+oy2+'" r="7" fill="#C0272D" stroke="#fff" stroke-width="2"/>');
-    o.push(T(ex2,oy2+34,'answer: −8','#C0272D',11,'middle',true));
-  }
-  s.setAttribute('viewBox','0 0 480 '+(p>=5?330:260));
-  s.innerHTML=o.join('');
-}
+function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||2)+'"/>';}
+function svgFrac(x,y,num,den,col,sz){col=col||'#C0272D';sz=sz||14;var hw=Math.max(String(num).length,String(den).length)*sz*0.36+6;return '<text x="'+x+'" y="'+(y-2)+'" font-size="'+sz+'" font-family="Arial" fill="'+col+'" text-anchor="middle" font-weight="700">'+num+'</text>'+'<line x1="'+(x-hw)+'" y1="'+y+'" x2="'+(x+hw)+'" y2="'+y+'" stroke="'+col+'" stroke-width="1.5"/>'+'<text x="'+x+'" y="'+(y+sz+2)+'" font-size="'+sz+'" font-family="Arial" fill="'+col+'" text-anchor="middle">'+den+'</text>';}
+function pieSlices(cx,cy,r,den,filled){var out='',ang=-90,step=360/den;for(var i=0;i<den;i++){var a0=(ang+i*step)*Math.PI/180,a1=(ang+(i+1)*step)*Math.PI/180;var x0=(cx+r*Math.cos(a0)).toFixed(1),y0=(cy+r*Math.sin(a0)).toFixed(1);var x1=(cx+r*Math.cos(a1)).toFixed(1),y1=(cy+r*Math.sin(a1)).toFixed(1);var large=step>180?1:0;var fill=(i<filled)?'#C0272D':'#fdf1ea';out+='<path d="M '+cx+' '+cy+' L '+x0+' '+y0+' A '+r+' '+r+' 0 '+large+' 1 '+x1+' '+y1+' Z" fill="'+fill+'" stroke="#fff" stroke-width="2"/>';}return out;}
+
+function dQ1(rawP){var s=g();s.setAttribute('viewBox','0 0 480 330');var o=[];var ox=40,oy=100,sc=28;o.push(L(ox-8,oy,ox+18*sc+8,oy,'#333',2));for(var i=-9;i<=9;i++){o.push(L(ox+(i+9)*sc,oy-5,ox+(i+9)*sc,oy+5,'#555',1));if(i%3===0)o.push(T(ox+(i+9)*sc,oy+16,i,'#555',10));}o.push(R(14,8,452,44,'#fff5f0','#C0272D',1.5));o.push(T(240,32,'\u22127 + 12  on the number line','#C0272D',15,'middle',true));var p=rawP;if(p>=1){var sx=ox+((-7)+9)*sc;o.push('<circle cx="'+sx+'" cy="'+oy+'" r="7" fill="#C0272D" stroke="#fff" stroke-width="2"/>');o.push(T(sx,oy-16,'start: \u22127','#C0272D',10,'middle',true));}if(p>=2){var sx2=ox+((-7)+9)*sc, ex=ox+(5+9)*sc;o.push('<path d="M '+sx2+' '+(oy-10)+' Q '+((sx2+ex)/2)+' '+(oy-44)+' '+ex+' '+(oy-10)+'" fill="none" stroke="#C8922A" stroke-width="2.5"/>');o.push(T((sx2+ex)/2,oy-50,'+ 12','#C8922A',12,'middle',true));}if(p>=3){var ex2=ox+(5+9)*sc;o.push('<circle cx="'+ex2+'" cy="'+oy+'" r="7" fill="#1a7a3a" stroke="#fff" stroke-width="2"/>');o.push(T(ex2,oy-16,'answer: 5','#1a7a3a',10,'middle',true));o.push(R(130,130,220,36,'#e8f8ee','#1a7a3a',2));o.push(T(240,152,'\u22127 + 12 = 5','#1a7a3a',17,'middle',true));}if(p>=4){o.push(T(240,196,'Adding positive \u2192 move RIGHT','#C8922A',11,'middle',false));o.push(T(240,212,'Subtracting \u2192 move LEFT','#1a5a8a',11,'middle',false));}s.setAttribute('viewBox','0 0 480 260');s.innerHTML=o.join('');}
+
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Adding a negative = subtracting','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,64,'5 + (\u22123) means the same as 5 \u2212 3','#241A17',14,'middle',true));}if(p>=2){o.push(R(60,84,150,40,'#fff5f0','#C0272D',1.5));o.push(T(135,109,'5 + (\u22123)','#C0272D',15,'middle',true));o.push(T(240,109,'=','#888',16));o.push(R(270,84,150,40,'#e8f8ee','#1a7a3a',1.5));o.push(T(345,109,'5 \u2212 3 = 2','#1a7a3a',15,'middle',true));}if(p>=3){o.push(T(240,150,'Two \u201cminus\u201d-type signs together become subtraction','#888',11,'middle',false));}if(p>=4){o.push(T(240,176,'This works because adding a negative moves you LEFT, just like subtracting','#888',10,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Subtracting a negative = adding','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,64,'5 \u2212 (\u22123) means the same as 5 + 3','#241A17',14,'middle',true));}if(p>=2){o.push(R(60,84,150,40,'#fff5f0','#C0272D',1.5));o.push(T(135,109,'5 \u2212 (\u22123)','#C0272D',15,'middle',true));o.push(T(240,109,'=','#888',16));o.push(R(270,84,150,40,'#e8f8ee','#1a7a3a',1.5));o.push(T(345,109,'5 + 3 = 8','#1a7a3a',15,'middle',true));}if(p>=3){o.push(T(240,150,'Two negatives together \u201ccancel out\u201d into a positive','#888',11,'middle',false));}if(p>=4){o.push(T(240,176,'Memory trick: \u201cminus a minus\u201d = plus','#888',10,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Multiplying and dividing negatives','#C0272D',13,'middle',true));var rows=[['(+) \u00d7 (+) = (+)','2 \u00d7 3 = 6'],['(+) \u00d7 (\u2212) = (\u2212)','2 \u00d7 (\u22123) = \u22126'],['(\u2212) \u00d7 (\u2212) = (+)','(\u22122) \u00d7 (\u22123) = 6']];rows.forEach(function(r,i){if(p>=i+1){o.push(R(40,50+i*46,190,36,'#fff5f0','#C0272D',1.5));o.push(T(135,72+i*46,r[0],'#C0272D',13,'middle',true));o.push(R(260,50+i*46,180,36,'#e8f8ee','#1a7a3a',1.5));o.push(T(350,72+i*46,r[1],'#1a7a3a',13,'middle',true));}});if(p>=4){o.push(T(240,206,'Same signs \u2192 positive result. Different signs \u2192 negative result.','#888',10,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Order of operations with negatives','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,64,'Work out \u22123 \u2212 4 \u00d7 (\u22122)','#241A17',15,'middle',true));}if(p>=2){o.push(R(140,80,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,102,'Multiplication first: 4 \u00d7 (\u22122) = \u22128','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,124,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,146,'\u22123 \u2212 (\u22128) = \u22123 + 8 = 5','#1a7a3a',13,'middle',true));}if(p>=4){o.push(T(240,182,'BIDMAS still applies \u2014 do multiplication before subtraction','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Real life: temperature change','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,64,'Temperature starts at \u22124\u00b0C and drops by 6\u00b0C','#241A17',13,'middle'));}if(p>=2){o.push(R(80,80,320,36,'#fff5f0','#C0272D',1.5));o.push(T(240,103,'\u22124 \u2212 6 = \u221210\u00b0C','#C0272D',16,'middle',true));}if(p>=3){o.push(T(240,138,'\u201cDrops by\u201d means subtract \u2014 the temperature gets MORE negative','#888',11,'middle',false));}if(p>=4){o.push(T(240,160,'If it then RISES by 3\u00b0C: \u221210 + 3 = \u22127\u00b0C','#1a7a3a',12,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Real life: lift / elevator floors','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,64,'Basement floors are often labelled with negative numbers','#241A17',13,'middle'));}if(p>=2){o.push(R(200,80,80,120,'#fff5f0','#C0272D',1.5));['3','2','1','G','\u22121','\u22122'].forEach(function(fl,i){o.push(T(240,100+i*18,fl,i<3?'#1a7a3a':i===3?'#241A17':'#C0272D',12,'middle',true));});}if(p>=4){o.push(T(240,216,'From floor 2, going down 4 floors: 2 \u2212 4 = \u22122','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Squaring negative numbers','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,64,'(\u22124)\u00b2 means (\u22124) \u00d7 (\u22124)','#241A17',15,'middle',true));}if(p>=2){o.push(R(140,80,200,36,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,103,'(\u22124) \u00d7 (\u22124) = 16','#1a7a3a',16,'middle',true));}if(p>=3){o.push(T(240,138,'Negative \u00d7 negative = positive, so squaring a negative gives a POSITIVE result','#888',11,'middle',false));}if(p>=4){o.push(T(240,160,'But \u22124\u00b2 (no brackets) means \u2212(4\u00b2) = \u221216 \u2014 brackets matter!','#C0272D',10,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Solving a simple equation with negatives','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,64,'Solve: x + 8 = 3','#241A17',16,'middle',true));}if(p>=2){o.push(R(140,80,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,102,'Subtract 8 from both sides','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,124,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,146,'x = 3 \u2212 8 = \u22125','#1a7a3a',15,'middle',true));}if(p>=4){o.push(T(240,182,'Check: \u22125 + 8 = 3 \u2713','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 240');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Mixed practice with negative numbers','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,64,'Work out: \u22125 + 3 \u2212 (\u22127)','#241A17',15,'middle',true));}if(p>=2){o.push(R(100,80,280,34,'#fff5f0','#C0272D',1.5));o.push(T(240,102,'\u2212 (\u22127) becomes + 7','#C0272D',13,'middle',true));}if(p>=3){o.push(R(100,124,280,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,146,'\u22125 + 3 + 7 = 5','#1a7a3a',16,'middle',true));}if(p>=4){o.push(T(240,182,'Work left to right once double-signs are simplified','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
 
 var QS=[
-  {ey:'Q3 · Year 7 · Number',ti:'Negative Numbers',su:'Calculate −7 + 12 on a number line.',steps:[
-    {lb:'Number line',dr:dQ1,ht:'<p>Adding positive → move <b>right</b>. Subtracting → move <b>left</b>.</p>'},
-    {lb:'Start at −7',dr:dQ1,ht:'<p>Place marker at −7.</p>'},
-    {lb:'Move right 12',dr:dQ1,ht:'<p>12 steps right from −7.</p>'},
-    {lb:'Answer',dr:dQ1,ht:'<div class="fm">−7 + 12 = 5</div>'},
-    {lb:'Adding positive',dr:dQ1,ht:'<p>Adding a positive number always means moving <b>right</b> on the number line. Start at −7, jump 12 right → land on 5.</p>'},
-    {lb:'Subtracting / neg + neg',dr:dQ1,ht:'<div class="fm">−3 − 5: start at −3, move 5 LEFT = −8</div><div class="fm">−3 + (−5) = −8  (same thing)</div><p style="margin-top:6px;font-size:13px;color:#6b5750;">Subtracting or adding a negative → move <b>left</b>.</p>'},
-    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
-      var types=rPick(['pos','neg']);
-      var a,b,ans,q,h1,h2;
-      if(types==='pos'){a=rInt(-9,-2);b=rInt(1,12);ans=a+b;q='Calculate <b>'+a+' + '+b+'</b>.';h1='Start at '+a;h2='Move '+b+' steps RIGHT';}
-      else{a=rInt(-6,-1);b=rInt(1,7);ans=a-b;q='Calculate <b>'+a+' − '+b+'</b>.';h1='Start at '+a;h2='Move '+b+' steps LEFT → '+(a-b);}
-      return{question:q,hints:[h1,h2,'Use the number line'],ans:ans,tol:0.05,unit:'',working:q.replace(/<b>|<\/b>/g,'')+' = '+ans};
-    })},
-  ]}
+  {ey:'Q1 \u00b7 Year 7 \u00b7 Negative Numbers',ti:'Adding and Subtracting on a Number Line',su:'Calculate \u22127 + 12 on a number line.',steps:[
+    {lb:'Number line',dr:dQ1,ht:'<p>Adding positive \u2192 move <b>right</b>. Subtracting \u2192 move <b>left</b>.</p>',speak:'Adding a positive number means moving right. Subtracting means moving left.'},
+    {lb:'Start at \u22127',dr:dQ1,ht:'<p>Place your marker at \u22127.</p>',speak:'Place your marker at negative 7.'},
+    {lb:'Move right 12',dr:dQ1,ht:'<p>Move 12 steps right from \u22127.</p>',speak:'Move 12 steps to the right from negative 7.'},
+    {lb:'Answer',dr:dQ1,ht:'<div class="fm">\u22127 + 12 = 5</div>',speak:'Negative 7 plus 12 equals 5.'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var types=rPick(['pos','neg']);var a,b,ans,q;if(types==='pos'){a=rInt(-9,-2);b=rInt(1,12);ans=a+b;q='Calculate <b>'+a+' + '+b+'</b>.';}else{a=rInt(-6,-1);b=rInt(1,7);ans=a-b;q='Calculate <b>'+a+' \u2212 '+b+'</b>.';}return{question:q,hints:['Start at '+a,'Use the number line'],ans:ans,tol:0.05,unit:'',working:q.replace(/<b>|<\/b>/g,'')+' = '+ans};}),speak:'Now it is your turn \u2014 use the number line to work this out.'},
+  ]},
+  {ey:'Q2 \u00b7 Year 7 \u00b7 Negative Numbers',ti:'Adding a Negative Number',su:'Simplify 5 + (\u22123).',steps:[
+    {lb:'Two signs together',dr:dQ2,ht:'<p>Adding a negative number is the same as <b>subtracting</b> a positive one.</p>',speak:'Adding a negative number is the same as subtracting a positive one.'},
+    {lb:'Rewrite it',dr:dQ2,ht:'<div class="fm">5 + (\u22123) = 5 \u2212 3</div>',speak:'5 plus negative 3 can be rewritten as 5 minus 3.'},
+    {lb:'Calculate',dr:dQ2,ht:'<div class="fm">5 \u2212 3 = 2</div>',speak:'5 minus 3 equals 2.'},
+    {lb:'Why it works',dr:dQ2,ht:'<p>Adding a negative moves you LEFT on the number line \u2014 exactly like subtracting does.</p>',speak:'Adding a negative moves you left on the number line, exactly like subtracting does.'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var a=rInt(1,15),b=rInt(1,10);var ans=a-b;return{question:'Simplify <b>'+a+' + (\u2212'+b+')</b>.',hints:['This is the same as '+a+' \u2212 '+b],ans:ans,tol:0,unit:'',working:a+' + (\u2212'+b+') = '+a+' \u2212 '+b+' = '+ans};}),speak:'Now it is your turn \u2014 simplify adding a negative number.'},
+  ]},
+  {ey:'Q3 \u00b7 Year 7 \u00b7 Negative Numbers',ti:'Subtracting a Negative Number',su:'Simplify 5 \u2212 (\u22123).',steps:[
+    {lb:'Two negatives together',dr:dQ3,ht:'<p>Subtracting a negative number is the same as <b>adding</b> a positive one.</p>',speak:'Subtracting a negative number is the same as adding a positive one.'},
+    {lb:'Rewrite it',dr:dQ3,ht:'<div class="fm">5 \u2212 (\u22123) = 5 + 3</div>',speak:'5 minus negative 3 can be rewritten as 5 plus 3.'},
+    {lb:'Calculate',dr:dQ3,ht:'<div class="fm">5 + 3 = 8</div>',speak:'5 plus 3 equals 8.'},
+    {lb:'Memory trick',dr:dQ3,ht:'<p>\u201cMinus a minus\u201d always becomes \u201cplus\u201d.</p>',speak:'Remember: minus a minus always becomes plus.'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var a=rInt(1,15),b=rInt(1,10);var ans=a+b;return{question:'Simplify <b>'+a+' \u2212 (\u2212'+b+')</b>.',hints:['This is the same as '+a+' + '+b],ans:ans,tol:0,unit:'',working:a+' \u2212 (\u2212'+b+') = '+a+' + '+b+' = '+ans};}),speak:'Now it is your turn \u2014 simplify subtracting a negative number.'},
+  ]},
+  {ey:'Q4 \u00b7 Year 7 \u00b7 Negative Numbers',ti:'Multiplying and Dividing Negatives',su:'Learn the sign rules for multiplying and dividing.',steps:[
+    {lb:'Same signs',dr:dQ4,ht:'<p>Positive \u00d7 positive = positive. Negative \u00d7 negative = positive.</p>',speak:'Positive times positive gives a positive. Negative times negative also gives a positive.'},
+    {lb:'Different signs',dr:dQ4,ht:'<p>Positive \u00d7 negative = negative. Negative \u00d7 positive = negative.</p>',speak:'Positive times negative gives a negative. Negative times positive also gives a negative.'},
+    {lb:'Examples',dr:dQ4,ht:'<div class="fm">2 \u00d7 (\u22123) = \u22126 &nbsp;&nbsp; (\u22122) \u00d7 (\u22123) = 6</div>',speak:'2 times negative 3 is negative 6. Negative 2 times negative 3 is positive 6.'},
+    {lb:'Same rule for division',dr:dQ4,ht:'<p>Division follows the exact same sign rules as multiplication.</p>',speak:'Division follows the exact same sign rules as multiplication.'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var a=rInt(2,9),b=rInt(2,9);var signA=rPick([1,-1]),signB=rPick([1,-1]);var ans=(signA*a)*(signB*b);var qa=signA*a,qb=signB*b;return{question:'Calculate <b>('+qa+') \u00d7 ('+qb+')</b>.',hints:['Same signs give a positive result','Different signs give a negative result'],ans:ans,tol:0,unit:'',working:'('+qa+')\u00d7('+qb+') = '+ans};}),speak:'Now it is your turn \u2014 apply the sign rules to multiply these two numbers.'},
+  ]},
+  {ey:'Q5 \u00b7 Year 7 \u00b7 Negative Numbers',ti:'Order of Operations with Negatives',su:'Work out \u22123 \u2212 4 \u00d7 (\u22122) using BIDMAS.',steps:[
+    {lb:'BIDMAS still applies',dr:dQ5,ht:'<p>Even with negative numbers, you must follow the correct <b>order of operations</b>.</p>',speak:'Even with negative numbers, you must follow the correct order of operations.'},
+    {lb:'Multiplication first',dr:dQ5,ht:'<div class="fm">4 \u00d7 (\u22122) = \u22128</div>',speak:'Do the multiplication first: 4 times negative 2 equals negative 8.'},
+    {lb:'Now subtract',dr:dQ5,ht:'<div class="fm">\u22123 \u2212 (\u22128) = \u22123 + 8 = 5</div>',speak:'Now: negative 3 minus negative 8 becomes negative 3 plus 8, which equals 5.'},
+    {lb:'Common mistake',dr:dQ5,ht:'<p>Don\u2019t work left to right blindly \u2014 multiplication and division always come before addition and subtraction.</p>',speak:'Don\u2019t work left to right blindly. Multiplication and division always come before addition and subtraction.'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var a=rInt(-9,-1),b=rInt(2,6),c=rInt(-4,-1);var ans=a-(b*c);return{question:'Calculate <b>'+a+' \u2212 '+b+' \u00d7 ('+c+')</b>.',hints:['Multiply first: '+b+' \u00d7 ('+c+') = '+(b*c),'Then '+a+' \u2212 ('+(b*c)+')'],ans:ans,tol:0,unit:'',working:a+' \u2212 '+b+'\u00d7('+c+') = '+a+' \u2212 ('+(b*c)+') = '+ans};}),speak:'Now it is your turn \u2014 remember to multiply before you subtract.'},
+  ]},
+  {ey:'Q6 \u00b7 Year 7 \u00b7 Negative Numbers',ti:'Real Life: Temperature Change',su:'A temperature drops from \u22124\u00b0C by 6\u00b0C.',steps:[
+    {lb:'The scenario',dr:dQ6,ht:'<p>Temperature starts at \u22124\u00b0C and then drops by a further 6\u00b0C.</p>',speak:'Temperature starts at negative 4 degrees and then drops by a further 6 degrees.'},
+    {lb:'Set up the calculation',dr:dQ6,ht:'<div class="fm">\u22124 \u2212 6 = \u221210\u00b0C</div>',speak:'Negative 4 minus 6 equals negative 10 degrees.'},
+    {lb:'\u201cDrops by\u201d means subtract',dr:dQ6,ht:'<p>\u201cDrops by\u201d always means subtract \u2014 the temperature gets MORE negative.</p>',speak:'Drops by always means subtract \u2014 the temperature gets more negative.'},
+    {lb:'What if it then rises?',dr:dQ6,ht:'<p>If it then rises by 3\u00b0C: \u221210 + 3 = \u22127\u00b0C.</p>',speak:'If it then rises by 3 degrees: negative 10 plus 3 equals negative 7 degrees.'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var start=rInt(-8,5),drop=rInt(2,10);var ans=start-drop;return{question:'Temperature starts at <b>'+start+'\u00b0C</b> and drops by <b>'+drop+'\u00b0C</b>. What is the new temperature?',hints:['\u201cDrops by\u201d means subtract'],ans:ans,tol:0,unit:'\u00b0C',working:start+' \u2212 '+drop+' = '+ans+'\u00b0C'};}),speak:'Now it is your turn \u2014 work out the new temperature after it drops.'},
+  ]},
+  {ey:'Q7 \u00b7 Year 7 \u00b7 Negative Numbers',ti:'Real Life: Lift Floors',su:'Basement floors use negative numbers.',steps:[
+    {lb:'Negative floors',dr:dQ7,ht:'<p>Basement floors in a building are often labelled with <b>negative numbers</b> \u2014 the further down, the more negative.</p>',speak:'Basement floors in a building are often labelled with negative numbers \u2014 the further down, the more negative.'},
+    {lb:'Ground floor is 0',dr:dQ7,ht:'<p>Ground floor is usually 0. Floors above are positive, floors below are negative.</p>',speak:'Ground floor is usually labelled 0. Floors above are positive, and floors below are negative.'},
+    {lb:'Moving down',dr:dQ7,ht:'<p>Moving down in a lift means subtracting from your current floor number.</p>',speak:'Moving down in a lift means subtracting from your current floor number.'},
+    {lb:'Example',dr:dQ7,ht:'<div class="fm">From floor 2, going down 4 floors: 2 \u2212 4 = \u22122</div>',speak:'From floor 2, going down 4 floors: 2 minus 4 equals negative 2.'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var start=rInt(1,6),down=rInt(2,9);var ans=start-down;return{question:'A lift starts at floor <b>'+start+'</b> and goes down <b>'+down+'</b> floors. What floor does it end on?',hints:['Going down means subtracting'],ans:ans,tol:0,unit:'',working:start+' \u2212 '+down+' = '+ans};}),speak:'Now it is your turn \u2014 work out which floor the lift ends on.'},
+  ]},
+  {ey:'Q8 \u00b7 Year 7 \u00b7 Negative Numbers',ti:'Squaring Negative Numbers',su:'Work out (\u22124)\u00b2.',steps:[
+    {lb:'What squaring means',dr:dQ8,ht:'<p>(\u22124)\u00b2 means (\u22124) \u00d7 (\u22124) \u2014 multiplying the number by itself.</p>',speak:'Negative 4 squared means negative 4 times negative 4 \u2014 multiplying the number by itself.'},
+    {lb:'Calculate',dr:dQ8,ht:'<div class="fm">(\u22124) \u00d7 (\u22124) = 16</div>',speak:'Negative 4 times negative 4 equals 16.'},
+    {lb:'Why it\u2019s positive',dr:dQ8,ht:'<p>Negative \u00d7 negative = positive, so squaring any negative number always gives a <b>positive</b> result.</p>',speak:'Negative times negative gives a positive, so squaring any negative number always gives a positive result.'},
+    {lb:'Watch the brackets!',dr:dQ8,ht:'<p>But \u22124\u00b2 (no brackets) means \u2212(4\u00b2) = \u221216 \u2014 brackets completely change the meaning.</p>',speak:'But negative 4 squared without brackets means the negative of 4 squared, which is negative 16. Brackets completely change the meaning.'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var n=rInt(2,12);var ans=n*n;return{question:'Calculate <b>(\u2212'+n+')\u00b2</b>.',hints:['(\u2212'+n+') \u00d7 (\u2212'+n+')','Negative \u00d7 negative = positive'],ans:ans,tol:0,unit:'',working:'(\u2212'+n+')\u00b2 = '+ans};}),speak:'Now it is your turn \u2014 square this negative number, remembering the result is positive.'},
+  ]},
+  {ey:'Q9 \u00b7 Year 7 \u00b7 Negative Numbers',ti:'Solving Equations with Negatives',su:'Solve x + 8 = 3.',steps:[
+    {lb:'The equation',dr:dQ9,ht:'<p>Solve for x: x + 8 = 3. The answer might well be negative \u2014 don\u2019t be surprised!</p>',speak:'Solve for x: x plus 8 equals 3. The answer might well be negative \u2014 don\u2019t be surprised!'},
+    {lb:'Isolate x',dr:dQ9,ht:'<p>Subtract 8 from both sides to isolate x.</p>',speak:'Subtract 8 from both sides to isolate x.'},
+    {lb:'Calculate',dr:dQ9,ht:'<div class="fm">x = 3 \u2212 8 = \u22125</div>',speak:'x equals 3 minus 8, which is negative 5.'},
+    {lb:'Check',dr:dQ9,ht:'<p>Check: \u22125 + 8 = 3 \u2713 \u2014 always substitute back to verify.</p>',speak:'Check: negative 5 plus 8 equals 3 \u2014 correct. Always substitute back to verify.'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var x=rInt(-9,-1),b=rInt(5,15);var rhs=x+b;return{question:'Solve <b>x + '+b+' = '+rhs+'</b>.',hints:['Subtract '+b+' from both sides'],ans:x,tol:0,unit:'',working:'x + '+b+' = '+rhs+' \u2192 x = '+rhs+' \u2212 '+b+' = '+x};}),speak:'Now it is your turn \u2014 solve for x, and don\u2019t worry if the answer is negative.'},
+  ]},
+  {ey:'Q10 \u00b7 Year 7 \u00b7 Negative Numbers',ti:'Mixed Practice',su:'Combine addition, subtraction, and double signs.',steps:[
+    {lb:'Simplify double signs first',dr:dQ10,ht:'<p>Before calculating, simplify any double signs: \u201c\u2212(\u2212)\u201d becomes \u201c+\u201d.</p>',speak:'Before calculating, simplify any double signs: minus a minus becomes plus.'},
+    {lb:'Rewrite the expression',dr:dQ10,ht:'<div class="fm">\u22125 + 3 \u2212 (\u22127) becomes \u22125 + 3 + 7</div>',speak:'Negative 5 plus 3 minus negative 7 becomes negative 5 plus 3 plus 7.'},
+    {lb:'Calculate left to right',dr:dQ10,ht:'<div class="fm">\u22125 + 3 + 7 = 5</div>',speak:'Negative 5 plus 3 plus 7 equals 5.'},
+    {lb:'The strategy',dr:dQ10,ht:'<p>Once all double-signs are simplified, work through left to right.</p>',speak:'Once all double-signs are simplified, work through the calculation left to right.'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var a=rInt(-9,-1),b=rInt(1,9),c=rInt(1,9);var ans=a+b+c;return{question:'Calculate <b>'+a+' + '+b+' \u2212 ('+(-c)+')</b>.',hints:['\u2212('+(-c)+') becomes + '+c,'Then work left to right'],ans:ans,tol:0,unit:'',working:a+' + '+b+' \u2212 ('+(-c)+') = '+a+' + '+b+' + '+c+' = '+ans};}),speak:'Now it is your turn \u2014 simplify the double sign first, then calculate.'},
+  ]},
+
 ];
 
 var qi=0,si=0;
 function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
 function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
-function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=(si===0);document.getElementById('nb').textContent=(si===q.steps.length-1)?'Restart':'Next →';}
+function render(){if(typeof stopReading==='function')stopReading();bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=(si===0);document.getElementById('nb').textContent=(si===q.steps.length-1)?'Restart':'Next →';}
 document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
 document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=(si===q.steps.length-1)?0:si+1;render();});
+
+// ── Auto-reader ───────────────────────────────────────────────────────
+var voiceSelEl = document.getElementById('voiceSel');
+var readerStatusEl = document.getElementById('readerStatus');
+var readBtnEl = document.getElementById('readBtn');
+var autoBtnEl = document.getElementById('autoBtn');
+var stopBtnEl = document.getElementById('stopReadBtn');
+var autoPlaying = false;
+var userPickedVoice = false;
+
+function populateVoices(){
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  voiceSelEl.innerHTML = '<option value="">Default voice</option>' + voices.map(function(v,i){return '<option value="'+i+'">'+v.name+' ('+v.lang+')</option>';}).join('');
+}
+if (window.speechSynthesis) {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+voiceSelEl.addEventListener('change', function(){ userPickedVoice = (voiceSelEl.value !== ''); });
+function currentVoice(){
+  if (!userPickedVoice) return null;
+  var voices = (window.speechSynthesis ? speechSynthesis.getVoices() : []).filter(function(v){return v.lang.indexOf('en')===0;});
+  return voices[parseInt(voiceSelEl.value,10)] || null;
+}
+function hasInteractiveQuestion(st){ return st.ht.indexOf('data-tryid')>-1; }
+
+function stopReading(){
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  autoPlaying = false;
+  readBtnEl.disabled = false; autoBtnEl.disabled = false;
+  stopBtnEl.style.display = 'none';
+  readerStatusEl.textContent = '';
+  window.__activeUtterance = null;
+}
+
+function speakStep(st, onDone){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech isn’t supported on this browser.'; if(onDone) onDone(); return; }
+  if (!st.speak) { if(onDone) onDone(); return; }
+  var u = new SpeechSynthesisUtterance(st.speak);
+  var v = currentVoice();
+  if (v) u.voice = v;
+  u.rate = 0.95;
+  u.onend = function(){ window.__activeUtterance = null; if (onDone) onDone(); };
+  u.onerror = function(ev){
+    window.__activeUtterance = null;
+    readerStatusEl.textContent = 'Couldn’t play audio (' + (ev && ev.error ? ev.error : 'unknown error') + '). Check the device isn’t muted and try again.';
+    if (onDone) onDone();
+  };
+  window.__activeUtterance = u;
+  speechSynthesis.speak(u);
+  setTimeout(function(){
+    if (window.__activeUtterance === u && !speechSynthesis.speaking && !speechSynthesis.pending) {
+      readerStatusEl.textContent = 'No audio started — try tapping the button again, or check the device isn’t on silent/muted.';
+    }
+  }, 600);
+}
+
+readBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  readerStatusEl.textContent = 'Reading…';
+  var st = QS[qi].steps[si];
+  speakStep(st, function(){
+    readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+  });
+});
+
+autoBtnEl.addEventListener('click', function(){
+  if (!window.speechSynthesis) { readerStatusEl.textContent = 'Speech not supported on this device.'; return; }
+  speechSynthesis.cancel();
+  autoPlaying = true;
+  readBtnEl.disabled = true; autoBtnEl.disabled = true; stopBtnEl.style.display = 'inline-block';
+  autoStep();
+});
+
+stopBtnEl.addEventListener('click', stopReading);
+
+function autoStep(){
+  if (!autoPlaying) return;
+  var q = QS[qi], st = q.steps[si];
+  readerStatusEl.textContent = 'Reading step '+(si+1)+' of '+q.steps.length+'…';
+  speakStep(st, function(){
+    if (!autoPlaying) return;
+    if (hasInteractiveQuestion(st)) {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Your turn — try the question below.';
+      return;
+    }
+    if (si < q.steps.length-1) {
+      si++;
+      var p=document.getElementById('pn'); var nst=q.steps[si];
+      p.innerHTML='<div class="sl">'+nst.lb+'</div>'+nst.ht; nst.dr(si);
+      p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');
+      bDT();
+      autoStep();
+    } else {
+      autoPlaying = false;
+      readBtnEl.disabled = false; autoBtnEl.disabled = false; stopBtnEl.style.display = 'none';
+      readerStatusEl.textContent = 'Question narrated.';
+    }
+  });
+}
+
+
 render();
 
 </script>
