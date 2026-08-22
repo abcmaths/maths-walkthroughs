@@ -169,8 +169,11 @@ function ckById(id){
     if(!ni||!di)return;
     var nv=parseFloat(ni.value),dv=parseFloat(di.value);
     if(isNaN(nv)||isNaN(dv)||dv===0){fb.className='try-fb fb er';fb.textContent='Enter a valid fraction (numerator and denominator).';return;}
-    if(Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){
+    var ok=o.fracExact?(nv===o.ansN&&dv===o.ansD):(Math.abs(nv/dv-o.ansN/o.ansD)<1e-6);
+    if(ok){
       fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else if(o.fracExact&&Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){
+      fb.className='try-fb fb er';fb.textContent='That\u2019s an equivalent fraction, but not fully simplified \u2014 try again.';
     }else{
       fb.className='try-fb fb er';fb.textContent='Not quite — try again.';
     }
@@ -468,7 +471,7 @@ var QS=[
     {lb:'Find HCF',dr:dQ6,ht:'<div class="fm">HCF(18, 24) = 6</div>'},
     {lb:'Divide both by 6',dr:dQ6,ht:'<p>Divide <b>numerator</b> and <b>denominator</b> by 6:</p>'},
     {lb:'Result',dr:dQ6,ht:'<div class="fm">18/24 simplifies to 3/4</div>'},
-    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var data=[[20,35,5,4,7],[12,18,6,2,3],[15,25,5,3,5],[8,20,4,2,5],[9,27,9,1,3],[14,21,7,2,3]];var d=rPick(data);return{question:'Simplify '+htmlFrac(d[0],d[1],'#C0272D',false)+' fully. Type only the <b>bottom number (denominator)</b> of your simplified fraction into the box below.',hints:['HCF of '+d[0]+' and '+d[1]+' = '+d[2],'Divide both by '+d[2]],ans:d[4],tol:0,unit:'denominator only',working:''+d[0]+'÷'+d[2]+'='+d[3]+', '+d[1]+'÷'+d[2]+'='+d[4]+'. Answer: '+htmlFrac(d[3],d[4],'#1a7a3a',false)};})},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var data=[[20,35,5,4,7],[12,18,6,2,3],[15,25,5,3,5],[8,20,4,2,5],[9,27,9,1,3],[14,21,7,2,3]];var d=rPick(data);return{question:'Simplify '+htmlFrac(d[0],d[1],'#C0272D',false)+' fully. Enter it as a fraction in its simplest form.',hints:['HCF of '+d[0]+' and '+d[1]+' = '+d[2],'Divide both by '+d[2]],frac:true,fracExact:true,ansN:d[3],ansD:d[4],working:''+d[0]+'÷'+d[2]+'='+d[3]+', '+d[1]+'÷'+d[2]+'='+d[4]+'. Answer: '+htmlFrac(d[3],d[4],'#1a7a3a',false)};})},
   ]},
   {ey:'Q7 · Year 7 · Number',ti:'Adding and Subtracting Fractions',su:'Calculate 2/5 + 1/10.',steps:[
     {lb:'Common denominator',dr:dQ7,ht:'<p>Make denominators the same first (find the LCD).</p>'},
