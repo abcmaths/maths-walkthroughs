@@ -1,4 +1,4 @@
-<!-- REVIEW STATUS: SPLIT from year07/algebra-y7.html 22 Aug 2026 — needs fresh staff review -->
+<!-- REVIEW STATUS: NEW — built out to full 10-checkpoint depth, 22 Aug 2026, needs staff review -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +14,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simplifying Expressions · Year 7 · Maths Walkthroughs</title>
+<style>
 <style>
 
 :root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
@@ -82,6 +83,27 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 <body>
 <header>
   <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Writing Algebraic Expressions &mdash; Year 7</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="reader-row">
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
   <div class="ht">Simplifying Expressions &mdash; Year 7</div>
   <div style="width:80px"></div>
 </header>
@@ -121,16 +143,22 @@ function parseLinearExpr(str,vars){
   str=str.replace(/\s+/g,'').toLowerCase();
   if(str==='')return null;
   var coeffs={};vars.forEach(function(v){coeffs[v]=0;});
-  var re=/([+-]?\d*)([a-z])/g;var m;var matchedAny=false;var idx=0;
+  var constant=0;
+  var re=/([+-]?\d*)([a-z])|([+-]?\d+)(?![a-z])/g;var m;var matchedAny=false;var idx=0;
   while((m=re.exec(str))){
     if(m.index!==idx)return null;
     idx=re.lastIndex;matchedAny=true;
-    var c=m[1],v=m[2];
-    if(vars.indexOf(v)===-1)return null;
-    if(c===''||c==='+')c='1';else if(c==='-')c='-1';
-    coeffs[v]+=parseInt(c,10);
+    if(m[2]){
+      var c=m[1],v=m[2];
+      if(vars.indexOf(v)===-1)return null;
+      if(c===''||c==='+')c='1';else if(c==='-')c='-1';
+      coeffs[v]+=parseInt(c,10);
+    } else if(m[3]!==undefined){
+      constant+=parseInt(m[3],10);
+    }
   }
   if(!matchedAny||idx!==str.length)return null;
+  coeffs._const=constant;
   return coeffs;
 }
 function tryIt(genFn){
@@ -149,7 +177,7 @@ function buildTry(id,o){
     ?'<input type="text" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     :'<input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>';
   return '<div class="try" data-tryid="'+id+'">'
-    +'<div class="try-t">\u2714 Your Turn <button class="newq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-t">✔ Your Turn <button class="newq-btn" data-tryid="'+id+'">↻ New</button></div>'
     +'<div class="try-q">'+o.question+'</div>'+ex
     +'<div class="ar">'+inputHtml
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
@@ -174,14 +202,16 @@ function ckById(id){
     if(!parsed){fb.className='try-fb fb er';fb.textContent='Enter an expression, e.g. '+(o.placeholder||'5x + 3y').replace('e.g. ','');return;}
     var ok=true;
     for(var i=0;i<o.vars.length;i++){var vv=o.vars[i];if(parsed[vv]!==o.coeffs[vv])ok=false;}
-    if(ok){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-    else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+    var expectedConst=(o.constant!=null)?o.constant:0;
+    if(parsed._const!==expectedConst)ok=false;
+    if(ok){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+    else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
     return;
   }
   var v=parseFloat(inp.value);
   if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
-  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-  else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+  else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
 }
 document.addEventListener('click',function(e){
   var btn=e.target;
@@ -194,6 +224,7 @@ function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text 
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#C0272D')+'" stroke-width="'+(w||2)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'#fce8d8')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'"/>';}
+
 function dQ1(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   o.push(T(240,28,'3x + 2y + 5x + y','#C0272D',18,'middle',true));
@@ -219,15 +250,97 @@ function dQ1(p){
   if(p>=3){o.push(R(130,212,220,34,'#e8f8ee','#1a7a3a',2));o.push(T(240,234,'= 8x + 3y','#1a7a3a',18,'middle',true));}
   s.innerHTML=o.join('');
 }
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Simplifying with more terms','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'2x + 3x + 4x + x','#241A17',18,'middle',true));}if(p>=2){o.push(T(240,90,'All the same variable \u2014 add all the coefficients','#888',11,'middle'));}if(p>=3){o.push(R(120,104,240,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,126,'2+3+4+1 = 10x','#1a7a3a',16,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'When terms cancel to zero','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'4x + 3y \u2212 4x','#241A17',18,'middle',true));}if(p>=2){o.push(T(240,90,'The x terms: 4x \u2212 4x = 0','#C0272D',13,'middle'));}if(p>=3){o.push(R(140,104,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,126,'= 3y (no x term left!)','#1a7a3a',15,'middle',true));}if(p>=4){o.push(T(240,162,'It\u2019s fine for a term to disappear completely','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Simplifying with constants','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'3x + 5 + 2x + 1','#241A17',18,'middle',true));}if(p>=2){o.push(T(240,90,'Group x-terms and number-terms separately','#888',11,'middle'));}if(p>=3){o.push(R(140,104,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,126,'5x + 6','#1a7a3a',18,'middle',true));}if(p>=4){o.push(T(240,162,'x-terms and plain numbers are DIFFERENT kinds of term','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Simplifying products','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'2x \u00d7 3','#241A17',20,'middle',true));}if(p>=2){o.push(T(240,90,'Multiply the numbers together, keep the letter','#888',11,'middle'));}if(p>=3){o.push(R(140,104,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,126,'= 6x','#1a7a3a',20,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Simplifying with three variables','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'2x + 3y + z + x + y','#241A17',15,'middle',true));}if(p>=2){o.push(T(60,88,'x: 2x+x=3x','#C0272D',12,'start'));o.push(T(60,108,'y: 3y+y=4y','#1a5a8a',12,'start'));o.push(T(60,128,'z: z','#C8922A',12,'start'));}if(p>=3){o.push(R(140,144,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,166,'= 3x + 4y + z','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'A common mistake: unlike terms','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'3x + 2y \u2014 can this simplify further?','#241A17',13,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fde8e8','#C0272D',1.5));o.push(T(240,98,'WRONG: 3x+2y = 5xy','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'RIGHT: stays 3x + 2y','#1a7a3a',13,'middle',true));}if(p>=4){o.push(T(240,178,'Only LIKE terms (same letter) can combine','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Simplify, then substitute','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Simplify 3x+2x, then evaluate when x=4','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Simplify first: 3x+2x = 5x','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'5\u00d74 = 20','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Real life: total cost expression','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'3 pens at \u20a6x, then 2 more pens at \u20a6x. Simplify the total.','#241A17',11,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'3x + 2x','#C0272D',15,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'= 5x total','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Mixed simplifying practice','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Step 1: identify like terms (same letter)','#241A17',12,'middle'));}if(p>=2){o.push(T(240,86,'Step 2: add/subtract their coefficients','#241A17',12,'middle'));}if(p>=3){o.push(R(80,106,320,40,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,124,'Example: 4a + 5 + 2a \u2212 3','#1a7a3a',12,'middle'));o.push(T(240,140,'= 6a + 2','#1a7a3a',13,'middle'));}s.innerHTML=o.join('');}
+
 
 var QS=[
-  {ey:'Q3 \u00b7 Year 7 \u00b7 Algebra',ti:'Simplifying Expressions',su:'Simplify 3x + 2y + 5x + y.',steps:[
+  {ey:'Q1 \u00b7 Year 7 \u00b7 Simplifying Expressions',ti:'Simplifying Expressions',su:'Simplify 3x + 2y + 5x + y.',steps:[
     {lb:'Like terms',dr:dQ1,ht:'<p><b>Like terms</b> (the same) share the same letter. For example, 3x and 5x are like terms; 2y and y are like terms. Only like terms can be added or subtracted together.</p>',speak:'Like terms share the same letter. For example, 3x and 5x are like terms; 2y and y are like terms. Only like terms can be added or subtracted together.'},
     {lb:'Group by type',dr:dQ1,ht:'<p>x-terms: 3x and 5x<br>y-terms: 2y and y (= 1y)</p>',speak:'Group by type: the x-terms are 3x and 5x. The y-terms are 2y and y, which is the same as 1y.'},
     {lb:'Collect',dr:dQ1,ht:'<div class="fm">3x + 5x = 8x</div><div class="fm">2y + y = 3y</div>',speak:'Collect each group: 3x plus 5x equals 8x. 2y plus y equals 3y.'},
     {lb:'Result',dr:dQ1,ht:'<div class="fm">3x + 2y + 5x + y = 8x + 3y</div>',speak:'So 3x plus 2y plus 5x plus y simplifies to 8x plus 3y.'},
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var a=rInt(2,7),b=rInt(2,6),c=rInt(1,5),d=rInt(1,5),rx=a+c,ry=b+d;return{question:'Simplify <b>'+a+'x + '+b+'y + '+c+'x + '+d+'y</b>. Write the fully simplified expression.',hints:['Collect x terms: '+a+'x + '+c+'x = '+rx+'x','Collect y terms: '+b+'y + '+d+'y = '+ry+'y','Combine both parts into one expression'],vars:['x','y'],coeffs:{x:rx,y:ry},placeholder:'e.g. 5x + 3y',working:rx+'x + '+ry+'y'};}),speak:'Now it\u2019s your turn \u2014 write the fully simplified expression.'},
-  ]}
+  ]},
+  {ey:'Q2 \u00b7 Year 7 \u00b7 Simplifying Expressions',ti:'Simplifying with More Terms',su:'Simplify 2x + 3x + 4x + x.',steps:[
+    {lb:'Four terms, one letter',dr:dQ2,ht:'<p>2x + 3x + 4x + x \u2014 all four terms use the same letter, so they\u2019re all like terms.</p>',speak:'2x plus 3x plus 4x plus x \u2014 all four terms use the same letter, so they\u2019re all like terms.'},
+    {lb:'Add all the coefficients',dr:dQ2,ht:'<p>Add every coefficient together: 2, 3, 4, and 1 (remember x = 1x).</p>',speak:'Add every coefficient together: 2, 3, 4, and 1, remembering that x means 1x.'},
+    {lb:'Calculate',dr:dQ2,ht:'<div class="fm">2+3+4+1 = 10x</div>',speak:'2 plus 3 plus 4 plus 1 equals 10x.'},
+    {lb:'Any number of like terms',dr:dQ2,ht:'<p>This works for any number of like terms \u2014 just add all the coefficients.</p>',speak:'This works for any number of like terms \u2014 just add all the coefficients.'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var terms=[rInt(1,5),rInt(1,5),rInt(1,5),rInt(1,5)];var sum=terms.reduce(function(a,b){return a+b;},0);var letter=rPick(['x','y','a']);return{question:'Simplify <b>'+terms[0]+letter+' + '+terms[1]+letter+' + '+terms[2]+letter+' + '+terms[3]+letter+'</b>.',hints:['Add all the coefficients: '+terms.join('+')],vars:[letter],coeffs:(function(){var o={};o[letter]=sum;return o;})(),placeholder:'e.g. 10'+letter,working:terms.join('+')+' = '+sum+letter};}),speak:'Now it\u2019s your turn \u2014 add all four coefficients together.'},
+  ]},
+  {ey:'Q3 \u00b7 Year 7 \u00b7 Simplifying Expressions',ti:'When Terms Cancel to Zero',su:'Simplify 4x + 3y \u2212 4x.',steps:[
+    {lb:'A special case',dr:dQ3,ht:'<p>4x + 3y \u2212 4x \u2014 what happens when like terms completely cancel out?</p>',speak:'4x plus 3y minus 4x \u2014 what happens when like terms completely cancel out?'},
+    {lb:'Collect the x-terms',dr:dQ3,ht:'<p>The x terms: 4x \u2212 4x = 0.</p>',speak:'The x terms: 4x minus 4x equals 0.'},
+    {lb:'The result',dr:dQ3,ht:'<p>= 3y (no x term left!)</p>',speak:'The result is 3y \u2014 no x term left at all.'},
+    {lb:'This is normal',dr:dQ3,ht:'<p>It\u2019s completely fine for a term to disappear entirely \u2014 don\u2019t write "+0x", just leave it out.</p>',speak:'It\u2019s completely fine for a term to disappear entirely. Don\u2019t write plus zero x, just leave it out.'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var c=rInt(2,8),d=rInt(1,9);var letters=rPick([['x','y'],['a','b'],['p','q']]);return{question:'Simplify <b>'+c+letters[0]+' + '+d+letters[1]+' \u2212 '+c+letters[0]+'</b>.',hints:[c+letters[0]+' \u2212 '+c+letters[0]+' = 0'],vars:[letters[1]],coeffs:(function(){var o={};o[letters[1]]=d;return o;})(),placeholder:'e.g. 3'+letters[1],working:c+letters[0]+'\u2212'+c+letters[0]+'=0, leaving '+d+letters[1]};}),speak:'Now it\u2019s your turn \u2014 notice which terms cancel out completely.'},
+  ]},
+  {ey:'Q4 \u00b7 Year 7 \u00b7 Simplifying Expressions',ti:'Simplifying with Constants',su:'Simplify 3x + 5 + 2x + 1.',steps:[
+    {lb:'Numbers are terms too',dr:dQ4,ht:'<p>3x + 5 + 2x + 1 \u2014 this expression has both x-terms AND plain number terms.</p>',speak:'3x plus 5 plus 2x plus 1 \u2014 this expression has both x-terms and plain number terms.'},
+    {lb:'Group separately',dr:dQ4,ht:'<p>Group the x-terms together, and the plain numbers together \u2014 they\u2019re different kinds of term.</p>',speak:'Group the x-terms together, and the plain numbers together \u2014 they\u2019re different kinds of term.'},
+    {lb:'Collect each group',dr:dQ4,ht:'<div class="fm">3x + 2x = 5x &nbsp;&nbsp; 5 + 1 = 6</div>',speak:'3x plus 2x equals 5x. 5 plus 1 equals 6.'},
+    {lb:'The result',dr:dQ4,ht:'<div class="fm">= 5x + 6</div>',speak:'The simplified expression is 5x plus 6.'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var a=rInt(1,6),c=rInt(1,6),b=rInt(1,10),d=rInt(1,10);var rx=a+c,rc=b+d;var letter=rPick(['x','y','n']);return{question:'Simplify <b>'+a+letter+' + '+b+' + '+c+letter+' + '+d+'</b>.',hints:['Collect '+letter+'-terms: '+a+letter+'+'+c+letter,'Collect numbers: '+b+'+'+d],vars:[letter],coeffs:(function(){var o={};o[letter]=rx;return o;})(),constant:rc,placeholder:'e.g. 5'+letter+' + 6',working:rx+letter+' + '+rc};}),speak:'Now it\u2019s your turn \u2014 group the letter terms and the plain numbers separately.'},
+  ]},
+  {ey:'Q5 \u00b7 Year 7 \u00b7 Simplifying Expressions',ti:'Simplifying Products',su:'Simplify 2x \u00d7 3.',steps:[
+    {lb:'A different kind of simplifying',dr:dQ5,ht:'<p>2x \u00d7 3 \u2014 this is multiplying a term by a number, not adding like terms.</p>',speak:'2x times 3 \u2014 this is multiplying a term by a number, not adding like terms.'},
+    {lb:'Multiply the numbers',dr:dQ5,ht:'<p>Multiply the numbers together, and keep the letter as it is.</p>',speak:'Multiply the numbers together, and keep the letter as it is.'},
+    {lb:'The result',dr:dQ5,ht:'<div class="fm">= 6x</div>',speak:'2x times 3 equals 6x.'},
+    {lb:'Quick and simple',dr:dQ5,ht:'<p>Unlike adding like terms, this works even with a SINGLE term \u2014 no need for a matching pair.</p>',speak:'Unlike adding like terms, this works even with a single term \u2014 no need for a matching pair.'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var c=rInt(2,8),m=rInt(2,7);var letter=rPick(['x','y','a']);var ans=c*m;return{question:'Simplify <b>'+c+letter+' \u00d7 '+m+'</b>.',hints:['Multiply the numbers: '+c+'\u00d7'+m],vars:[letter],coeffs:(function(){var o={};o[letter]=ans;return o;})(),placeholder:'e.g. '+ans+letter,working:c+'\u00d7'+m+' = '+ans+letter};}),speak:'Now it\u2019s your turn \u2014 multiply the numbers and keep the letter.'},
+  ]},
+  {ey:'Q6 \u00b7 Year 7 \u00b7 Simplifying Expressions',ti:'Simplifying with Three Variables',su:'Simplify 2x + 3y + z + x + y.',steps:[
+    {lb:'More letters, same idea',dr:dQ6,ht:'<p>2x + 3y + z + x + y \u2014 with three different letters, group each one separately.</p>',speak:'2x plus 3y plus z plus x plus y \u2014 with three different letters, group each one separately.'},
+    {lb:'Collect each letter',dr:dQ6,ht:'<p>x: 2x+x=3x. y: 3y+y=4y. z: just z (only one term).</p>',speak:'For x: 2x plus x equals 3x. For y: 3y plus y equals 4y. For z: there\u2019s only one term, so it stays as z.'},
+    {lb:'Combine',dr:dQ6,ht:'<div class="fm">= 3x + 4y + z</div>',speak:'Combined: 3x plus 4y plus z.'},
+    {lb:'Order by convention',dr:dQ6,ht:'<p>It\u2019s common (though not required) to write terms in alphabetical order of their letters.</p>',speak:'It\u2019s common, though not required, to write terms in alphabetical order of their letters.'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var a1=rInt(1,4),a2=rInt(1,4),b1=rInt(1,4),b2=rInt(1,4),c1=rInt(1,4);var rx=a1+a2,ry=b1+b2;return{question:'Simplify <b>'+a1+'x + '+b1+'y + '+c1+'z + '+a2+'x + '+b2+'y</b>.',hints:['Collect x-terms, y-terms, and z-terms separately'],vars:['x','y','z'],coeffs:{x:rx,y:ry,z:c1},placeholder:'e.g. 3x + 4y + z',working:rx+'x + '+ry+'y + '+c1+'z'};}),speak:'Now it\u2019s your turn \u2014 collect all three types of term.'},
+  ]},
+  {ey:'Q7 \u00b7 Year 7 \u00b7 Simplifying Expressions',ti:'Common Mistake: Unlike Terms',su:'Can 3x + 2y simplify any further?',steps:[
+    {lb:'A tempting error',dr:dQ7,ht:'<p>3x + 2y \u2014 can this simplify any further? Many students think yes, but it can\u2019t.</p>',speak:'3x plus 2y \u2014 can this simplify any further? Many students think yes, but it can\u2019t.'},
+    {lb:'The wrong way',dr:dQ7,ht:'<div class="fm">WRONG: 3x+2y = 5xy</div>',speak:'The wrong way: thinking 3x plus 2y equals 5xy. This is incorrect.'},
+    {lb:'The right way',dr:dQ7,ht:'<div class="fm">RIGHT: stays as 3x + 2y</div>',speak:'The right way: it simply stays as 3x plus 2y \u2014 it cannot be simplified.'},
+    {lb:'Only like terms combine',dr:dQ7,ht:'<p>Only LIKE terms (same letter) can combine. x and y are different unknowns \u2014 they can\u2019t be added together.</p>',speak:'Only like terms, with the same letter, can combine. x and y are different unknowns \u2014 they can\u2019t be added together.'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var a=rInt(2,9),b=rInt(2,9);var letters=rPick([['x','y'],['a','b'],['p','q']]);return{question:'Can '+a+letters[0]+' + '+b+letters[1]+' simplify further? Enter 1 for YES, 2 for NO.',hints:['Are '+letters[0]+' and '+letters[1]+' the same letter?'],ans:2,tol:0,unit:'',working:letters[0]+' and '+letters[1]+' are different letters, so it CANNOT simplify further'};}),speak:'Now it\u2019s your turn \u2014 can this expression simplify any further?'},
+  ]},
+  {ey:'Q8 \u00b7 Year 7 \u00b7 Simplifying Expressions',ti:'Simplify, Then Substitute',su:'Simplify 3x+2x, then evaluate when x=4.',steps:[
+    {lb:'Two skills combined',dr:dQ8,ht:'<p>Simplify 3x+2x, then evaluate when x=4 \u2014 always simplify FIRST, it makes substitution easier.</p>',speak:'Simplify 3x plus 2x, then evaluate when x equals 4 \u2014 always simplify first, it makes substitution easier.'},
+    {lb:'Simplify first',dr:dQ8,ht:'<div class="fm">3x+2x = 5x</div>',speak:'3x plus 2x simplifies to 5x.'},
+    {lb:'Now substitute',dr:dQ8,ht:'<div class="fm">5\u00d74 = 20</div>',speak:'5 times 4 equals 20.'},
+    {lb:'Why simplify first',dr:dQ8,ht:'<p>Simplifying first means fewer calculations \u2014 much easier than substituting into every single term separately.</p>',speak:'Simplifying first means fewer calculations \u2014 much easier than substituting into every single term separately.'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var a=rInt(1,5),c=rInt(1,5),x=rInt(2,9);var sum=a+c;var ans=sum*x;var letter=rPick(['x','y','n']);return{question:'Simplify '+a+letter+'+'+c+letter+', then evaluate when '+letter+'='+x+'.',hints:['Simplify first: '+a+letter+'+'+c+letter+' = '+sum+letter,'Then \u00d7'+x],ans:ans,tol:0,unit:'',working:sum+letter+' \u00d7 '+x+' = '+ans};}),speak:'Now it\u2019s your turn \u2014 simplify first, then substitute.'},
+  ]},
+  {ey:'Q9 \u00b7 Year 7 \u00b7 Simplifying Expressions',ti:'Real Life: Total Cost',su:'3 pens at \u20a6x each, then 2 more pens at \u20a6x each. Simplify the total.',steps:[
+    {lb:'The scenario',dr:dQ9,ht:'<p>You buy 3 pens at \u20a6x each, then later buy 2 more pens at \u20a6x each. Simplify the total cost.</p>',speak:'You buy 3 pens at x naira each, then later buy 2 more pens at x naira each. Simplify the total cost.'},
+    {lb:'Write both purchases',dr:dQ9,ht:'<div class="fm">3x + 2x</div>',speak:'3x plus 2x.'},
+    {lb:'Combine',dr:dQ9,ht:'<div class="fm">= 5x total</div>',speak:'The total is 5x.'},
+    {lb:'Real-world meaning',dr:dQ9,ht:'<p>This makes sense: you bought 5 pens altogether, each costing \u20a6x, so the total is 5x.</p>',speak:'This makes sense: you bought 5 pens altogether, each costing x naira, so the total is 5x.'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var a=rInt(2,6),c=rInt(2,6);var letter=rPick(['x','p','m']);var ans=a+c;return{question:'You buy '+a+' items at \u20a6'+letter+' each, then '+c+' more items at \u20a6'+letter+' each. Simplify the total cost.',hints:['Add the quantities: '+a+'+'+c],vars:[letter],coeffs:(function(){var o={};o[letter]=ans;return o;})(),placeholder:'e.g. 5'+letter,working:a+letter+' + '+c+letter+' = '+ans+letter};}),speak:'Now it\u2019s your turn \u2014 simplify this real-life total cost.'},
+  ]},
+  {ey:'Q10 \u00b7 Year 7 \u00b7 Simplifying Expressions',ti:'Mixed Practice',su:'Combine everything you\u2019ve learned about simplifying expressions.',steps:[
+    {lb:'Step 1: identify like terms',dr:dQ10,ht:'<p>Find terms with the SAME letter (or plain numbers together).</p>',speak:'Step 1: find terms with the same letter, or plain numbers grouped together.'},
+    {lb:'Step 2: combine coefficients',dr:dQ10,ht:'<p>Add or subtract the coefficients of each group of like terms.</p>',speak:'Step 2: add or subtract the coefficients of each group of like terms.'},
+    {lb:'Worked example',dr:dQ10,ht:'<div class="fm">4a + 5 + 2a \u2212 3 = 6a + 2</div>',speak:'For example: 4a plus 5 plus 2a minus 3 simplifies to 6a plus 2.'},
+    {lb:'Watch for cancelling',dr:dQ10,ht:'<p>Remember terms can cancel to zero completely \u2014 that\u2019s a valid outcome, not a mistake.</p>',speak:'Remember terms can cancel to zero completely \u2014 that\u2019s a valid outcome, not a mistake.'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var a=rInt(1,6),b=rInt(1,10),c=rInt(1,6),d=rInt(1,10);var rx=a+c,rc=b-d;var letter=rPick(['a','x','n']);var sign=rc>=0?' + ':' \u2212 ';var absC=Math.abs(rc);return{question:'Simplify <b>'+a+letter+' + '+b+' + '+c+letter+' \u2212 '+d+'</b>.',hints:['Collect '+letter+'-terms and numbers separately'],vars:[letter],coeffs:(function(){var o={};o[letter]=rx;return o;})(),constant:rc,placeholder:'e.g. 6'+letter+' + 2',working:rx+letter+sign+absC};}),speak:'Now it\u2019s your turn \u2014 one final mixed simplifying question.'},
+  ]},
+
 ];
 
 var qi=0,si=0;
