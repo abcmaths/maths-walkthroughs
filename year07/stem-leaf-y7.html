@@ -1,0 +1,325 @@
+<!-- REVIEW STATUS: SPLIT from year07/stats-y7.html 22 Aug 2026 — needs fresh staff review -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const _lc = createClient(
+    'https://lnwinoghbefmjpvmixzo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo'
+  );
+  const { data: { session } } = await _lc.auth.getSession();
+  if (!session) window.location.href = '../login.html';
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stem-and-Leaf Diagrams · Year 7 · Maths Walkthroughs</title>
+<style>
+<style>
+:root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--ink);font-family:'Helvetica Neue',Arial,sans-serif;}
+header{background:var(--red);color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.back{font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:3px;text-decoration:none;}
+.ht{font-size:15px;font-weight:700;}
+.layout{display:flex;max-width:1100px;margin:0 auto;padding:28px 20px 60px;gap:28px;}
+.sb{width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.sb-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:4px;}
+.qb{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 12px;cursor:pointer;font-size:12px;transition:.15s;color:var(--ink);}
+.qb:hover{border-color:var(--red);color:var(--red);}
+.qb.on{background:var(--red);color:#fff;border-color:var(--red);}
+.qn{font-weight:700;font-size:10px;display:block;opacity:.7;}
+.main{flex:1;min-width:0;}
+.hdr{width:100%;max-width:760px;border-bottom:3px solid var(--red);padding-bottom:12px;margin-bottom:20px;}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-weight:700;}
+.hdr h1{font-family:Georgia,serif;font-size:24px;margin:6px 0 4px;line-height:1.2;}
+.sub{font-size:14px;color:#6b5750;}
+.stage{background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden;width:100%;max-width:760px;}
+.cvs{background:linear-gradient(#fff,#fdf7f4);padding:14px 0 4px;display:flex;justify-content:center;}
+.cvs svg{width:100%;max-width:520px;height:auto;}
+.pnl{padding:20px 24px 24px;border-top:1px solid var(--line);min-height:160px;}
+.sl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px;}
+.pnl p{font-size:16px;line-height:1.55;margin:0 0 8px;}
+.fm{font-family:'Cambria Math',Georgia,serif;font-size:17px;background:var(--cream);border-left:4px solid var(--red);padding:9px 13px;margin:8px 0;display:block;}
+.ctrl{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;}
+.btn{font-size:14px;font-weight:600;padding:9px 18px;border-radius:3px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;transition:.15s;font-family:inherit;}
+.btn.p{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.3;cursor:default;}
+.btn:not(:disabled):hover{background:var(--dark);color:#fff;border-color:var(--dark);}
+.dots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.on{background:var(--red);}.dot.dn{background:var(--gold);}
+.fi{animation:fi .4s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.try{background:#fff;border:2px solid var(--gold);border-radius:6px;padding:18px 20px;margin-top:4px;}
+.try-t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px;}
+.hl{font-size:14px;color:#3a2a24;margin:8px 0 12px;padding-left:4px;list-style:none;}
+.hl li{margin-bottom:5px;padding-left:18px;position:relative;}
+.hl li::before{content:"›";position:absolute;left:0;color:var(--gold);font-weight:700;}
+.ar{display:flex;gap:8px;margin-top:6px;align-items:center;}
+.fracbox{display:flex;flex-direction:column;align-items:center;}
+.fracbox input{width:64px;text-align:center;padding:6px 4px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;font-size:15px;}
+.fracbox input:focus{border-color:var(--gold);}
+.fracline{width:64px;height:2px;background:var(--ink);margin:4px 0;}
+.ar input{flex:1;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:3px;outline:none;font-family:inherit;}
+.ar input:focus{border-color:var(--gold);}
+.ck{font-size:14px;font-weight:600;padding:8px 16px;background:var(--gold);color:#fff;border:none;border-radius:3px;cursor:pointer;white-space:nowrap;}
+.ck:hover{background:#a07018;}
+.fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;display:none;}
+.fb.ok{background:#e8f8ee;color:#1a7a3a;border:1px solid #a8dbb8;display:block;}
+.fb.er{background:#fde8e8;color:#a01820;border:1px solid #f0b8b8;display:block;}
+.wk summary{cursor:pointer;color:var(--red);font-weight:600;font-size:14px;}
+.wk-b{margin-top:8px;font-size:14px;line-height:1.6;color:#3a2a24;}
+@media(max-width:640px){.layout{flex-direction:column;}.sb{width:100%;flex-direction:row;flex-wrap:wrap;}.qb{flex:1;min-width:80px;}}
+
+.newq-btn{float:right;font-size:11px;font-weight:600;padding:3px 9px;border-radius:3px;border:1px solid var(--gold);background:#fff;color:var(--gold);cursor:pointer;font-family:inherit;}
+.newq-btn:hover{background:var(--gold);color:#fff;}
+.try-fb{margin-top:10px;font-size:14px;padding:9px 12px;border-radius:3px;}
+.try-q{font-size:15px;margin:8px 0 10px;}
+</style>
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Stem-and-Leaf Diagrams &mdash; Year 7</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" id="pb">&larr; Back</button>
+      <div class="dots" id="dt"></div>
+      <button class="btn p" id="nb">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+<script>
+
+var ST={};
+
+function rInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rPick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function htmlFrac(num,den,col,lbl){
+  col=col||'#C0272D';
+  return '<span style="display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;line-height:1.1;">'
+    +(lbl?'<span style="font-size:10px;color:#888;font-style:italic;line-height:1.2;">numerator</span>':'')
+    +'<span style="font-size:17px;font-weight:700;color:'+col+';border-bottom:2px solid '+col+';padding:0 4px 1px;min-width:18px;text-align:center;">'+num+'</span>'
+    +'<span style="font-size:17px;color:'+col+';padding:1px 4px 0;min-width:18px;text-align:center;">'+den+'</span>'
+    +(lbl?'<span style="font-size:10px;color:#888;font-style:italic;line-height:1.2;">denominator</span>':'')
+    +'</span>';
+}
+
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function tryIt(genFn){
+  if(typeof genFn==='object'){var _o=genFn;genFn=function(){return _o;};}
+  var id='t'+Math.random().toString(36).slice(2);
+  var o=genFn();
+  ST[id]={o:o,genFn:genFn};
+  return buildTry(id,o);
+}
+
+function buildTry(id,o){
+  var h=(o.hints||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+  var wk=(h?'<ul class=\"hl\">'+h+'</ul>':'')+'<div class=\"wk-b\">'+o.working+'</div>';
+  var ex=o.extraHTML||'';
+  var ph='Answer'+(o.unit?' ('+o.unit+')':'');
+  var ansBox=o.frac
+    ? '<div class="ar"><div class="fracbox"><input type="number" step="any" placeholder="num" class="try-num" data-tryid="'+id+'"/><div class="fracline"></div><input type="number" step="any" placeholder="den" class="try-den" data-tryid="'+id+'"/></div><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
+    : '<div class="ar"><input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/><button class="ck try-ck" data-tryid="'+id+'">Check</button></div>';
+  return '<div class="try" data-tryid="'+id+'">'
+    +'<div class="try-t">✔ Your Turn'
+    +' <button class="newq-btn" data-tryid="'+id+'">↻ New</button></div>'
+    +'<div class="try-q">'+o.question+'</div>'
+    +ex
+    +ansBox
+    +'<div class="try-fb" data-tryid="'+id+'"></div>'
+    +'<details class="wk"><summary>Show working</summary>'
+    +'<div class="wk-b">'+o.working+'</div></details>'
+    +'</div>';
+}
+
+function newQ(id){
+  var e=ST[id]; if(!e||!e.genFn)return;
+  var o=e.genFn(); e.o=o;
+  var box=document.querySelector('.try[data-tryid="'+id+'"]');
+  if(!box)return;
+  var tmp=document.createElement('div');
+  tmp.innerHTML=buildTry(id,o);
+  box.parentNode.replaceChild(tmp.firstChild,box);
+  ST[id]={o:o,genFn:e.genFn};
+}
+
+function ckById(id){
+  var e=ST[id]; if(!e)return;
+  var o=e.o;
+  var fb=document.querySelector('.try-fb[data-tryid="'+id+'"]');
+  if(!fb)return;
+  if(o.frac){
+    var ni=document.querySelector('.try-num[data-tryid="'+id+'"]');
+    var di=document.querySelector('.try-den[data-tryid="'+id+'"]');
+    if(!ni||!di)return;
+    var nv=parseFloat(ni.value),dv=parseFloat(di.value);
+    if(isNaN(nv)||isNaN(dv)||dv===0){fb.className='try-fb fb er';fb.textContent='Enter a valid fraction (numerator and denominator).';return;}
+    var ok=o.fracExact?(nv===o.ansN&&dv===o.ansD):(Math.abs(nv/dv-o.ansN/o.ansD)<1e-6);
+    if(ok){
+      fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+    }else if(o.fracExact&&Math.abs(nv/dv-o.ansN/o.ansD)<1e-6){
+      fb.className='try-fb fb er';fb.textContent='That\u2019s an equivalent fraction, but not fully simplified \u2014 try again.';
+    }else{
+      fb.className='try-fb fb er';fb.textContent='Not quite — try again.';
+    }
+    return;
+  }
+  var inp=document.querySelector('.try-inp[data-tryid="'+id+'"]');
+  if(!inp)return;
+  var v=parseFloat(inp.value);
+  if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
+  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){
+    fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;
+  }else{
+    fb.className='try-fb fb er';fb.textContent='Not quite — try again.';
+  }
+}
+
+document.addEventListener('click',function(e){
+  var btn=e.target;
+  if(btn.classList.contains('newq-btn')){
+    newQ(btn.getAttribute('data-tryid'));
+  } else if(btn.classList.contains('try-ck')){
+    ckById(btn.getAttribute('data-tryid'));
+  }
+});
+
+function g(){return document.getElementById('dg');}
+function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||12;a=a||'middle';return '<text x="'+x+'" y="'+y+'" font-size="'+sz+'" font-family="Arial" fill="'+c+'" text-anchor="'+a+'" font-weight="'+(b?700:400)+'">'+t+'</text>';}
+function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#888')+'" stroke-width="'+(w||1.5)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
+function R(x,y,w,h,fill,stroke,sw){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+(fill||'#fff5f0')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||1.5)+'" rx="2"/>';}
+
+/* Q1 Tally chart */
+function dQ1(p){
+  var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
+  var stems=[[1,[2,5,8]],[2,[0,3,3,7]],[3,[1,4,9]],[4,[2,6]]];
+  o.push(T(240,20,'Test scores (back-to-back stem-and-leaf)','#241A17',12,'middle',true));
+  o.push(L(220,32,220,220,'#888',2));
+  o.push(T(150,32,'Leaves','#888',11,'middle',false));o.push(T(300,32,'Stem | Leaves','#888',11,'start',false));
+  stems.forEach(function(row,i){
+    var y=50+i*44;
+    o.push(T(220,y+14,row[0],'#241A17',14,'middle',true));
+    if(p>=1){
+      row[1].forEach(function(leaf,j){o.push(T(240+j*18,y+14,leaf,'#C0272D',13,'start',false));});
+    }
+    if(p>=2 && i===0){o.push(T(200,y+14,'8  5  2','#1a5a8a',13,'end',false));}
+  });
+  if(p>=3){o.push(T(240,226,'Key: 2 | 3 means 23. Median is the middle value.','#888',11,'middle',false));}
+  s.innerHTML=o.join('');
+}
+
+var QS=[
+  {ey:'Q8 \u00b7 Year 7 \u00b7 Statistics',ti:'Stem-and-Leaf Diagrams',su:'Read a stem-and-leaf diagram showing test scores. Find the median.',steps:[
+    {lb:'What is a stem-and-leaf?',dr:dQ1,ht:'<p>A <b>stem-and-leaf diagram</b> shows data in order. The <b>stem</b> is the tens digit; the <b>leaves</b> are the units digits. Key: 2|3 means 23.</p>'},
+    {lb:'Read the data',dr:dQ1,ht:'<p>Stems: 1, 2, 3, 4. Leaves shown for each stem. Reading the diagram gives individual values.</p>'},
+    {lb:'Find the median',dr:dQ1,ht:'<p>Count all values in order. The middle one is the median. For an even count, average the two middle values.</p>'},
+    {lb:'Your turn',dr:dQ1,ht:tryIt(function(){
+  var stems = [pick([1,2,3]), 0, 0, 0];
+  stems[1] = stems[0] + 1;
+  stems[2] = stems[0] + 2;
+
+  var s1 = stems[0], s2 = stems[1], s3 = stems[2];
+
+  // Generate random number of leaves for each stem (1-4 each)
+  var n1 = rnd(1, 4);
+  var n2 = rnd(1, 4);
+  var n3 = rnd(1, 4);
+  var total = n1 + n2 + n3;
+
+  // Generate distinct leaves for each stem
+  function makeLeaves(count) {
+    var pool = [0,1,2,3,4,5,6,7,8,9];
+    var chosen = [];
+    for (var i = 0; i < count; i++) {
+      var idx = rnd(0, pool.length - 1);
+      chosen.push(pool.splice(idx, 1)[0]);
+    }
+    chosen.sort(function(a,b){return a-b;});
+    return chosen;
+  }
+
+  var l1 = makeLeaves(n1);
+  var l2 = makeLeaves(n2);
+  var l3 = makeLeaves(n3);
+
+  var l1str = l1.join(', ');
+  var l2str = l2.join(', ');
+  var l3str = l3.join(', ');
+
+  var vals1 = l1.map(function(d){return s1+''+d;}).join(', ');
+  var vals2 = l2.map(function(d){return s2+''+d;}).join(', ');
+  var vals3 = l3.map(function(d){return s3+''+d;}).join(', ');
+
+  return {
+    question: 'A stem-and-leaf diagram has stems ' + s1 + ', ' + s2 + ', ' + s3 + '. '
+      + 'Stem ' + s1 + ' has leaves ' + l1str + ' (meaning ' + vals1 + '). '
+      + 'Stem ' + s2 + ' has leaves ' + l2str + ' (meaning ' + vals2 + '). '
+      + 'Stem ' + s3 + ' has leaves ' + l3str + ' (meaning ' + vals3 + '). '
+      + 'How many data values are there in total?',
+    hints: [
+      'Count every leaf — each leaf is one data value',
+      'Stem ' + s1 + ': ' + n1 + ' leaf/leaves. Stem ' + s2 + ': ' + n2 + ' leaf/leaves. Stem ' + s3 + ': ' + n3 + ' leaf/leaves.'
+    ],
+    ans: total,
+    tol: 0,
+    unit: 'values',
+    working: n1 + ' + ' + n2 + ' + ' + n3 + ' = ' + total + ' values total'
+  };
+})}
+  ]}
+];
+
+var qi=0,si=0;
+function bSB(){var sb=document.getElementById('sb');var lbl=sb.querySelector('.sb-lbl');sb.innerHTML='';sb.appendChild(lbl);QS.forEach(function(q,i){var b=document.createElement('button');b.className='qb'+(i===qi?' on':'');b.innerHTML='<span class="qn">Q'+(i+1)+'</span>'+q.ti;b.onclick=function(){qi=i;si=0;render();};sb.appendChild(b);});}
+function bDT(){var w=document.getElementById('dt');w.innerHTML='';QS[qi].steps.forEach(function(_,i){var d=document.createElement('div');d.className='dot'+(i===si?' on':i<si?' dn':'');w.appendChild(d);});}
+function render(){bSB();var q=QS[qi],st=q.steps[si];document.getElementById('ey').innerHTML=q.ey;document.getElementById('ti').textContent=q.ti;document.getElementById('su').textContent=q.su;var p=document.getElementById('pn');p.classList.remove('fi');void p.offsetWidth;p.classList.add('fi');p.innerHTML='<div class="sl">'+st.lb+'</div>'+st.ht;st.dr(si);bDT();document.getElementById('pb').disabled=(si===0);document.getElementById('nb').textContent=(si===q.steps.length-1)?'Restart':'Next →';}
+document.getElementById('pb').addEventListener('click',function(){if(si>0){si--;render();}});
+document.getElementById('nb').addEventListener('click',function(){var q=QS[qi];si=(si===q.steps.length-1)?0:si+1;render();});
+render();
+
+</script>
+
+
+<!-- ABC Supabase Progress Tracking -->
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const _sb = createClient('https://lnwinoghbefmjpvmixzo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxud2lub2doYmVmbWpwdm1peHpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODIxNzQsImV4cCI6MjA5Nzk1ODE3NH0.ubKHVLrxlxQd-w3n5pS3O6YMAI7I--ndEkI2xWM9qCo');
+window._supabase = _sb;
+window._abcTopicCode = 'Y7-STA-17';
+window.markComplete = async function() {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) return;
+  const { data: topic } = await _sb.from('topics').select('id').eq('topic_code', window._abcTopicCode).maybeSingle();
+  if (!topic) return;
+  window._abcTopicId = topic.id;
+  const { data: __mySchoolProfile } = await _sb.from('profiles').select('school_id').eq('id', session.user.id).maybeSingle();
+  const __mySchoolId = __mySchoolProfile ? __mySchoolProfile.school_id : null;
+  await _sb.from('walkthrough_progress').upsert({
+    student_id: session.user.id, school_id: __mySchoolId, topic_id: topic.id,
+    status: 'completed', completed_at: new Date().toISOString(),
+    last_visited_at: new Date().toISOString(),
+  }, { onConflict: 'student_id,topic_id' });
+};
+</script>
+<script src="../abc_feedback_widget.js"></script>
+</body>
+</html>
