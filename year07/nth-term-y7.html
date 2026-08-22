@@ -1,4 +1,4 @@
-<!-- REVIEW STATUS: SPLIT from year07/algebra-y7.html 22 Aug 2026 — needs fresh staff review -->
+<!-- REVIEW STATUS: NEW — built out to full 10-checkpoint depth, 22 Aug 2026, needs staff review -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +14,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>nth Term of a Sequence · Year 7 · Maths Walkthroughs</title>
+<style>
 <style>
 
 :root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
@@ -82,6 +83,27 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 <body>
 <header>
   <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Writing Algebraic Expressions &mdash; Year 7</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="reader-row">
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
   <div class="ht">nth Term of a Sequence &mdash; Year 7</div>
   <div style="width:80px"></div>
 </header>
@@ -121,16 +143,22 @@ function parseLinearExpr(str,vars){
   str=str.replace(/\s+/g,'').toLowerCase();
   if(str==='')return null;
   var coeffs={};vars.forEach(function(v){coeffs[v]=0;});
-  var re=/([+-]?\d*)([a-z])/g;var m;var matchedAny=false;var idx=0;
+  var constant=0;
+  var re=/([+-]?\d*)([a-z])|([+-]?\d+)(?![a-z])/g;var m;var matchedAny=false;var idx=0;
   while((m=re.exec(str))){
     if(m.index!==idx)return null;
     idx=re.lastIndex;matchedAny=true;
-    var c=m[1],v=m[2];
-    if(vars.indexOf(v)===-1)return null;
-    if(c===''||c==='+')c='1';else if(c==='-')c='-1';
-    coeffs[v]+=parseInt(c,10);
+    if(m[2]){
+      var c=m[1],v=m[2];
+      if(vars.indexOf(v)===-1)return null;
+      if(c===''||c==='+')c='1';else if(c==='-')c='-1';
+      coeffs[v]+=parseInt(c,10);
+    } else if(m[3]!==undefined){
+      constant+=parseInt(m[3],10);
+    }
   }
   if(!matchedAny||idx!==str.length)return null;
+  coeffs._const=constant;
   return coeffs;
 }
 function tryIt(genFn){
@@ -149,7 +177,7 @@ function buildTry(id,o){
     ?'<input type="text" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     :'<input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>';
   return '<div class="try" data-tryid="'+id+'">'
-    +'<div class="try-t">\u2714 Your Turn <button class="newq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-t">✔ Your Turn <button class="newq-btn" data-tryid="'+id+'">↻ New</button></div>'
     +'<div class="try-q">'+o.question+'</div>'+ex
     +'<div class="ar">'+inputHtml
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
@@ -174,14 +202,16 @@ function ckById(id){
     if(!parsed){fb.className='try-fb fb er';fb.textContent='Enter an expression, e.g. '+(o.placeholder||'5x + 3y').replace('e.g. ','');return;}
     var ok=true;
     for(var i=0;i<o.vars.length;i++){var vv=o.vars[i];if(parsed[vv]!==o.coeffs[vv])ok=false;}
-    if(ok){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-    else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+    var expectedConst=(o.constant!=null)?o.constant:0;
+    if(parsed._const!==expectedConst)ok=false;
+    if(ok){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+    else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
     return;
   }
   var v=parseFloat(inp.value);
   if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
-  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-  else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+  else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
 }
 document.addEventListener('click',function(e){
   var btn=e.target;
@@ -194,6 +224,7 @@ function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text 
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#C0272D')+'" stroke-width="'+(w||2)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'#fce8d8')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'"/>';}
+
 function dQ1(p){
   var s=g();s.setAttribute('viewBox','0 0 480 320');
   var o=[];
@@ -220,15 +251,97 @@ function dQ1(p){
   if(p>=4){o.push(T(240,292,'Check: n=1\u21921 \u2713  n=2\u21923 \u2713  Term 10 = 19','#1a7a3a',12,'middle'));}
   s.innerHTML=o.join('');
 }
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Find the nth term formula','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Find the nth term of 4, 7, 10, 13, ...','#241A17',14,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Common difference = 3, so 3n','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'3n gives 3,6,9,12 \u2014 add 1','#1a7a3a',13,'middle',true));}if(p>=4){o.push(T(240,178,'nth term = 3n + 1','#888',13,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Using the formula to find a term','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'The nth term is 5n \u2212 2. Find term 8.','#241A17',15,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Substitute n=8','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'5(8)\u22122 = 38','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Is a number in the sequence?','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'nth term is 4n+1. Is 33 a term?','#241A17',15,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Set 4n+1=33, solve for n','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'n=8 (whole number) \u2192 YES','#1a7a3a',14,'middle',true));}if(p>=4){o.push(T(240,178,'If n comes out as a whole number, the value IS in the sequence','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'A decreasing sequence','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Find the nth term of 20, 17, 14, 11, ...','#241A17',14,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Common difference = \u22123','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'nth term = \u22123n + 23','#1a7a3a',14,'middle',true));}if(p>=4){o.push(T(240,178,'A negative common difference means the sequence is DECREASING','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Real life: seating pattern','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Tables seat 4, then joined tables seat 4,6,8,10... Find nth term.','#241A17',11,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Common difference = 2','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'nth term = 2n + 2','#1a7a3a',16,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'A sequence starting negative','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Find the nth term of \u22123, 1, 5, 9, ...','#241A17',15,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Common difference = 4, so 4n','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'4n gives 4,8,12,16 \u2014 subtract 7','#1a7a3a',13,'middle',true));}if(p>=4){o.push(T(240,178,'nth term = 4n \u2212 7','#888',13,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Finding the term NUMBER','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'nth term is 6n\u22124. Which term equals 32?','#241A17',14,'middle',true));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Set 6n\u22124=32','#C0272D',15,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'6n=36, n=6','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'A common mistake','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Sequence 5, 8, 11, 14 \u2014 is the nth term just 3n?','#241A17',13,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fde8e8','#C0272D',1.5));o.push(T(240,98,'3n gives 3,6,9,12 \u2014 NOT matching!','#C0272D',12,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'Correct: 3n + 2','#1a7a3a',15,'middle',true));}if(p>=4){o.push(T(240,178,'ALWAYS check your formula against n=1 before finalizing','#888',11,'middle',false));}s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Mixed nth term practice','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Step 1: find the common difference between terms','#241A17',12,'middle'));}if(p>=2){o.push(T(240,86,'Step 2: adjust the constant so n=1 gives the first term','#241A17',12,'middle'));}if(p>=3){o.push(R(80,106,320,40,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,124,'Example: 6,10,14,18 \u2192 diff=4','#1a7a3a',12,'middle'));o.push(T(240,140,'nth term = 4n+2','#1a7a3a',13,'middle'));}s.innerHTML=o.join('');}
+
 
 var QS=[
-  {ey:'Q9 \u00b7 Year 7 \u00b7 Algebra',ti:'nth Term of a Sequence',su:'Find the nth term of 1, 3, 5, 7, ...',steps:[
+  {ey:'Q1 \u00b7 Year 7 \u00b7 nth Term of a Sequence',ti:'nth Term of a Sequence',su:'Find the nth term of 1, 3, 5, 7, ...',steps:[
     {lb:'Spot the pattern',dr:dQ1,ht:'<p>Write out the terms and look at how much they increase each time. Here: 1 \u2192 3 \u2192 5 \u2192 7. Each step goes up by <b>2</b>. We call this the <b>common difference</b>.</p>',speak:'Write out the terms and look at how much they increase each time. Here: 1, then 3, then 5, then 7. Each step goes up by 2. We call this the common difference.'},
     {lb:'Use the common difference',dr:dQ1,ht:'<p>Because the difference is 2, the nth term <b>starts with 2n</b>. But 2n gives 2, 4, 6, 8 \u2014 which is <b>1 too many</b> each time. So we adjust by subtracting 1.</p>',speak:'Because the difference is 2, the nth term starts with 2n. But 2n gives 2, 4, 6, 8 \u2014 which is 1 too many each time. So we adjust by subtracting 1.'},
     {lb:'Find the adjustment',dr:dQ1,ht:'<div class="fm">2n \u2192 2, 4, 6, 8, ...</div><div class="fm">Our sequence \u2192 1, 3, 5, 7, ...</div><p>Each value is <b>1 less</b> than 2n, so: nth term = 2n \u2212 1</p>',speak:'2n gives 2, 4, 6, 8. Our sequence is 1, 3, 5, 7. Each value is 1 less than 2n, so the nth term is 2n minus 1.'},
     {lb:'nth term formula',dr:dQ1,ht:'<div class="fm">nth term = 2n \u2212 1</div><p>Check: n=1 \u2192 2(1)\u22121 = 1 \u2713 &nbsp; n=2 \u2192 2(2)\u22121 = 3 \u2713</p><div class="fm">Term 10 = 2(10) \u2212 1 = 19</div>',speak:'The nth term is 2n minus 1. Check: when n is 1, 2 times 1 minus 1 is 1, correct. When n is 2, 2 times 2 minus 1 is 3, correct. Term 10 would be 2 times 10 minus 1, which is 19.'},
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var d=rPick([2,3,4,5]),a=rInt(1,8),n=rInt(6,12),adj=a-d,ans=d*n+adj;return{question:'A sequence starts <b>'+a+', '+(a+d)+', '+(a+2*d)+', '+(a+3*d)+', ...</b> What is <b>term '+n+'</b>?',hints:['Common difference = '+d+' (nth term has '+d+'n)','Adjustment = '+(adj>=0?'+':'')+adj+' (check with n=1)','Term '+n+' = '+d+'('+n+') '+(adj>=0?'+':'')+adj],ans:ans,tol:0,unit:'',working:'nth term = '+d+'n '+(adj>=0?'+':'')+adj+'. Term '+n+' = '+d+'('+n+') '+(adj>=0?'+':'')+adj+' = '+ans};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
-  ]}
+  ]},
+  {ey:'Q2 \u00b7 Year 7 \u00b7 nth Term of a Sequence',ti:'Find the Formula',su:'Find the nth term of 4, 7, 10, 13, ...',steps:[
+    {lb:'Same method',dr:dQ2,ht:'<p>Find the nth term of 4, 7, 10, 13, ... \u2014 same method as before.</p>',speak:'Find the nth term of 4, 7, 10, 13 \u2014 same method as before.'},
+    {lb:'Find the common difference',dr:dQ2,ht:'<div class="fm">Common difference = 3, so 3n</div>',speak:'The common difference is 3, so the formula starts with 3n.'},
+    {lb:'Find the adjustment',dr:dQ2,ht:'<div class="fm">3n gives 3,6,9,12 \u2014 add 1</div>',speak:'3n gives 3, 6, 9, 12. We need to add 1 to match our sequence.'},
+    {lb:'The formula',dr:dQ2,ht:'<p>nth term = 3n + 1</p>',speak:'So the nth term is 3n plus 1.'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var d=rPick([2,3,4,5,6]),a=rInt(1,10);var adj=a-d;return{question:'Find the nth term of <b>'+a+', '+(a+d)+', '+(a+2*d)+', '+(a+3*d)+', ...</b>',hints:['Common difference = '+d,'Check the adjustment using n=1'],vars:['n'],coeffs:{n:d},constant:adj,placeholder:'e.g. 3n + 1',working:d+'n '+(adj>=0?'+ '+adj:'\u2212 '+Math.abs(adj))};}),speak:'Now it\u2019s your turn \u2014 find the nth term formula.'},
+  ]},
+  {ey:'Q3 \u00b7 Year 7 \u00b7 nth Term of a Sequence',ti:'Using the Formula to Find a Term',su:'The nth term is 5n \u2212 2. Find term 8.',steps:[
+    {lb:'Working forwards',dr:dQ3,ht:'<p>The nth term is 5n \u2212 2. Find term 8 \u2014 substitute n=8 into the formula.</p>',speak:'The nth term is 5n minus 2. Find term 8 \u2014 substitute n equals 8 into the formula.'},
+    {lb:'Substitute',dr:dQ3,ht:'<p>Replace n with 8 in the formula.</p>',speak:'Replace n with 8 in the formula.'},
+    {lb:'Calculate',dr:dQ3,ht:'<div class="fm">5(8)\u22122 = 38</div>',speak:'5 times 8, minus 2, equals 38.'},
+    {lb:'Formulas work like functions',dr:dQ3,ht:'<p>Using the nth term formula is exactly the same as substitution, which you\u2019ve already practised.</p>',speak:'Using the nth term formula is exactly the same as substitution, which you\u2019ve already practised.'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var d=rInt(2,7),c=rInt(1,9),n=rInt(4,15);var ans=d*n-c;return{question:'The nth term is '+d+'n \u2212 '+c+'. Find term '+n+'.',hints:['Substitute n='+n],ans:ans,tol:0,unit:'',working:d+'('+n+')\u2212'+c+' = '+ans};}),speak:'Now it\u2019s your turn \u2014 substitute into the formula.'},
+  ]},
+  {ey:'Q4 \u00b7 Year 7 \u00b7 nth Term of a Sequence',ti:'Is a Number in the Sequence?',su:'nth term is 4n+1. Is 33 a term?',steps:[
+    {lb:'A different type of question',dr:dQ4,ht:'<p>nth term is 4n+1. Is 33 a term in this sequence? Work BACKWARDS to find out.</p>',speak:'The nth term is 4n plus 1. Is 33 a term in this sequence? Work backwards to find out.'},
+    {lb:'Set up an equation',dr:dQ4,ht:'<div class="fm">Set 4n+1=33, solve for n</div>',speak:'Set 4n plus 1 equal to 33, and solve for n.'},
+    {lb:'Solve and check',dr:dQ4,ht:'<div class="fm">n=8 (whole number) \u2192 YES</div>',speak:'n equals 8, which is a whole number, so yes, 33 is in the sequence.'},
+    {lb:'The key test',dr:dQ4,ht:'<p>If n comes out as a whole number, the value IS in the sequence. If n is a fraction, it ISN\u2019T.</p>',speak:'If n comes out as a whole number, the value is in the sequence. If n is a fraction, it isn\u2019t.'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var d=rInt(2,7),c=rInt(1,9);var isIn=rPick([true,false]);var n=rInt(3,10);var target=isIn?d*n+c:d*n+c+1;var ans=isIn?1:2;return{question:'nth term is '+d+'n+'+c+'. Is '+target+' a term in the sequence? Enter 1 for YES, 2 for NO.',hints:['Set '+d+'n+'+c+'='+target+', solve for n','Is n a whole number?'],ans:ans,tol:0,unit:'',working:'n = ('+target+'\u2212'+c+')\u00f7'+d+' = '+((target-c)/d)+(isIn?' (whole number, YES)':' (not whole, NO)')};}),speak:'Now it\u2019s your turn \u2014 check if this number is in the sequence.'},
+  ]},
+  {ey:'Q5 \u00b7 Year 7 \u00b7 nth Term of a Sequence',ti:'A Decreasing Sequence',su:'Find the nth term of 20, 17, 14, 11, ...',steps:[
+    {lb:'Going down instead of up',dr:dQ5,ht:'<p>Find the nth term of 20, 17, 14, 11, ... \u2014 this sequence decreases each time.</p>',speak:'Find the nth term of 20, 17, 14, 11 \u2014 this sequence decreases each time.'},
+    {lb:'Find the difference',dr:dQ5,ht:'<div class="fm">Common difference = \u22123</div>',speak:'The common difference is negative 3.'},
+    {lb:'Build the formula',dr:dQ5,ht:'<div class="fm">nth term = \u22123n + 23</div>',speak:'The nth term is negative 3n plus 23.'},
+    {lb:'Negative differences are normal',dr:dQ5,ht:'<p>A negative common difference just means the sequence is DECREASING \u2014 the method is identical.</p>',speak:'A negative common difference just means the sequence is decreasing \u2014 the method is identical.'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var d=rInt(2,6),a=rInt(15,30);var adj=a+d;return{question:'Find the nth term of <b>'+a+', '+(a-d)+', '+(a-2*d)+', '+(a-3*d)+', ...</b>',hints:['This sequence decreases \u2014 common difference = \u2212'+d],vars:['n'],coeffs:{n:-d},constant:adj,placeholder:'e.g. \u22123n + 23',working:'\u2212'+d+'n + '+adj};}),speak:'Now it\u2019s your turn \u2014 find the formula for this decreasing sequence.'},
+  ]},
+  {ey:'Q6 \u00b7 Year 7 \u00b7 nth Term of a Sequence',ti:'Real Life: Seating Pattern',su:'Joined tables seat 4, 6, 8, 10... Find the nth term.',steps:[
+    {lb:'The scenario',dr:dQ6,ht:'<p>One table seats 4. Joining tables in a row seats 4, 6, 8, 10... Find the nth term.</p>',speak:'One table seats 4. Joining tables in a row seats 4, 6, 8, 10. Find the nth term.'},
+    {lb:'Find the difference',dr:dQ6,ht:'<div class="fm">Common difference = 2</div>',speak:'The common difference is 2.'},
+    {lb:'Build the formula',dr:dQ6,ht:'<div class="fm">nth term = 2n + 2</div>',speak:'The nth term is 2n plus 2.'},
+    {lb:'Sequences model real patterns',dr:dQ6,ht:'<p>Real growth patterns like this \u2014 seating, tiling, matchsticks \u2014 are exactly what nth term formulas describe.</p>',speak:'Real growth patterns like this \u2014 seating, tiling, matchsticks \u2014 are exactly what nth term formulas describe.'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var d=rInt(2,5),a=rInt(3,10);var adj=a-d;return{question:'A pattern starts at '+a+' and increases by '+d+' each time: '+a+', '+(a+d)+', '+(a+2*d)+', ... Find the nth term.',hints:['Common difference = '+d],vars:['n'],coeffs:{n:d},constant:adj,placeholder:'e.g. 2n + 2',working:d+'n '+(adj>=0?'+ '+adj:'\u2212 '+Math.abs(adj))};}),speak:'Now it\u2019s your turn \u2014 find the formula for this real-life pattern.'},
+  ]},
+  {ey:'Q7 \u00b7 Year 7 \u00b7 nth Term of a Sequence',ti:'A Sequence Starting Negative',su:'Find the nth term of \u22123, 1, 5, 9, ...',steps:[
+    {lb:'Starting below zero',dr:dQ7,ht:'<p>Find the nth term of \u22123, 1, 5, 9, ... \u2014 the sequence starts with a negative number.</p>',speak:'Find the nth term of negative 3, 1, 5, 9 \u2014 the sequence starts with a negative number.'},
+    {lb:'Find the difference',dr:dQ7,ht:'<div class="fm">Common difference = 4, so 4n</div>',speak:'The common difference is 4, so the formula starts with 4n.'},
+    {lb:'Find the adjustment',dr:dQ7,ht:'<div class="fm">4n gives 4,8,12,16 \u2014 subtract 7</div>',speak:'4n gives 4, 8, 12, 16. We need to subtract 7 to match our sequence.'},
+    {lb:'The formula',dr:dQ7,ht:'<p>nth term = 4n \u2212 7</p>',speak:'So the nth term is 4n minus 7.'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var d=rInt(3,7);var a=rInt(-8,-1);var adj=a-d;return{question:'Find the nth term of <b>'+a+', '+(a+d)+', '+(a+2*d)+', '+(a+3*d)+', ...</b>',hints:['Common difference = '+d,'The first term is negative \u2014 the adjustment will be too'],vars:['n'],coeffs:{n:d},constant:adj,placeholder:'e.g. 4n \u2212 7',working:d+'n '+(adj>=0?'+ '+adj:'\u2212 '+Math.abs(adj))};}),speak:'Now it\u2019s your turn \u2014 find the formula for this sequence.'},
+  ]},
+  {ey:'Q8 \u00b7 Year 7 \u00b7 nth Term of a Sequence',ti:'Finding the Term Number',su:'nth term is 6n\u22124. Which term equals 32?',steps:[
+    {lb:'Working backwards again',dr:dQ8,ht:'<p>nth term is 6n\u22124. Which term equals 32? We need to find n, not the term value.</p>',speak:'The nth term is 6n minus 4. Which term equals 32? We need to find n, not the term value.'},
+    {lb:'Set up the equation',dr:dQ8,ht:'<div class="fm">Set 6n\u22124=32</div>',speak:'Set 6n minus 4 equal to 32.'},
+    {lb:'Solve for n',dr:dQ8,ht:'<div class="fm">6n=36, n=6</div>',speak:'6n equals 36, so n equals 6.'},
+    {lb:'This is just solving an equation',dr:dQ8,ht:'<p>Once you set up the equation, this is exactly the same as solving any one or two-step equation.</p>',speak:'Once you set up the equation, this is exactly the same as solving any one or two-step equation.'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var d=rInt(2,8),c=rInt(1,9),n=rInt(3,12);var target=d*n-c;return{question:'nth term is '+d+'n\u2212'+c+'. Which term equals '+target+'?',hints:['Set '+d+'n\u2212'+c+'='+target,'Solve for n'],ans:n,tol:0,unit:'',working:d+'n='+(target+c)+', n='+n};}),speak:'Now it\u2019s your turn \u2014 find which term number gives this value.'},
+  ]},
+  {ey:'Q9 \u00b7 Year 7 \u00b7 nth Term of a Sequence',ti:'A Common Mistake',su:'Sequence 5, 8, 11, 14 \u2014 is the nth term just 3n?',steps:[
+    {lb:'A tempting shortcut',dr:dQ9,ht:'<p>Sequence 5, 8, 11, 14 \u2014 is the nth term just 3n? It\u2019s tempting to stop after finding the common difference.</p>',speak:'Sequence 5, 8, 11, 14 \u2014 is the nth term just 3n? It\u2019s tempting to stop after finding the common difference.'},
+    {lb:'Check it',dr:dQ9,ht:'<div class="fm">3n gives 3,6,9,12 \u2014 NOT matching!</div>',speak:'3n gives 3, 6, 9, 12 \u2014 that doesn\u2019t match our sequence at all.'},
+    {lb:'The correction',dr:dQ9,ht:'<div class="fm">Correct: 3n + 2</div>',speak:'The correct formula is 3n plus 2.'},
+    {lb:'Always verify',dr:dQ9,ht:'<p>ALWAYS check your formula against n=1 (and ideally n=2) before finalizing your answer.</p>',speak:'Always check your formula against n equals 1, and ideally n equals 2, before finalizing your answer.'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var d=rInt(2,7),a=rInt(1,10);var adj=a-d;return{question:'Sequence: '+a+', '+(a+d)+', '+(a+2*d)+', '+(a+3*d)+'. Is the nth term simply '+d+'n (with no adjustment)? Enter 1 for YES, 2 for NO.',hints:['Check: does '+d+'\u00d71 = '+a+'?'],ans:(adj===0?1:2),tol:0,unit:'',working:d+'\u00d71='+d+', but first term is '+a+' \u2014 '+(adj===0?'matches, so YES':'doesn\u2019t match, so NO, needs adjustment of '+adj)};}),speak:'Now it\u2019s your turn \u2014 check whether an adjustment is needed.'},
+  ]},
+  {ey:'Q10 \u00b7 Year 7 \u00b7 nth Term of a Sequence',ti:'Mixed Practice',su:'Combine everything you\u2019ve learned about nth term formulas.',steps:[
+    {lb:'Step 1: find the common difference',dr:dQ10,ht:'<p>Find the common difference between consecutive terms.</p>',speak:'Step 1: find the common difference between consecutive terms.'},
+    {lb:'Step 2: find the adjustment',dr:dQ10,ht:'<p>Adjust the constant so that n=1 gives the first term.</p>',speak:'Step 2: adjust the constant so that n equals 1 gives the first term.'},
+    {lb:'Worked example',dr:dQ10,ht:'<div class="fm">6,10,14,18 \u2192 diff=4, nth term = 4n+2</div>',speak:'For example: 6, 10, 14, 18 has a common difference of 4, giving the nth term 4n plus 2.'},
+    {lb:'Always verify',dr:dQ10,ht:'<p>Check your formula works for at least the first two terms before finalizing.</p>',speak:'Check your formula works for at least the first two terms before finalizing.'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var d=rPick([2,3,4,5,6]),a=rInt(1,10);var adj=a-d;return{question:'Find the nth term of <b>'+a+', '+(a+d)+', '+(a+2*d)+', '+(a+3*d)+', ...</b>',hints:['Common difference = '+d,'Check the adjustment against the first term'],vars:['n'],coeffs:{n:d},constant:adj,placeholder:'e.g. 3n + 1',working:d+'n '+(adj>=0?'+ '+adj:'\u2212 '+Math.abs(adj))};}),speak:'Now it\u2019s your turn \u2014 one final nth term question.'},
+  ]},
+
 ];
 
 var qi=0,si=0;
