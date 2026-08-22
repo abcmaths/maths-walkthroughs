@@ -1,4 +1,4 @@
-<!-- REVIEW STATUS: SPLIT from year07/algebra-y7.html 22 Aug 2026 — needs fresh staff review -->
+<!-- REVIEW STATUS: NEW — built out to full 10-checkpoint depth, 22 Aug 2026, needs staff review -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +14,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Forming Expressions · Year 7 · Maths Walkthroughs</title>
+<style>
 <style>
 
 :root{--red:#C0272D;--dark:#7A1418;--cream:#FBF6F1;--ink:#241A17;--line:#E4D6CE;--gold:#C8922A;}
@@ -82,6 +83,27 @@ header{background:var(--red);color:#fff;height:56px;display:flex;align-items:cen
 <body>
 <header>
   <a href="../index.html" class="back">&larr; All Topics</a>
+  <div class="ht">Writing Algebraic Expressions &mdash; Year 7</div>
+  <div style="width:80px"></div>
+</header>
+<div class="layout">
+  <div class="sb" id="sb"><div class="sb-lbl">Questions</div></div>
+  <div class="main">
+    <div class="hdr">
+      <div class="eyebrow" id="ey"></div>
+      <h1 id="ti"></h1>
+      <div class="sub" id="su"></div>
+    </div>
+    <div class="stage">
+      <div class="cvs"><svg id="dg" viewBox="0 0 480 260"></svg></div>
+      <div class="pnl fi" id="pn"></div>
+    </div>
+    <div class="reader-row">
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="back">&larr; All Topics</a>
   <div class="ht">Forming Expressions &mdash; Year 7</div>
   <div style="width:80px"></div>
 </header>
@@ -121,16 +143,22 @@ function parseLinearExpr(str,vars){
   str=str.replace(/\s+/g,'').toLowerCase();
   if(str==='')return null;
   var coeffs={};vars.forEach(function(v){coeffs[v]=0;});
-  var re=/([+-]?\d*)([a-z])/g;var m;var matchedAny=false;var idx=0;
+  var constant=0;
+  var re=/([+-]?\d*)([a-z])|([+-]?\d+)(?![a-z])/g;var m;var matchedAny=false;var idx=0;
   while((m=re.exec(str))){
     if(m.index!==idx)return null;
     idx=re.lastIndex;matchedAny=true;
-    var c=m[1],v=m[2];
-    if(vars.indexOf(v)===-1)return null;
-    if(c===''||c==='+')c='1';else if(c==='-')c='-1';
-    coeffs[v]+=parseInt(c,10);
+    if(m[2]){
+      var c=m[1],v=m[2];
+      if(vars.indexOf(v)===-1)return null;
+      if(c===''||c==='+')c='1';else if(c==='-')c='-1';
+      coeffs[v]+=parseInt(c,10);
+    } else if(m[3]!==undefined){
+      constant+=parseInt(m[3],10);
+    }
   }
   if(!matchedAny||idx!==str.length)return null;
+  coeffs._const=constant;
   return coeffs;
 }
 function tryIt(genFn){
@@ -149,7 +177,7 @@ function buildTry(id,o){
     ?'<input type="text" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>'
     :'<input type="number" step="any" placeholder="'+ph+'" class="try-inp" data-tryid="'+id+'"/>';
   return '<div class="try" data-tryid="'+id+'">'
-    +'<div class="try-t">\u2714 Your Turn <button class="newq-btn" data-tryid="'+id+'">\u21bb New</button></div>'
+    +'<div class="try-t">✔ Your Turn <button class="newq-btn" data-tryid="'+id+'">↻ New</button></div>'
     +'<div class="try-q">'+o.question+'</div>'+ex
     +'<div class="ar">'+inputHtml
     +'<button class="ck try-ck" data-tryid="'+id+'">Check</button></div>'
@@ -174,14 +202,16 @@ function ckById(id){
     if(!parsed){fb.className='try-fb fb er';fb.textContent='Enter an expression, e.g. '+(o.placeholder||'5x + 3y').replace('e.g. ','');return;}
     var ok=true;
     for(var i=0;i<o.vars.length;i++){var vv=o.vars[i];if(parsed[vv]!==o.coeffs[vv])ok=false;}
-    if(ok){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-    else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+    var expectedConst=(o.constant!=null)?o.constant:0;
+    if(parsed._const!==expectedConst)ok=false;
+    if(ok){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+    else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
     return;
   }
   var v=parseFloat(inp.value);
   if(isNaN(v)){fb.className='try-fb fb er';fb.textContent='Enter a number.';return;}
-  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='\u2713 Correct! '+o.working;}
-  else{fb.className='try-fb fb er';fb.textContent='Not quite \u2014 try again.';}
+  if(Math.abs(v-o.ans)<=(o.tol!=null?o.tol:0.5)){fb.className='try-fb fb ok';fb.innerHTML='✓ Correct! '+o.working;}
+  else{fb.className='try-fb fb er';fb.textContent='Not quite — try again.';}
 }
 document.addEventListener('click',function(e){
   var btn=e.target;
@@ -194,6 +224,7 @@ function T(x,y,t,c,sz,a,b){c=c||'#241A17';sz=sz||13;a=a||'middle';return '<text 
 function R(x,y,w,h,fill,stroke,sw){fill=fill||'#fff5f0';stroke=stroke||'#C0272D';sw=sw||2;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" rx="4"/>';}
 function L(x1,y1,x2,y2,c,w,d){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(c||'#C0272D')+'" stroke-width="'+(w||2)+'" '+(d?'stroke-dasharray="'+d+'"':'')+'/>';}
 function C(cx,cy,r,fill,stroke,sw){return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+(fill||'#fce8d8')+'" stroke="'+(stroke||'#C0272D')+'" stroke-width="'+(sw||2)+'"/>';}
+
 function dQ1(p){
   var s=g();s.setAttribute('viewBox','0 0 480 260');var o=[];
   // 3 adult tickets (red) + 4 child tickets (blue) shown separately
@@ -222,15 +253,97 @@ function dQ1(p){
   if(p>=3)o.push(T(240,224,'a=\u00a38, c=\u00a35: 3(8)+4(5)=24+20=\u00a344','#888',13,'middle'));
   s.innerHTML=o.join('');
 }
+function dQ2(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Perimeter expressions','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A rectangle has length (x+3) and width 5. Form an expression for the perimeter.','#241A17',11,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'P = 2(x+3) + 2(5)','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'P = 2x + 16','#1a7a3a',16,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ3(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Age word problems','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Ada is x years old. In 6 years, how old will she be?','#241A17',13,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'\u201cIn 6 years\u201d means ADD 6','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'Ada\u2019s future age = x + 6','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ4(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Shopping total expressions','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'You buy n books at \u20a6800 each, then pay a \u20a6200 delivery fee.','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Books: 800n','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'Total = 800n + 200','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ5(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Consecutive numbers','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'If the first of two consecutive numbers is n, what is the second?','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Consecutive means \u201cone after another\u201d','#C0272D',12,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'Second number = n + 1','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ6(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Real life: phone plan','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'A phone plan costs \u20a62,000 plus \u20a615 per minute used, m minutes.','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Cost of minutes: 15m','#C0272D',14,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'Total = 15m + 2000','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ7(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Expressions for what remains','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'You have \u20a6x. You spend \u20a6350. Write an expression for what\u2019s left.','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'\u201cSpend\u201d means SUBTRACT','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'Remaining = x \u2212 350','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ8(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Combining two expressions','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Rectangle 1 has area 3x. Rectangle 2 has area 2x. Total area?','#241A17',12,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'Add the two areas','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'Total = 3x + 2x = 5x','#1a7a3a',15,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ9(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Real life: hourly wage','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Tolu earns \u20a6h per hour and works 6 hours. Total pay?','#241A17',13,'middle'));}if(p>=2){o.push(R(140,76,200,34,'#fff5f0','#C0272D',1.5));o.push(T(240,98,'6 hours \u00d7 rate per hour','#C0272D',13,'middle',true));}if(p>=3){o.push(R(140,120,200,34,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,142,'Total pay = 6h','#1a7a3a',18,'middle',true));}s.innerHTML=o.join('');}
+
+function dQ10(p){var s=g();s.setAttribute('viewBox','0 0 480 220');var o=[];o.push(R(14,8,452,32,'#fff5f0','#C0272D',1.5));o.push(T(240,29,'Mixed forming-expressions practice','#C0272D',13,'middle',true));if(p>=1){o.push(T(240,60,'Step 1: identify each unknown quantity','#241A17',12,'middle'));}if(p>=2){o.push(T(240,86,'Step 2: build an expression for each part, then combine','#241A17',12,'middle'));}if(p>=3){o.push(R(80,106,320,40,'#e8f8ee','#1a7a3a',1.5));o.push(T(240,124,'Example: 4 pens at \u20a6p, plus \u20a650 fee','#1a7a3a',11,'middle'));o.push(T(240,140,'= 4p + 50','#1a7a3a',13,'middle'));}s.innerHTML=o.join('');}
+
 
 var QS=[
-  {ey:'Q7 \u00b7 Year 7 \u00b7 Algebra',ti:'Forming Expressions',su:'Write an expression for the cost of 3 adult and 4 child tickets.',steps:[
+  {ey:'Q1 \u00b7 Year 7 \u00b7 Forming Expressions',ti:'Forming Expressions',su:'Write an expression for the cost of 3 adult and 4 child tickets.',steps:[
     {lb:'Define variables',dr:dQ1,ht:'<p>Let <b>a</b> = cost of one adult ticket. Let <b>c</b> = cost of one child ticket.</p>',speak:'Let a equal the cost of one adult ticket. Let c equal the cost of one child ticket.'},
     {lb:'Build parts',dr:dQ1,ht:'<div class="fm">3 adults: 3 \u00d7 a = 3a</div><div class="fm">4 children: 4 \u00d7 c = 4c</div>',speak:'3 adults costs 3 times a, which is 3a. 4 children costs 4 times c, which is 4c.'},
     {lb:'Combine',dr:dQ1,ht:'<div class="fm">Total = 3a + 4c</div>',speak:'Combine the two parts: total equals 3a plus 4c.'},
     {lb:'Evaluate',dr:dQ1,ht:'<div class="fm">a = \u00a38, c = \u00a35:</div><div class="fm">3(8) + 4(5) = 24 + 20 = \u00a344</div>',speak:'If a is 8 pounds and c is 5 pounds: 3 times 8, plus 4 times 5, equals 24 plus 20, which is 44 pounds.'},
     {lb:'Your turn',dr:dQ1,ht:tryIt(function(){var na=rInt(2,6),nc=rInt(2,6),a=rInt(4,12),c=rInt(2,8),ans=na*a+nc*c;return{question:''+na+' adult tickets at \u00a3'+a+' each and '+nc+' child tickets at \u00a3'+c+' each. What is the total cost?',hints:['Adults: '+na+' \u00d7 '+a+' = \u00a3'+na*a,'Children: '+nc+' \u00d7 '+c+' = \u00a3'+nc*c,'Add the two amounts'],ans:ans,tol:0,unit:'\u00a3',working:na+' \u00d7 '+a+' + '+nc+' \u00d7 '+c+' = '+na*a+' + '+nc*c+' = \u00a3'+ans};}),speak:'Now it\u2019s your turn \u2014 have a go at the question below.'},
-  ]}
+  ]},
+  {ey:'Q2 \u00b7 Year 7 \u00b7 Forming Expressions',ti:'Perimeter Expressions',su:'A rectangle has length (x+3) and width 5. Form an expression for the perimeter.',steps:[
+    {lb:'The rectangle',dr:dQ2,ht:'<p>A rectangle has length (x+3) and width 5. Form an expression for the perimeter.</p>',speak:'A rectangle has length x plus 3, and width 5. Form an expression for the perimeter.'},
+    {lb:'Set up the formula',dr:dQ2,ht:'<div class="fm">P = 2(x+3) + 2(5)</div>',speak:'Perimeter equals 2 times the bracket x plus 3, plus 2 times 5.'},
+    {lb:'Expand and simplify',dr:dQ2,ht:'<div class="fm">P = 2x + 6 + 10 = 2x + 16</div>',speak:'That expands to 2x plus 6 plus 10, which simplifies to 2x plus 16.'},
+    {lb:'A useful skill combo',dr:dQ2,ht:'<p>Forming this expression combines forming AND expanding \u2014 two skills working together.</p>',speak:'Forming this expression combines forming and expanding \u2014 two skills working together.'},
+    {lb:'Your turn',dr:dQ2,ht:tryIt(function(){var b=rInt(1,9),w=rInt(2,10);var constant=2*b+2*w;return{question:'A rectangle has length (x+'+b+') and width '+w+'. Write an expression for the perimeter.',hints:['P = 2(x+'+b+') + 2('+w+')','Expand and simplify'],vars:['x'],coeffs:{x:2},constant:constant,placeholder:'e.g. 2x + 16',working:'2x + 2\u00d7'+b+' + 2\u00d7'+w+' = 2x + '+constant};}),speak:'Now it\u2019s your turn \u2014 form and simplify the perimeter expression.'},
+  ]},
+  {ey:'Q3 \u00b7 Year 7 \u00b7 Forming Expressions',ti:'Age Word Problems',su:'Ada is x years old. In 6 years, how old will she be?',steps:[
+    {lb:'The scenario',dr:dQ3,ht:'<p>Ada is x years old. In 6 years, how old will she be?</p>',speak:'Ada is x years old. In 6 years, how old will she be?'},
+    {lb:'What does "in the future" mean?',dr:dQ3,ht:'<p>"In 6 years" means ADD 6 to her current age.</p>',speak:'In 6 years means add 6 to her current age.'},
+    {lb:'Build the expression',dr:dQ3,ht:'<div class="fm">Ada\u2019s future age = x + 6</div>',speak:'Ada\u2019s future age equals x plus 6.'},
+    {lb:'What about the past?',dr:dQ3,ht:'<p>Watch out: "6 years ago" would mean SUBTRACT instead \u2014 x \u2212 6.</p>',speak:'Watch out: 6 years ago would mean subtract instead \u2014 x minus 6.'},
+    {lb:'Your turn',dr:dQ3,ht:tryIt(function(){var years=rInt(2,15),age=rInt(8,40);var ans=age+years;var name=rPick(['Chidi','Ngozi','Tunde','Amara']);return{question:name+' is currently '+age+' years old. In '+years+' years, how old will '+name+' be?',hints:['Add '+years+' to the current age'],ans:ans,tol:0,unit:'',working:age+' + '+years+' = '+ans};}),speak:'Now it\u2019s your turn \u2014 add the years to find the future age.'},
+  ]},
+  {ey:'Q4 \u00b7 Year 7 \u00b7 Forming Expressions',ti:'Shopping Total Expressions',su:'n books at \u20a6800 each, plus a \u20a6200 delivery fee.',steps:[
+    {lb:'The scenario',dr:dQ4,ht:'<p>You buy n books at \u20a6800 each, then pay a \u20a6200 delivery fee.</p>',speak:'You buy n books at 800 naira each, then pay a 200 naira delivery fee.'},
+    {lb:'Cost of the books',dr:dQ4,ht:'<div class="fm">Books: 800n</div>',speak:'The cost of the books is 800n.'},
+    {lb:'Add the fixed fee',dr:dQ4,ht:'<div class="fm">Total = 800n + 200</div>',speak:'Total equals 800n plus 200.'},
+    {lb:'Variable + fixed cost pattern',dr:dQ4,ht:'<p>This "variable cost + fixed fee" pattern appears constantly \u2014 delivery, subscriptions, taxis.</p>',speak:'This variable cost plus fixed fee pattern appears constantly \u2014 delivery, subscriptions, taxis.'},
+    {lb:'Your turn',dr:dQ4,ht:tryIt(function(){var price=rInt(2,9)*100,fee=rInt(1,5)*100;return{question:'You buy n items at \u20a6'+price+' each, then pay a \u20a6'+fee+' delivery fee. Write an expression for the total cost.',hints:['Items: '+price+'n','Add the fee'],vars:['n'],coeffs:{n:price},constant:fee,placeholder:'e.g. 800n + 200',working:price+'n + '+fee};}),speak:'Now it\u2019s your turn \u2014 form the total cost expression.'},
+  ]},
+  {ey:'Q5 \u00b7 Year 7 \u00b7 Forming Expressions',ti:'Consecutive Numbers',su:'If the first of two consecutive numbers is n, what is the second?',steps:[
+    {lb:'What are consecutive numbers?',dr:dQ5,ht:'<p>Consecutive numbers follow one after another, like 5, 6, 7.</p>',speak:'Consecutive numbers follow one after another, like 5, 6, 7.'},
+    {lb:'The pattern',dr:dQ5,ht:'<p>If the first number is n, the next one is always exactly 1 more.</p>',speak:'If the first number is n, the next one is always exactly 1 more.'},
+    {lb:'Build the expression',dr:dQ5,ht:'<div class="fm">Second number = n + 1</div>',speak:'The second number equals n plus 1.'},
+    {lb:'Extending the pattern',dr:dQ5,ht:'<p>The third consecutive number would be n+2, the fourth n+3, and so on.</p>',speak:'The third consecutive number would be n plus 2, the fourth n plus 3, and so on.'},
+    {lb:'Your turn',dr:dQ5,ht:tryIt(function(){var n=rInt(2,20);var pos=rPick([2,3,4]);var ans=n+(pos-1);return{question:'Three consecutive numbers start at n = '+n+'. What is the '+(pos===2?'2nd':pos===3?'3rd':'4th')+' number?',hints:['Each consecutive number is 1 more than the last'],ans:ans,tol:0,unit:'',working:n+' + '+(pos-1)+' = '+ans};}),speak:'Now it\u2019s your turn \u2014 find this consecutive number.'},
+  ]},
+  {ey:'Q6 \u00b7 Year 7 \u00b7 Forming Expressions',ti:'Real Life: Phone Plan',su:'A phone plan costs \u20a62,000 plus \u20a615 per minute used.',steps:[
+    {lb:'The scenario',dr:dQ6,ht:'<p>A phone plan costs \u20a62,000 plus \u20a615 per minute used, for m minutes.</p>',speak:'A phone plan costs 2,000 naira plus 15 naira per minute used, for m minutes.'},
+    {lb:'Cost of the minutes',dr:dQ6,ht:'<div class="fm">Cost of minutes: 15m</div>',speak:'The cost of the minutes is 15m.'},
+    {lb:'Add the fixed cost',dr:dQ6,ht:'<div class="fm">Total = 15m + 2000</div>',speak:'Total equals 15m plus 2,000.'},
+    {lb:'Order doesn\u2019t matter for writing it',dr:dQ6,ht:'<p>You could also write this as 2000 + 15m \u2014 addition order doesn\u2019t change the meaning.</p>',speak:'You could also write this as 2,000 plus 15m \u2014 addition order doesn\u2019t change the meaning.'},
+    {lb:'Your turn',dr:dQ6,ht:tryIt(function(){var rate=rInt(5,30),fixed=rInt(5,30)*100;return{question:'A phone plan costs \u20a6'+fixed+' plus \u20a6'+rate+' per minute used, for m minutes. Write an expression for the total cost.',hints:['Cost of minutes: '+rate+'m','Add the fixed cost'],vars:['m'],coeffs:{m:rate},constant:fixed,placeholder:'e.g. 15m + 2000',working:rate+'m + '+fixed};}),speak:'Now it\u2019s your turn \u2014 form the total phone plan cost.'},
+  ]},
+  {ey:'Q7 \u00b7 Year 7 \u00b7 Forming Expressions',ti:'Expressions for What Remains',su:'You have \u20a6x. You spend \u20a6350. Write an expression for what\u2019s left.',steps:[
+    {lb:'The scenario',dr:dQ7,ht:'<p>You have \u20a6x. You spend \u20a6350. Write an expression for what\u2019s left.</p>',speak:'You have x naira. You spend 350 naira. Write an expression for what\u2019s left.'},
+    {lb:'What does "spend" mean?',dr:dQ7,ht:'<p>"Spend" means SUBTRACT from what you started with.</p>',speak:'Spend means subtract from what you started with.'},
+    {lb:'Build the expression',dr:dQ7,ht:'<div class="fm">Remaining = x \u2212 350</div>',speak:'Remaining equals x minus 350.'},
+    {lb:'A common real-life pattern',dr:dQ7,ht:'<p>"What remains after spending" is one of the most common real-life expression patterns.</p>',speak:'What remains after spending is one of the most common real-life expression patterns.'},
+    {lb:'Your turn',dr:dQ7,ht:tryIt(function(){var spend=rInt(1,20)*50;return{question:'You have \u20a6x. You spend \u20a6'+spend+'. Write an expression for what\u2019s left.',hints:['"Spend" means subtract'],vars:['x'],coeffs:{x:1},constant:-spend,placeholder:'e.g. x \u2212 350',working:'x \u2212 '+spend};}),speak:'Now it\u2019s your turn \u2014 form an expression for what remains.'},
+  ]},
+  {ey:'Q8 \u00b7 Year 7 \u00b7 Forming Expressions',ti:'Combining Two Expressions',su:'Rectangle 1 has area 3x. Rectangle 2 has area 2x. Total area?',steps:[
+    {lb:'The scenario',dr:dQ8,ht:'<p>Rectangle 1 has area 3x. Rectangle 2 has area 2x. Find the total area.</p>',speak:'Rectangle 1 has area 3x. Rectangle 2 has area 2x. Find the total area.'},
+    {lb:'What do we do?',dr:dQ8,ht:'<p>Add the two areas together to find the combined total.</p>',speak:'Add the two areas together to find the combined total.'},
+    {lb:'Combine',dr:dQ8,ht:'<div class="fm">Total = 3x + 2x = 5x</div>',speak:'Total equals 3x plus 2x, which simplifies to 5x.'},
+    {lb:'Building bigger expressions',dr:dQ8,ht:'<p>Combining smaller expressions into a bigger one is a key algebra skill used throughout maths.</p>',speak:'Combining smaller expressions into a bigger one is a key algebra skill used throughout maths.'},
+    {lb:'Your turn',dr:dQ8,ht:tryIt(function(){var a=rInt(2,8),b=rInt(2,8);var ans=a+b;var letter=rPick(['x','y','n']);return{question:'Rectangle 1 has area '+a+letter+'. Rectangle 2 has area '+b+letter+'. Find the total area.',hints:['Add the coefficients: '+a+'+'+b],vars:[letter],coeffs:(function(){var o={};o[letter]=ans;return o;})(),placeholder:'e.g. 5'+letter,working:a+letter+' + '+b+letter+' = '+ans+letter};}),speak:'Now it\u2019s your turn \u2014 combine the two areas.'},
+  ]},
+  {ey:'Q9 \u00b7 Year 7 \u00b7 Forming Expressions',ti:'Real Life: Hourly Wage',su:'Tolu earns \u20a6h per hour and works 6 hours. Total pay?',steps:[
+    {lb:'The scenario',dr:dQ9,ht:'<p>Tolu earns \u20a6h per hour and works 6 hours. Find the total pay.</p>',speak:'Tolu earns h naira per hour and works 6 hours. Find the total pay.'},
+    {lb:'Set up the calculation',dr:dQ9,ht:'<div class="fm">6 hours \u00d7 rate per hour</div>',speak:'6 hours times the rate per hour.'},
+    {lb:'Build the expression',dr:dQ9,ht:'<div class="fm">Total pay = 6h</div>',speak:'Total pay equals 6h.'},
+    {lb:'A simple but common pattern',dr:dQ9,ht:'<p>Hours \u00d7 hourly rate is one of the most common real-world multiplication expressions.</p>',speak:'Hours times hourly rate is one of the most common real-world multiplication expressions.'},
+    {lb:'Your turn',dr:dQ9,ht:tryIt(function(){var hours=rInt(2,10),rate=rInt(300,1500);var ans=hours*rate;return{question:'A worker earns \u20a6'+rate+' per hour and works '+hours+' hours. Find the total pay.',hints:[hours+' \u00d7 '+rate],ans:ans,tol:0,unit:'\u20a6',working:hours+' \u00d7 '+rate+' = \u20a6'+ans};}),speak:'Now it\u2019s your turn \u2014 calculate the total pay.'},
+  ]},
+  {ey:'Q10 \u00b7 Year 7 \u00b7 Forming Expressions',ti:'Mixed Practice',su:'Combine everything you\u2019ve learned about forming expressions.',steps:[
+    {lb:'Step 1: identify the unknowns',dr:dQ10,ht:'<p>Identify each unknown quantity and give it a letter.</p>',speak:'Step 1: identify each unknown quantity and give it a letter.'},
+    {lb:'Step 2: build and combine',dr:dQ10,ht:'<p>Build an expression for each part, then combine them.</p>',speak:'Step 2: build an expression for each part, then combine them.'},
+    {lb:'Worked example',dr:dQ10,ht:'<div class="fm">4 pens at \u20a6p, plus \u20a650 fee = 4p + 50</div>',speak:'For example: 4 pens at p naira each, plus a 50 naira fee, equals 4p plus 50.'},
+    {lb:'Real-world sanity check',dr:dQ10,ht:'<p>Test your expression with a small number to see if the answer makes sense.</p>',speak:'Test your expression with a small number to see if the answer makes sense.'},
+    {lb:'Your turn',dr:dQ10,ht:tryIt(function(){var price=rInt(2,9)*50,fee=rInt(1,5)*20;var letter=rPick(['p','x','n']);return{question:'You buy '+letter+' items at \u20a6'+price+' each, plus a \u20a6'+fee+' fee. Write an expression for the total cost.',hints:['Cost of items: '+price+letter,'Add the fee'],vars:[letter],coeffs:(function(){var o={};o[letter]=price;return o;})(),constant:fee,placeholder:'e.g. 800'+letter+' + 200',working:price+letter+' + '+fee};}),speak:'Now it\u2019s your turn \u2014 one final expression-forming question.'},
+  ]},
+
 ];
 
 var qi=0,si=0;
